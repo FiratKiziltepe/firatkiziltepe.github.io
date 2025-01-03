@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Işığın Kırılması Simülasyonu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Işığın Kırılması - Snell Yasası Simülasyonu</h1>
+        
+        <div class="simulation-container">
+            <div id="canvas-container"></div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="incident-angle">Gelen Işık Açısı (θ₁):</label>
+                    <input type="range" id="incident-angle" min="0" max="89" value="45">
+                    <span id="incident-angle-value">45°</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="n1">Ortam 1 Kırılma İndisi (n₁):</label>
+                    <input type="number" id="n1" min="1" max="3" step="0.1" value="1.0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="n2">Ortam 2 Kırılma İndisi (n₂):</label>
+                    <input type="number" id="n2" min="1" max="3" step="0.1" value="1.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="formula-display">
+            <h3>Snell Yasası:</h3>
+            <p class="formula">n₁·sinθ₁ = n₂·sinθ₂</p>
+            <div id="calculations"></div>
+        </div>
+
+        <div class="quiz-section">
+            <h3>Bilginizi Test Edin</h3>
+            <div id="quiz-container">
+                <p id="question"></p>
+                <div id="options"></div>
+                <button id="check-answer">Cevabı Kontrol Et</button>
+            </div>
+            <p id="feedback"></p>
+        </div>
+
+        <div class="report-section">
+            <h3>Deney Raporu</h3>
+            <textarea id="report" rows="5" placeholder="Gözlemlerinizi ve sonuçlarınızı buraya yazın..."></textarea>
+            <button id="save-report">Raporu Kaydet</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
