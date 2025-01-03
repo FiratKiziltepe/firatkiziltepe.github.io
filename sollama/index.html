@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tren Sollama Simülasyonu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Tren Sollama Simülasyonu</h1>
+        
+        <div class="simulation-container">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="carSpeed">Araba Hızı (km/s):</label>
+                    <input type="range" id="carSpeed" min="40" max="120" value="80" step="5">
+                    <span id="carSpeedValue">80</span>
+                </div>
+                <div class="control-group">
+                    <label for="trainSpeed">Tren Hızı (km/s):</label>
+                    <input type="range" id="trainSpeed" min="20" max="100" value="60" step="5">
+                    <span id="trainSpeedValue">60</span>
+                </div>
+                <div class="control-group">
+                    <label for="trainLength">Tren Uzunluğu (m):</label>
+                    <input type="range" id="trainLength" min="100" max="500" value="200" step="50">
+                    <span id="trainLengthValue">200</span>
+                </div>
+                <div class="control-group">
+                    <label for="initialDistance">Başlangıç Mesafesi (m):</label>
+                    <input type="range" id="initialDistance" min="0" max="200" value="50" step="10">
+                    <span id="initialDistanceValue">50</span>
+                </div>
+                <div class="button-group">
+                    <button id="startBtn">Başlat</button>
+                    <button id="pauseBtn">Duraklat</button>
+                    <button id="resetBtn">Sıfırla</button>
+                </div>
+            </div>
+
+            <div class="animation-area">
+                <div class="animation-container">
+                    <div class="road"></div>
+                    <div class="railway"></div>
+                    <div id="car"></div>
+                    <div id="train"></div>
+                </div>
+            </div>
+
+            <div class="calculations">
+                <h3>Hesaplamalar</h3>
+                <div id="formula">
+                    Sollama Süresi = (Tren Uzunluğu + Başlangıç Mesafesi) / (Araba Hızı - Tren Hızı)
+                </div>
+                <div id="results">
+                    <p>Sollama Süresi: <span id="overtakeTime">0</span> saniye</p>
+                    <p>Katedilen Mesafe: <span id="totalDistance">0</span> metre</p>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <canvas id="distanceTimeGraph"></canvas>
+            </div>
+        </div>
+
+        <div class="educational-notes">
+            <h3>Eğitsel Notlar</h3>
+            <ul>
+                <li>Göreceli hız, iki nesnenin hızları arasındaki farktır.</li>
+                <li>Sollama mesafesi, arabanın tren uzunluğu kadar mesafeyi kat etmesi için gereken mesafedir.</li>
+                <li>Eğer araba hızı tren hızından düşükse, sollama gerçekleşemez!</li>
+            </ul>
+            <div class="questions">
+                <h4>Düşünme Soruları:</h4>
+                <ol>
+                    <li>Araba hızı tren hızına eşit olduğunda ne olur?</li>
+                    <li>Sollama süresini en çok etkileyen faktör nedir?</li>
+                    <li>Güvenli bir sollama için minimum hız farkı ne olmalıdır?</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
