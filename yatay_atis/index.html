@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eğik Atış Simülasyonu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <h1 class="text-center mb-4">Eğik Atış Simülasyonu</h1>
+        <a href="javascript:history.back()">Geri</a>
+        
+        <!-- Histogram -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Atış Mesafesi Dağılımı</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="temizleHistogram()">Temizle</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="mesafeHistogram" style="height: 150px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sol Panel - Kontroller -->
+            <div class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Cisim Seçimi</h5>
+                    </div>
+                    <div class="card-body">
+                        <select class="form-select" id="cisimTipi">
+                            <option value="top">Top</option>
+                            <option value="ok">Ok</option>
+                            <option value="mermi">Mermi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Parametreler</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Atış Açısı: <span id="aciDeger">45</span>°</label>
+                            <div id="aciSlider"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Başlangıç Hızı: <span id="hizDeger">15</span> m/s</label>
+                            <div id="hizSlider"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ortam Seçimi</label>
+                            <select class="form-select" id="ortamSecimi">
+                                <option value="dunya">Dünya (g = 9.81 m/s²)</option>
+                                <option value="ay">Ay (g = 1.62 m/s²)</option>
+                                <option value="mars">Mars (g = 3.72 m/s²)</option>
+                            </select>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="havaDirenci">
+                            <label class="form-check-label">Hava Direnci</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Ölçüm Araçları</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="cetvel" checked>
+                            <label class="form-check-label">Cetvel</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="kronometre" checked>
+                            <label class="form-check-label">Kronometre</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="izler" checked>
+                            <label class="form-check-label">Hareket İzi</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orta Panel - Simülasyon -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Simülasyon</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="simulasyonCanvas"></canvas>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn btn-primary me-2" onclick="simulasyonuBaslat()">Fırlat</button>
+                            <button class="btn btn-secondary" onclick="simulasyonuSifirla()">Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel - Grafikler ve Sonuçlar -->
+            <div class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Anlık Değerler</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Geçen Süre: <span id="sure">0.00</span> s</p>
+                        <p>Menzil: <span id="menzil">0.00</span> m</p>
+                        <p>Yükseklik: <span id="yukseklik">0.00</span> m</p>
+                        <p>Hız: <span id="anlikHiz">0.00</span> m/s</p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Son Atış Sonuçları</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Maksimum Yükseklik: <span id="maksYukseklik">-</span> m</p>
+                        <p>Toplam Menzil: <span id="toplamMenzil">-</span> m</p>
+                        <p>Uçuş Süresi: <span id="ucusSuresi">-</span> s</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

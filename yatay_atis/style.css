@@ -1,0 +1,105 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container-fluid {
+    max-width: 1800px;
+    padding: 0 30px;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: #f1f8ff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+canvas {
+    border: 1px solid #ddd;
+    width: 100%;
+    height: 500px;
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+.btn {
+    margin-right: 0.5rem;
+    border-radius: 4px;
+}
+
+.form-select, .form-control {
+    border-radius: 4px;
+}
+
+/* Slider Özelleştirmeleri */
+.noUi-connect {
+    background: #0d6efd;
+}
+
+.noUi-handle {
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+.noUi-handle:before,
+.noUi-handle:after {
+    display: none;
+}
+
+/* Ölçüm Araçları */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Histogram */
+#mesafeHistogram {
+    width: 100%;
+    background-color: white;
+}
+
+/* Animasyon Efektleri */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Responsive Ayarlar */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0 15px;
+    }
+    
+    canvas {
+        height: 300px;
+    }
+}
+
+/* Cisim İkonları */
+.cisim-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Ölçek Çizgileri */
+.olcek-cizgisi {
+    stroke: #ddd;
+    stroke-width: 1;
+}
+
+.olcek-yazisi {
+    font-size: 10px;
+    fill: #666;
+} 
