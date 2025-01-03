@@ -29,6 +29,13 @@ const saltRange = document.getElementById('saltRange');
 const saltValue = document.getElementById('saltValue');
 const waterDensitySpan = document.getElementById('waterDensity');
 
+// Dalga parametreleri ekle (global değişkenler bölümüne)
+let waveOffset = 0;
+const WAVE_SPEED = 0.05;
+const WAVE_AMPLITUDE = 3;
+let splashEffect = 0;
+const SPLASH_DECAY = 0.95;
+
 // Cisim seçimi fonksiyonu
 function selectObject(objectType) {
     selectedObject = OBJECTS[objectType];
@@ -95,30 +102,30 @@ function drawForceVectors(x, y) {
 function updatePhysics() {
     if (!selectedObject) return;
 
-    // Su içindeki kısmı hesapla
+    const prevY = objectY;
     const submergedRatio = Math.min(Math.max((objectY + OBJECT_SIZE - WATER_LEVEL) / OBJECT_SIZE, 0), 1);
     
-    // Kuvvetleri hesapla
     const weightForce = selectedObject.density * GRAVITY;
     const buoyancyForce = currentWaterDensity * GRAVITY * submergedRatio;
     
-    // Net kuvvet
     let netForce = weightForce - buoyancyForce;
     
-    // Su direnci
     if (submergedRatio > 0) {
         netForce -= objectVelocity * WATER_RESISTANCE * submergedRatio;
     }
     
-    // Hız ve pozisyon güncelleme
     objectVelocity += netForce;
     objectVelocity *= DAMPING;
     objectY += objectVelocity;
     
-    // Sınırları kontrol et
+    // Su ile temas durumunda splash efekti oluştur
+    if (objectY + OBJECT_SIZE >= WATER_LEVEL && prevY + OBJECT_SIZE < WATER_LEVEL) {
+        splashEffect = Math.abs(objectVelocity) * 5;
+    }
+    
     if (objectY + OBJECT_SIZE > canvas.height) {
         objectY = canvas.height - OBJECT_SIZE;
-        objectVelocity *= -0.5; // Zemine çarpma
+        objectVelocity *= -0.5;
     }
     if (objectY < 0) {
         objectY = 0;
@@ -128,22 +135,40 @@ function updatePhysics() {
 
 // Ana çizim fonksiyonu
 function draw() {
-    // Canvas'ı temizle
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Suyu çiz
-    ctx.fillStyle = `rgba(0, 100, 255, ${0.3 + (currentWaterDensity - WATER_BASE_DENSITY)})`;
-    ctx.fillRect(0, WATER_LEVEL, canvas.width, canvas.height - WATER_LEVEL);
+    // Dalgalı su çizimi
+    ctx.beginPath();
+    ctx.moveTo(0, WATER_LEVEL);
     
+    // Su dalgalarını çiz
+    for (let x = 0; x <= canvas.width; x += 5) {
+        const waveHeight = Math.sin(x * 0.02 + waveOffset) * WAVE_AMPLITUDE;
+        // Splash efektini merkeze ekle
+        const splashHeight = splashEffect * Math.exp(-(Math.pow(x - canvas.width/2, 2)) / 5000);
+        ctx.lineTo(x, WATER_LEVEL + waveHeight + splashHeight);
+    }
+    
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    
+    ctx.fillStyle = `rgba(0, 100, 255, ${0.3 + (currentWaterDensity - WATER_BASE_DENSITY)})`;
+    ctx.fill();
+    
+    // Dalga offsetini güncelle
+    waveOffset += WAVE_SPEED;
+    
+    // Splash efektini azalt
+    splashEffect *= SPLASH_DECAY;
+
     if (selectedObject) {
-        // Fiziği güncelle
         updatePhysics();
         
         // Cismi çiz
         ctx.fillStyle = selectedObject.color;
         ctx.fillRect(canvas.width/2 - OBJECT_SIZE/2, objectY, OBJECT_SIZE, OBJECT_SIZE);
         
-        // Kuvvet vektörlerini çiz
         drawForceVectors(canvas.width/2, objectY);
     }
     
