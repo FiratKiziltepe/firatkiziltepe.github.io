@@ -3,35 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suda Yüzme Simülasyonu</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Fırat KIZILTEPE - Kişisel Web Sitesi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Suda Yüzme Simülasyonu</h1>
-        <div class="simulation-area">
-            <canvas id="simulationCanvas"></canvas>
-            <div class="controls">
-                <div class="object-selection">
-                    <h3>Cisim Seçimi</h3>
-                    <button onclick="selectObject('tahta')">Tahta</button>
-                    <button onclick="selectObject('demir')">Demir</button>
-                    <button onclick="selectObject('plastik')">Plastik</button>
-                </div>
-                <div class="salt-control">
-                    <h3>Tuz Kontrolü</h3>
-                    <input type="range" id="saltRange" min="0" max="100" value="0">
-                    <p>Tuz Oranı: <span id="saltValue">0</span>%</p>
-                    <p>Su Yoğunluğu: <span id="waterDensity">1.00</span> g/cm³</p>
-                </div>
-                <div class="info-panel">
-                    <h3>Bilgi Paneli</h3>
-                    <p id="objectInfo"></p>
-                    <p id="stateInfo"></p>
+    <nav class="navbar">
+        <div class="nav-brand">Fırat KIZILTEPE</div>
+        <div class="nav-links">
+            <a href="#home">Ana Sayfa</a>
+            <a href="#about">Hakkımda</a>
+            <div class="dropdown">
+                <button class="dropbtn">İçerikler 
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-content">
+                    <a href="yuzme_simulasyon/index.html">Suda Yüzme Simülasyonu</a>
+                    <a href="#content2">İçerik 2</a>
+                    <a href="#content3">İçerik 3</a>
                 </div>
             </div>
+            <a href="#contact">İletişim</a>
         </div>
-    </div>
-    <script src="script.js"></script>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Hoş Geldiniz</h1>
+            <p>Kişisel web siteme hoş geldiniz. Burada içeriklerimi ve çalışmalarımı paylaşıyorum.</p>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <h2>Hakkımda</h2>
+        <div class="about-content">
+            <p>Buraya kendiniz hakkında bilgi ekleyebilirsiniz.</p>
+        </div>
+    </section>
+
+    <section id="content1" class="content">
+        <h2>İçerik 1</h2>
+        <div class="content-box">
+            <p>İçerik 1 detayları buraya eklenecek.</p>
+        <iframe id="myIframe" src="yuzme_simulasyon/index.html" width="1200px" height="800px" style="border:none;"></iframe>
+        </div>
+    </section>
+
+    <section id="content2" class="content">
+        <h2>İçerik 2</h2>
+        <div class="content-box">
+            <p>İçerik 2 detayları buraya eklenecek.</p>
+        </div>
+    </section>
+
+    <section id="content3" class="content">
+        <h2>İçerik 3</h2>
+        <div class="content-box">
+            <p>İçerik 3 detayları buraya eklenecek.</p>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <h2>İletişim</h2>
+        <div class="contact-content">
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            </div>
+            <p>E-posta: örnek@email.com</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="scripts.js"></script>
 </body>
-</html> 
+</html>

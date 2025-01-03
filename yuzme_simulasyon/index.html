@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suda Yüzme Simülasyonu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Suda Yüzme Simülasyonu</h1>
+        <a href="tork/index.html">Tork Simülasyonu</a>
+        <div class="simulation-area">
+            <canvas id="simulationCanvas"></canvas>
+            <div class="controls">
+                <div class="object-selection">
+                    <h3>Cisim Seçimi</h3>
+                    <button onclick="selectObject('tahta')">Tahta</button>
+                    <button onclick="selectObject('demir')">Demir</button>
+                    <button onclick="selectObject('plastik')">Plastik</button>
+                </div>
+                <div class="salt-control">
+                    <h3>Tuz Kontrolü</h3>
+                    <input type="range" id="saltRange" min="0" max="100" value="0">
+                    <p>Tuz Oranı: <span id="saltValue">0</span>%</p>
+                    <p>Su Yoğunluğu: <span id="waterDensity">1.00</span> g/cm³</p>
+                </div>
+                <div class="info-panel">
+                    <h3>Bilgi Paneli</h3>
+                    <p id="objectInfo"></p>
+                    <p id="stateInfo"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
