@@ -34,6 +34,10 @@
         </div>
     </section>
 
+    <!-- Arama için gizli input -->
+    <input type="hidden" id="searchInput">
+    <div id="searchResults"></div>
+
     <section class="content-grid">
         <a href="yatay_atis/index.html" target="_blank" class="content-card">
             <div class="preview-image">
@@ -94,10 +98,42 @@
         </div>
     </section>
 
+    <!-- Chat Bot -->
+    <div class="chat-bot">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-robot"></i>
+                <span>Sohbet Asistanı</span>
+            </div>
+            <button class="minimize-btn">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="chat-body">
+            <div class="chat-messages">
+                <div class="message bot">
+                    <i class="fas fa-robot"></i>
+                    <div class="message-content">
+                        Merhaba! Size nasıl yardımcı olabilirim?
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" placeholder="Mesajınızı yazın..." id="chat-input">
+                <button id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
     </footer>
 
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="config.js"></script>
     <script src="scripts.js"></script>
 </body>
 </html>

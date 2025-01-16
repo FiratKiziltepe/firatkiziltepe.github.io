@@ -1,0 +1,13 @@
+# API anahtarı içeren config dosyası
+config.js
+
+# IDE ve sistem dosyaları
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Diğer hassas bilgiler
+*.env
+*.env.local
+*.log 
