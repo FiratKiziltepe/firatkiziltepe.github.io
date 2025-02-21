@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Tools Database</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Digital Tools Database</h1>
+        
+        <!-- Filters -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <input type="text" id="searchInput" placeholder="Search..." 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <select id="categoryFilter" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div>
+                <select id="platformFilter" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Platforms</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Tool Name">Tool Name ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Main Category">Category ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Platform">Platform ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Pricing">Pricing ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Rating">Rating ↕</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const tools = [
+            {"Tool Name": "Tez Ara", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": "5"},
+            {"Tool Name": "YÖK Tez", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": ""},
+            {"Tool Name": "ProQuest", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
+            {"Tool Name": "Web of Science", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
+            {"Tool Name": "SCOPUS", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
+            {"Tool Name": "Google Scholar", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": ""},
+            {"Tool Name": "Litmaps", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Research Rabbit", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free", "Rating": "5"},
+            {"Tool Name": "Kling AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Heygen AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Suno AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Eleven Labs AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Agent Ransack", "Main Category": "Desktop Use", "Platform": "Windows", "Pricing": "Free", "Rating": ""},
+            {"Tool Name": "Zotero", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Free", "Rating": "5"},
+            {"Tool Name": "Mendeley", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Free", "Rating": "4"},
+            {"Tool Name": "EndNote", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Subscription", "Rating": "3"},
+            {"Tool Name": "SPSS", "Main Category": "İstatistik & Analiz", "Platform": "", "Pricing": "Paid", "Rating": "4"},
+            {"Tool Name": "Jamovi", "Main Category": "İstatistik & Analiz", "Platform": "Windows", "Pricing": "Free", "Rating": "5"},
+            {"Tool Name": "ChatPDF AI", "Main Category": "Academic Writing", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "GammaAPP AI", "Main Category": "Design & Creative", "Platform": "Web", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Perplexity AI", "Main Category": "Academic Writing", "Platform": "Chatbot, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Citenet Explorer", "Main Category": "Academic Writing", "Platform": "Masaüstü Uygulaması", "Pricing": "Free", "Rating": ""},
+            {"Tool Name": "Scite AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "Elicit AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
+            {"Tool Name": "SCISPACE AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": "5"},
+            {"Tool Name": "Publish or Perish", "Main Category": "Literature Review", "Platform": "Windows", "Pricing": "", "Rating": ""},
+            {"Tool Name": "Napkin AI", "Main Category": "Academic Writing", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free", "Rating": "5"},
+            {"Tool Name": "Connected Papers AI", "Main Category": "Literature Review", "Platform": "Web", "Pricing": "Free Trial", "Rating": "3"},
+            {"Tool Name": "Co-STORM AI", "Main Category": "Academic Writing", "Platform": "Yapay Zekâ Aracı", "Pricing": "", "Rating": ""}
+        ];
+
+        // Initialize table and filters
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate category and platform filters
+            const categories = [...new Set(tools.map(tool => tool["Main Category"]))];
+            const platforms = [...new Set(tools.map(tool => tool.Platform))];
+            
+            const categoryFilter = document.getElementById('categoryFilter');
+            const platformFilter = document.getElementById('platformFilter');
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+            
+            platforms.forEach(platform => {
+                if (platform) {
+                    const option = document.createElement('option');
+                    option.value = platform;
+                    option.textContent = platform;
+                    platformFilter.appendChild(option);
+                }
+            });
+
+            // Initial render
+            renderTable(tools);
+
+            // Add event listeners
+            document.getElementById('searchInput').addEventListener('input', filterTable);
+            categoryFilter.addEventListener('change', filterTable);
+            platformFilter.addEventListener('change', filterTable);
+            
+            // Add sorting listeners
+            document.querySelectorAll('th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    sortTable(column);
+                });
+            });
+        });
+
+        // Render table function
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(tool => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tool["Tool Name"]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool["Main Category"]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Platform}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Pricing}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Rating ? '⭐'.repeat(parseInt(tool.Rating)) : ''}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter table function
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const platformFilter = document.getElementById('platformFilter').value;
+            
+            const filteredData = tools.filter(tool => {
+                const matchesSearch = Object.values(tool).some(value => 
+                    value.toString().toLowerCase().includes(searchTerm)
+                );
+                const matchesCategory = !categoryFilter || tool["Main Category"] === categoryFilter;
+                const matchesPlatform = !platformFilter || tool.Platform.includes(platformFilter);
+                
+                return matchesSearch && matchesCategory && matchesPlatform;
+            });
+            
+            renderTable(filteredData);
+        }
+
+        // Sort table function
+        let sortDirection = {};
+        
+        function sortTable(column) {
+            sortDirection[column] = !sortDirection[column];
+            
+            const sortedData = [...tools].sort((a, b) => {
+                let valueA = a[column] || '';
+                let valueB = b[column] || '';
+                
+                if (column === 'Rating') {
+                    valueA = parseFloat(valueA) || 0;
+                    valueB = parseFloat(valueB) || 0;
+                }
+                
+                if (sortDirection[column]) {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            renderTable(sortedData);
+        }
+    </script>
+</body>
+</html>
