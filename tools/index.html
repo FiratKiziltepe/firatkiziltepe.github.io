@@ -35,8 +35,11 @@
                         <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Tool Name">Tool Name ↕</th>
                         <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Main Category">Category ↕</th>
                         <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Platform">Platform ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="URL">URL ↕</th>
                         <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Pricing">Pricing ↕</th>
                         <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Rating">Rating ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Description">Description ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Notes">Notes ↕</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -48,35 +51,16 @@
     <script>
         // Data
         const tools = [
-            {"Tool Name": "Tez Ara", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": "5"},
-            {"Tool Name": "YÖK Tez", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": ""},
-            {"Tool Name": "ProQuest", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
-            {"Tool Name": "Web of Science", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
-            {"Tool Name": "SCOPUS", "Main Category": "Database", "Platform": "Web", "Pricing": "Subscription", "Rating": ""},
-            {"Tool Name": "Google Scholar", "Main Category": "Database", "Platform": "Web", "Pricing": "Free", "Rating": ""},
-            {"Tool Name": "Litmaps", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Research Rabbit", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free", "Rating": "5"},
-            {"Tool Name": "Kling AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Heygen AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Suno AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Eleven Labs AI", "Main Category": "Video & Audio", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Agent Ransack", "Main Category": "Desktop Use", "Platform": "Windows", "Pricing": "Free", "Rating": ""},
-            {"Tool Name": "Zotero", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Free", "Rating": "5"},
-            {"Tool Name": "Mendeley", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Free", "Rating": "4"},
-            {"Tool Name": "EndNote", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "Pricing": "Subscription", "Rating": "3"},
-            {"Tool Name": "SPSS", "Main Category": "İstatistik & Analiz", "Platform": "", "Pricing": "Paid", "Rating": "4"},
-            {"Tool Name": "Jamovi", "Main Category": "İstatistik & Analiz", "Platform": "Windows", "Pricing": "Free", "Rating": "5"},
-            {"Tool Name": "ChatPDF AI", "Main Category": "Academic Writing", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "GammaAPP AI", "Main Category": "Design & Creative", "Platform": "Web", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Perplexity AI", "Main Category": "Academic Writing", "Platform": "Chatbot, Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Citenet Explorer", "Main Category": "Academic Writing", "Platform": "Masaüstü Uygulaması", "Pricing": "Free", "Rating": ""},
-            {"Tool Name": "Scite AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "Elicit AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": ""},
-            {"Tool Name": "SCISPACE AI", "Main Category": "Literature Review", "Platform": "Yapay Zekâ Aracı", "Pricing": "Free Trial", "Rating": "5"},
-            {"Tool Name": "Publish or Perish", "Main Category": "Literature Review", "Platform": "Windows", "Pricing": "", "Rating": ""},
-            {"Tool Name": "Napkin AI", "Main Category": "Academic Writing", "Platform": "Web, Yapay Zekâ Aracı", "Pricing": "Free", "Rating": "5"},
-            {"Tool Name": "Connected Papers AI", "Main Category": "Literature Review", "Platform": "Web", "Pricing": "Free Trial", "Rating": "3"},
-            {"Tool Name": "Co-STORM AI", "Main Category": "Academic Writing", "Platform": "Yapay Zekâ Aracı", "Pricing": "", "Rating": ""}
+            {"Tool Name": "Tez Ara", "Main Category": "Database", "Platform": "Web", "URL": "https://tezara.org/search", "Pricing": "Free", "Rating": "5", "Description": "YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar.", "Notes": ""},
+            {"Tool Name": "YÖK Tez", "Main Category": "Database", "Platform": "Web", "URL": "https://tez.yok.gov.tr/UlusalTezMerkezi/giris.jsp", "Pricing": "Free", "Rating": "", "Description": "YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar.", "Notes": ""},
+            {"Tool Name": "ProQuest", "Main Category": "Database", "Platform": "Web", "URL": "https://www.proquest.com/", "Pricing": "Subscription", "Rating": "", "Description": "Uluslararası tezlere erişim sağlar.", "Notes": "Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. https://mk.gov.tr/veritabanlari/Veritabanlar%C4%B1%20Listesi/liste"},
+            {"Tool Name": "Web of Science", "Main Category": "Database", "Platform": "Web", "URL": "https://www.webofknowledge.com/", "Pricing": "Subscription", "Rating": "", "Description": "SSCI vb. indeksli yayınlara erişim sağlar.", "Notes": "Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. https://mk.gov.tr/veritabanlari/Veritabanlar%C4%B1%20Listesi/liste"},
+            {"Tool Name": "SCOPUS", "Main Category": "Database", "Platform": "Web", "URL": "https://www.scopus.com/", "Pricing": "Subscription", "Rating": "", "Description": "SSCI vb. indeksli yayınlara erişim sağlar.", "Notes": "Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. Millet Kütüphanesi"},
+            {"Tool Name": "Google Scholar", "Main Category": "Database", "Platform": "Web", "URL": "https://scholar.google.com/", "Pricing": "Free", "Rating": "", "Description": "Google üzerinden akademik arama yapmayı sağlar", "Notes": "Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. Millet Kütüphanesi"},
+            {"Tool Name": "Litmaps", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "URL": "https://app.litmaps.com/", "Pricing": "Free Trial", "Rating": "", "Description": "Literatür görselleştirme ve ilişkileri görme", "Notes": ""},
+            {"Tool Name": "Research Rabbit", "Main Category": "Literature Review", "Platform": "Web, Yapay Zekâ Aracı", "URL": "https://www.researchrabbit.ai/", "Pricing": "Free", "Rating": "5", "Description": "Literatür görselleştirme ve ilişkileri görme", "Notes": "Zotero ile bağlantı kurulabiliyor."},
+            {"Tool Name": "Zotero", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "URL": "https://www.zotero.org/", "Pricing": "Free", "Rating": "5", "Description": "Makale arşivleme ve atıf yönetimi", "Notes": "300 mb sınırlı alanı vardır. Kullanımı kolay ve açık kaynaklıdır."},
+            {"Tool Name": "Mendeley", "Main Category": "Academic Writing", "Platform": "Android, Windows, iOS, macOS", "URL": "https://www.mendeley.com/", "Pricing": "Free", "Rating": "4", "Description": "Makale arşivleme ve atıf yönetimi", "Notes": "Üniversite hesabıyla 100 gb alan vermektedir."}
         ];
 
         // Initialize table and filters
@@ -134,8 +118,13 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tool["Tool Name"]}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool["Main Category"]}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Platform}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-500 hover:text-blue-700">
+                        <a href="${tool.URL}" target="_blank" class="underline">${tool.URL}</a>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Pricing}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Rating ? '⭐'.repeat(parseInt(tool.Rating)) : ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Notes}</td>
                 `;
                 
                 tbody.appendChild(row);
