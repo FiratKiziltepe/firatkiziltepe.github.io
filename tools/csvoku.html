@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Tools Database</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Digital Tools Database</h1>
+        
+        <!-- Filters -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <input type="text" id="searchInput" placeholder="Search..." 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <select id="categoryFilter" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div>
+                <select id="platformFilter" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Platforms</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Tool Name">Tool Name ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Main Category">Category ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Platform">Platform ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Pricing">Pricing ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Rating">Rating ↕</th>
+                        <th class="cursor-pointer px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="Description">Description</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let tools = [];
+
+        // CSV dosyasını okuma ve parse etme fonksiyonu
+        async function loadCSV() {
+            try {
+                const response = await fetch('tools.csv');
+                const csvText = await response.text();
+                
+                // CSV'yi parse et
+                const rows = csvText.split('\n');
+                const headers = rows[0].split(',').map(header => header.trim());
+                
+                tools = rows.slice(1).filter(row => row.trim()).map(row => {
+                    const values = row.split(',');
+                    return headers.reduce((obj, header, index) => {
+                        obj[header] = values[index] ? values[index].trim() : '';
+                        return obj;
+                    }, {});
+                });
+
+                initializeTable();
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                            Error loading data. Please make sure tools.csv exists in the same directory.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Tabloyu başlatma
+        function initializeTable() {
+            // Populate category and platform filters
+            const categories = [...new Set(tools.map(tool => tool["Main Category"]))];
+            const platforms = [...new Set(tools.map(tool => tool.Platform))];
+            
+            const categoryFilter = document.getElementById('categoryFilter');
+            const platformFilter = document.getElementById('platformFilter');
+            
+            categories.forEach(category => {
+                if (category) {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilter.appendChild(option);
+                }
+            });
+            
+            platforms.forEach(platform => {
+                if (platform) {
+                    const option = document.createElement('option');
+                    option.value = platform;
+                    option.textContent = platform;
+                    platformFilter.appendChild(option);
+                }
+            });
+
+            // Initial render
+            renderTable(tools);
+        }
+
+        // Render table function
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(tool => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tool["Tool Name"] || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool["Main Category"] || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Platform || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Pricing || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.Rating ? '⭐'.repeat(parseInt(tool.Rating)) : ''}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-md truncate">${tool.Description || ''}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter table function
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const platformFilter = document.getElementById('platformFilter').value;
+            
+            const filteredData = tools.filter(tool => {
+                const matchesSearch = Object.values(tool).some(value => 
+                    value.toString().toLowerCase().includes(searchTerm)
+                );
+                const matchesCategory = !categoryFilter || tool["Main Category"] === categoryFilter;
+                const matchesPlatform = !platformFilter || tool.Platform.includes(platformFilter);
+                
+                return matchesSearch && matchesCategory && matchesPlatform;
+            });
+            
+            renderTable(filteredData);
+        }
+
+        // Sort table function
+        let sortDirection = {};
+        
+        function sortTable(column) {
+            sortDirection[column] = !sortDirection[column];
+            
+            const sortedData = [...tools].sort((a, b) => {
+                let valueA = a[column] || '';
+                let valueB = b[column] || '';
+                
+                if (column === 'Rating') {
+                    valueA = parseFloat(valueA) || 0;
+                    valueB = parseFloat(valueB) || 0;
+                }
+                
+                if (sortDirection[column]) {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            renderTable(sortedData);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load CSV data
+            loadCSV();
+
+            // Add event listeners
+            document.getElementById('searchInput').addEventListener('input', filterTable);
+            document.getElementById('categoryFilter').addEventListener('change', filterTable);
+            document.getElementById('platformFilter').addEventListener('change', filterTable);
+            
+            // Add sorting listeners
+            document.querySelectorAll('th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    sortTable(column);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

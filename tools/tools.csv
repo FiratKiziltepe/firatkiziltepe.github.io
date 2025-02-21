@@ -1,0 +1,30 @@
+﻿Tool Name,Main Category,Platform,URL,Description,Pricing,Rating,Notes
+Tez Ara,Database,Web,https://tezara.org/search,YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar.,Free,5,
+YÖK Tez,Database,Web,https://tez.yok.gov.tr/UlusalTezMerkezi/giris.jsp,YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar.,Free,,
+ProQuest,Database,Web,https://www.proquest.com/,Uluslararası tezlere erişim sağlar.,Subscription,,Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. https://mk.gov.tr/veritabanlari/Veritabanlar%C4%B1%20Listesi/liste
+Web of Science,Database,Web,https://www.webofknowledge.com/,SSCI vb. indeksli yayınlara erişim sağlar.,Subscription,,Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. https://mk.gov.tr/veritabanlari/Veritabanlar%C4%B1%20Listesi/liste
+SCOPUS,Database,Web,https://www.scopus.com/,SSCI vb. indeksli yayınlara erişim sağlar.,Subscription,,Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. Millet Kütüphanesi
+Google Scholar,Database,Web,https://scholar.google.com/,Google üzerinden akademik arama yapmayı sağlar,Free,,Üniversite hesabı veya Millet Kütüphanesi üyeliği ile sınırsız erişim sağlanabilir. Millet Kütüphanesi
+Litmaps,Literature Review,"Web, Yapay Zekâ Aracı",https://app.litmaps.com/,Literatür görselleştirme ve ilişkileri görme,Free Trial,,
+Research Rabbit,Literature Review,"Web, Yapay Zekâ Aracı",https://www.researchrabbit.ai/,Literatür görselleştirme ve ilişkileri görme,Free,5,Zotero ile bağlantı kurulabiliyor.
+Kling AI,Video & Audio,"Web, Yapay Zekâ Aracı",https://klingai.com/,Yapay zekâ ile video üretimi.,Free Trial,,Ücretsiz sınırlı sayıda içerik üretme.
+Heygen AI,Video & Audio,"Web, Yapay Zekâ Aracı",https://app.heygen.com/,Yapay zekâ ile video üretimi.,Free Trial,,Avatarla ders anlatım videoları hazırlanabilir.
+Suno AI,Video & Audio,"Web, Yapay Zekâ Aracı",https://suno.com/,Yapay zekâ ile şarkı üretimi.,Free Trial,,Ücretsiz sınırlı sayıda içerik üretme.
+Eleven Labs AI,Video & Audio,"Web, Yapay Zekâ Aracı",https://elevenlabs.io/,Yapay zekâ ile text to speech vb. ses üretimi.,Free Trial,,
+Agent Ransack,Desktop Use,Windows,https://www.mythicsoft.com/filelocatorpro/download/,Bilgisayarda dosya arama programı,Free,,
+Zotero,Academic Writing,"Android, Windows, iOS, macOS",https://www.zotero.org/,Makale arşivleme ve atıf yönetimi,Free,5,300 mb sınırlı alanı vardır. Kullanımı kolay ve açık kaynaklıdır.
+Mendeley,Academic Writing,"Android, Windows, iOS, macOS",https://www.mendeley.com/,Makale arşivleme ve atıf yönetimi,Free,4,Üniversite hesabıyla 100 gb alan vermektedir.
+EndNote,Academic Writing,"Android, Windows, iOS, macOS",https://endnote.com/,Makale arşivleme ve atıf yönetimi,Subscription,3,Üniversiteler genelde ücretsiz sağlar.
+SPSS,İstatistik & Analiz,,https://www.ibm.com/products/spss-statistics,İstatistiksel analiz aracı.,Paid,4,En kapsamlı araçlardan biridir.
+Jamovi,İstatistik & Analiz,Windows,https://www.jamovi.org/,SPSS muadili İstatistiksel analiz aracı.,Free,5,SPSS’e göre daha pratik ve tabloları daha iyi görselleştirmektedir.
+ChatPDF AI,Academic Writing,Yapay Zekâ Aracı,https://www.chatpdf.com/,PDF’ler yükleyip soru cevap yapılabilir.,Free Trial,,
+GammaAPP AI,Design & Creative,Web,https://gamma.app/,Yapay zekâ destekli sunu hazırlama aracı.,Free Trial,,
+Perplexity AI,Academic Writing,"Chatbot, Yapay Zekâ Aracı",https://www.perplexity.ai/,Yapay zekâ destekli literatür tarama ve yazım aracı,Free Trial,,
+Citenet Explorer,Academic Writing,Masaüstü Uygulaması,https://www.citnetexplorer.nl/,"bilimsel yayınların atıf ağlarını görselleştirmek ve analiz etmek için kullanılan bir yazılım aracıdır. ",Free,,"Araç, atıf ağlarının doğrudan Web of Science veritabanından içe aktarılmasını sağlar. Atıf ağları, örneğin bir ağa girerek ve yakından ilişkili yayınların kümelerini belirleyerek etkileşimli olarak keşfedilebilir."
+Scite AI,Literature Review,Yapay Zekâ Aracı,https://scite.ai/,Yapay zekâ destekli literatür tarama aracıdır.,Free Trial,,
+Elicit AI,Literature Review,Yapay Zekâ Aracı,https://elicit.com/,Yapay zekâ destekli literatür tarama aracıdır.,Free Trial,,Derinlemesine sistematik tarama yapar ve raporlaştırır. Sorunuza deneme sürümünde 4-5 kaynakla sınırlı özet oluşturur.
+SCISPACE AI,Literature Review,Yapay Zekâ Aracı,https://typeset.io/,Yapay zekâ destekli literatür tarama aracıdır.,Free Trial,5,Sorunuza deneme sürümünde 4-5 kaynakla sınırlı özet oluşturur. PDF belgenizi istenilen latex dergi formatına çevirir. PDF to video gibi birçok özelliği bulunmaktadır.
+Publish or Perish,Literature Review,Windows,https://harzing.com/resources/publish-or-perish,Veri tabanlarına masaüstü uygulamasıyla erişmeyi sağlar.,,,Google scholar taramasını topluca görmek için idealdir.
+Napkin AI,Academic Writing,"Web, Yapay Zekâ Aracı",https://app.napkin.ai/,Görsel destekli ve yapay zekâ tabanlı içerik üretme sitesi,Free,5,Yapay zekânın ürettiği veya sizin yazdığınız içerikteki istediğini bölüm için diyagramlar üretiyor. Oldukça faydalı.
+Connected Papers AI,Literature Review,Web,https://www.connectedpapers.com/,Araştırmalar arasında ilişki ağını göstermede ve literatür taramada kullanılır.,Free Trial,3,Her ay 5 görsel üretilebiliyor.
+Co-STORM AI,Academic Writing,Yapay Zekâ Aracı,https://storm.genie.stanford.edu/,İstenilen konuda uzun makale yazma aracı. Özellikle bir konuda outline oluşturmak için ideal bir araçtır.,,,
