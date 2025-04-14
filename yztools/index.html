@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeachAI Navigator - Unlock AI in Your Classroom</title>
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #4A90E2; /* Trustworthy Blue */
+            --secondary-color: #F5A623; /* Encouraging Orange */
+            --light-bg: #F5F5F5;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --border-color: #CCCCCC;
+            --card-bg: #FFFFFF;
+            --font-heading: 'Nunito', sans-serif; /* Example font */
+            --font-body: 'Open Sans', sans-serif; /* Example font */
+        }
+
+        /* Basic Reset & Font Setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            margin-bottom: 0.75em;
+            color: var(--primary-color); /* Make headings stand out */
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 1.8rem; }
+        h3 { font-size: 1.4rem; }
+
+        p {
+            margin-bottom: 1em;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- Header / Top Navigation --- */
+        .top-nav {
+            background-color: var(--text-light);
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; /* Make it sticky */
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 2rem;
+        }
+        .logo a { text-decoration: none; }
+
+
+        .main-nav ul, .user-nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-nav li, .user-nav li {
+            margin-left: 1.5rem;
+        }
+
+        .main-nav a, .user-nav a {
+            font-weight: bold;
+            font-size: 0.95rem;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            transition: color 0.3s ease;
+        }
+
+         .main-nav a:hover, .user-nav a:hover {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .search-bar {
+            display: flex; /* Keep search and button together */
+            margin-left: 2rem; /* Space from main nav */
+        }
+
+        .search-bar input[type="search"] {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px 0 0 4px; /* Rounded left corners */
+            min-width: 200px;
+        }
+
+         .search-bar button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border-radius: 0 4px 4px 0; /* Rounded right corners */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+         }
+         .search-bar button:hover {
+            background-color: #3a7ac0; /* Darker blue */
+         }
+
+
+        /* --- Main Content Area --- */
+        main {
+            padding: 40px 0; /* Space above and below main content */
+        }
+
+        section {
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            background-color: var(--text-light); /* White background for contrast */
+            padding: 60px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .hero h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5em;
+        }
+
+        .hero .sub-headline {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto 1.5em auto;
+        }
+
+        .cta-button {
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 25px; /* Pill shape */
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block; /* Allows padding and centering */
+        }
+
+        .cta-button:hover {
+            background-color: #e4961a; /* Darker orange */
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .hero-visual {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--light-bg); /* Placeholder background */
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* --- How It Works Section --- */
+        .how-it-works {
+            text-align: center;
+        }
+         .how-it-works h2 {
+             margin-bottom: 1.5em;
+         }
+
+        .steps-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            flex-wrap: wrap; /* Wrap steps on smaller screens */
+        }
+
+        .step {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            flex-basis: calc(33.333% - 20px); /* Adjust basis for gap */
+            text-align: center;
+        }
+
+        .step .step-number {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step h3 {
+            font-size: 1.2rem;
+            color: var(--text-dark); /* Use darker text for step titles */
+            margin-bottom: 10px;
+        }
+
+        /* --- Featured Goals/Tools Sections --- */
+        .featured-goals, .featured-tools {
+            background-color: var(--text-light);
+            padding: 40px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+         .featured-goals h2, .featured-tools h2 {
+             text-align: center;
+             margin-bottom: 1.5em;
+         }
+
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+            gap: 25px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+            display: flex; /* Use flex for internal alignment */
+            flex-direction: column; /* Stack content vertically */
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .card h3 { /* Goal/Tool Title */
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .card h3 a { color: inherit; text-decoration: none; } /* Make title clickable if needed */
+        .card h3 a:hover { text-decoration: underline; }
+
+        .card p { /* Description */
+            font-size: 0.95rem;
+            color: #555;
+            flex-grow: 1; /* Makes description take available space */
+            margin-bottom: 15px; /* Space before potential link/button */
+        }
+
+        .card .card-link {
+             display: inline-block;
+             margin-top: auto; /* Push link to bottom if card heights vary */
+             font-weight: bold;
+             color: var(--secondary-color);
+        }
+         .card .card-link:hover {
+             color: #e4961a;
+         }
+
+         .card .tool-meta { /* For tool cards */
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 10px;
+         }
+         .card .tool-meta span { margin-right: 10px; }
+
+
+        /* --- Testimonials Section --- */
+        .testimonials h2 {
+            text-align: center;
+             margin-bottom: 1.5em;
+        }
+        .testimonial-card {
+             background-color: var(--card-bg);
+             padding: 25px;
+             border-radius: 8px;
+             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+             border-left: 5px solid var(--secondary-color); /* Accent border */
+        }
+        .testimonial-card blockquote {
+            margin: 0;
+            font-style: italic;
+            color: #555;
+        }
+         .testimonial-card .author {
+            margin-top: 15px;
+            font-weight: bold;
+            color: var(--text-dark);
+            text-align: right;
+         }
+
+        /* --- Resources Link Section --- */
+        .resources-link {
+            text-align: center;
+            background-color: var(--primary-color);
+            padding: 30px 20px;
+            border-radius: 8px;
+        }
+         .resources-link p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 1em;
+         }
+         .resources-link a {
+             color: var(--text-light);
+             font-weight: bold;
+             border: 1px solid var(--text-light);
+             padding: 0.5rem 1.5rem;
+             border-radius: 20px;
+             transition: background-color 0.3s ease, color 0.3s ease;
+         }
+         .resources-link a:hover {
+             background-color: var(--text-light);
+             color: var(--primary-color);
+             text-decoration: none;
+         }
+
+
+        /* --- Footer --- */
+        .site-footer {
+            background-color: #333; /* Dark footer */
+            color: #ccc;
+            padding: 30px 0;
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+
+        .site-footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Wrap on smaller screens */
+        }
+
+        .footer-nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap; /* Allow links to wrap */
+        }
+
+        .footer-nav li {
+            margin-right: 1.5rem;
+            margin-bottom: 0.5rem; /* Spacing when wrapped */
+        }
+
+        .footer-nav a {
+            color: #ccc;
+        }
+
+        .footer-nav a:hover {
+            color: var(--text-light);
+        }
+
+        .footer-copy {
+             margin-top: 10px; /* Space if wrapping occurs */
+             flex-basis: 100%; /* Take full width if wrapped */
+             text-align: center; /* Center copyright when wrapped */
+        }
+
+        /* --- Accessibility --- */
+        /* Basic focus outline for keyboard navigation */
+        a:focus, button:focus, input:focus {
+             outline: 2px solid var(--secondary-color);
+             outline-offset: 2px;
+        }
+         /* Hide visually but keep accessible for screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 992px) {
+            .top-nav .container {
+                flex-direction: column; /* Stack elements vertically */
+                align-items: flex-start; /* Align to left */
+            }
+            .main-nav, .user-nav, .search-bar {
+                 margin-top: 1rem; /* Add space between stacked elements */
+                 margin-left: 0; /* Reset margin */
+                 width: 100%; /* Take full width */
+            }
+             .main-nav ul, .user-nav ul {
+                 flex-direction: column; /* Stack nav items */
+                 align-items: flex-start;
+                 width: 100%;
+             }
+             .main-nav li, .user-nav li {
+                 margin-left: 0;
+                 margin-bottom: 0.5rem;
+                 width: 100%;
+             }
+             .search-bar {
+                 justify-content: flex-start;
+             }
+             .search-bar input[type="search"] {
+                 flex-grow: 1; /* Allow input to grow */
+             }
+
+            .steps-container {
+                flex-direction: column; /* Stack steps vertically */
+                align-items: center;
+            }
+            .step {
+                flex-basis: 80%; /* Wider basis when stacked */
+                max-width: 450px; /* Limit max width */
+            }
+            .card-container {
+                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adjust card size */
+             }
+        }
+
+         @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.6rem; }
+
+            .hero { padding: 40px 15px; }
+            .cta-button { padding: 0.8rem 2rem; font-size: 1rem; }
+
+             .site-footer .container {
+                 flex-direction: column;
+                 text-align: center;
+             }
+             .footer-nav ul {
+                 justify-content: center; /* Center footer links */
+                 margin-bottom: 1rem;
+             }
+              .footer-nav li {
+                 margin: 0 0.75rem 0.5rem; /* Adjust spacing */
+             }
+             .footer-copy {
+                 margin-top: 0; /* Reset margin */
+             }
+         }
+
+    </style>
+    <!-- Link Google Fonts (Optional, but used in CSS) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 1. Top Navigation Bar (Persistent) -->
+    <header class="top-nav">
+        <div class="container">
+            <div class="logo"><a href="#">TeachAI Navigator</a></div>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <ul>
+                    <li><a href="#goals">Explore Goals</a></li>
+                    <li><a href="#tools">Browse AI Tools</a></li>
+                    <li><a href="#learn">Learn</a></li>
+                    <li><a href="#community">Community</a></li>
+                </ul>
+            </nav>
+
+            <form class="search-bar" role="search">
+                <label for="global-search" class="sr-only">Search TeachAI Navigator</label>
+                <input type="search" id="global-search" placeholder="Search goals, tools, resources...">
+                <button type="submit">Search</button>
+            </form>
+
+            <nav class="user-nav" aria-label="User account">
+                <ul>
+                    <li><a href="#login">Login</a></li>
+                    <li><a href="#signup">Sign Up</a></li>
+                    <!-- Logged-in state would show Profile link here -->
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 2. Main Content Area (Homepage Example) -->
+    <main>
+        <!-- A. Homepage -->
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Unlock the Power of AI in Your Classroom</h1>
+                <p class="sub-headline">TeachAI Navigator guides you step-by-step to achieve your educational goals using the right AI tools.</p>
+                <a href="goal-definition.html" class="cta-button">Define Your Goal</a>
+                <div class="hero-visual">[Friendly illustration representing AI and education blending]</div>
+            </div>
+        </section>
+
+        <!-- "How it Works" Section -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2>How TeachAI Navigator Works</h2>
+                <div class="steps-container">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <h3>Define Your Goal</h3>
+                        <p>Tell us what you want to achieve in your teaching.</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <h3>Get Guided Steps</h3>
+                        <p>Receive a clear, actionable plan tailored to your needs.</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <h3>Use AI Tools</h3>
+                        <p>Discover and utilize suggested AI tools effectively.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Goals Section -->
+        <section class="featured-goals" id="goals">
+            <div class="container">
+                <h2>Start with a Popular Goal</h2>
+                <div class="card-container">
+                    <article class="card">
+                        <h3><a href="#goal-lesson-plan">Create a Lesson Plan</a></h3>
+                        <p>Generate structured lesson plans for any subject and grade level.</p>
+                        <a href="#goal-lesson-plan" class="card-link">Start Planning &rarr;</a>
+                    </article>
+                    <article class="card">
+                        <h3><a href="#goal-quiz">Generate Quiz Questions</a></h3>
+                        <p>Quickly create multiple-choice, short answer, or other question types.</p>
+                         <a href="#goal-quiz" class="card-link">Create Quiz &rarr;</a>
+                    </article>
+                    <article class="card">
+                        <h3><a href="#goal-visuals">Design Presentation Visuals</a></h3>
+                        <p>Use AI to generate images or illustrations for your slides.</p>
+                         <a href="#goal-visuals" class="card-link">Generate Visuals &rarr;</a>
+                    </article>
+                     <article class="card">
+                        <h3><a href="#goal-summary">Summarize Text</a></h3>
+                        <p>Condense long articles or documents for student reading.</p>
+                         <a href="#goal-summary" class="card-link">Summarize Now &rarr;</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Tools Section -->
+        <section class="featured-tools" id="tools">
+            <div class="container">
+                <h2>Discover Helpful AI Tools</h2>
+                 <div class="card-container">
+                    <article class="card">
+                        <h3><a href="#tool-chatgpt">ChatGPT (OpenAI)</a></h3>
+                        <p>Versatile tool for text generation, brainstorming, explanations, and more.</p>
+                        <div class="tool-meta">
+                            <span>Category: Content Generation</span>
+                            <span>Cost: Freemium</span>
+                        </div>
+                        <a href="#tool-chatgpt" class="card-link">View Details &rarr;</a>
+                    </article>
+                    <article class="card">
+                        <h3><a href="#tool-canva">Canva Magic Studio</a></h3>
+                        <p>Integrates AI features for design, presentations, and basic animation.</p>
+                         <div class="tool-meta">
+                            <span>Category: Content Creation, Visuals</span>
+                            <span>Cost: Freemium</span>
+                        </div>
+                        <a href="#tool-canva" class="card-link">View Details &rarr;</a>
+                    </article>
+                    <article class="card">
+                        <h3><a href="#tool-diffit">Diffit for Teachers</a></h3>
+                        <p>Adapts existing materials for different reading levels and generates resources.</p>
+                         <div class="tool-meta">
+                            <span>Category: Differentiation, Content Creation</span>
+                            <span>Cost: Freemium</span>
+                        </div>
+                        <a href="#tool-diffit" class="card-link">View Details &rarr;</a>
+                    </article>
+                 </div>
+                 <p style="text-align: center; margin-top: 30px;"><a href="tool-database.html" class="cta-button" style="background-color: var(--primary-color); font-size: 1rem; padding: 0.8rem 2rem;">Browse All Tools</a></p>
+            </div>
+        </section>
+
+        <!-- Testimonial Snippets Section -->
+        <section class="testimonials">
+            <div class="container">
+                <h2>What Teachers Are Saying</h2>
+                <div class="card-container">
+                    <div class="testimonial-card">
+                         <blockquote>"TeachAI Navigator made incorporating AI feel manageable, not overwhelming. The step-by-step guides are fantastic!"</blockquote>
+                         <p class="author">- Placeholder Teacher Name</p>
+                    </div>
+                     <div class="testimonial-card">
+                         <blockquote>"Finding the right AI tool used to take hours. This platform narrowed it down perfectly for my lesson planning needs."</blockquote>
+                         <p class="author">- Another Educator</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Link to Resources Section -->
+        <section class="resources-link" id="learn">
+             <div class="container">
+                 <p>New to AI in education? Explore our guides and tutorials.</p>
+                 <a href="learn-hub.html">Go to Learn Hub</a>
+             </div>
+        </section>
+
+    </main>
+
+    <!-- 3. Footer -->
+    <footer class="site-footer">
+        <div class="container">
+             <nav class="footer-nav" aria-label="Footer navigation">
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                    <li><a href="#accessibility">Accessibility Statement</a></li>
+                </ul>
+             </nav>
+             <div class="footer-copy">
+                 &copy; 2024 TeachAI Navigator. All rights reserved.
+             </div>
+        </div>
+    </footer>
+
+    <!-- Basic Javascript (Optional - for potential future interactivity) -->
+    <script>
+        // Example: Smooth scroll for anchor links (optional)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                // Only prevent default and scroll if it's a real internal link, not just "#"
+                if (href.length > 1 && document.querySelector(href)) {
+                     e.preventDefault();
+                     document.querySelector(href).scrollIntoView({
+                         behavior: 'smooth'
+                     });
+                }
+            });
+        });
+
+        // Placeholder alert for CTA button click
+        const ctaButton = document.querySelector('.cta-button');
+        if (ctaButton) {
+            ctaButton.addEventListener('click', function(e) {
+                // Prevent default only if it's a real link we are not scrolling to
+                const href = this.getAttribute('href');
+                 if (!href || href === '#goal-definition') { // Adjust if target ID changes
+                     alert('Navigating to Goal Definition Flow!');
+                 }
+            });
+        }
+
+    </script>
+
+</body>
+</html>
