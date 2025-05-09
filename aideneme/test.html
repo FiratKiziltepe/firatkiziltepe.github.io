@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Test</title>
+</head>
+<body>
+    <h1>JSON Testi</h1>
+    <div id="sonuc"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sonucDiv = document.getElementById('sonuc');
+            
+            fetch('tools.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP hata! Durum: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    sonucDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    console.log('Veri yüklendi:', data);
+                })
+                .catch(error => {
+                    sonucDiv.innerHTML = `<div style="color:red">Hata: ${error.message}</div>`;
+                    console.error('Hata:', error);
+                });
+        });
+    </script>
+</body>
+</html> 

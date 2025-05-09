@@ -1,0 +1,32 @@
+[
+  {
+    "kategori": "Metin İşleme",
+    "araclar": [
+      {
+        "isim": "ÖrnekAraç",
+        "aciklama": "Araç açıklaması",
+        "url": "https://ornek.com"
+      },
+      {
+        "isim": "LanguageTool",
+        "aciklama": "Dil ve yazım denetleyicisi",
+        "url": "https://languagetool.org"
+      }
+    ]
+  },
+  {
+    "kategori": "Görsel İşleme",
+    "araclar": [
+      {
+        "isim": "DALL-E",
+        "aciklama": "Metin açıklamalarından gerçekçi görseller oluşturur",
+        "url": "https://openai.com/dall-e-2"
+      },
+      {
+        "isim": "Midjourney",
+        "aciklama": "Metin komutlarına dayalı görsel üretim aracı",
+        "url": "https://www.midjourney.com"
+      }
+    ]
+  }
+] 
