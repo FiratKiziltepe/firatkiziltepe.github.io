@@ -1,32 +1,488 @@
 [
   {
-    "kategori": "Metin İşleme",
+    "kategori": "Akademik İçerik Hazırlama Araçları",
     "araclar": [
       {
-        "isim": "ÖrnekAraç",
-        "aciklama": "Araç açıklaması",
-        "url": "https://ornek.com"
+        "isim": "Elicit",
+        "aciklama": "Elicit; özetleme, veri çıkarma ve bulgularınızı sentezleme gibi zaman alıcı araştırma görevlerini otomatikleştiren bir yapay zekâ aracıdır.",
+        "url": "https://elicit.com"
       },
       {
-        "isim": "LanguageTool",
-        "aciklama": "Dil ve yazım denetleyicisi",
-        "url": "https://languagetool.org"
+        "isim": "Typeset",
+        "aciklama": "Typeset; bilimsel yazılar ve akademik makaleler oluşturma sürecini kolaylaştırmak için tasarlanmış güçlü bir araştırma ve yazma platformudur. Araştırmacılara, iyi yapılandırılmış, yayına hazır belgeler üretmede yardımcı olmak için kapsamlı bir araç takımı sunar.",
+        "url": "https://typeset.io"
+      },
+      {
+        "isim": "Scite",
+        "aciklama": "Scite; bilimsel yayınları analiz eden, alıntılar için bağlam sağlayan ve araştırmacıların akademik makalelerin güvenilirliğini ve etkisini değerlendirmelerine yardımcı olan bir araştırma platformudur. Kullanıcıların araştırma makalelerini değerlendirmelerine, ilgili literatürü bulmalarına ve araştırma makalelerinden bilgi sentezlemelerine olanak tanır.",
+        "url": "https://scite.ai"
+      },
+      {
+        "isim": "ChatGPT",
+        "aciklama": "ChatGpt; çok yönlü bir yapay zekâ aracıdır. Soruları yanıtlayabilir, hikayeler oluşturabilir, bilimsel yazı oluşturabilir, kitap konularını özetleyebilir, görselleri analiz edebilir.",
+        "url": "https://openai.com/chatgpt"
+      },
+      {
+        "isim": "Copilot",
+        "aciklama": "Copilot; kod yazma, bilimsel ve akademik içerik oluşturma, günlük ofis işlerini kolaylaştırma amacı taşıyan bir araçtır. Eğitilmiş bu dijital asistan, kullanıcıların yazdıkları komutları anlayarak amaca uygun yönlendirmeler yapar. Word, Excel, Powerpoint, Teams ve Outlook gibi programlarla başarılı şekilde çalışır.",
+        "url": "https://copilot.microsoft.com"
+      },
+      {
+        "isim": "Gemini",
+        "aciklama": "Gemini; bilimsel metin, görüntü, ses, video gibi farklı formatlardaki içerikleri oluşturabilen ve anlayabilen bir yapay zekâ aracıdır. Gemini, çeşitli programlama dillerinde kodlar oluşturabilir ve anlayabilir.",
+        "url": "https://gemini.google.com"
+      },
+      {
+        "isim": "Jenni",
+        "aciklama": "Jenni; araştırmacılara, makaleler ve diğer akademik yazılar için kısa, net ve ilgi çekici ifadeler oluşturmada yardımcı olmak üzere tasarlanmış bir araçtır. Jenni, gelişmiş algoritmalardan ve doğal dil işleme teknolojilerinden yararlanarak, herhangi bir yazılı çalışma için güçlü bir temel görevi görecek bir tez cümlesi hazırlama sürecini basitleştirir.",
+        "url": "https://jenni.ai"
+      },
+      {
+        "isim": "Quillbot",
+        "aciklama": "Quillbot; kullanıcıların intihalden kaçınma, cümlelerini yeniden ifade etme ve alternatif içerik üretme yoluyla yazım alternatiflerini genişletmesine yardımcı olur. Yazılı metnin okunabilirliğini, tutarlılığını ve genel standardını artırmak için dil bilgisi denetimi ve kelime önerme işlevleri sağlar.",
+        "url": "https://quillbot.com"
+      },
+      {
+        "isim": "Aithor",
+        "aciklama": "Aithor; makale gibi yazma görevlerine yardımcı olmak için tasarlanmış çevrimiçi bir yapay zekâ yazma platformudur. İçeriğin ana hatlarını çizmek, yapılandırmak veya yeniden düzenlemek ve içerik için doğru alıntılar oluşturmak için kullanılabilir.",
+        "url": "https://aithor.com"
+      },
+      {
+        "isim": "Perplexity",
+        "aciklama": "Perplexity; ChatGpt benzeri bir yazılım olan Perplexity, Chatgpt'den farklı olarak oluşturduğu makale, sunumu gerçek ve güncel kaynaklardan alıntılar ve yorumlar. Ayrıca yüklenen belgelerle ilgili olarak analiz ve yorumlar yapabilir. (Mesela bir EKG ya da tahlil sonucunu yorumlayabilir.)",
+        "url": "https://www.perplexity.ai"
+      },
+      {
+        "isim": "HyperWrite",
+        "aciklama": "HyperWriteai; çok yönlü bir yazım platformudur. Öne çıkan iki güçlü yönü ise yazım asistanı ve şablon kütüphanesi'dir. Yazım asistanı, benzer sistemler içerisinde hız/kullanışlılık/isabetli metin üretme açısından öne çıkar. Sistem, ön tanımlı pek çok şablona da sahiptir.",
+        "url": "https://www.hyperwriteai.com"
+      },
+      {
+        "isim": "Writesonic",
+        "aciklama": "Writesonic; gerçek zamanlı verilerle doğru içerik yazımı yapan optimize edilmiş içerikler üreten platformudur.",
+        "url": "https://writesonic.com"
+      },
+      {
+        "isim": "Consensus",
+        "aciklama": "Consensus; akademik ve bilimsel araştırmaları kolaylaştırmak için tasarlanmış, akademik makalelerin incelenmesine ve sonuçların hızlı şekilde sunulmasına olanak tanıyan araçtır.",
+        "url": "https://consensus.app"
+      },
+      {
+        "isim": "DeepSeek",
+        "aciklama": "DeepSeek; büyük dil modeli içeren, yapay zekâ destekli bir bilgi keşif ve analiz platformudur. Gelişmiş algoritmaları sayesinde kullanıcıların ihtiyaç duyduğu bilgilere hızlı ve etkili bir şekilde ulaşmasını sağlayan bir yapay zekâ aracıdır. ChatGpt'ye göre kullanımı daha teknik beceriler isteyen bir platformdur.",
+        "url": "https://www.deepseek.com"
       }
     ]
   },
   {
-    "kategori": "Görsel İşleme",
+    "kategori": "Akademik Çeviri Araçları",
     "araclar": [
       {
-        "isim": "DALL-E",
-        "aciklama": "Metin açıklamalarından gerçekçi görseller oluşturur",
-        "url": "https://openai.com/dall-e-2"
+        "isim": "ChatGPT",
+        "aciklama": "ChatGPT; pratik şekilde uygulanabilen çok yönlü bir yapay zekâ aracıdır. İstenilen dilde çeviri yapabilir.",
+        "url": "https://openai.com/chatgpt"
       },
       {
-        "isim": "Midjourney",
-        "aciklama": "Metin komutlarına dayalı görsel üretim aracı",
-        "url": "https://www.midjourney.com"
+        "isim": "DeepL",
+        "aciklama": "DeepL; kendisine aktarılan metinleri veya metin dosyalarını yüksek kalitede ve doğrulukta istenilen dile çevirebilen bir yapay zekâ aracıdır.",
+        "url": "https://www.deepl.com"
+      },
+      {
+        "isim": "Grammarly",
+        "aciklama": "Grammarly; İngilizce yazıların dilbilgisi hatalarını, anlatım bozukluklarını, hatalı kelime ve noktalama işareti kullanımlarını düzelten ve metni anlatım açısından daha güçlü hale getiren bir yapay zekâ aracıdır.",
+        "url": "https://www.grammarly.com"
+      },
+      {
+        "isim": "Gemini",
+        "aciklama": "Gemini; kendisine aktarılan metinleri, metin dosyalarını ve görselleri yüksek doğrulukta istenilen dile çeviren bir yapay zekâ aracıdır.",
+        "url": "https://gemini.google.com"
+      },
+      {
+        "isim": "Reverso",
+        "aciklama": "Reverso; kendisine yüklenen metin veya belgeleri istenilen dile çevirebilen ve dilbilgisi kontrolü de yapabilen bir yapay zekâ aracıdır. Bunun yanında dil öğrenmeye yardımcı modüllere de sahiptir.",
+        "url": "https://www.reverso.net"
+      },
+      {
+        "isim": "Hix",
+        "aciklama": "Hix; kendisine verilen dosyaları istenilen dile çevirebilen bir yapay zekâ aracıdır. Bunun yanında yeniden yazma, dilbilgisi denetimi yapma, çevrilen metinleri genişletme, düzeltme veya özetleme gibi özelliklere sahip bir yapay zekâ aracıdır.",
+        "url": "https://hix.ai"
+      }
+    ]
+  },
+  {
+    "kategori": "Ders Planı ve Materyal Hazırlama Araçları",
+    "araclar": [
+      {
+        "isim": "Magic School",
+        "aciklama": "Magic School; eğitimciler için tasarlanmış, ders planlaması, değerlendirme araçları, ders materyalleri özel eğitim programları oluşturma ve öğrencilere geri bildirim sağlamaya kadar birçok modüle sahiptir.",
+        "url": "https://www.magicschool.ai"
+      },
+      {
+        "isim": "School AI",
+        "aciklama": "School Al; çalışma sayfası, ders planı, çoktan seçmeli sınav, rubrik, metin düzenleme, bireyselleştirilmiş eğitim programı, tercüme, müfredat oluşturma gibi birçok aracı bir araya getiren yapay zekâ aracıdır.",
+        "url": "https://schoolai.com"
+      },
+      {
+        "isim": "Socrat AI",
+        "aciklama": "Socrat Al; eğitimcilere sanal sınıf oluşturarak, öğrencilerle etkileşimli ders işleme, öğrencilere materyal ve değerlendirme araçları hazırlama konularında yardımcı olan yapay zekâ aracıdır.",
+        "url": "https://socratic.org"
+      },
+      {
+        "isim": "MathGPT",
+        "aciklama": "MathGPT; temel matematikten ileri seviye matematik ve geometriye kadar tüm matematik problemlerini yazarak veya resimlerini yükleyerek çözmede kullanıcılara yardımcı olmak için özel bir araç olarak tasarlanmıştır. Kullanıcıların matematiksel kavramları tam olarak anlamalarına yardımcı olmak adım adım rehberlik sunan bir yapay zekâ aracıdır.",
+        "url": "https://mathgpt.com"
+      },
+      {
+        "isim": "Curipod",
+        "aciklama": "Curipod; öğretmenlerin istedikleri ders ve konularla ilgili ders planları hazırlamaları ve bunları etkileşimli bir ortamda kişiselleştirilmiş bir şekilde işlemelerini sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://curipod.com"
+      },
+      {
+        "isim": "Diffit",
+        "aciklama": "Diffit; bir ders içeriği için gerekli (konu anlatımı, özet, kısa ve çoktan seçmeli sorular, çalışma kâğıtlari) gibi tüm materyalleri kişiye özel olarak hazırlayabilen, öğrencilere ait verileri analiz ederek geri bildirim sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://diffit.me"
+      },
+      {
+        "isim": "Gradescope",
+        "aciklama": "Gradescope; öğretmenlerin sınavları ve ödevleri hızlı ve tutarlı bir şekilde değerlendirmesine ve sonuçlar hakkında yorum yapılabilmesine yardımcı olan bir yapay zekâ aracıdır.",
+        "url": "https://www.gradescope.com"
+      },
+      {
+        "isim": "Youlearn",
+        "aciklama": "Youlearn; içeriğin üst düzey bir özetini çıkarmaya yarar. İçeriğin ana noktalarının hızlı bir şekilde anlaşılmasını sağlayan ve içeriğe ait konu başlıklarıyla ilgili bilgi kartları oluşturan bir yapay zekâ aracıdır.",
+        "url": "https://youlearn.com"
+      }
+    ]
+  },
+  {
+    "kategori": "Diyagram ve Zihin Haritaları Hazırlama Araçları",
+    "araclar": [
+      {
+        "isim": "NoteGpt",
+        "aciklama": "NoteGpt; zihin haritalama ihtiyaçları için verilen metni özetleyebilen ve onun üzerinden zihin haritası oluşturabilen, kullanımı kolay bir yapay zekâ aracıdır.",
+        "url": "https://notegpt.io"
+      },
+      {
+        "isim": "MyMap",
+        "aciklama": "MyMap; girilen ders notları veya araştırma makalelerini, içerik analizi yaparak temel kavramları birbirine bağlayan görsel zihin haritalarına dönüştüren, yazılan istemler/internette güvenilir kaynaklardan elde edilen veriler ile diyagramlar oluşturabilen bir yapay zekâ aracıdır. Bunların yanında pdf ve Youtube videolarını özetleme özellikleri de mevcuttur.",
+        "url": "https://www.mymap.ai"
+      },
+      {
+        "isim": "Mermaidchart",
+        "aciklama": "Mermaidchart; kullanıcıların karmaşık diyagramlar ve grafikler oluşturmasını kolaylaştıran güçlü bir yapay zekâ aracıdır. Araç; akış şemaları, sıra şemaları, Gantt şemaları ve daha fazlası dahil olmak üzere çeşitli diyagram türlerini destekler.",
+        "url": "https://mermaid.live"
+      },
+      {
+        "isim": "Diagramming AI",
+        "aciklama": "Diagramming Al; iş akışı tasarımlarını oluşturma ve düzenleme sürecini basitleştiren yapay zekâ destekli bir araçtır. Al Chat özelliği ile kullanıcılar, diyagramlardaki iyileştirmeler ve zorluklar için kişiselleştirilmiş öneriler alınabilir ve bunlar anında diyagramlara yansıtılabilir.",
+        "url": "https://www.diagramming.ai"
+      },
+      {
+        "isim": "Jeda",
+        "aciklama": "Jeda; beyin fırtınası yoluyla bilgi ve içerikler oluşturup, analizler yapabilen, şablon analizinden, not alma, zihin haritaları oluşturma, akış diyagramları oluşturma, fikirleri görsellere dönüştürme gibi birçok özelliğe sahiptir.",
+        "url": "https://jeda.ai"
+      },
+      {
+        "isim": "Diagramgpt",
+        "aciklama": "Diagramgpt; yazılan istemin detayına bağlı olarak hızlı diyagramlar oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://diagramgpt.com"
+      },
+      {
+        "isim": "Lucidchart",
+        "aciklama": "Lucidchart; yazılan isteme göre veya varolan şablonlardan akış şeması, organizasyon şeması, iş süreci akışı, veritabanı, sıra diyagramı, algoritma akış şeması gibi diyagramlar oluşturabilir.",
+        "url": "https://www.lucidchart.com"
+      },
+      {
+        "isim": "Venngage",
+        "aciklama": "Venngage; detaylı istem yazılarak veya seçilen hazır diyagram şablonları kullanılarak görsel açıdan zengin diyagramlar oluşturan, yapay zekâ aracıdır. Bunun yanında farklı infografik seçenekleri de içermektedir.",
+        "url": "https://venngage.com"
+      },
+      {
+        "isim": "Figma",
+        "aciklama": "Figma; belirlenen konu veya içeriklerle ilgili çok detaylı istem yazarak diyagramlar oluşturan bir yapay zekâ aracıdır. İstem cevap süresi ve buna bağlı diyagram oluşturması oldukça hızlıdır.",
+        "url": "https://www.figma.com"
+      },
+      {
+        "isim": "Infografix",
+        "aciklama": "Infografix; doğru istemler yazarak çeşitli diyagramlar hazırlayan bir yapay zekâ aracıdır.",
+        "url": "https://infografix.ai"
+      },
+      {
+        "isim": "Napkin",
+        "aciklama": "Napkin; metinleri görsel içeriğe dönüştürme konusunda uzmanlaşmış bir belge düzenleme platformu olarak çalışır. Yazılı içeriği grafiklere, diyagramlara dönüştüren bir yapay zekâ aracıdır.",
+        "url": "https://napkin.io"
+      }
+    ]
+  },
+  {
+    "kategori": "Görsel Hazırlama Araçları",
+    "araclar": [
+      {
+        "isim": "Microsoft Designer",
+        "aciklama": "Microsoft Designer; Microsoft 365'in bir parçası olarak sunulan ve yapay zekâ destekli grafik tasarım aracı olarak öne çıkan; metin, görsel ve diğer grafik ögeleri kullanarak sosyal medya gönderileri, davetiyeler, posterler ve sunumlar gibi birçok farklı türde tasarım oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://designer.microsoft.com"
+      },
+      {
+        "isim": "Adobe Firefly",
+        "aciklama": "Adobe Firefly; metinden görseller oluşturabilen, görüntüler üzerinde düzenlemeler yapılabilen (Renk tonları değişimi, arka plan değiştirme -silme, görseli yeniden yapılandırma vb.) gelişmiş bir yapay zekâ aracıdır.",
+        "url": "https://firefly.adobe.com"
+      },
+      {
+        "isim": "Blinkshot",
+        "aciklama": "Blinkshot; açık kaynak kodlu ve ücretsiz görsel oluşturan bir yapay zekâ aracıdır.",
+        "url": "URL_NOT_FOUND"
+      },
+      {
+        "isim": "Decohere",
+        "aciklama": "Decohere; kullanıcıların metin ve ses girdilerinden video içeriği oluşturmak için tasarlanmış bir yapay zekâ aracıdır. Anime ve foto gerçekçilik dahil olmak üzere çok çeşitli video stillerini destekleyen yazılım, görsel olarak çeşitli içerik oluşturma ihtiyaçlarını karşılar.",
+        "url": "https://decohere.ai"
+      },
+      {
+        "isim": "ImageFX",
+        "aciklama": "ImageFX; görüntü oluşturmak ve düzenlemek için kullanılan istem tabanlı bir yapay zekâ aracıdır. İstemler kullanılarak kaliteli tasarımlar oluşturulabilen bir yapay zekâ aracıdır. Girilen resimler üzerinde de düzenleme imkânı sağlar.",
+        "url": "https://aistudio.google.com/app/imagefx"
+      },
+      {
+        "isim": "Ideogram",
+        "aciklama": "Ideogram; sanatsal görseller oluşturmanın yanı sıra metin girdilerini otomatik olarak resimlere dönüştürebilen bir yapay zekâ aracıdır.",
+        "url": "https://ideogram.ai"
+      },
+      {
+        "isim": "DeepAI",
+        "aciklama": "Deepai, gelişmiş ağları kullanarak görüntüleri, sanat eserlerine dönüştürmeye yardımcı olur. Deepai'ın Al güdümlü algoritmalarını kullanarak fotoğrafları düzenleyerek, çok çeşitli stiller ve efektler uygulayarak çarpıcı görseller oluşturulabilir.",
+        "url": "https://deepai.org"
+      },
+      {
+        "isim": "BasedLabs",
+        "aciklama": "BasedLabs; metinden görsel, görselden görsel oluşturan, fotoğrafları düzenleme ve statik görüntüleri yapay zekâ tarafından oluşturulan videolara ve soyut animasyonlara dönüştüren yapay zekâ aracıdır.",
+        "url": "https://www.basedlabs.ai"
+      },
+      {
+        "isim": "Leonardo",
+        "aciklama": "Leonardo; özellikle karmaşık grafikler ve detaylı tasarımlar oluşturmak isteyenler için uygundur. Leonardo Al, yapay zekâ algoritmalarıyla çalışan gelişmiş ve kişiselleştirilebilir profesyonel seviyede bir yapay zekâ aracıdır.",
+        "url": "https://leonardo.ai"
+      },
+      {
+        "isim": "Canva",
+        "aciklama": "Canva; farklı tasarım şablonlarını bir araya getirerek özgün içerikler üretmeye imkân sunan bir yapay zekâ aracıdır.",
+        "url": "https://www.canva.com"
+      },
+      {
+        "isim": "PromeAI",
+        "aciklama": "PromeAl, 3D modellere ve eskizlere gerçekçi görseller kazandırarak hayat vermek amacıyla tasarlanmış bir yapay zekâ aracıdır. Bu araç, mimari, iç tasarım ve ürün görselleştirme dahil olmak üzere geniş bir tasarım yelpazesine sahiptir.",
+        "url": "https://www.promeai.com"
+      },
+      {
+        "isim": "Storynest",
+        "aciklama": "Ses veya istem kullanarak belirli bir kurgu dahilinde hikâye, roman, eğitsel içerik hikayeleri gibi birçok alanda görsel kurgular oluşturan bir yapay zekâ aracıdır.",
+        "url": "URL_NOT_FOUND"
+      }
+    ]
+  },
+  {
+    "kategori": "Video Hazırlama Araçları",
+    "araclar": [
+      {
+        "isim": "Invideo",
+        "aciklama": "InVideo, etkileyici ve profesyonel videolar oluşturmaya, düzenlemeye ve bu videolara birden fazla dil seslendirmesi eklemeye yarayan, 7500+ şablona sahip bir yapay zekâ aracıdır.",
+        "url": "https://invideo.io"
+      },
+      {
+        "isim": "Opus Clip",
+        "aciklama": "Opus Clip; uzun videolardaki en önemli ve dikkat çekici kısımları analiz eden ve bu kısımları kısa videolara dönüştüren bir yapay zekâ aracıdır.",
+        "url": "https://www.opus.pro"
+      },
+      {
+        "isim": "Pikaart",
+        "aciklama": "Pikaart; metin veya görüntülerden hızlı bir şekilde yüksek kaliteli dinamik kısa videolar oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://pika.art"
+      },
+      {
+        "isim": "D-ID",
+        "aciklama": "D-ID; hareketsiz fotoğrafları kişiselleştirilmiş, akışlı videolara dönüştürerek gerçekçi dijital insanlar üretmeyi sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://www.d-id.com"
+      },
+      {
+        "isim": "Runway",
+        "aciklama": "Runway; metinden görüntüye, görüntüden görüntüye, resimlere hareket katma, yüz eşleştirme ile resimlere eş zamanlı konuşma ve mimik ekleme gibi profesyonel videolar oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://runwayml.com"
+      },
+      {
+        "isim": "Vyond",
+        "aciklama": "Vyond; metinden animasyon tabanlı video oluşturma özelliğine sahip bir yapay zekâ aracıdır. Sunu veya kısa bilgilendirici videolar hazırlamak için kullanılabilecek oldukça hızlı ve kullanışlı bir yapay zekâ aracıdır.",
+        "url": "https://www.vyond.com"
+      },
+      {
+        "isim": "Pictory",
+        "aciklama": "Pictory; Blog veya makaleler gibi metin tabanlı kapsamlı içeriklerden, kısa videolar yapmaya olanak sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://pictory.ai"
+      },
+      {
+        "isim": "Lumen5",
+        "aciklama": "Lumen5; metin bazlı içerikleri hızlı bir şekilde videoya dönüştürebilen bir yapay zekâ aracıdır.",
+        "url": "https://lumen5.com"
+      },
+      {
+        "isim": "Hailuo",
+        "aciklama": "Hailuo; metin ve resimler dahil olmak üzere çeşitli girdilerle istenen amaca göre videolar oluşturabilen çok yönlü bir yapay zekâ aracıdır.",
+        "url": "URL_NOT_FOUND"
+      },
+      {
+        "isim": "Kling",
+        "aciklama": "Kling; kullanıcıların metin tabanlı içeriklerden yüksek kaliteli videolar oluşturmasına olanak tanıyan bir yapay zekâ aracıdır. Özellikle sosyal medya içerikleri için optimize edilmiştir.",
+        "url": "https://kling.ai"
+      }
+      {
+        "isim": "Veed.io",
+        "aciklama": "Veed.io; sosyal medya içeriklerinden eğitime birçok alanda metinden videoya, avatarlara, otomatik altyazılara, ses çevirilerine kadar farklı alan ve şekillerde video oluşturma ve düzenleme yapabilen bir yapay zekâ aracıdır.",
+        "url": "https://www.veed.io"
+      },
+      {
+        "isim": "Krea",
+        "aciklama": "Krea; girilen metinden video oluşturma, video düzenleme gibi özellikleri bünyesinden bulunduran profesyonel bir yapay zekâ aracıdır. Bu aracı diğerlerinden ayıran temel özelliklerden birisi; yazılan istemin görselinin gerçek zamanlı olarak gösterilmesidir.",
+        "url": "https://www.krea.ai"
+      }
+    ]
+  },
+  {
+    "kategori": "Fotoğraf ve Video Analiz Araçları",
+    "araclar": [
+      {
+        "isim": "Astica",
+        "aciklama": "Astica; yüklenen resimleri, verilen istemlere göre analiz eder. Bir resimdeki kişilerin duygu, giyim vb. durumları hakkında sorulan sorulara bağlı kalarak yorumlar yapan ve istatistikler çıkaran bir yapay zekâ aracıdır.",
+        "url": "https://www.astica.ai"
+      },
+      {
+        "isim": "Hume",
+        "aciklama": "Hume; yüklenen resimlerden, seslerden veya kamera görüntülerinden, mikrofon konuşmalarından duygu durumu analizleri yapan ve bunları temel seviyede raporlayan bir yapay zekâ aracıdır.",
+        "url": "https://hume.ai"
+      },
+      {
+        "isim": "Voicera",
+        "aciklama": "Voicera; video ve sesli iletişimlerden gelen sözlü ve sözsüz ipuçlarını değerlendirerek ifadelerin doğru, tarafsız olup, olmadığını belirleyen bir yapay zekâ aracıdır.",
+        "url": "https://voicera.co"
+      }
+    ]
+  },
+  {
+    "kategori": "Müzik Oluşturma Araçları",
+    "araclar": [
+      {
+        "isim": "Suno",
+        "aciklama": "Suno; yazılan istemler dahilinde şarkı sözü, bestesi ve albüm kapağı yapabilen bir yapay zekâ aracıdır.",
+        "url": "https://suno.com"
+      },
+      {
+        "isim": "Stable Audio",
+        "aciklama": "Stable Audio; hazır istemler ya da yazılan istemler ile istenilen tarz, ritim ve uzunlukta şarkılar oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://www.stableaudio.com"
+      },
+      {
+        "isim": "SoundRaw",
+        "aciklama": "SoundRaw; telifsiz, orijinal müzik oluşturma imkânı sağlayan bir yapay zekâ müzik üreticisi aracıdır.",
+        "url": "https://soundraw.io"
+      },
+      {
+        "isim": "Sunoai",
+        "aciklama": "Sunoai; kendisine verilen metinlerden şarkılar üretebilen bir yapay zekâ aracıdır.",
+        "url": "https://suno.ai"
+      }
+    ]
+  },
+  {
+    "kategori": "Ses Düzenleme Araçları",
+    "araclar": [
+      {
+        "isim": "ElevenLabs",
+        "aciklama": "ElevenLabs; konuşma sentezi için derin öğrenme modeli kullanan, ses klonlama, seslendirme gibi araçları bünyesinde bulunduran ses üretimi odaklı bir yapay zekâ aracıdır.",
+        "url": "https://elevenlabs.io"
+      },
+      {
+        "isim": "Descript",
+        "aciklama": "Descript; kullanıcıların videolarını ve podcast'lerini yazmalarını, kaydetmelerini, transkript etmelerini, düzenlemelerini, iş birliği yapmalarını ve paylaşmalarını ve ses kayıtları üzerinde düzenlemeler yapmalarını sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://www.descript.com"
+      },
+      {
+        "isim": "Adobe Speech Enhancer",
+        "aciklama": "Adobe Speech Enhancer; kaydedilen konuşmaların kalitesini artırmak için çevrimiçi kullanılabilen bir yapay zekâ aracıdır. Özellikle mülakat tarzı ses kayıtlarında meydana gelen düşük kalite ve gürültülü sesleri daha anlaşılır hale getirebilen bir yapay zekâ aracıdır.",
+        "url": "https://podcast.adobe.com/enhance"
+      },
+      {
+        "isim": "VoiceMod",
+        "aciklama": "VoiceMod; gerçek zamanlı ses değişimi imkânı sağlayan ücretsiz bir yapay zekâ aracıdır.",
+        "url": "https://www.voicemod.net"
+      },
+      {
+        "isim": "Murf",
+        "aciklama": "Murf; sesli kitaplar, Youtube videoları, açıklayıcı videolar, podcast'ler, sosyal medya için seslendirmeler oluşturan bir metinden sese, ses üreticisi yapay zekâ aracıdır. Kendi içerisinde yüzlerce farklı sese sahip olmakla birlikte ses klonlaması ile kişinin kendi sesini de kaydedip kullanabilmesine olanak sağlar.",
+        "url": "https://murf.ai"
+      }
+    ]
+  },
+  {
+    "kategori": "Sunum Hazırlama Uygulamaları",
+    "araclar": [
+      {
+        "isim": "Gamma",
+        "aciklama": "Gamma; yapay zekâ odaklı sunumlar hazırlayan bir platformdur. Doğal Dil İşleme (NLP) özellikleriyle sezgisel hareket eden ve buna göre sunum hazırlamaya ve paylaşamaya olanak sağlayan bir yapay zekâ aracıdır.",
+        "url": "https://gamma.app"
+      },
+      {
+        "isim": "Beautiful",
+        "aciklama": "Beautiful; yazılı veya sesli olarak girilen fikirleri veya konu başlıklarını görsel hikayelere dönüştürerek otomatik sunum hazırlayan bir yapay zekâ aracıdır.",
+        "url": "https://www.beautiful.ai"
+      },
+      {
+        "isim": "Slidesgo",
+        "aciklama": "Slidesgo; var olan taslak sunumlarını düzenleyebilen ya da basit metinlerden profesyonel seviyede sunumlar hazırlayabilen bir yapay zekâ aracıdır.",
+        "url": "https://slidesgo.com"
+      },
+      {
+        "isim": "Presentation",
+        "aciklama": "Presentation; sunum oluşturma sürecini otomatikleştirmek ve geliştirmek için gelişmiş teknolojiyi kullanan, onları daha ilgi çekici ve etkili hale getiren bir yapay zekâ aracıdır.",
+        "url": "URL_NOT_FOUND"
+      },
+      {
+        "isim": "Canva",
+        "aciklama": "Canva; zengin içerik kütüphanesindeki binlerce ücretsiz görsel, video, grafik gibi öğelerle üst düzey sunumlar yapabileceğiniz bir yapay zekâ uygulamasıdır.",
+        "url": "https://www.canva.com"
+      },
+      {
+        "isim": "Prezo",
+        "aciklama": "Prezo; görsel açıdan etkileyici ve profesyonel sunumlar hazırlanabilecek bir yapay zekâ aracıdır.",
+        "url": "https://prezo.ai"
+      },
+      {
+        "isim": "Plus",
+        "aciklama": "Plus; yüksek kalite görseller ile profesyonel seviyede sunumlar hazırlamaya yardımcı olan bir yapay zekâ uygulamasıdır.",
+        "url": "https://www.plusdocs.com"
+      },
+      {
+        "isim": "AhaSlides",
+        "aciklama": "AhaSlides; standart sunumlar hazırlamanın yanında anketler, sınavlar, soru-cevap gibi etkileşimli sunumlar da oluşturulabilen bir yapay zekâ aracıdır.",
+        "url": "https://ahaslides.com"
+      },
+      {
+        "isim": "Autoppt",
+        "aciklama": "Autoppt; sunumlar ve zihin haritaları oluşturmayı basitleştirmek için tasarlanmış bir yapay zekâ aracıdır.",
+        "url": "https://www.autoppt.com"
+      },
+      {
+        "isim": "Sendsteps",
+        "aciklama": "Sendsteps; sıfırdan bir konu başlığı ve istenilen özelliklere ait istemler girilerek veya konu metni yüklenerek görsel ve içerik anlamda kaliteli sunumlar veya etkileşimli sınavlar oluşturabilen bir yapay zekâ aracıdır.",
+        "url": "https://www.sendsteps.com"
+      }
+      ,
+      {
+        "isim": "Pitch",
+        "aciklama": "Pitch; hızlı ve etkileyici sunumlar hazırlamak için tasarlanmış bir yapay zekâ aracıdır. Kullanıcı dostu arayüzü ve şablonlarıyla profesyonel sunumlar oluşturmayı kolaylaştırır.",
+        "url": "https://pitch.com"
+      },
+      {
+        "isim": "Tome",
+        "aciklama": "Tome; metin tabanlı içeriklerden görsel ve etkileşimli sunumlar oluşturmayı sağlayan bir yapay zekâ aracıdır. Sunumları hikaye anlatımı formatında düzenler.",
+        "url": "https://tome.app"
       }
     ]
   }
-] 
+]
