@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üretken Yapay Zeka Araçları Rehberi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Üretken Yapay Zeka Araçları Rehberi</h1>
+    </header>
+
+    <main>
+        <aside class="filters-sidebar">
+            <h2>Filtreler</h2>
+            <div class="filter-group">
+                <label for="search-input">Araç Adı/Açıklama Ara:</label>
+                <input type="text" id="search-input" placeholder="Örn: ChatGPT, çeviri, video...">
+            </div>
+            <div class="filter-group">
+                <h3>Kategoriye Göre Filtrele</h3>
+                <div id="category-filters">
+                    <button class="category-btn active" data-category="All">Tüm Kategoriler</button>
+                    </div>
+            </div>
+            <button id="clear-filters-btn">Filtreleri Temizle</button>
+        </aside>
+
+        <section id="tools-container">
+            <p class="loading-message">Araçlar yükleniyor...</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Yapay Zeka Araçları Rehberi. Veriler Yıldırım Üniversitesi UYZ Uygulama Rehberi'nden alınmıştır.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
