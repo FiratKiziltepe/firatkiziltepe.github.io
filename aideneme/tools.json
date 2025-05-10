@@ -331,7 +331,7 @@
         "isim": "Kling",
         "aciklama": "Kling; kullanıcıların metin tabanlı içeriklerden yüksek kaliteli videolar oluşturmasına olanak tanıyan bir yapay zekâ aracıdır. Özellikle sosyal medya içerikleri için optimize edilmiştir.",
         "url": "https://kling.ai"
-      }
+      },
       {
         "isim": "Veed.io",
         "aciklama": "Veed.io; sosyal medya içeriklerinden eğitime birçok alanda metinden videoya, avatarlara, otomatik altyazılara, ses çevirilerine kadar farklı alan ve şekillerde video oluşturma ve düzenleme yapabilen bir yapay zekâ aracıdır.",
@@ -471,8 +471,7 @@
         "isim": "Sendsteps",
         "aciklama": "Sendsteps; sıfırdan bir konu başlığı ve istenilen özelliklere ait istemler girilerek veya konu metni yüklenerek görsel ve içerik anlamda kaliteli sunumlar veya etkileşimli sınavlar oluşturabilen bir yapay zekâ aracıdır.",
         "url": "https://www.sendsteps.com"
-      }
-      ,
+      },
       {
         "isim": "Pitch",
         "aciklama": "Pitch; hızlı ve etkileyici sunumlar hazırlamak için tasarlanmış bir yapay zekâ aracıdır. Kullanıcı dostu arayüzü ve şablonlarıyla profesyonel sunumlar oluşturmayı kolaylaştırır.",
