@@ -93,4 +93,32 @@ li:last-child {
 
 .delete-btn:hover {
     background-color: #d32f2f;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.header-container h1 {
+    margin-bottom: 0;
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#user-info {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+#login-btn, #logout-btn {
+    border-radius: 4px;
 } 

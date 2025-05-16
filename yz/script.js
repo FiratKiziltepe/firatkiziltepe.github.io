@@ -12,12 +12,54 @@ const firebaseConfig = {
 // Firebase'i başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 const toolsCollection = db.collection("tools");
 
 // DOM elementleri
 const toolForm = document.getElementById("add-tool-form");
 const toolInput = document.getElementById("tool-input");
 const toolList = document.getElementById("tool-list");
+const loginBtn = document.getElementById("login-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const userInfo = document.getElementById("user-info");
+
+// Auth durumunu izle
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // Kullanıcı giriş yapmış
+        console.log("Kullanıcı giriş yaptı:", user.email);
+        userInfo.textContent = user.email;
+        userInfo.style.display = "inline";
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+        toolForm.style.display = "flex";
+    } else {
+        // Kullanıcı çıkış yapmış
+        console.log("Kullanıcı çıkış yaptı");
+        userInfo.style.display = "none";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+        toolForm.style.display = "none";
+    }
+});
+
+// Giriş yap
+loginBtn.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .catch(error => {
+            console.error("Giriş hatası:", error);
+            alert("Giriş yapılırken bir hata oluştu: " + error.message);
+        });
+});
+
+// Çıkış yap
+logoutBtn.addEventListener("click", () => {
+    auth.signOut()
+        .catch(error => {
+            console.error("Çıkış hatası:", error);
+        });
+});
 
 // Sayfa yüklendiğinde araçları listele
 document.addEventListener("DOMContentLoaded", () => {
@@ -27,6 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // Form gönderildiğinde yeni araç ekle
 toolForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    
+    // Kullanıcı giriş yapmış mı kontrol et
+    if (!auth.currentUser) {
+        alert("Araç eklemek için giriş yapmalısınız!");
+        return;
+    }
+    
     const toolName = toolInput.value.trim();
     
     if (toolName) {
@@ -55,8 +104,9 @@ function listTools() {
                 li.innerHTML = `
                     <span class="tool-name">${tool.name}</span>
                     <div class="actions">
+                        ${auth.currentUser ? `
                         <button class="edit-btn" onclick="updateTool('${toolId}')">Düzenle</button>
-                        <button class="delete-btn" onclick="deleteTool('${toolId}')">Sil</button>
+                        <button class="delete-btn" onclick="deleteTool('${toolId}')">Sil</button>` : ''}
                     </div>
                 `;
                 
@@ -71,9 +121,17 @@ function listTools() {
 
 // Yeni araç ekle
 function addTool(name) {
+    // Kullanıcı giriş yapmış mı kontrol et
+    if (!auth.currentUser) {
+        alert("Araç eklemek için giriş yapmalısınız!");
+        return;
+    }
+    
     toolsCollection.add({
         name: name,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: auth.currentUser.uid,
+        userEmail: auth.currentUser.email
     })
     .then(() => {
         listTools();
@@ -85,6 +143,12 @@ function addTool(name) {
 
 // Araç güncelle
 function updateTool(id) {
+    // Kullanıcı giriş yapmış mı kontrol et
+    if (!auth.currentUser) {
+        alert("Araçları düzenlemek için giriş yapmalısınız!");
+        return;
+    }
+    
     toolsCollection.doc(id).get()
         .then((doc) => {
             if (doc.exists) {
@@ -94,7 +158,8 @@ function updateTool(id) {
                 if (newName && newName.trim() !== "" && newName !== tool.name) {
                     toolsCollection.doc(id).update({
                         name: newName.trim(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: auth.currentUser.email
                     })
                     .then(() => {
                         listTools();
@@ -112,6 +177,12 @@ function updateTool(id) {
 
 // Araç sil
 function deleteTool(id) {
+    // Kullanıcı giriş yapmış mı kontrol et
+    if (!auth.currentUser) {
+        alert("Araçları silmek için giriş yapmalısınız!");
+        return;
+    }
+    
     const confirmDelete = confirm("Bu aracı silmek istediğinizden emin misiniz?");
     
     if (confirmDelete) {

@@ -8,9 +8,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Yapay Zeka Araçları</h1>
+        <div class="header-container">
+            <h1>Yapay Zeka Araçları</h1>
+            <div class="auth-buttons">
+                <button id="login-btn">Giriş Yap</button>
+                <button id="logout-btn" style="display: none;">Çıkış Yap</button>
+                <span id="user-info" style="display: none;"></span>
+            </div>
+        </div>
         
-        <form id="add-tool-form">
+        <form id="add-tool-form" style="display: none;">
             <input type="text" id="tool-input" placeholder="Araç adı girin" required>
             <button type="submit">Ekle</button>
         </form>
@@ -21,6 +28,7 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 
