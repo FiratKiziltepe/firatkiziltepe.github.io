@@ -69,16 +69,30 @@ try {
     loginBtn.addEventListener("click", () => {
         console.log("Giriş düğmesine tıklandı");
         
+        // Varsa eski bir UI containerı kaldır
+        const oldContainer = document.getElementById('firebaseui-auth-container');
+        if (oldContainer) {
+            oldContainer.remove();
+        }
+        
         // Login modunu göster
         const uiContainer = document.createElement('div');
         uiContainer.id = 'firebaseui-auth-container';
         document.body.appendChild(uiContainer);
         
+        // Gelişmiş UI yapılandırması
+        ui.reset();
         ui.start('#firebaseui-auth-container', {
             signInOptions: [
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                firebase.auth.EmailAuthProvider.PROVIDER_ID
+                // Google ile giriş devre dışı bırakıldı
+                // firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                {
+                    provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    requireDisplayName: false, // Kullanıcı adı sorma
+                    disableSignUp: true // Yeni kayıt seçeneğini kapat
+                }
             ],
+            credentialHelper: firebaseui.auth.CredentialHelper.NONE, // Tarayıcıda kayıtlı şifreleri sorma
             signInFlow: 'popup',
             tosUrl: 'https://firatkiziltepe.github.io/yz/terms.html',
             privacyPolicyUrl: 'https://firatkiziltepe.github.io/yz/privacy.html',
@@ -93,8 +107,64 @@ try {
                         if (container) {
                             container.remove();
                         }
+                        
+                        // Kullanıcı girişi başarılı olduğunda bildirim göster
+                        showMessage(`Hoş geldiniz, ${authResult.user.email}`, "info");
                     }
                     return false; // Otomatik yönlendirme yapma
+                },
+                uiShown: function() {
+                    // UI gösterildiğinde özel bir başlık ekle
+                    setTimeout(() => {
+                        // Başlık güncelleme
+                        const title = document.querySelector('.firebaseui-title');
+                        if (title) {
+                            title.textContent = 'Giriş Yap'; // Başlığı "Giriş Yap" olarak değiştir
+                        }
+                        
+                        // Altyazı ekle
+                        const subtitle = document.createElement('div');
+                        subtitle.className = 'firebaseui-subtitle';
+                        subtitle.textContent = 'Hesabınıza erişmek için e-postanızı girin';
+                        
+                        const header = document.querySelector('.firebaseui-card-header');
+                        if (header && !header.querySelector('.firebaseui-subtitle')) { // Altyazı zaten yoksa ekle
+                           header.appendChild(subtitle);
+                        }
+                        
+                        // Email input'una focus yap
+                        const emailInput = document.querySelector('.firebaseui-id-email');
+                        if (emailInput) {
+                            emailInput.focus();
+                        }
+                        
+                        // Kapatma butonu ekle (eğer yoksa)
+                        if (!document.querySelector('.firebaseui-container .close-button')) {
+                            const closeBtn = document.createElement('button');
+                            closeBtn.textContent = '✕';
+                            closeBtn.className = 'close-button'; // Stil için class ekle
+                            closeBtn.style.position = 'absolute';
+                            closeBtn.style.right = '15px';
+                            closeBtn.style.top = '15px';
+                            closeBtn.style.background = 'none';
+                            closeBtn.style.border = 'none';
+                            closeBtn.style.fontSize = '20px';
+                            closeBtn.style.color = '#999';
+                            closeBtn.style.cursor = 'pointer';
+                            closeBtn.onclick = function() {
+                                const container = document.getElementById('firebaseui-auth-container');
+                                if (container) {
+                                    container.remove();
+                                }
+                            };
+                            
+                            const container = document.querySelector('.firebaseui-container');
+                            if (container) {
+                                container.style.position = 'relative';
+                                container.appendChild(closeBtn);
+                            }
+                        }
+                    }, 100);
                 }
             }
         });
