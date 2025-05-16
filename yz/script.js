@@ -23,6 +23,11 @@ const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userInfo = document.getElementById("user-info");
 
+// Hata mesajlarını kontrol etmek için
+console.log("Firebase yüklendi:", !!firebase);
+console.log("Auth yüklendi:", !!auth);
+console.log("Firestore yüklendi:", !!db);
+
 // Auth durumunu izle
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -33,6 +38,9 @@ auth.onAuthStateChanged(user => {
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
         toolForm.style.display = "flex";
+        
+        // Araçları yeniden listele (giriş/çıkış yaptıktan sonra butonları göstermek/gizlemek için)
+        listTools();
     } else {
         // Kullanıcı çıkış yapmış
         console.log("Kullanıcı çıkış yaptı");
@@ -40,22 +48,45 @@ auth.onAuthStateChanged(user => {
         loginBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
         toolForm.style.display = "none";
+        
+        // Araçları yeniden listele (giriş/çıkış yaptıktan sonra butonları göstermek/gizlemek için)
+        listTools();
     }
 });
 
-// Giriş yap
+// Firebase UI yapılandırması
+let ui = new firebaseui.auth.AuthUI(auth);
+
+// Giriş yap - Firebase UI kullanarak
 loginBtn.addEventListener("click", () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .catch(error => {
-            console.error("Giriş hatası:", error);
-            alert("Giriş yapılırken bir hata oluştu: " + error.message);
-        });
+    console.log("Giriş düğmesine tıklandı");
+    
+    // Login modunu göster
+    document.body.insertAdjacentHTML('beforeend', '<div id="firebaseui-auth-container"></div>');
+    
+    ui.start('#firebaseui-auth-container', {
+        signInOptions: [
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.EmailAuthProvider.PROVIDER_ID
+        ],
+        signInFlow: 'popup',
+        callbacks: {
+            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                // Başarılı giriş sonrası UI'ı kaldır
+                document.getElementById('firebaseui-auth-container').remove();
+                return false; // Otomatik yönlendirme yapma
+            }
+        }
+    });
 });
 
 // Çıkış yap
 logoutBtn.addEventListener("click", () => {
+    console.log("Çıkış düğmesine tıklandı");
     auth.signOut()
+        .then(() => {
+            console.log("Çıkış başarılı");
+        })
         .catch(error => {
             console.error("Çıkış hatası:", error);
         });
