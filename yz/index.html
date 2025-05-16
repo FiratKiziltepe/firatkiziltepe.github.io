@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Zeka Araçları</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Yapay Zeka Araçları</h1>
+        
+        <form id="add-tool-form">
+            <input type="text" id="tool-input" placeholder="Araç adı girin" required>
+            <button type="submit">Ekle</button>
+        </form>
+        
+        <ul id="tool-list"></ul>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
