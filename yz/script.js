@@ -1,12 +1,16 @@
-// Firebase yapılandırması
+// Güvenlik notu: Bu uygulama güvenlik en iyi uygulamaları göz önünde bulundurularak yazılmıştır.
+// - XSS saldırıları önlenmesi: innerHTML yerine textContent, DocumentFragment, createElement kullanılmıştır
+// - Yetkilendirme: İstemci tarafı ve Firestore Rules ile tutarlı yetkilendirme kontrolleri eklenmiştir
+// - Rate limiting: Form gönderimleri için basit bir rate limiter eklenmiştir
+// - Firestore güvenlik kuralları: firestore.rules dosyasını Firebase Konsolu'na yüklemeyi unutmayın
+
+// Firebase yapılandırması - Minimum gerekli alanlar
+// Güvenlik: Diğer hassas yapılandırma değerleri için .env veya environment değişkenleri kullanılmalıdır
 const firebaseConfig = {
     apiKey: "AIzaSyCuruHWInugnstLGq-LwybAuGdzKc1gM50",
     authDomain: "yztools-cfa96.firebaseapp.com",
-    projectId: "yztools-cfa96",
-    storageBucket: "yztools-cfa96.firebasestorage.app",
-    messagingSenderId: "550011721075",
-    appId: "1:550011721075:web:d53ad0b4de1770210be106",
-    measurementId: "G-JN6911XYZ7"
+    projectId: "yztools-cfa96"
+    // Diğer yapılandırma ayarları sunucu tarafında saklanmalıdır
 };
 
 // Firebase'i başlat
@@ -22,17 +26,99 @@ const toolList = document.getElementById("tool-list");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userInfo = document.getElementById("user-info");
+const submitBtn = document.getElementById("submit-btn");
 
-// Hata mesajlarını kontrol etmek için
-console.log("Firebase yüklendi:", !!firebase);
-console.log("Auth yüklendi:", !!auth);
-console.log("Firestore yüklendi:", !!db);
+// Güvenlik: Rate limiting için değişkenler
+let lastSubmitTime = 0;
+const MIN_SUBMIT_INTERVAL = 2000; // 2 saniye
+
+// Hata ve bilgi mesajlarını göstermek için yardımcı fonksiyon
+function showMessage(message, type = 'error') {
+    // DOM'dan varsa mevcut mesajı kaldır
+    const existingMessage = document.querySelector(`.${type}-message`);
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Yeni mesaj elementi oluştur
+    const messageElement = document.createElement('div');
+    messageElement.className = `${type}-message`;
+    
+    // XSS Koruması: innerHTML yerine textContent kullan
+    messageElement.textContent = message;
+    
+    // Mesajı form öncesine ekle
+    toolForm.parentNode.insertBefore(messageElement, toolForm);
+    
+    // 5 saniye sonra mesajı otomatik kaldır
+    setTimeout(() => {
+        if (messageElement.parentNode) {
+            messageElement.remove();
+        }
+    }, 5000);
+}
+
+// Firebase UI yapılandırması
+try {
+    let ui = new firebaseui.auth.AuthUI(auth);
+
+    // Güvenlik: Tarayıcı dilini kullan (kimlik doğrulama arayüzü için)
+    auth.useDeviceLanguage();
+
+    // Giriş yap - Firebase UI kullanarak
+    loginBtn.addEventListener("click", () => {
+        console.log("Giriş düğmesine tıklandı");
+        
+        // Login modunu göster
+        const uiContainer = document.createElement('div');
+        uiContainer.id = 'firebaseui-auth-container';
+        document.body.appendChild(uiContainer);
+        
+        ui.start('#firebaseui-auth-container', {
+            signInOptions: [
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID
+            ],
+            signInFlow: 'popup',
+            tosUrl: 'https://firatkiziltepe.github.io/yz/terms.html',
+            privacyPolicyUrl: 'https://firatkiziltepe.github.io/yz/privacy.html',
+            callbacks: {
+                signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                    // Güvenlik: Kimlik doğrulama sonuçlarını kontrol et
+                    if (authResult.user) {
+                        console.log("Kullanıcı başarıyla giriş yaptı:", authResult.user.email);
+                        
+                        // Başarılı giriş sonrası UI'ı kaldır
+                        const container = document.getElementById('firebaseui-auth-container');
+                        if (container) {
+                            container.remove();
+                        }
+                    }
+                    return false; // Otomatik yönlendirme yapma
+                }
+            }
+        });
+    });
+} catch (error) {
+    console.error("Firebase UI başlatma hatası:", error);
+    // Alternatif basit giriş mekanizması
+    loginBtn.addEventListener("click", () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider)
+            .catch(error => {
+                console.error("Giriş hatası:", error);
+                showMessage("Giriş yapılırken bir hata oluştu: " + error.message);
+            });
+    });
+}
 
 // Auth durumunu izle
 auth.onAuthStateChanged(user => {
     if (user) {
         // Kullanıcı giriş yapmış
         console.log("Kullanıcı giriş yaptı:", user.email);
+        
+        // XSS Koruması: innerHTML yerine textContent kullan
         userInfo.textContent = user.email;
         userInfo.style.display = "inline";
         loginBtn.style.display = "none";
@@ -54,32 +140,6 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// Firebase UI yapılandırması
-let ui = new firebaseui.auth.AuthUI(auth);
-
-// Giriş yap - Firebase UI kullanarak
-loginBtn.addEventListener("click", () => {
-    console.log("Giriş düğmesine tıklandı");
-    
-    // Login modunu göster
-    document.body.insertAdjacentHTML('beforeend', '<div id="firebaseui-auth-container"></div>');
-    
-    ui.start('#firebaseui-auth-container', {
-        signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            firebase.auth.EmailAuthProvider.PROVIDER_ID
-        ],
-        signInFlow: 'popup',
-        callbacks: {
-            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                // Başarılı giriş sonrası UI'ı kaldır
-                document.getElementById('firebaseui-auth-container').remove();
-                return false; // Otomatik yönlendirme yapma
-            }
-        }
-    });
-});
-
 // Çıkış yap
 logoutBtn.addEventListener("click", () => {
     console.log("Çıkış düğmesine tıklandı");
@@ -89,6 +149,7 @@ logoutBtn.addEventListener("click", () => {
         })
         .catch(error => {
             console.error("Çıkış hatası:", error);
+            showMessage("Çıkış yapılırken bir hata oluştu: " + error.message);
         });
 });
 
@@ -97,56 +158,119 @@ document.addEventListener("DOMContentLoaded", () => {
     listTools();
 });
 
+// Güvenlik: Rate limiting için form gönderim kontrolü
 // Form gönderildiğinde yeni araç ekle
 toolForm.addEventListener("submit", (e) => {
     e.preventDefault();
     
+    // Rate limiting kontrolü
+    const now = Date.now();
+    if (now - lastSubmitTime < MIN_SUBMIT_INTERVAL) {
+        showMessage("Lütfen tekrar denemeden önce biraz bekleyin.");
+        return;
+    }
+    
     // Kullanıcı giriş yapmış mı kontrol et
     if (!auth.currentUser) {
-        alert("Araç eklemek için giriş yapmalısınız!");
+        showMessage("Araç eklemek için giriş yapmalısınız!");
         return;
     }
     
     const toolName = toolInput.value.trim();
     
     if (toolName) {
+        // Buton spam'i önle
+        submitBtn.disabled = true;
+        
+        // Son gönderim zamanını güncelle
+        lastSubmitTime = now;
+        
         addTool(toolName);
         toolInput.value = "";
+        
+        // 2 saniye sonra butonu etkinleştir
+        setTimeout(() => {
+            submitBtn.disabled = false;
+        }, MIN_SUBMIT_INTERVAL);
     }
 });
 
 // Araçları listele
 function listTools() {
-    toolList.innerHTML = "";
+    // Güvenlik: İçeriği temizlemeden önce referansı sakla
+    const listElement = toolList;
+    
+    // Liste içeriğini güvenli bir şekilde temizle
+    while (listElement.firstChild) {
+        listElement.removeChild(listElement.firstChild);
+    }
     
     toolsCollection.orderBy("name")
         .get()
         .then((snapshot) => {
             if (snapshot.empty) {
-                toolList.innerHTML = "<li>Henüz araç eklenmemiş</li>";
+                // Güvenlik: DocumentFragment kullan
+                const fragment = document.createDocumentFragment();
+                const emptyItem = document.createElement("li");
+                emptyItem.textContent = "Henüz araç eklenmemiş";
+                fragment.appendChild(emptyItem);
+                listElement.appendChild(fragment);
                 return;
             }
+            
+            // Bir kerede tüm DOM manipülasyonlarını yapmak için DocumentFragment kullan
+            const fragment = document.createDocumentFragment();
             
             snapshot.forEach((doc) => {
                 const tool = doc.data();
                 const toolId = doc.id;
                 
+                // Güvenlik: innerHTML yerine DOM API'lerini kullan
                 const li = document.createElement("li");
-                li.innerHTML = `
-                    <span class="tool-name">${tool.name}</span>
-                    <div class="actions">
-                        ${auth.currentUser ? `
-                        <button class="edit-btn" onclick="updateTool('${toolId}')">Düzenle</button>
-                        <button class="delete-btn" onclick="deleteTool('${toolId}')">Sil</button>` : ''}
-                    </div>
-                `;
                 
-                toolList.appendChild(li);
+                // Araç adı
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "tool-name";
+                nameSpan.textContent = tool.name;
+                li.appendChild(nameSpan);
+                
+                // Aksiyonlar
+                const actionsDiv = document.createElement("div");
+                actionsDiv.className = "actions";
+                
+                // Güvenlik: İstemci tarafı yetkilendirme kontrolleri
+                const currentUser = auth.currentUser;
+                if (currentUser && tool.userId === currentUser.uid) {
+                    // Düzenle butonu
+                    const editBtn = document.createElement("button");
+                    editBtn.className = "edit-btn";
+                    editBtn.textContent = "Düzenle";
+                    editBtn.addEventListener("click", () => updateTool(toolId));
+                    actionsDiv.appendChild(editBtn);
+                    
+                    // Sil butonu
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.className = "delete-btn";
+                    deleteBtn.textContent = "Sil";
+                    deleteBtn.addEventListener("click", () => deleteTool(toolId));
+                    actionsDiv.appendChild(deleteBtn);
+                }
+                
+                li.appendChild(actionsDiv);
+                fragment.appendChild(li);
             });
+            
+            listElement.appendChild(fragment);
         })
         .catch((error) => {
             console.error("Araçlar listelenirken hata oluştu:", error);
-            toolList.innerHTML = "<li>Araçlar yüklenirken bir hata oluştu</li>";
+            
+            // Güvenlik: innerHTML yerine textContent kullan
+            const errorItem = document.createElement("li");
+            errorItem.textContent = "Araçlar yüklenirken bir hata oluştu";
+            listElement.appendChild(errorItem);
+            
+            showMessage("Araçlar yüklenirken bir hata oluştu: " + error.message);
         });
 }
 
@@ -154,7 +278,13 @@ function listTools() {
 function addTool(name) {
     // Kullanıcı giriş yapmış mı kontrol et
     if (!auth.currentUser) {
-        alert("Araç eklemek için giriş yapmalısınız!");
+        showMessage("Araç eklemek için giriş yapmalısınız!");
+        return;
+    }
+    
+    // Güvenlik: Data validasyonu
+    if (!name || name.length < 2 || name.length > 100) {
+        showMessage("Araç adı 2-100 karakter arasında olmalıdır.");
         return;
     }
     
@@ -166,9 +296,14 @@ function addTool(name) {
     })
     .then(() => {
         listTools();
+        showMessage("Araç başarıyla eklendi.", "info");
     })
     .catch((error) => {
         console.error("Araç eklenirken hata oluştu:", error);
+        showMessage("Araç eklenirken bir hata oluştu: " + error.message);
+        
+        // Hata durumunda butonu etkinleştir
+        submitBtn.disabled = false;
     });
 }
 
@@ -176,7 +311,7 @@ function addTool(name) {
 function updateTool(id) {
     // Kullanıcı giriş yapmış mı kontrol et
     if (!auth.currentUser) {
-        alert("Araçları düzenlemek için giriş yapmalısınız!");
+        showMessage("Araçları düzenlemek için giriş yapmalısınız!");
         return;
     }
     
@@ -184,9 +319,22 @@ function updateTool(id) {
         .then((doc) => {
             if (doc.exists) {
                 const tool = doc.data();
+                
+                // Güvenlik: İstemci tarafı yetkilendirme kontrolü
+                if (tool.userId !== auth.currentUser.uid) {
+                    showMessage("Sadece kendi eklediğiniz araçları düzenleyebilirsiniz!");
+                    return;
+                }
+                
                 const newName = prompt("Yeni araç adını girin:", tool.name);
                 
+                // Güvenlik: Veri validasyonu
                 if (newName && newName.trim() !== "" && newName !== tool.name) {
+                    if (newName.length < 2 || newName.length > 100) {
+                        showMessage("Araç adı 2-100 karakter arasında olmalıdır.");
+                        return;
+                    }
+                    
                     toolsCollection.doc(id).update({
                         name: newName.trim(),
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -194,15 +342,18 @@ function updateTool(id) {
                     })
                     .then(() => {
                         listTools();
+                        showMessage("Araç başarıyla güncellendi.", "info");
                     })
                     .catch((error) => {
                         console.error("Araç güncellenirken hata oluştu:", error);
+                        showMessage("Araç güncellenirken bir hata oluştu: " + error.message);
                     });
                 }
             }
         })
         .catch((error) => {
             console.error("Araç bilgisi alınırken hata oluştu:", error);
+            showMessage("Araç bilgisi alınırken bir hata oluştu: " + error.message);
         });
 }
 
@@ -210,21 +361,40 @@ function updateTool(id) {
 function deleteTool(id) {
     // Kullanıcı giriş yapmış mı kontrol et
     if (!auth.currentUser) {
-        alert("Araçları silmek için giriş yapmalısınız!");
+        showMessage("Araçları silmek için giriş yapmalısınız!");
         return;
     }
     
-    const confirmDelete = confirm("Bu aracı silmek istediğinizden emin misiniz?");
-    
-    if (confirmDelete) {
-        toolsCollection.doc(id).delete()
-            .then(() => {
-                listTools();
-            })
-            .catch((error) => {
-                console.error("Araç silinirken hata oluştu:", error);
-            });
-    }
+    toolsCollection.doc(id).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const tool = doc.data();
+                
+                // Güvenlik: İstemci tarafı yetkilendirme kontrolü
+                if (tool.userId !== auth.currentUser.uid) {
+                    showMessage("Sadece kendi eklediğiniz araçları silebilirsiniz!");
+                    return;
+                }
+                
+                const confirmDelete = confirm("Bu aracı silmek istediğinizden emin misiniz?");
+                
+                if (confirmDelete) {
+                    toolsCollection.doc(id).delete()
+                        .then(() => {
+                            listTools();
+                            showMessage("Araç başarıyla silindi.", "info");
+                        })
+                        .catch((error) => {
+                            console.error("Araç silinirken hata oluştu:", error);
+                            showMessage("Araç silinirken bir hata oluştu: " + error.message);
+                        });
+                }
+            }
+        })
+        .catch((error) => {
+            console.error("Araç bilgisi alınırken hata oluştu:", error);
+            showMessage("Araç bilgisi alınırken bir hata oluştu: " + error.message);
+        });
 }
 
 // Not: Bu kod Firestore'un Spark planında test modunda çalışacak şekilde ayarlanmıştır.

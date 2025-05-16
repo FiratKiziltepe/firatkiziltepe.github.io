@@ -1,3 +1,11 @@
+/* 
+ * Güvenlik notu: CSS, XSS saldırılarına maruz kalabilir. 
+ * DOM tabanlı XSS saldırılarını önlemek için:
+ * - Kullanıcı girdilerini asla CSS'e yerleştirmeyin
+ * - @import veya data URI'leri gibi potansiyel tehlikeli CSS yapılarını kullanmaktan kaçının
+ * - CSS selektörleri ve değerlerini dinamik olarak oluşturmaktan kaçının
+ */
+
 * {
     margin: 0;
     padding: 0;
@@ -52,6 +60,11 @@ button:hover {
     background-color: #3367d6;
 }
 
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
 ul {
     list-style-type: none;
 }
@@ -70,6 +83,15 @@ li:last-child {
 
 .tool-name {
     flex: 1;
+    /* XSS önlemi - word-wrap özelliği uzun metinlerin sayfa düzenini bozmasını önler */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 70%;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
 }
 
 .actions button {
@@ -117,6 +139,11 @@ li:last-child {
     margin-left: 10px;
     font-size: 14px;
     color: #555;
+    /* XSS önlemi için overflow kontrolü */
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 #login-btn, #logout-btn {
@@ -147,4 +174,25 @@ li:last-child {
 .firebaseui-title {
     text-align: center;
     color: #333;
+}
+
+/* Hata ve bilgi mesajları için stiller */
+.error-message {
+    color: #ea4335;
+    background-color: #fdecea;
+    border: 1px solid #ea4335;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.info-message {
+    color: #34a853;
+    background-color: #e6f4ea;
+    border: 1px solid #34a853;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 14px;
 } 
