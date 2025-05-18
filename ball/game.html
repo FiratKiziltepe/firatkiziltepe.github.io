@@ -808,7 +808,8 @@
                 <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
                 <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
             </div>
-                <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
+            <button class="btn btn-primary hidden" id="play-again-btn" style="margin-top: 1rem;">Yeniden Oyna</button> <!-- Yeniden Oyna Butonu Eklendi -->
+            <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
             </div>
         </div>
     </div>
@@ -970,10 +971,7 @@
         let currentGameId = null;
         let localPlayerNumber = null; // Bu istemcinin oyuncu numarası (1 veya 2)
         let gameRoomCode = null; // Kullanıcıya gösterilen oda kodu
-        let selectedPenaltyDirection = null; // Penaltı için seçilen yön
-        let selectedFreekickDirection = null; // Frikik için seçilen yön
-        let selectedFreekickPower = null; // Frikik için seçilen güç
-        let selectedKeeperPosition = null; // Kaleci için seçilen pozisyon
+        let currentOpponentInfo = null; // Yeniden maç için rakip bilgisi (sadece host için)
 
         // Oyun değişkenleri (Mevcutlar korunuyor, bazıları Firebase'den yönetilecek)
         let interval;
@@ -1028,6 +1026,7 @@
         const joinRoomBtn = document.getElementById('join-room-btn');
         const createRoomBtn = document.getElementById('create-room-btn');
         const gameBoard = document.querySelector('.game-board');
+        const playAgainBtn = document.getElementById('play-again-btn'); // Yeniden Oyna butonu referansı
 
         // Kurallar Modalı Elemanları
         const rulesBtn = document.getElementById('rules-btn');
@@ -1043,7 +1042,7 @@
             const p2Score = currentSnapshotData.player2Score;
             const currentTotalTurns = currentSnapshotData.currentTurnForCheck;
             const maxScore = currentSnapshotData.gameSettings?.maxScore || 3;
-            const maxTurns = currentSnapshotData.gameSettings?.maxTurns || 10; // Toplam hamle sayısı (her oyuncu maxTurns/2 hamle)
+            const maxTurns = currentSnapshotData.gameSettings?.maxTurns || 40; // Toplam hamle sayısı (her oyuncu maxTurns/2 hamle)
         
             let gameOver = false;
             let winner = null; // 1, 2, or 'draw'
@@ -1235,25 +1234,44 @@
             onValue(gameRefInstance, async (snapshot) => { // Fonksiyonu async yaptık
                 if (!snapshot.exists()) {
                     console.warn(`Dinlenen oda (${gameId}) artık mevcut değil.`);
-                    alert("Oda bağlantısı kesildi veya oda kapandı.");
-                    lobbyControls.classList.remove('hidden');
-                    gameBoard.classList.add('hidden');
-                    messageElem.classList.add('hidden');
-                    currentGameId = null;
-                    localPlayerNumber = null;
-                    gameRoomCode = null;
-                    createRoomBtn.disabled = false;
-                    joinRoomBtn.disabled = false;
-                    roomCodeInput.disabled = false;
-                    roomCodeInput.value = '';
-                    if (turnTimerId) clearTimeout(turnTimerId); // Aktif timer varsa temizle
-                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId); // Aktif timer varsa temizle
+                    // Eğer oyun zaten bittiyse ve yönlendirme olduysa, bu uyarıyı gösterme.
+                    // Bu kontrol, bir oyuncu manuel olarak sayfayı yenilediğinde veya eski oyun ID'si artık yoksa önemli.
+                    if (!playAgainBtn.classList.contains('hidden')) {
+                        // Eğer playAgainBtn görünür değilse (yani oyun sonu değilse veya host değilse) uyarı ver.
+                        // Veya daha iyisi, eğer bir yönlendirme beklemiyorsak uyarı ver.
+                    }
+                    // alert("Oda bağlantısı kesildi veya oda kapandı."); 
+                    // initializeAppUI(); // Lobiye dönmek için çağrılabilir
+                    // Şimdilik sadece konsol logu, kullanıcı deneyimini bozmamak için.
                     return;
                 }
 
                 const gameData = snapshot.val();
                 console.log("Oyun verisi güncellendi:", gameData);
                 if (!gameData) return;
+
+                // Rematch yönlendirme kontrolü (ÖNCELİKLE)
+                if (gameData.redirectToGameId && gameId !== gameData.redirectToGameId) { // Kendini yönlendirmeyi engelle
+                    console.log(`Yönlendirme algılandı. Eski Oda: ${gameId}, Yeni Oda: ${gameData.redirectToGameId}`);
+                    // Sadece bu client için geçerli oyuncu numarasını koruyarak yönlen
+                    // localPlayerNumber zaten doğru olmalı (host için 1, guest için 2)
+                    
+                    currentGameId = gameData.redirectToGameId;
+                    gameRoomCode = currentGameId; 
+
+                    if (turnTimerId) clearTimeout(turnTimerId);
+                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
+                    
+                    // UI Temizliği (lobby gizli, gameboard açık kalmalı)
+                    playAgainBtn.classList.add('hidden');
+                    playAgainBtn.disabled = false; // Bir sonraki oyun için hazırla
+                    messageElem.textContent = "Yeni maça katınılıyor...";
+                    
+                    // Yeni oyunu dinle
+                    listenToGameUpdates(currentGameId);
+                    return; // Eski oyun verisini işlemeyi durdur
+                }
+
 
                 // --- Stop local timer if it's not this client's turn to actively time ---
                 if (running &&
@@ -1459,6 +1477,7 @@
                     toggleBtn.disabled = !(localPlayerNumber === gameData.currentPlayer &&
                         (gameData.gameState === `player${localPlayerNumber}_turn` ||
                             gameData.gameState === `player${localPlayerNumber}_timing`));
+                    playAgainBtn.classList.add('hidden'); // Oyun devam ederken Yeniden Oyna butonu gizli
                 }
                 resetBtn.disabled = true;
 
@@ -2166,6 +2185,81 @@
         } else {
             console.warn("Kurallar modalı veya butonları bulunamadı, olay dinleyicileri eklenemedi.");
         }
+
+        // Yeniden Oyna Butonu için Olay Dinleyici (Sadece Host)
+        async function initiateRematch() {
+            if (localPlayerNumber !== 1 || !currentOpponentInfo || !currentGameId) {
+                console.error("Yeniden maç başlatmak için yetki veya bilgi eksik.");
+                return;
+            }
+
+            playAgainBtn.disabled = true;
+            const oldGameId = currentGameId; // Önceki oyun ID'sini sakla
+            const player1Info = (await get(ref(database, 'games/' + oldGameId + '/player1'))).val(); // Host kendi güncel bilgisini alsın
+
+            if (!player1Info) {
+                console.error("Oyuncu 1 bilgisi alınamadı.");
+                playAgainBtn.disabled = false;
+                return;
+            }
+
+            const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            // localPlayerNumber zaten 1 (host)
+            // currentGameId'yi yeni oda koduyla güncellemeye gerek yok, çünkü listenToGameUpdates yönlendirecek.
+            // Ancak hostun kendi currentGameId'sini ve gameRoomCode'unu burada set etmesi ve 
+            // sonra listenToGameUpdates(newRoomCode) çağırması daha doğru olur.
+            
+            const newGameCurrentPlayer = Math.random() < 0.5 ? 1 : 2;
+            const initialGameDataForRematch = {
+                player1: { id: player1Info.id || "player1_host", name: player1Info.name || "Oyuncu 1", score: 0, lastStopTimeMs: null, penaltyChoice: null },
+                player2: { id: currentOpponentInfo.id || "player2_guest", name: currentOpponentInfo.name || "Oyuncu 2", score: 0, lastStopTimeMs: null, penaltyChoice: null },
+                currentPlayer: newGameCurrentPlayer,
+                gameState: newGameCurrentPlayer === 1 ? 'player1_turn' : 'player2_turn',
+                sharedStopwatchMs: 0,
+                liveTimeMs: 0,
+                gameSettings: (await get(ref(database, 'games/' + oldGameId + '/gameSettings'))).val() || { maxTurns: 10, maxScore: 3, turnTimeoutSeconds: 5, stopTimeoutSeconds: 3 },
+                currentTurn: 0,
+                lastActionTimestamp: serverTimestamp(),
+                messageToPlayers: `Yeniden Maç! Sıra Oyuncu ${newGameCurrentPlayer}'de.`,
+                isBotGame: false, // Varsayılan
+                rematchOf: oldGameId // İsteğe bağlı: Hangi oyunun revanşı olduğunu belirtir
+            };
+
+            try {
+                // 1. Yeni oyunu oluştur
+                await set(ref(database, 'games/' + newRoomCode), initialGameDataForRematch);
+                console.log("Yeni oyun odası oluşturuldu (rematch):", newRoomCode);
+
+                // 2. Eski oyuna yönlendirme bilgisini yaz
+                await update(ref(database, 'games/' + oldGameId), { redirectToGameId: newRoomCode });
+                console.log("Eski oyuna yönlendirme bilgisi yazıldı:", oldGameId, "->", newRoomCode);
+
+                // 3. Host olarak kendi state'ini güncelle ve yeni oyunu dinle
+                currentGameId = newRoomCode;
+                gameRoomCode = newRoomCode;
+                // localPlayerNumber = 1; zaten öyle olmalı.
+                
+                if (turnTimerId) clearTimeout(turnTimerId);
+                if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
+
+                playAgainBtn.classList.add('hidden');
+                playAgainBtn.disabled = false; // Butonu bir sonraki sefer için aktif et
+                messageElem.textContent = "Yeni maça katınılıyor..."; // Host için de mesaj
+
+                listenToGameUpdates(newRoomCode);
+
+            } catch (error) {
+                console.error("Yeniden maç başlatılırken hata:", error);
+                alert("Yeniden maç başlatılamadı. Lütfen konsolu kontrol edin.");
+                playAgainBtn.disabled = false;
+            }
+        }
+
+        playAgainBtn.addEventListener('click', () => {
+            if (localPlayerNumber === 1) {
+                initiateRematch();
+            }
+        });
     </script>
 </body>
 </html>
