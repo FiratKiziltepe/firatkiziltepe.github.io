@@ -3,17 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChronoFootball - İki Oyunculu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <title>ChronoFootball - 90'lar Casio Mod</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
             --navy: #0d3b66;
             --yellow: #f4d35e;
             --orange: #ee964b;
-            --red: #f95738;
+            --red: #f95738; /* Ana kronometre rengi için kullanılabilir */
             --white: #ffffff;
             --light-gray: #f0f0f0;
-            --dark-gray: #222;
+            --dark-gray: #222; /* Casio ekranı için daha koyu bir gri */
+            --casio-bg: #c0c0c0; /* Casio saat kasası rengi */
+            --casio-screen-bg: #90a090; /* Casio ekran arka planı (genelde yeşilimsi) */
+            --casio-text: #333333; /* Casio ekran yazısı */
+            --football-green: #2A8C2A; /* Yeşil saha rengi */
+            --goal-line-white: #FFFFFF;
+
             --transparent-black: rgba(0, 0, 0, 0.7);
             --transparent-green: rgba(0, 255, 0, 0.3);
             --transparent-red: rgba(255, 0, 0, 0.3);
@@ -27,31 +33,136 @@
         }
         
         body {
-            background-color: var(--light-gray);
+            background-color: var(--football-green); /* Yeşil saha arka planı */
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Animasyonlarda taşmayı engelle */
+            position: relative; /* İçerideki absolute pozisyonlamalar için */
+        }
+
+        /* Saha Çizgileri (Basit) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            width: 2px;
+            height: 80%;
+            background-color: rgba(255, 255, 255, 0.3); /* Orta saha çizgisi */
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px; /* Orta yuvarlak çapı */
+            height: 100px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .game-area {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1; /* Diğer elemanların üstünde olması için */
+        }
+
+        /* Kale Alanı (Basit CSS ile) */
+        .goal-area {
+            position: absolute;
+            top: 10px; /* Sahanın üst kısmında */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px; /* Kale genişliği */
+            height: 60px; /* Kale yüksekliği */
+            border: 3px solid var(--goal-line-white);
+            border-top: none; /* Üst direk yok, sadece yan ve alt */
+            z-index: 1;
+        }
+        .goal-area::before, .goal-area::after { /* Kale direkleri */
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            height: 100%;
+            background-color: var(--goal-line-white);
+        }
+        .goal-area::before { left: -3px; }
+        .goal-area::after { right: -3px; }
+
+
+        /* Futbol Topu */
+        #football-ball {
+            position: absolute;
+            bottom: 20%; /* Başlangıç pozisyonu, kronometrenin biraz üstü */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5rem; /* Top boyutu */
+            z-index: 2;
+            transition: transform 0.5s ease-in-out, bottom 0.5s ease-in-out;
+        }
+
+        #football-ball.shooting {
+            /* JavaScript ile bu class eklendiğinde top kaleye doğru hareket edecek */
+            /* Hedef: .goal-area'nın ortası */
+            transform: translate(-50%, -250px); /* Y ekseninde yukarı hareket, değeri ayarlayın */
+            /* Alternatif olarak goal-area'nın top pozisyonuna göre hesaplanabilir */
+            bottom: 70%; /* Daha yukarı, kaleye yakın */
+        }
+
+
+        /* Gol Sevinci Metni */
+        #goal-celebration-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            font-family: 'Press Start 2P', cursive; /* Pixelated font */
+            font-size: 3rem; /* Büyük ve etkili */
+            color: var(--yellow);
+            text-shadow: 3px 3px 0 var(--navy), -1px -1px 0 var(--navy), 1px -1px 0 var(--navy), -1px 1px 0 var(--navy), 1px 1px 0 var(--navy);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.3s ease-out;
+            z-index: 100;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        #goal-celebration-text.animate {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
         }
         
         .header {
             background-color: var(--navy);
             color: var(--white);
-            padding: 1rem;
+            padding: 0.5rem 1rem; /* Biraz daha kompakt */
             text-align: center;
             position: relative;
+            z-index: 2; /* Oyun alanının üstünde */
         }
         
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem; /* Biraz küçültüldü */
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+             font-family: 'Press Start 2P', cursive;
         }
 
         .turn-indicator {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
+            font-size: 0.9rem; /* Biraz küçültüldü */
+            padding: 0.3rem 0.8rem;
             border-radius: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
             font-weight: bold;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -80,59 +191,73 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem; /* Biraz küçültüldü */
+            font-size: 1rem; 
             font-weight: bold;
         }
         
         .team {
-            padding: 0 0.5rem; /* Biraz daraltıldı */
+            padding: 0 0.5rem; 
             flex: 1;
             text-align: center;
         }
         
         .score {
             padding: 0 0.5rem;
-            min-width: 1.5rem; /* Biraz daraltıldı */
+            min-width: 1.5rem; 
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* Skor biraz daha belirgin */
         }
         
-        .main {
+        .main { /* Bu artık game-area içinde kronometre ve kontrolleri tutacak */
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end; /* Kontrolleri aşağıya ve kronometreyi üste yakın tutar */
             flex-grow: 1;
             padding: 1rem;
+            width: 100%;
+            z-index: 2; /* Header ile aynı seviyede */
+            margin-bottom: 50px; /* Footer için yer bırak */
         }
         
+        .stopwatch-container {
+            background-color: var(--casio-bg); /* Casio saat kasası */
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.3), inset 1px 1px 0px rgba(255,255,255,0.5);
+            margin-bottom: 1.5rem; /* Top ile arasında boşluk */
+        }
+
         .stopwatch {
-            font-family: 'Rubik Mono One', monospace;
-            font-size: 5rem;
-            background-color: var(--dark-gray);
-            color: var(--red);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            margin: 2rem 0;
-            min-width: 18rem;
+            font-family: 'Rubik Mono One', 'Press Start 2P', monospace; /* Dijital görünümlü font */
+            font-size: 3.5rem; /* Boyut ayarlanabilir */
+            background-color: var(--casio-screen-bg); /* Casio ekran arka planı */
+            color: var(--casio-text); /* Casio ekran yazısı */
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.3rem;
+            border: 2px solid var(--dark-gray);
+            min-width: 15rem; /* Min genişlik */
             text-align: center;
-            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.2); /* Hafif ekran parlama efekti */
+            box-shadow: inset 2px 2px 3px rgba(0,0,0,0.2);
             transition: opacity 0.3s;
         }
         
         .message {
-            font-size: 1.5rem;
-            height: 2rem;
-            margin: 1rem 0;
-            color: var(--navy);
+            font-size: 1.3rem; /* Biraz büyütüldü */
+            height: 1.8rem; /* Yüksekliği ayarlandı */
+            margin: 0.5rem 0; /* Boşluk azaltıldı */
+            color: var(--white); /* Beyaz, saha üzerinde daha iyi okunur */
             font-weight: bold;
             text-align: center;
+            text-shadow: 1px 1px 2px var(--navy); /* Okunurluk için gölge */
+            min-height: 1.8rem; /* İçerik olmadığında bile yer kaplasın */
         }
         
         .controls {
             display: flex;
             gap: 1rem;
-            margin-top: 2rem;
+            margin-top: 1rem; /* Mesaj ile arasında boşluk */
         }
         
         .btn {
@@ -144,23 +269,26 @@
             color: var(--white);
             cursor: pointer;
             transition: all 0.2s;
+            font-family: 'Press Start 2P', cursive; /* Pixelated font for buttons */
+            box-shadow: 2px 2px 0px var(--dark-gray);
         }
-        
+
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px) translateX(-1px);
+            box-shadow: 3px 3px 0px var(--dark-gray);
         }
 
         .btn:disabled {
-            background-color: #ccc;
+            background-color: #999;
+            color: #ccc;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
+            box-shadow: 1px 1px 0px #777;
         }
         
         .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(1px) translateX(0.5px);
+            box-shadow: 1px 1px 0px var(--dark-gray);
         }
         
         .btn-primary {
@@ -172,12 +300,14 @@
         }
 
         .keyboard-hint {
-            font-size: 0.9rem;
-            color: #555;
-            margin-top: 1rem;
+            font-size: 0.8rem; /* Biraz küçültüldü */
+            color: var(--light-gray);
+            margin-top: 0.8rem;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 1px var(--dark-gray);
         }
         
-        .modal { /* Genel modal stili */
+        .modal { 
             position: fixed;
             top: 0;
             left: 0;
@@ -187,7 +317,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
+            z-index: 200; /* En üstte */
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
@@ -198,19 +328,22 @@
             pointer-events: auto;
         }
 
-        .modal-content { /* Modal içeriği için genel stil */
-            background-color: var(--white);
+        .modal-content { 
+            background-color: var(--casio-bg); /* Modal da Casio temasına uygun */
             padding: 2rem;
             border-radius: 1rem;
             text-align: center;
             max-width: 90%;
             width: 400px;
+            border: 3px solid var(--dark-gray);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
         }
 
         .modal-content h2 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            color: var(--navy);
+            color: var(--casio-text);
+            font-family: 'Press Start 2P', cursive;
         }
 
         .player-options {
@@ -225,9 +358,11 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 1.1rem;
+            color: var(--casio-text);
+            font-family: 'Roboto', sans-serif; /* Radio buton yazıları normal olabilir */
         }
         
-        .penalty-modal { /* Mevcut penalty-modal'ı yeni modal yapısına uyarlıyoruz */
+        .penalty-modal { 
             position: fixed;
             top: 0;
             left: 0;
@@ -237,7 +372,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
+            z-index: 200; /* En üstte */
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
@@ -248,19 +383,22 @@
             pointer-events: auto;
         }
         
-        .penalty-card { /* .modal-content ile benzer */
-            background-color: var(--white);
+        .penalty-card { 
+            background-color: var(--casio-bg); /* Penaltı kartı da Casio temalı */
             padding: 2rem;
             border-radius: 1rem;
             text-align: center;
             max-width: 90%;
             width: 400px;
+            border: 3px solid var(--dark-gray);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
         }
         
         .penalty-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* Biraz küçültüldü */
             margin-bottom: 1rem;
-            color: var(--navy);
+            color: var(--casio-text);
+            font-family: 'Press Start 2P', cursive;
         }
         
         .penalty-options {
@@ -270,7 +408,7 @@
             margin-top: 1.5rem;
         }
         
-        .game-flash {
+        .game-flash { /* Bu genel ekran flashı olarak kalabilir veya kaldırılabilir */
             position: fixed;
             top: 0;
             left: 0;
@@ -279,91 +417,124 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
-            z-index: 5;
+            z-index: 5; /* Top ve GOOOL yazısının altında */
         }
         
         .flash-goal {
             background-color: var(--transparent-green);
         }
         
-        .flash-miss {
+        .flash-miss { /* Aut durumu için kullanılabilir */
             background-color: var(--transparent-red);
         }
         
-        .stats {
-            display: flex;
+        .stats { /* İstatistikler görünür olmayabilir, isteğe bağlı */
+            display: none; /* Şimdilik gizlendi, tasarımda yer kaplamasın */
             justify-content: space-around;
             width: 100%;
             max-width: 600px;
             margin-top: 1rem;
             font-size: 0.9rem;
-            color: #666;
+            color: var(--light-gray);
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
         }
         
         @media (max-width: 600px) {
             .stopwatch {
-                font-size: 3rem;
+                font-size: 2.5rem; /* Mobil için daha küçük */
                 min-width: 12rem;
+                padding: 0.6rem 1rem;
             }
-            
+            .stopwatch-container {
+                padding: 8px;
+            }
+            #goal-celebration-text {
+                font-size: 2rem;
+            }
             .controls {
                 flex-direction: column;
             }
             .scoreboard {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
             .team {
                 padding: 0 0.2rem;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            #football-ball {
+                font-size: 2rem;
+            }
+            .goal-area {
+                width: 100px;
+                height: 50px;
+            }
+             .message {
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">⚽ ChronoFootball ⚽</div>
+        <div class="logo">ChronoGoal!</div>
         <div class="scoreboard">
-            <div class="team" id="player1-name">Oyuncu 1 (Ev Sahibi)</div>
+            <div class="team" id="player1-name">OYUNCU 1</div>
             <div class="score" id="score-p1">0</div>
             <div>-</div>
             <div class="score" id="score-p2">0</div>
-            <div class="team" id="player2-name">Oyuncu 2 (Deplasman)</div>
+            <div class="team" id="player2-name">OYUNCU 2</div>
         </div>
-        <div id="turn-indicator" class="turn-indicator">Sıra Oyuncudadır.</div>
+        <div id="turn-indicator" class="turn-indicator">Sıra Oyuncuda</div>
+    </div>
+
+    <div class="game-area">
+        <div class="goal-area"></div>
+        <div id="football-ball">⚽</div>
+        <div id="goal-celebration-text">GOOOOL!</div>
+
+        <div class="main"> <!-- Kronometre ve kontroller bu alanda -->
+            <div class="stopwatch-container">
+                <div class="stopwatch" id="stopwatch">00.00</div>
+            </div>
+            <div class="message" id="message">Kim Başlasın?</div>
+            <div class="controls">
+                <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
+                <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
+            </div>
+            <div class="keyboard-hint">P1: Boşluk, P2: Enter</div>
+        </div>
     </div>
     
-    <div class="main">
-        <div class="stopwatch" id="stopwatch">00.00</div>
-        <div class="message" id="message"></div>
-        <div class="controls">
-            <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur">Başlat</button>
-            <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat">Yeniden Başlat</button>
-        </div>
-        <div class="keyboard-hint">P1: Boşluk, P2: Enter</div>
-        <div class="stats">
-            <div>Goller: <span id="goals">0</span></div>
-            <div>Penaltılar: <span id="penalties">0</span></div>
-            <div>Kaçan Penaltılar: <span id="misses">0</span></div>
-        </div>
+    <div class="stats"> <!-- İstatistikler (isteğe bağlı, şu an display: none) -->
+        <div>Goller: <span id="goals">0</span></div>
+        <div>Penaltılar: <span id="penalties">0</span></div>
+        <div>Kaçan Penaltılar: <span id="misses">0</span></div>
     </div>
 
     <div id="start-player-modal" class="modal">
         <div class="modal-content">
-            <h2>Kim Başlasın?</h2>
+            <h2>KİM BAŞLASIN?</h2>
             <div class="player-options">
                 <label><input type="radio" name="startPlayer" value="1" checked> Oyuncu 1</label>
                 <label><input type="radio" name="startPlayer" value="2"> Oyuncu 2</label>
             </div>
-            <button id="confirm-start-player-btn" class="btn btn-primary">Onayla ve Başla</button>
+            <button id="confirm-start-player-btn" class="btn btn-primary">ONAYLA</button>
         </div>
     </div>
     
     <div class="penalty-modal" id="penalty-modal">
         <div class="penalty-card">
             <div class="penalty-title" id="penalty-title-text">PENALTI!</div>
-            <div>Kronometre tek mi, çift mi gelecek?</div>
+            <div>Sayı TEK mi, ÇİFT mi?</div>
             <div class="penalty-options">
-                <button class="btn btn-primary" id="odd-btn" aria-label="Tek">Tek</button>
-                <button class="btn btn-primary" id="even-btn" aria-label="Çift">Çift</button>
+                <button class="btn btn-primary" id="odd-btn" aria-label="Tek">TEK</button>
+                <button class="btn btn-primary" id="even-btn" aria-label="Çift">ÇİFT</button>
             </div>
         </div>
     </div>
@@ -376,6 +547,9 @@
     <audio id="whistle-sound" preload="auto">
         <source src="https://assets.mixkit.co/active_storage/sfx/2032/2032-preview.mp3" type="audio/mpeg">
     </audio>
+     <audio id="aut-sound" preload="auto"> <!-- Aut sesi için eklendi -->
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3" type="audio/mpeg">
+    </audio>
     
     <script>
         // Oyun değişkenleri
@@ -385,7 +559,7 @@
         let isPenalty = false;
         let penaltyGuess = null;
         let scores = { p1: 0, p2: 0 };
-        let stats = { goals: 0, penalties: 0, misses: 0 };
+        // let stats = { goals: 0, penalties: 0, misses: 0 }; // İstatistikler gizlendiği için yorum satırı
         let currentPlayer = 1;
         let gameStarted = false;
         
@@ -404,22 +578,28 @@
         const scoreP2Elem = document.getElementById('score-p2');
         
         const gameFlash = document.getElementById('game-flash');
-        const goalsElem = document.getElementById('goals');
-        const penaltiesElem = document.getElementById('penalties');
-        const missesElem = document.getElementById('misses');
+        // const goalsElem = document.getElementById('goals'); // Stats gizli
+        // const penaltiesElem = document.getElementById('penalties'); // Stats gizli
+        // const missesElem = document.getElementById('misses'); // Stats gizli
         
         const goalSound = document.getElementById('goal-sound');
         const whistleSound = document.getElementById('whistle-sound');
+        const autSound = document.getElementById('aut-sound');
+
 
         const startPlayerModal = document.getElementById('start-player-modal');
         const confirmStartPlayerBtn = document.getElementById('confirm-start-player-btn');
         const turnIndicatorElem = document.getElementById('turn-indicator');
+
+        const footballBallElem = document.getElementById('football-ball');
+        const goalCelebrationTextElem = document.getElementById('goal-celebration-text');
 
         // Başlangıç Ayarları
         function initializeGame() {
             toggleBtn.disabled = true;
             resetBtn.disabled = true;
             startPlayerModal.classList.add('active');
+            messageElem.textContent = "Oyuncu seçimi bekleniyor...";
         }
         
         confirmStartPlayerBtn.addEventListener('click', () => {
@@ -432,30 +612,31 @@
                 resetBtn.disabled = false;
                 messageElem.textContent = `Oyuncu ${currentPlayer} başlıyor!`;
                 updateTurnIndicator();
-                resetGameInternals(false); // Sadece oyun içi değerleri sıfırla, skorları değil
+                resetGameInternals(false); 
             }
         });
 
-        function updateTurnIndicator() {
+        function updateTurnIndicator(isSwitching = false) {
             if (!gameStarted) {
-                turnIndicatorElem.textContent = "Oyuncu seçimi bekleniyor...";
+                turnIndicatorElem.textContent = "Oyuncu Seçin";
                 turnIndicatorElem.classList.remove('player1-turn', 'player2-turn', 'blinking');
                 return;
             }
             turnIndicatorElem.textContent = `Sıra: Oyuncu ${currentPlayer}`;
-            turnIndicatorElem.classList.remove('player1-turn', 'player2-turn', 'blinking');
-            void turnIndicatorElem.offsetWidth; // Animasyon için reflow
-
+            turnIndicatorElem.classList.remove('player1-turn', 'player2-turn');
+            
             if (currentPlayer === 1) {
                 turnIndicatorElem.classList.add('player1-turn');
             } else {
                 turnIndicatorElem.classList.add('player2-turn');
             }
-            turnIndicatorElem.classList.add('blinking');
             
-            setTimeout(() => {
-                if (gameStarted) turnIndicatorElem.classList.remove('blinking');
-            }, 2500); // 2.5 saniye yanıp sönsün
+            if(isSwitching) {
+                turnIndicatorElem.classList.add('blinking');
+                setTimeout(() => {
+                    if (gameStarted) turnIndicatorElem.classList.remove('blinking');
+                }, 1500); 
+            }
         }
 
 
@@ -469,10 +650,12 @@
         // Kronometre mantığı
         function startStopwatch() {
             if (!gameStarted) return;
+            if (goalCelebrationTextElem.classList.contains('animate')) return; // Gol animasyonu sırasında başlatma
+
             if (!running) {
                 running = true;
                 toggleBtn.textContent = 'Durdur';
-                messageElem.textContent = ''; // Temizle veya "Oyuncu X oynuyor"
+                messageElem.textContent = `Oyuncu ${currentPlayer} oynuyor...`;
                 
                 interval = setInterval(() => {
                     milliseconds += 10;
@@ -495,44 +678,73 @@
         // Sonuç değerlendirme
         function evaluateResult() {
             if (!gameStarted) return;
-            const centiseconds = Math.floor((milliseconds % 1000) / 10) % 100;
+            const currentMilliseconds = milliseconds; // Durdurulduğu andaki milisaniyeyi al
+            const centiseconds = Math.floor((currentMilliseconds % 1000) / 10); // 0-99 arası
             
             if (isPenalty) {
                 const isOddResult = centiseconds % 2 === 1;
-                isPenalty = false; // Penaltı durumu bitti
+                // isPenalty = false; // Penaltı durumu handleGoal veya switchPlayer sonrası resetlenir
                 
                 if ((penaltyGuess === 'odd' && isOddResult) || (penaltyGuess === 'even' && !isOddResult)) {
-                    handleGoal();
+                    showMessage(`Oyuncu ${currentPlayer} penaltıdan ATTI!`);
+                    handleGoal(true); // true: penaltı golü olduğunu belirtir
                 } else {
-                    stats.misses++;
-                    missesElem.textContent = stats.misses;
-                    showMessage(`Oyuncu ${currentPlayer} penaltıyı kaçırdı!`);
-                    flashScreen('miss');
-                    switchPlayer(); // Sırayı diğer oyuncuya ver
+                    // stats.misses++; // stats gizli
+                    // missesElem.textContent = stats.misses; // stats gizli
+                    showMessage(`Oyuncu ${currentPlayer} penaltıyı KAÇIRDI!`);
+                    flashScreen('miss'); // Ekran flash'ı
+                    autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
+                    isPenalty = false; // Penaltı bitti
+                    penaltyGuess = null;
+                    switchPlayer(); 
                 }
-                penaltyGuess = null; // Tahmini sıfırla
             } else {
-                if (centiseconds === 0) {
+                if (centiseconds >= 90 && centiseconds <= 99) { // Yeni Gol koşulu: 90-99 arası
                     handleGoal();
-                } else if (centiseconds === 1 || centiseconds === 99) {
+                } else if (centiseconds === 1) { // Penaltı koşulu: 01 
                     isPenalty = true;
-                    stats.penalties++;
-                    penaltiesElem.textContent = stats.penalties;
-                    penaltyTitleTextElem.textContent = `OYUNCU ${currentPlayer} PENALTI KULLANIYOR`;
-                    showMessage(`Oyuncu ${currentPlayer} penaltı kazandı!`);
+                    // stats.penalties++; // stats gizli
+                    // penaltiesElem.textContent = stats.penalties; // stats gizli
+                    penaltyTitleTextElem.textContent = `OYUNCU ${currentPlayer} PENALTI!`;
+                    showMessage(`Oyuncu ${currentPlayer} PENALTI kazandı!`);
                     togglePenaltyModal(true);
-                    whistleSound.play().catch(e => console.log('Ses oynatılamadı:', e));
+                    whistleSound.play().catch(e => console.log('Düdük sesi oynatılamadı:', e));
                     // Penaltı modalı açıldığında sıra değişmez, oyuncu penaltıyı kullanır.
-                } else {
-                    showMessage('Aut! Sıra diğer oyuncuda.');
-                    switchPlayer(); // Sırayı diğer oyuncuya ver
+                } else { // Aut
+                    showMessage('AUT! Sıra diğer oyuncuda.');
+                    flashScreen('miss'); // Ekran flash'ı
+                    autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
+                    switchPlayer();
                 }
             }
         }
+
+        // Gol animasyonları
+        function animateBallToGoal() {
+            footballBallElem.classList.add('shooting');
+            // Animasyon bittikten sonra topu eski yerine al ve class'ı kaldır
+            setTimeout(() => {
+                footballBallElem.classList.remove('shooting');
+                // İsterseniz burada topu başlangıç pozisyonuna anında döndürebilirsiniz
+                 footballBallElem.style.transform = 'translateX(-50%)'; // Merkezi X pozisyonu
+                 footballBallElem.style.bottom = '20%'; // Başlangıç Y pozisyonu
+            }, 1000); // Animasyon süresi + biraz bekleme
+        }
+
+        function animateGoalText() {
+            goalCelebrationTextElem.classList.add('animate');
+            setTimeout(() => {
+                goalCelebrationTextElem.classList.remove('animate');
+            }, 2000); // GOOOL yazısının görünür kalma süresi
+        }
         
         // Gol işleme
-        function handleGoal() {
+        function handleGoal(isPenaltyGoal = false) {
             if (!gameStarted) return;
+            
+            animateBallToGoal();
+            animateGoalText();
+
             if (currentPlayer === 1) {
                 scores.p1++;
                 scoreP1Elem.textContent = scores.p1;
@@ -540,25 +752,40 @@
                 scores.p2++;
                 scoreP2Elem.textContent = scores.p2;
             }
-            stats.goals++;
-            goalsElem.textContent = stats.goals;
+            // stats.goals++; // stats gizli
+            // goalsElem.textContent = stats.goals; // stats gizli
             
-            showMessage(`GOOOOOL! Oyuncu ${currentPlayer} attı!`);
-            flashScreen('goal');
-            goalSound.play().catch(e => console.log('Ses oynatılamadı:', e));
+            // Mesajı burada göstermiyoruz, animateGoalText zaten GOOOL diyor
+            // showMessage(`GOOOOOL! Oyuncu ${currentPlayer} attı!`); 
+            // flashScreen('goal'); // flashScreen yerine yeni animasyonlar var
+            goalSound.play().catch(e => console.log('Gol sesi oynatılamadı:', e));
             
-            switchPlayer(); // Gol sonrası sıra değişir
+            if(isPenalty) { // Eğer penaltı durumu aktifse, penaltı bitti olarak işaretle
+                isPenalty = false;
+                penaltyGuess = null;
+                togglePenaltyModal(false); // Penaltı modalını kapat
+            }
+
+            // Gol animasyonları bitene kadar sıra geçişini beklet
+            setTimeout(() => {
+                if (gameStarted) switchPlayer(); // Sıra değişir
+            }, 2000); // GOOOL yazısı süresiyle eşleşebilir
         }
 
         function switchPlayer() {
             if (!gameStarted) return;
+            if (goalCelebrationTextElem.classList.contains('animate')) return; // Gol animasyonu sırasında sıra değiştirme
+            
             currentPlayer = (currentPlayer === 1) ? 2 : 1;
-            updateTurnIndicator();
-            // Kronometreyi ve mesajı bir sonraki tur için hazırla
-            milliseconds = 0;
+            updateTurnIndicator(true); // true: yanıp sönme efekti için
+            
+            milliseconds = 0; // Kronometreyi sıfırla
             stopwatchElem.textContent = formatTime(milliseconds);
-            if (!isPenalty) { // Eğer penaltı durumu devam etmiyorsa mesajı güncelle
+            
+            if (!isPenalty && gameStarted) { 
                  messageElem.textContent = `Sıra Oyuncu ${currentPlayer}'de`;
+            } else if (isPenalty && gameStarted) {
+                messageElem.textContent = `Oyuncu ${currentPlayer} penaltı kullanıyor...`;
             }
         }
         
@@ -571,19 +798,19 @@
             }
         }
         
-        // Flash efekti göster
+        // Flash efekti göster (Aut için kullanılabilir)
         function flashScreen(type) {
-            gameFlash.className = 'game-flash';
-            void gameFlash.offsetWidth; // Reflow
+            gameFlash.className = 'game-flash'; // Önceki class'ları temizle
+            void gameFlash.offsetWidth; // Reflow tetiklemesi
             
-            if (type === 'goal') {
-                gameFlash.classList.add('flash-goal');
-            } else {
+            if (type === 'goal') { // Gol için artık kullanılmıyor, yeni animasyon var
+                // gameFlash.classList.add('flash-goal');
+            } else if (type === 'miss') { // Aut veya kaçan penaltı
                 gameFlash.classList.add('flash-miss');
             }
             
             setTimeout(() => {
-                gameFlash.className = 'game-flash';
+                gameFlash.className = 'game-flash'; // Temizle
             }, 500);
         }
         
@@ -592,74 +819,77 @@
             messageElem.textContent = msg;
         }
 
-        // Oyun içi değerleri sıfırla (skorlar hariç veya dahil)
-        function resetGameInternals(resetScores = true) {
+        // Oyun içi değerleri sıfırla
+        function resetGameInternals(resetScoresAndPlayer = true) {
             clearInterval(interval);
             running = false;
             milliseconds = 0;
             isPenalty = false;
             penaltyGuess = null;
             
-            if (resetScores) {
+            if (resetScoresAndPlayer) {
                 scores = { p1: 0, p2: 0 };
-                stats = { goals: 0, penalties: 0, misses: 0 };
+                // stats = { goals: 0, penalties: 0, misses: 0 }; // stats gizli
             }
 
             stopwatchElem.textContent = '00.00';
             toggleBtn.textContent = 'Başlat';
-            if (resetScores) messageElem.textContent = '';
-
-            if (resetScores) {
+            
+            if (resetScoresAndPlayer) {
                 scoreP1Elem.textContent = '0';
                 scoreP2Elem.textContent = '0';
-                goalsElem.textContent = '0';
-                penaltiesElem.textContent = '0';
-                missesElem.textContent = '0';
+                // goalsElem.textContent = '0'; // stats gizli
+                // penaltiesElem.textContent = '0'; // stats gizli
+                // missesElem.textContent = '0'; // stats gizli
+                if (gameStarted) messageElem.textContent = `Sıra Oyuncu ${currentPlayer}'de`;
+                else messageElem.textContent = "Oyuncu seçimi bekleniyor...";
+
             }
             togglePenaltyModal(false);
+            // Animasyonları sıfırla
+            footballBallElem.classList.remove('shooting');
+            footballBallElem.style.transform = 'translateX(-50%)';
+            footballBallElem.style.bottom = '20%';
+            goalCelebrationTextElem.classList.remove('animate');
         }
         
         // Oyunu tamamen sıfırla
         function resetGame() {
-            resetGameInternals(true); // Skorları da sıfırla
+            resetGameInternals(true); 
             gameStarted = false;
-            currentPlayer = 1; // Varsayılan olarak Oyuncu 1'e dönebilir veya modal tekrar açılabilir
-            initializeGame(); // Oyuncu seçme modalını tekrar göster
+            // currentPlayer = 1; // initializeGame zaten modalı açacak ve oyuncu seçilecek
+            initializeGame(); 
             updateTurnIndicator();
         }
         
         // Olay dinleyicileri
         toggleBtn.addEventListener('click', () => {
-            if (!isPenalty) startStopwatch(); // Penaltı modalı açıkken ana butona basılmasını engelle
+            if (!isPenalty && !goalCelebrationTextElem.classList.contains('animate')) startStopwatch(); 
         });
         resetBtn.addEventListener('click', resetGame);
         
         oddBtn.addEventListener('click', () => {
-            if (!gameStarted) return;
+            if (!gameStarted || !isPenalty) return;
             penaltyGuess = 'odd';
             togglePenaltyModal(false);
-            // Penaltı tahmini yapıldıktan sonra sonucu hemen değerlendir, kronometreyi tekrar başlatma.
+            // Penaltı tahmini yapıldıktan sonra sonucu değerlendir.
             // Kronometre zaten durmuştu, evaluateResult çağrılacak.
-            // evaluateResult() çağrısı stopStopwatch() içinde yapılıyor.
-            // Penaltı seçeneğine tıklandığında, kronometrenin durduğu son değer üzerinden işlem yapılır.
-            // Bu yüzden burada doğrudan evaluateResult'ı çağıralım.
-            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster
+            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster (gerekirse)
             evaluateResult(); 
         });
         
         evenBtn.addEventListener('click', () => {
-            if (!gameStarted) return;
+            if (!gameStarted || !isPenalty) return;
             penaltyGuess = 'even';
             togglePenaltyModal(false);
-            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster
+            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster (gerekirse)
             evaluateResult();
         });
         
         // Klavye desteği
         document.addEventListener('keydown', (e) => {
-            if (!gameStarted || penaltyModal.classList.contains('active')) {
-                 // Oyun başlamadıysa veya penaltı modalı aktifse klavye ile oynama
-                return;
+            if (!gameStarted || penaltyModal.classList.contains('active') || goalCelebrationTextElem.classList.contains('animate')) {
+                return; // Oyun başlamadıysa, penaltı/başlangıç modalı aktifse veya gol animasyonu varsa klavye ile oynama
             }
 
             if (e.code === 'Space' && currentPlayer === 1) {
@@ -668,7 +898,7 @@
             } else if (e.code === 'Enter' && currentPlayer === 2) {
                 e.preventDefault();
                 startStopwatch();
-            } else if (e.code === 'KeyR') { // 'R' tuşu ile reset (opsiyonel)
+            } else if (e.code === 'KeyR' && !startPlayerModal.classList.contains('active')) { // 'R' tuşu ile reset (modal açık değilken)
                 e.preventDefault();
                 resetGame();
             }
@@ -676,7 +906,7 @@
 
         // Sayfa yüklendiğinde oyunu başlat
         initializeGame();
-        updateTurnIndicator(); // Başlangıçta "Oyuncu seçimi bekleniyor" mesajı için
+        updateTurnIndicator(); 
     </script>
 </body>
 </html>
