@@ -406,6 +406,75 @@
             margin-top: 1.5rem;
         }
         
+        .penalty-status {
+            margin-top: 10px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            color: var(--casio-text);
+        }
+
+        .penalty-directions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        .penalty-direction-btn {
+            flex: 1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            padding: 10px 5px;
+            background-color: var(--navy);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .penalty-direction-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .goal-representation {
+            margin: 15px auto;
+            width: 200px;
+            height: 100px;
+            border: 3px solid var(--dark-gray);
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .goal-section {
+            width: 33%;
+            height: 100%;
+            border: 1px dashed rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .goal-section:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .goal-section.selected {
+            background-color: rgba(255,255,0,0.3);
+        }
+
+        .goal-section.save-result {
+            background-color: rgba(0,255,0,0.3);
+        }
+
+        .goal-section.missed-result {
+            background-color: rgba(255,0,0,0.3);
+        }
+        
         .game-flash { /* Bu genel ekran flashı olarak kalabilir veya kaldırılabilir */
             position: fixed;
             top: 0;
@@ -539,6 +608,165 @@
         .cheering .spectator-icon {
             animation-play-state: running;
         }
+
+        /* Frikik Stili */
+        .freekick-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--transparent-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .freekick-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .freekick-card {
+            background-color: var(--casio-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            border: 3px solid var(--dark-gray);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+        }
+        
+        .freekick-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--casio-text);
+            font-family: 'Press Start 2P', cursive;
+        }
+        
+        .freekick-description {
+            margin-top: 10px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            color: var(--casio-text);
+        }
+        
+        .power-selection {
+            display: flex;
+            flex-direction: column;
+            margin: 15px 0;
+        }
+        
+        .power-label {
+            font-size: 0.8rem;
+            font-family: 'Press Start 2P', cursive;
+            color: var(--casio-text);
+            margin-bottom: 5px;
+        }
+        
+        .power-options {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .power-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 8px 0;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            background-color: var(--navy);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .power-btn.selected {
+            background-color: var(--orange);
+            transform: scale(1.05);
+        }
+
+        /* Kurallar Modalı */
+        .rules-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--transparent-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 250; /* Diğer modalların da üzerinde olabilir */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .rules-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .rules-card {
+            background-color: var(--casio-bg);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            text-align: left;
+            max-width: 90%;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 3px solid var(--dark-gray);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+        }
+
+        .rules-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--casio-text);
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+        }
+
+        .rules-content p {
+            font-family: 'Roboto', sans-serif;
+            color: var(--casio-text);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+
+        .rules-content strong {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--navy);
+        }
+
+        .rules-content ul {
+            list-style-position: inside;
+            padding-left: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .rules-content li {
+            font-family: 'Roboto', sans-serif;
+            color: var(--casio-text);
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .rules-close-btn-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
     </style>
 </head>
 <body>
@@ -555,6 +783,7 @@
             <div class="team" id="player2-name">OYUNCU 2</div>
         </div>
         <div id="turn-indicator" class="turn-indicator">Sıra Oyuncuda</div>
+        <button class="btn btn-secondary" id="rules-btn" style="position: absolute; top: 10px; right: 10px; padding: 0.5rem 1rem; font-size: 0.8rem;">Kurallar</button>
     </div>
 
     <div class="game-area">
@@ -566,19 +795,19 @@
         </div>
 
         <div class="game-board hidden"> <!-- Oyun alanı başlangıçta gizli -->
-            <div class="goal-area"></div>
-            <div id="football-ball">⚽</div>
-            <div id="goal-celebration-text">GOOOOL!</div>
+        <div class="goal-area"></div>
+        <div id="football-ball">⚽</div>
+        <div id="goal-celebration-text">GOOOOL!</div>
             <div class="message" id="message">Kim Başlasın?</div>
 
-            <div class="main"> <!-- Kronometre ve kontroller bu alanda -->
-                <div class="stopwatch-container">
-                    <div class="stopwatch" id="stopwatch">00.00</div>
-                </div>
-                <div class="controls">
-                    <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
-                    <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
-                </div>
+        <div class="main"> <!-- Kronometre ve kontroller bu alanda -->
+            <div class="stopwatch-container">
+                <div class="stopwatch" id="stopwatch">00.00</div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
+                <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
+            </div>
                 <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
             </div>
         </div>
@@ -604,10 +833,63 @@
     <div class="penalty-modal" id="penalty-modal">
         <div class="penalty-card">
             <div class="penalty-title" id="penalty-title-text">PENALTI!</div>
-            <div>Sayı TEK mi, ÇİFT mi?</div>
-            <div class="penalty-options">
-                <button class="btn btn-primary" id="odd-btn" aria-label="Tek">TEK</button>
-                <button class="btn btn-primary" id="even-btn" aria-label="Çift">ÇİFT</button>
+            <div id="penalty-description" class="penalty-status">Yön seçin:</div>
+            
+            <div id="goal-representation" class="goal-representation">
+                <div class="goal-section" data-direction="left">⬅️</div>
+                <div class="goal-section" data-direction="center">⚽</div>
+                <div class="goal-section" data-direction="right">➡️</div>
+            </div>
+            
+            <div id="penalty-shooter-controls" class="penalty-options">
+                <button class="btn btn-primary" id="penalty-shoot-btn" aria-label="Şut Çek">ŞUT ÇEK</button>
+            </div>
+
+            <div id="penalty-keeper-controls" class="penalty-options" style="display: none;">
+                <button class="btn btn-primary" id="penalty-save-btn" aria-label="Kurtar">KURTAR</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="freekick-modal" id="freekick-modal">
+        <div class="freekick-card">
+            <div class="freekick-title" id="freekick-title-text">FRİKİK!</div>
+            <div id="freekick-description" class="freekick-description">Yön ve güç seçin:</div>
+            
+            <div id="freekick-goal-representation" class="goal-representation">
+                <div class="goal-section" data-direction="left">⬅️</div>
+                <div class="goal-section" data-direction="center">⚽</div>
+                <div class="goal-section" data-direction="right">➡️</div>
+            </div>
+            
+            <div id="freekick-shooter-controls">
+                <div class="power-selection">
+                    <div class="power-label">ŞUT GÜCÜ:</div>
+                    <div class="power-options">
+                        <button class="power-btn" data-power="low">DÜŞÜK</button>
+                        <button class="power-btn" data-power="medium">ORTA</button>
+                        <button class="power-btn" data-power="high">YÜKSEK</button>
+                    </div>
+                </div>
+                
+                <div class="penalty-options">
+                    <button class="btn btn-primary" id="freekick-shoot-btn" aria-label="Şut Çek">ŞUT ÇEK</button>
+                </div>
+            </div>
+            
+            <div id="freekick-keeper-controls" style="display: none;">
+                <div class="power-selection">
+                    <div class="power-label">KALEDE POZİSYON:</div>
+                    <div class="power-options">
+                        <button class="power-btn" data-position="low">ALÇAK</button>
+                        <button class="power-btn" data-position="medium">ORTA</button>
+                        <button class="power-btn" data-position="high">YÜKSEK</button>
+                    </div>
+                </div>
+                
+                <div class="penalty-options">
+                    <button class="btn btn-primary" id="freekick-save-btn" aria-label="Kurtar">KURTAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -624,6 +906,45 @@
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3" type="audio/mpeg">
     </audio>
     
+    <div class="rules-modal" id="rules-modal">
+        <div class="rules-card">
+            <div class="rules-title">OYUN KURALLARI</div>
+            <div class="rules-content">
+                <p><strong>AMAÇ:</strong> Rakibinden daha fazla gol atarak veya belirlenen tur sayısı sonunda daha önde olarak maçı kazanmak!</p>
+                
+                <p><strong>NASIL OYNANIR:</strong></p>
+                <ul>
+                    <li>Sıra sana geldiğinde, kronometreyi <strong>BAŞLAT</strong> (Boşluk veya Enter tuşu ile de kontrol edebilirsin).</li>
+                    <li>Kronometreyi doğru zamanda <strong>DURDUR</strong>. Durdurduğun salise (saniyenin yüzde biri) sonucu belirler!</li>
+                </ul>
+
+                <p><strong>SONUÇLAR:</strong></p>
+                <ul>
+                    <li><strong>Salise 00:</strong> GOOOOL! ⚽ Rakip kaleye gol atarsın.</li>
+                    <li><strong>Salise 90-99:</strong> PENALTI! 🎯 Penaltı atışı kazanırsın. Yön seçerek şutunu çekersin, rakibin de kurtarmak için yön seçer.</li>
+                    <li><strong>Salise 80-89:</strong> FRİKİK! 🥅 Frikik kazanırsın. Yön ve şut gücünü seçersin, rakibin de kurtarmak için yön ve kaleci pozisyonunu belirler.</li>
+                    <li><strong>Diğer Saliseler:</strong> AUT! 💨 Top dışarı çıkar, sıra rakibe geçer.</li>
+                </ul>
+
+                <p><strong>ZAMAN AŞIMLARI (DİKKAT!):</strong></p>
+                <ul>
+                    <li>Kronometreyi başlatmak için <strong>5 saniyen</strong> var. Başlatmazsan, sıra rakibe geçer ve ortak süreye 5 saniye eklenir.</li>
+                    <li>Kronometreyi başlattıktan sonra durdurmak için <strong>3 saniyen</strong> var. Durdurmazsan, sıra rakibe geçer ve ortak süreye 3 saniye eklenir.</li>
+                </ul>
+
+                <p><strong>KAZANMA KOŞULLARI:</strong></p>
+                <ul>
+                    <li><strong>Skor:</strong> Bir oyuncu <strong>3 gole</strong> ulaşırsa maçı kazanır.</li>
+                    <li><strong>Süre/Tur:</strong> Toplam <strong>10 hamle</strong> (her oyuncu 5'er hamle) tamamlandığında, daha fazla golü olan oyuncu kazanır. Beraberlik durumunda maç berabere biter.</li>
+                </ul>
+                 <p>İyi eğlenceler!</p>
+            </div>
+            <div class="rules-close-btn-container">
+                <button class="btn btn-primary" id="close-rules-modal-btn">KAPAT</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Firebase SDK'larını import et
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
@@ -649,12 +970,19 @@
         let currentGameId = null;
         let localPlayerNumber = null; // Bu istemcinin oyuncu numarası (1 veya 2)
         let gameRoomCode = null; // Kullanıcıya gösterilen oda kodu
+        let selectedPenaltyDirection = null; // Penaltı için seçilen yön
+        let selectedFreekickDirection = null; // Frikik için seçilen yön
+        let selectedFreekickPower = null; // Frikik için seçilen güç
+        let selectedKeeperPosition = null; // Kaleci için seçilen pozisyon
 
         // Oyun değişkenleri (Mevcutlar korunuyor, bazıları Firebase'den yönetilecek)
         let interval;
         let running = false;
-        let milliseconds = 0; // Bu yerel kronometre için hala kullanılacak
-        let currentPlayer = 1; // Firebase'den gameData.currentPlayer ile yönetilecek
+        let milliseconds = 0;
+        // Diğer oyun state'leri (isPenalty, penaltyGuess, scores, currentPlayer, gameStarted) Firebase'den yönetilecek.
+        
+        let turnTimerId = null; // Host için zaman aşımı sayacını tutar
+        let liveUpdateIntervalId = null; // Aktif oyuncunun canlı zamanını Firebase'e periyodik yazma interval'i
         
         // DOM elementleri
         const stopwatchElem = document.getElementById('stopwatch');
@@ -664,8 +992,12 @@
         
         const penaltyModal = document.getElementById('penalty-modal');
         const penaltyTitleTextElem = document.getElementById('penalty-title-text');
-        const oddBtn = document.getElementById('odd-btn');
-        const evenBtn = document.getElementById('even-btn');
+        const penaltyDescriptionElem = document.getElementById('penalty-description');
+        const penaltyShooterControls = document.getElementById('penalty-shooter-controls');
+        const penaltyKeeperControls = document.getElementById('penalty-keeper-controls');
+        const penaltyShootBtn = document.getElementById('penalty-shoot-btn');
+        const penaltySaveBtn = document.getElementById('penalty-save-btn');
+        const goalRepresentation = document.getElementById('goal-representation');
         
         const scoreP1Elem = document.getElementById('score-p1');
         const scoreP2Elem = document.getElementById('score-p2');
@@ -675,6 +1007,16 @@
         const goalSound = document.getElementById('goal-sound');
         const whistleSound = document.getElementById('whistle-sound');
         const autSound = document.getElementById('aut-sound');
+
+        // Frikik modalı elementleri
+        const freekickModal = document.getElementById('freekick-modal');
+        const freekickTitleTextElem = document.getElementById('freekick-title-text');
+        const freekickDescriptionElem = document.getElementById('freekick-description');
+        const freekickShooterControls = document.getElementById('freekick-shooter-controls');
+        const freekickKeeperControls = document.getElementById('freekick-keeper-controls');
+        const freekickShootBtn = document.getElementById('freekick-shoot-btn');
+        const freekickSaveBtn = document.getElementById('freekick-save-btn');
+        const freekickGoalRepresentation = document.getElementById('freekick-goal-representation');
 
         const turnIndicatorElem = document.getElementById('turn-indicator');
         const footballBallElem = document.getElementById('football-ball');
@@ -687,12 +1029,88 @@
         const createRoomBtn = document.getElementById('create-room-btn');
         const gameBoard = document.querySelector('.game-board');
 
+        // Kurallar Modalı Elemanları
+        const rulesBtn = document.getElementById('rules-btn');
+        const rulesModal = document.getElementById('rules-modal');
+        const closeRulesModalBtn = document.getElementById('close-rules-modal-btn');
+
+        // Host tarafında çalışacak fonksiyon
+        async function checkGameOverConditionOnHost(gameId, currentSnapshotData) {
+            // currentSnapshotData = { player1Score, player2Score, currentTurnForCheck, gameSettings }
+            if (localPlayerNumber !== 1) return false;
+        
+            const p1Score = currentSnapshotData.player1Score;
+            const p2Score = currentSnapshotData.player2Score;
+            const currentTotalTurns = currentSnapshotData.currentTurnForCheck;
+            const maxScore = currentSnapshotData.gameSettings?.maxScore || 3;
+            const maxTurns = currentSnapshotData.gameSettings?.maxTurns || 10; // Toplam hamle sayısı (her oyuncu maxTurns/2 hamle)
+        
+            let gameOver = false;
+            let winner = null; // 1, 2, or 'draw'
+            let endMessage = "";
+        
+            if (p1Score >= maxScore) {
+                gameOver = true;
+                winner = 1;
+                endMessage = `MAÇ BİTTİ! Oyuncu 1 kazandı! Skor: ${p1Score}-${p2Score}`;
+            } else if (p2Score >= maxScore) {
+                gameOver = true;
+                winner = 2;
+                endMessage = `MAÇ BİTTİ! Oyuncu 2 kazandı! Skor: ${p1Score}-${p2Score}`;
+            } else if (currentTotalTurns >= maxTurns) {
+                gameOver = true;
+                if (p1Score > p2Score) {
+                    winner = 1;
+                    endMessage = `MAÇ BİTTİ! Süre doldu. Oyuncu 1 kazandı! Skor: ${p1Score}-${p2Score}`;
+                } else if (p2Score > p1Score) {
+                    winner = 2;
+                    endMessage = `MAÇ BİTTİ! Süre doldu. Oyuncu 2 kazandı! Skor: ${p1Score}-${p2Score}`;
+                } else {
+                    winner = 'draw';
+                    endMessage = `MAÇ BİTTİ! Süre doldu. Berabere! Skor: ${p1Score}-${p2Score}`;
+                }
+            }
+        
+            if (gameOver) {
+                const gameRef = ref(database, 'games/' + gameId);
+                const updatesToFirebase = {
+                    gameState: 'game_over',
+                    winnerPlayer: winner,
+                    messageToPlayers: endMessage,
+                    lastActionTimestamp: serverTimestamp(),
+                    'player1/score': p1Score, // Skoru ve turu da game_over ile birlikte yazalım
+                    'player2/score': p2Score,
+                    currentTurn: currentTotalTurns,
+                };
+                await update(gameRef, updatesToFirebase);
+                console.log("Oyun bitti (checkGameOverConditionOnHost). Kazanan: ", winner, " Mesaj: ", endMessage);
+                return true; // Oyun bitti
+            }
+            return false; // Oyun devam ediyor
+        }
+
         function initializeAppUI() {
             lobbyControls.classList.remove('hidden');
             gameBoard.classList.add('hidden');
             messageElem.classList.add('hidden');
             toggleBtn.disabled = true;
             resetBtn.disabled = true;
+            
+            // UI elemanlarını kontrol et
+            console.log("Penalty Modal Element:", penaltyModal ? "OK" : "YOK");
+            console.log("Freekick Modal Element:", freekickModal ? "OK" : "YOK");
+            
+            // Daha detaylı frikik modalı eleman kontrolü (önceki logun devamı gibi)
+            console.log("Frikik modalı detayları:", {
+                modal: freekickModal ? "OK" : "YOK",
+                title: freekickTitleTextElem ? "OK" : "YOK",
+                description: freekickDescriptionElem ? "OK" : "YOK",
+                shooterControls: freekickShooterControls ? "OK" : "YOK",
+                keeperControls: freekickKeeperControls ? "OK" : "YOK",
+                shootBtn: freekickShootBtn ? "OK" : "YOK",
+                saveBtn: freekickSaveBtn ? "OK" : "YOK",
+                goalRepresentation: freekickGoalRepresentation ? "OK" : "YOK"
+            });
         }
         
         async function createGameRoom() {
@@ -708,9 +1126,13 @@
                     player1: { id: "player1_host", name: "Oyuncu 1", score: 0, lastStopTimeMs: null, penaltyChoice: null },
                     currentPlayer: 1,
                     gameState: 'waiting_for_player2',
+                    sharedStopwatchMs: 0,
+                    liveTimeMs: 0, // Eklendi: Aktif oyuncunun canlı zamanı
                     gameSettings: {
-                        maxTurns: 10,
-                        turnTimeoutSeconds: 5 
+                        maxTurns: 10, // Her oyuncu 5 hamle, toplam 10 hamle
+                        maxScore: 3,  // 3 gole ulaşan kazanır
+                        turnTimeoutSeconds: 5,
+                        stopTimeoutSeconds: 3
                     },
                     currentTurn: 0,
                     lastActionTimestamp: serverTimestamp(),
@@ -790,7 +1212,7 @@
                     messageElem.classList.remove('hidden');
                     listenToGameUpdates(currentGameId);
 
-                } else {
+            } else {
                     alert("Oda bulunamadı. Kodu kontrol edin.");
                     console.log("Oda bulunamadı:", inputRoomCode);
                     createRoomBtn.disabled = false;
@@ -810,7 +1232,7 @@
             const gameRefPath = 'games/' + gameId;
             const gameRefInstance = ref(database, gameRefPath);
 
-            onValue(gameRefInstance, (snapshot) => {
+            onValue(gameRefInstance, async (snapshot) => { // Fonksiyonu async yaptık
                 if (!snapshot.exists()) {
                     console.warn(`Dinlenen oda (${gameId}) artık mevcut değil.`);
                     alert("Oda bağlantısı kesildi veya oda kapandı.");
@@ -824,6 +1246,8 @@
                     joinRoomBtn.disabled = false;
                     roomCodeInput.disabled = false;
                     roomCodeInput.value = '';
+                    if (turnTimerId) clearTimeout(turnTimerId); // Aktif timer varsa temizle
+                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId); // Aktif timer varsa temizle
                     return;
                 }
 
@@ -831,9 +1255,176 @@
                 console.log("Oyun verisi güncellendi:", gameData);
                 if (!gameData) return;
 
+                // --- Stop local timer if it's not this client's turn to actively time ---
+                if (running &&
+                    (localPlayerNumber !== gameData.currentPlayer || !gameData.gameState.endsWith(`_timing`)) &&
+                    gameData.gameState !== `player${localPlayerNumber}_stopped`) {
+                    clearInterval(interval);
+                    running = false;
+                    if (liveUpdateIntervalId) { // Canlı güncelleme interval'ini de temizle
+                        clearInterval(liveUpdateIntervalId);
+                        liveUpdateIntervalId = null;
+                    }
+                    toggleBtn.textContent = 'Başlat';
+                    if (localPlayerNumber !== gameData.currentPlayer && gameData.gameState.endsWith('_turn')) {
+                        toggleBtn.disabled = true; // Sıra bende değilse buton pasif olmalı
+                    }
+                }
+
+                // --- Host specific logic block ---
+                if (localPlayerNumber === 1) {
+                    if (turnTimerId) {
+                        clearTimeout(turnTimerId);
+                        turnTimerId = null;
+                    }
+
+                    if (gameData.gameState && gameData.gameState.endsWith('_stopped') && gameData.lastActionDetail) {
+                        const lastPlayer = gameData.lastActionDetail.player;
+                        // Oyuncu zaten sonucu işledi ve sırayı devretti mi kontrolü
+                        // Bu, özellikle _aiming durumuna geçildikten sonra _stopped'un tekrar işlenmesini engeller
+                        const expectedNextPlayerForNormalTurn = lastPlayer === 1 ? 2 : 1;
+                        const isAlreadyProcessedAndTurnedOver = gameData.currentPlayer === expectedNextPlayerForNormalTurn && gameData.gameState === `player${expectedNextPlayerForNormalTurn}_turn`;
+                        const isSpecialAimingState = gameData.gameState && (gameData.gameState.startsWith('penalty_') || gameData.gameState.startsWith('freekick_')) && gameData.gameState.endsWith('_aiming');
+
+                        // Sadece host, ve eğer bu _stopped olayı henüz _aiming gibi bir özel duruma veya bir sonraki oyuncunun normal turuna dönüştürülmemişse işle.
+                        if (gameData.lastActionDetail.player === localPlayerNumber || // Eğer durduran bu host ise
+                           (gameData.lastActionDetail.player !== localPlayerNumber && !isAlreadyProcessedAndTurnedOver && !isSpecialAimingState && gameData.gameState === `player${gameData.lastActionDetail.player}_stopped` ) // Ya da durduran diğer oyuncuysa ve henüz sonuç işlenmemişse
+                        ) {
+                            // Bu _stopped olayını işleyip işlemediğimizi takip etmek için basit bir flag
+                            // Bu, özellikle host'un kendi _stopped olayını birden fazla kez tetiklemesini önlemek için değil,
+                            // daha çok diğer oyuncu durdurduğunda host'un bunu sadece bir kez işlemesini sağlamak için.
+                            // Ancak, en güvenli yol `lastActionTimestamp` veya `currentTurn` gibi daha sağlam bir belirteç kullanmaktır.
+                            // Şimdilik, `gameData.lastActionDetail.processedByHost` gibi bir alan ekleyebiliriz.
+                            // VEYA: Host'un sadece kendi playerX_stopped mesajını değil, diğer oyuncunun playerY_stopped mesajını da işlemesi gerekir.
+                            // Oyuncunun kendi _stopped mesajını işleme mantığı zaten var.
+                            // Eğer lastActionDetail.player mevcut host değilse ve gameState hala playerX_stopped ise host bunu işlemeli.
+
+                            // Eğer bu client (host) zaten bu sonucu işlemişse (örn: state'i _aiming'e çevirmişse), tekrar işleme.
+                            // Bunun için en iyi kontrol, Firebase'deki gameState'in beklenen bir sonraki duruma (örn: playerY_turn veya penalty_playerX_aiming)
+                            // zaten geçip geçmediğidir.
+                            if (!(gameData.gameState.endsWith('_aiming') || gameData.gameState.endsWith('_result') || (gameData.gameState.endsWith('_turn') && gameData.currentPlayer !== lastPlayer ))) {
+                                const centiseconds = gameData.lastActionDetail.centiseconds;
+                                const timeMs = gameData.lastActionDetail.timeMs;
+                                let outcomeMessage = "";
+                                let newGameState = "";
+                                const nextPlayer = lastPlayer === 1 ? 2 : 1;
+                                let scoreUpdates = {};
+                                let penaltyDetailsUpdate = null;
+
+                                // Skorları belirle
+                                if (centiseconds === 0) { // F3: GOL
+                                    scoreUpdates[`player${lastPlayer}/score`] = (gameData[`player${lastPlayer}`]?.score || 0) + 1;
+                                }
+                                // Penaltı/Frikik için skor güncellemesi turnOverAfterSpecialAction içinde yapılır.
+
+                                // Potansiyel yeni skorlar ve tur sayısı
+                                const potentialP1Score = gameData.player1?.score + (scoreUpdates['player1/score'] ? 1 : 0) || gameData.player1?.score || 0;
+                                const potentialP2Score = gameData.player2?.score + (scoreUpdates['player2/score'] ? 1 : 0) || gameData.player2?.score || 0;
+                                const nextTurnNumber = (gameData.currentTurn || 0) + 1;
+
+                                // Oyun bitişini kontrol et (güncellenmiş skorlar ve yeni tur sayısı ile)
+                                const isGameOver = await checkGameOverConditionOnHost(currentGameId, {
+                                    player1Score: potentialP1Score,
+                                    player2Score: potentialP2Score,
+                                    currentTurnForCheck: nextTurnNumber,
+                                    gameSettings: gameData.gameSettings
+                                });
+
+                                if (isGameOver) {
+                                    console.log("Host: Oyun bittiği için (_stopped sonrası) normal durum güncellemesi yapılmadı.");
+                                    // checkGameOverConditionOnHost zaten Firebase'i güncelledi ve skoru/turu da yazdı.
+                                    // Bu yüzden burada ek bir Firebase güncellemesi yapmaya gerek yok.
+                                } else {
+                                    // Oyun bitmediyse, sonucu işle ve Firebase'i güncelle.
+                                    if (centiseconds === 0) { // F3: GOL
+                                        outcomeMessage = `GOOOOL! Oyuncu ${lastPlayer} attı! (Süre: ${formatTime(timeMs)})`;
+                                        newGameState = `player${nextPlayer}_turn`;
+                                        if (goalSound) goalSound.play().catch(e => console.log("Gol sesi oynatılamadı:", e));
+                                    } else if (centiseconds >= 90 && centiseconds <= 99) { // F4: PENALTI
+                                        outcomeMessage = `PENALTI! Oyuncu ${lastPlayer} kullanacak... (Süre: ${formatTime(timeMs)})`;
+                                        newGameState = `penalty_player${lastPlayer}_aiming`;
+                                        penaltyDetailsUpdate = { shooter: lastPlayer, type: 'penalty', status: 'aiming' };
+                                        if (whistleSound) whistleSound.play().catch(e => console.log("Düdük sesi oynatılamadı:", e));
+                                    } else if (centiseconds >= 80 && centiseconds <= 89) { // F5: FRİKİK
+                                        outcomeMessage = `FRİKİK! Oyuncu ${lastPlayer} kullanacak... (Süre: ${formatTime(timeMs)})`;
+                                        newGameState = `freekick_player${lastPlayer}_aiming`;
+                                        penaltyDetailsUpdate = { shooter: lastPlayer, type: 'freekick', status: 'aiming' };
+                                        if (whistleSound) whistleSound.play().catch(e => console.log("Düdük sesi oynatılamadı:", e));
+                                        console.log("Frikik durumu oluştu (host):", newGameState, penaltyDetailsUpdate);
+                                    } else { // AUT
+                                        outcomeMessage = `AUT! Sıra Oyuncu ${nextPlayer}\'de. (Durdurulan: ${formatTime(timeMs)})`;
+                                        newGameState = `player${nextPlayer}_turn`;
+                                    }
+    
+                                    const updates = {
+                                        currentPlayer: newGameState.includes('_turn') ? nextPlayer : lastPlayer,
+                                        gameState: newGameState,
+                                        sharedStopwatchMs: timeMs,
+                                        liveTimeMs: timeMs,
+                                        messageToPlayers: outcomeMessage,
+                                        lastActionTimestamp: serverTimestamp(),
+                                        currentTurn: nextTurnNumber, // nextTurnNumber burada kullanılıyor
+                                        ...scoreUpdates, // scoreUpdates burada kullanılıyor
+                                        penaltyDetails: penaltyDetailsUpdate
+                                    };
+                                    if (penaltyDetailsUpdate === null && gameData.penaltyDetails) {
+                                        updates.penaltyDetails = null;
+                                    }
+    
+                                    update(ref(database, 'games/' + currentGameId), updates)
+                                        .then(() => {
+                                            console.log(`Host: Oyuncu ${lastPlayer} aksiyonu DEĞERLENDİRİLDİ (ANA BLOK). Yeni durum: ${newGameState}. Sonuç: ${outcomeMessage}`);
+                                        })
+                                        .catch(error => {
+                                            console.error("Host: Oyun durumu güncellenirken hata (ANA BLOK):", error);
+                                        });
+                                }
+                            } else {
+                                console.log(`Host: Oyuncu ${lastPlayer} aksiyonu zaten işlenmiş veya oyun ilerlemiş. Mevcut durum: ${gameData.gameState}, Mevcut oyuncu: ${gameData.currentPlayer}`);
+                            }
+                        }
+                    } else if (gameData.gameState && gameData.player1 && gameData.player2) { // Zaman aşımı kurma mantığı
+                        const currentTurnForTimeout = gameData.currentTurn;
+                        let timeoutSettings = 5;
+                        let playerWhoseTurnItIs = null;
+                        let expectedStateForTimeout = gameData.gameState;
+
+                        if (gameData.gameState.endsWith('_turn')) {
+                            playerWhoseTurnItIs = parseInt(gameData.gameState.charAt(6));
+                            timeoutSettings = gameData.gameSettings?.turnTimeoutSeconds || 5;
+                        } else if (gameData.gameState.endsWith('_timing')) {
+                            playerWhoseTurnItIs = parseInt(gameData.gameState.charAt(6));
+                            timeoutSettings = gameData.gameSettings?.stopTimeoutSeconds || 3;
+                        } else if (gameData.gameState.endsWith('_aiming') || gameData.gameState.endsWith('_waiting') || gameData.gameState.endsWith('_result')) {
+                             playerWhoseTurnItIs = null; // Özel durumlarda (penaltı/frikik adımları) ana zaman aşımı sayacı kurulmaz.
+                        }
+
+
+                        if (playerWhoseTurnItIs !== null) {
+                            const timeoutMs = timeoutSettings * 1000;
+                            turnTimerId = setTimeout(() => {
+                                handleTurnTimeout(playerWhoseTurnItIs, currentTurnForTimeout, expectedStateForTimeout);
+                            }, timeoutMs);
+                        }
+                    }
+                } // --- End of Host specific logic block ---
+
+                // Update shared stopwatch display based on state (All Clients)
+                if (gameData.gameState && gameData.gameState.endsWith('_timing') && localPlayerNumber !== gameData.currentPlayer) {
+                    stopwatchElem.textContent = formatTime(gameData.liveTimeMs || gameData.sharedStopwatchMs || 0);
+                } else if (gameData.gameState && (gameData.gameState.endsWith('_turn') || gameData.gameState === 'waiting_for_player2')) {
+                    stopwatchElem.textContent = formatTime(gameData.sharedStopwatchMs || 0);
+                } else if (gameData.gameState && gameData.gameState.endsWith('_stopped') && gameData.lastActionDetail) {
+                     // Eğer _stopped durumu ise ve bu client o anki aktif oyuncu değilse, lastActionDetail'den göster.
+                     // Aktif oyuncu ise, kendi lokal sayacından gösterir (bu blok güncellenene kadar)
+                    if (localPlayerNumber !== gameData.lastActionDetail.player) {
+                        stopwatchElem.textContent = formatTime(gameData.lastActionDetail.timeMs || 0);
+                    }
+                }
+
                 scoreP1Elem.textContent = gameData.player1?.score !== undefined ? gameData.player1.score : 0;
                 scoreP2Elem.textContent = gameData.player2?.score !== undefined ? gameData.player2.score : 0;
-                
+
                 document.getElementById('player1-name').textContent = gameData.player1?.name || 'OYUNCU 1';
                 document.getElementById('player2-name').textContent = gameData.player2?.name || (gameData.isBotGame ? 'BOT' : (gameData.gameState === 'waiting_for_player2' ? 'BEKLENİYOR' : 'OYUNCU 2'));
 
@@ -846,93 +1437,304 @@
                 if (gameData.gameState === 'waiting_for_player2' && localPlayerNumber === 1) {
                     turnIndicatorElem.textContent = `Oda: ${gameRoomCode} - Rakip bekleniyor...`;
                 } else if (gameData.gameState === 'game_over') {
-                     turnIndicatorElem.textContent = "MAÇ BİTTİ!";
-                } else if (gameData.player1 && gameData.player2) { 
-                     turnIndicatorElem.textContent = `Sıra: Oyuncu ${gameData.currentPlayer}`;
-                     const currentTurnPlayerClass = gameData.currentPlayer === 1 ? 'player1-turn' : 'player2-turn';
-                     const otherPlayerClass = gameData.currentPlayer === 1 ? 'player2-turn' : 'player1-turn';
-                     turnIndicatorElem.classList.add(currentTurnPlayerClass);
-                     turnIndicatorElem.classList.remove(otherPlayerClass);
-                     if (localPlayerNumber === gameData.currentPlayer) {
+                    turnIndicatorElem.textContent = "MAÇ BİTTİ!";
+                } else if (gameData.player1 && gameData.player2) {
+                    turnIndicatorElem.textContent = `Sıra: Oyuncu ${gameData.currentPlayer}`;
+                    const currentTurnPlayerClass = gameData.currentPlayer === 1 ? 'player1-turn' : 'player2-turn';
+                    const otherPlayerClass = gameData.currentPlayer === 1 ? 'player2-turn' : 'player1-turn';
+                    turnIndicatorElem.classList.add(currentTurnPlayerClass);
+                    turnIndicatorElem.classList.remove(otherPlayerClass);
+                    if (localPlayerNumber === gameData.currentPlayer) {
                         turnIndicatorElem.textContent += " (SEN)";
-                     }
+                    }
                 } else {
-                     turnIndicatorElem.textContent = "Oyuncular bekleniyor...";
+                    turnIndicatorElem.textContent = "Oyuncular bekleniyor...";
                 }
 
-                if (gameData.gameState === 'waiting_for_player2' || !gameData.player2) {
-                    toggleBtn.disabled = true;
-                } else if (gameData.gameState === 'game_over') {
+                if (gameData.gameState === 'waiting_for_player2' || !gameData.player2 ||
+                    gameData.gameState.endsWith('_aiming') || gameData.gameState.endsWith('_waiting') || gameData.gameState.endsWith('_result') || // Penaltı/Frikik adımlarında ana başlatma butonu pasif
+                    gameData.gameState === 'game_over') {
                     toggleBtn.disabled = true;
                 } else {
-                    toggleBtn.disabled = !(localPlayerNumber === gameData.currentPlayer && 
-                                           (gameData.gameState === `player${localPlayerNumber}_turn` || 
-                                            gameData.gameState === `player${localPlayerNumber}_timing`));
+                    toggleBtn.disabled = !(localPlayerNumber === gameData.currentPlayer &&
+                        (gameData.gameState === `player${localPlayerNumber}_turn` ||
+                            gameData.gameState === `player${localPlayerNumber}_timing`));
                 }
                 resetBtn.disabled = true;
-                
-                if (gameData.gameState && gameData.gameState.endsWith('_stopped')) {
-                    if (localPlayerNumber === 1 && gameData.lastActionDetail) {
-                        const lastPlayer = gameData.lastActionDetail.player;
-                        const centiseconds = gameData.lastActionDetail.centiseconds;
-                        const timeMs = gameData.lastActionDetail.timeMs;
 
-                        const expectedNextPlayer = lastPlayer === 1 ? 2 : 1;
-                        if (gameData.currentPlayer === expectedNextPlayer && gameData.gameState === `player${expectedNextPlayer}_turn`) {
-                            // Already processed and turned over, do nothing here for this client.
-                            // console.log("Host: Action already processed, state advanced.");
-                        } else {
-                            let outcomeMessage = "";
-                            let newGameState = "";
-                            const nextPlayer = lastPlayer === 1 ? 2 : 1;
-                            // let scoreUpdates = {}; // For GOL etc. in future features
+                // Özel oyun durumları (Penaltı/Frikik) için UI yönetimi
+                const handleSpecialGameState = () => {
+                    // Önce tüm modalları kapat (her UI güncellemesinde temiz bir başlangıç için)
+                    // Ancak bu, modal içindeki seçimlerin kaybolmasına neden olabilir.
+                    // Bunun yerine, sadece gameState değiştiğinde veya modalın kapanması gerektiğinde kapatmak daha iyi olabilir.
+                    // Şimdilik mevcut haliyle bırakalım, ancak _result sonrası otomatik kapanma zaten var.
+                    // togglePenaltyModal(false);
+                    // toggleFreekickModal(false);
 
-                            // For F2, implement AUT and turn change.
-                            // Detailed GOL, PENALTI, FRIKIK logic will be in F3, F4, F5.
-                            
-                            // PRD F6: AUT/KAÇIRILAN Sonucu (Default for F2)
-                            outcomeMessage = `AUT! Sıra Oyuncu ${nextPlayer}\'de. (Durdurulan: ${formatTime(timeMs)})`;
-                            newGameState = `player${nextPlayer}_turn`;
-                            
-                            const updates = {
-                                currentPlayer: nextPlayer,
-                                gameState: newGameState,
-                                messageToPlayers: outcomeMessage,
-                                lastActionTimestamp: serverTimestamp(),
-                                currentTurn: (gameData.currentTurn || 0) + 1,
-                                // lastActionDetail: null, // Clear after processing if needed, or keep for history
-                            };
+                    if (!gameData.gameState) return;
+                    const gameState = gameData.gameState;
+                     // console.log(\"Özel durum kontrolü için gameState:\", gameState); // Çok sık log basar, dikkat!
 
-                            const gameRefPath = 'games/' + currentGameId;
-                            update(ref(database, gameRefPath), updates)
-                                .then(() => {
-                                    console.log(`Host: Oyuncu ${lastPlayer} aksiyonu değerlendirildi. Yeni tur: Oyuncu ${nextPlayer}. Sonuç: AUT`);
-                                })
-                                .catch(error => {
-                                    console.error("Host: Oyun durumu güncellenirken hata:", error);
-                                });
+                    const isPenaltyState = gameState.startsWith('penalty_player');
+                    const isFreekickState = gameState.startsWith('freekick_player');
+
+                    if (!isPenaltyState && !isFreekickState) {
+                        // Eğer penaltı veya frikik durumu değilse, açık olabilecek modalları kapat.
+                        if (penaltyModal.classList.contains('active')) togglePenaltyModal(false);
+                        if (freekickModal.classList.contains('active')) toggleFreekickModal(false);
+                        return;
+                    }
+                    
+                    let actionType = isPenaltyState ? 'penalty' : 'freekick';
+                    let shooter = gameData.penaltyDetails?.shooter;
+
+                    if (!shooter && gameData.penaltyDetails) { // penaltyDetails var ama shooter yoksa (beklenmedik)
+                        console.warn(`[${gameState}] Shooter penaltyDetails içinde (${actionType}) bulunamadı ancak penaltyDetails objesi var. gameState string'inden parse ediliyor.`);
+                        try { shooter = parseInt(gameState.split('_')[1].charAt(6)); } catch (e) { /* ignore */ }
+                    } else if (!gameData.penaltyDetails) { // penaltyDetails objesi hiç yoksa (örn. host henüz oluşturmadı)
+                         console.warn(`[${gameState}] penaltyDetails objesi henüz yok (${actionType}). gameState string'inden shooter parse ediliyor.`);
+                         try { shooter = parseInt(gameState.split('_')[1].charAt(6)); } catch (e) { /* ignore */ }
+                         // Eğer host ise ve shooter bulunduysa ama penaltyDetails hala yoksa, oluştur.
+                         if (localPlayerNumber === 1 && shooter && !gameData.penaltyDetails) {
+                            console.log(`[${gameState}] Host, eksik penaltyDetails için (${actionType}) düzeltme deniyor. Shooter: ${shooter}`);
+                            update(ref(database, 'games/' + currentGameId), {
+                                penaltyDetails: { shooter: shooter, type: actionType, status: gameState.endsWith('_aiming') ? 'aiming' : (gameState.endsWith('_waiting') ? 'shooting': 'unknown') }
+                            });
+                            return; // Bir sonraki update'te işlenecek
+                         }
+                    }
+
+
+                    if (!shooter) {
+                        console.error(`[${gameState}] ${actionType} için shooter kesin olarak bulunamadı. Detaylar:`, gameData.penaltyDetails);
+                        return;
+                    }
+
+                    // console.log(`[${gameState}] ${actionType} shooter işleniyor: ${shooter}`);
+                    const keeper = shooter === 1 ? 2 : 1;
+                    let modalToToggle = isPenaltyState ? togglePenaltyModal : toggleFreekickModal;
+                    let titleElem = isPenaltyState ? penaltyTitleTextElem : freekickTitleTextElem;
+                    let descriptionElem = isPenaltyState ? penaltyDescriptionElem : freekickDescriptionElem;
+                    let shooterControls = isPenaltyState ? penaltyShooterControls : freekickShooterControls;
+                    let keeperControls = isPenaltyState ? penaltyKeeperControls : freekickKeeperControls;
+                    let goalRep = isPenaltyState ? goalRepresentation : freekickGoalRepresentation;
+
+                    if (gameState.endsWith('_aiming')) {
+                        if (localPlayerNumber === shooter) {
+                            titleElem.textContent = `SEN ${actionType.toUpperCase()} ${isPenaltyState ? 'ATIYORSUN' : 'KULLANIYORSUN'}!`;
+                            descriptionElem.textContent = isPenaltyState ? 'Yön seçip ŞUT ÇEK butonuna bas.' : 'Yön, güç seçip ŞUT ÇEK butonuna bas.';
+                            shooterControls.style.display = isPenaltyState ? 'flex' : 'block';
+                            keeperControls.style.display = 'none';
+                        } else if (localPlayerNumber === keeper) {
+                            titleElem.textContent = `OYUNCU ${shooter} ${actionType.toUpperCase()} ${isPenaltyState ? 'ATIYOR' : 'KULLANIYOR'}...`;
+                            descriptionElem.textContent = isPenaltyState ? 'Kurtarmak için bir yön seç:' : 'Kurtarmak için yön ve pozisyon seç:';
+                            shooterControls.style.display = 'none';
+                            keeperControls.style.display = isPenaltyState ? 'flex' : 'block';
+                        }
+                        // console.log(`[${gameState}] ${actionType} modalı AÇILMAYA çalışılıyor (_aiming)...`);
+                        modalToToggle(true);
+                        // Diğer modalı kapat
+                        if (isPenaltyState && freekickModal.classList.contains('active')) toggleFreekickModal(false);
+                        if (isFreekickState && penaltyModal.classList.contains('active')) togglePenaltyModal(false);
+
+                    } else if (gameState.endsWith('_waiting')) {
+                        if (localPlayerNumber === shooter) {
+                            titleElem.textContent = `ŞUT ÇEKTİN!`;
+                            descriptionElem.textContent = 'Kaleci kurtarış yapmayı bekliyor...';
+                            shooterControls.style.display = 'none';
+                            keeperControls.style.display = 'none';
+                        } else if (localPlayerNumber === keeper) {
+                            titleElem.textContent = `OYUNCU ${shooter} ŞUT ÇEKTİ!`;
+                            descriptionElem.textContent = isPenaltyState ? 'Kurtarmak için bir yön seç:' : 'Kurtarmak için yön ve pozisyon seç:';
+                            shooterControls.style.display = 'none';
+                            keeperControls.style.display = isPenaltyState ? 'flex' : 'block';
+                        }
+                         // console.log(`[${gameState}] ${actionType} modalı AÇILMAYA çalışılıyor (_waiting)...`);
+                        modalToToggle(true);
+                         // Diğer modalı kapat
+                        if (isPenaltyState && freekickModal.classList.contains('active')) toggleFreekickModal(false);
+                        if (isFreekickState && penaltyModal.classList.contains('active')) togglePenaltyModal(false);
+
+                    } else if (gameState.endsWith('_result')) {
+                        const details = gameData.penaltyDetails;
+                        if (!details) {
+                            console.error(`[${gameState}] Sonuç durumu için penaltyDetails eksik!`);
+                            return;
+                        }
+                        const shooterDirection = details.shooterDirection;
+                        const keeperDirection = details.keeperDirection;
+                        const isGoal = details.isGoal;
+
+                        titleElem.textContent = isGoal ? 'GOOOL!' : 'KAÇTI!';
+                        if (isPenaltyState) {
+                            descriptionElem.textContent = `Şut: ${directionText(shooterDirection)}, Kaleci: ${directionText(keeperDirection)}`;
+                        } else { // Frikik
+                            descriptionElem.textContent = `Şut: ${directionText(shooterDirection)} (${powerText(details.shooterPower)}), Kaleci: ${directionText(keeperDirection)} (${positionText(details.keeperPosition)})`;
+                        }
+
+                        const goalSections = goalRep.querySelectorAll('.goal-section');
+                        goalSections.forEach(section => {
+                            section.classList.remove('selected', 'save-result', 'missed-result');
+                            if (section.dataset.direction === shooterDirection) {
+                                section.classList.add(isGoal ? 'save-result' : 'missed-result');
+                            }
+                        });
+
+                        shooterControls.style.display = 'none';
+                        keeperControls.style.display = 'none';
+                        // console.log(`[${gameState}] ${actionType} modalı AÇILMAYA çalışılıyor (_result)...`);
+                        modalToToggle(true);
+                         // Diğer modalı kapat
+                        if (isPenaltyState && freekickModal.classList.contains('active')) toggleFreekickModal(false);
+                        if (isFreekickState && penaltyModal.classList.contains('active')) togglePenaltyModal(false);
+
+
+                        if (localPlayerNumber === 1) { // Sadece host sonucu işleyip turu devreder
+                            setTimeout(() => turnOverAfterSpecialAction(shooter, isGoal, actionType, details), 3000);
                         }
                     }
-                }
+                };
 
-                if (gameData.messageToPlayers && 
-                    gameData.messageToPlayers.toLowerCase().includes('aut!') && 
-                    gameData.gameState !== gameData.previousGameStateForAutSound) {
+                const turnOverAfterSpecialAction = async (shooter, isGoal, actionType, actionDetails) => { // Fonksiyonu async yaptık
+                    if (!shooter || !currentGameId || localPlayerNumber !== 1 || !actionDetails) return;
+
+                    // Bu fonksiyonun birden fazla kez çağrılmasını engellemek için kontrol
+                    if (gameData.penaltyDetails === null) {
+                        console.log(`[${actionType}_result] turnOverAfterSpecialAction zaten işlenmiş, penaltyDetails null.`);
+                        return;
+                    }
+
+                    console.log(`${actionType} sonucu (host işliyor): ${isGoal ? 'GOL' : 'KAÇTI'}, Şutör: ${shooter}`);
+
+                    const nextPlayerIfGoal = shooter === 1 ? 2 : 1;
+                    const nextPlayerIfMiss = shooter === 1 ? 2 : 1; 
+                    const nextPlayer = isGoal ? nextPlayerIfGoal : nextPlayerIfMiss;
+
+                    // Potansiyel skorları hesapla
+                    let potentialP1Score = gameData.player1?.score || 0;
+                    let potentialP2Score = gameData.player2?.score || 0;
+                    const shooterPlayerObjKey = (gameData.player1 && (gameData.player1.id === `player${shooter}_host` || gameData.player1.name.includes(`Oyuncu ${shooter}`) || (shooter === 1))) ? 'player1' : 'player2';
+                    
+                    if (isGoal) {
+                        if (shooterPlayerObjKey === 'player1') {
+                            potentialP1Score++;
+                        } else {
+                            potentialP2Score++;
+                        }
+                    }
+
+                    // Oyun bitişini kontrol et
+                    // currentTurn, _stopped durumunda zaten güncellenmişti, bu özel aksiyon tur sayısını değiştirmez.
+                    const isGameOverAfterSpecial = await checkGameOverConditionOnHost(currentGameId, {
+                        player1Score: potentialP1Score,
+                        player2Score: potentialP2Score,
+                        currentTurnForCheck: gameData.currentTurn, // Mevcut tur sayısını kullan
+                        gameSettings: gameData.gameSettings
+                    });
+
+                    if (isGameOverAfterSpecial) {
+                        console.log(`Host: Oyun bittiği için (${actionType} sonrası) normal tur devri yapılmadı.`);
+                        // checkGameOverConditionOnHost zaten Firebase'i güncelledi ve skoru/turu da yazdı.
+                    } else {
+                        const updates = {
+                            gameState: `player${nextPlayer}_turn`,
+                            currentPlayer: nextPlayer,
+                            messageToPlayers: isGoal ?
+                                `GOOOL! Oyuncu ${shooter} ${actionType === 'penalty' ? 'penaltıyı' : 'frikiği'} gole çevirdi! Sıra Oyuncu ${nextPlayer}\'de.` :
+                                `${actionType === 'penalty' ? 'Penaltı' : 'Frikik'} KAÇTI! Oyuncu ${shooter} kaçırdı. Sıra Oyuncu ${nextPlayer}\'de.`,
+                            penaltyDetails: null, 
+                            lastActionTimestamp: serverTimestamp(),
+                        };
+    
+                        if (isGoal) {
+                             if (shooterPlayerObjKey === 'player1') {
+                                 updates[`player1/score`] = potentialP1Score;
+                            } else if (shooterPlayerObjKey === 'player2') {
+                                 updates[`player2/score`] = potentialP2Score;
+                            }
+                        }
+    
+                        update(ref(database, 'games/' + currentGameId), updates)
+                            .then(() => console.log(`${actionType} sonrası oyun durumu güncellendi. Sıra: ${nextPlayer}`))
+                            .catch((error) => console.error(`${actionType} sonrası güncelleme hatası:`, error));
+                    }
+                };
+
+                handleSpecialGameState();
+
+                if (gameData.messageToPlayers &&
+                    gameData.messageToPlayers.toLowerCase().includes('aut!') &&
+                    gameData.gameState !== gameData.previousGameStateForAutSound) { // TODO: previousGameStateForAutSound eklenmeli
                     if (autSound) autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
                     flashScreen('miss');
-                    // Firebase'e bir sonraki sesin çalınabilmesi için dummy bir state yazılabilir veya bu kontrol iyileştirilebilir.
-                    // Şimdilik bu basit kontrol yeterli olabilir.
                 }
 
-                if (gameData.messageToPlayers && gameData.messageToPlayers.toLowerCase().includes('gooool')) {
+                if (gameData.messageToPlayers && gameData.messageToPlayers.toLowerCase().includes('gooool!') &&
+                    !gameData.gameState.startsWith('penalty_') && !gameData.gameState.startsWith('freekick_') && // Sadece normal goller için
+                    gameData.gameState !== gameData.previousGameStateForGoalSound // TODO: previousGameStateForGoalSound eklenmeli
+                ) {
+                    if (goalSound) goalSound.play().catch(e => console.log("Gol sesi oynatılamadı:", e));
                     spectatorsArea.classList.add('cheering');
                     animateBallToGoal();
-                    animateGoalText();  
+                    animateGoalText();
                     setTimeout(() => spectatorsArea.classList.remove('cheering'), 2500);
                 }
             });
         }
-        
+
+        async function handleTurnTimeout(playerNumberWhoShouldHavePlayed, turnNumberWhenTimerSet, expectedGameStateWhenTimerSet) {
+            if (localPlayerNumber !== 1 || !currentGameId) return; // Only host processes timeouts
+
+            // console.log(`Host: handleTurnTimeout called for Player ${playerNumberWhoShouldHavePlayed} (timer set during turn ${turnNumberWhenTimerSet}, expected state ${expectedGameStateWhenTimerSet})`);
+
+            const gameRef = ref(database, 'games/' + currentGameId);
+            try {
+                const snapshot = await get(gameRef);
+                if (!snapshot.exists()) {
+                    // console.log("Host: Game ended or does not exist, timeout cancelled.");
+                    if (turnTimerId) { clearTimeout(turnTimerId); turnTimerId = null; }
+                    return;
+                }
+                const freshGameData = snapshot.val();
+
+                // Critical Check: Is it still the same player's turn, the same turn number, AND the expected game state?
+                if (freshGameData.gameState === expectedGameStateWhenTimerSet &&
+                    freshGameData.currentTurn === turnNumberWhenTimerSet &&
+                    parseInt(freshGameData.gameState.charAt(6)) === playerNumberWhoShouldHavePlayed) { // Ensure it is still this player's specific turn/timing state
+
+                    const nextPlayer = playerNumberWhoShouldHavePlayed === 1 ? 2 : 1;
+                    let timeoutReason = "";
+                    let timeoutDurationMs = 0;
+
+                    if (expectedGameStateWhenTimerSet.endsWith('_turn')) {
+                        timeoutReason = "başlatmadı";
+                        timeoutDurationMs = (freshGameData.gameSettings?.turnTimeoutSeconds || 5) * 1000;
+                    } else if (expectedGameStateWhenTimerSet.endsWith('_timing')) {
+                        timeoutReason = "durdurmadı";
+                        timeoutDurationMs = (freshGameData.gameSettings?.stopTimeoutSeconds || 3) * 1000;
+                    }
+
+                    const newSharedStopwatchMs = (freshGameData.sharedStopwatchMs || 0) + timeoutDurationMs; // Zaman aşımı süresini ekle
+
+                    const updates = {
+                        currentPlayer: nextPlayer,
+                        gameState: `player${nextPlayer}_turn`,
+                        messageToPlayers: `Oyuncu ${playerNumberWhoShouldHavePlayed} zamanında ${timeoutReason}! Sıra Oyuncu ${nextPlayer}\'de. (Süreye ${formatTime(timeoutDurationMs)} eklendi)`,
+                        sharedStopwatchMs: newSharedStopwatchMs,
+                        liveTimeMs: newSharedStopwatchMs, // Zaman aşımı sonrası liveTimeMs'i de güncelle
+                        currentTurn: freshGameData.currentTurn + 1, 
+                        lastActionTimestamp: serverTimestamp()
+                    };
+
+                    await update(gameRef, updates);
+            } else {
+                    // console.log(`Host: Timeout for Player ${playerNumberWhoShouldHavePlayed} (turn ${turnNumberWhenTimerSet}) is stale or player made a move. DB state: ${freshGameData.gameState}, DB turn: ${freshGameData.currentTurn}. No action taken.`);
+                }
+            } catch (error) {
+                console.error("Host: Error in handleTurnTimeout:", error);
+            }
+        }
+
         function formatTime(ms) {
             const seconds = Math.floor(ms / 1000);
             const centiseconds = Math.floor((ms % 1000) / 10);
@@ -955,7 +1757,7 @@
 
                     running = true;
                     toggleBtn.textContent = 'Durdur';
-                    milliseconds = 0; 
+                    milliseconds = gameData.sharedStopwatchMs || 0;
                     stopwatchElem.textContent = formatTime(milliseconds);
 
                     update(gameRefInstance, { 
@@ -968,6 +1770,15 @@
                         milliseconds += 10;
                         stopwatchElem.textContent = formatTime(milliseconds);
                     }, 10);
+
+                    // Start interval for this client to update liveTimeMs in Firebase
+                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
+                    liveUpdateIntervalId = setInterval(() => {
+                        if (running && currentGameId) { // Ensure still running and in a game
+                            update(ref(database, 'games/' + currentGameId), { liveTimeMs: milliseconds });
+                        }
+                    }, 250); // Update Firebase every 250ms
+
                 }
             });
         }
@@ -983,14 +1794,20 @@
             const stoppedMilliseconds = milliseconds;
             const centisecondsValue = Math.floor((stoppedMilliseconds % 1000) / 10);
 
+            if (liveUpdateIntervalId) { // Stop live updates to Firebase
+                clearInterval(liveUpdateIntervalId);
+                liveUpdateIntervalId = null;
+            }
+
             const gameRefPath = 'games/' + currentGameId;
             update(ref(database, gameRefPath), {
                  lastActionDetail: {
                     player: localPlayerNumber,
-                    timeMs: stoppedMilliseconds,
+                    timeMs: stoppedMilliseconds, 
                     centiseconds: centisecondsValue
                 },
                 gameState: `player${localPlayerNumber}_stopped`,
+                liveTimeMs: stoppedMilliseconds, // Son durdurulan zamanı liveTimeMs'e de yaz
                 messageToPlayers: `Oyuncu ${localPlayerNumber} durdurdu: ${formatTime(stoppedMilliseconds)}. Sonuç bekleniyor...`,
                 lastActionTimestamp: serverTimestamp()
             }).then(() => {
@@ -1004,24 +1821,46 @@
         function animateBallToGoal() {
             footballBallElem.classList.add('shooting');
             setTimeout(() => {
-                footballBallElem.classList.remove('shooting');
-                footballBallElem.style.transform = 'translateX(-50%)'; 
-                footballBallElem.style.bottom = '20%'; 
+            footballBallElem.classList.remove('shooting');
+            footballBallElem.style.transform = 'translateX(-50%)';
+            footballBallElem.style.bottom = '20%';
             }, 1000); 
         }
 
         function animateGoalText() {
             goalCelebrationTextElem.classList.add('animate');
             setTimeout(() => {
-                goalCelebrationTextElem.classList.remove('animate');
+            goalCelebrationTextElem.classList.remove('animate');
             }, 2000); 
         }
         
         function togglePenaltyModal(show) { 
+            console.log(`togglePenaltyModal çağrıldı: ${show}`);
+            if (!penaltyModal) {
+                console.error("PENALTI MODALI DOM ELEMENTİ BULUNAMADI!");
+                return;
+            }
             if (show) {
                 penaltyModal.classList.add('active');
+                console.log("Penaltı modalı AKTİFLEŞTİRİLDİ (.active class eklendi)");
             } else {
                 penaltyModal.classList.remove('active');
+                // console.log("Penaltı modalı PASİFLEŞTİRİLDİ (.active class kaldırıldı)"); // Kapatma logu genellikle çok sık basılır, şimdilik kapalı
+            }
+        }
+        
+        function toggleFreekickModal(show) { 
+            console.log("toggleFreekickModal çağrıldı:", show);
+            if (!freekickModal) {
+                console.error("Frikik modalı bulunamadı!");
+                return;
+            }
+            
+            if (show) {
+                freekickModal.classList.add('active');
+                console.log("Frikik modalı aktifleştirildi");
+            } else {
+                freekickModal.classList.remove('active');
             }
         }
         
@@ -1060,14 +1899,8 @@
                 }
             });
         });
-
-        oddBtn.addEventListener('click', () => {
-            console.log("Penaltı TEK seçildi - Firebase entegrasyonu F4'te yapılacak.");
-        });
         
-        evenBtn.addEventListener('click', () => {
-            console.log("Penaltı ÇİFT seçildi - Firebase entegrasyonu F4'te yapılacak.");
-        });
+        // Eski oddBtn/evenBtn kodları kaldırıldı - artık penaltı için yön seçimi kullanılıyor
         
         document.addEventListener('keydown', (e) => {
             if (!currentGameId || !localPlayerNumber || lobbyControls.classList.contains('hidden') === false) return; 
@@ -1078,9 +1911,9 @@
                     const gameData = snapshot.val();
                     if (gameData.currentPlayer === localPlayerNumber) {
                         if (e.code === 'Space' || e.code === 'Enter') { 
-                            e.preventDefault();
+                e.preventDefault();
                              if(gameData.gameState === `player${localPlayerNumber}_turn`){
-                                startStopwatch();
+                startStopwatch();
                             } else if (gameData.gameState === `player${localPlayerNumber}_timing`){
                                 stopStopwatch();
                             }
@@ -1091,6 +1924,248 @@
         });
 
         document.addEventListener('DOMContentLoaded', initializeAppUI);
+
+        // Penaltı yön seçimi için olay dinleyicileri
+        goalRepresentation.addEventListener('click', (e) => {
+            const section = e.target.closest('.goal-section');
+            if (!section) return;
+            
+            // Tüm seçimleri temizle
+            const allSections = goalRepresentation.querySelectorAll('.goal-section');
+            allSections.forEach(s => s.classList.remove('selected'));
+            
+            // Seçilen yönü işaretle
+            section.classList.add('selected');
+            selectedPenaltyDirection = section.dataset.direction;
+        });
+        
+        // Şut çekme butonu
+        penaltyShootBtn.addEventListener('click', () => {
+            if (!selectedPenaltyDirection || !currentGameId || !localPlayerNumber) return;
+            
+            // Firebase'e yön bilgisini gönder
+            const gameRefPath = 'games/' + currentGameId;
+            
+            update(ref(database, gameRefPath), {
+                [`penaltyDetails/shooterDirection`]: selectedPenaltyDirection,
+                [`penaltyDetails/status`]: 'shooting',
+                gameState: `penalty_player${localPlayerNumber}_waiting`, // Kalecinin kurtarış seçimini bekliyor
+                messageToPlayers: `Oyuncu ${localPlayerNumber} şut çekti! Kaleci hazırlanıyor...`,
+                lastActionTimestamp: serverTimestamp()
+            }).then(() => {
+                penaltyDescriptionElem.textContent = 'Kaleci kurtarış yapmayı bekliyor...';
+                penaltyShooterControls.style.display = 'none';
+            });
+        });
+        
+        // Kurtarış butonu
+        penaltySaveBtn.addEventListener('click', () => {
+            if (!selectedPenaltyDirection || !currentGameId || !localPlayerNumber) return;
+            
+            const gameRefPath = 'games/' + currentGameId;
+            get(ref(database, gameRefPath)).then(snapshot => {
+                if (!snapshot.exists()) return;
+                
+                const gameData = snapshot.val();
+                const shooter = gameData.penaltyDetails?.shooter;
+                const shooterDirection = gameData.penaltyDetails?.shooterDirection;
+                
+                if (!shooterDirection || gameData.gameState !== `penalty_player${shooter}_waiting`) {
+                    console.log("Şutör henüz şut çekmemiş veya uygun oyun durumu değil.");
+                    return;
+                }
+                
+                // Kurtarış sonucunu belirle
+                const isGoal = shooterDirection !== selectedPenaltyDirection; // Kaleci doğru tahmin edemezse gol
+                
+                update(ref(database, gameRefPath), {
+                    [`penaltyDetails/keeperDirection`]: selectedPenaltyDirection,
+                    [`penaltyDetails/isGoal`]: isGoal,
+                    [`penaltyDetails/status`]: 'completed',
+                    gameState: `penalty_player${shooter}_result`,
+                    messageToPlayers: isGoal ? 
+                        `GOOOL! Oyuncu ${shooter} penaltıdan gol attı! (${directionText(shooterDirection)})` : 
+                        `Kaleci KURTARDI! Oyuncu ${localPlayerNumber} doğru yönü tahmin etti! (${directionText(shooterDirection)})`,
+                    lastActionTimestamp: serverTimestamp()
+                }).then(() => {
+                    // UI güncellemesi listenToGameUpdates üzerinden yapılacak
+                    if (isGoal && goalSound) {
+                        goalSound.play().catch(e => console.log("Gol sesi oynatılamadı:", e));
+                    } else if (!isGoal && whistleSound) {
+                        whistleSound.play().catch(e => console.log("Düdük sesi oynatılamadı:", e));
+                    }
+                });
+            });
+        });
+        
+        // Yön adını insan dostu formata çevirir
+        function directionText(direction) {
+            switch(direction) {
+                case 'left': return 'SOL';
+                case 'center': return 'ORTA';
+                case 'right': return 'SAĞ';
+                default: return direction;
+            }
+        }
+        
+        // Güç seviyesini insan dostu formata çevirir
+        function powerText(power) {
+            switch(power) {
+                case 'low': return 'DÜŞÜK';
+                case 'medium': return 'ORTA';
+                case 'high': return 'YÜKSEK';
+                default: return power;
+            }
+        }
+        
+        // Pozisyon seviyesini insan dostu formata çevirir
+        function positionText(position) {
+            switch(position) {
+                case 'low': return 'ALÇAK';
+                case 'medium': return 'ORTA';
+                case 'high': return 'YÜKSEK';
+                default: return position;
+            }
+        }
+
+        // Frikik yön ve güç seçimi için olay dinleyicileri
+        freekickGoalRepresentation.addEventListener('click', (e) => {
+            const section = e.target.closest('.goal-section');
+            if (!section) return;
+            
+            // Tüm seçimleri temizle
+            const allSections = freekickGoalRepresentation.querySelectorAll('.goal-section');
+            allSections.forEach(s => s.classList.remove('selected'));
+            
+            // Seçilen yönü işaretle
+            section.classList.add('selected');
+            selectedFreekickDirection = section.dataset.direction;
+        });
+        
+        // Frikik güç seçimi
+        freekickShooterControls.querySelectorAll('.power-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Tüm seçimleri temizle
+                freekickShooterControls.querySelectorAll('.power-btn').forEach(b => b.classList.remove('selected'));
+                // Seçilen gücü işaretle
+                btn.classList.add('selected');
+                selectedFreekickPower = btn.dataset.power;
+            });
+        });
+        
+        // Kaleci pozisyon seçimi
+        freekickKeeperControls.querySelectorAll('.power-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Tüm seçimleri temizle
+                freekickKeeperControls.querySelectorAll('.power-btn').forEach(b => b.classList.remove('selected'));
+                // Seçilen pozisyonu işaretle
+                btn.classList.add('selected');
+                selectedKeeperPosition = btn.dataset.position;
+            });
+        });
+        
+        // Frikik şut çekme butonu
+        freekickShootBtn.addEventListener('click', () => {
+            if (!selectedFreekickDirection || !selectedFreekickPower || !currentGameId || !localPlayerNumber) {
+                alert("Lütfen hem yön hem de güç seçin!");
+                return;
+            }
+            
+            // Firebase'e yön ve güç bilgisini gönder
+            const gameRefPath = 'games/' + currentGameId;
+            
+            update(ref(database, gameRefPath), {
+                [`penaltyDetails/shooterDirection`]: selectedFreekickDirection,
+                [`penaltyDetails/shooterPower`]: selectedFreekickPower,
+                [`penaltyDetails/status`]: 'shooting',
+                [`penaltyDetails/type`]: 'freekick',
+                gameState: `freekick_player${localPlayerNumber}_waiting`, // Kalecinin kurtarış seçimini bekliyor
+                messageToPlayers: `Oyuncu ${localPlayerNumber} şut çekti! Kaleci hazırlanıyor...`,
+                lastActionTimestamp: serverTimestamp()
+            }).then(() => {
+                freekickDescriptionElem.textContent = 'Kaleci kurtarış yapmayı bekliyor...';
+                freekickShooterControls.style.display = 'none';
+            });
+        });
+        
+        // Frikik kurtarış butonu
+        freekickSaveBtn.addEventListener('click', () => {
+            if (!selectedFreekickDirection || !selectedKeeperPosition || !currentGameId || !localPlayerNumber) {
+                alert("Lütfen hem yön hem de pozisyon seçin!");
+                return;
+            }
+            
+            const gameRefPath = 'games/' + currentGameId;
+            get(ref(database, gameRefPath)).then(snapshot => {
+                if (!snapshot.exists()) return;
+                
+                const gameData = snapshot.val();
+                const shooter = gameData.penaltyDetails?.shooter;
+                const shooterDirection = gameData.penaltyDetails?.shooterDirection;
+                const shooterPower = gameData.penaltyDetails?.shooterPower;
+                
+                if (!shooterDirection || !shooterPower || gameData.gameState !== `freekick_player${shooter}_waiting`) {
+                    console.log("Şutör henüz şut çekmemiş veya uygun oyun durumu değil.");
+                    return;
+                }
+                
+                // Frikik kurtarış mantığı:
+                // 1. Eğer kaleci yönü doğru tahmin ettiyse:
+                //    - Eğer pozisyon ve güç uyumluysa kurtar (ör: yüksek şuta yüksek pozisyon)
+                //    - Değilse gol
+                // 2. Eğer kaleci yönü yanlış tahmin ettiyse:
+                //    - Otomatik gol
+                
+                let isGoal = true; // Varsayılan olarak gol
+                
+                if (shooterDirection === selectedFreekickDirection) {
+                    // Doğru yön, pozisyon kontrolü
+                    if ((shooterPower === 'low' && selectedKeeperPosition === 'low') ||
+                        (shooterPower === 'medium' && selectedKeeperPosition === 'medium') ||
+                        (shooterPower === 'high' && selectedKeeperPosition === 'high')) {
+                        isGoal = false; // Pozisyon eşleşmesi, kurtarış
+                    }
+                }
+                
+                update(ref(database, gameRefPath), {
+                    [`penaltyDetails/keeperDirection`]: selectedFreekickDirection,
+                    [`penaltyDetails/keeperPosition`]: selectedKeeperPosition,
+                    [`penaltyDetails/isGoal`]: isGoal,
+                    [`penaltyDetails/status`]: 'completed',
+                    gameState: `freekick_player${shooter}_result`,
+                    messageToPlayers: isGoal ? 
+                        `GOOOL! Oyuncu ${shooter} frikiği gole çevirdi! (${directionText(shooterDirection)}, ${powerText(shooterPower)})` : 
+                        `Kaleci KURTARDI! Oyuncu ${localPlayerNumber} doğru yönü ve pozisyonu tahmin etti!`,
+                    lastActionTimestamp: serverTimestamp()
+                }).then(() => {
+                    // UI güncellemesi listenToGameUpdates üzerinden yapılacak
+                    if (isGoal && goalSound) {
+                        goalSound.play().catch(e => console.log("Gol sesi oynatılamadı:", e));
+                    } else if (!isGoal && whistleSound) {
+                        whistleSound.play().catch(e => console.log("Düdük sesi oynatılamadı:", e));
+                    }
+                });
+            });
+        });
+
+        // Kurallar Modalı için Olay Dinleyicileri
+        if (rulesBtn && rulesModal && closeRulesModalBtn) {
+            rulesBtn.addEventListener('click', () => {
+                rulesModal.classList.add('active');
+            });
+
+            closeRulesModalBtn.addEventListener('click', () => {
+                rulesModal.classList.remove('active');
+            });
+
+            rulesModal.addEventListener('click', (event) => {
+                if (event.target === rulesModal) { // Sadece modalın dışına tıklanırsa kapat
+                    rulesModal.classList.remove('active');
+                }
+            });
+        } else {
+            console.warn("Kurallar modalı veya butonları bulunamadı, olay dinleyicileri eklenemedi.");
+        }
     </script>
 </body>
 </html>

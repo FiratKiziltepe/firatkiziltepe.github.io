@@ -42,12 +42,12 @@
 *   **User Stories:**
     *   "Bir oyuncu olarak, sıram geldiğinde kronometreyi başlatıp durdurabilmek istiyorum."
     *   "Bir oyuncu olarak, sıramın kimde olduğunu net bir şekilde görebilmek istiyorum."
-    *   "Sistem olarak, bir oyuncu sırası geldiğinde 5 saniye içinde hamle yapmazsa (kronometreyi başlatmazsa/durdurmazsa), sırayı otomatik olarak diğer oyuncuya geçirmek istiyorum."
+    *   "Sistem olarak, bir oyuncu sırası geldiğinde 5 saniye içinde hamle yapmazsa (kronometreyi başlatmazsa) veya kronometreyi başlattıktan sonra 3 saniye içinde durdurmazsa, ilgili zaman aşımı süresinin (5sn veya 3sn) oyunun ortak saatine eklenerek sırayı otomatik olarak diğer oyuncuya geçirmek istiyorum."
 *   **Acceptance Criteria:**
     *   `currentPlayer` bilgisi Firebase'den okunarak ekranda gösterilir.
     *   Sadece sırası gelen oyuncu "Başlat/Durdur" butonunu aktif olarak kullanabilir.
     *   Kronometre durdurulduğunda, salise değeri (00-99) sonucu belirlemek üzere Firebase'e gönderilir.
-    *   Sıra zaman aşımı (5 saniye) Firebase üzerinden yönetilmeli (örn: `turnStartTime` timestamp'i ile). Zaman aşımı durumunda `currentPlayer` Firebase'de güncellenir.
+    *   Sıra zaman aşımı (başlatmama için 5 saniye, durdurmama için 3 saniye) Firebase üzerinden yönetilmeli (örn: `turnStartTime` timestamp'i ve host tarafında kurulan `setTimeout` ile). Zaman aşımı durumunda ilgili süre (`turnTimeoutSeconds` veya `stopTimeoutSeconds`) oyunun `sharedStopwatchMs` değerine eklenir ve `currentPlayer` Firebase'de güncellenir.
 *   **Technical Implementation Notes:**
     *   `toggleBtn` (mevcut `game.html`deki) kullanılabilirliği `localPlayerNumber === currentPlayerFromFirebase` kontrolüne bağlanmalı.
     *   Kronometrenin durdurulduğu `milliseconds` (veya sadece salise) değeri Firebase'e (`/games/{roomId}/playerX/lastStopTimeMs` veya `/games/{roomId}/lastActionDetail/centiseconds`) yazılmalı.
