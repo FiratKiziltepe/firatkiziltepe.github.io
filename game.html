@@ -112,11 +112,9 @@
         }
 
         #football-ball.shooting {
-            /* JavaScript ile bu class eklendiğinde top kaleye doğru hareket edecek */
-            /* Hedef: .goal-area'nın ortası */
-            transform: translate(-50%, -250px); /* Y ekseninde yukarı hareket, değeri ayarlayın */
-            /* Alternatif olarak goal-area'nın top pozisyonuna göre hesaplanabilir */
-            bottom: 70%; /* Daha yukarı, kaleye yakın */
+            /* Moves the ball towards the goal area */
+            transform: translateX(-50%); /* Maintain horizontal centering */
+            bottom: 85%; /* Target Y position (closer to the top). Adjust this percentage for best visual effect. */
         }
 
 
@@ -779,8 +777,8 @@
             currentPlayer = (currentPlayer === 1) ? 2 : 1;
             updateTurnIndicator(true); // true: yanıp sönme efekti için
             
-            milliseconds = 0; // Kronometreyi sıfırla
-            stopwatchElem.textContent = formatTime(milliseconds);
+            // milliseconds = 0; // Kronometreyi sıfırla <-- Bu satır kaldırıldı
+            stopwatchElem.textContent = formatTime(milliseconds); // Durdurulan zamanı göster
             
             if (!isPenalty && gameStarted) { 
                  messageElem.textContent = `Sıra Oyuncu ${currentPlayer}'de`;
