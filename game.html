@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoFootball</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0d3b66;
+            --yellow: #f4d35e;
+            --orange: #ee964b;
+            --red: #f95738;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f0f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .team {
+            padding: 0 1rem;
+        }
+        
+        .score {
+            padding: 0 1rem;
+            min-width: 2rem;
+            text-align: center;
+        }
+        
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 1rem;
+        }
+        
+        .stopwatch {
+            font-family: 'Rubik Mono One', monospace;
+            font-size: 5rem;
+            background-color: #222;
+            color: #ff0000;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            min-width: 18rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            transition: opacity 0.3s;
+        }
+        
+        .message {
+            font-size: 1.5rem;
+            height: 2rem;
+            margin: 1rem 0;
+            color: var(--navy);
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 2rem;
+            background-color: var(--navy);
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: var(--orange);
+        }
+        
+        .btn-secondary {
+            background-color: var(--navy);
+        }
+        
+        .penalty-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .penalty-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .penalty-card {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+        }
+        
+        .penalty-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--navy);
+        }
+        
+        .penalty-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .game-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+        
+        .flash-goal {
+            background-color: rgba(0, 255, 0, 0.3);
+        }
+        
+        .flash-miss {
+            background-color: rgba(255, 0, 0, 0.3);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .stopwatch {
+                font-size: 3rem;
+                min-width: 12rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">⚽ ChronoFootball ⚽</div>
+        <div class="scoreboard">
+            <div class="team">Takım A</div>
+            <div class="score" id="score-a">0</div>
+            <div>-</div>
+            <div class="score" id="score-b">0</div>
+            <div class="team">Takım B</div>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="stopwatch" id="stopwatch">00.00</div>
+        <div class="message" id="message"></div>
+        <div class="controls">
+            <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur">Başlat</button>
+            <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat">Yeniden Başlat</button>
+        </div>
+        <div class="stats">
+            <div>Goller: <span id="goals">0</span></div>
+            <div>Penaltılar: <span id="penalties">0</span></div>
+            <div>Kaçan Penaltılar: <span id="misses">0</span></div>
+        </div>
+    </div>
+    
+    <div class="penalty-modal" id="penalty-modal">
+        <div class="penalty-card">
+            <div class="penalty-title">PENALTI!</div>
+            <div>Kronometre tek mi, çift mi gelecek?</div>
+            <div class="penalty-options">
+                <button class="btn btn-primary" id="odd-btn" aria-label="Tek">Tek</button>
+                <button class="btn btn-primary" id="even-btn" aria-label="Çift">Çift</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="game-flash" id="game-flash"></div>
+    
+    <audio id="goal-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="whistle-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2032/2032-preview.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // Oyun değişkenleri
+        let interval;
+        let running = false;
+        let milliseconds = 0;
+        let isPenalty = false;
+        let penaltyGuess = null;
+        let scores = { a: 0, b: 0 };
+        let stats = { goals: 0, penalties: 0, misses: 0 };
+        let currentTeam = 'a'; // Hangi takımın sırası olduğunu takip eder
+        
+        // DOM elementleri
+        const stopwatchElem = document.getElementById('stopwatch');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const messageElem = document.getElementById('message');
+        const penaltyModal = document.getElementById('penalty-modal');
+        const oddBtn = document.getElementById('odd-btn');
+        const evenBtn = document.getElementById('even-btn');
+        const scoreA = document.getElementById('score-a');
+        const scoreB = document.getElementById('score-b');
+        const gameFlash = document.getElementById('game-flash');
+        const goalsElem = document.getElementById('goals');
+        const penaltiesElem = document.getElementById('penalties');
+        const missesElem = document.getElementById('misses');
+        const goalSound = document.getElementById('goal-sound');
+        const whistleSound = document.getElementById('whistle-sound');
+        
+        // Kronometre formatı
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const centiseconds = Math.floor((ms % 1000) / 10);
+            return `${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Kronometre mantığı
+        function startStopwatch() {
+            if (!running) {
+                running = true;
+                toggleBtn.textContent = 'Durdur';
+                messageElem.textContent = '';
+                
+                interval = setInterval(() => {
+                    milliseconds += 10;
+                    stopwatchElem.textContent = formatTime(milliseconds);
+                }, 10);
+            } else {
+                stopStopwatch();
+            }
+        }
+        
+        function stopStopwatch() {
+            running = false;
+            clearInterval(interval);
+            toggleBtn.textContent = 'Başlat';
+            
+            // Sonucu değerlendir
+            evaluateResult();
+        }
+        
+        // Sonuç değerlendirme
+        function evaluateResult() {
+            const centiseconds = Math.floor((milliseconds % 1000) / 10) % 100;
+            
+            if (isPenalty) {
+                // Penaltı modu - tek/çift tahmin kontrolü
+                const isOdd = centiseconds % 2 === 1;
+                isPenalty = false;
+                
+                if ((penaltyGuess === 'odd' && isOdd) || (penaltyGuess === 'even' && !isOdd)) {
+                    // Doğru tahmin - gol!
+                    handleGoal();
+                } else {
+                    // Yanlış tahmin - kaçan penaltı
+                    stats.misses++;
+                    missesElem.textContent = stats.misses;
+                    showMessage('Penaltı kaçtı!');
+                    flashScreen('miss');
+                }
+            } else {
+                // Normal oyun modu
+                if (centiseconds === 0) {
+                    // Direkt gol!
+                    handleGoal();
+                } else if (centiseconds === 1 || centiseconds === 99) {
+                    // Penaltı kazanıldı
+                    isPenalty = true;
+                    stats.penalties++;
+                    penaltiesElem.textContent = stats.penalties;
+                    showMessage('Penaltı kazandın!');
+                    togglePenaltyModal(true);
+                    whistleSound.play().catch(e => console.log('Ses oynatılamadı:', e));
+                } else {
+                    showMessage('Devam...');
+                }
+            }
+        }
+        
+        // Gol işleme
+        function handleGoal() {
+            scores[currentTeam]++;
+            document.getElementById(`score-${currentTeam}`).textContent = scores[currentTeam];
+            stats.goals++;
+            goalsElem.textContent = stats.goals;
+            
+            showMessage('GOOOOOL!');
+            flashScreen('goal');
+            goalSound.play().catch(e => console.log('Ses oynatılamadı:', e));
+            
+            // Takım değiştir
+            currentTeam = currentTeam === 'a' ? 'b' : 'a';
+        }
+        
+        // Penaltı modalını aç/kapa
+        function togglePenaltyModal(show) {
+            if (show) {
+                penaltyModal.classList.add('active');
+            } else {
+                penaltyModal.classList.remove('active');
+            }
+        }
+        
+        // Flash efekti göster
+        function flashScreen(type) {
+            gameFlash.className = 'game-flash';
+            void gameFlash.offsetWidth; // Reflow
+            
+            if (type === 'goal') {
+                gameFlash.classList.add('flash-goal');
+            } else {
+                gameFlash.classList.add('flash-miss');
+            }
+            
+            setTimeout(() => {
+                gameFlash.className = 'game-flash';
+            }, 500);
+        }
+        
+        // Mesaj göster
+        function showMessage(msg) {
+            messageElem.textContent = msg;
+        }
+        
+        // Oyunu sıfırla
+        function resetGame() {
+            clearInterval(interval);
+            running = false;
+            milliseconds = 0;
+            isPenalty = false;
+            penaltyGuess = null;
+            scores = { a: 0, b: 0 };
+            stats = { goals: 0, penalties: 0, misses: 0 };
+            currentTeam = 'a';
+            
+            // Arayüzü güncelle
+            stopwatchElem.textContent = '00.00';
+            toggleBtn.textContent = 'Başlat';
+            messageElem.textContent = '';
+            scoreA.textContent = '0';
+            scoreB.textContent = '0';
+            goalsElem.textContent = '0';
+            penaltiesElem.textContent = '0';
+            missesElem.textContent = '0';
+            togglePenaltyModal(false);
+        }
+        
+        // Olay dinleyicileri
+        toggleBtn.addEventListener('click', startStopwatch);
+        resetBtn.addEventListener('click', resetGame);
+        
+        oddBtn.addEventListener('click', () => {
+            penaltyGuess = 'odd';
+            togglePenaltyModal(false);
+            startStopwatch();
+        });
+        
+        evenBtn.addEventListener('click', () => {
+            penaltyGuess = 'even';
+            togglePenaltyModal(false);
+            startStopwatch();
+        });
+        
+        // Klavye desteği
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isPenalty && penaltyModal.classList.contains('active')) {
+                    return; // Penaltı modalı açıkken boşluk çalışmasın
+                }
+                if (!running) {
+                    startStopwatch();
+                } else {
+                    stopStopwatch();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
