@@ -476,11 +476,77 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Eklenen Stiller */
+        #lobby-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+        }
+
+        #lobby-controls input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--dark-gray);
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--light-gray);
+            color: var(--casio-text);
+        }
+
+        .game-board.hidden, #lobby-controls.hidden {
+            display: none !important;
+        }
+        /* Tribün Stili */
+        .spectators {
+            position: absolute;
+            top: -20px; /* Header'ın biraz üstüne taşabilir veya header'ın hemen altına */
+            left: 0;
+            width: 100%;
+            height: 50px; /* Tribün yüksekliği */
+            /* background-color: #555; */ /* Basit bir tribün rengi */
+            overflow: hidden;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            z-index: 0; /* Saha çizgilerinin arkasında, header'ın önünde olabilir */
+        }
+
+        .spectator-icon {
+            font-size: 1.5rem; /* Taraftar boyutu */
+            color: rgba(255, 255, 255, 0.7);
+            animation: cheer 1s infinite alternate ease-in-out;
+            animation-play-state: paused; /* Başlangıçta duruk */
+        }
+         .spectator-icon:nth-child(odd) {
+            animation-delay: 0.2s;
+        }
+         .spectator-icon:nth-child(even) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes cheer {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        .cheering .spectator-icon {
+            animation-play-state: running;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">ChronoGoal!</div>
+        <div class="spectators" id="spectators-area">
+            <span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span>
+        </div>
         <div class="scoreboard">
             <div class="team" id="player1-name">OYUNCU 1</div>
             <div class="score" id="score-p1">0</div>
@@ -492,20 +558,29 @@
     </div>
 
     <div class="game-area">
-        <div class="goal-area"></div>
-        <div id="football-ball">⚽</div>
-        <div id="goal-celebration-text">GOOOOL!</div>
+        <div id="lobby-controls">
+            <input type="text" id="room-code-input" placeholder="Oda Kodu Girin">
+            <button id="join-room-btn" class="btn btn-primary">Odaya Katıl</button>
+            <p style="color: var(--white); font-family: 'Press Start 2P', cursive; margin: 0.5rem 0;">veya</p>
+            <button id="create-room-btn" class="btn btn-secondary">Yeni Oda Oluştur</button>
+        </div>
 
-        <div class="main"> <!-- Kronometre ve kontroller bu alanda -->
-            <div class="stopwatch-container">
-                <div class="stopwatch" id="stopwatch">00.00</div>
-            </div>
+        <div class="game-board hidden"> <!-- Oyun alanı başlangıçta gizli -->
+            <div class="goal-area"></div>
+            <div id="football-ball">⚽</div>
+            <div id="goal-celebration-text">GOOOOL!</div>
             <div class="message" id="message">Kim Başlasın?</div>
-            <div class="controls">
-                <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
-                <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
+
+            <div class="main"> <!-- Kronometre ve kontroller bu alanda -->
+                <div class="stopwatch-container">
+                    <div class="stopwatch" id="stopwatch">00.00</div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
+                    <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
+                </div>
+                <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
             </div>
-            <div class="keyboard-hint">P1: Boşluk, P2: Enter</div>
         </div>
     </div>
     
@@ -549,17 +624,36 @@
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3" type="audio/mpeg">
     </audio>
     
-    <script>
-        // Oyun değişkenleri
+    <script type="module">
+        // Firebase SDK'larını import et
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-database.js";
+
+        // ÖNEMLİ: Firebase projenizin yapılandırma bilgilerini buraya girin!
+        const firebaseConfig = {
+            apiKey: "AIzaSyAad-afEL6c7S3Y4RJuGwoFxgPsx81k_D0",
+            authDomain: "chronogoalonline.firebaseapp.com",
+            projectId: "chronogoalonline",
+            storageBucket: "chronogoalonline.firebasestorage.app",
+            messagingSenderId: "688627066429",
+            appId: "1:688627066429:web:0c38b3e132c579668a2c54",
+            measurementId: "G-S0K2X6DB15"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Global Değişkenler (Firebase entegrasyonu için)
+        let currentGameId = null;
+        let localPlayerNumber = null; // Bu istemcinin oyuncu numarası (1 veya 2)
+        let gameRoomCode = null; // Kullanıcıya gösterilen oda kodu
+
+        // Oyun değişkenleri (Mevcutlar korunuyor, bazıları Firebase'den yönetilecek)
         let interval;
         let running = false;
-        let milliseconds = 0;
-        let isPenalty = false;
-        let penaltyGuess = null;
-        let scores = { p1: 0, p2: 0 };
-        // let stats = { goals: 0, penalties: 0, misses: 0 }; // İstatistikler gizlendiği için yorum satırı
-        let currentPlayer = 1;
-        let gameStarted = false;
+        let milliseconds = 0; // Bu yerel kronometre için hala kullanılacak
+        let currentPlayer = 1; // Firebase'den gameData.currentPlayer ile yönetilecek
         
         // DOM elementleri
         const stopwatchElem = document.getElementById('stopwatch');
@@ -576,219 +670,308 @@
         const scoreP2Elem = document.getElementById('score-p2');
         
         const gameFlash = document.getElementById('game-flash');
-        // const goalsElem = document.getElementById('goals'); // Stats gizli
-        // const penaltiesElem = document.getElementById('penalties'); // Stats gizli
-        // const missesElem = document.getElementById('misses'); // Stats gizli
         
         const goalSound = document.getElementById('goal-sound');
         const whistleSound = document.getElementById('whistle-sound');
         const autSound = document.getElementById('aut-sound');
 
-
-        const startPlayerModal = document.getElementById('start-player-modal');
-        const confirmStartPlayerBtn = document.getElementById('confirm-start-player-btn');
         const turnIndicatorElem = document.getElementById('turn-indicator');
-
         const footballBallElem = document.getElementById('football-ball');
         const goalCelebrationTextElem = document.getElementById('goal-celebration-text');
+        const spectatorsArea = document.getElementById('spectators-area');
 
-        // Başlangıç Ayarları
-        function initializeGame() {
+        const lobbyControls = document.getElementById('lobby-controls');
+        const roomCodeInput = document.getElementById('room-code-input');
+        const joinRoomBtn = document.getElementById('join-room-btn');
+        const createRoomBtn = document.getElementById('create-room-btn');
+        const gameBoard = document.querySelector('.game-board');
+
+        function initializeAppUI() {
+            lobbyControls.classList.remove('hidden');
+            gameBoard.classList.add('hidden');
+            messageElem.classList.add('hidden');
             toggleBtn.disabled = true;
             resetBtn.disabled = true;
-            startPlayerModal.classList.add('active');
-            messageElem.textContent = "Oyuncu seçimi bekleniyor...";
         }
         
-        confirmStartPlayerBtn.addEventListener('click', () => {
-            const selectedPlayer = document.querySelector('input[name="startPlayer"]:checked');
-            if (selectedPlayer) {
-                currentPlayer = parseInt(selectedPlayer.value);
-                gameStarted = true;
-                startPlayerModal.classList.remove('active');
-                toggleBtn.disabled = false;
-                resetBtn.disabled = false;
-                messageElem.textContent = `Oyuncu ${currentPlayer} başlıyor!`;
-                updateTurnIndicator();
-                resetGameInternals(false); 
-            }
-        });
+        async function createGameRoom() {
+            createRoomBtn.disabled = true;
+            joinRoomBtn.disabled = true;
+            roomCodeInput.disabled = true;
+            try {
+                gameRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                localPlayerNumber = 1;
+                currentGameId = gameRoomCode;
 
-        function updateTurnIndicator(isSwitching = false) {
-            if (!gameStarted) {
-                turnIndicatorElem.textContent = "Oyuncu Seçin";
-                turnIndicatorElem.classList.remove('player1-turn', 'player2-turn', 'blinking');
-                return;
-            }
-            turnIndicatorElem.textContent = `Sıra: Oyuncu ${currentPlayer}`;
-            turnIndicatorElem.classList.remove('player1-turn', 'player2-turn');
-            
-            if (currentPlayer === 1) {
-                turnIndicatorElem.classList.add('player1-turn');
-            } else {
-                turnIndicatorElem.classList.add('player2-turn');
-            }
-            
-            if(isSwitching) {
-                turnIndicatorElem.classList.add('blinking');
-                setTimeout(() => {
-                    if (gameStarted) turnIndicatorElem.classList.remove('blinking');
-                }, 1500); 
+                const initialGameData = {
+                    player1: { id: "player1_host", name: "Oyuncu 1", score: 0, lastStopTimeMs: null, penaltyChoice: null },
+                    currentPlayer: 1,
+                    gameState: 'waiting_for_player2',
+                    gameSettings: {
+                        maxTurns: 10,
+                        turnTimeoutSeconds: 5 
+                    },
+                    currentTurn: 0,
+                    lastActionTimestamp: serverTimestamp(),
+                    messageToPlayers: `Oda Kodu: ${gameRoomCode} - Oyuncu 2 bekleniyor...`,
+                    isBotGame: false,
+                };
+
+                await set(ref(database, 'games/' + currentGameId), initialGameData);
+                
+                lobbyControls.classList.add('hidden');
+                gameBoard.classList.remove('hidden');
+                messageElem.classList.remove('hidden');
+                messageElem.textContent = `Oda Kodu: ${gameRoomCode} - Oyuncu 2 bekleniyor...`;
+                console.log(`Oda oluşturuldu: ${currentGameId}`);
+                listenToGameUpdates(currentGameId);
+
+            } catch (error) {
+                console.error("Oda oluşturulamadı:", error);
+                messageElem.classList.remove('hidden');
+                messageElem.textContent = "Hata: Oda oluşturulamadı. Konsolu kontrol edin.";
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+                roomCodeInput.disabled = false;
             }
         }
 
+        async function joinGameRoom() {
+            const inputRoomCode = roomCodeInput.value.toUpperCase().trim();
+            if (!inputRoomCode) {
+                alert("Lütfen bir oda kodu girin."); 
+                return;
+            }
 
-        // Kronometre formatı
+            createRoomBtn.disabled = true;
+            joinRoomBtn.disabled = true;
+            roomCodeInput.disabled = true;
+
+            try {
+                const gameRefPath = 'games/' + inputRoomCode;
+                const gameRefInstance = ref(database, gameRefPath);
+                const snapshot = await get(gameRefInstance);
+
+                if (snapshot.exists()) {
+                    const gameData = snapshot.val();
+                    if (gameData.player2) {
+                        alert("Bu oda dolu veya zaten bir oyun devam ediyor.");
+                        console.log("Oda dolu:", inputRoomCode);
+                        createRoomBtn.disabled = false;
+                        joinRoomBtn.disabled = false;
+                        roomCodeInput.disabled = false;
+                        return;
+                    }
+                    if (gameData.gameState !== 'waiting_for_player2') {
+                         alert("Bu odaya şu an katılamazsınız (oyun başlamış olabilir).");
+                         createRoomBtn.disabled = false;
+                         joinRoomBtn.disabled = false;
+                         roomCodeInput.disabled = false;
+                         return;
+                    }
+
+                    localPlayerNumber = 2;
+                    currentGameId = inputRoomCode;
+                    gameRoomCode = inputRoomCode;
+
+                    const updates = {};
+                    updates[`player2`] = { id: "player2_guest", name: "Oyuncu 2", score: 0, lastStopTimeMs: null, penaltyChoice: null };
+                    updates[`gameState`] = 'player1_turn'; 
+                    updates[`currentPlayer`] = 1; 
+                    updates[`messageToPlayers`] = 'Oyuncular hazır! Sıra Oyuncu 1\'de.';
+                    updates[`lastActionTimestamp`] = serverTimestamp();
+                    
+                    await update(gameRefInstance, updates);
+
+                    console.log(`Odaya katınıldı: ${currentGameId}`);
+                    lobbyControls.classList.add('hidden');
+                    gameBoard.classList.remove('hidden');
+                    messageElem.classList.remove('hidden');
+                    listenToGameUpdates(currentGameId);
+
+                } else {
+                    alert("Oda bulunamadı. Kodu kontrol edin.");
+                    console.log("Oda bulunamadı:", inputRoomCode);
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
+                    roomCodeInput.disabled = false;
+                }
+            } catch (error) {
+                console.error("Odaya katılırken hata:", error);
+                alert("Hata: Odaya katılamadı. Konsolu kontrol edin.");
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+                roomCodeInput.disabled = false;
+            }
+        }
+
+        function listenToGameUpdates(gameId) {
+            const gameRefPath = 'games/' + gameId;
+            const gameRefInstance = ref(database, gameRefPath);
+
+            onValue(gameRefInstance, (snapshot) => {
+                if (!snapshot.exists()) {
+                    console.warn(`Dinlenen oda (${gameId}) artık mevcut değil.`);
+                    alert("Oda bağlantısı kesildi veya oda kapandı.");
+                    lobbyControls.classList.remove('hidden');
+                    gameBoard.classList.add('hidden');
+                    messageElem.classList.add('hidden');
+                    currentGameId = null;
+                    localPlayerNumber = null;
+                    gameRoomCode = null;
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
+                    roomCodeInput.disabled = false;
+                    roomCodeInput.value = '';
+                    return;
+                }
+
+                const gameData = snapshot.val();
+                console.log("Oyun verisi güncellendi:", gameData);
+                if (!gameData) return;
+
+                scoreP1Elem.textContent = gameData.player1?.score !== undefined ? gameData.player1.score : 0;
+                scoreP2Elem.textContent = gameData.player2?.score !== undefined ? gameData.player2.score : 0;
+                
+                document.getElementById('player1-name').textContent = gameData.player1?.name || 'OYUNCU 1';
+                document.getElementById('player2-name').textContent = gameData.player2?.name || (gameData.isBotGame ? 'BOT' : (gameData.gameState === 'waiting_for_player2' ? 'BEKLENİYOR' : 'OYUNCU 2'));
+
+                if(messageElem.classList.contains('hidden')) messageElem.classList.remove('hidden');
+                messageElem.textContent = gameData.messageToPlayers || '';
+
+                const turnIndicatorClasses = ['player1-turn', 'player2-turn', 'blinking'];
+                turnIndicatorElem.classList.remove(...turnIndicatorClasses);
+
+                if (gameData.gameState === 'waiting_for_player2' && localPlayerNumber === 1) {
+                    turnIndicatorElem.textContent = `Oda: ${gameRoomCode} - Rakip bekleniyor...`;
+                } else if (gameData.gameState === 'game_over') {
+                     turnIndicatorElem.textContent = "MAÇ BİTTİ!";
+                } else if (gameData.player1 && gameData.player2) { 
+                     turnIndicatorElem.textContent = `Sıra: Oyuncu ${gameData.currentPlayer}`;
+                     const currentTurnPlayerClass = gameData.currentPlayer === 1 ? 'player1-turn' : 'player2-turn';
+                     const otherPlayerClass = gameData.currentPlayer === 1 ? 'player2-turn' : 'player1-turn';
+                     turnIndicatorElem.classList.add(currentTurnPlayerClass);
+                     turnIndicatorElem.classList.remove(otherPlayerClass);
+                     if (localPlayerNumber === gameData.currentPlayer) {
+                        turnIndicatorElem.textContent += " (SEN)";
+                     }
+                } else {
+                     turnIndicatorElem.textContent = "Oyuncular bekleniyor...";
+                }
+
+                if (gameData.gameState === 'waiting_for_player2' || !gameData.player2) {
+                    toggleBtn.disabled = true;
+                } else if (gameData.gameState === 'game_over') {
+                    toggleBtn.disabled = true;
+                } else {
+                    toggleBtn.disabled = !(localPlayerNumber === gameData.currentPlayer && 
+                                           (gameData.gameState === `player${localPlayerNumber}_turn` || 
+                                            gameData.gameState === `player${localPlayerNumber}_timing`));
+                }
+                resetBtn.disabled = true;
+                
+                if (gameData.gameState && gameData.gameState.startsWith('penalty_player') && gameData.gameState.endsWith('_aiming')){
+                     // Eğer penaltı moduysa, penaltı UI'ını göster (F4'te detaylanacak)
+                     // togglePenaltyModal(true);
+                     // penaltyTitleTextElem.textContent = `OYUNCU ${gameData.penaltyDetails.shooterPlayer} PENALTI ATIYOR!`;
+                } else {
+                    // togglePenaltyModal(false);
+                }
+
+                if (gameData.messageToPlayers && gameData.messageToPlayers.toLowerCase().includes('gooool')) {
+                    spectatorsArea.classList.add('cheering');
+                    animateBallToGoal();
+                    animateGoalText();  
+                    setTimeout(() => spectatorsArea.classList.remove('cheering'), 2500);
+                }
+            });
+        }
+        
         function formatTime(ms) {
             const seconds = Math.floor(ms / 1000);
             const centiseconds = Math.floor((ms % 1000) / 10);
             return `${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
         }
         
-        // Kronometre mantığı
         function startStopwatch() {
-            if (!gameStarted) return;
-            if (goalCelebrationTextElem.classList.contains('animate')) return; // Gol animasyonu sırasında başlatma
+            if (running || !localPlayerNumber || !currentGameId) return;
+            
+            const gameRefPath = 'games/' + currentGameId;
+            const gameRefInstance = ref(database, gameRefPath);
 
-            if (!running) {
-                running = true;
-                toggleBtn.textContent = 'Durdur';
-                messageElem.textContent = `Oyuncu ${currentPlayer} oynuyor...`;
-                
-                interval = setInterval(() => {
-                    milliseconds += 10;
+            get(gameRefInstance).then(snapshot => {
+                if(snapshot.exists()){
+                    const gameData = snapshot.val();
+                    if(gameData.currentPlayer !== localPlayerNumber || gameData.gameState !== `player${localPlayerNumber}_turn`){
+                        console.warn("Sıra sizde değil veya oyun durumu (start) uygun değil:", gameData.gameState);
+                        return;
+                    }
+
+                    running = true;
+                    toggleBtn.textContent = 'Durdur';
+                    milliseconds = 0; 
                     stopwatchElem.textContent = formatTime(milliseconds);
-                }, 10);
-            } else {
-                stopStopwatch();
-            }
+
+                    update(gameRefInstance, { 
+                        gameState: `player${localPlayerNumber}_timing`,
+                        messageToPlayers: `Oyuncu ${localPlayerNumber} oynuyor...`,
+                        lastActionTimestamp: serverTimestamp()
+                    });
+
+                    interval = setInterval(() => {
+                        milliseconds += 10;
+                        stopwatchElem.textContent = formatTime(milliseconds);
+                    }, 10);
+                }
+            });
         }
         
         function stopStopwatch() {
-            if (!gameStarted) return;
+            if (!running || !localPlayerNumber || !currentGameId) return;
+
             running = false;
             clearInterval(interval);
             toggleBtn.textContent = 'Başlat';
-            
-            evaluateResult();
+            toggleBtn.disabled = true; 
+
+            const stoppedMilliseconds = milliseconds;
+            const centisecondsValue = Math.floor((stoppedMilliseconds % 1000) / 10);
+
+            const gameRefPath = 'games/' + currentGameId;
+            update(ref(database, gameRefPath), {
+                 lastActionDetail: {
+                    player: localPlayerNumber,
+                    timeMs: stoppedMilliseconds,
+                    centiseconds: centisecondsValue
+                },
+                gameState: `player${localPlayerNumber}_stopped`,
+                messageToPlayers: `Oyuncu ${localPlayerNumber} durdurdu: ${formatTime(stoppedMilliseconds)}. Sonuç bekleniyor...`,
+                lastActionTimestamp: serverTimestamp()
+            }).then(() => {
+                console.log("Durdurma bilgisi Firebase'e gönderildi: " + formatTime(stoppedMilliseconds));
+            }).catch(error => {
+                console.error("Durdurma bilgisi gönderilemedi:", error);
+                toggleBtn.disabled = false; 
+            });
         }
         
-        // Sonuç değerlendirme
-        function evaluateResult() {
-            if (!gameStarted) return;
-            const currentMilliseconds = milliseconds; // Durdurulduğu andaki milisaniyeyi al
-            const centiseconds = Math.floor((currentMilliseconds % 1000) / 10); // 0-99 arası
-            
-            if (isPenalty) {
-                const isOddResult = centiseconds % 2 === 1;
-                // isPenalty = false; // Penaltı durumu handleGoal veya switchPlayer sonrası resetlenir
-                
-                if ((penaltyGuess === 'odd' && isOddResult) || (penaltyGuess === 'even' && !isOddResult)) {
-                    showMessage(`Oyuncu ${currentPlayer} penaltıdan ATTI!`);
-                    handleGoal(true); // true: penaltı golü olduğunu belirtir
-                } else {
-                    // stats.misses++; // stats gizli
-                    // missesElem.textContent = stats.misses; // stats gizli
-                    showMessage(`Oyuncu ${currentPlayer} penaltıyı KAÇIRDI!`);
-                    flashScreen('miss'); // Ekran flash'ı
-                    autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
-                    isPenalty = false; // Penaltı bitti
-                    penaltyGuess = null;
-                    switchPlayer(); 
-                }
-            } else {
-                if (centiseconds >= 90 && centiseconds <= 99) { // Yeni Gol koşulu: 90-99 arası
-                    handleGoal();
-                } else if (centiseconds === 1) { // Penaltı koşulu: 01 
-                    isPenalty = true;
-                    // stats.penalties++; // stats gizli
-                    // penaltiesElem.textContent = stats.penalties; // stats gizli
-                    penaltyTitleTextElem.textContent = `OYUNCU ${currentPlayer} PENALTI!`;
-                    showMessage(`Oyuncu ${currentPlayer} PENALTI kazandı!`);
-                    togglePenaltyModal(true);
-                    whistleSound.play().catch(e => console.log('Düdük sesi oynatılamadı:', e));
-                    // Penaltı modalı açıldığında sıra değişmez, oyuncu penaltıyı kullanır.
-                } else { // Aut
-                    showMessage('AUT! Sıra diğer oyuncuda.');
-                    flashScreen('miss'); // Ekran flash'ı
-                    autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
-                    switchPlayer();
-                }
-            }
-        }
-
-        // Gol animasyonları
         function animateBallToGoal() {
             footballBallElem.classList.add('shooting');
-            // Animasyon bittikten sonra topu eski yerine al ve class'ı kaldır
             setTimeout(() => {
                 footballBallElem.classList.remove('shooting');
-                // İsterseniz burada topu başlangıç pozisyonuna anında döndürebilirsiniz
-                 footballBallElem.style.transform = 'translateX(-50%)'; // Merkezi X pozisyonu
-                 footballBallElem.style.bottom = '20%'; // Başlangıç Y pozisyonu
-            }, 1000); // Animasyon süresi + biraz bekleme
+                footballBallElem.style.transform = 'translateX(-50%)'; 
+                footballBallElem.style.bottom = '20%'; 
+            }, 1000); 
         }
 
         function animateGoalText() {
             goalCelebrationTextElem.classList.add('animate');
             setTimeout(() => {
                 goalCelebrationTextElem.classList.remove('animate');
-            }, 2000); // GOOOL yazısının görünür kalma süresi
+            }, 2000); 
         }
         
-        // Gol işleme
-        function handleGoal(isPenaltyGoal = false) {
-            if (!gameStarted) return;
-            
-            animateBallToGoal();
-            animateGoalText();
-
-            if (currentPlayer === 1) {
-                scores.p1++;
-                scoreP1Elem.textContent = scores.p1;
-            } else {
-                scores.p2++;
-                scoreP2Elem.textContent = scores.p2;
-            }
-            // stats.goals++; // stats gizli
-            // goalsElem.textContent = stats.goals; // stats gizli
-            
-            // Mesajı burada göstermiyoruz, animateGoalText zaten GOOOL diyor
-            // showMessage(`GOOOOOL! Oyuncu ${currentPlayer} attı!`); 
-            // flashScreen('goal'); // flashScreen yerine yeni animasyonlar var
-            goalSound.play().catch(e => console.log('Gol sesi oynatılamadı:', e));
-            
-            if(isPenalty) { // Eğer penaltı durumu aktifse, penaltı bitti olarak işaretle
-                isPenalty = false;
-                penaltyGuess = null;
-                togglePenaltyModal(false); // Penaltı modalını kapat
-            }
-
-            // Gol animasyonları bitene kadar sıra geçişini beklet
-            setTimeout(() => {
-                if (gameStarted) switchPlayer(); // Sıra değişir
-            }, 2000); // GOOOL yazısı süresiyle eşleşebilir
-        }
-
-        function switchPlayer() {
-            if (!gameStarted) return;
-            if (goalCelebrationTextElem.classList.contains('animate')) return; // Gol animasyonu sırasında sıra değiştirme
-            
-            currentPlayer = (currentPlayer === 1) ? 2 : 1;
-            updateTurnIndicator(true); // true: yanıp sönme efekti için
-            
-            // milliseconds = 0; // Kronometreyi sıfırla <-- Bu satır kaldırıldı
-            stopwatchElem.textContent = formatTime(milliseconds); // Durdurulan zamanı göster
-            
-            if (!isPenalty && gameStarted) { 
-                 messageElem.textContent = `Sıra Oyuncu ${currentPlayer}'de`;
-            } else if (isPenalty && gameStarted) {
-                messageElem.textContent = `Oyuncu ${currentPlayer} penaltı kullanıyor...`;
-            }
-        }
-        
-        // Penaltı modalını aç/kapa
-        function togglePenaltyModal(show) {
+        function togglePenaltyModal(show) { 
             if (show) {
                 penaltyModal.classList.add('active');
             } else {
@@ -796,115 +979,72 @@
             }
         }
         
-        // Flash efekti göster (Aut için kullanılabilir)
-        function flashScreen(type) {
-            gameFlash.className = 'game-flash'; // Önceki class'ları temizle
-            void gameFlash.offsetWidth; // Reflow tetiklemesi
+        function flashScreen(type) { 
+            gameFlash.className = 'game-flash'; 
+            void gameFlash.offsetWidth; 
             
-            if (type === 'goal') { // Gol için artık kullanılmıyor, yeni animasyon var
-                // gameFlash.classList.add('flash-goal');
-            } else if (type === 'miss') { // Aut veya kaçan penaltı
+            if (type === 'miss') { 
                 gameFlash.classList.add('flash-miss');
             }
             
             setTimeout(() => {
-                gameFlash.className = 'game-flash'; // Temizle
+                gameFlash.className = 'game-flash'; 
             }, 500);
         }
         
-        // Mesaj göster
-        function showMessage(msg) {
-            messageElem.textContent = msg;
-        }
+        createRoomBtn.addEventListener('click', createGameRoom);
+        joinRoomBtn.addEventListener('click', joinGameRoom);
 
-        // Oyun içi değerleri sıfırla
-        function resetGameInternals(resetScoresAndPlayer = true) {
-            clearInterval(interval);
-            running = false;
-            milliseconds = 0;
-            isPenalty = false;
-            penaltyGuess = null;
-            
-            if (resetScoresAndPlayer) {
-                scores = { p1: 0, p2: 0 };
-                // stats = { goals: 0, penalties: 0, misses: 0 }; // stats gizli
-            }
-
-            stopwatchElem.textContent = '00.00';
-            toggleBtn.textContent = 'Başlat';
-            
-            if (resetScoresAndPlayer) {
-                scoreP1Elem.textContent = '0';
-                scoreP2Elem.textContent = '0';
-                // goalsElem.textContent = '0'; // stats gizli
-                // penaltiesElem.textContent = '0'; // stats gizli
-                // missesElem.textContent = '0'; // stats gizli
-                if (gameStarted) messageElem.textContent = `Sıra Oyuncu ${currentPlayer}'de`;
-                else messageElem.textContent = "Oyuncu seçimi bekleniyor...";
-
-            }
-            togglePenaltyModal(false);
-            // Animasyonları sıfırla
-            footballBallElem.classList.remove('shooting');
-            footballBallElem.style.transform = 'translateX(-50%)';
-            footballBallElem.style.bottom = '20%';
-            goalCelebrationTextElem.classList.remove('animate');
-        }
-        
-        // Oyunu tamamen sıfırla
-        function resetGame() {
-            resetGameInternals(true); 
-            gameStarted = false;
-            // currentPlayer = 1; // initializeGame zaten modalı açacak ve oyuncu seçilecek
-            initializeGame(); 
-            updateTurnIndicator();
-        }
-        
-        // Olay dinleyicileri
         toggleBtn.addEventListener('click', () => {
-            if (!isPenalty && !goalCelebrationTextElem.classList.contains('animate')) startStopwatch(); 
+            const gameRefPath = 'games/' + currentGameId;
+            get(ref(database, gameRefPath)).then(snapshot => {
+                if(snapshot.exists()){
+                    const gameData = snapshot.val();
+                    if(gameData.currentPlayer === localPlayerNumber){
+                        if(gameData.gameState === `player${localPlayerNumber}_turn`){
+                            startStopwatch();
+                        } else if (gameData.gameState === `player${localPlayerNumber}_timing`){
+                            stopStopwatch();
+                        } else {
+                            console.log("Oyun durumu (toggleBtn) kronometre başlatmaya/durdurmaya uygun değil:", gameData.gameState);
+                        }
+                    } else {
+                        console.log("Sıra sizde değil (toggleBtn).");
+                    }
+                }
+            });
         });
-        resetBtn.addEventListener('click', resetGame);
-        
+
         oddBtn.addEventListener('click', () => {
-            if (!gameStarted || !isPenalty) return;
-            penaltyGuess = 'odd';
-            togglePenaltyModal(false);
-            // Penaltı tahmini yapıldıktan sonra sonucu değerlendir.
-            // Kronometre zaten durmuştu, evaluateResult çağrılacak.
-            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster (gerekirse)
-            evaluateResult(); 
+            console.log("Penaltı TEK seçildi - Firebase entegrasyonu F4'te yapılacak.");
         });
         
         evenBtn.addEventListener('click', () => {
-            if (!gameStarted || !isPenalty) return;
-            penaltyGuess = 'even';
-            togglePenaltyModal(false);
-            stopwatchElem.textContent = formatTime(milliseconds); // Son zamanı göster (gerekirse)
-            evaluateResult();
+            console.log("Penaltı ÇİFT seçildi - Firebase entegrasyonu F4'te yapılacak.");
         });
         
-        // Klavye desteği
         document.addEventListener('keydown', (e) => {
-            if (!gameStarted || penaltyModal.classList.contains('active') || goalCelebrationTextElem.classList.contains('animate')) {
-                return; // Oyun başlamadıysa, penaltı/başlangıç modalı aktifse veya gol animasyonu varsa klavye ile oynama
-            }
-
-            if (e.code === 'Space' && currentPlayer === 1) {
-                e.preventDefault();
-                startStopwatch();
-            } else if (e.code === 'Enter' && currentPlayer === 2) {
-                e.preventDefault();
-                startStopwatch();
-            } else if (e.code === 'KeyR' && !startPlayerModal.classList.contains('active')) { // 'R' tuşu ile reset (modal açık değilken)
-                e.preventDefault();
-                resetGame();
-            }
+            if (!currentGameId || !localPlayerNumber || lobbyControls.classList.contains('hidden') === false) return; 
+            
+            const gameRefPath = 'games/' + currentGameId;
+            get(ref(database, gameRefPath)).then(snapshot => {
+                if(snapshot.exists()){
+                    const gameData = snapshot.val();
+                    if (gameData.currentPlayer === localPlayerNumber) {
+                        if (e.code === 'Space' || e.code === 'Enter') { 
+                            e.preventDefault();
+                             if(gameData.gameState === `player${localPlayerNumber}_turn`){
+                                startStopwatch();
+                            } else if (gameData.gameState === `player${localPlayerNumber}_timing`){
+                                stopStopwatch();
+                            }
+                        }
+                    }
+                }
+            });
         });
 
-        // Sayfa yüklendiğinde oyunu başlat
-        initializeGame();
-        updateTurnIndicator(); 
+        document.addEventListener('DOMContentLoaded', initializeAppUI);
     </script>
 </body>
 </html>
