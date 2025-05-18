@@ -871,12 +871,57 @@
                 }
                 resetBtn.disabled = true;
                 
-                if (gameData.gameState && gameData.gameState.startsWith('penalty_player') && gameData.gameState.endsWith('_aiming')){
-                     // Eğer penaltı moduysa, penaltı UI'ını göster (F4'te detaylanacak)
-                     // togglePenaltyModal(true);
-                     // penaltyTitleTextElem.textContent = `OYUNCU ${gameData.penaltyDetails.shooterPlayer} PENALTI ATIYOR!`;
-                } else {
-                    // togglePenaltyModal(false);
+                if (gameData.gameState && gameData.gameState.endsWith('_stopped')) {
+                    if (localPlayerNumber === 1 && gameData.lastActionDetail) {
+                        const lastPlayer = gameData.lastActionDetail.player;
+                        const centiseconds = gameData.lastActionDetail.centiseconds;
+                        const timeMs = gameData.lastActionDetail.timeMs;
+
+                        const expectedNextPlayer = lastPlayer === 1 ? 2 : 1;
+                        if (gameData.currentPlayer === expectedNextPlayer && gameData.gameState === `player${expectedNextPlayer}_turn`) {
+                            // Already processed and turned over, do nothing here for this client.
+                            // console.log("Host: Action already processed, state advanced.");
+                        } else {
+                            let outcomeMessage = "";
+                            let newGameState = "";
+                            const nextPlayer = lastPlayer === 1 ? 2 : 1;
+                            // let scoreUpdates = {}; // For GOL etc. in future features
+
+                            // For F2, implement AUT and turn change.
+                            // Detailed GOL, PENALTI, FRIKIK logic will be in F3, F4, F5.
+                            
+                            // PRD F6: AUT/KAÇIRILAN Sonucu (Default for F2)
+                            outcomeMessage = `AUT! Sıra Oyuncu ${nextPlayer}\'de. (Durdurulan: ${formatTime(timeMs)})`;
+                            newGameState = `player${nextPlayer}_turn`;
+                            
+                            const updates = {
+                                currentPlayer: nextPlayer,
+                                gameState: newGameState,
+                                messageToPlayers: outcomeMessage,
+                                lastActionTimestamp: serverTimestamp(),
+                                currentTurn: (gameData.currentTurn || 0) + 1,
+                                // lastActionDetail: null, // Clear after processing if needed, or keep for history
+                            };
+
+                            const gameRefPath = 'games/' + currentGameId;
+                            update(ref(database, gameRefPath), updates)
+                                .then(() => {
+                                    console.log(`Host: Oyuncu ${lastPlayer} aksiyonu değerlendirildi. Yeni tur: Oyuncu ${nextPlayer}. Sonuç: AUT`);
+                                })
+                                .catch(error => {
+                                    console.error("Host: Oyun durumu güncellenirken hata:", error);
+                                });
+                        }
+                    }
+                }
+
+                if (gameData.messageToPlayers && 
+                    gameData.messageToPlayers.toLowerCase().includes('aut!') && 
+                    gameData.gameState !== gameData.previousGameStateForAutSound) {
+                    if (autSound) autSound.play().catch(e => console.log("Aut sesi oynatılamadı:", e));
+                    flashScreen('miss');
+                    // Firebase'e bir sonraki sesin çalınabilmesi için dummy bir state yazılabilir veya bu kontrol iyileştirilebilir.
+                    // Şimdilik bu basit kontrol yeterli olabilir.
                 }
 
                 if (gameData.messageToPlayers && gameData.messageToPlayers.toLowerCase().includes('gooool')) {
