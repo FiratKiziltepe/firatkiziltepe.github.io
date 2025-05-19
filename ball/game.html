@@ -33,37 +33,43 @@
         }
         
         body {
-            background-color: var(--football-green); /* Yeşil saha arka planı */
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden; /* Animasyonlarda taşmayı engelle */
             position: relative; /* İçerideki absolute pozisyonlamalar için */
+            background-image: url('images/background.png');
+            background-size: contain;
+            background-position: center top; /* Değiştirildi: center center -> center top */
+            background-repeat: no-repeat;
+            background-color: var(--football-green); /* Eklendi: Kenar boşlukları için dolgu rengi */
         }
 
         /* Saha Çizgileri (Basit) */
         body::before {
-            content: '';
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            width: 2px;
-            height: 80%;
-            background-color: rgba(255, 255, 255, 0.3); /* Orta saha çizgisi */
-            transform: translateX(-50%);
-            z-index: 0;
+            /* content: ''; */ /* Kaldırıldı */
+            /* position: absolute; */
+            /* top: 10%; */
+            /* left: 50%; */
+            /* width: 2px; */
+            /* height: 80%; */
+            /* background-color: rgba(255, 255, 255, 0.3); */ /* Orta saha çizgisi */
+            /* transform: translateX(-50%); */
+            /* z-index: 0; */
+            display: none; /* Kaldırıldı */
         }
         body::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100px; /* Orta yuvarlak çapı */
-            height: 100px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
+            /* content: ''; */ /* Kaldırıldı */
+            /* position: absolute; */
+            /* top: 50%; */
+            /* left: 50%; */
+            /* width: 100px; */ /* Orta yuvarlak çapı */
+            /* height: 100px; */
+            /* border: 2px solid rgba(255, 255, 255, 0.3); */
+            /* border-radius: 50%; */
+            /* transform: translate(-50%, -50%); */
+            /* z-index: 0; */
+            display: none; /* Kaldırıldı */
         }
 
         .game-area {
@@ -87,6 +93,7 @@
             border: 3px solid var(--goal-line-white);
             border-top: none; /* Üst direk yok, sadece yan ve alt */
             z-index: 1;
+            display: none; /* Arka plan resminde kale olacağı için gizlendi */
         }
         .goal-area::before, .goal-area::after { /* Kale direkleri */
             content: '';
@@ -103,18 +110,22 @@
         /* Futbol Topu */
         #football-ball {
             position: absolute;
-            bottom: 20%; /* Başlangıç pozisyonu, kronometrenin biraz üstü */
+            /* bottom: 20%; */ /* Başlangıç pozisyonu, kronometrenin biraz üstü - Değiştirildi */
+            top: 55%; /* Yeni başlangıç pozisyonu - Saha ortası (yaklaşık) */
             left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.5rem; /* Top boyutu */
+            transform: translate(-50%, -50%); /* Yeni başlangıç pozisyonu için transform */
+            font-size: 2rem; /* Boyut ayarlanabilir, arka plana göre */
             z-index: 2;
-            transition: transform 0.5s ease-in-out, bottom 0.5s ease-in-out;
+            transition: transform 0.5s ease-in-out, top 0.5s ease-in-out, left 0.5s ease-in-out; /* left ve top eklendi */
         }
 
         #football-ball.shooting {
             /* Moves the ball towards the goal area */
-            transform: translateX(-50%); /* Maintain horizontal centering */
-            bottom: 85%; /* Target Y position (closer to the top). Adjust this percentage for best visual effect. */
+            /* transform: translateX(-50%); */ /* Maintain horizontal centering - Zaten transform ile yönetiliyor */
+            /* bottom: 85%; */ /* Target Y position (closer to the top). Adjust this percentage for best visual effect. - Değiştirildi */
+            top: 15%; /* Hedef Y pozisyonu (arka plandaki kaleye göre ayarlanmalı) */
+            /* left: 50%; // Yatayda ortalı kalacak, transform ile yönetiliyor */
+            transform: translateX(-50%); /* Sadece yatayda ortala, dikey hareket top ile */
         }
 
 
@@ -147,6 +158,11 @@
             text-align: center;
             position: relative;
             z-index: 2; /* Oyun alanının üstünde */
+        }
+        
+        .player-icon {
+            margin-right: 5px;
+            font-size: 0.9em; /* Takım adı fontuna göre ayarlı */
         }
         
         .logo {
@@ -197,6 +213,14 @@
             padding: 0 0.5rem; 
             flex: 1;
             text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s; /* Vurgu için eklendi */
+            border-radius: 0.3rem; /* Vurgu için eklendi */
+        }
+
+        .team.active-turn {
+            transform: scale(1.05); /* Hafif büyütme */
+            box-shadow: 0 0 8px var(--yellow); /* Parlama efekti */
+            color: var(--yellow);
         }
         
         .score {
@@ -243,13 +267,37 @@
         
         .message {
             font-size: 1.3rem; /* Biraz büyütüldü */
-            height: 1.8rem; /* Yüksekliği ayarlandı */
-            margin: 0.5rem 0; /* Boşluk azaltıldı */
-            color: var(--white); /* Beyaz, saha üzerinde daha iyi okunur */
+            height: auto; /* Yüksekliği otomatik ayarla, içerik taşmasın */
+            min-height: 1.8rem; /* Eskisi gibi min yükseklik kalsın */
+            padding: 0.3rem 0.5rem; /* İç boşluk */
+            border-radius: 0.3rem; /* Köşeleri yuvarla */
+            margin: 0.5rem 0; 
+            color: var(--white); 
             font-weight: bold;
             text-align: center;
-            text-shadow: 1px 1px 2px var(--navy); /* Okunurluk için gölge */
-            min-height: 1.8rem; /* İçerik olmadığında bile yer kaplasın */
+            text-shadow: 1px 1px 2px var(--navy); 
+            /* min-height: 1.8rem; */ /* Üstte ayarlandı */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .message-info { /* Varsayılan */
+            background-color: transparent; /* Veya hafif bir arkaplan */
+            color: var(--white);
+        }
+        .message-goal {
+            background-color: var(--transparent-green); /* Şeffaf yeşil */
+            color: var(--white);
+            text-shadow: 1px 1px 1px var(--dark-gray);
+        }
+        .message-event { /* Penaltı, Frikik */
+            background-color: rgba(244, 211, 94, 0.4); /* Şeffaf sarı (var(--yellow) alpha ile) */
+            color: var(--navy);
+            text-shadow: none;
+        }
+        .message-out { /* Aut, Zaman aşımı, Hata */
+            background-color: var(--transparent-red); /* Şeffaf kırmızı */
+            color: var(--white);
+            text-shadow: 1px 1px 1px var(--dark-gray);
         }
         
         .controls {
@@ -282,6 +330,7 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: 1px 1px 0px #777;
+            opacity: 0.6; /* Daha belirgin pasiflik */
         }
         
         .btn:active {
@@ -303,6 +352,7 @@
             margin-top: 0.8rem;
             font-family: 'Press Start 2P', cursive;
             text-shadow: 1px 1px 1px var(--dark-gray);
+            opacity: 0.7; /* Daha az dikkat çekici */
         }
         
         .modal { 
@@ -816,14 +866,14 @@
     <div class="header">
         <div class="logo">ChronoGoal!</div>
         <div class="spectators" id="spectators-area">
-            <span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span>
+            <span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span><span class="spectator-icon">👤</span>
         </div>
         <div class="scoreboard">
-            <div class="team" id="player1-name">OYUNCU 1</div>
+            <div class="team" id="player1-name-container"><span class="player-icon">👤</span><span id="player1-name-text">OYUNCU 1</span></div>
             <div class="score" id="score-p1">0</div>
             <div>-</div>
             <div class="score" id="score-p2">0</div>
-            <div class="team" id="player2-name">OYUNCU 2</div>
+            <div class="team" id="player2-name-container"><span class="player-icon">👤</span><span id="player2-name-text">OYUNCU 2</span></div>
         </div>
         <div id="turn-indicator" class="turn-indicator">Sıra Oyuncuda</div>
         <button class="btn btn-secondary" id="rules-btn" style="position: absolute; top: 10px; right: 10px; padding: 0.5rem 1rem; font-size: 0.8rem;">Kurallar</button>
@@ -1078,6 +1128,11 @@
         const rulesBtn = document.getElementById('rules-btn');
         const rulesModal = document.getElementById('rules-modal');
         const closeRulesModalBtn = document.getElementById('close-rules-modal-btn');
+
+        const player1NameElem = document.getElementById('player1-name-text');
+        const player2NameElem = document.getElementById('player2-name-text');
+        const player1ContainerElem = document.getElementById('player1-name-container');
+        const player2ContainerElem = document.getElementById('player2-name-container');
 
         // Host tarafında çalışacak fonksiyon
         async function checkGameOverConditionOnHost(gameId, currentSnapshotData) {
@@ -1470,21 +1525,50 @@
                 scoreP1Elem.textContent = gameData.player1?.score !== undefined ? gameData.player1.score : 0;
                 scoreP2Elem.textContent = gameData.player2?.score !== undefined ? gameData.player2.score : 0;
 
-                document.getElementById('player1-name').textContent = gameData.player1?.name || 'OYUNCU 1';
-                document.getElementById('player2-name').textContent = gameData.player2?.name || (gameData.isBotGame ? 'BOT' : (gameData.gameState === 'waiting_for_player2' ? 'BEKLENİYOR' : 'OYUNCU 2'));
+                player1NameElem.textContent = gameData.player1?.name || 'OYUNCU 1';
+                player2NameElem.textContent = gameData.player2?.name || (gameData.isBotGame ? 'BOT' : (gameData.gameState === 'waiting_for_player2' ? 'BEKLENİYOR' : 'OYUNCU 2'));
 
-                if(messageElem.classList.contains('hidden')) messageElem.classList.remove('hidden');
-                messageElem.textContent = gameData.messageToPlayers || '';
+                // Mesaj alanı sınıfını ayarla
+                messageElem.classList.remove('message-goal', 'message-event', 'message-out', 'message-info');
+                if (gameData.messageToPlayers) {
+                    const msgLower = gameData.messageToPlayers.toLowerCase();
+                    if (msgLower.includes('gooool!')) {
+                        messageElem.classList.add('message-goal');
+                    } else if (msgLower.includes('penaltı!') || msgLower.includes('frikik!') || msgLower.includes('şut çekti') || msgLower.includes('hazırlanıyor')) {
+                        messageElem.classList.add('message-event');
+                    } else if (msgLower.includes('aut!') || msgLower.includes('zamanında') || msgLower.includes('hata')) {
+                        messageElem.classList.add('message-out');
+                    } else {
+                        messageElem.classList.add('message-info');
+                    }
+                } else {
+                    messageElem.classList.add('message-info'); // Mesaj yoksa varsayılan
+                }
+
+                if(gameData.gameState !== 'game_over'){
+                    if(messageElem.classList.contains('hidden')) messageElem.classList.remove('hidden');
+                    messageElem.textContent = gameData.messageToPlayers || '';
+                }
 
                 const turnIndicatorClasses = ['player1-turn', 'player2-turn', 'blinking'];
                 turnIndicatorElem.classList.remove(...turnIndicatorClasses);
 
+                // Takım sırası vurgusu
+                player1ContainerElem.classList.remove('active-turn');
+                player2ContainerElem.classList.remove('active-turn');
+
                 if (gameData.gameState === 'waiting_for_player2' && localPlayerNumber === 1) {
                     turnIndicatorElem.textContent = `Oda: ${gameRoomCode} - Rakip bekleniyor...`;
                 } else if (gameData.gameState === 'game_over') {
-                    turnIndicatorElem.textContent = "MAÇ BİTTİ!";
+                    // Zaten yukarıda turnIndicatorElem.textContent = "MAÇ BİTTİ!"; olarak ayarlandı
                 } else if (gameData.player1 && gameData.player2) {
                     turnIndicatorElem.textContent = `Sıra: Oyuncu ${gameData.currentPlayer}`;
+                    if (gameData.currentPlayer === 1) {
+                        player1ContainerElem.classList.add('active-turn');
+                    } else if (gameData.currentPlayer === 2) {
+                        player2ContainerElem.classList.add('active-turn');
+                    }
+
                     const currentTurnPlayerClass = gameData.currentPlayer === 1 ? 'player1-turn' : 'player2-turn';
                     const otherPlayerClass = gameData.currentPlayer === 1 ? 'player2-turn' : 'player1-turn';
                     turnIndicatorElem.classList.add(currentTurnPlayerClass);
@@ -1871,8 +1955,12 @@
             footballBallElem.classList.add('shooting');
             setTimeout(() => {
                 footballBallElem.classList.remove('shooting');
-            footballBallElem.style.transform = 'translateX(-50%)';
-            footballBallElem.style.bottom = '20%';
+            // footballBallElem.style.transform = 'translateX(-50%)'; // Eski reset
+            // footballBallElem.style.bottom = '20%'; // Eski reset
+            footballBallElem.style.top = '55%'; // Yeni başlangıç pozisyonuna reset
+            footballBallElem.style.left = '50%';
+            footballBallElem.style.transform = 'translate(-50%, -50%)';
+            footballBallElem.style.bottom = ''; // Eski bottom stilini temizle
             }, 1000); 
         }
 
