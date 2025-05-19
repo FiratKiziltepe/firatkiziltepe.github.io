@@ -437,30 +437,73 @@
             transform: scale(1.05);
         }
 
+        /* Kale Gösterimi (Resim Tabanlı) */
         .goal-representation {
             margin: 15px auto;
-            width: 200px;
-            height: 100px;
-            border: 3px solid var(--dark-gray);
+            width: 240px; /* Resmin genişliğine göre ayarlanabilir */
+            height: 120px; /* Resmin yüksekliğine göre ayarlanabilir */
             position: relative;
-            display: flex;
-            justify-content: space-between;
+            border: 2px solid var(--dark-gray); /* İsteğe bağlı çerçeve */
+            background-size: cover; /* Resmi kaplayacak şekilde ayarla */
+            background-position: center;
+            overflow: hidden; /* Taşan kısımları gizle */
         }
 
-        .goal-section {
-            width: 33%;
+        .goal-image {
+            display: block;
+            width: 100%;
             height: 100%;
-            border: 1px dashed rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
+            object-fit: cover; /* Resmin oranını koruyarak alanı doldurur */
+        }
+
+        .clickable-goal-area {
+            position: absolute;
+            top: 0;
+            height: 100%;
             cursor: pointer;
-            transition: background-color 0.2s;
+            /* background-color: rgba(255, 0, 0, 0.1); /* Test için görünür yap */
+        }
+
+        .clickable-goal-area.left {
+            left: 0;
+            width: 33%; /* Genişlikler resme göre ayarlanmalı */
+        }
+        .clickable-goal-area.center {
+            left: 33%;
+            width: 34%;
+        }
+        .clickable-goal-area.right {
+            left: 67%;
+            width: 33%;
+        }
+
+        .clickable-goal-area:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .clickable-goal-area.selected {
+            background-color: rgba(255, 255, 0, 0.4); /* Daha belirgin sarı */
+            border: 2px solid var(--yellow);
+        }
+
+        .clickable-goal-area.save-result { /* Gol olduğunda şutun gittiği yer */
+            background-color: var(--transparent-green); 
+            border: 2px solid var(--football-green);
+        }
+
+        .clickable-goal-area.missed-result { /* Kaçtığında şutun gittiği yer */
+            background-color: var(--transparent-red);
+            border: 2px solid var(--red);
+        }
+
+        /* Eski .goal-section stilleri artık gereksiz olabilir veya uyarlanabilir */
+        .goal-section {
+            /* Bu sınıf artık doğrudan kullanılmıyorsa kaldırılabilir veya yorumlanabilir */
+            /* display: flex; ... vb. */
         }
 
         .goal-section:hover {
-            background-color: rgba(255,255,255,0.2);
+            /* background-color: rgba(255,255,255,0.2); */
         }
 
         .goal-section.selected {
@@ -808,8 +851,7 @@
                 <button class="btn btn-primary" id="toggle-btn" aria-label="Başlat veya Durdur" disabled>Başlat</button>
                 <button class="btn btn-secondary" id="reset-btn" aria-label="Yeniden Başlat" disabled>Sıfırla</button>
             </div>
-            <button class="btn btn-primary hidden" id="play-again-btn" style="margin-top: 1rem;">Yeniden Oyna</button> <!-- Yeniden Oyna Butonu Eklendi -->
-            <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
+                <div class="keyboard-hint">P1: Boşluk, P2: Enter (Online modda sadece aktif oyuncu)</div>
             </div>
         </div>
     </div>
@@ -837,9 +879,10 @@
             <div id="penalty-description" class="penalty-status">Yön seçin:</div>
             
             <div id="goal-representation" class="goal-representation">
-                <div class="goal-section" data-direction="left">⬅️</div>
-                <div class="goal-section" data-direction="center">⚽</div>
-                <div class="goal-section" data-direction="right">➡️</div>
+                <img src="images/kale.png" alt="Kale" class="goal-image">
+                <div class="clickable-goal-area left" data-direction="left"></div>
+                <div class="clickable-goal-area center" data-direction="center"></div>
+                <div class="clickable-goal-area right" data-direction="right"></div>
             </div>
             
             <div id="penalty-shooter-controls" class="penalty-options">
@@ -858,9 +901,10 @@
             <div id="freekick-description" class="freekick-description">Yön ve güç seçin:</div>
             
             <div id="freekick-goal-representation" class="goal-representation">
-                <div class="goal-section" data-direction="left">⬅️</div>
-                <div class="goal-section" data-direction="center">⚽</div>
-                <div class="goal-section" data-direction="right">➡️</div>
+                 <img src="images/kale.png" alt="Kale" class="goal-image">
+                <div class="clickable-goal-area left" data-direction="left"></div>
+                <div class="clickable-goal-area center" data-direction="center"></div>
+                <div class="clickable-goal-area right" data-direction="right"></div>
             </div>
             
             <div id="freekick-shooter-controls">
@@ -873,7 +917,7 @@
                     </div>
                 </div>
                 
-                <div class="penalty-options">
+            <div class="penalty-options">
                     <button class="btn btn-primary" id="freekick-shoot-btn" aria-label="Şut Çek">ŞUT ÇEK</button>
                 </div>
             </div>
@@ -971,7 +1015,10 @@
         let currentGameId = null;
         let localPlayerNumber = null; // Bu istemcinin oyuncu numarası (1 veya 2)
         let gameRoomCode = null; // Kullanıcıya gösterilen oda kodu
-        let currentOpponentInfo = null; // Yeniden maç için rakip bilgisi (sadece host için)
+        let selectedPenaltyDirection = null; // Penaltı için seçilen yön
+        let selectedFreekickDirection = null; // Frikik için seçilen yön
+        let selectedFreekickPower = null; // Frikik için seçilen güç
+        let selectedKeeperPosition = null; // Kaleci için seçilen pozisyon
 
         // Oyun değişkenleri (Mevcutlar korunuyor, bazıları Firebase'den yönetilecek)
         let interval;
@@ -1026,7 +1073,6 @@
         const joinRoomBtn = document.getElementById('join-room-btn');
         const createRoomBtn = document.getElementById('create-room-btn');
         const gameBoard = document.querySelector('.game-board');
-        const playAgainBtn = document.getElementById('play-again-btn'); // Yeniden Oyna butonu referansı
 
         // Kurallar Modalı Elemanları
         const rulesBtn = document.getElementById('rules-btn');
@@ -1042,7 +1088,7 @@
             const p2Score = currentSnapshotData.player2Score;
             const currentTotalTurns = currentSnapshotData.currentTurnForCheck;
             const maxScore = currentSnapshotData.gameSettings?.maxScore || 3;
-            const maxTurns = currentSnapshotData.gameSettings?.maxTurns || 40; // Toplam hamle sayısı (her oyuncu maxTurns/2 hamle)
+            const maxTurns = currentSnapshotData.gameSettings?.maxTurns || 10; // Toplam hamle sayısı (her oyuncu maxTurns/2 hamle)
         
             let gameOver = false;
             let winner = null; // 1, 2, or 'draw'
@@ -1234,44 +1280,25 @@
             onValue(gameRefInstance, async (snapshot) => { // Fonksiyonu async yaptık
                 if (!snapshot.exists()) {
                     console.warn(`Dinlenen oda (${gameId}) artık mevcut değil.`);
-                    // Eğer oyun zaten bittiyse ve yönlendirme olduysa, bu uyarıyı gösterme.
-                    // Bu kontrol, bir oyuncu manuel olarak sayfayı yenilediğinde veya eski oyun ID'si artık yoksa önemli.
-                    if (!playAgainBtn.classList.contains('hidden')) {
-                        // Eğer playAgainBtn görünür değilse (yani oyun sonu değilse veya host değilse) uyarı ver.
-                        // Veya daha iyisi, eğer bir yönlendirme beklemiyorsak uyarı ver.
-                    }
-                    // alert("Oda bağlantısı kesildi veya oda kapandı."); 
-                    // initializeAppUI(); // Lobiye dönmek için çağrılabilir
-                    // Şimdilik sadece konsol logu, kullanıcı deneyimini bozmamak için.
+                    alert("Oda bağlantısı kesildi veya oda kapandı.");
+                    lobbyControls.classList.remove('hidden');
+                    gameBoard.classList.add('hidden');
+                    messageElem.classList.add('hidden');
+                    currentGameId = null;
+                    localPlayerNumber = null;
+                    gameRoomCode = null;
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
+                    roomCodeInput.disabled = false;
+                    roomCodeInput.value = '';
+                    if (turnTimerId) clearTimeout(turnTimerId); // Aktif timer varsa temizle
+                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId); // Aktif timer varsa temizle
                     return;
                 }
 
                 const gameData = snapshot.val();
                 console.log("Oyun verisi güncellendi:", gameData);
                 if (!gameData) return;
-
-                // Rematch yönlendirme kontrolü (ÖNCELİKLE)
-                if (gameData.redirectToGameId && gameId !== gameData.redirectToGameId) { // Kendini yönlendirmeyi engelle
-                    console.log(`Yönlendirme algılandı. Eski Oda: ${gameId}, Yeni Oda: ${gameData.redirectToGameId}`);
-                    // Sadece bu client için geçerli oyuncu numarasını koruyarak yönlen
-                    // localPlayerNumber zaten doğru olmalı (host için 1, guest için 2)
-                    
-                    currentGameId = gameData.redirectToGameId;
-                    gameRoomCode = currentGameId; 
-
-                    if (turnTimerId) clearTimeout(turnTimerId);
-                    if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
-                    
-                    // UI Temizliği (lobby gizli, gameboard açık kalmalı)
-                    playAgainBtn.classList.add('hidden');
-                    playAgainBtn.disabled = false; // Bir sonraki oyun için hazırla
-                    messageElem.textContent = "Yeni maça katınılıyor...";
-                    
-                    // Yeni oyunu dinle
-                    listenToGameUpdates(currentGameId);
-                    return; // Eski oyun verisini işlemeyi durdur
-                }
-
 
                 // --- Stop local timer if it's not this client's turn to actively time ---
                 if (running &&
@@ -1477,7 +1504,6 @@
                     toggleBtn.disabled = !(localPlayerNumber === gameData.currentPlayer &&
                         (gameData.gameState === `player${localPlayerNumber}_turn` ||
                             gameData.gameState === `player${localPlayerNumber}_timing`));
-                    playAgainBtn.classList.add('hidden'); // Oyun devam ederken Yeniden Oyna butonu gizli
                 }
                 resetBtn.disabled = true;
 
@@ -1501,8 +1527,8 @@
                         // Eğer penaltı veya frikik durumu değilse, açık olabilecek modalları kapat.
                         if (penaltyModal.classList.contains('active')) togglePenaltyModal(false);
                         if (freekickModal.classList.contains('active')) toggleFreekickModal(false);
-                        return;
-                    }
+                return;
+            }
                     
                     let actionType = isPenaltyState ? 'penalty' : 'freekick';
                     let shooter = gameData.penaltyDetails?.shooter;
@@ -1544,11 +1570,15 @@
                             descriptionElem.textContent = isPenaltyState ? 'Yön seçip ŞUT ÇEK butonuna bas.' : 'Yön, güç seçip ŞUT ÇEK butonuna bas.';
                             shooterControls.style.display = isPenaltyState ? 'flex' : 'block';
                             keeperControls.style.display = 'none';
+                            // Seçim yapıldığında aktif olan .selected classını temizle (yeni seçim için)
+                            goalRep.querySelectorAll('.clickable-goal-area').forEach(area => area.classList.remove('selected', 'save-result', 'missed-result'));
                         } else if (localPlayerNumber === keeper) {
                             titleElem.textContent = `OYUNCU ${shooter} ${actionType.toUpperCase()} ${isPenaltyState ? 'ATIYOR' : 'KULLANIYOR'}...`;
                             descriptionElem.textContent = isPenaltyState ? 'Kurtarmak için bir yön seç:' : 'Kurtarmak için yön ve pozisyon seç:';
                             shooterControls.style.display = 'none';
                             keeperControls.style.display = isPenaltyState ? 'flex' : 'block';
+                             // Seçim yapıldığında aktif olan .selected classını temizle (yeni seçim için)
+                            goalRep.querySelectorAll('.clickable-goal-area').forEach(area => area.classList.remove('selected', 'save-result', 'missed-result'));
                         }
                         // console.log(`[${gameState}] ${actionType} modalı AÇILMAYA çalışılıyor (_aiming)...`);
                         modalToToggle(true);
@@ -1591,11 +1621,11 @@
                             descriptionElem.textContent = `Şut: ${directionText(shooterDirection)} (${powerText(details.shooterPower)}), Kaleci: ${directionText(keeperDirection)} (${positionText(details.keeperPosition)})`;
                         }
 
-                        const goalSections = goalRep.querySelectorAll('.goal-section');
-                        goalSections.forEach(section => {
-                            section.classList.remove('selected', 'save-result', 'missed-result');
-                            if (section.dataset.direction === shooterDirection) {
-                                section.classList.add(isGoal ? 'save-result' : 'missed-result');
+                        const goalAreas = goalRep.querySelectorAll('.clickable-goal-area');
+                        goalAreas.forEach(area => {
+                            area.classList.remove('selected', 'save-result', 'missed-result');
+                            if (area.dataset.direction === shooterDirection) {
+                                area.classList.add(isGoal ? 'save-result' : 'missed-result');
                             }
                         });
 
@@ -1637,7 +1667,7 @@
                     if (isGoal) {
                         if (shooterPlayerObjKey === 'player1') {
                             potentialP1Score++;
-                        } else {
+            } else {
                             potentialP2Score++;
                         }
                     }
@@ -1774,8 +1804,8 @@
                         return;
                     }
 
-                    running = true;
-                    toggleBtn.textContent = 'Durdur';
+                running = true;
+                toggleBtn.textContent = 'Durdur';
                     milliseconds = gameData.sharedStopwatchMs || 0;
                     stopwatchElem.textContent = formatTime(milliseconds);
 
@@ -1784,11 +1814,11 @@
                         messageToPlayers: `Oyuncu ${localPlayerNumber} oynuyor...`,
                         lastActionTimestamp: serverTimestamp()
                     });
-
-                    interval = setInterval(() => {
-                        milliseconds += 10;
-                        stopwatchElem.textContent = formatTime(milliseconds);
-                    }, 10);
+                
+                interval = setInterval(() => {
+                    milliseconds += 10;
+                    stopwatchElem.textContent = formatTime(milliseconds);
+                }, 10);
 
                     // Start interval for this client to update liveTimeMs in Firebase
                     if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
@@ -1840,7 +1870,7 @@
         function animateBallToGoal() {
             footballBallElem.classList.add('shooting');
             setTimeout(() => {
-            footballBallElem.classList.remove('shooting');
+                footballBallElem.classList.remove('shooting');
             footballBallElem.style.transform = 'translateX(-50%)';
             footballBallElem.style.bottom = '20%';
             }, 1000); 
@@ -1849,7 +1879,7 @@
         function animateGoalText() {
             goalCelebrationTextElem.classList.add('animate');
             setTimeout(() => {
-            goalCelebrationTextElem.classList.remove('animate');
+                goalCelebrationTextElem.classList.remove('animate');
             }, 2000); 
         }
         
@@ -1946,16 +1976,16 @@
 
         // Penaltı yön seçimi için olay dinleyicileri
         goalRepresentation.addEventListener('click', (e) => {
-            const section = e.target.closest('.goal-section');
-            if (!section) return;
+            const area = e.target.closest('.clickable-goal-area');
+            if (!area) return;
             
             // Tüm seçimleri temizle
-            const allSections = goalRepresentation.querySelectorAll('.goal-section');
-            allSections.forEach(s => s.classList.remove('selected'));
+            const allAreas = goalRepresentation.querySelectorAll('.clickable-goal-area');
+            allAreas.forEach(a => a.classList.remove('selected'));
             
             // Seçilen yönü işaretle
-            section.classList.add('selected');
-            selectedPenaltyDirection = section.dataset.direction;
+            area.classList.add('selected');
+            selectedPenaltyDirection = area.dataset.direction;
         });
         
         // Şut çekme butonu
@@ -2049,16 +2079,16 @@
 
         // Frikik yön ve güç seçimi için olay dinleyicileri
         freekickGoalRepresentation.addEventListener('click', (e) => {
-            const section = e.target.closest('.goal-section');
-            if (!section) return;
+            const area = e.target.closest('.clickable-goal-area');
+            if (!area) return;
             
             // Tüm seçimleri temizle
-            const allSections = freekickGoalRepresentation.querySelectorAll('.goal-section');
-            allSections.forEach(s => s.classList.remove('selected'));
+            const allAreas = freekickGoalRepresentation.querySelectorAll('.clickable-goal-area');
+            allAreas.forEach(a => a.classList.remove('selected'));
             
             // Seçilen yönü işaretle
-            section.classList.add('selected');
-            selectedFreekickDirection = section.dataset.direction;
+            area.classList.add('selected');
+            selectedFreekickDirection = area.dataset.direction;
         });
         
         // Frikik güç seçimi
@@ -2185,81 +2215,6 @@
         } else {
             console.warn("Kurallar modalı veya butonları bulunamadı, olay dinleyicileri eklenemedi.");
         }
-
-        // Yeniden Oyna Butonu için Olay Dinleyici (Sadece Host)
-        async function initiateRematch() {
-            if (localPlayerNumber !== 1 || !currentOpponentInfo || !currentGameId) {
-                console.error("Yeniden maç başlatmak için yetki veya bilgi eksik.");
-                return;
-            }
-
-            playAgainBtn.disabled = true;
-            const oldGameId = currentGameId; // Önceki oyun ID'sini sakla
-            const player1Info = (await get(ref(database, 'games/' + oldGameId + '/player1'))).val(); // Host kendi güncel bilgisini alsın
-
-            if (!player1Info) {
-                console.error("Oyuncu 1 bilgisi alınamadı.");
-                playAgainBtn.disabled = false;
-                return;
-            }
-
-            const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            // localPlayerNumber zaten 1 (host)
-            // currentGameId'yi yeni oda koduyla güncellemeye gerek yok, çünkü listenToGameUpdates yönlendirecek.
-            // Ancak hostun kendi currentGameId'sini ve gameRoomCode'unu burada set etmesi ve 
-            // sonra listenToGameUpdates(newRoomCode) çağırması daha doğru olur.
-            
-            const newGameCurrentPlayer = Math.random() < 0.5 ? 1 : 2;
-            const initialGameDataForRematch = {
-                player1: { id: player1Info.id || "player1_host", name: player1Info.name || "Oyuncu 1", score: 0, lastStopTimeMs: null, penaltyChoice: null },
-                player2: { id: currentOpponentInfo.id || "player2_guest", name: currentOpponentInfo.name || "Oyuncu 2", score: 0, lastStopTimeMs: null, penaltyChoice: null },
-                currentPlayer: newGameCurrentPlayer,
-                gameState: newGameCurrentPlayer === 1 ? 'player1_turn' : 'player2_turn',
-                sharedStopwatchMs: 0,
-                liveTimeMs: 0,
-                gameSettings: (await get(ref(database, 'games/' + oldGameId + '/gameSettings'))).val() || { maxTurns: 10, maxScore: 3, turnTimeoutSeconds: 5, stopTimeoutSeconds: 3 },
-                currentTurn: 0,
-                lastActionTimestamp: serverTimestamp(),
-                messageToPlayers: `Yeniden Maç! Sıra Oyuncu ${newGameCurrentPlayer}'de.`,
-                isBotGame: false, // Varsayılan
-                rematchOf: oldGameId // İsteğe bağlı: Hangi oyunun revanşı olduğunu belirtir
-            };
-
-            try {
-                // 1. Yeni oyunu oluştur
-                await set(ref(database, 'games/' + newRoomCode), initialGameDataForRematch);
-                console.log("Yeni oyun odası oluşturuldu (rematch):", newRoomCode);
-
-                // 2. Eski oyuna yönlendirme bilgisini yaz
-                await update(ref(database, 'games/' + oldGameId), { redirectToGameId: newRoomCode });
-                console.log("Eski oyuna yönlendirme bilgisi yazıldı:", oldGameId, "->", newRoomCode);
-
-                // 3. Host olarak kendi state'ini güncelle ve yeni oyunu dinle
-                currentGameId = newRoomCode;
-                gameRoomCode = newRoomCode;
-                // localPlayerNumber = 1; zaten öyle olmalı.
-                
-                if (turnTimerId) clearTimeout(turnTimerId);
-                if (liveUpdateIntervalId) clearInterval(liveUpdateIntervalId);
-
-                playAgainBtn.classList.add('hidden');
-                playAgainBtn.disabled = false; // Butonu bir sonraki sefer için aktif et
-                messageElem.textContent = "Yeni maça katınılıyor..."; // Host için de mesaj
-
-                listenToGameUpdates(newRoomCode);
-
-            } catch (error) {
-                console.error("Yeniden maç başlatılırken hata:", error);
-                alert("Yeniden maç başlatılamadı. Lütfen konsolu kontrol edin.");
-                playAgainBtn.disabled = false;
-            }
-        }
-
-        playAgainBtn.addEventListener('click', () => {
-            if (localPlayerNumber === 1) {
-                initiateRematch();
-            }
-        });
     </script>
 </body>
 </html>
