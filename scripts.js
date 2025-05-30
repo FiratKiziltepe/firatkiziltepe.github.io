@@ -1,3 +1,13 @@
+// Hamburger Menu Toggle
+const hamburgerMenu = document.querySelector('.hamburger-menu');
+const navLinksMobile = document.querySelector('.nav-links-mobile');
+
+if (hamburgerMenu && navLinksMobile) {
+    hamburgerMenu.addEventListener('click', () => {
+        navLinksMobile.classList.toggle('active');
+    });
+}
+
 // Arama fonksiyonu
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {

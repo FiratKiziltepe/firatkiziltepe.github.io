@@ -11,6 +11,15 @@ body {
 }
 
 /* Navbar Styles */
+.hamburger-menu {
+    display: none; /* Hidden by default, shown in media query */
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: #2c3e50;
+    cursor: pointer;
+}
+
 .navbar {
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -28,26 +37,28 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     color: #2c3e50;
+    margin-right: auto; /* Pushes hamburger to the right */
 }
 
-.nav-links {
+.nav-links-mobile { /* Renamed from nav-links for clarity */
     display: flex;
     gap: 2rem;
     align-items: center;
 }
 
-.nav-links a {
+.nav-links-mobile a {
     text-decoration: none;
     color: #2c3e50;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
-.nav-links a:hover {
+.nav-links-mobile a:hover {
     color: #3498db;
 }
 
 /* Dropdown Menu */
+/* Styles for dropdown within nav-links-mobile need to be checked if they behave as expected */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -185,22 +196,76 @@ footer {
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        padding: 1rem;
+        /* Adjusted for brand and hamburger alignment */
+        flex-direction: row; /* Keep brand and hamburger on the same line */
+        justify-content: space-between; /* Align brand to left, hamburger to right */
+        padding: 1rem 5%; /* Consistent padding */
     }
 
-    .nav-links {
-        margin-top: 1rem;
+    .nav-brand {
+        margin-right: 0; /* Reset margin for mobile layout */
+    }
+
+    .hamburger-menu {
+        display: block; /* Show hamburger menu */
+    }
+
+    .nav-links-mobile {
+        display: none; /* Hide links by default */
         flex-direction: column;
-        gap: 1rem;
+        width: 100%;
+        background-color: #ffffff;
+        position: absolute;
+        top: 60px; /* Adjust based on navbar height */
+        left: 0;
+        padding: 1rem 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .nav-links-mobile.active {
+        display: flex; /* Show when active */
+    }
+
+    .nav-links-mobile a,
+    .nav-links-mobile .dropdown { /* Ensure dropdown also stacks correctly */
+        text-align: center;
+        padding: 0.5rem 0;
+        width: 100%;
+    }
+
+    .nav-links-mobile .dropdown .dropbtn { /* Center dropdown button text */
+        justify-content: center;
+    }
+
+    .nav-links-mobile .dropdown-content {
+        position: static; /* Make dropdown content flow normally in mobile */
+        box-shadow: none;
+        background-color: #f9f9f9; /* Slight background to differentiate */
+    }
+
+    .hero {
+        min-height: 40vh; /* More flexible height */
+        padding-top: 4rem; /* Adjust padding for mobile */
+        padding-bottom: 4rem; /* Adjust padding for mobile */
+        height: auto; /* Override fixed vh if any was there */
     }
 
     .hero h1 {
-        font-size: 2rem;
+        font-size: 2.2rem; /* Slightly larger than 2rem for better impact */
     }
 
     section {
         padding: 3rem 5%;
+    }
+
+    /* Content Card Adjustments for Mobile */
+    .content-grid {
+        padding: 1rem; /* Reduced padding for the grid */
+        gap: 1rem; /* Reduced gap between cards */
+    }
+
+    .content-card .content-info {
+        padding: 0.75rem; /* Reduced padding inside cards */
     }
 }
 
@@ -417,6 +482,38 @@ footer {
     }
     
     .chat-body {
-        height: calc(100vh - 60px);
+        height: calc(100vh - 60px); /* Assumes chat-header is 60px */
+    }
+
+    .chat-header {
+        padding: 10px 15px; /* Slightly adjust padding for smaller screens */
+    }
+
+    .chat-messages {
+        padding: 10px; /* Reduce padding slightly on small screens */
+    }
+
+    .message-content {
+        padding: 8px 12px; /* Slightly reduce padding in messages */
+        font-size: 0.95rem; /* Ensure readable font size */
+    }
+
+    .message.user .message-content {
+        /* Ensure user message specific styles are maintained or adjusted if needed */
+    }
+
+    .chat-input {
+        padding: 10px; /* Reduce padding for the input area */
+        gap: 8px; /* Reduce gap between input and button */
+    }
+
+    .chat-input input {
+        padding: 8px 12px; /* Adjust input field padding */
+        font-size: 0.95rem; /* Ensure readable font size */
+    }
+
+    #send-btn {
+        width: 36px; /* Slightly smaller button */
+        height: 36px;
     }
 }
