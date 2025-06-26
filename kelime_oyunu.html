@@ -17,6 +17,7 @@
             --incorrect-color: #d9534f;
             --text-color: #333;
             --white-color: #ffffff;
+            --grey-color: #6c757d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,7 +71,7 @@
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 150px;
             border: 2px solid #ddd;
             border-radius: 10px;
             padding: 15px;
@@ -91,6 +92,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
         }
 
         .btn:hover {
@@ -100,6 +102,9 @@
         
         .btn.start-btn { background-color: var(--accent-color); color: var(--text-color); }
         .btn.start-btn:hover { background-color: #ffb700; }
+        .btn.secondary-btn { background-color: var(--grey-color); }
+        .btn.secondary-btn:hover { background-color: #5a6268; }
+
 
         #game-header {
             display: flex;
@@ -197,13 +202,21 @@
         <!-- Ekran 1: Kurulum -->
         <div id="setup-screen" class="screen">
             <h1>Kelime Macerası</h1>
-            <p>Öğrenmek istediğin kelimeleri ve Türkçe anlamlarını aralarına virgül koyarak her satıra bir tane olacak şekilde yaz.<br>Örnek: <strong>apple,elma</strong></p>
-            <textarea id="word-input" placeholder="apple,elma
+            <p>Nasıl oynamak istersin?</p>
+            
+            <div id="initial-options">
+                <button id="use-default-words-btn" class="btn start-btn">🚀 Gemini'nin Kelimeleriyle Oyna</button>
+                <button id="use-custom-words-btn" class="btn">✏️ Kendi Kelimelerimi Gireceğim</button>
+            </div>
+
+            <div id="custom-word-area" class="hidden">
+                <p>Öğrenmek istediğin kelimeleri ve Türkçe anlamlarını aralarına virgül koyarak her satıra bir tane olacak şekilde yaz.<br>Örnek: <strong>apple,elma</strong></p>
+                <textarea id="word-input" placeholder="apple,elma
 car,araba
-book,kitap
-house,ev
-friend,arkadaş"></textarea>
-            <button id="start-game-btn" class="btn start-btn">Oyuna Başla!</button>
+book,kitap..."></textarea>
+                <button id="start-custom-game-btn" class="btn start-btn">Oyuna Başla!</button>
+                <button id="back-to-options-btn" class="btn secondary-btn">Geri</button>
+            </div>
         </div>
 
         <!-- Ekran 2: Oyun -->
@@ -242,8 +255,14 @@ friend,arkadaş"></textarea>
         const gameScreen = document.getElementById('game-screen');
         const resultsScreen = document.getElementById('results-screen');
 
+        const initialOptions = document.getElementById('initial-options');
+        const customWordArea = document.getElementById('custom-word-area');
+        
+        const useDefaultWordsBtn = document.getElementById('use-default-words-btn');
+        const useCustomWordsBtn = document.getElementById('use-custom-words-btn');
         const wordInput = document.getElementById('word-input');
-        const startGameBtn = document.getElementById('start-game-btn');
+        const startCustomGameBtn = document.getElementById('start-custom-game-btn');
+        const backToOptionsBtn = document.getElementById('back-to-options-btn');
         
         const levelIndicator = document.getElementById('level-indicator');
         const scoreIndicator = document.getElementById('score-indicator');
@@ -266,22 +285,40 @@ friend,arkadaş"></textarea>
         const totalLevels = 3;
         let levelWordCount = 0;
 
+        const defaultWords = [
+            { english: 'school', turkish: 'okul' }, { english: 'student', turkish: 'öğrenci' },
+            { english: 'teacher', turkish: 'öğretmen' }, { english: 'pencil', turkish: 'kalem' },
+            { english: 'book', turkish: 'kitap' }, { english: 'family', turkish: 'aile' },
+            { english: 'mother', turkish: 'anne' }, { english: 'father', turkish: 'baba' },
+            { english: 'friend', turkish: 'arkadaş' }, { english: 'happy', turkish: 'mutlu' },
+            { english: 'game', turkish: 'oyun' }, { english: 'water', turkish: 'su' },
+            { english: 'sun', turkish: 'güneş' }, { english: 'moon', turkish: 'ay' },
+            { english: 'star', turkish: 'yıldız' }, { english: 'red', turkish: 'kırmızı' },
+            { english: 'blue', turkish: 'mavi' }, { english: 'green', turkish: 'yeşil' },
+            { english: 'big', turkish: 'büyük' }, { english: 'small', turkish: 'küçük' }
+        ];
+
         // Event Listeners
-        startGameBtn.addEventListener('click', startGame);
+        useDefaultWordsBtn.addEventListener('click', () => initializeGame(defaultWords));
+        useCustomWordsBtn.addEventListener('click', showCustomWordInput);
+        startCustomGameBtn.addEventListener('click', startCustomGame);
+        backToOptionsBtn.addEventListener('click', showInitialOptions);
         nextBtn.addEventListener('click', nextQuestion);
         playAgainBtn.addEventListener('click', resetGame);
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        function showCustomWordInput() {
+            initialOptions.classList.add('hidden');
+            customWordArea.classList.remove('hidden');
         }
 
-        function startGame() {
+        function showInitialOptions() {
+            customWordArea.classList.add('hidden');
+            initialOptions.classList.remove('hidden');
+        }
+
+        function startCustomGame() {
             const rawWords = wordInput.value.trim().split('\n');
-            words = rawWords.map(line => {
+            const customWords = rawWords.map(line => {
                 const parts = line.split(',');
                 if (parts.length === 2) {
                     return { english: parts[0].trim(), turkish: parts[1].trim() };
@@ -289,22 +326,33 @@ friend,arkadaş"></textarea>
                 return null;
             }).filter(word => word !== null && word.english && word.turkish);
 
-            if (words.length < 4) {
+            if (customWords.length < 4) {
                 alert("Lütfen en az 4 geçerli kelime girin (örnek: apple,elma).");
                 return;
             }
-
+            initializeGame(customWords);
+        }
+        
+        function initializeGame(wordList) {
+            words = shuffleArray([...wordList]);
             level = 1;
             score = 0;
             currentWordIndex = 0;
             levelWordCount = 0;
-            words = shuffleArray(words);
 
             setupScreen.classList.add('hidden');
             resultsScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
 
             showQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         function showQuestion() {
@@ -459,6 +507,7 @@ friend,arkadaş"></textarea>
         function resetGame() {
             resultsScreen.classList.add('hidden');
             setupScreen.classList.remove('hidden');
+            showInitialOptions();
             wordInput.value = '';
         }
 
