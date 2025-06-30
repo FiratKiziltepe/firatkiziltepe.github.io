@@ -36,9 +36,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #E07A5F 0%, #3D405B 100%);
+        }
+        .main-content {
+            display: none;
+        }
+        .main-content.authenticated {
+            display: block;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body class="antialiased">
+    
+    <!-- Şifre Giriş Ekranı -->
+    <div id="login-screen" class="login-container">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#E07A5F] rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4">YZ</div>
+                <h1 class="text-2xl font-bold text-[#3D405B] mb-2">Eğitimde Yapay Zekâ Etiği</h1>
+                <p class="text-gray-600">Bu içeriğe erişmek için lütfen şifrenizi girin</p>
+            </div>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E07A5F] focus:border-[#E07A5F] transition text-center text-lg tracking-widest" placeholder="Şifrenizi girin" maxlength="10">
+                </div>
+                
+                <button type="submit" class="w-full bg-[#3D405B] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#31344b] transition-colors">
+                    Giriş Yap
+                </button>
+                
+                <div id="error-msg" class="hidden text-red-600 text-center text-sm bg-red-50 p-3 rounded-lg">
+                    ❌ Şifre hatalı! Lütfen tekrar deneyin.
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center text-xs text-gray-500">
+                MEB | Millî Eğitim Bakanlığı
+            </div>
+        </div>
+    </div>
+
+    <!-- Ana Sayfa İçeriği -->
+    <div id="main-content" class="main-content">
 
     <header class="bg-[#F8F7F4]/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
         <div class="container mx-auto px-6 py-4">
@@ -188,8 +239,53 @@
 
     </main>
 
+    </div> <!-- Ana sayfa içeriği kapanış -->
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Şifre kontrolü
+    const loginScreen = document.getElementById('login-screen');
+    const mainContent = document.getElementById('main-content');
+    const loginForm = document.getElementById('login-form');
+    const passwordInput = document.getElementById('password');
+    const errorMsg = document.getElementById('error-msg');
+    const correctPassword = '3610';
+
+    // Sayfa yüklendiğinde login ekranını göster
+    loginScreen.style.display = 'flex';
+    mainContent.classList.remove('authenticated');
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const enteredPassword = passwordInput.value.trim();
+        
+        if (enteredPassword === correctPassword) {
+            // Şifre doğru - ana içeriği göster
+            loginScreen.style.display = 'none';
+            mainContent.classList.add('authenticated');
+            errorMsg.classList.add('hidden');
+        } else {
+            // Şifre yanlış - hata mesajı göster
+            errorMsg.classList.remove('hidden');
+            passwordInput.value = '';
+            passwordInput.focus();
+            
+            // Şifre alanını titret
+            passwordInput.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                passwordInput.style.animation = '';
+            }, 500);
+        }
+    });
+
+    // Enter tuşu ile giriş
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            loginForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Ana içerik kontrolleri (şifre doğru girildiğinde çalışacak)
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('main section');
     const mobileMenuBtn = document.getElementById('menu-btn');
