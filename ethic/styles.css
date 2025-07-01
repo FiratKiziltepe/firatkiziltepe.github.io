@@ -768,9 +768,14 @@ p {
   min-height: 1.2rem;
 }
 
-.page-protected {
+.page-protected main,
+.page-protected .header,
+.page-protected .footer {
   filter: blur(5px);
   pointer-events: none;
+}
+
+.page-protected {
   overflow: hidden;
 }
 
