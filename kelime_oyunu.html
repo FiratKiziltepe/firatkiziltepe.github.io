@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Macerası | İngilizce Öğrenme Oyunu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f9ff;
+            --main-color: #00a8e8;
+            --secondary-color: #007ea7;
+            --accent-color: #ffc300;
+            --correct-color: #5cb85c;
+            --incorrect-color: #d9534f;
+            --text-color: #333;
+            --white-color: #ffffff;
+            --grey-color: #6c757d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            width: 100%;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1, h2 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 2.5rem; font-weight: 900; }
+        h2 { font-size: 1.8rem; }
+
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--main-color);
+            color: var(--white-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn.start-btn { background-color: var(--accent-color); color: var(--text-color); }
+        .btn.start-btn:hover { background-color: #ffb700; }
+        .btn.secondary-btn { background-color: var(--grey-color); }
+        .btn.secondary-btn:hover { background-color: #5a6268; }
+
+
+        #game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        #level-indicator { color: var(--secondary-color); }
+        #score-indicator { color: var(--accent-color); }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        #question-area {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #question-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--main-color);
+        }
+
+        #scrambled-word {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--main-color);
+            letter-spacing: 5px;
+            margin-top: 10px;
+        }
+
+        #answer-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .answer-btn {
+            background-color: var(--white-color);
+            color: var(--main-color);
+            border: 2px solid var(--main-color);
+        }
+        .answer-btn:hover { background-color: #eefcff; }
+        .answer-btn.correct { background-color: var(--correct-color); color: var(--white-color); border-color: var(--correct-color); }
+        .answer-btn.incorrect { background-color: var(--incorrect-color); color: var(--white-color); border-color: var(--incorrect-color); }
+        .answer-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        #answer-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #feedback {
+            font-size: 1.5rem;
+            font-weight: 700;
+            height: 30px;
+            margin-top: 20px;
+        }
+
+        #results-screen h2 { color: var(--accent-color); }
+        #final-score { font-size: 1.5rem; color: var(--secondary-color); }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+
+        <!-- Ekran 1: Kurulum -->
+        <div id="setup-screen" class="screen">
+            <h1>Kelime Macerası</h1>
+            <p>Nasıl oynamak istersin?</p>
+            
+            <div id="initial-options">
+                <button id="use-default-words-btn" class="btn start-btn">🚀 Gemini'nin Kelimeleriyle Oyna</button>
+                <button id="use-custom-words-btn" class="btn">✏️ Kendi Kelimelerimi Gireceğim</button>
+            </div>
+
+            <div id="custom-word-area" class="hidden">
+                <p>Öğrenmek istediğin kelimeleri ve Türkçe anlamlarını aralarına virgül koyarak her satıra bir tane olacak şekilde yaz.<br>Örnek: <strong>apple,elma</strong></p>
+                <textarea id="word-input" placeholder="apple,elma
+car,araba
+book,kitap..."></textarea>
+                <button id="start-custom-game-btn" class="btn start-btn">Oyuna Başla!</button>
+                <button id="back-to-options-btn" class="btn secondary-btn">Geri</button>
+            </div>
+        </div>
+
+        <!-- Ekran 2: Oyun -->
+        <div id="game-screen" class="screen hidden">
+            <div id="game-header">
+                <span id="level-indicator">Seviye: 1</span>
+                <span id="score-indicator">Puan: 0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="question-area">
+                <p id="question-prompt"></p>
+                <div id="question-text"></div>
+                <div id="scrambled-word"></div>
+            </div>
+            <div id="answer-area">
+                <!-- Cevaplar buraya gelecek -->
+            </div>
+            <p id="feedback"></p>
+            <button id="next-btn" class="btn hidden">Sonraki Soru</button>
+        </div>
+
+        <!-- Ekran 3: Sonuçlar -->
+        <div id="results-screen" class="screen hidden">
+            <h2>Oyun Bitti! Harikasın!</h2>
+            <p id="final-score">Toplam Puanın: 100</p>
+            <button id="play-again-btn" class="btn">Tekrar Oyna</button>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elementleri
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const initialOptions = document.getElementById('initial-options');
+        const customWordArea = document.getElementById('custom-word-area');
+        
+        const useDefaultWordsBtn = document.getElementById('use-default-words-btn');
+        const useCustomWordsBtn = document.getElementById('use-custom-words-btn');
+        const wordInput = document.getElementById('word-input');
+        const startCustomGameBtn = document.getElementById('start-custom-game-btn');
+        const backToOptionsBtn = document.getElementById('back-to-options-btn');
+        
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreIndicator = document.getElementById('score-indicator');
+        const progressBar = document.getElementById('progress-bar');
+        const questionPrompt = document.getElementById('question-prompt');
+        const questionText = document.getElementById('question-text');
+        const scrambledWord = document.getElementById('scrambled-word');
+        const answerArea = document.getElementById('answer-area');
+        const feedback = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+
+        const finalScore = document.getElementById('final-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Oyun Değişkenleri
+        let words = [];
+        let currentWordIndex = 0;
+        let score = 0;
+        let level = 1;
+        const totalLevels = 3;
+        let levelWordCount = 0;
+
+        const defaultWords = [
+            { english: 'school', turkish: 'okul' }, { english: 'student', turkish: 'öğrenci' },
+            { english: 'teacher', turkish: 'öğretmen' }, { english: 'pencil', turkish: 'kalem' },
+            { english: 'book', turkish: 'kitap' }, { english: 'family', turkish: 'aile' },
+            { english: 'mother', turkish: 'anne' }, { english: 'father', turkish: 'baba' },
+            { english: 'friend', turkish: 'arkadaş' }, { english: 'happy', turkish: 'mutlu' },
+            { english: 'game', turkish: 'oyun' }, { english: 'water', turkish: 'su' },
+            { english: 'sun', turkish: 'güneş' }, { english: 'moon', turkish: 'ay' },
+            { english: 'star', turkish: 'yıldız' }, { english: 'red', turkish: 'kırmızı' },
+            { english: 'blue', turkish: 'mavi' }, { english: 'green', turkish: 'yeşil' },
+            { english: 'big', turkish: 'büyük' }, { english: 'small', turkish: 'küçük' }
+        ];
+
+        // Event Listeners
+        useDefaultWordsBtn.addEventListener('click', () => initializeGame(defaultWords));
+        useCustomWordsBtn.addEventListener('click', showCustomWordInput);
+        startCustomGameBtn.addEventListener('click', startCustomGame);
+        backToOptionsBtn.addEventListener('click', showInitialOptions);
+        nextBtn.addEventListener('click', nextQuestion);
+        playAgainBtn.addEventListener('click', resetGame);
+
+        function showCustomWordInput() {
+            initialOptions.classList.add('hidden');
+            customWordArea.classList.remove('hidden');
+        }
+
+        function showInitialOptions() {
+            customWordArea.classList.add('hidden');
+            initialOptions.classList.remove('hidden');
+        }
+
+        function startCustomGame() {
+            const rawWords = wordInput.value.trim().split('\n');
+            const customWords = rawWords.map(line => {
+                const parts = line.split(',');
+                if (parts.length === 2) {
+                    return { english: parts[0].trim(), turkish: parts[1].trim() };
+                }
+                return null;
+            }).filter(word => word !== null && word.english && word.turkish);
+
+            if (customWords.length < 4) {
+                alert("Lütfen en az 4 geçerli kelime girin (örnek: apple,elma).");
+                return;
+            }
+            initializeGame(customWords);
+        }
+        
+        function initializeGame(wordList) {
+            words = shuffleArray([...wordList]);
+            level = 1;
+            score = 0;
+            currentWordIndex = 0;
+            levelWordCount = 0;
+
+            setupScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            showQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function showQuestion() {
+            if (currentWordIndex >= words.length) {
+                level++;
+                if (level > totalLevels) {
+                    showResults();
+                    return;
+                }
+                currentWordIndex = 0;
+                levelWordCount = 0;
+                words = shuffleArray(words);
+            }
+
+            updateGameHeader();
+            feedback.textContent = '';
+            nextBtn.classList.add('hidden');
+            answerArea.innerHTML = '';
+            scrambledWord.textContent = '';
+
+            const currentWord = words[currentWordIndex];
+
+            switch (level) {
+                case 1:
+                    setupMultipleChoice(currentWord);
+                    break;
+                case 2:
+                    setupFillInTheBlank(currentWord);
+                    break;
+                case 3:
+                    setupScrambledWord(currentWord);
+                    break;
+            }
+        }
+
+        function setupMultipleChoice(word) {
+            questionPrompt.textContent = 'Bu kelimenin İngilizce karşılığı nedir?';
+            questionText.textContent = word.turkish;
+
+            let options = [word.english];
+            while (options.length < 4) {
+                const randomWord = words[Math.floor(Math.random() * words.length)].english;
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            options = shuffleArray(options);
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('btn', 'answer-btn');
+                button.addEventListener('click', () => checkMultipleChoice(button, word.english));
+                answerArea.appendChild(button);
+            });
+        }
+
+        function setupFillInTheBlank(word) {
+            questionPrompt.textContent = 'Bu kelimenin İngilizce karşılığını yaz:';
+            questionText.textContent = word.turkish;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'answer-input';
+            input.autocomplete = 'off';
+
+            const submitBtn = document.createElement('button');
+            submitBtn.textContent = 'Kontrol Et';
+            submitBtn.classList.add('btn');
+            submitBtn.addEventListener('click', () => checkFillInTheBlank(input, word.english));
+
+            answerArea.appendChild(input);
+            answerArea.appendChild(submitBtn);
+            input.focus();
+        }
+
+        function setupScrambledWord(word) {
+            questionPrompt.textContent = 'Harfleri karıştırılmış kelimeyi bul:';
+            questionText.textContent = word.turkish;
+            scrambledWord.textContent = shuffleArray(word.english.split('')).join('');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'answer-input';
+            input.autocomplete = 'off';
+
+            const submitBtn = document.createElement('button');
+            submitBtn.textContent = 'Kontrol Et';
+            submitBtn.classList.add('btn');
+            submitBtn.addEventListener('click', () => checkFillInTheBlank(input, word.english));
+
+            answerArea.appendChild(input);
+            answerArea.appendChild(submitBtn);
+            input.focus();
+        }
+
+        function checkMultipleChoice(button, correctAnswer) {
+            const buttons = answerArea.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (button.textContent === correctAnswer) {
+                button.classList.add('correct');
+                feedback.textContent = 'Harika! Doğru cevap!';
+                feedback.style.color = 'var(--correct-color)';
+                score += 10;
+            } else {
+                button.classList.add('incorrect');
+                feedback.textContent = `Yanlış! Doğru cevap: ${correctAnswer}`;
+                feedback.style.color = 'var(--incorrect-color)';
+                buttons.forEach(btn => {
+                    if (btn.textContent === correctAnswer) btn.classList.add('correct');
+                });
+            }
+            nextBtn.classList.remove('hidden');
+        }
+
+        function checkFillInTheBlank(input, correctAnswer) {
+            const userAnswer = input.value.trim().toLowerCase();
+            input.disabled = true;
+            answerArea.querySelector('.btn').disabled = true;
+
+            if (userAnswer === correctAnswer.toLowerCase()) {
+                feedback.textContent = 'Süper! Çok iyi gidiyorsun!';
+                feedback.style.color = 'var(--correct-color)';
+                score += 15;
+            } else {
+                feedback.textContent = `Maalesef! Doğru cevap: ${correctAnswer}`;
+                feedback.style.color = 'var(--incorrect-color)';
+            }
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentWordIndex++;
+            levelWordCount++;
+            showQuestion();
+        }
+
+        function updateGameHeader() {
+            scoreIndicator.textContent = `Puan: ${score}`;
+            levelIndicator.textContent = `Seviye: ${level}`;
+            const progress = (levelWordCount / words.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showResults() {
+            gameScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            finalScore.textContent = `Toplam Puanın: ${score}`;
+        }
+
+        function resetGame() {
+            resultsScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            showInitialOptions();
+            wordInput.value = '';
+        }
+
+    </script>
+</body>
+</html>

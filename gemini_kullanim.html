@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini | Etkili Kullanım Kılavuzu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --card-bg: #1f2833;
+            --primary-accent: #4da8da;
+            --text-light: #f0f8ff;
+            --text-secondary: #c5c6c7;
+            --border-color: #2c3e50;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .infographic-container {
+            max-width: 900px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+            margin-bottom: 0.5rem;
+        }
+        header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-accent);
+            display: inline-block;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .card {
+            background-color: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(77, 168, 218, 0.2);
+        }
+        .card .icon {
+            font-size: 3rem;
+            color: var(--primary-accent);
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .list-section {
+            margin-bottom: 2rem;
+        }
+        .list-section ul {
+            list-style: none;
+        }
+        .list-section li {
+            background-color: var(--bg-dark);
+            margin-bottom: 0.75rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            border-left: 5px solid var(--primary-accent);
+        }
+        .list-section .icon {
+            font-size: 1.5rem;
+            color: var(--primary-accent);
+            margin-right: 1rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic-container">
+        <header>
+            <h1>Beni En Etkili Nasıl Kullanırsın?</h1>
+            <p class="subtitle">Yazılım Geliştirme ve Otomasyon için Komut Satırı Asistanın</p>
+        </header>
+
+        <main>
+            <h2 class="section-title">Neler Yapabilirim?</h2>
+            <div class="grid-container">
+                <div class="card">
+                    <div class="icon"><i class="fas fa-code"></i></div>
+                    <h3>Kodlama & Analiz</h3>
+                    <p>Kod yazabilir, mevcut kodu analiz edip açıklayabilir, yeniden düzenleyebilir (refactor) ve testler oluşturabilirim.</p>
+                </div>
+                <div class="card">
+                    <div class="icon"><i class="fas fa-file-alt"></i></div>
+                    <h3>Dosya İşlemleri</h3>
+                    <p>Dosya ve klasörleri listeleyebilir, oluşturabilir, okuyabilir ve içeriklerini değiştirebilirim. Tekrar eden görevleri otomatikleştirebilirim.</p>
+                </div>
+                <div class="card">
+                    <div class="icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Proje Yönetimi</h3>
+                    <p>Sıfırdan proje iskeletleri oluşturabilir, `npm` veya `pip` gibi araçlarla bağımlılıkları kurabilir ve test/build komutlarını çalıştırabilirim.</p>
+                </div>
+                <div class="card">
+                    <div class="icon"><i class="fas fa-search"></i></div>
+                    <h3>Bilgi & Hata Ayıklama</h3>
+                    <p>Web'de araştırma yapabilir, hata mesajlarını analiz edebilir ve olası çözüm yolları hakkında sana bilgi verebilirim.</p>
+                </div>
+            </div>
+
+            <div class="list-section">
+                <h2 class="section-title">Pro İpuçları</h2>
+                <ul>
+                    <li><i class="icon fas fa-bullseye"></i> <strong>Spesifik Ol:</strong> "Kodum bozuk" yerine "login.js'teki X fonksiyonu Y hatası veriyor" de.</li>
+                    <li><i class="icon fas fa-folder-tree"></i> <strong>Bağlam Sağla:</strong> Hangi dosya veya klasörle çalıştığımı belirt.</li>
+                    <li><i class="icon fas fa-shoe-prints"></i> <strong>Adım Adım İlerle:</strong> Büyük görevleri küçük, yönetilebilir adımlara böl.</li>
+                    <li><i class="icon fas fa-toolbox"></i> <strong>Beni Yönlendir:</strong> `read_file`, `run_shell_command` gibi araçları kullanmamı iste.</li>
+                </ul>
+            </div>
+
+            <div class="list-section">
+                <h2 class="section-title">Sınırlarım</h2>
+                <ul>
+                    <li><i class="icon fas fa-eye-slash"></i> <strong>Grafik Arayüzü Yok:</strong> Ekranını göremem, fareni kullanamam. Sadece komut satırındayım.</li>
+                    <li><i class="icon fas fa-lock"></i> <strong>Erişim Kısıtlamaları:</strong> Sadece izin verilen dosyalara erişebilirim. Kişisel bulut klasörlerin tabu!</li>
+                    <li><i class="icon fas fa-pause-circle"></i> <strong>Etkileşimli Komutlar:</strong> Sürekli girdi bekleyen (`git rebase -i` gibi) komutları çalıştıramam.</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer>
+            <p>Bu infografik Gemini tarafından oluşturulmuştur. Tarayıcıda açıp "Yazdır > PDF Olarak Kaydet" ile PDF'e dönüştürebilirsin.</p>
+        </footer>
+    </div>
+</body>
+</html>
