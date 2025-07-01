@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Password protection functionality
 function initializePasswordProtection() {
+    // Only apply password protection on index page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    if (currentPage !== 'index.html') {
+        return;
+    }
+    
     const correctPassword = '3610';
     const modal = document.getElementById('password-modal');
     const input = document.getElementById('password-input');
