@@ -5,6 +5,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/ethic/', // <-- projenin adı neyse onunla aynı olmalı
   plugins: [react(),tailwindcss()],
   resolve: {
     alias: {
