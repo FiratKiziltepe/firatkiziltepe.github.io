@@ -1,15 +1,270 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MEB Yapay Zeka Etik Çerçevesi ve Kurul Yapısı</title>
-    <meta name="description" content="Millî Eğitim Bakanlığı Eğitimde Yapay Zeka Uygulamaları Etik Çerçevesi ve Kurul Yapısı Raporu" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    <meta name="description" content="Millî Eğitim Bakanlığı'nın eğitimde yapay zeka uygulamaları için geliştirdiği kapsamlı etik çerçeve ve kurul yapısı raporu.">
+    <meta name="keywords" content="MEB, yapay zeka, etik, eğitim, kurul, çerçeve">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🤖</div>
+                <span>MEB YZ Etik Çerçevesi</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Ana Sayfa</a></li>
+                <li><a href="about.html" class="nav-link">Hakkında</a></li>
+                <li><a href="international.html" class="nav-link">Uluslararası Çerçeveler</a></li>
+                <li><a href="principles.html" class="nav-link">Etik İlkeler</a></li>
+                <li><a href="committee.html" class="nav-link">Etik Kurul</a></li>
+                <li><a href="assessment.html" class="nav-link">EED Modeli</a></li>
+                <li><a href="roadmap.html" class="nav-link">Yol Haritası</a></li>
+                <li><a href="resources.html" class="nav-link">Kaynaklar</a></li>
+                <li><a href="contact.html" class="nav-link">İletişim</a></li>
+            </ul>
+            
+            <button class="theme-toggle" id="theme-toggle">🌙</button>
+            <button class="mobile-menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>Eğitimde Yapay Zeka<br><span class="accent">Etik Çerçevesi</span></h1>
+                        <p>Millî Eğitim Bakanlığı'nın eğitimde yapay zeka uygulamaları için geliştirdiği kapsamlı etik çerçeve ve kurul yapısı raporu.</p>
+                        <div class="btn-group">
+                            <a href="about.html" class="btn btn-primary">Raporu Keşfet</a>
+                            <a href="principles.html" class="btn btn-outline">Etik İlkeler</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="ai_ethics_society.png" alt="Yapay Zeka Etiği Görseli">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">14</div>
+                        <div class="stat-label">Uluslararası Kaynak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Etik İlke</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Alt Komisyon</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Uygulama Adımı</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features py-20">
+            <div class="container">
+                <div class="features-header">
+                    <h2>Kapsamlı Etik Çerçeve</h2>
+                    <p>Uluslararası standartlara uygun, Türkiye'nin eğitim bağlamına özel olarak uyarlanmış etik ilkeler ve uygulama modeli.</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="card">
+                        <div class="card-icon">🌍</div>
+                        <div class="card-header">
+                            <h3 class="card-title">UNESCO, AB ve OECD standartlarına uygun etik çerçeve</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>Uluslararası kuruluşların etik ilke ve belgelerinin analizi ile oluşturulmuş kapsamlı çerçeve.</p>
+                            <a href="international.html" class="btn btn-secondary mt-4">Detayları Gör</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">⚖️</div>
+                        <div class="card-header">
+                            <h3 class="card-title">Öğrenci odaklılık, adillik, şeffaflık ve güvenlik ilkeleri</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>Yedi temel etik ilke ile eğitimde yapay zeka uygulamalarının sorumlu kullanımı.</p>
+                            <a href="principles.html" class="btn btn-secondary mt-4">Detayları Gör</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">👥</div>
+                        <div class="card-header">
+                            <h3 class="card-title">Çok paydaşlı ve uzman kurul yapısı</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>Akademisyenler, MEB temsilcileri, teknik uzmanlar ve sivil toplumun katılımıyla oluşturulan kurul.</p>
+                            <a href="committee.html" class="btn btn-secondary mt-4">Detayları Gör</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">📋</div>
+                        <div class="card-header">
+                            <h3 class="card-title">Sistematik etik etki değerlendirme süreci</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>Yapay zeka projelerinin etik etkilerini değerlendiren kapsamlı süreç ve form yapısı.</p>
+                            <a href="assessment.html" class="btn btn-secondary mt-4">Detayları Gör</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Principles Section -->
+        <section class="py-16" style="background: var(--muted);">
+            <div class="container">
+                <h2 class="section-title">Temel Etik İlkeler</h2>
+                <div class="grid grid-cols-3">
+                    <div class="card">
+                        <div class="card-icon">👤</div>
+                        <div class="card-header">
+                            <h4 class="card-title">İnsan odaklı yapay zeka yaklaşımı</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Öğrenci ve insan refahını önceleyerek teknolojinin insana hizmet etmesi ilkesi.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🔒</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Veri mahremiyeti ve güvenlik önceliği</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Kişisel verilerin korunması ve güvenli işlenmesi için katı standartlar.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">⚖️</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Algoritmik yanlılığın önlenmesi</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Adil ve kapsayıcı sistemler için yanlılık tespiti ve önleme mekanizmaları.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🔍</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Şeffaf ve açıklanabilir sistemler</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Karar alma süreçlerinin anlaşılabilir ve açıklanabilir olması ilkesi.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🎓</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Pedagojik değer odaklı uygulama</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Eğitim hedefleri ve pedagojik değerlerle uyumlu teknoloji entegrasyonu.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Sürekli izleme ve değerlendirme</h4>
+                        </div>
+                        <div class="card-content">
+                            <p>Sistemlerin performansının ve etik uyumunun düzenli olarak izlenmesi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20">
+            <div class="container text-center">
+                <h2 class="mb-6">Türkiye'nin Eğitim Geleceği</h2>
+                <p class="mb-8" style="font-size: 1.25rem; max-width: 800px; margin: 0 auto 2rem;">
+                    Türkiye'nin eğitim sisteminde yapay zeka uygulamalarının etik, güvenli ve pedagojik değer odaklı kullanımı için geliştirilen kapsamlı çerçeve.
+                </p>
+                <div class="btn-group" style="justify-content: center;">
+                    <a href="about.html" class="btn btn-primary">Raporu İncele</a>
+                    <a href="roadmap.html" class="btn btn-secondary">Yol Haritası</a>
+                    <a href="contact.html" class="btn btn-outline">İletişime Geç</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MEB Yapay Zeka Etik Çerçevesi</h3>
+                    <p>Eğitimde yapay zeka uygulamalarının etik, güvenli ve pedagojik değer odaklı kullanımı için geliştirilen kapsamlı çerçeve.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Hızlı Bağlantılar</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">Rapor Hakkında</a></li>
+                        <li><a href="principles.html">Etik İlkeler</a></li>
+                        <li><a href="committee.html">Etik Kurul</a></li>
+                        <li><a href="assessment.html">EED Modeli</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Kaynaklar</h3>
+                    <ul class="footer-links">
+                        <li><a href="international.html">Uluslararası Çerçeveler</a></li>
+                        <li><a href="roadmap.html">Uygulama Yol Haritası</a></li>
+                        <li><a href="resources.html">Dokümanlar</a></li>
+                        <li><a href="contact.html">İletişim</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>İletişim</h3>
+                    <p>Millî Eğitim Bakanlığı<br>
+                    Atatürk Bulvarı No: 98<br>
+                    Kızılay/Ankara</p>
+                    <p>E-posta: yapayzeka.etik@meb.gov.tr</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Millî Eğitim Bakanlığı. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
 </html>
 
