@@ -487,7 +487,7 @@ body {
     font-size: 1.125rem; /* 1.5rem'den küçültüldü */
     font-weight: 600;
     color: white;
-    background: var(--primary-light);
+    background: #f87171; /* Açık kırmızı arka plan */
     padding: 0.75rem 1rem; /* 1.5rem'den küçültüldü */
     margin: 0;
 }
@@ -498,6 +498,12 @@ body {
     border-bottom: 1px solid var(--border-light);
     display: flex;
     gap: 0.75rem; /* 1rem'den küçültüldü */
+    background: #f8f9fa; /* Açık gri arka plan */
+    
+    border-left: 4px solid #f87171; /* Sol çizgi rengi subsection-title ile aynı */
+
+    position: relative;
+    margin-bottom: 1px; /* Aralarında ince boşluk */
 }
 
 .criterion:last-child {
@@ -523,6 +529,7 @@ body {
     font-weight: 500;
     line-height: 1.5; /* 1.6'dan küçültüldü */
     font-size: 0.95rem; /* Biraz küçültüldü */
+    font-weight: bold;
 }
 
 .criterion-details {
