@@ -6,10 +6,10 @@
 }
 
 :root {
-    --primary-color: #4a5568;
-    --primary-dark: #2d3748;
-    --primary-light: #718096;
-    --secondary-color: #3182ce;
+    --primary-color: #dc2626;
+    --primary-dark: #b91c1c;
+    --primary-light: #f87171;
+    --secondary-color: #dc2626;
     --accent-color: #ffffff;
     --text-primary: #1f2937;
     --text-secondary: #6b7280;
@@ -94,7 +94,7 @@ body {
     gap: 0.6rem;
     font-size: 1.125rem;
     font-weight: 700;
-    color: var(--accent-color);
+    color: var(--primary-light);
 }
 
 .sidebar-logo i {
@@ -131,12 +131,12 @@ body {
 .nav-link:focus {
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    border-left-color: var(--secondary-color);
+    border-left-color: var(--primary-light);
     outline: none;
 }
 
 .nav-link.active {
-    background: var(--secondary-color);
+    background: var(--primary-color);
     color: white;
     border-left-color: var(--accent-color);
 }
@@ -161,7 +161,7 @@ body {
 }
 
 .nav-link.show-all.active {
-    background: var(--secondary-color);
+    background: var(--primary-color);
     font-weight: 600;
 }
 
@@ -181,12 +181,34 @@ body {
 
 .nav-link.external-link:hover,
 .nav-link.external-link:focus {
-    color: var(--secondary-color);
+    color: var(--primary-light);
     background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.external-link i {
-    color: var(--secondary-color);
+    color: var(--primary-light);
+}
+
+/* TTKB Logo Footer */
+.sidebar-logo-footer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: var(--sidebar-width);
+    padding: 1rem;
+    text-align: center;
+    z-index: 1001;
+}
+
+.ttkb-logo {
+    width: 100px;
+    height: auto;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.ttkb-logo:hover {
+    opacity: 1;
 }
 
 /* Main Container */
@@ -201,7 +223,7 @@ body {
 
 /* Header - Minimalist */
 .header {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: white;
     padding: 0.75rem 0; /* Daha da küçültüldü */
     position: sticky;
@@ -370,7 +392,7 @@ body {
 }
 
 .search-highlight {
-    background-color: #bee3f8;
+    background-color: #fecaca;
     padding: 0.125rem 0.25rem;
     border-radius: var(--radius-sm);
     font-weight: 600;
@@ -397,7 +419,7 @@ body {
     color: white;
     margin-bottom: 1rem; /* 1.5rem'den küçültüldü */
     padding: 0.75rem 1rem; /* 1rem 1.5rem'den küçültüldü */
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
 }
@@ -465,7 +487,7 @@ body {
     font-size: 1.125rem; /* 1.5rem'den küçültüldü */
     font-weight: 600;
     color: white;
-    background: var(--primary-color);
+    background: var(--primary-light);
     padding: 0.75rem 1rem; /* 1.5rem'den küçültüldü */
     margin: 0;
 }
@@ -547,7 +569,7 @@ body {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--secondary-color);
+    color: var(--primary-light);
 }
 
 .footer-info p {
@@ -556,7 +578,7 @@ body {
 }
 
 .footer-info a {
-    color: var(--secondary-color);
+    color: var(--primary-light);
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -569,7 +591,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
     padding: 1.5rem;
     border-radius: var(--radius-lg);
-    border-left: 4px solid var(--secondary-color);
+    border-left: 4px solid var(--primary-light);
 }
 
 .footer-note p {
@@ -583,7 +605,7 @@ body {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: var(--secondary-color);
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 50%;
@@ -849,6 +871,10 @@ body {
         font-size: 1.125rem;
     }
     
+    .sidebar-logo-footer {
+        display: none;
+    }
+    
     .back-to-top {
         bottom: 0.75rem;
         right: 0.75rem;
@@ -865,7 +891,7 @@ body {
     top: 1rem;
     left: 1rem;
     z-index: 1002;
-    background: var(--secondary-color);
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: var(--radius-md);
