@@ -122,6 +122,13 @@ function addMobileMenuToggle() {
     
     document.body.appendChild(toggleBtn);
     document.body.appendChild(overlay);
+    
+    // Mobil zoom kontrolü için window resize listener
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            document.body.style.zoom = '1';
+        }
+    });
 }
 
 // Initialize search functionality
@@ -134,6 +141,17 @@ function initializeSearch() {
     searchInput.addEventListener('focus', function() {
         if (searchInput.value.trim().length >= 2) {
             showSearchResults();
+        }
+        // Mobil zoom önlemek için
+        if (window.innerWidth <= 768) {
+            document.body.style.zoom = '1';
+        }
+    });
+    
+    // Mobil zoom kontrolü
+    searchInput.addEventListener('blur', function() {
+        if (window.innerWidth <= 768) {
+            document.body.style.zoom = '1';
         }
     });
     
@@ -549,10 +567,20 @@ function navigateToSection(sectionId) {
         
         const sectionTop = section.offsetTop - offset;
         
+        // Mobil cihazlarda zoom önlemek için instant scroll
+        const scrollBehavior = window.innerWidth <= 768 ? 'auto' : 'smooth';
+        
         window.scrollTo({
             top: sectionTop,
-            behavior: 'smooth'
+            behavior: scrollBehavior
         });
+        
+        // Mobil zoom kontrolü
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                document.body.style.zoom = '1';
+            }, 100);
+        }
     }
 }
 
@@ -608,10 +636,19 @@ function addBackToTop() {
     backToTopBtn.className = 'back-to-top';
     
     backToTopBtn.addEventListener('click', function() {
+        const scrollBehavior = window.innerWidth <= 768 ? 'auto' : 'smooth';
+        
         window.scrollTo({
             top: 0,
-            behavior: 'smooth'
+            behavior: scrollBehavior
         });
+        
+        // Mobil zoom kontrolü
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                document.body.style.zoom = '1';
+            }, 100);
+        }
     });
     
     // Show/hide back to top button with throttling

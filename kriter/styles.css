@@ -37,6 +37,9 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-secondary);
     font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 /* Skip link for accessibility */
@@ -242,10 +245,14 @@ body {
     padding: 0.625rem 0.875rem 0.625rem 2.5rem; /* Padding küçültüldü */
     border: none;
     outline: none;
-    font-size: 0.8rem; /* 0.875rem'den küçültüldü */
+    font-size: 16px; /* Mobil zoom önlemek için 16px */
     color: var(--text-primary);
     background: transparent;
     border-radius: 9999px;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 #searchInput::placeholder {
@@ -637,7 +644,7 @@ body {
     
     #searchInput {
         padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-        font-size: 0.875rem;
+        font-size: 16px; /* Mobil zoom önlemek için 16px */
     }
     
     .search-icon {
@@ -741,7 +748,7 @@ body {
     
     #searchInput {
         padding: 0.45rem 0.625rem 0.45rem 2rem;
-        font-size: 0.8rem;
+        font-size: 16px; /* Mobil zoom önlemek için 16px */
     }
     
     .search-icon {
