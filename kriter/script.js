@@ -22,11 +22,106 @@ function addMobileMenuToggle() {
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'mobile-menu-toggle';
     toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-    toggleBtn.addEventListener('click', function() {
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.toggle('open');
+    toggleBtn.setAttribute('aria-label', 'Menüyü aç/kapat');
+    
+    const sidebar = document.querySelector('.sidebar');
+    
+    // İlk click handler kaldırıldı - overlay ile birlikte handle edilecek
+    
+    // Click ve escape handler'ları artık aşağıda tanımlanacak
+    
+    // Add touch swipe support
+    let startX = 0;
+    let currentX = 0;
+    let isSwipeOpen = false;
+    
+    document.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        isSwipeOpen = sidebar.classList.contains('open');
     });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (!startX) return;
+        
+        currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+        
+        // Swipe right to open menu (from left edge)
+        if (startX < 50 && diffX > 50 && !isSwipeOpen) {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            const icon = toggleBtn.querySelector('i');
+            icon.className = 'fas fa-times';
+            toggleBtn.setAttribute('aria-label', 'Menüyü kapat');
+        }
+        
+        // Swipe left to close menu
+        if (isSwipeOpen && diffX < -50) {
+            closeMenu();
+        }
+    });
+    
+    document.addEventListener('touchend', function() {
+        startX = 0;
+        currentX = 0;
+        isSwipeOpen = false;
+    });
+    
+    // Create sidebar overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        const icon = toggleBtn.querySelector('i');
+        icon.className = 'fas fa-bars';
+        toggleBtn.setAttribute('aria-label', 'Menüyü aç');
+    });
+    
+    // Update toggle function to handle overlay
+    toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Toggle button clicked'); // Debug için
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        // Update button icon
+        const icon = toggleBtn.querySelector('i');
+        if (sidebar.classList.contains('open')) {
+            icon.className = 'fas fa-times';
+            toggleBtn.setAttribute('aria-label', 'Menüyü kapat');
+        } else {
+            icon.className = 'fas fa-bars';
+            toggleBtn.setAttribute('aria-label', 'Menüyü aç');
+        }
+    });
+    
+    // Helper function to close menu
+    function closeMenu() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        const icon = toggleBtn.querySelector('i');
+        icon.className = 'fas fa-bars';
+        toggleBtn.setAttribute('aria-label', 'Menüyü aç');
+    }
+    
+    // Global event handlers
+    document.addEventListener('click', function(e) {
+        if (sidebar.classList.contains('open') && 
+            !sidebar.contains(e.target) && 
+            !toggleBtn.contains(e.target)) {
+            closeMenu();
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+            closeMenu();
+        }
+    });
+    
     document.body.appendChild(toggleBtn);
+    document.body.appendChild(overlay);
 }
 
 // Initialize search functionality
@@ -420,12 +515,29 @@ function initializeNavigation() {
             
             // Close mobile menu if open
             const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
             sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            // Update mobile menu button icon
+            const toggleBtn = document.querySelector('.mobile-menu-toggle');
+            if (toggleBtn) {
+                const icon = toggleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-bars';
+                    toggleBtn.setAttribute('aria-label', 'Menüyü aç');
+                }
+            }
         });
     });
     
-    // Update active navigation on scroll
-    window.addEventListener('scroll', updateActiveNavOnScroll);
+    // Update active navigation on scroll with throttling
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+        }
+        scrollTimeout = setTimeout(updateActiveNavOnScroll, 10);
+    });
 }
 
 // Navigate to section
@@ -502,13 +614,19 @@ function addBackToTop() {
         });
     });
     
-    // Show/hide back to top button
+    // Show/hide back to top button with throttling
+    let backToTopTimeout;
     window.addEventListener('scroll', function() {
-        if (window.scrollY > 500) {
-            backToTopBtn.classList.add('visible');
-        } else {
-            backToTopBtn.classList.remove('visible');
+        if (backToTopTimeout) {
+            clearTimeout(backToTopTimeout);
         }
+        backToTopTimeout = setTimeout(function() {
+            if (window.scrollY > 500) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        }, 10);
     });
     
     document.body.appendChild(backToTopBtn);
