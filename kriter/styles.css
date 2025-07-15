@@ -6,11 +6,11 @@
 }
 
 :root {
-    --primary-color: #c53030;
-    --primary-dark: #9b2c2c;
-    --primary-light: #e53e3e;
-    --secondary-color: #e53e3e;
-    --accent-color: #c53030;
+    --primary-color: #4a5568;
+    --primary-dark: #2d3748;
+    --primary-light: #718096;
+    --secondary-color: #3182ce;
+    --accent-color: #ffffff;
     --text-primary: #1f2937;
     --text-secondary: #6b7280;
     --text-light: #9ca3af;
@@ -131,12 +131,12 @@ body {
 .nav-link:focus {
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    border-left-color: var(--accent-color);
+    border-left-color: var(--secondary-color);
     outline: none;
 }
 
 .nav-link.active {
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
     border-left-color: var(--accent-color);
 }
@@ -161,7 +161,7 @@ body {
 }
 
 .nav-link.show-all.active {
-    background: var(--primary-light);
+    background: var(--secondary-color);
     font-weight: 600;
 }
 
@@ -181,12 +181,12 @@ body {
 
 .nav-link.external-link:hover,
 .nav-link.external-link:focus {
-    color: var(--accent-color);
+    color: var(--secondary-color);
     background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.external-link i {
-    color: #dc3545;
+    color: var(--secondary-color);
 }
 
 /* Main Container */
@@ -201,7 +201,7 @@ body {
 
 /* Header - Minimalist */
 .header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     color: white;
     padding: 0.75rem 0; /* Daha da küçültüldü */
     position: sticky;
@@ -233,7 +233,7 @@ body {
 
 .main-title i {
     font-size: 1.25rem; /* Daha da küçültüldü */
-    color: var(--accent-color);
+    color: white;
 }
 
 .subtitle {
@@ -370,7 +370,7 @@ body {
 }
 
 .search-highlight {
-    background-color: #fef3c7;
+    background-color: #bee3f8;
     padding: 0.125rem 0.25rem;
     border-radius: var(--radius-sm);
     font-weight: 600;
@@ -394,11 +394,10 @@ body {
 .section-title {
     font-size: 1.5rem; /* 2rem'den küçültüldü */
     font-weight: 600; /* 700'den küçültüldü */
-    color: var(--primary-color);
+    color: white;
     margin-bottom: 1rem; /* 1.5rem'den küçültüldü */
     padding: 0.75rem 1rem; /* 1rem 1.5rem'den küçültüldü */
-    background: var(--primary-color);
-    color: white;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
 }
@@ -465,8 +464,8 @@ body {
 .subsection-title {
     font-size: 1.125rem; /* 1.5rem'den küçültüldü */
     font-weight: 600;
-    color: rgb(255, 252, 252);
-    background: rgba(123, 122, 122, 0.945); /* Ana başlık rengiyle uyumlu ama daha soluk kırmızı */
+    color: white;
+    background: var(--primary-color);
     padding: 0.75rem 1rem; /* 1.5rem'den küçültüldü */
     margin: 0;
 }
@@ -548,7 +547,7 @@ body {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--accent-color);
+    color: var(--secondary-color);
 }
 
 .footer-info p {
@@ -557,7 +556,7 @@ body {
 }
 
 .footer-info a {
-    color: var(--accent-color);
+    color: var(--secondary-color);
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -570,7 +569,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
     padding: 1.5rem;
     border-radius: var(--radius-lg);
-    border-left: 4px solid var(--accent-color);
+    border-left: 4px solid var(--secondary-color);
 }
 
 .footer-note p {
@@ -584,7 +583,7 @@ body {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
     border: none;
     border-radius: 50%;
@@ -866,7 +865,7 @@ body {
     top: 1rem;
     left: 1rem;
     z-index: 1002;
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
     border: none;
     border-radius: var(--radius-md);
