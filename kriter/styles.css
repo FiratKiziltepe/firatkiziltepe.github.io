@@ -540,12 +540,12 @@ body {
 }
 
 .criterion-details li::before {
-    content: "▶";
+    content: "●";
     position: absolute;
     left: 0;
-    color: var(--accent-color);
+    color: var(--primary-color);
     font-weight: bold;
-    font-size: 0.75rem; /* 0.875rem'den küçültüldü */
+    font-size: 1rem;
 }
 
 /* Footer */
@@ -767,6 +767,15 @@ body {
         padding-left: 1rem;
     }
     
+    .criterion-details li::before {
+        content: "●";
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
     .nav-link {
         padding: 1rem 1.5rem;
         font-size: 0.95rem;
@@ -856,6 +865,15 @@ body {
     .criterion-details li {
         font-size: 0.8rem;
         padding-left: 0.875rem;
+    }
+    
+    .criterion-details li::before {
+        content: "●";
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 0.85rem;
     }
     
     .nav-link {
