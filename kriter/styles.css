@@ -146,6 +146,24 @@ body {
     opacity: 0.8;
 }
 
+/* Special style for show-all link */
+.nav-link.show-all {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.show-all:hover,
+.nav-link.show-all:focus {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link.show-all.active {
+    background: var(--primary-light);
+    font-weight: 600;
+}
+
 /* Main Container */
 .main-container {
     flex: 1;

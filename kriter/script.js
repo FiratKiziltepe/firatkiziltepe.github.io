@@ -528,7 +528,13 @@ function initializeNavigation() {
             // Clear search when navigating
             clearSearch();
             
-            navigateToSection(sectionId);
+            // Check if this is the "show all" link
+            if (this.classList.contains('show-all')) {
+                showAllSections();
+            } else {
+                showOnlySection(sectionId);
+            }
+            
             updateActiveNavLink(this);
             
             // Close mobile menu if open
@@ -548,40 +554,47 @@ function initializeNavigation() {
         });
     });
     
-    // Update active navigation on scroll with throttling
-    let scrollTimeout;
-    window.addEventListener('scroll', function() {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-        scrollTimeout = setTimeout(updateActiveNavOnScroll, 10);
-    });
+    // Show all sections initially and mark show-all as active
+    showAllSections();
+    const showAllLink = document.querySelector('.show-all');
+    if (showAllLink) {
+        updateActiveNavLink(showAllLink);
+    }
 }
 
-// Navigate to section
-function navigateToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        const headerHeight = document.querySelector('.header').offsetHeight;
-        const offset = headerHeight + 20;
+// Show only specified section
+function showOnlySection(sectionId) {
+    // Hide all sections
+    const allSections = document.querySelectorAll('.content-section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show only the selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
         
-        const sectionTop = section.offsetTop - offset;
-        
-        // Mobil cihazlarda zoom önlemek için instant scroll
-        const scrollBehavior = window.innerWidth <= 768 ? 'auto' : 'smooth';
-        
-        window.scrollTo({
-            top: sectionTop,
-            behavior: scrollBehavior
-        });
-        
-        // Mobil zoom kontrolü
-        if (window.innerWidth <= 768) {
-            setTimeout(() => {
-                document.body.style.zoom = '1';
-            }, 100);
+        // Scroll to top of main content
+        const mainContent = document.querySelector('.content');
+        if (mainContent) {
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const scrollBehavior = window.innerWidth <= 768 ? 'auto' : 'smooth';
+            
+            window.scrollTo({
+                top: mainContent.offsetTop - headerHeight,
+                behavior: scrollBehavior
+            });
         }
     }
+}
+
+// Show all sections (default view)
+function showAllSections() {
+    const allSections = document.querySelectorAll('.content-section');
+    allSections.forEach(section => {
+        section.style.display = 'block';
+    });
 }
 
 // Update active navigation link
@@ -590,43 +603,12 @@ function updateActiveNavLink(activeLink) {
     activeLink.classList.add('active');
 }
 
-// Update active navigation on scroll
-function updateActiveNavOnScroll() {
-    const sections = document.querySelectorAll('.content-section');
-    const headerHeight = document.querySelector('.header').offsetHeight;
-    const offset = headerHeight + 100;
-    
-    let currentSection = '';
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop - offset;
-        const sectionHeight = section.offsetHeight;
-        
-        if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-            currentSection = section.id;
-        }
-    });
-    
-    if (currentSection) {
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${currentSection}`) {
-                link.classList.add('active');
-            }
-        });
-    }
-}
+// Update active navigation on scroll (removed since we show only one section at a time)
 
 // Initialize smooth scrolling
 function initializeSmoothScrolling() {
-    // Add smooth scrolling to all anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            navigateToSection(targetId);
-        });
-    });
+    // Add smooth scrolling to all anchor links (disabled for new navigation)
+    // All navigation is now handled by the sidebar navigation
 }
 
 // Add back to top functionality
