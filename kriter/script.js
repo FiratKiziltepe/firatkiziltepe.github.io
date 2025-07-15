@@ -522,6 +522,11 @@ function initializeNavigation() {
     // Add click listeners to navigation links
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
+            // Don't prevent default for external links
+            if (this.classList.contains('external-link')) {
+                return;
+            }
+            
             e.preventDefault();
             const sectionId = this.getAttribute('href').substring(1);
             
