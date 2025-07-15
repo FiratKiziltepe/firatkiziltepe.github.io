@@ -873,7 +873,7 @@ body {
         left: 0;
         color: var(--primary-color);
         font-weight: bold;
-        font-size: 0.85rem;
+        font-size: 0.65rem;
     }
     
     .nav-link {
