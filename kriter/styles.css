@@ -223,7 +223,7 @@ body {
 
 /* Header - Minimalist */
 .header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: var(--bg-dark);
     color: white;
     padding: 0.75rem 0; /* Daha da küçültüldü */
     position: sticky;
