@@ -126,6 +126,8 @@ body {
     margin-left: var(--sidebar-width);
     background: var(--bg-primary);
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
 /* Header - Minimalist */
@@ -307,6 +309,8 @@ body {
     padding: 1.5rem; /* 2rem'den küçültüldü */
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .content-section {
@@ -351,6 +355,8 @@ body {
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 3;
 }
 
 .definition-item:hover {
@@ -379,6 +385,8 @@ body {
     box-shadow: var(--shadow-md);
     overflow: hidden;
     border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 3;
 }
 
 .subsection-title {
