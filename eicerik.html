@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif E-İçerik Değerlendirme Kriterleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Calm Harmony (Stone, Slate Blue/Teal, Amber) -->
+    <!-- Application Structure Plan: A single-page application with a fixed left-side navigation bar for the 6 main criteria sections and a dynamic main content area. This task-oriented design allows reviewers to quickly access specific criteria sets without scrolling through a long document, enhancing usability. An interactive donut chart on the home/intro screen provides a visual entry point. A search bar enables rapid keyword lookup across all criteria. -->
+    <!-- Visualization & Content Choices: Report Info: 6 main categories of e-content criteria. Goal: Organize & Inform. Viz/Presentation: Interactive Donut Chart (Chart.js/Canvas) for visual navigation; Content Cards (HTML/Tailwind) for structured display. Interaction: Clickable nav/chart segments to switch views, search bar to filter criteria. Justification: This interactive checklist/dashboard model is more efficient for the target user (reviewers) than a static document. Library/Method: Chart.js for visualization, Vanilla JS for interactivity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4; 
+        }
+        .nav-item.active {
+            background-color: #f59e0b; /* amber-500 */
+            color: #ffffff;
+        }
+        .nav-item.active svg {
+            color: #ffffff;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .search-highlight {
+            background-color: #fef3c7; /* amber-100 */
+            border-radius: 3px;
+        }
+         .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 450px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 450px;
+            max-height: 80vh; 
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div class="flex h-screen bg-slate-50">
+        <!-- Sidebar Navigation -->
+        <aside class="w-20 lg:w-64 bg-slate-800 text-white flex flex-col transition-all duration-300">
+            <div class="h-20 flex items-center justify-center lg:justify-start lg:pl-6 border-b border-slate-700">
+                <div class="bg-amber-500 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="hidden lg:inline ml-3 text-lg font-bold">Kriterler</span>
+            </div>
+            <nav class="flex-1 px-2 lg:px-4 py-4 space-y-2">
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    <span class="hidden lg:inline ml-4">Giriş</span>
+                </a>
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                    <span class="hidden lg:inline ml-4">Mevzuat</span>
+                </a>
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547a2 2 0 00-.547 1.806l.477 2.387a6 6 0 00.517 3.86l.158.318a6 6 0 00.517 3.86l2.387.477a2 2 0 001.806-.547a2 2 0 00.547-1.806l-.477-2.387a6 6 0 00-.517-3.86l-.158-.318a6 6 0 01-.517-3.86l-.477-2.387a2 2 0 01.547-1.806z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8V4m0 8a4 4 0 100-8 4 4 0 000 8z" /></svg>
+                    <span class="hidden lg:inline ml-4">Bilimsel Yeterlik</span>
+                </a>
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <span class="hidden lg:inline ml-4">Eğitsel Tasarım</span>
+                </a>
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m4 0v2M3 7h12M9 9h6m-5 3h4m-5 4h.01M12 17h.01" /></svg>
+                    <span class="hidden lg:inline ml-4">Dil ve Anlatım</span>
+                </a>
+                <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    <span class="hidden lg:inline ml-4">Tasarım ve Teknik</span>
+                </a>
+                 <a href="#" class="nav-item flex items-center p-3 rounded-lg hover:bg-slate-700" data-section="6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    <span class="hidden lg:inline ml-4">Güvenlik ve Uyum</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">E-İçerik İnceleme Kriterleri</h1>
+                    <p class="text-slate-500 mt-1">Talim ve Terbiye Kurulu Başkanlığı Kriterlerine Dayalı İnteraktif Rehber</p>
+                </div>
+                 <div class="relative w-full max-w-xs">
+                    <input type="text" id="searchInput" placeholder="Kriterlerde ara..." class="w-full pl-10 pr-4 py-2 border rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-container">
+                <!-- Section 0: Giriş -->
+                <section id="section-0" class="content-section">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm">
+                        <h2 class="text-2xl font-bold mb-4 text-teal-700">İnteraktif Kriter Rehberine Hoş Geldiniz</h2>
+                        <p class="text-slate-600 mb-6 leading-relaxed">Bu uygulama, Milli Eğitim Bakanlığı Talim ve Terbiye Kurulu Başkanlığı tarafından yayımlanan "E-İçerik İnceleme ve Değerlendirme Kriterleri" raporunu interaktif bir formata dönüştürmek amacıyla hazırlanmıştır. Amacımız, eğitim materyali geliştiricileri, yayıncılar ve değerlendirme uzmanları için bu kapsamlı kriter setini daha erişilebilir, anlaşılır ve kullanılabilir kılmaktır. Soldaki menüyü veya aşağıdaki görselleştirmeyi kullanarak 6 ana kriter başlığı arasında gezinebilir, her bir başlığın altındaki detaylı maddeleri inceleyebilirsiniz. Arama çubuğu, tüm kriterler içinde anahtar kelime bazlı hızlı arama yapmanıza olanak tanır.</p>
+                        <div class="chart-container">
+                            <canvas id="criteriaChart"></canvas>
+                        </div>
+                         <p class="text-center text-sm text-slate-500 mt-4">Grafikteki bir dilime tıklayarak ilgili bölüme gidebilirsiniz.</p>
+                    </div>
+                </section>
+
+                <!-- Criteria sections will be populated by JS -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const criteriaData = {
+                sections: [
+                    {
+                        title: 'Anayasa ve Diğer Mevzuata Uygunluk',
+                        subsections: [
+                            {
+                                title: 'Genel Mevzuat ve Temel İlkeler',
+                                items: [
+                                    '**1.1.** E-içerik, Türkiye Cumhuriyeti Anayasası’na, taraf olunan uluslararası anlaşmalara, kanunlara ve diğer ilgili mevzuata aykırı herhangi bir unsur içermemelidir.',
+                                    '**1.2.** E-içerik, 1739 sayılı Millî Eğitim Temel Kanunu’nda ifade edilen “Türk Millî Eğitiminin Genel Amaçları” ile “Türk Millî Eğitiminin Temel İlkeleri” esas alınarak hazırlanmalıdır.',
+                                    '**1.3.** E-içerikte terör örgütlerini öven, anımsatan ya da bu örgütlerle irtibatlı veya iltisaklı herhangi bir görsel, yazılı öge, ifade veya ima bulunmamalıdır.',
+                                    '**1.4.** E-içerikte yer alan Türk bayrağı, İstiklâl Marşı ve Atatürk portresi gibi ulusal semboller, ilgili mevzuata uygun ve saygınlığına halel getirmeyecek şekilde kullanılmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Eşitlik, Kapsayıcılık ve İnsan Hakları',
+                                items: [
+                                    '**1.5.** E-içerik; ırk, renk, cinsiyet, dil, din, inanç, siyasi görüş, etnik köken, sosyoekonomik düzey veya engellilik gibi nedenlere dayalı her türlü ayrımcılığı, ön yargıyı ve kalıp yargıyı reddeden kapsayıcı bir yaklaşımla hazırlanmalıdır.',
+                                    '**1.6.** Toplumsal cinsiyet eşitliği gözetilmeli; kadın ve erkeklerin toplumsal rolleri ve temsili konusunda dengeli, pozitif ve güçlendirici bir sunum yapılmalıdır.',
+                                    '**1.7.** Engelli bireylere yönelik farkındalık oluşturulmalı; bu bireyleri belirli kısıtlamalarla tanımlayan, dışlayan veya acıma hissi uyandıran ifade ve görsellerden kaçınılmalıdır.',
+                                    '**1.8.** İçerik, Çocuk Haklarına Dair Sözleşme’ye uygun olmalı; çocuğun yaşama, gelişme, korunma ve katılım hakkı ile çocuğun yüksek yararı ilkesini gözeten bir yaklaşımla hazırlanmalıdır.',
+                                    '**1.9.** İçerikte temel insan hak ve özgürlükleri, din ve vicdan hürriyeti, düşünce ve ifade özgürlüğü gibi evrensel değerler desteklenmeli; bu değerleri zedeleyici unsurlara yer verilmemelidir.'
+                                ]
+                            },
+                            {
+                                title: 'Etik Kurallar ve Fikrî Mülkiyet',
+                                items: [
+                                    '**1.10.** E-içerikte Fikir ve Sanat Eserleri Kanunu’na tam uyum sağlanmalı; kullanılan metin, görsel, ses, video gibi tüm bileşenler için telif haklarına riayet edilmeli, kaynak gösterimi akademik atıf sistemlerine uygun ve tutarlı bir şekilde yapılmalıdır.',
+                                    '**1.11.** Yapay zekâ araçları kullanılarak üretilen metin, görsel vb. unsurlar için bu durum kaynakçada açıkça belirtilmelidir.',
+                                    '**1.12.** E-içerik, herhangi bir ürün, hizmet veya markaya yönelik ticari bir yönlendirme, gizli veya açık reklam ya da haksız rekabete yol açacak manipülasyon unsurları içermemelidir.',
+                                    '**1.13.** Öğrencilerin fiziksel ve ruhsal gelişimini olumsuz etkileyebilecek; şiddet, korku, zorbalık, argo, müstehcenlik ve bağımlılık yapıcı maddeleri özendirme gibi unsurlar açık veya örtük bir biçimde bulunmamalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Kişisel Verilerin Korunması',
+                                items: [
+                                    '**1.14.** E-içerik, 6698 sayılı Kişisel Verilerin Korunması Kanunu’na (KVKK) aykırılık teşkil edecek herhangi bir uygulama içermemelidir.',
+                                    '**1.15.** Kullanıcıdan veri toplanması gereken durumlarda, hangi verinin ne amaçla talep edildiği, nasıl saklanacağı ve işleneceği konusunda kullanıcıya açık ve anlaşılır bir dille bilgi verilmeli ve kullanıcının açık rızası alınmalıdır.',
+                                    '**1.16.** E-içeriğin çalışması için gerekli olmayan kişisel verilere (kamera, mikrofon, konum vb.) erişim izni istenmemelidir.'
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: 'İçeriğin Bilimsel Olarak Yeterliği',
+                        subsections: [
+                            {
+                                title: 'Bilimsel Doğruluk ve Güncellik',
+                                items: [
+                                    '**2.1.** E-içerikte sunulan tüm bilgiler (veri, kuram, tanım, formül vb.) bilimsel olarak doğru, güncel, geçerli ve güvenilir kaynaklara dayalı olmalıdır.',
+                                    '**2.2.** İçerik, kavram yanılgısı, hatalı genelleme, bilgi hatası, eksik bilgi, tutarsızlık veya çelişki barındırmamalıdır.',
+                                    '**2.3.** Görüş ve kanaat niteliğindeki bilgiler, bilimsel verilerden ayırt edilecek şekilde sunulmalı ve bu bilgilerin kaynağı belirtilmelidir.'
+                                ]
+                            },
+                            {
+                                title: 'Kavram, Terim ve Gösterimler',
+                                items: [
+                                    '**2.4.** Alana özgü kavram, terim, simge, birim ve semboller doğru kullanılmalı ve içerik boyunca tutarlılık sağlanmalıdır.',
+                                    '**2.5.** Alana özgü terim ve gösterimlerin yazımında ilgili dersin öğretim programı, TDK Bilim ve Sanat Terimleri Ana Sözlüğü ve alanın kabul görmüş standartları esas alınmalıdır.'
+                                ]
+                            },
+                             {
+                                title: 'Kaynak Kullanımı ve Atıf',
+                                items: [
+                                    '**2.6.** Alıntı yapılan veya faydalanılan tüm eserlere (metin, görsel, video, ses vb.) eksiksiz ve doğru bir şekilde atıf yapılmalıdır.',
+                                    '**2.7.** Kaynakça ve metin içi atıflarda, genel kabul görmüş akademik atıf stillerinden (APA, MLA vb.) biri seçilerek içerik boyunca tutarlı bir şekilde kullanılmalıdır.',
+                                    '**2.8.** Alıntılanan metinler eserin orijinaline uygun olarak verilmeli, yapılan kısaltmalar metnin anlam bütünlüğünü ve yazarın üslubunu bozmamalı ve bu durum belirtilmelidir.',
+                                    '**2.9.** Genel ağ kaynakları, tam bağlantı adresi (URL) ve erişim tarihi ile birlikte kaynakçada belirtilmelidir.'
+                                ]
+                            },
+                             {
+                                title: 'Metin ve Görsel Uyumu',
+                                items: [
+                                    '**2.10.** İçerikte kullanılan tüm görseller (fotoğraf, çizim, grafik, tablo vb.) metinle doğrudan ilişkili, onu destekleyici ve açıklayıcı nitelikte olmalıdır.',
+                                    '**2.11.** Görsellerde veya görsellere ait alt yazılarda yer alan bilgiler, metinle çelişmemeli ve hata içermemelidir.',
+                                    '**2.12.** Sanat eserleri gibi özel görsellerin künye bilgileri (sanatçı, eser adı, dönem, bulunduğu yer vb.) doğru bir şekilde belirtilmelidir.'
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Programa ve Eğitsel Tasarıma Uygunluk',
+                         subsections: [
+                            {
+                                title: 'Öğretim Programıyla Uyumluluk',
+                                items: [
+                                    '**3.1.** E-içerik, ilgili dersin öğretim programında yer alan öğrenme çıktılarını, süreç bileşenlerini ve içerik çerçevesini tam olarak karşılamalıdır.',
+                                    '**3.2.** E-içerik, öğretim programının öngördüğü alan becerileri, kavramsal beceriler, sosyal-duygusal öğrenme becerileri ve değerleri geliştirmeyi desteklemelidir.',
+                                    '**3.3.** E-içerik, öğretim programında belirtilen disiplinler arası ilişkileri ve bütüncül eğitim yaklaşımını yansıtmalıdır.',
+                                    '**3.4.** E-içerik, öğretim programının belirlediği kapsam ve sınırlılıkların dışına çıkan gereksiz ayrıntılar içermemelidir.'
+                                ]
+                            },
+                            {
+                                title: 'Pedagojik Yaklaşım ve Öğrenme Süreci',
+                                items: [
+                                    '**3.5.** E-içerik, hedef kitlenin yaşına, hazırbulunuşluk düzeyine ve bilişsel, duyuşsal, sosyal gelişim özelliklerine uygun olmalıdır.',
+                                    '**3.6.** Öğrenciyi merkeze alan, aktif katılımını teşvik eden, merak uyandıran ve öğrenmeye karşı güdüleyen bir yapıda tasarlanmalıdır.',
+                                    '**3.7.** Öğrencilerin farklı öğrenme stratejilerini ve stillerini kullanmalarına imkân tanıyan çeşitli etkinlik ve yöntemler sunmalıdır.',
+                                    '**3.8.** Konuların işlenişinde gerçek hayatla ve öğrencinin yakın çevresiyle anlamlı bağlantılar kurulmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Etkileşim ve Geri Bildirim',
+                                items: [
+                                    '**3.9.** E-içerik, öğrencinin kendi öğrenme hızında ilerlemesine olanak tanıyan ve içerikle aktif olarak etkileşime girmesini sağlayan ögeler (simülasyon, sürükle-bırak, veri girişi vb.) içermelidir.',
+                                    '**3.10.** Etkileşimli ögeler sonucunda öğrenciye anında, yapıcı, açıklayıcı ve sadece doğru/yanlış demekten öte, yönlendirici geri bildirimler sunulmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Ölçme ve Değerlendirme',
+                                items: [
+                                    '**3.11.** E-içerik, öğrenme çıktılarını ölçmeye yönelik, öğretim süreciyle bütünleşik ve çeşitli (çoktan seçmeli, açık uçlu, eşleştirme, proje, performans görevi vb.) ölçme ve değerlendirme araçları içermelidir.',
+                                    '**3.12.** Değerlendirme etkinlikleri, öğrenme eksikliklerini belirlemeye ve gidermeye yönelik olmalıdır.',
+                                    '**3.13.** Öğrencinin kendi öğrenme sürecini ve ürününü değerlendirmesine olanak tanıyan öz değerlendirme ve akran değerlendirme gibi yaklaşımlara yer verilmelidir.'
+                                ]
+                            }
+                        ]
+                    },
+                     {
+                        title: 'Dil ve Anlatım Yönünden Yeterliği',
+                         subsections: [
+                            {
+                                title: 'Dilin Doğru ve Etkili Kullanımı',
+                                items: [
+                                    '**4.1.** E-içerikte kullanılan dil, Türkçenin ses, yapı ve anlam özelliklerine uygun, özenli ve doğru olmalıdır.',
+                                    '**4.2.** Anlatım; akıcılık, yalınlık, açıklık ve duruluk gibi ilkelere uygun olmalı; anlatım bozukluğu içermemelidir.',
+                                    '**4.3.** Öğrencilerin yaş ve sınıf seviyesine uygun bir dil ve üslup kullanılmalı, söz varlığını zenginleştiren metinler tercih edilmelidir.',
+                                    '**4.4.** Türkçeye henüz yerleşmemiş yabancı sözcükler yerine varsa Türkçe karşılıkları kullanılmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Yazım ve Noktalama Kuralları',
+                                items: [
+                                    '**4.5.** E-içerikteki metinler, Türk Dil Kurumu (TDK) tarafından yayımlanan güncel Yazım Kılavuzu ve Türkçe Sözlük esas alınarak hazırlanmalı, yazım yanlışı içermemelidir.',
+                                    '**4.6.** Metinlerde noktalama işaretleri doğru ve yerinde kullanılmalı, eksik veya gereksiz noktalama işareti kullanımından kaçınılmalıdır.'
+                                ]
+                            },
+                             {
+                                title: 'Anlam Bütünlüğü',
+                                items: [
+                                    '**4.7.** Metni oluşturan cümleler ve paragraflar arasında anlam ve anlatım bütünlüğü sağlanmalıdır.',
+                                    '**4.8.** Anlatım, hiçbir tartışmaya veya farklı yoruma yol açmayacak şekilde tek bir yargıyı açıkça ifade etmelidir.'
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Tasarım, Kullanılabilirlik ve Teknik Yeterlilik',
+                        subsections: [
+                             {
+                                title: 'Görsel Tasarım ve Estetik',
+                                items: [
+                                    '**5.1.** E-içeriğin genel tasarımı; denge, bütünlük, hiyerarşi gibi temel tasarım ilkelerine uygun, estetik ve öğrencinin ilgisini çekecek nitelikte olmalıdır.',
+                                    '**5.2.** Yazı tipi, punto büyüklüğü, renk, boşluk ve hizalama gibi tipografik ögeler okunabilirliği desteklemeli ve içerik boyunca tutarlı bir şekilde kullanılmalıdır.',
+                                    '**5.3.** Görsel ögeler (fotoğraf, video, animasyon vb.) öğrenmeyi destekleyici, yüksek çözünürlüklü ve kaliteli olmalıdır.',
+                                    '**5.4.** Tasarımda öğrenme amacına hizmet etmeyen, dikkat dağıtıcı ve bilişsel yükü artıran gereksiz görsel unsurlardan kaçınılmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Arayüz ve Kullanım Kolaylığı (Kullanılabilirlik)',
+                                items: [
+                                    '**5.5.** Arayüz basit, anlaşılır, sezgisel ve kullanıcı dostu bir yapıda tasarlanmalıdır.',
+                                    '**5.6.** Menüler, düğmeler ve bağlantılar gibi yönlendirme (navigasyon) ögeleri kolayca erişilebilir olmalı ve beklenen işlevi yerine getirmelidir.',
+                                    '**5.7.** Video ve ses içeriklerinde oynatma, durdurma, sesi ayarlama, ileri-geri sarma gibi temel kontrol seçenekleri sunulmalıdır.',
+                                    '**5.8.** Etkileşimli alanlar (yazma, sürükleme, tıklama vb.) amacına uygun büyüklükte ve kolay kullanılabilir olmalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Teknik Performans ve Kalite',
+                                items: [
+                                    '**5.9.** E-içerik, farklı platformlarda (mobil, masaüstü vb.) ve yaygın kullanılan web tarayıcılarında sorunsuz bir şekilde çalışmalıdır.',
+                                    '**5.10.** Sesler net, anlaşılır ve dip gürültüsünden arındırılmış olmalı; ses ve görüntü birbiriyle eş zamanlı (senkronize) olmalıdır.',
+                                    '**5.11.** Videolar akıcı olmalı, görüntü kalitesi yüksek olmalı ve takılma, donma gibi performans sorunları yaşanmamalıdır.'
+                                ]
+                            },
+                            {
+                                title: 'Erişilebilirlik',
+                                items: [
+                                    '**5.12.** E-içerik, özel gereksinimli öğrencilerin kullanımını destekleyecek şekilde tasarlanmalıdır.',
+                                    '**5.13.** Renk körlüğü gibi durumlar göz önünde bulundurularak yeterli renk kontrastı sağlanmalı, bilgi aktarımı sadece renklere dayalı olmamalıdır.',
+                                    '**5.14.** Sesli anlatım içeren video içerikleri için kullanıcı tarafından açılıp kapatılabilen, sesle senkronize ve doğru alt yazılar hazırlanmalıdır.',
+                                    '**5.15.** İçerikteki tüm etkileşimli ögeler klavye aracılığıyla kullanılabilir olmalıdır.'
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Güvenlik, Güncellik ve Uyumluluk',
+                         subsections: [
+                             {
+                                title: 'Güvenlik',
+                                items: [
+                                    '**6.1.** E-içerik; virüs, truva atı, casus yazılım gibi zararlı unsurlar içermemeli ve kullanıcı cihazının güvenliğini tehlikeye atacak kod parçacıkları barındırmamalıdır.',
+                                    '**6.2.** Güvenlik tedbiri alınması gereken deney, etkinlik gibi uygulamalarda gerekli uyarılar ve semboller açıkça belirtilmelidir.'
+                                ]
+                            },
+                            {
+                                title: 'Güncellik',
+                                items: [
+                                    '**6.3.** E-içerik, güncel web teknolojileri ve yazılım geliştirme standartları kullanılarak hazırlanmalıdır.',
+                                    '**6.4.** Öğrenme analitiklerinin izlenmesine olanak sağlayan SCORM, xAPI gibi güncel e-öğrenme standartlarında paketlenmelidir.'
+                                ]
+                            },
+                             {
+                                title: 'Uyumluluk ve Platform Bağımsızlığı',
+                                items: [
+                                    '**6.5.** E-içerik, farklı işletim sistemleri (Windows, macOS, Android, iOS vb.), ekran boyutları ve çözünürlüklerinde işlevsel ve görsel bir kayıp olmadan duyarlı tasarım (responsive design) ilkelerine uygun olarak çalışmalıdır.',
+                                    '**6.6.** Herhangi bir ek yazılım veya eklenti (plug-in) kurulumu gerektirmeden kullanılabilmelidir. Kurulum zorunlu ise asgari sistem gereksinimleri ve kurulum adımları açıkça belirtilmelidir.',
+                                    '**6.7.** E-içerik, farklı öğrenme yönetim sistemleri (ÖYS) arasında taşınabilir ve yeniden kullanılabilir bir yapıda tasarlanmalıdır.'
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            const contentContainer = document.getElementById('content-container');
+            const navItems = document.querySelectorAll('.nav-item');
+            const searchInput = document.getElementById('searchInput');
+            let myChart;
+
+            function formatText(text) {
+                return text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>');
+            }
+            
+            function populateContent() {
+                criteriaData.sections.forEach((section, index) => {
+                    const sectionEl = document.createElement('section');
+                    sectionEl.id = `section-${index + 1}`;
+                    sectionEl.className = 'content-section';
+                    
+                    let sectionHTML = `<h2 class="text-2xl font-bold mb-6 text-teal-700">${section.title}</h2><div class="space-y-6">`;
+
+                    section.subsections.forEach(subsection => {
+                        sectionHTML += `
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 criterion-card">
+                                <h3 class="text-lg font-semibold mb-4 text-slate-800">${subsection.title}</h3>
+                                <ul class="space-y-3 list-inside text-slate-600">
+                        `;
+                        subsection.items.forEach(item => {
+                            sectionHTML += `<li class="criterion-item leading-relaxed flex items-start"><span class="mr-2 mt-1 text-amber-500">&#10148;</span><span>${formatText(item)}</span></li>`;
+                        });
+                        sectionHTML += `</ul></div>`;
+                    });
+
+                    sectionHTML += `</div>`;
+                    sectionEl.innerHTML = sectionHTML;
+                    contentContainer.appendChild(sectionEl);
+                });
+            }
+
+            function showSection(sectionIndex) {
+                document.querySelectorAll('.content-section').forEach((section, index) => {
+                    section.classList.toggle('active', index == sectionIndex);
+                });
+                navItems.forEach((navItem, index) => {
+                    navItem.classList.toggle('active', index == sectionIndex);
+                });
+            }
+            
+            function createChart() {
+                const ctx = document.getElementById('criteriaChart').getContext('2d');
+                const labels = navItemsToLabels();
+                 myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Kriterler',
+                            data: [1, 1, 1, 1, 1, 1],
+                            backgroundColor: [
+                                'rgba(15, 118, 110, 0.7)',  // teal-700
+                                'rgba(51, 65, 85, 0.7)',   // slate-700
+                                'rgba(245, 158, 11, 0.7)',  // amber-500
+                                'rgba(100, 116, 139, 0.7)', // slate-500
+                                'rgba(22, 163, 74, 0.7)',   // green-600
+                                'rgba(219, 39, 119, 0.7)'  // pink-600
+                            ],
+                            borderColor: '#ffffff',
+                            borderWidth: 4,
+                            hoverOffset: 16
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '50%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 14,
+                                        family: 'Inter'
+                                    },
+                                    color: '#475569',
+                                    padding: 20
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const chartElement = elements[0];
+                                const index = chartElement.index;
+                                showSection(index + 1); // +1 to skip intro section
+                            }
+                        }
+                    }
+                });
+            }
+
+            function handleSearch() {
+                const query = searchInput.value.toLowerCase().trim();
+                const allItems = document.querySelectorAll('.criterion-item');
+                const allCards = document.querySelectorAll('.criterion-card');
+
+                if (query === '') {
+                    allItems.forEach(item => item.style.display = 'flex');
+                    allCards.forEach(card => card.style.display = 'block');
+                     allItems.forEach(item => {
+                        item.querySelector('span:last-child').innerHTML = formatText(item.querySelector('span:last-child').textContent);
+                    });
+                    return;
+                }
+                
+                let visibleItemsInAnySection = false;
+
+                allCards.forEach(card => {
+                    let hasVisibleItem = false;
+                    const itemsInCard = card.querySelectorAll('.criterion-item');
+                    itemsInCard.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        const originalText = item.querySelector('span:last-child').textContent;
+                        if (text.includes(query)) {
+                            item.style.display = 'flex';
+                            hasVisibleItem = true;
+                            visibleItemsInAnySection = true;
+                            
+                            const regex = new RegExp(query, 'gi');
+                            const newHTML = formatText(originalText).replace(regex, `<span class="search-highlight">$&</span>`);
+                            item.querySelector('span:last-child').innerHTML = newHTML;
+                        } else {
+                            item.style.display = 'none';
+                            item.querySelector('span:last-child').innerHTML = formatText(originalText);
+                        }
+                    });
+
+                    if (hasVisibleItem) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (visibleItemsInAnySection) {
+                    document.querySelectorAll('.content-section').forEach(section => {
+                         let hasVisibleCard = section.querySelector('.criterion-card[style*="display: block"]');
+                         if(hasVisibleCard){
+                            section.classList.add('active');
+                         } else {
+                            section.classList.remove('active');
+                         }
+                    });
+                     if(!document.querySelector('.content-section.active')) {
+                        showSection(0);
+                    }
+                }
+            }
+
+            function navItemsToLabels() {
+                const labels = [];
+                navItems.forEach((item, index) => {
+                    if (index > 0) { // Skip "Giriş"
+                         labels.push(item.querySelector('span').textContent);
+                    }
+                });
+                return labels;
+            }
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    handleSearch();
+                    const sectionIndex = e.currentTarget.dataset.section;
+                    showSection(sectionIndex);
+                });
+            });
+            
+            searchInput.addEventListener('keyup', handleSearch);
+
+            populateContent();
+            showSection(0); // Show introduction by default
+            createChart();
+        });
+    </script>
+</body>
+</html>

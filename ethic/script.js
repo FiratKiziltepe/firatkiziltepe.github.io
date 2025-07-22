@@ -2,6 +2,7 @@
 
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
+    initializePasswordProtection();
     initializeNavigation();
     initializeThemeToggle();
     initializeTabs();
@@ -9,6 +10,77 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForms();
     initializeMobileMenu();
 });
+
+// Password protection functionality
+function initializePasswordProtection() {
+    // Only apply password protection on index page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    if (currentPage !== 'index.html') {
+        return;
+    }
+    
+    const correctPassword = '3610';
+    const modal = document.getElementById('password-modal');
+    const input = document.getElementById('password-input');
+    const submitBtn = document.getElementById('password-submit');
+    const errorDiv = document.getElementById('password-error');
+    const body = document.body;
+    
+    // Check if password is already entered
+    const isAuthenticated = sessionStorage.getItem('passwordEntered');
+    
+    if (!isAuthenticated) {
+        // Show modal and protect page
+        body.classList.add('page-protected');
+        modal.style.display = 'flex';
+        
+        // Focus on input
+        setTimeout(() => {
+            input.focus();
+        }, 100);
+        
+        // Handle password submission
+        function checkPassword() {
+            const enteredPassword = input.value;
+            
+            if (enteredPassword === correctPassword) {
+                // Correct password
+                sessionStorage.setItem('passwordEntered', 'true');
+                modal.style.display = 'none';
+                body.classList.remove('page-protected');
+                errorDiv.textContent = '';
+            } else {
+                // Wrong password
+                errorDiv.textContent = 'Yanlış şifre! Tekrar deneyin.';
+                input.value = '';
+                input.focus();
+                
+                // Shake animation
+                input.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    input.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        // Event listeners
+        submitBtn.addEventListener('click', checkPassword);
+        
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        // Clear error on input
+        input.addEventListener('input', function() {
+            errorDiv.textContent = '';
+        });
+    } else {
+        // Hide modal if already authenticated
+        modal.style.display = 'none';
+    }
+}
 
 // Navigation functionality
 function initializeNavigation() {

@@ -1,0 +1,884 @@
+1
+ARAÇLARI 
+A 
+AÇIKLAMALARI2Bu doküman  HİZMETE ÖZEL  olarak Talim ve Terbiye Kurulu Başkanlığı tarafından hazırlanmıştır. Başka bir amaçla kullanılamaz.
+Bu kriterler ve açıklamalarının; 23.05.2024 tarihli ve 20 sayılı Kurul Kararı ile öğretim programları değişikliğine gidilen dersler ve 
+aynı Kurul Kararı ile kabul edilen “Türkiye Yüzyılı Maarif Modeli Öğretim Programları Ortak Metni” çerçevesinde öğretim programı 
+değişikliği yapılan derslere ait taslak ders kitapları ve eğitim araçlarının hazırlama, inceleme ve değerlendirme süreçlerinde kullanıl -
+ması 15.10.2024 tarih ve 117172165 sayılı Kurul Mütalaası ile uygun bulunmuştur.3DERS KİTAPLARI VE EĞİTİM ARAÇLARI 
+İLE BUNLARA AİT ELEKTRONİK 
+İÇERİKLERİN İNCELENMESİNDE 
+DEĞERLENDİRMEYE ESAS OLACAK
+ KRİTERLER VE AÇIKLAMALARI
+(TÜRKİYE YÜZYILI MAARİF MODELİ KAPSAMINDA
+HAZIRLANAN EĞİTİM ÖĞRETİM PROGRAMLARI İÇİN)4
+PROGRAMINI N
+AMAÇ VE 
+KAPSAMINA   ANAY ASA  VE
+PROGRAMININ 
+YAPISINA  GÖRSEL TASARIMI N
+TASARIMINI N
+ÖLÇME VE AÇIKLAMALARI8
+7
+6
+5 4321 8
+DİL VE ANLATIM 
+YÖNÜNDEN 
+YETERLİĞİELEKTRONİK 
+İÇERİKLERİN 
+KAPSAM VE 
+TASARIMININ 
+UYGUNLUĞU
+BİLİMSEL 
+OLARAK 
+YETERLİĞİ5TANIMLAR VE AÇIKLAMALARI
+Ders kitabını ve öğrenme sürecini desteklemek üzere öğrenciye yönelik üretilen dijital veya 
+basılı kitap.Eğitim öğretim sürecini desteklemek ve zenginleştirmek için öğrenme ortamlarında elektronik araçlar 
+ile kullanılmak üzere tasarlanmış, zamandan ve mekândan bağımsız, tekrar kullanılabilir özellikteki 
+metin, görsel, ses, video, etkileşimli uygulama gibi çeşitli formatlarda sunulan eğitsel içerikler.
+Kullanıcıların düğmeler ve sürükle-bırak aktiviteleri gibi etkileşim ögeleri sayesinde içerikle aktif 
+bir şekilde etkileşime geçmesini mümkün kılan ve öğrenme sürecini daha dinamik ve katılımcı 
+hâle getiren, görev tamamlama ve geri bildirim alma imkânı sunan dijital materyaller.
+Öğretmeni desteklemek üzere üretilen dijital veya basılı kitap.
+Herhangi bir eğitim ve öğretim programı çerçevesinde hazırlanmış basılı veya dijital ortamdaki 
+kitap ve eklerinin taslak veya model prototipi.Ders kitabı ya da eğitim aracını hazırlayan hizmet birimini veya yayınevini.
+Taslak ders kitabını yazan, en az lisans düzeyinde öğrenim görmüş veya öğretmen olarak atan -
+mış ya da daha önce alanda yayımlanmış ders kitabı olan kişi.
+14.10.2021 tarihli ve 31628 sayılı Resmî Gazete’de yayımlanan Millî Eğitim Bakanlığı Ders Kita -
+pları ve Eğitim Araçları Yönetmeliği.Öğrenci Çalışma KitabıE-içerik
+Etkileşimli İçerik
+Öğretmen Kılavuz Kitabı
+Taslak Ders KitabıBaşvuru Sahibi
+Yazar
+Yönetmelik
+Herhangi bir eğitim ve öğretim programı çerçevesinde hazırlanmış, Kurulca örgün ve yaygın 
+eğitim kurumlarında okutulması uygun bulunan basılı veya dijital ortamdaki kitap ve ekleri veya 
+bunların model prototipi.
+Elektronik eğitim içeriklerinin taslak ders kitaplarını zenginleştirmede daha yaygın kullanılması -
+na yönelik hazırlanan tablo.Ders Kitabı
+Ders Kitapları Elektronik 
+Eğitim İçerikleri Tablosu
+Eğitim AracıAlanında ve sınıf düzeyinde ders kitabı olmaması veya sadece özel yayınevlerine ait ders kitapları ol -
+ması hâlinde, kamu yararı gözetilerek eğitim ve öğretim kurumlarında okutulmak üzere Kurul kararı ve 
+Bakan onayı ile ilgili hizmet birimince hazırlanan basılı veya dijital ortamdaki kitap ve ekleri.6İÇİNDEKİLER
+1.1. Genel..............................................................................9
+1.2. Millî Güvenlik..................................................................9
+1.3. Eşitlik ve Kapsayıcılık...................................................10
+1.4. Millî ve Manevi Değerler................................................11
+1.5. Güvenli ve Etik İçerik.....................................................11
+1.6. Kişisel Verilerin Korunması...........................................11
+1.7. Reklam Unsurları..........................................................12
+1.8. Telif ve İntihal................................................................ 12
+1.9. Çevre ve Sürdürülebilir Yaşam......................................12
+2.1. Bilimsellik.......................................................................14
+2.2. Metin ve Görsel Uyumu.................................................14
+2.3. Kavram ve Terimlerin Kullanımı.....................................15
+2.4. Orijinal Metinler..............................................................15
+2.5. Yazar Biyografileri .......................................................15
+2.6. Standart Bölümler..........................................................15
+2.7. Güvenlik.........................................................................16
+2.8. Sözlük............................................................................16
+2.9. Kaynak Gösterimi.........................................................163.1. İçeriğin Kapsamı ve Öğrenme Çıktılarına Uygunluğu ....19
+3.2. İçeriğin Yapısı..................................................................19
+3.3. Öğrenme Alanı/Ünite/Temaların Dengeli Dağılımı............20
+3.4. Öğretme ve Öğrenme Süreci............................................20
+3.5. Öğrenci Çalışma Kitabı ve Öğretmen Kılavuz 
+Kitabı...............................................................................20
+4.1. İçeriğin Eğitim Öğretim Programının Programlar Arası 
+Bileşenlerine Uygunluğu ....................................................... 23
+4.2. İçeriğin Eğitim Öğretim Programının Bütüncül Eğitim 
+Yaklaşımına Uygunluğu ........................................................ 23
+Anayasa ve Diğer Mevzuata UygunluğuEğitim ve Öğretim Programının
+Amaç ve Kapsamına Uygunluğu
+Bilimsel Olarak Yeterliği1 3
+4 2Eğitim ve Öğretim Programının
+Bütünleşik Yapısına Uygunluğu76.1. Dil ve Üslup.............. ............ ............. .................. ......29
+6.2. Yazı Dili Standartlarına Uygunluk........ ......................29
+6.3. Anlam ve Anlatım.......................................................297.1. Kapak Tasarımı......................................................32
+7.2. Genel Tasarım Uyumu........... ............. ...................32
+7.3. Sayfa Tasarımı.......................................................33
+7.4. Görsel Destekli Öğrenme.................. .................. ...34 
+7.5. Görsel ve Yazılı Unsurların Özellikleri.... ........ ........34
+8.1. Standart Olarak Hazırlanması Gereken E-içerikler
+ ve Karekodlar............................... ....................................37
+8.2. Elektronik Eğitim İçerikleri Tablosuna Uygunluk.........38
+8.3. Eğitsel Tasarım.................. ................................. .........38
+8.4. Arayüz Tasarımı ve Kullanılabilirlik.......... ....................40
+8.5. Ses ve Görüntü Kalitesi................................... ...........41
+8.6. Güvenlik, Güncellik ve Uyumluluk................... ...........425.1. Temel İlkeler ve Mevzuata Uygunluk .............................25
+5.2. Ölçme ve Değerlendirme Sürecinin Öğretim
+Programına Uygunluğu.........................................................26
+5.3. Ön Değerlendirme ve Pekiştirme Araçları......................27
+5
+67
+8Dil ve Anlatım Yönünden YeterliğiGörsel Tasarımın ve İçerikTasarımının 
+Uygunluğu
+Elektronik İçeriklerin Kapsam ve 
+Tasarımının UygunluğuÖlçme ve Değerlendirme Sürecinin 
+Uygunluğu81. ANAYASA VE DİĞER 
+MEVZUATA UYGUNLUĞU
+ Bu bölümde ders kitapları ve eğitim araçları ile bunlara 
+ait elektronik içeriklerin Anayasa ve diğer mevzuata 
+uygunluk açısından incelenmesi ve değerlendirilme -
+sinde dikkate alınacak kriterler ve açıklamaları yer 
+almaktadır.91.1. Genel
+1.1.1. İçerikte Anayasa, taraf olduğumuz milletlerarası anlaşmalar, kanunlar ve diğer mevzuata aykırı bir husus bulunmamalıdır.  
+ 
+• İçerik, Anayasa’da ve Millî Eğitim Temel Kanunu’nda açıkça hükme bağlanmış eşitlik ilkesi gözetilerek temel insan hak ve özgürlük -
+lerini destekleyen ve her türlü ayrımcılığı reddeden bir yaklaşımla hazırlanmalıdır .
+ 
+• İçerik; demokratik, laik ve sosyal bir hukuk devleti olan Türkiye Cumhuriyeti’ne karşı görev ve sorumluluklarını bilen ve bunları dav -
+ranış hâline getirmiş vatandaşlar yetiştirme amacına uygun hazırlanmalıdır .
+• İçerik, 1739 sayılı Millî Eğitim Temel Kanunu’nun 2’nci maddesinde ifade edilen “Türk Millî Eğitiminin Genel Amaçları” ile ikinci bölü -
+münde yer alan “Türk Millî Eğitiminin Temel İlkeleri” esas alınarak hazırlanmalıdır. 
+• İçerik; 1739 sayılı Millî Eğitim Temel Kanunu’nun 2’nci maddesinde ifade edilen Türk Milletinin millî, ahlaki, insani, manevi ve kültürel 
+değerlerini benimseyen, koruyan ve geliştiren bir vatandaş yetiştirme anlayışıyla tasarlanmalıdır .
+• İçerikte yer alan Türk bayrağı görseli; Türk Bayrağı Kanunu’na uygun olarak herhangi bir tartışmaya, değersizleştirmeye neden ol -
+mayacak şekilde, sayfa düzenine ve görsel tasarıma uygun olarak çizilmeli ve konumlandırılmalıdır . 
+1.1.2. Ders kitabı ve eğitim aracında Atatürk Portresi, İstiklâl Marşı, Gençliğe Hitabe, Öğrenci Andı, Türkiye’nin Mülki İdare 
+Bölümleri ile Kara ve Deniz Komşuları Haritası ve Türk Dünyası Haritası ile arka kapak tasarımı Kurulun uygun gördüğü ve 
+Yönetmelik’te (Millî Eğitim Bakanlığı Ders Kitapları ve Eğitim Araçları Yönetmeliği) belirtilen şekilde kullanılmalıdır.
+• İlkokul 1, 2 ve 3. sınıflarına ait ders kitapları ve eğitim araçlarında ikinci yaprak ve devamında, yaprağın ön yüzünde Türk bayrağı ile 
+birlikte İstiklâl Marşı’nın ilk iki kıtası, yaprağın arka yüzünde Öğrenci Andı, üçüncü yaprağın ön yüzünde Atatürk resmi ve resmin alt 
+kısmında Mustafa Kemal Atatürk yazısı Yönetmelik’te belirtilen şekilde bulunmalıdır.
+• İlkokul 4. sınıf, ortaokul, ortaöğretim ve yaygın eğitim ders kitapları ve eğitim araçlarında, ikinci yaprağın ön yüzünde Türk bayrağı ile 
+İstiklâl Marşı; yaprağın arka yüzünde Atatürk’ün Gençliğe Hitabesi; üçüncü yaprağın ön yüzünde Atatürk resmi ile resmin alt kısmında 
+Mustafa Kemal Atatürk yazısı Yönetmelik’te belirtilen şekilde bulunmalıdır.
+1.1.3. Taslak ders kitabı ve eğitim aracının herhangi bir bölümünde yazarın ya da yazarların, bunların dışında kitabı hazırlayan -
+ların adı, soyadı ve varsa akademik ünvanı, başvuru sahibinin adı veya adresi, amblemi; taslak ders kitabı ve eğitim aracının 
+kimliğini gösteren bilgi veya kenar süsü, sayfa numarası gibi simge ya da işaretler, kitabın kimliğini belirleyici herhangi bir öge 
+(logo, sembol, sete özel isim vb.) yer almamalıdır.
+1.2. Millî Güvenlik
+1.2.1. İçerikte terör örgütleri ile irtibatlı veya iltisaklı herhangi bir görsel veya yazılı öge, ifade yahut ima bulunmamalıdır .
+1.2.2. Türkiye Cumhuriyeti’ni uluslararası alanlarda zor duruma düşürecek veya millî menfaatlere zarar verecek içerik bulun -
+mamalıdır. 
+9101.3. Eşitlik ve Kapsayıcılık
+1.3.1. Ders kitabı ve eğitim aracı eşitlikçi ve kapsayıcı şekilde tasarlanmalı, bireylerin hak ve özgürlüklerini ihlal edebilecek 
+herhangi bir unsur bulundurmamalıdır.
+• İçerikte çoğulculuk ilkesi gözetilmelidir.
+• İçerikte ırk, renk, dil, din, siyasi tercih, etnik köken, mülkiyet veya başka herhangi bir ayrım gözetilmeksizin evrensel insan haklarının 
+herkes için geçerli olduğu ilkesi esas alınmalıdır. 
+• Konuların işlenişinde veya örneklerde, insanların betimlenmesi ve olayların sunulmasında toplumsal eşitlik ilkesi gözetilmelidir . 
+• İçerik oluşturulurken toplumun tüm kesimlerine hitap edilerek toplumsal temsiliyet dikkate alınmalıdır .
+1.3.2. İçerikte din ve vicdan hürriyeti, düşünce ve ifade özgürlüğü, adalet, toplumsal barış ve insan hakları gözetilmelidir; bu 
+anlayışı bozan herhangi bir ifade veya ima yer almamalıdır. 
+• İçerik rol, statü ve kuşaklar arası çatışma oluşturmayacak mahiyette olmalıdır . 
+• Toplumsal kesimlerin düşünce ve inanç biçimini, siyasi görüş ve felsefi tercihini küçük düşürebilecek, ön yargı ile değerlendirilmesine 
+yol açabilecek anlatımlara yer verilmemelidir.
+1.3.3. İçerikte tarafsızlık ilkesi gözetilerek kişileri ve toplulukları aşağılayıcı, dışlayıcı, etiketleyici veya aşırı yüceltici ifadeler 
+bulunmamalıdır.
+ 
+• İçerikte farklı kültürel ve etnik yapılar ile yerel-yöresel ayrıntılar, din ve mezhep kaynaklı özellik ve davranışlar üzerinden gidilecek 
+genellemelere yer verilmemelidir.
+• İçerikte gelir düzeyine veya sosyal konuma göre bireyi aşağılayacak ya da yüceltecek ifade, kinaye, ima yer almamalıdır .
+• İçerikte bireysel, sosyal, mesleki kimlikleri ve kişilikleri küçülten herhangi bir ifade veya ima yer almamalıdır . 
+• Kadın-erkek temsilinde isnat, ön yargı, kalıp yargı vb. ifadeler bulunmamalıdır . 
+1.3.4. Verilen örneklerde ve kullanılan karakterlerde içeriğin tamamı dikkate alınarak kadın ve erkek dağılımında makul bir 
+denge gözetilmelidir.
+• İçerikte eğitim öğretim programı ile uyumlu olacak şekilde kadın hakları, kadınların toplum hayatına katılımı ile tarihsel ve güncel 
+başarıları konusunda pozitif bir temsil sağlanmalıdır.
+1.3.5. İçerikte engelli bireyler hakkında genellemeler yapılarak bu bireyleri belirli kısıtlamalarla tanımlayan ifade ve görseller 
+yer almamalıdır.111.3.6. İçerik genelinde engellilik konusunda farkındalık oluşturacak pozitif bir temsil sağlanmalıdır .
+• Verilen örneklerde ve kullanılan karakterlerde farklı engel durumlarına yönelik yazılı veya görsel unsurlara yer verilmelidir.
+• İçeriklerde eğitim öğretim programına uygun olarak ilgili ünite/tema/öğrenme alanlarının bağlamları göz önünde bulundurulup engelli 
+bireylerin günlük yaşamlarına ve deneyimlerine yer verilmelidir. 
+1.3.7. Ünite/tema/öğrenme alanı göz önünde bulundurularak içerikte çocuk haklarına (yaşama hakkı, gelişim hakkı, koruma ve 
+katılım hakkına vb.) aykırılık teşkil edecek yazılı veya görsel herhangi bir unsur bulunmamalıdır . 
+• İçerik ünite/tema/öğrenme alanı göz önünde bulundurularak çocuk haklarının dayandığı ayrımcılık yapmama, çocuğun yüksek yararı, 
+yaşama-gelişme ve çocuğun görüşlerine yer verme gibi temel ilkelere uygun bir yaklaşımla hazırlanmalıdır .
+1.4. Millî ve Manevi Değerler
+1.4.1. İçerik öğrencilerin adalet bilinci ve hakkaniyet duygusunu geliştirecek ahlaki değerleri benimsemeleri ve pekiştirmelerini, 
+millî birlik ve beraberliğe katkı sorumluluğunu içselleştirmelerini sağlayacak bir işlev görmelidir .
+1.4.2. İçeriği oluşturan unsurlarda millî ve manevi değerler, toplumsal hassasiyetler göz önünde bulundurulmalı; toplumun 
+giyim ve hayat tarzı gerçeğe uygun yansıtılmalıdır. 
+1.5. Güvenli ve Etik İçerik
+1.5.1. İçerikte bağımlılık yapıcı, müstehcen, öğrencilerin maneviyatına ve kişilik gelişimlerine olumsuz etki edebilecek herhangi 
+bir unsur açık veya örtük bir biçimde bulunmamalıdır.
+• İçerikte öğrencilerin duyuşsal ve bilişsel gelişimini olumsuz etkileyecek korku, şiddet, hakaret, aşağılama, cinsel içerikli öge; bağımlılık 
+yapıcı unsurları özendirici herhangi bir mesaj veya ima yer almamalıdır .
+• İçerikte öğrencilerin yaş ve gelişim seviyesine uygun olmayan rol modeli, ürün, sembol, imge gibi yazılı veya görsel herhangi bir 
+unsur yer almamalıdır.
+1.5.2. İçerikte öğrencilerin fiziksel gelişimini ve beden sağlığını olumsuz etkileyecek ögelere yer verilmemelidir .  
+1.5.3. İçerikte eğitim öğretim programına uygun olarak ilgili ünite/tema/öğrenme alanlarının bağlamı göz önünde bulundurularak 
+psikolojik, fiziksel, sözlü ve siber zorbalıkla mücadele durumlarına yönelik yazılı ve görsel unsurlara yer verilmelidir .
+1.6. Kişisel Verilerin Korunması
+1.6.1. İçerikte Kişisel Verilerin Korunması Kanunu’na aykırılık teşkil edecek herhangi bir unsur yer almamalıdır.
+•  İçerik, hiçbir surette kimliği belirli veya belirlenebilir bir gerçek kişiyle ilişkilendirilebilecek şekilde verilmemelidir .12• Kurulum gerektiren e-içeriklerde kullanıcıdan gerekli izinler alınmalı, hangi iznin neden istendiği ve ne tür bilgiler toplanacağı kulla -
+nıcılara açık ve net bir şekilde belirtilmelidir.
+• E-içerikler, bilgi sistem ağındaki veri akışının iz kayıtlarını tutmamalı, ajanlı ya da ajansız iz toplama yöntemi içermemeli ve kullanı -
+cıdan gereksiz izin istememelidir.
+• E-içeriklerde kişisel verilerin tamamı veya bir kısmının otomatik ya da otomatik olmayan yollarla elde edilmesi, kaydedilmesi, depo -
+lanması gibi işlemler yapılmamalıdır.
+1.7. Reklam Unsurları
+1.7.1. İçerikte kullanılan ögeler haksız rekabete yol açabilecek lehte veya aleyhte reklam yahut manipülasyon unsuru taşıma -
+malı, ticari bir tercih ve yönlendirme içermemeli, çağrışımda bulunmamalıdır .
+1.8. Telif ve İntihal
+1.8.1. Yazılı ve görsel tüm içeriklerde alıntı ve atıflar telif hakları mevzuatına uygun olarak yapılmalıdır.
+• Kaynak gösterilmeden alıntı yapılmamalıdır.
+1.8.2. İçerikte herhangi bir ders kitabı ya da eğitim aracı kaynak olarak gösterilmemeli, bu kitaplardan alıntı yapılmamalıdır .
+1.8.3. Kitabın hangi aşamasında yapay zekâ araçlarından faydalanıldığı ifade edilmelidir .
+• Yapay zekâ tarafından üretilen metin, video, görsel vb. çoklu ortam unsurlarına yönelik “Yapay zekâ tarafından üretilmiştir.” ibaresine 
+ilgili kaynakçasında yer verilmelidir.
+1.9. Çevre ve Sürdürülebilir Yaşam
+ 
+1.9.1. İçerikte çevre bilincine aykırı mesajlar içeren yazılı veya görsel herhangi bir unsur bulunmamalıdır .
+1.9.2. İçerikte öğrencilerin çevre bilinçlerinin artması teşvik edilmelidir .
+• İçerikte eğitim öğretim programı ile uyumlu olacak şekilde çevre ve sürdürülebilirlik, iklim değişikliği, doğal kaynakların korunması 
+ve yeşil dönüşümlerle ilgili yazılı ve görsel unsurlara ve e-içeriklere yer verilmelidir .
+1.9.3. İçerikte hayvan haklarına aykırılık teşkil edecek yazılı ve görsel herhangi bir unsur bulunmamalıdır .132. BİLİMSEL YETERLİĞİ
+ Bu bölümde ders kitapları ve eğitim araçları ile 
+bunlara ait elektronik içeriklerin bilimsel yeterlik yö -
+nünden incelenmesi ve değerlendirilmesinde dikkate 
+alınacak kriterler ve açıklamaları yer almaktadır.142.1. Bilimsellik 
+2.1.1. İçerik bilimsellik ilkesi gözetilerek oluşturulmalıdır. 
+• İçerik geçerli, güvenilir, güncel ve objektif kaynaklara dayandırılmalı; kavram yanılgısı, hatalı genelleme, tutarsızlık ve çelişkiye yol 
+açabilecek bilgi ve ifade tarzı barındırmamalıdır.  
+• Görüş ve kanaat niteliğinde olan bilgilerin kullanılması durumunda bilginin kaynağı belirtilmeli ve bunlara kaynakçada yer verilmelidir. 
+• Bilimsel ve genel kabul görmüş çeviriler tercih edilmelidir. 
+• Kavram, terim, sembol, tercüme, sesletim vb. unsurların kullanımında, kitap genelinde ve takım hâlindeki kitaplar (ders kitabı, öğrenci 
+çalışma kitabı, öğretmen kılavuz kitabı) arasında tutarlılık olmalıdır .
+2.1.2. İçerikte bilgi hatası bulunmamalıdır .
+• Konu anlatımı, tanım, açıklama, örnek, gösterim, etkinlik, deney , şema, grafik, tablo, terim, sembol, kısaltma vb. içerikler hata
+ içermemelidir.
+2.1.3. İçerikte bilgi eksikliği bulunmamalıdır.
+• Konu anlatımı, tanım, açıklama, örnek, gösterim, etkinlik, deney, şema, grafik, tablo, terim, sembol, kısaltma vb. içerikler eksiklik 
+içermemelidir.
+2.2. Metin ve Görsel Uyumu
+2.2.1. Metin ile görsel uyumlu olmalıdır.
+• Metin içeren görsellerdeki (tablo, konuşma balonu, bilgi görseli vb.) bilgiler metin ile çelişmemelidir . 
+• Metinde atıf yapılan görsellere eksiksiz bir biçimde ve metinle aynı veya karşılıklı sayfada yer verilmelidir .
+2.2.2. Açıklama gerektiren görsele ait alt yazıda hata ve eksiklik bulunmamalıdır. 
+• Görselin açıklama gerektirip gerektirmediği ve içerikle olan ilişkisi göz önünde bulundurulmalı, açıklama ve numaralandırma bu 
+doğrultuda yapılmalıdır.
+• Numaralandırmalar her ünite/tema/öğrenme alanının sıralamasına uygun olacak şekilde yeniden başlamalıdır .
+• Açıklama gerektiren görsele ait alt yazı; görselde anlatılmak istenen olay, duygu, durum vb. hususları yansıtıcı nitelikte, kısa ve öz 
+olmalıdır. 
+• Görsele eklenen alt yazı ile görsel uyumlu olmalıdır.15• Görselde verilen eserlerin ismi, biliniyorsa sanatçısı ve dönemi, bulunduğu ve sergilendiği yer görsel alt yazısında belirtilmelidir .
+2.3. Kavram ve Terimlerin Kullanımı
+2.3.1. Alana ve konunun özelliğine uygun kavram ve terimler kullanılmalıdır.
+• Alana özgü özel isim, terim, simge, noktalama işareti, birim, sembol, sabit vb. yazımında varsa Kurulca uygun görülen ve yayımlanan 
+yazım kılavuzu/kılavuzları esas alınmalıdır. Yazım kılavuzunda/kılavuzlarında yer almayanların yazımında ise sırasıyla ilgili dersin 
+öğretim programı, TDK Bilim ve Sanat Terimleri Ana Sözlüğü, ilgili bilim dalının alanda kabul görmüş sözlükleri ve Uluslararası Birim 
+Sistemi (SI) esas alınmalıdır.
+2.4. Orijinal Metinler
+2.4.1. İçerikte kullanılan alıntı, eserin orijinaline uygun olarak verilmelidir .
+• Metin/eserde öğrenci seviyesi ve ders işleniş süresi göz önünde bulundurularak kısaltma yapılabilir. Bu durum metnin/eserin altında 
+belirtilmelidir. 
+• Kısaltma yapılırken eserin orijinalinden uzaklaşmamaya ve bağlamdan kopmamaya dikkat edilmelidir . 
+• Yazarın üslubundan ya da Türkçenin dönemsel özelliklerinden kaynaklı yazım ve noktalama farklılıkları hata olarak nitelendirilip 
+düzeltilmemelidir.
+2.5. Yazar Biyografileri
+2.5.1. Metinleri kullanılan yazar ve şairlerin biyografilerinin verilişinde sınıf seviyesi göz önünde bulundurulmalıdır .
+• İlkokul Türkçe ders kitaplarında, metinleri bulunan yazar ve şairlerin biyografilerine yer verilmemelidir. 
+• Ortaokul Türkçe ve Türk dili ve edebiyatı ders kitaplarında Türk ve dünya edebiyatından şair ve yazarların metinleri kullanıldığında 
+biyografi verilmesi durumunda, sanatçıların edebî yönü ve eserlerini öne çıkaran biyografilerine yer verilmelidir .
+2.6. Standart Bölümler
+2.6.1. Ders kitabı ve eğitim aracında tüm sayfalar, ders kitabına ve eğitim aracına ait ekler ve standart bölümler (kapak sayfası 
+içindekiler, organizasyon şeması, sözlük, kaynakça, cevap anahtarı, görsel ve genel ağ kaynakçası) eksiksiz ve sıralı bir bi -
+çimde yer almalıdır.
+• İlkokul birinci sınıf seviyesine ait ders kitapları ve eğitim araçlarında cevap anahtarı kullanmayı gerektirmeyecek düzeyde etkinlikler 
+yer aldığından standart bölümlerden biri olan “Cevap Anahtarı” bölümüne yer verilmeyebilir.
+• Ders kitabı ve eğitim aracının standart bölümleri sırayla Kapak Sayfası, kitabın başlangıcında İçindekiler, Kitap Tanıtım Şeması (Orga -
+nizasyon Şeması); kitabın sonunda Sözlük, Kaynakça, Cevap Anahtarı, Görsel Kaynakça, Genel Ağ Kaynakçası şeklinde verilmelidir.16• Türkçe 5, 6, 7 ve 8. sınıflarda “Sözlük” bölümüne yer verilmemelidir .
+• Ders kitabı ve eğitim aracının “Cevap Anahtarı, Görsel Kaynakça ve Genel Ağ Kaynakçası” bölümleri elektronik ortamda verilmelidir.
+2.6.2. Ders kitabı ve eğitim aracının kullanımına kılavuzluk eden bölümlerde kullanılan simgelerin tamamı (ikon, sembol, vinyet 
+vb.) temsil ettiği işleve uygun olmalıdır.
+2.7. Güvenlik
+2.7.1. İçerik güvenlik bakımından gerekli uyarı ve tedbirlere uygun şekilde düzenlenmelidir .
+• Güvenlik tedbirlerinin alınmasını gerektiren içeriklerde güvenlik kurallarına aykırı ögeler bulunmamalıdır .
+• Deney, etkinlik ve uygulamalarda gerekli durumlarda güvenlik uyarı ve sembollerine yer verilmelidir.
+• Laboratuvar tanıtımı, güvenlik sembolü ile kuralları ders kitabı ve eğitim aracının başlangıcında, ünite/tema/öğrenme alanlarına giriş 
+yapılmadan verilmelidir.
+2.8. Sözlük
+2.8.1. Sözlük belirli ilkeler doğrultusunda, standarda bağlı kalınarak oluşturulmalıdır .
+• Sözlük bölümü TDK sözlükleri referans alınarak sözlük hazırlama ilkelerine uygun şekilde hazırlanmalıdır. 
+• İçerikte kullanılan ve anlamda kilit rol oynayan sözcük, sözcük grubu, kavram ve terimlerin metindeki anlamları; ders ve konunun 
+niteliğine uygun olarak öncelikle güncel TDK sözlüklerine göre verilmelidir. 
+• TDK sözlüklerinde yer almayan kelimeler için alanda kabul görmüş sözlükler ilgili kaynakçada yer verilmek kaydıyla kullanılabilir. 
+İlkokul kitaplarında yer alan sözlüklerde sözcük, kavram ve terimlerin anlamları verilirken öğrencilerin gelişim düzeyine uygun, açık 
+ve anlaşılır olacak şekilde ve bağlamdan kopmadan düzenleme yapılabilir . 
+• Sözlük bölümünde sözcüklerin anlamları, öğrencilerin sınıf seviyelerine ve içerik açıklamalarına uygun olmalıdır .
+2.9. Kaynak Gösterimi
+2.9.1. Kaynakça belirli ilkeler doğrultusunda, belli bir standarda bağlı kalınarak oluşturulmalıdır .
+• Kaynakçada kullanılan atıf sistemi tutarlı ve bütünlük arz edecek şekilde olmalı ve metin içi ile sayfa altı dipnot gösteriminde de ilgili 
+atıf sisteminin yazı stili bütünlük arz edecek şekilde kullanılmalıdır .
+• Kullanılan atıf sisteminin adı kaynakçanın sonunda belirtilmelidir .
+2.9.2. Alınan bilginin kaynağı belirli ilkeler doğrultusunda, tam ve doğru olarak belirtilmelidir. 17• Verilen kaynak, dipnot ve alıntılarda hata veya eksiklik bulunmamalıdır. 
+• Kaynakçada verilen her kaynağın içerikte bir karşılığı olmalıdır .
+• Ders kitabı ve eğitim araçlarında yer verilen basın veya genel ağdan alıntılanan içeriklerin kaynağının verilmesinde ilgili içeriklerin 
+altında yalnızca “Genel ağdan/Basından alınmıştır.” ifadesi kullanılmalıdır.
+• Alıntı metinlerin başlıklarında geçen özel isimlerin okunuşu dipnot ile verilmelidir . 
+• Genel Ağ Kaynakçası’nda verilen kaynaklar görünen hâlleriyle kontrol edilmek üzere tam bağlantı adresi ve erişim tarihiyle (atıf sis -
+teminde yer almasa bile) verilmelidir. 
+• Genel Ağ Kaynakçası ve Görsel Kaynakça bölümlerinde bilgisi verilen alıntı kaynağı veya sayfada yer alan görsel, kullanıldığı sayfa 
+numaraları ile eşleştirilerek verilmelidir. 
+• Orijinal metinlerde yazarın üslubundan ya da Türkçenin dönemsel özelliklerinden kaynaklı yazım ve noktalama farklılıklarına yönelik 
+açıklama dipnot şeklinde verilmelidir.
+• Güvenli hizmet kapsamına uygun internet siteleri dışında herhangi bir site genel ağ kaynağı olarak kullanılmamalıdır .183. EĞİTİM VE ÖĞRETİM 
+PROGRAMININ AMAÇ VE 
+KAPSAMINA UYGUNLUĞU
+ Bu bölümde ders kitapları ve eğitim araçları ile 
+bunlara ait elektronik içeriklerin eğitim ve öğretim 
+programının amaç ve kapsamına uygunluğu yönün -
+den incelenmesi ve değerlendirilmesinde dikkate 
+alınacak kriterler ve açıklamaları yer almaktadır.193.1. İçeriğin Kapsamı ve Öğrenme Çıktılarına Uygunluğu
+3.1.1. Ders kitabı ve eğitim aracı ilgili ünite/tema/öğrenme alanının içerik çerçevesini karşılamalıdır .
+3.1.2. İçerik, eğitim öğretim programlarının öğrenme-öğretme yaşantıları bölümlerinde yer alan ön değerlendirme süreci bö -
+lümlerini karşılamalıdır.
+• Ön değerlendirme sürecine ilişkin bölümler ilgili olduğu temel kabuller dikkate alınarak yapılandırılmalıdır .
+3.1.3. İçerik, öğretim programlarının öğrenme-öğretme yaşantıları bölümlerinde yer alan köprü kurma bölümlerini karşılamalıdır.
+• Köprü kurma sürecine ilişkin bölümler ilgili olduğu temel kabuller ve öğrenme çıktıları dikkate alınarak yapılandırılmalıdır .
+3.1.4. İçerik, tüm öğrenme çıktıları ile öğrenme çıktılarının süreç bileşenlerini karşılamalıdır .
+• İçerik, öğrenme çıktıları ile öğrenme çıktılarının süreç bileşenlerinin sınırladığı çerçevede eksiksiz olarak verilmelidir .
+• Öğrenme-öğretme uygulamaları bölümlerinde “...istenebilir, verilebilir, vb.” şeklinde biten, öğrenme çıktısına ilişkin konunun ve sınıfın 
+şartları göz önünde bulundurularak yazılmış örnek öğretim yöntemlerine içerikte yer verilmeyebilir. Ancak böyle bir durumda içerikte 
+ilgili örnek öğretim yöntemlerini karşılayacak farklı öğretim yöntemlerine yer verilmelidir .
+• İçerik, alan becerilerini ve kavramsal becerileri geliştirmeye yönlendirmelidir . 
+3.2. İçeriğin Yapısı
+3.2.1. İçerik anlaşılır olmalıdır.
+• Tanım, açıklama, örnek, gösterim, etkinlik, deney ve simülasyon gibi içerikler tartışmaya yol açmayacak şekilde net olmalıdır.
+• İçerik bir öğrencinin başkasının yardımı olmadan, okuyarak anlayabileceği ve öğrenebileceği yapıda sunulmalıdır .
+3.2.2. İçerik konu alanının özelliğine uygun olarak bütünsel bir yapıda verilmelidir .
+• İçeriği oluşturan tüm birimler (ünite, tema, öğrenme alanı, bölüm, başlık, alt başlık vb.) birbirleri arasında ve kendi içinde tutarlılığa 
+sahip olmalıdır.
+3.2.3. İçerik ilgili yaş ve sınıf seviyesine uygun olmalıdır.
+• İçerik (etkinlik, kavram, terim, örnek, formül, anlatım dili, görsel ögeler vb.) öğrencinin hazır bulunuşluk düzeyine ve sınıf seviyesine 
+uygun olarak hazırlanmalıdır.
+• İçerikte gereksiz ve seviye üstü ayrıntılardan kaçınılmalıdır.203.3. Ünite/Tema/Öğrenme Alanının Dengeli Dağılımı
+3.3.1. İçeriğin dağılımı ünite/tema/öğrenme alanı ve hedeflenen süre bazında dengeli olmalıdır .
+• Ders işlenişinde konular arasında hacim bakımından eğitim öğretim programına uygun bir denge gözetilmelidir .
+• İçerik ilgili ünite/tema/öğrenme alanına ayrılan kısım ve haftalık ders saati göz önüne alındığında hedeflenen sürede tamamlanabilir 
+nitelikte olmalıdır.
+3.4. Öğrenme ve Öğretme Süreci
+3.4.1. İçerik, ilgili eğitim öğretim programının öğrenme-öğretme uygulamaları kapsamındaki eğitim ve öğretim ilkeleri dikkate 
+alınarak oluşturulmalıdır.
+• Yazılı ve görsel tüm unsurlarda aynı amaca hizmet eden gereksiz tekrarlardan kaçınılmalıdır.
+3.4.2. İçerik öğrencilerin farklı öğrenme stratejileri ve stillerini kullanmasına imkân tanımalıdır .
+• İçerik öğrencinin bağımsız ve iş birlikli öğrenmesini destekleyecek biçimde zenginleştirilmelidir .
+• İçerik öğrencileri farklı kaynaklardan araştırma ve inceleme yapmaya yönlendirmelidir .
+• İçerik öğrencinin dikkatini çekip öğrencide merak uyandıracak nitelikte verilmelidir .
+3.4.3. Strateji, yöntem ve teknik seçimi dersin niteliğine ve eğitim öğretim programına uygun olmalıdır .
+• Yöntem ve teknikler öğrencinin sosyal-duygusal öğrenme ve okuryazarlık becerilerini geliştirmesine imkân vermelidir .
+• Yöntem ve teknikler, öğretim programlarının “Erdem-Değer-Eylem Çerçevesi”ne uygun olarak öğrencinin sahip olduğu değerlerin 
+gelişimine ve değerleri içselleştirmesine katkıda bulunmalıdır.
+• Yöntem ve teknikler alan ve kavramsal becerilerin geliştirilmesine imkân verecek bir yapıda olmalıdır .
+3.5. Öğrenci Çalışma Kitabı ve Öğretmen Kılavuz Kitabı
+3.5.1. Öğrenci çalışma kitabı hazırlanırken ders kitabının ve eğitim aracının nitelikleri ile hazırlanma usullerinin yanı sıra Yö -
+netmelik’in ilgili maddesi ve açıklamaları göz önünde bulundurulmalıdır .
+• Öğrencilerin bilgi, beceri, tutum, değer ve okuryazarlıklarını geliştirmelerine yardımcı olacak çeşitli ünite/tema/öğrenme alanı, 
+konu, örnek ve alıştırmalarla ilgili kaynaklara yer verilmelidir .
+• Dersin özelliğine göre inceleme, gezi, gözlem, deney ve uygulamalarla ilgili yapılacak ön hazırlıklara, alınacak sağlık ve güvenlik 
+tedbirlerine, izlenecek iş ve işlem basamaklarına, zaman ve malzeme tasarrufu bakımından uyarı ve bilgilere yer verilmelidir .21• Kitabı oluşturan unsurların ders kitabı ve eğitim aracı ile bütünleştirilmesi hâlinde öğrenci çalışma kitabı ders kitabı ile birlikte de 
+hazırlanabilir. Bu şekilde hazırlanan kitapların kapak ve iç kapağında “Ders Kitabı ve Öğrenci Çalışma Kitabı” ibaresi yer almalıdır.
+• Dersin özelliğine göre bazı ünite/tema/öğrenme alanı veya konularda kullanılmak üzere öğrencinin ilgisini çekecek örneklere, eği -
+tim ve öğretimi destekleyici çeşitli elektronik eğitim içeriklerine yer verilmelidir .
+3.5..2. Öğretmen kılavuz kitabında ders kitabının ve eğitim aracının nitelikleri ile hazırlanma usullerinin yanı sıra Yönetmelik’in 
+ilgili maddesi ve açıklamaları göz önünde bulundurulmalıdır.
+• İçerik çerçevesinin işlenişinde ulaşılmak istenen öğrenme çıktıları belirtilmelidir .
+• Bilgi, beceri, tutum, değer ve okuryazarlıkların öğrencilere kazandırılmasında kullanılabilecek araç ve gereçlerle birlikte strateji, 
+öğretim yöntem ve teknikleri belirtilmelidir.
+• İçerik çerçevesinin işleniş planına, öğretmenin konu ile ilgili yapacağı ön hazırlıklara, ünite/tema/öğrenme alanına ait bilgi, beceriler 
+ve bu becerilerin süreç bileşenleri kapsamında temel kabuller dikkate alınarak ön değerlendirme ve köprü kurma süreçlerine yer 
+verilmelidir.
+• Öğrenme-öğretme süreciyle ilişkilendirilen sosyal-duygusal öğrenme ve okuryazarlık becerileri ile değerler kapsamında öğrenme-
+öğretme yaşantılarının hayata geçirildiği uygulamalara yer verilmelidir .
+• Öğrencileri araştırmaya, günlük yaşamda karşılaşılan çeşitli sorunlara çözüm üretmeye yöneltecek proje ve benzeri örnek çalışma -
+lara yer verilmelidir.
+• İşlenişin sonunda, gerekli görülen kavramlarla ilgili sözlük ve kaynakça bulunmalıdır .224. EĞİTİM VE ÖĞRETİM 
+PROGRAMININ BÜTÜNLEŞİK 
+YAPISINA UYGUNLUĞU
+ Bu bölümde ders kitapları ve eğitim araçları ile bunlara 
+ait elektronik içeriklerin eğitim ve öğretim programının 
+bütünleşik yapısına uygunluğu yönünden incelenme -
+si ve değerlendirilmesinde dikkate alınacak kriterler ve 
+açıklamaları yer almaktadır.234.1. İçeriğin Eğitim Öğretim Programının Programlar Arası Bileşenlere Uygunluğu 
+4.1.1. İçerik, ilgili ünite/tema/öğrenme alanının öğrenme-öğretme uygulamaları bölümlerinde öngörülen sosyal-duygusal öğ -
+renme becerilerini destekleyecek şekilde hazırlanmalıdır.
+4.1.2. İçerik, ilgili ünite/tema/öğrenme alanının öğrenme-öğretme uygulamaları bölümlerinde öngörülen değerleri “Erdem-De -
+ğer-Eylem Çerçevesi”ne uygun ve destekleyecek şekilde hazırlanmalıdır .
+4.1.3. İçerik, ilgili ünite/tema/öğrenme alanının öğrenme-öğretme uygulamaları bölümlerinde öngörülen sistem okuryazarlığını 
+destekleyecek şekilde hazırlanmalıdır.
+4.2. İçeriğin Eğitim Öğretim Programının Bütüncül Eğitim Yaklaşımına Uygunluğu
+4.2.1. İçerik, ilgili ünite/tema/öğrenme alanının öğrenme-öğretme uygulamaları bölümlerinde öngörülen eğilimleri destekleye -
+cek şekilde hazırlanmalıdır.
+4.2.2. İlgili ünite/tema/öğrenme alanının beceriler arası ilişkiler bölümünde gösterilen beceriler, öğrenme-öğretme uygulamaları 
+bölümünde öngörüldüğü biçimde öğrenme çıktısıyla ilişkilendirilerek verilmelidir .
+4.2.3. İçerikte eğitim öğretim programında yer verilen disiplinler arası ilişkiler ilgili ünite/tema/öğrenme alanı ile anlamlı bir 
+bütünlük oluşturacak biçimde ilişkilendirilerek verilmelidir.245. ÖLÇME VE DEĞERLENDİRME 
+SÜRECİNİN UYGUNLUĞU
+ Bu bölümde ders kitapları ve eğitim araçları ile 
+bunlara ait elektronik içeriklerin ölçme ve değerlen -
+dirme sürecinin uygunluğu  yönünden incelenmesi 
+ve değerlendirilmesinde dikkate alınacak kriterler ve 
+açıklamaları yer almaktadır.255. ÖLÇME VE DEĞERLENDİRME 
+SÜRECİNİN UYGUNLUĞU5.1. Temel İlkeler ve Mevzuata Uygunluk 
+5.1.1. İçerikte yer alan etkinlikler, örnek soru ve çözümleri, performans görevleri, araştırma soruları, uygulamalar, ölçme ve 
+değerlendirmeye yönelik sorular hatalı ve eksik olmamalıdır.
+5.1.2. Ölçme ve değerlendirme bölümünde yer alan her türlü madde ve etkinlik ölçme ve değerlendirme ilkelerine ve ilgili 
+mevzuata uygun olarak hazırlanmalıdır.
+• Ölçme ve değerlendirme etkinliklerinde yönergeler açık ve anlaşılır olmalıdır . Yönergelerde gereksiz bilgiye yer verilmemelidir.
+• Hazırlanan tüm madde türlerinin kurgusu, kökü ve öncülleri açık, anlaşılır ve tam olmalıdır . 
+• Ölçme ve değerlendirme bölümünde çoktan seçmeli ve doğru yanlış türü maddelerin kullanılması durumunda cevapların bir örüntü 
+oluşturmamasına dikkat edilmelidir.
+• Ölçme ve değerlendirme bölümünde çoktan seçmeli madde türü kullanılması durumunda seçeneklerin uzunluklarının birbirine ya -
+kın olmasına özen gösterilmelidir.
+• Ölçme ve değerlendirme bölümünde çoktan seçmeli madde türü kullanılması durumunda seçenekler sayısal değerlerden oluşuyor -
+sa küçükten büyüğe veya büyükten küçüğe doğru sıralanmalıdır.
+• Ölçme ve değerlendirme bölümünde çoktan seçmeli madde türü kullanılması durumunda hepsi, hiçbiri, tümü gibi seçenekler veril -
+memelidir.
+• Ölçme ve değerlendirme bölümünde eşleştirme madde türü kullanılması durumunda öncüller ve yanıtların eşit sayıda olmamasına 
+dikkat edilmelidir.
+• Ölçme ve değerlendirme bölümünde yer alan maddelerden birinin seçeneği başka bir maddenin doğru yanıtı için ipucu oluşturma -
+malıdır.
+• Hazırlanan madde türlerinde olumsuz soru ifadeleri dikkat çekici şekilde vurgulanmalıdır . 
+• Maddeye ait bilgi veya beceriler, öğrencilerin neyi öğrenmesi gerektiği ile doğrudan ilişkili olmalıdır.
+• Hazırlanan madde türlerinde madde ile ilgili olmayan gereksiz görsellere yer verilmemelidir .
+5.1.3. Cevap anahtarı eksik veya hatalı olmamalıdır.
+• Ünite/tema/öğrenme alanı ve konu sonlarında kullanılan ölçme ve değerlendirme etkinliklerindeki açık uçlu sorular hariç tüm soru -
+ların cevapları hatasız olarak cevap anahtarında yer almalı, cevaplar sorularla aynı sayfada verilmemelidir .
+5.1.4. Ölçme ve değerlendirmeye yönelik etkinlikler öğrencinin seviyesine uygun olmalıdır .
+• Ölçme ve değerlendirmeye yönelik etkinlikler basitten karmaşığa, kolaydan zora olacak şekilde sıralanmalıdır .26• Ölçme ve değerlendirmeye yönelik etkinlikler ilgi çekici, yakın ve uzak çevrede karşılaşılan durumlar göz önünde bulundurularak 
+tasarlanmalıdır.
+5.1.5. Türkçe ve yabancı dil derslerine yönelik temel dil becerilerini destekleyici ölçme ve değerlendirme etkinlikleri 
+hazırlanmalıdır.
+• Hazırlanan ölçme ve değerlendirme etkinlikleri ilgili ünite/tema/öğrenme alanındaki dil becerilerini destekleyici nitelikte olmalıdır .
+• İlkokul ders kitaplarında Türkçenin doğru ve güzel kullanımını geliştirmek amacıyla dinleme, konuşma, okuma ve yazma becerileri -
+nin izlenmesi ve geliştirilmesine yönelik ölçme araçları kullanılmalıdır .
+5.2. Ölçme ve Değerlendirme Sürecinin Eğitim Öğretim Programına Uygunluğu 
+5.2.1. İçerikte kullanılan ölçme ve değerlendirme etkinliklerinin planlanmasında ilgili ünite/tema/öğrenme alanının öğrenme 
+kanıtları bölümleri ve öğrenme-öğretme uygulamaları bölümleri esas alınmalıdır .
+• Ölçme ve değerlendirmeye yönelik etkinlikler, öğrenme çıktıları ve bu çıktıların süreç bileşenleri ile öğrenme-öğretme uygulamaları -
+nı tam olarak karşılamalıdır.
+• Ölçme ve değerlendirmeye yönelik etkinlikler, ilgili öğretim programında belirlenen öğrenme çıktılarına uygun olmalıdır. 
+• Öğrenme-öğretme uygulamaları bölümleri ile öğrenme kanıtları bölümlerinde “istenebilir , verilebilir, vb.” şeklinde biten, ölçme 
+değerlendirme sürecine ilişkin konunun ve sınıfın şartları göz önünde bulundurularak yazılmış olan ölçme ve değerlendirme araç -
+larına ders kitabı ve eğitim aracında yer verilmeyebilir. Ancak böyle bir durumda ilgili ölçme değerlendirme süreci farklı bir ölçme ve 
+değerlendirme aracıyla ölçülecek biçimde ders kitabı ve eğitim aracında yer almalıdır . 
+• Ölçme ve değerlendirme araçlarının planlaması, tasarımı ve uygulamasında; ödevler , projeler, performans görevleri, sunumlar, 
+kontrol listeleri, sınavlar, gözlem ve görüşme formları, öğrenci anketleri, ölçekler, mezun anketleri, sınıf içi tartışmalar, öz/akran/
+grup değerlendirmeleri ve yansıtma yazıları gibi öğrenme kanıtları eğitim öğretim programının sınırlılıkları ve beklentileri dikkate 
+alınarak yapılmalıdır. 
+• Ölçme ve değerlendirme bölümü ilgili öğretim programında yer alan öğrenme-öğretme yaşantılarında ölçülmek istenen yapıya bağ -
+lı olarak belirlenmelidir.
+• Öğrenme kanıtlarına yönelik etkinlikler öğrenme çıktılarını destekleyen, beceri ve süreç odaklı bir biçimde tasarlanmalıdır . 
+• Ölçme ve değerlendirme bölümleri bilgi ve beceri düzeylerini belirlemenin yanı sıra öğrenme eksiklikleriyle ilgili de bilgi sağlamalı -
+dır.
+• Ölçme ve değerlendirme bölümleri öğretmenlere öğrenci gelişimini takip etme, öğretim yöntemlerini iyileştirme ve öğrenme çıktıları -
+na ulaşma konularında rehberlik etmelidir.
+5.2.2. Her ünite/tema/öğrenme alanında en az bir tane performans görevi verilmelidir .27• Performans görevleri gerçek hayatla ilişkili, bilginin transferine imkân sağlayan, öğrenci için anlamlı ve ilgi çekici olan, bireysel ilgi 
+ve ihtiyaçlara göre farklılaşabilme konusunda esnekliğe imkân verecek şekilde tasarlanmalıdır .
+• Değer, eğilim, okuryazarlık ve sosyal duygusal öğrenme becerilerindeki gelişim ve değişimin izlenebilmesi amacıyla performans 
+görevi ölçütleri arasında bu becerilerin yer alması sağlanmalıdır .
+5.3. Ön Değerlendirme ve Pekiştirme Araçları
+5.3.1. İçerikte ön öğrenmeleri belirleyici, konuya hazırlayıcı ve öğrenilenleri pekiştirici nitelikte etkinlik ve maddelere yer 
+verilmelidir.
+• İçerikte ünite/tema/öğrenme alanına ilişkin temel kabullerde yer alan bilgileri hatırlatabilecek, yeni konuya çerçeve oluşturabilecek, 
+öğrenme isteği ve merak uyandırıcı, motive edici nitelikte hazırlayıcı etkinliklere yer verilmelidir . 
+• Ders kitabı ve eğitim aracında yer alan öğrenme kanıtlarına yönelik etkinlikler dışında ünite/tema/öğrenme alanı sonu ölçme ve 
+değerlendirme bölümlerinde yer verilmek üzere, sınıf seviyesi ve alan türleri dikkate alınarak konunun niteliği, öğrenme çıktıları 
+ve süreç bileşenlerinin düzeyine bağlı olarak farklı soru çeşitleri ve ölçme araçları ile öğrenilenleri pekiştirici etkinlik veya sorular 
+hazırlanmalıdır.
+• Ön değerlendirme sürecinde öğrenilenleri pekiştirici nitelikte etkinlik ve maddelere yeterli oranda yer verilmelidir .
+5.3.2. Ölçme ve değerlendirmeye yönelik içerikler ünite/tema/öğrenme alanının köprü kurma bölümlerini kapsayacak nitelik -
+te olmalıdır.
+5.3.3. İlgili ünite/tema/öğrenme alanında yer alan öğrenme kanıtlarında kullanılacak yöntem ve tekniklerde çeşitlilik sağlan -
+malıdır.
+• Ölçme ve değerlendirmeye yönelik etkinlikler öğrencilerin yetenek farklılıkları, özel gereksinimleri ve öğrenme profilleri göz önünde 
+bulundurularak çeşitlendirilmeli ve çok yönlü bir biçimde tasarlanmalıdır .
+• Ölçme ve değerlendirmeye yönelik etkinlikler öğrencinin kendisini değerlendirmesine fırsat vermelidir .
+5.3.4. Ölçme ve değerlendirmeye yönelik etkinlikler ilgili ünite/tema/öğrenme alanı dikkate alınarak mümkün olduğunca sınıf 
+ortamında yapılacak şekilde tasarlanmalıdır.286. DİL VE ANLATIM YÖNÜNDEN 
+YETERLİĞİ
+ Bu bölümde ders kitapları ve eğitim araçları ile bun -
+lara ait elektronik içeriklerin dil ve anlatım yönünden 
+yeterliğinin incelenmesi ve değerlendirilmesinde dik -
+kate alınacak kriterler ve açıklamaları yer almaktadır.296.1. Dil ve Üslup 
+6.1.1. İçerik Türkçenin doğru ve özenli kullanımını, dilin anlatım zenginliğini, gücünü ve anlam inceliklerini yansıtır nitelikte 
+olmalıdır.
+• Dilin kullanımında kültürel miras niteliğindeki dil ve edebiyat ürünleri ile aradaki bağı koparmayacak bir hassasiyet gözetilmelidir. 
+• Söz varlığı yönünden zengin olan metinler tercih edilmelidir. 
+• Türkçeye henüz yerleşmemiş yabancı sözcükler yerine varsa Türkçe karşılıkları kullanılmalıdır.
+• Öğrencilerin sınıf seviyelerine uygun ve söz varlıklarını zenginleştirmeye yönelik bir dil kullanılmalıdır. 
+• Dönemsel söyleyiş ve ağız özellikleri konunun niteliğine göre değerlendirilmelidir.
+6.1.2. Özel isim, yabancı sözcük ve sözcük gruplarının okunuşu ile kısaltmaların açılımı, içindekiler bölümü, ünite/tema/öğren -
+me alanı kapakları ve başlıklar haricinde ilk geçtiği yerde verilmelidir.
+• Özel isim, yabancı sözcük ve sözcük gruplarının yazılışı ile okunuşu aynı olsa bile ilk geçtiği yerde okunuşuna yer verilmelidir.
+6.2. Yazı Dili Standartlarına Uygunluk
+6.2.1. İçerikte yazım yanlışı bulunmamalıdır.
+• Alana özgü olmayan ifadelerin yazımında Türk Dil Kurumu Yazım Kılavuzu esas alınmalıdır.
+6.2.2. İçerikte noktalama eksikliği, yanlışlığı olmamalı; gereksiz noktalama işareti kullanılmamalıdır.
+• Sayılar ve birimlerden sonra gelen eklerin kesme işareti ile ayrılması hususunda TDK yazımı esas alınmalıdır. Karışıklığa yol aça -
+bilecek sembol ve gösterimlere (türev, tümleyen, değişken, mutlak değer, aralık, geometrik ifadeler, vb.) gelen eklerin yazımında 
+kesme işareti kullanılmamalıdır.
+6.2.3. Yabancı diller, yaşayan diller ve lehçeler alanındaki ders kitapları ve eğitim araçları, ilgili olduğu dilin dil bilgisi kurallarına 
+uygun olmalıdır.
+6.2.4. Yabancı diller, yaşayan diller ve lehçeler alanındaki ders kitapları ve eğitim araçları, ilgili olduğu dilin öğretim programında 
+temel alınan lehçeye özgü kullanım şekline uygun hazırlanmalıdır.
+6.3. Anlam ve Anlatım
+6.3.1. İçerikte anlamsal veya yapısal anlatım bozukluğu bulunmamalıdır.
+6.3.2. Anlatım ilkelerine (akıcılık, yalınlık, açıklık, duruluk vb.) uygun bir dil kullanılmalıdır.
+• Anlatım hiçbir tartışmaya yol açmadan tek bir yargıyı açıkça ifade etmelidir.
+ 
+• Anlatım gereksiz söz sanatları ve sözcük öbeklerinden uzak, basit ve yalın; ifadeler sade ve anlaşılır olmalıdır. 
+• Anlatım gereksiz sözcüklerden, aynı anlama gelen ifadelerden ve sözcük tekrarlarından arınmış olmalıdır. 30• Anlatım, metin içerisinde akıcılığı bozacak nitelikte uzun cümlelerden ve karışık ifadelerden uzak; okumayı yavaşlatmayan ve kolay 
+okunabilir nitelikte olmalıdır.
+6.3.3. Metin içerisinde kullanılan sözcük ve sözcük grupları, bağlama uygun biçimde verilmelidir.
+6.3.4. Metni oluşturan birimler (cümle, paragraf vb.) arasında anlam ve anlatım bütünlüğü sağlanmalıdır.317. GÖRSEL TASARIM VE İÇERİK 
+TASARIMININ UYGUNLUĞU
+ Bu bölümde ders kitapları ve eğitim araçları ile bun -
+lara ait elektronik içeriklerin görsel tasarım ve içerik 
+tasarımının uygunluğunun incelenmesi ve değerlen -
+dirilmesinde dikkate alınacak kriterler ve açıklamaları 
+yer almaktadır.327.1. Kapak Tasarımı
+7.1.1. Kapak tasarımı genel tasarım ilkelerine, Yönetmelik’te belirlenmiş ilkelere ve “Ders Kitabı Kapağı Tasarım Çerçevesi”ne 
+uygun olmalıdır.
+• Kapak tasarımında kullanılan görseller ünite/tema/öğrenme alanı kapak görselleri ile aynı olmamalıdır .
+• Kapak, öğrencilerin gelişim seviyesine uygun olarak ilgi çekici ve öğrencide merak uyandırıcı bir nitelikte tasarlanmalıdır . 
+• Kapak tasarımında kullanılan ögeler ve bunların kullanılış tarzı kitabın içeriğiyle uyumlu ve içeriği destekleyici nitelikte olmalıdır .
+7.1.2. Ünite/tema/öğrenme alanı kapak tasarımında kullanılan ögeler ve bunların kullanılış tarzı ilgili ünite/tema/öğrenme alanı 
+içeriğiyle uyumlu ve içeriği destekleyici nitelikte olmalıdır.
+• Ünite/tema/öğrenme alanı veya konu başında yer alan görsel, ünite/tema/öğrenme alanını veya konuyu temsil etmelidir .
+7.2. Genel Tasarım Uyumu
+7.2.1. Tasarımda kullanılan ögeler sistematik bir bütünlüğe sahip olmalıdır.
+• Kitabın bütününde sayfa düzeni, yazı karakteri ve büyüklüğü, satır boşluğu, kenar boşluk ayarları gibi ögeler arasında bütünlük ve 
+devamlılık sağlanmalıdır.
+• Ana ve alt başlıkların punto, renk, yazı tipi vb. özellikleri metinden ayırt edilecek ve konuyu toparlayacak şekilde sistematik bir bi -
+çimde düzenlenmelidir. 
+• Sayfa numaraları kolaylıkla görülebilecek, takibi güçleştirmeyecek ve karışıklığa yol açmayacak şekilde; sağ (ön) sayfalarda tek 
+sayılar, sol (arka) sayfalarda çift sayılar kullanılarak yapılmalıdır. 
+• Sayfada resim, tablo, şema, grafik, fotoğraf, kavram haritası, zihin haritası, karekod vb. ögelerin tasarımında kendi içinde birlik olmalıdır.
+• Metin, kaynak bağlacı, kaynakça, dipnotlar, görsel alt yazıları vb. bölümler kitabın tamamında bütünlük oluşturacak şekilde hazır -
+lanmalıdır.
+7.2.2. İçindekiler listesi sistematik ve işlevsel olmalıdır.
+• İçindekiler listesi sayfa tasarımı biçimlendirmesine, metinde kullanılan başlık sistemine, içeriği tanıtma amacına uygun; rahat oku -
+nabilir, sistematik ve işlevsel biçimde düzenlenmelidir. 
+• İçindekiler bölümünde belirtilen başlık ve alt başlıklar içerikte kullanılan başlıklarla aynı olmalıdır .
+• İçindekiler bölümünde belirtilen sayfa numaraları içerikte doğru yere yönlendirmelidir .33• Alfabetik sıralamada alfabemizde yer alan harf sıralamasına uyulmalıdır. Yabancı dilde yazılan kitaplardaki sıralamada ilgili dilin 
+alfabesi dikkate alınmalıdır.
+7.2.3. Cevap anahtarları belli bir düzen içinde ve takibi kolaylaştıracak şekilde verilmelidir .
+7.2.4. Dikkat gerektiren bölümler vurgulama teknikleri kullanılarak etkili bir biçimde tasarlanmalıdır .
+• Metinlerde vurgulama amaçlı kullanılan çeşitli yöntemler, seçilen yazı tipi, madde imi vb. unsurlar içeriğin tamamında tutarlı olmalıdır.
+7.3. Sayfa Tasarımı
+7.3.1. Sayfa tasarımı genel tasarım ilkelerine uygun olmalıdır.
+• Sayfada kullanılan arka plan rengi ile yazılı ve görsel unsurların renklendirilmesinde okumayı ve algılamayı kolaylaştıracak bir ta -
+sarım tercih edilmelidir. 
+• Kenar boşlukları ve yazma alanları, konunun özelliğine bağlı olarak öğrenmeyi destekleyici nitelikte olmalıdır . 
+• İçerikte boşluk doldurma, eşleştirme, çizim vb. etkinliklerde yazmak için bırakılan alanlar yeterli olmalıdır . 
+• Sayfa tasarımında perspektif, denge, birlik, hiyerarşi, baskınlık, oran-orantı, uygunluk, zıtlık ve diğer tasarım ilkeleri dikkate alınmalıdır. 
+• Görsel ögeler sayfa düzenine uygun ve okuma akışını engellemeyecek şekilde yerleştirilmeli, yatay ve dikey olarak materyale eşit 
+ağırlıkta dağıtılıp dengeli bir biçimde verilmelidir.
+7.3.2. Sayfalar ve görseller estetik olarak tasarlanmalıdır.
+• Görsellerde kompozisyon bütünlüğünü bozan gereksiz öge kullanılmamalıdır . 
+• Sayfada amacı belli olmayan, anlaşılırlığı bozan ögelerin kullanımından kaçınılmalı; gereksiz ögeler kullanılmamalıdır . 
+• Sayfa tasarımı öğrencinin ilgisini çekecek, gelişim seviyesine uygun ve görsel algısını kolaylaştıracak nitelikte olmalıdır .
+• Karşılıklı sayfalar tek bir kompozisyon olarak tasarlanmışsa görsel bütünlük bozulmamalıdır .
+• Tasarımsal ögelerdeki çizgi, boyut, doku, renk, ışık, gölge, tonlama, perspektif vb. unsurlar öğrenmeye katkı sağlayacak şekilde 
+kullanılmalıdır.
+7.3.3.  Özgün veya konunun niteliğine uygun olarak özgün kabul edilebilecek tasarım ögeleri kullanılmalıdır . 347.4. Görsel Destekli Öğrenme
+7.4.1. İçerik öğrenme çıktıları ve süreç bileşenlerinin gerçekleşmesini ve öğrenmeyi destekleyecek, anlamayı kolaylaştıracak 
+görsellerle desteklenmelidir.
+• İçerik öğrenmeyi destekleyecek sayıda, amaca hizmet eder nitelikte ve metinle bütünlük oluşturacak çeşitlilikte görsellerle zengin -
+leştirilmelidir. 
+• Konunun niteliğine bağlı olarak anlamayı ve yorumlamayı kolaylaştıracak, sözel ve yazılı unsurları destekleyecek görsel ögelere 
+(tablo, şema, grafik, fotoğraf, kavram haritası, zihin haritası, bilgi görseli vb.) yer verilmelidir .
+7.4.2. Görsellerin seçiminde yakından uzağa ilkesi gözetilmelidir .
+7.4.3. Eğitim öğretim programında yer alan öğrenme çıktıları ünite/tema/öğrenme alanı başlarında görsel özetleyicilerle sunul -
+malıdır.
+7.5. Görsel ve Yazılı Unsurların Özellikleri
+7.5.1. Görseller anlaşılır ve net olmalıdır.
+• Görseller ve içinde kullanılan ögeler yüksek çözünürlük ve kalitede olmalıdır .
+ 
+• Görseller ve görsellerin içinde yer alan yazılı unsurlar okunabilir , belirgin ve anlaşılır olmalıdır. 
+• Görseller kolay algılanabilecek büyüklükte olmalıdır.
+• Görseller verilmek istenen mesajı açık bir biçimde iletmelidir. 
+7.5.2. Görsel ve görseli oluşturan ögeler hata ve eksiklik içermemelidir .
+• Görsellerde yükseklik, genişlik ve derinlik özellikleri açısından perspektif hataları bulunmamalıdır . 
+• Görsellerde öge eksikliği bulunmamalıdır.
+• Görseller ışık kaynağına uygun şekilde çizilmeli, tonlama ve gölgelendirmede ışık kaynağının konumu göz önünde bulundurulmalıdır. 
+• Nesne ve varlıklar birbirlerine göre oran ve orantı bakımından uygun bir şekilde verilmelidir . 
+• Görsellerde anatomik bozukluklar olmamalıdır.
+• Görsellerde denge unsurlarına (simetrik ve asimetrik) dikkat edilmelidir .
+• Nesnelerin göze olan uzaklık ve yakınlığına, göz hizasından aşağıda ve yukarıda oluşuna göre çizgi, yüzey, renk değişikliklerini 
+yansıtan ölçü ve oranlar doğru kullanılmalıdır.35• Görseller içeriğe uygun şekilde bir bütün olarak alınmalı veya bütünlüğü bozmayacak şekilde kesit alınarak gösterilmelidir .
+• Figürlerin bulundukları mekân ve nesnelerle ilişkisi, mekândaki konumlandırılışı, yerleşimi ve mekânla bütünleşmesi doğru kompo -
+zisyona oturtulmalıdır. 
+7.5.3. Görseller konunun niteliğine bağlı olarak gerçek durumları yansıtıcı özellikte olmalıdır . 
+7.5.4. Yazılı unsurlar, genel tasarım ilkelerine ve Yönetmelik’te belirlenmiş ilkelere uygun olmalıdır.
+• Metin tüm bileşenleriyle temel tasarım ilkeleri göz önünde bulundurularak öğrenmeyi destekleyen ve kolay anlaşılabilir şekilde ta -
+sarlanmalıdır. 
+• Yazıda karakter büyüklüğü Yönetmelik hükümlerinde belirtildiği şekilde olmalı; metin kısımlarının başlıkları dışında kalan bölümle -
+rinde resim altı yazıları, dipnot ve benzeri kullanılan yazılar hariç ilkokul 1’inci sınıflar için yirmi, 2’nci sınıflar için on sekiz, 3’üncü 
+sınıflar için on dört, 4’üncü sınıflar için on iki, ortaokul 5’inci sınıflar için on bir; daha üst sınıflar için ise on puntodan daha küçük 
+punto kullanılmamalıdır.
+ 
+• Seçilen yazı tipi öğrenci düzeyine uygun ve kolay okunabilir nitelikte olmalıdır . 
+• İçerikte öğrencilerin okuma hızını, anlama yeteneğini olumsuz etkileyecek ve bilişsel yükü artıracak düzeyde farklı yazı tipleri kulla -
+nılmamalıdır. 
+• Metin içerisinde vurgulama amaçlı olarak büyük harf kullanılmamalıdır . 
+• Paragraflar arası boşluklar satır arası boşluklardan fazla olmalıdır. Başlıkla metin arasındaki boşluk satır arasındaki boşluktan fazla 
+olmalıdır. 
+• Metinlerde tipografik tasarım hataları (sözcüklerin ve harflerin aralarında yeterli ve dengeli boşluk bırakılmamasından kaynaklı sıkışık 
+metin tasarımı vb.) bulunmamalıdır. 
+• Tutarsız boşluklar nedeniyle okumanın kesintiye uğramaması için otomatik tam bloklama (yanlardan hizalama) yapılmamalıdır.368. ELEKTRONİK İÇERİKLERİNİN 
+KAPSAM VE TASARIMIN 
+UYGUNLUĞU
+ Bu bölümde elektronik içeriklerin kapsam ve 
+tasarımının uygunluğunun incelenmesi ve değerlen -
+dirilmesinde dikkate alınacak kriterler ve açıklamaları 
+yer almaktadır.378.1. Standart Olarak Hazırlanması Gereken E-içerikler ve Karekodlar
+Bu bölümde bir ders kitabı ve eğitim aracında standart olarak hazırlanması gereken e-içerikler ve karekodlara yönelik kriter ve açıkla -
+malara yer verilmiştir. 
+8.1.1. Ders Kitabı ve eğitim aracının ilgili bölümlerinde karekodlara ve e-içeriklere yer verilmelidir .
+• Tüm ünite/tema/öğrenme alanlarının kapaklarında ilgili ünite/tema/öğrenme alanına yönlendiren karekod yer almalıdır .
+• Arka kapakta kitabın EBA platformunda yer alan elektronik nüshasına yönlendiren karekod yer almalıdır.
+• Tüm ünite/tema/öğrenme alanları için özet e-içerikler hazırlanmalı ve bu e-içeriklere yönlendiren karekodlara ilgili ünite/tema/öğrenme 
+alanı kapağında yer verilmelidir.
+• Tüm ünite/tema/öğrenme alanları için ek etkinlik veya sorular e-içerik olarak hazırlanmalı ve bu e-içeriklere yönlendiren karekodlara 
+ilgili ünite/tema/öğrenme alanı sonunda yer verilmelidir.
+• Ders kitabı ve eğitim aracının “Cevap Anahtarı, Görsel Kaynakça ve Genel Ağ Kaynakçası” bölümleri elektronik ortamda verilmelidir.
+• Kaynakça bölümünde görsel kaynakçaya ve genel ağ kaynakçasına yönlendiren karekod yer almalıdır .
+• Cevap anahtarı bölümünde cevap anahtarına yönlendiren karekod yer almalıdır .
+8.1.2. Karekodlar standartlara uygun olarak tasarlanmalı ve yerleştirilmelidir .
+• Karekodlar ilişkili olduğu içeriğe uygun sayfalara yerleştirilmelidir .
+• Karekodların yönlendirdiği e-içeriğin tanıtıcı nitelikte, kısa ve öz alt yazısı olmalıdır .  
+• Karekodlar; kitabın sırt kısmına yakın olmayacak, netliği sağlayacak ve okumayı zorlaştırmayacak şekilde yerleştirilmelidir .  
+• Aynı sayfada iki veya daha fazla karekod kullanılması durumunda karekodlar birbirlerinin okunurluğunu etkilemeyecek şekilde yer -
+leştirilmelidir.    
+8.1.3. E-içeriklere karekodu okutma ve tıklama yoluyla erişim sağlanabilmelidir .
+8.1.4. Özet e-içerikler etkili bir öğretim sağlayacak nitelikte hazırlanmalıdır .
+• Özet e-içerikler ünite/tema/öğrenme alanı içeriğini ana hatlarıyla özetleyecek şekilde ve ders işlenişine uygun olarak hazırlanmalıdır.
+• Özet e-içerikler basılı kitabın bire bir aynısı olmamalı, özgün bir anlatım ve bakış açısı sunmalıdır .
+• Özet e-içerikler kitaptaki bilgilerle çelişmemeli ve tutarlı olmalıdır .388.1.5. E-içerik olarak hazırlanan ek etkinlik veya sorular öğrenme çıktılarının tamamını ölçmeye yönelik, yeterli sayıda ve çeşitlilikte 
+hazırlanmalıdır.
+• Sınıf seviyesi ve alan türleri dikkate alınarak konunun niteliğine bağlı farklı soru çeşitleri ve ölçme araçları ile öğrenilenleri pekiştirici etkinlik 
+veya sorular hazırlanmalıdır.
+8.2. Elektronik Eğitim İçerikleri Tablosuna Uygunluk
+8.2.1. Ders kitapları ve eğitim araçlarına yönelik hazırlanması gereken “Elektronik Eğitim İçerikleri Tablosu”nda belirtilen e-içerikler 
+hazırlanmalıdır.
+• E-içerikler eğitim öğretim programının yapısı, kitabın kurgusu ve e-içerik tablosu dikkate alınarak hazırlanmalıdır .
+• Tablo satırında belirtilen e-içerik türlerinden en az birinde e-içerik hazırlanmalıdır.
+• E-içerikler içeriğin yapısı, konunun uygunluk durumu ve e-içeriğin türü göz önüne alınarak tabloda istenen e-içeriklerden birkaçını kapsayacak 
+şekilde hazırlanabilir.
+8.3. Eğitsel Tasarım
+8.3.1. E-içerikler ilgili öğretim programında öngörülen ve öğrenme çıktılarıyla ilişkili bilgi, beceri, eğilim ve değerlerin geliştirilmesine 
+katkıda bulunacak şekilde hazırlanmalıdır.
+• Öğrencilerin değer ve eğilimlerini geliştirmelerini teşvik edecek e-içerikler hazırlanmalıdır .
+8.3.2. E-içerikler öğrencilerin öğrenme fırsatlarını artıracak çeşitlilik ve nitelikte hazırlanmalıdır . 
+• İçerik, öğrencilere becerilerini uygulayabilecekleri fırsatlar sunan ve farklı öğrenme stratejilerini destekleyen etkinlikler içermelidir .
+• İçerik, dersin türü ve ilgili ünite/tema/öğrenme alanları dikkate alınarak video, etkileşimli içerik, bilgi görselleri, animasyon gibi farklı e-içerik 
+türleri ile zenginleştirilmelidir.
+• E-içerik tasarımında metin, resim, ses ve video gibi farklı çoklu ortam unsurları dengeli ve etkili bir şekilde kullanılmalıdır .
+• Kitap genelindeki e-içerikler, öğrenme sürecinin sadece belirli bölümlerine odaklanmamalı, öğrencinin dikkatini çekmekten öğrendiklerini de -
+ğerlendirmeye kadar tüm öğrenme aşamalarını destekleyecek şekilde çeşitlilik göstermelidir .
+8.3.3. E-içerikler mantıklı, ilgi çekici ve motive edici senaryolar üzerinden kurgulanmalıdır . 
+• İçeriğin açık, net ve eğitim öğretim programına uygun amacı olmalıdır .
+• İçerik, ders kitabı ve eğitim aracındaki ilişkili olduğu içeriği tamamlayıcı nitelikte tasarlanmalıdır .
+• İçerik, e-içeriğin türüne bağlı olarak öğrencilerin aktif olarak katılmasını teşvik eden etkileşimli ögeler içermelidir .39• Konunun özelliği ve e-içeriğin türüne bağlı olarak öğrencileri güdülemeye yönelik ödüllendirme mekanizmaları kullanılmalıdır .
+• Seslerin ve videoların uzunluğu içeriğin amacına uygun olmalıdır . 
+8.3.4. E-içerikler öğrencinin yaşına ve sınıf seviyesine uygun olmalıdır .
+• İçerik, öğrencinin yaşına ve sınıf seviyesine uygun bir pedagojik yaklaşımla hazırlanmalıdır .
+• İçerikte kullanılan metin, görsel, ses vb. çoklu ortam unsurları öğrencinin yaşına ve sınıf seviyesine uygun olmalıdır .
+• İçerikte öğrencinin yaşına ve sınıf seviyesine uygun, anlaşılır ve sade bir dil kullanılmalıdır .
+• İçerik, öğrencinin yaşına ve sınıf seviyesine uygun bir etkileşim düzeyi sunmalıdır .
+8.3.5. E-içerikler bilişsel yük dengesi açısından etkili bir öğretim sağlayacak nitelikte tasarlanmalıdır .
+• İçerikte öğrenmenin amaçlarıyla doğrudan ilgili olmayan görseller ve gereksiz bilgiler yer almamalıdır .
+• Birden fazla adımdan oluşan görevler, alt görevlere bölünmeli ve açık bir şekilde talimatlandırılmalıdır.
+• Öğrencilerin içerikte zorlandıkları noktalarda gerekli ipucu desteği sağlanmalıdır .
+• Öğrencinin aktif katılacağı içeriklerde karmaşık görevler olması durumunda (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik 
+ve tutarlı yönergelere yer verilmelidir.
+• Bilgi sunumunda bilişsel yükü azaltmak ve öğrenmeyi kolaylaştırmak için e-içeriğin türüne uygun olarak görsel ve işitsel ögeler den -
+geli bir şekilde kullanılmalıdır.
+• Birbirleriyle ilişkili ögelerin birbirine yakın ve eş zamanlı olarak sunulmasına özen gösterilmelidir .
+8.3.6. Etkileşimli içeriklerde e-içeriğin türüne, konusuna ve öğrenenin özelliklerine uygun geri bildirimlere yer verilmelidir . 
+• Geri bildirimler, öğrenciye en uygun sürede ve sıklıkta sağlanmalıdır.
+• Geri bildirimin içeriği, öğrenme süreciyle doğrudan ilişkili olmalıdır .
+• Geri bildirim yapıcı olmalı, öğrencilerin güçlü yönlerini ortaya çıkarmalı, gelişimlerini teşvik etmeli, öz güvenlerini desteklemeli ve 
+aynı zamanda gelişim alanlarıyla ilgili farkındalık kazandırmalıdır .
+• Bir soruya verilen yanıtlarla ilgili geri bildirimlerde sadece yanıtın doğru veya yanlış olduğu belirtilmemeli, aynı zamanda açıklayıcı 
+bilgiler ve ipuçları verilmeli veya yönlendirmeler yapılmalıdır.
+• Geri bildirim, metin, ses ve görsel gibi çeşitli formatları kullanarak çok yönlü bir yaklaşım sergilemeli ve böylece farklı öğrenme stil -
+lerine hitap etmelidir. 408.4. Arayüz Tasarımı ve Kullanılabilirlik
+8.4.1. E-içerikler sorunsuz bir şekilde çalışmalıdır. 
+• Düğmeler, bağlantılar, menüler gibi etkileşimli ögeler tıklandığında veya kullanıldığında beklenen işlevi yerine getirmelidir.
+• Sürükle-bırak işlevi sorunsuz çalışmalı, ögeler kolayca seçilip taşınabilmeli ve hedef alanlara doğru şekilde yerleştirilebilmelidir .
+• İçerikler herhangi bir eklenti ya da yazılım kurulumu gerektirmeden kullanılabilmelidir . 
+8.4.2. Arayüz basit, anlaşılır ve kullanımı kolay olmalıdır.
+• Araç çubukları, menüler ve düğmeler gibi denetim ögeleri işlevini doğru yansıtacak şekilde kolay hatırlanabilir ve anlaşılır olmalıdır . 
+• Video veya sesli anlatım içeren etkileşimli içeriklerde durdurma, geri ve ileri sarma gibi oynatma seçenekleri sunulmalıdır . 
+8.4.3. E-içeriklerin genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır . 
+• Ekranlar ve geçişler arasında tematik bir bütünlük olmalıdır. 
+• Arayüzde kullanılan tüm ögeler, tutarlı bir görsel ve işlevsel düzen içinde yer almalıdır.
+• E-içeriklerin farklı ekranları, menüleri, düğmeleri, kullanılan yazı tipi ve boyutu, renk, boşluk, hizalama gibi tasarım özellikleri ve ben -
+zeri yapıları arasında renk, biçim, kompozisyon gibi unsurlar açısından görsel estetik ve tematik bütünlük sağlanmalıdır .
+8.4.4. Etkileşimli içeriklerde alanlar etkileşime uygun tasarlanmalıdır .
+• Etkileşimli içeriklerde sunulan eşleştirme, yazma, tıklama, boşluk doldurma vb. alanlar ile diğer etkileşim bölümleri amacına uygun 
+tasarlanmalıdır.
+• Eşleşen ögeler arasında görsel bir bağlantı (örneğin renk değişimi veya çizgi) kurularak eşleşmenin doğruluğu vurgulanmalıdır .
+• Yazma alanları yeterli büyüklükte olmalı ve öğrencinin rahatça yazmasına imkân tanımalıdır.
+• Yazma alanlarındaki yazı tipi ve boyutu okunaklı olmalıdır.
+• Boşlukların uzunluğu, beklenen cevaba uygun olmalıdır.    
+8.4.5. Renkler, içerik ve işlevselliği destekleyecek nitelikte olmalıdır.
+• Renkler arasında yeterli kontrast sağlanmalıdır.
+• Renkler, içerik ve işlev açısından uyumlu ve anlamlı bir şekilde kullanılmalıdır.
+• Renk paletleri ve kontrastları uluslararası erişilebilirlik ölçütlerine uygun olmalıdır . 41• Renk paleti, arayüzdeki bilgilerin anlaşılmasını kolaylaştıracak şekilde planlanmalıdır .
+• Seçilen renk tonları, göz yormayan, rahat ve kullanıcı dostu olmalıdır .
+• İçeriğe uygun, öğrenmeyi destekleyici, görsel algı açısından uyumlu, bilgi akışına katkı sunan ve ilgi çekici renkler tercih edilmelidir .
+8.5. Ses ve Görüntü Kalitesi
+8.5.1. Ses ile içerik uyumlu olmalıdır.
+• Ses ve görüntü birbirine eş zamanlı (senkronize) olmalıdır.
+• Tonlamanın oluşturduğu algı içerikle uyumlu olmalıdır.
+• Ses rengi ve sesler, içeriğin yazılı ve görsel ögeleriyle uyumlu olmalıdır.
+8.5.2. Sesler net ve anlaşılır olmalıdır. 
+• Sesler profesyonel kalitede olmalıdır. 
+• Dikkat dağıtıcı arka plan sesleri olmamalıdır. 
+• Sesler bozulma olmayacak şekilde uygun ses hacmi ve kalitesinde olmalıdır . 
+• Sesler net, dip gürültüsüz, akıcı (kesintiye uğramadan) olmalıdır . 
+• Seçilen işitsel efektler içeriğe uygun ve dikkat dağıtmayacak bir ses hacmi ile verilmelidir .  
+8.5.3. Video ve görseller net, yüksek çözünürlük ve kalitede olmalıdır .
+• Video ve fotoğraflarda yeterli ve uygun ışıklandırma kullanılmalıdır . 
+• Video ve fotoğraf çekimleri doğru şekilde çerçevelenmeli ve önemli detaylar odak noktası olmalıdır . 
+• Farklı çekim ölçekleri (yakın plan, genel plan vb.) ve açılar kullanılarak görsel çeşitlilik sağlanmalıdır . 
+• Video ve görseller estetik ve dengeli bir kompozisyona sahip olmalıdır . 
+• Video ve görsellerin görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır .
+• Karakterler, dokular vb. yapıların detayları doğru bir biçimde verilmelidir.
+8.5.4. Video akışı ve geçişler sorunsuz olmalıdır.
+• Videoların akış boyutu, bit oranı, bit yoğunluğu ve kare hızı uygun ve hatasız olmalıdır . 42• Farklı görüntüler arasındaki geçişler dikkat dağıtıcı nitelikte olmamalıdır . 
+• Videolar akıcı olmalı, kesintiye uğramamalıdır.
+8.5.5. Sesli anlatım bulunan video içerikler için alt yazı hazırlanmalıdır .
+• Alt yazılar ortamın desteklediği formatta hazırlanmalı ve sesli içerikle bire bir örtüşmelidir .
+• Ses ile alt yazı eş zamanlı (senkronize) olmalıdır.
+• Öğretim programlarındaki dinleme becerisinin geliştirilmesine yönelik hazırlanan içerikler için alt yazı hazırlanmayabilir .
+8.6. Güvenlik, Güncellik ve Uyumluluk
+8.6.1. E-içerikler zararlı yazılımlar içermemelidir. 
+• Virüs, truva atı, solucan ve benzeri nitelikte zararlı unsurlar içermemeli ve bu nitelikteki üçüncü tür uygulama veya web sayfalarına 
+yönlendirme yapmamalıdır.
+8.6.2. E-içerikler sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır . 
+• E-içerikler bilişim teknolojileri cihazlarının (mobil-masaüstü) farklı ekran boyutları, çözünürlükleri ve özelliklerine uygun, bunlarla 
+uyumlu, kullanışlı ve işlevsel fark olmayacak şekilde hazırlanmalıdır .
+8.6.3. E-içerikler güncel teknolojilere ve standartlara uygun olarak geliştirilmelidir . 
+• İçerikler güvenlik açıkları ve sınırlamalarla karşılaşılmaması için güncel çoklu platformlarda, farklı işletim sistemleri ve cihazlarda 
+çalışabilecek yapıda ve güncel geliştirme ortamları, araç ve kütüphaneleri ile hazırlanmalıdır . 
+• E-içerikler uluslararası açık kaynaklı e-içerik standart ve belirtimlerine uygun olarak hazırlanmalıdır .
+8.6.4. E-içeriklerde Türkçe karakter setleri kullanılmalıdır. 
+• Türkçe karakterlerin kodlanmasında Windows 1254, UTF 8 ve ISO 8859-9 karakter kümeleri kullanılmalıdır . 
+• Yabancı diller, yaşayan diller ve lehçeler için hazırlanan eğitim araçlarında o dile uygun karakter seti kullanılmalıdır. 
+8.6.5. Sanal gerçeklik ve artırılmış gerçeklik uygulamaları standartlara uygun olarak hazırlanmalıdır . 
+• Sanal gerçeklik ve artırılmış gerçeklik cihazlarının web tarayıcısı desteği olmalıdır . 
+• Sanal gerçeklik uygulamaları güncel sanal gerçeklik başlıklarıyla uyumlu olmalıdır .
+• Sanal gerçeklik deneyimi için gerekli olan asgari sistem gereksinimleri (işlemci, RAM, grafik kartı vb.) belirtilmelidir .43• Sanal gerçeklik uygulamaları düşük gecikme süresi ile kesintisiz bir deneyim sunmalıdır .
+• Artırılmış gerçeklik uygulamaları mobil cihazlar ve artırılmış gerçeklik gözlükleri ile uyumlu olmalıdır .
+• Artırılmış gerçeklik uygulamaları, gerçek zamanlı izleme ve nesne tanıma özelliklerini desteklemelidir .
+• Artırılmış gerçeklik uygulamalarında kullanılan işaretleyiciler yüksek tanıma oranına sahip olmalıdır .
+• İşaretleyiciler çeşitli yüzeylerde ve ışık koşullarında doğru şekilde çalışmalıdır .44İnsan belleğine belirli bir zaman dilimi içerisinde yüklenen görsel ve işitsel algı yoğunluğu.
+ 
+(1) Taslak ders kitabında yer alan içerik unsurlarının öğrenciyi davranış özellikleri bilgi ve duygu bakımından 
+bir bütün olarak ele alması ve her yönden dengeli bir biçimde geliştirmesi. (2) İçeriğin dersin konuları, 
+konular arası hiyerarşi ve diğer derslerle ilişkilerine dikkat edilerek oluşturulması. (3) İçeriğin ortak ilkeler, 
+bağıntılar, kavramlar, fikir veya düzen ile birbirine bağlı, anlamlı bir bütün oluşturması. (4) İçeriğin bütün -
+lüğünü sağlamak, öğretilen konunun anlamını ve yorumlanmasını kolaylaştırmak için çizgi, şekil, renk gibi 
+unsurlar ve görseli oluşturan ögeler arasında bütünsel bir ilişki kurulması.
+Görsel unsurların boyutları ile biçimleri arasında oluşturulan benzerlikler ve tekrarlamalar ile gözün bir un -
+surdan diğerine kesintisiz geçişler yapabilmesi için sağlanmış olan görsel hiyerarşi.
+İki veya daha fazla akademik disiplinin ya da inceleme alanının birleştirilmesi ya da kapsanması.
+Web sayfaları görüntülenirken uygulamanın kullanılan farklı cihaz ve ekran boyutlarını algılayarak görsel 
+tasarım ve ögelerin yerleşimini cihaz ve ekran boyutuna uyarlayarak kullanıcıya sorunsuz ve etkili bir şekil -
+de görünüm sağladığı tasarım biçimi.
+Kendi başına çalışabilen bir program için genellikle özel bir alanda duyulan gereklilik üzerine geliştirilen, 
+programın daha hızlı çalışmasını veya daha fazla özelliğe sahip olmasına neden olan, programa yeni özel -
+likler ekleyen yazılım, bilgisayar programı.
+(1) Genel ağda bir sayfanın ulaşılabilir olması. (2) Farklı özelliklerdeki bireyler tarafından, farklı uygulama -
+larda yer alan bigi veya içeriğe kolay ulaşım ve kullanım imkânı bulunması.
+Öğrencilerin yeni bilgi, beceri ve tutumları edinip sergileyebilir düzeyde öğrenebilmeleri için yaşa bağlı 
+olarak sahip oldukları bilgi, duygu, eylem vb. özelliklerin tamamı.
+Öğrencinin anlamlı ve kalıcı öğrenmesi, öğretmenin etkin bir öğretme sağlayabilmesi ve kazanımların 
+daha etkili gerçekleştirilmesi için özel olarak hazırlanmış; görsel tasarım ilkeleri doğrultusunda kullanılmış 
+resim, fotoğraf, tablo, şema, harita, grafik, kavram haritası, zihin haritası, çizgi resim, şekil, piktogram vb. 
+öğrenme öğretme unsurları.SÖZLÜK
+Bilişsel yük :  
+Bütünlük : 
+Devamlılık : 
+Disiplinler arası :  
+ 
+Duyarlı tasarım :  
+ 
+ 
+Eklenti (plug-in) :  
+ 
+ 
+ 
+Erişilebilirlik :  
+ 
+ 
+Gelişim seviyesi : 
+Görsel unsur : 45İçerik :  
+ 
+İşaretleyici (marker) :  
+ 
+Organizasyon şeması : 
+Öğrenme stratejisi :
+Simülasyon (benzetim) :  
+ 
+Tutarlılık :   
+ 
+Yazılı unsur :İlgili eğitim öğretim programı çerçevesinde hazırlanmış basılı veya dijital ortamdaki kitap ve eklerine ait 
+unsurların tamamı.
+Artırılmış gerçeklik uygulamalarında, cihazlar tarafından tanındığında dijital bilgilerin, 3D modellerin veya 
+diğer sanal içeriklerin gerçek dünya üzerine yerleştirilmesine olanak tanıyan, belirli bir desen, kod, sembol 
+veya görsel olarak tanımlanan fiziksel işaretlerdir.
+Kitabın içeriğinde yer alan bölümlerin tanıtıldığı kısım.
+Öğrenen kişinin öğrenme sırasında gerçekleştirebileceği ve onun kodlama sürecini etkilemesi umulan 
+davranışlar ve düşünceler.
+Gerçek dünyada karşılaşılabilecek belirli bir olayı, süreci veya durumu modelleyerek öğrencilerin bu sen -
+aryoları sanal bir ortamda deneyimlemesini sağlayan araçlardır.
+(1) Varılan sonuçların bir mantıksal çıkarım kalıbına uygun olması, sunulan önermelerin kitabın iç bütün -
+lüğünde süreklilik oluşturması, çelişmeyip birbirine uygun düşmesi. (2) İçerik unsurlarının gerçeklikle ve 
+ilgili disiplindeki geçerli sonuçlarla mutabık olması.
+İçerikte yer alan metin, öğrenme öğretme etkinlikleri, ölçme ve değerlendirme etkinlikleri, deney tasarım -
+ları, bilgi notları, sözlük, kaynakça, içindekiler vb. yazılı unsurların tamamı.46....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................
+....................................................................................................................................................................................................................NOTLAR47 
+Serhat Mah.1290. Sokak No.8/B 06374
+Yenimahalle/ANKARA
+TTKB İnternet Adresi:
+https://ttkb.meb.gov.tr
+Kitap İnceleme Sistemi İnternet Adresi:
+https://kitapinceleme.meb.gov.tr
+Telefon:
+0 (312) 413 43 00 / 43 43
+E-posta Adresi:
+ttkb_kitapinceleme@meb.gov.trİLETİŞİM BİLGİLERİ48
+ANKARA
