@@ -690,10 +690,10 @@
 
     <!-- Canlı Destek Widget (Sağ Alt) -->
     <div id="canned-chat-widget" class="chat-widget">
-        <div id="canned-chat-window" class="chat-window hidden scale-0 opacity-0">
+        <div id="canned-chat-window" class="chat-window scale-0 opacity-0">
             <!-- Chat Header -->
             <div class="chat-header text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold">Canlı Destek</h3>
+                <h3 class="font-bold">Canlı Destek (Kural Temelli)</h3>
                 <button id="close-canned-chat" class="text-white hover:text-gray-200">
                     <i class="fas fa-times"></i>
                 </button>
@@ -719,7 +719,7 @@
 
     <!-- LLM Destekli Chatbot Widget (Sol Alt) -->
     <div id="llm-chat-widget" class="chat-widget">
-        <div id="llm-chat-window" class="chat-window hidden scale-0 opacity-0">
+        <div id="llm-chat-window" class="chat-window scale-0 opacity-0">
             <div class="chat-header text-white p-4 flex justify-between items-center">
                 <h3 class="font-bold">Yapay Zeka Asistan</h3>
                 <button id="close-llm-chat" class="text-white hover:text-gray-200">
@@ -757,6 +757,14 @@
             if (passwordInput.value === CORRECT_PASSWORD) {
                 passwordModal.style.display = 'none';
                 pageContent.style.display = 'block';
+                
+                // Chatları otomatik aç
+                setTimeout(() => {
+                    cannedChatWindow.classList.remove('scale-0', 'opacity-0');
+                    cannedChatIcon.classList.replace('fa-comments', 'fa-times');
+                    llmChatWindow.classList.remove('scale-0', 'opacity-0');
+                    llmChatIcon.classList.replace('fa-robot', 'fa-times');
+                }, 1000);
             } else {
                 errorMessage.textContent = 'Hatalı şifre. Lütfen tekrar deneyin.';
                 passwordInput.classList.add('border-red-500');
@@ -795,14 +803,12 @@
         const cannedChatMessages = document.getElementById('canned-chat-messages');
 
         function toggleCannedChatWindow() {
-            const isHidden = cannedChatWindow.classList.contains('hidden');
+            const isHidden = cannedChatWindow.classList.contains('scale-0');
             if (isHidden) {
-                cannedChatWindow.classList.remove('hidden');
-                setTimeout(() => cannedChatWindow.classList.remove('scale-0', 'opacity-0'), 10);
+                cannedChatWindow.classList.remove('scale-0', 'opacity-0');
                 cannedChatIcon.classList.replace('fa-comments', 'fa-times');
             } else {
                 cannedChatWindow.classList.add('scale-0', 'opacity-0');
-                setTimeout(() => cannedChatWindow.classList.add('hidden'), 300);
                 cannedChatIcon.classList.replace('fa-times', 'fa-comments');
             }
         }
@@ -834,17 +840,85 @@
         function getCannedResponse(userMessage) {
             const lowerCaseMessage = userMessage.toLowerCase();
             const intents = [
-                { name: 'belgeler', keywords: ['belge', 'doküman', 'evrak', 'gerekli', 'lazım'], response: 'Gerekli belgeler başvuru türünüze göre değişir. "Gerekli Belgeler" bölümünü inceleyebilirsiniz.' },
-                { name: 'süreç', keywords: ['süreç', 'nasıl başvururum', 'adımlar', 'işliyor'], response: 'Başvuru adımları "Adım Adım Başvuru Süreci" bölümünde detaylıca anlatılmıştır.' },
-                { name: 'selamlama', keywords: ['merhaba', 'selam'], response: 'Merhaba, size nasıl yardımcı olabilirim?' },
-                { name: 'teşekkür', keywords: ['teşekkür', 'sağ ol'], response: 'Rica ederim!' }
+                {
+                    name: 'belgeler',
+                    keywords: ['belge', 'doküman', 'evrak', 'gerekli', 'lazım', 'hangi belgeler', 'belgeler neler', 'gerekli belgeler'],
+                    response: 'Başvuru için gereken temel belgeler:\n• Tez Önerisi/Araştırma-Proje Bilgileri\n• Etik Kurul Onay Belgesi (bazı durumlar hariç)\n• MEB Başvuru Taahhütnamesi\n• Veri Toplama Araçları\n• Gönüllü Katılım ve Veli Onam Formları\n\nNot: Belgeler başvuru şeklinize göre değişir. Detaylar "Gerekli Belgeler" bölümünde.'
+                },
+                {
+                    name: 'süreç',
+                    keywords: ['süreç', 'nasıl başvururum', 'adımlar', 'işliyor', 'başvuru süreci', 'nasıl yapılır', 'başvuru nasıl'],
+                    response: 'Başvuru süreci 4 adımda:\n1️⃣ Sisteme Giriş (e-Devlet ile)\n2️⃣ Bilgi ve Belge Yükleme\n3️⃣ Birim Değerlendirmesi\n4️⃣ Nihai Karar ve Takip\n\nSistem adresi: https://arastirmaizinleri.meb.gov.tr'
+                },
+                {
+                    name: 'etik_kurul',
+                    keywords: ['etik', 'etik kurul', 'onay belgesi', 'etik kurul onayı'],
+                    response: 'Etik Kurul Onay Belgesi çoğu başvuru için gereklidir. ANCAK şu durumlar hariç:\n• Zorunlu eğitim öğrencilerinin araştırmaları\n• MEB birimleri adına yapılan araştırmalar\n• MEB uzman yardımcılarının tezleri\n\nBu durumlarda "Olur Belgesi" istenir.'
+                },
+                {
+                    name: 'başvuru_şekilleri',
+                    keywords: ['başvuru şekilleri', 'kim başvurabilir', 'kategoriler', 'öğrenci', 'akademisyen'],
+                    response: 'Başvuru yapabilenler:\n• Zorunlu eğitim öğrencileri (danışman aracılığıyla)\n• Akademisyenler ve üniversite öğrencileri\n• Kamu kurum/STK temsilcileri\n• Bağımsız araştırmacılar\n• MEB birim temsilcileri'
+                },
+                {
+                    name: 'değerlendirme',
+                    keywords: ['değerlendirme', 'karar', 'kim değerlendirir', 'süre', 'ne kadar sürer'],
+                    response: 'Değerlendirme süreci il sayısına göre:\n• 1-6 il → İl Millî Eğitim Müdürlükleri\n• 7-12 il → Bakanlık Merkez Birimleri\n• 13+ il → Talim ve Terbiye Kurulu Başkanlığı\n\nSüreç sistem üzerinden takip edilebilir.'
+                },
+                {
+                    name: 'uygulama_süresi',
+                    keywords: ['uygulama süresi', 'süre', 'ders saati', 'ne kadar sürer', 'kaç saat'],
+                    response: 'Uygulama süresi "ders saati" şeklinde belirtilmelidir. Gün/ay olarak belirtilirse toplam ders saati açıklanmalıdır. Okul dışı araştırmalar için saat olarak ifade edilir.'
+                },
+                {
+                    name: 'izin_geçerlilik',
+                    keywords: ['izin süresi', 'geçerlilik', 'uzatma', 'ne kadar geçerli'],
+                    response: 'Araştırma izni o eğitim-öğretim yılı için geçerlidir. İznin biteceği tarihten 3 ay önce talep edilirse bir defaya mahsus 6 ay uzatılabilir.'
+                },
+                {
+                    name: 'yönerge_dışı',
+                    keywords: ['hangi araştırmalar', 'kapsam dışı', 'yönerge kapsamında değil'],
+                    response: 'Yönerge kapsamı DIŞINDA:\n• Yükseköğretim kurumları araştırmaları\n• MEB dışındaki kişilerle yapılan araştırmalar\n• Okul dışı mekan araştırmaları (cami vb.)\n• Mimari projeler\n• Sadece doküman/arşiv taraması'
+                },
+                {
+                    name: 'roller',
+                    keywords: ['roller', 'kullanıcı rolleri', 'koordinatör', 'değerlendirici', 'yönetici'],
+                    response: 'Sistemdeki roller:\n• Değerlendirici: Başvuruları inceler\n• Koordinatör: Süreci koordine eder\n• Daire Başkanı/Birim Sorumlusu: Ara karar verir\n• Genel Müdür/Yönetici: Nihai kararı verir\n\nDetaylar "Kullanıcı Rolleri" bölümünde.'
+                },
+                {
+                    name: 'tezsiz_yüksek_lisans',
+                    keywords: ['tezsiz yüksek lisans', 'tezsiz', 'araştırma niteliği'],
+                    response: 'Tezsiz yüksek lisans araştırması için sistemde araştırma niteliği olarak "Araştırma" seçilmelidir. Bu seçim sonraki adımlar için bağlayıcıdır.'
+                },
+                {
+                    name: 'aykırı_işlem',
+                    keywords: ['aykırı', 'ceza', 'yaptırım', 'yasak'],
+                    response: 'Yönergeye aykırı işlem yapılması durumunda:\n• İlk ihlal: 2 eğitim-öğretim yılı başvuru yasağı\n• İkinci ihlal: Kalıcı başvuru yasağı\n• İzin iptal edilir ve yasal işlem başlatılır'
+                },
+                {
+                    name: 'sistem_giriş',
+                    keywords: ['sistem', 'giriş', 'e-devlet', 'nasıl girerim'],
+                    response: 'Sisteme giriş:\n• Adres: https://arastirmaizinleri.meb.gov.tr\n• Araştırmacılar: e-Devlet bilgileri ile\n• MEB personeli: MEBBİS kullanıcı bilgileri ile'
+                },
+                {
+                    name: 'selamlama',
+                    keywords: ['merhaba', 'selam', 'iyi günler', 'kolay gelsin'],
+                    response: 'Merhaba! Araştırma izinleri hakkında size nasıl yardımcı olabilirim? Soru örnekleri:\n• "Hangi belgeler gerekli?"\n• "Başvuru süreci nasıl işliyor?"\n• "Etik kurul onayı gerekli mi?"'
+                },
+                {
+                    name: 'teşekkür',
+                    keywords: ['teşekkür', 'sağ ol', 'sağolun', 'tşk', 'eyvallah'],
+                    response: 'Rica ederim! Başka sorularınız için buradayım. İyi çalışmalar dilerim! 😊'
+                }
             ];
+
             for (const intent of intents) {
                 if (intent.keywords.some(kw => lowerCaseMessage.includes(kw))) {
                     return intent.response;
                 }
             }
-            return 'Anlayamadım. Sorunuzu farklı bir şekilde sorabilir misiniz?';
+            
+            return 'Bu konuda yardımcı olamadım. Şu konularda sorular sorabilirsiniz:\n• Gerekli belgeler\n• Başvuru süreci\n• Etik kurul onayı\n• Başvuru şekilleri\n• Değerlendirme süreci\n\nDaha detaylı bilgi için sol taraftaki Yapay Zeka Asistanı da kullanabilirsiniz.';
         }
 
         // --- LLM-Powered Chat Logic ---
@@ -857,14 +931,12 @@
         const llmChatMessages = document.getElementById('llm-chat-messages');
 
         function toggleLlmChatWindow() {
-            const isHidden = llmChatWindow.classList.contains('hidden');
+            const isHidden = llmChatWindow.classList.contains('scale-0');
             if (isHidden) {
-                llmChatWindow.classList.remove('hidden');
-                setTimeout(() => llmChatWindow.classList.remove('scale-0', 'opacity-0'), 10);
+                llmChatWindow.classList.remove('scale-0', 'opacity-0');
                 llmChatIcon.classList.replace('fa-robot', 'fa-times');
             } else {
                 llmChatWindow.classList.add('scale-0', 'opacity-0');
-                setTimeout(() => llmChatWindow.classList.add('hidden'), 300);
                 llmChatIcon.classList.replace('fa-times', 'fa-robot');
             }
         }
@@ -874,10 +946,39 @@
         
         function getWebsiteContext() {
             const hero = document.getElementById('hero').innerText;
+            const dayanak = document.getElementById('dayanak').innerText;
+            const basvuruSekilleri = document.getElementById('basvuru-sekilleri').innerText;
             const surec = document.getElementById('surec').innerText;
             const belgeler = document.getElementById('belgeler').innerText;
+            const roller = document.getElementById('roller').innerText;
+            const kriterler = document.getElementById('kriterler').innerText;
             const sss = document.getElementById('sss').innerText;
-            return `Site İçeriği:\n\nBölüm: Ana Sayfa\n${hero}\n\nBölüm: Başvuru Süreci\n${surec}\n\nBölüm: Gerekli Belgeler\n${belgeler}\n\nBölüm: Sıkça Sorulan Sorular\n${sss}`;
+            
+            return `MEB ARAŞTIRMA UYGULAMA İZİNLERİ REHBERİ
+
+BÖLÜM 1 - GİRİŞ VE AMAÇ:
+${hero}
+
+BÖLÜM 2 - YASAL DAYANAK:
+${dayanak}
+
+BÖLÜM 3 - BAŞVURU ŞEKİLLERİ VE KİMLER BAŞVURABİLİR:
+${basvuruSekilleri}
+
+BÖLÜM 4 - BAŞVURU SÜRECİ ADIMLARI:
+${surec}
+
+BÖLÜM 5 - GEREKLİ BELGELER:
+${belgeler}
+
+BÖLÜM 6 - SİSTEMDE YER ALAN KULLANICI ROLLERİ:
+${roller}
+
+BÖLÜM 7 - DEĞERLENDİRME KRİTERLERİ:
+${kriterler}
+
+BÖLÜM 8 - SIKÇA SORULAN SORULAR:
+${sss}`;
         }
 
         llmChatForm.addEventListener('submit', async function(e) {
@@ -915,7 +1016,26 @@
             }
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             const context = getWebsiteContext();
-            const prompt = `Sen Milli Eğitim Bakanlığı Araştırma İzinleri portalı için bir yardımcı asistansın. Sadece ve sadece aşağıda sana verilen "Site İçeriği" metnini referans alarak cevap ver. Kullanıcının sorusu bu içerikle ilgiliyse, cevabı bu içerikten çıkararak ver. Eğer kullanıcının sorusunun cevabı bu içerikte yoksa veya soru içerikle alakasızsa, kesinlikle "Bu bilgi mevcut değildir, size sadece site içeriği hakkında yardımcı olabilirim." şeklinde cevap ver. Asla içerik dışında bilgi uydurma.\n\n${context}\n\nKullanıcı Sorusu: "${userMessage}"`;
+            const prompt = `Sen Millî Eğitim Bakanlığı Araştırma Uygulama İzinleri konusunda uzman bir danışmansın. Kullanıcının sorularını kısa, net ve doğru şekilde yanıtlayacaksın.
+
+YANIT KURALLARI:
+1. Kullanıcının sorusunu tam olarak anla
+2. Sadece soruyla DOĞRUDAN İLGİLİ bilgileri ver
+3. Kısa ve öz yanıt ver (3-5 cümle ideal)
+4. Gereksiz detaylara girmeden temel bilgiyi ver
+5. Eğer sorulan konu rehberde yoksa: "Bu bilgi rehberde yer almamaktadır"
+
+YANIT TARZI:
+• Doğrudan ve somut bilgi ver
+• Gereksiz başlık/alt başlık kullanma
+• Fazla detaya girmeden ana konuyu açıkla
+• Sadece sorulan konuya odaklan
+
+${context}
+
+Kullanıcı Sorusu: "${userMessage}"
+
+Bu soruya kısa ve net şekilde yanıt ver:`;
 
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
