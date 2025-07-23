@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEB Araştırma İzinleri Başvuru ve Değerlendirme Kılavuzu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hidden-content {
+            display: none;
+        }
+        .step-line {
+            position: absolute;
+            left: 50%;
+            top: 2rem;
+            bottom: 2rem;
+            width: 2px;
+            background-color: #e5e7eb;
+            transform: translateX(-50%);
+            z-index: -1;
+        }
+        .step-item:last-child .step-line {
+            display: none;
+        }
+        .faq-item .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 500px; /* Yeterince büyük bir değer */
+        }
+        .faq-item.open .icon-plus {
+            transform: rotate(45deg);
+        }
+        /* Chat Widget Stilleri */
+        .chat-widget {
+            position: fixed;
+            z-index: 1000;
+        }
+        
+        /* Sağ alt - Canned Chat */
+        #canned-chat-widget {
+            bottom: 2rem;
+            right: 2rem;
+        }
+        
+        /* Sol alt - LLM Chat */
+        #llm-chat-widget {
+            bottom: 2rem;
+            left: 2rem;
+        }
+        
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+            color: white;
+        }
+        
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Canlı Destek (Sağ) - Kırmızı */
+        #canned-chat-button {
+            background-color: #dc2626; /* red-600 */
+        }
+        
+        #canned-chat-window .chat-header {
+            background-color: #dc2626; /* red-600 */
+        }
+        
+        /* LLM Chat (Sol) - Mavi */
+        #llm-chat-button {
+            background-color: #2563eb; /* blue-600 */
+        }
+        
+        #llm-chat-window .chat-header {
+            background-color: #2563eb; /* blue-600 */
+        }
+        
+        .chat-window {
+            position: fixed;
+            width: 350px;
+            height: 500px;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        
+        #canned-chat-window {
+            bottom: 6.5rem;
+            right: 2rem;
+            transform-origin: bottom right;
+        }
+        
+        #llm-chat-window {
+            bottom: 6.5rem;
+            left: 2rem;
+            transform-origin: bottom left;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #dc2626; /* red-600 */
+            color: white;
+            align-self: flex-end;
+        }
+        .agent-message {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+            align-self: flex-start;
+        }
+        
+        /* Loading animation for LLM responses */
+        .loading-dots span {
+            animation: loading 1.4s infinite ease-in-out both;
+            display: inline-block;
+        }
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes loading {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[9999]">
+        <div class="bg-white p-8 rounded-lg shadow-2xl text-center w-11/12 max-w-sm">
+            <img src="https://placehold.co/80x80/dc2626/ffffff?text=MEB" alt="MEB Logo" class="h-20 w-20 rounded-full mx-auto mb-4">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Giriş Gerekli</h2>
+            <p class="text-gray-600 mb-6">Lütfen içeriği görüntülemek için şifreyi girin.</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Şifre">
+                <p id="error-message" class="text-red-500 text-sm mb-4 h-5"></p>
+                <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 font-semibold transition duration-300">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Page Content (Initially Hidden) -->
+    <div id="page-content" class="hidden-content">
+        <!-- Header -->
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="https://placehold.co/50x50/dc2626/ffffff?text=MEB" alt="MEB Logo" class="h-10 w-10 rounded-full">
+                    <span class="text-lg md:text-xl font-bold text-gray-700">Araştırma İzin Portalı</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#hero" class="text-gray-600 hover:text-red-600 transition duration-300">Ana Sayfa</a>
+                    <a href="#dayanak" class="text-gray-600 hover:text-red-600 transition duration-300">Dayanak</a>
+                    <a href="#surec" class="text-gray-600 hover:text-red-600 transition duration-300">Başvuru Süreci</a>
+                    <a href="#belgeler" class="text-gray-600 hover:text-red-600 transition duration-300">Gerekli Belgeler</a>
+                    <a href="#roller" class="text-gray-600 hover:text-red-600 transition duration-300">Kullanıcı Rolleri</a>
+                    <a href="#kriterler" class="text-gray-600 hover:text-red-600 transition duration-300">Değerlendirme</a>
+                    <a href="#sss" class="text-gray-600 hover:text-red-600 transition duration-300">S.S.S.</a>
+                    <a href="https://arastirmaizinleri.meb.gov.tr/" target="_blank" class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 font-semibold">Sisteme Giriş</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 focus:outline-none">
+                        <i class="fas fa-bars fa-lg"></i>
+                    </button>
+                </div>
+            </nav>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white py-2">
+                <a href="#hero" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Ana Sayfa</a>
+                <a href="#dayanak" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Dayanak</a>
+                <a href="#surec" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Başvuru Süreci</a>
+                <a href="#belgeler" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Gerekli Belgeler</a>
+                <a href="#roller" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Kullanıcı Rolleri</a>
+                <a href="#kriterler" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">Değerlendirme</a>
+                <a href="#sss" class="block px-6 py-2 text-gray-600 hover:bg-gray-100">S.S.S.</a>
+                <a href="https://arastirmaizinleri.meb.gov.tr/" target="_blank" class="block mx-6 my-2 text-center bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 font-semibold">Sisteme Giriş</a>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-6 py-12">
+            <!-- Hero Section -->
+            <section id="hero" class="text-center mb-24">
+                <h1 class="text-4xl md:text-5xl font-bold text-red-700 mb-4">Araştırma Uygulama İzinleri</h1>
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mb-6">Başvuru ve Değerlendirme Kılavuzu</h2>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    Millî Eğitim Bakanlığına bağlı merkez, taşra ve yurt dışı teşkilatlarında yapılacak ulusal ve uluslararası araştırma uygulama izinlerinin yürürlükte olan tüm yasal düzenlemeler ile Türk millî eğitiminin genel ve özel amaçlarına uygun olacak şekilde hazırlanması, planlanması ve uygulanmasına ilişkin iş ve işlemler gerçekleştirilirken uyulacak usul ve esasları açıklayan resmi kılavuz.
+                </p>
+            </section>
+
+            <!-- Dayanak Section -->
+            <section id="dayanak" class="mb-24 bg-white p-8 md:p-12 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Yasal Dayanak</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-gavel text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Temel Kanun</h3>
+                            <p class="text-gray-600">1739 sayılı Millî Eğitim Temel Kanunu</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-landmark text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Cumhurbaşkanlığı Kararnamesi</h3>
+                            <p class="text-gray-600">1 sayılı Cumhurbaşkanlığı Teşkilatı Hakkında Cumhurbaşkanlığı Kararnamesi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-book text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Yönetmelik</h3>
+                            <p class="text-gray-600">Talim ve Terbiye Kurulu Başkanlığı Yönetmeliği</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-file-contract text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Yönerge</h3>
+                            <p class="text-gray-600">Araştırma Uygulama İzinleri Yönergesi</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Başvuru Süreci Section -->
+            <section id="surec" class="mb-24">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Adım Adım Başvuru Süreci</h2>
+                <div class="relative max-w-4xl mx-auto">
+                    <div class="step-line"></div>
+                    <!-- Step 1 -->
+                    <div class="step-item mb-12 flex items-center w-full">
+                        <div class="w-1/2 flex justify-end pr-8">
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+                                <h3 class="font-bold text-xl mb-2 text-red-600">Sisteme Giriş</h3>
+                                <p class="text-gray-600">https://arastirmaizinleri.meb.gov.tr/ adresinden e-Devlet bilgileriniz ile sisteme giriş yapın.</p>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl z-10 shadow-lg">1</div>
+                        <div class="w-1/2"></div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="step-item mb-12 flex items-center w-full">
+                        <div class="w-1/2"></div>
+                        <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl z-10 shadow-lg">2</div>
+                        <div class="w-1/2 flex justify-start pl-8">
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+                                <h3 class="font-bold text-xl mb-2 text-red-600">Bilgi ve Belge Yükleme</h3>
+                                <p class="text-gray-600">Başvuru şeklinize uygun olarak kişisel, araştırma ve uygulama bilgilerini doldurun. Gerekli tüm belgeleri sisteme yükleyin.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="step-item mb-12 flex items-center w-full">
+                        <div class="w-1/2 flex justify-end pr-8">
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+                                <h3 class="font-bold text-xl mb-2 text-red-600">Birim Değerlendirmesi</h3>
+                                <p class="text-gray-600">Başvurunuz, kapsamına göre (il sayısı vb.) ilgili il millî eğitim müdürlüğüne veya Bakanlık merkez birimine sistem tarafından otomatik olarak yönlendirilir ve değerlendirilir.</p>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl z-10 shadow-lg">3</div>
+                        <div class="w-1/2"></div>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="step-item flex items-center w-full">
+                        <div class="w-1/2"></div>
+                        <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl z-10 shadow-lg">4</div>
+                        <div class="w-1/2 flex justify-start pl-8">
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+                                <h3 class="font-bold text-xl mb-2 text-red-600">Nihai Karar ve Takip</h3>
+                                <p class="text-gray-600">Değerlendirme sonucunda nihai karar (onay/ret) verilir. Başvurunuzun durumunu ve sonuç belgesini sistem üzerinden takip edebilirsiniz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Başvuru Şekilleri Section -->
+            <section id="basvuru-sekilleri" class="mb-24">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Başvuru Şekilleri</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-user-graduate text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-xl mb-3">Zorunlu Eğitim Öğrencileri</h3>
+                        <p class="text-gray-600">Zorunlu eğitime devam eden öğrenciler adına danışmanları tarafından yapılan başvurular.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-university text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-xl mb-3">Akademisyenler ve Öğrenciler</h3>
+                        <p class="text-gray-600">Üniversitelerde görev yapan akademik personel ya da ön lisans, lisans, yüksek lisans, doktora öğrencileri.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-building text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-xl mb-3">Kamu ve STK Temsilcileri</h3>
+                        <p class="text-gray-600">MEB dışındaki kamu kurum ve kuruluşları ile sivil toplum kuruluşları temsilcileri.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-user text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-xl mb-3">Bağımsız Araştırmacılar</h3>
+                        <p class="text-gray-600">Herhangi bir kuruma bağlı olmayan, kişisel araştırma yürüten araştırmacılar.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-school text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-xl mb-3">MEB Birim Temsilcileri</h3>
+                        <p class="text-gray-600">Millî eğitim müdürlükleri ve bağlı birimler adına yapılan başvurular.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gerekli Belgeler Section -->
+            <section id="belgeler" class="mb-24 bg-white p-8 md:p-12 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Başvuruda İstenen Temel Belgeler</h2>
+                <p class="text-center text-gray-600 -mt-8 mb-12">Not: Gerekli belgeler başvuru şekline (akademisyen, öğrenci vb.) ve araştırma niteliğine göre farklılık göstermektedir.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-file-invoice text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Tez Önerisi / Araştırma-Proje Bilgileri</h3>
+                            <p class="text-gray-600">Araştırmanın detaylarını içeren, onaylı tez önerisi veya kılavuz formatındaki araştırma/proje belgesi.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-university text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Enstitü Yönetim Kurulu Kararı</h3>
+                            <p class="text-gray-600">Tez önerisinin onaylandığını gösteren, tarih ve sayılı resmi yazı veya karar belgesi.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-shield-alt text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Etik Kurul Onay Belgesi</h3>
+                            <p class="text-gray-600">Belirli durumlar haricinde, yetkili bir etik kuruldan alınmış onay belgesi.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-file-signature text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">MEB Başvuru Taahhütnamesi</h3>
+                            <p class="text-gray-600">Kılavuz ekinde yer alan, araştırmacı tarafından imzalanmış taahhütname.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-list-check text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Veri Toplama Araçları</h3>
+                            <p class="text-gray-600">Kullanılacak anket, ölçek, görüşme ve gözlem formları gibi araçların tamamının birer örneği.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-child text-3xl text-red-500 mt-1"></i>
+                        <div>
+                            <h3 class="font-semibold text-lg">Gönüllü Katılım ve Veli Onam Formları</h3>
+                            <p class="text-gray-600">Katılımcılar için bilgilendirme ve gönüllü katılım formu. Reşit olmayanlar için Veli Onam Formu.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kullanıcı Rolleri Section -->
+            <section id="roller" class="mb-24">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Sistemde Yer Alan Kullanıcı Rolleri</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto">
+                    Araştırma uygulama izni başvuru değerlendirme sürecinde Bakanlık merkez birimleri ve il millî eğitim müdürlükleri tarafından belirlenen personel, aşağıdaki rollerle sistemde yer alır.
+                </p>
+                
+                <!-- Bakanlık Merkez Birimleri -->
+                <div class="mb-16">
+                    <h3 class="text-2xl font-bold text-center mb-8 text-red-600">Bakanlık Merkez Birimleri Kullanıcı Rolleri</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-user-check text-3xl text-red-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Değerlendirici</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Araştırma uygulama izni başvurularını Yönerge hükümlerine göre değerlendirme yapmak üzere birim koordinatörü tarafından yetkilendirilen personel.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Koordinatör tarafından yetkilendirilen başvuru için bilgi ve belgeleri değerlendirir</li>
+                                    <li>• Değerlendirme doğrultusunda başvuru ile ilgili ret ya da onay kararını verir</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-blue-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-users-cog text-3xl text-blue-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Koordinatör</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Araştırma uygulama izni başvuru değerlendirme sürecini Yönerge hükümlerine göre koordine eden, bağlı olduğu birim tarafından yetkilendirilen personel.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Sisteme değerlendirici ve yönetici rollerini tanımlar</li>
+                                    <li>• Her bir başvuru için en az iki değerlendiriciyi sistemde yetkilendirir</li>
+                                    <li>• Değerlendiricilerin kararı sonrası başvuruyu değerlendirir ve onay ya da ret kararını verir</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-green-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-user-tie text-3xl text-green-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Daire Başkanı/Birim Sorumlusu</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Araştırma uygulama izni başvuru değerlendirme sürecini yürüten koordinatörün yaptığı iş ve işlemlere yönelik karar veren amir.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Araştırma uygulama izni başvuru değerlendirme sürecini koordine etmek üzere bir koordinatörü resmî olarak yetkilendirir</li>
+                                    <li>• Koordinatörün onay ya da ret kararından sonra başvuruya ilişkin onay ya da ret kararını verir</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-purple-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-crown text-3xl text-purple-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Genel Müdür/Genel Müdür Yardımcısı</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Araştırma uygulama izni başvuru değerlendirme sürecini yöneten ve başvuruya ilişkin nihai kararı veren ilgili birimin en yetkili amiri.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Daire başkanı/birim sorumlusu kararından sonra başvuruya ilişkin nihai kararı verir</li>
+                                    <li>• Araştırma uygulama izni başvuru değerlendirme süreci ile ilgili tüm süreci yönetir</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- İl Millî Eğitim Müdürlükleri -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-center mb-8 text-red-600">İl Millî Eğitim Müdürlükleri Kullanıcı Rolleri</h3>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-user-check text-3xl text-red-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Değerlendirici</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Birim koordinatörü tarafından yetkilendirilen personel. Ünvan koşulu bulunmamaktadır.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Koordinatör tarafından yetkilendirilen başvuru için bilgi ve belgeleri değerlendirir</li>
+                                    <li>• Değerlendirme doğrultusunda başvuru ile ilgili ret ya da onay kararını verir</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-blue-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-users-cog text-3xl text-blue-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Koordinatör</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">Bağlı olduğu birim tarafından yetkilendirilen personel. AR-GE birimleri tarafından koordine edilir.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Sisteme değerlendirici ve yönetici rollerini tanımlar</li>
+                                    <li>• Her bir başvuru için en az iki değerlendiriciyi sistemde yetkilendirir</li>
+                                    <li>• Değerlendiricilerin kararı sonrası başvuruyu değerlendirir ve onay ya da ret kararını verir</li>
+                                    <li>• Onay kararı verilen başvurular için uygun okul/kurum isimlerini belirler</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-green-500">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-user-shield text-3xl text-green-500 mr-4"></i>
+                                <h4 class="text-xl font-bold text-gray-800">Yönetici</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">İl millî eğitim müdürü ya da il millî eğitim müdür yardımcısı olmalıdır. Nihai kararı veren yetkili amir.</p>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-gray-800 mb-2">Sorumlulukları:</h5>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Koordinatör kararından sonra başvuruya ilişkin nihai kararı verir</li>
+                                    <li>• Araştırma uygulama izni başvuru değerlendirme süreci ile ilgili tüm süreci yönetir</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Önemli Notlar -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-yellow-800 mb-2">Önemli Notlar</h4>
+                            <ul class="text-yellow-700 space-y-2">
+                                <li>• Araştırma uygulama izni başvuru değerlendirme sürecinde değerlendirici ve koordinatör rollerinde yer alan personelin <strong>lisansüstü eğitimini tamamlamış ya da lisansüstü eğitimine devam edenlerden seçilmesi önceliklidir</strong>.</li>
+                                <li>• İl millî eğitim müdürlüklerinde araştırma uygulama izni başvuru değerlendirme süreci ile ilgili iş ve işlemler <strong>AR-GE birimleri tarafından koordine edilir</strong>.</li>
+                                <li>• Değerlendirici ve koordinatör rollerinde <strong>ünvan koşulu bulunmamaktadır</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Değerlendirme Kriterleri Section -->
+            <section id="kriterler" class="mb-24">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Başvuru Değerlendirme Kriterleri</h2>
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <p class="text-gray-600 mb-8 text-center">Araştırma uygulama izni başvuruları Araştırma Uygulama İzinleri Yönergesi dikkate alınarak aşağıdaki kriterler çerçevesinde değerlendirilir:</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-xl text-red-600 mb-4">Temel Kriterler</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Araştırma içeriğinin yasal düzenlemelere uygunluğu</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Eğitim ve öğretim ile ilişkili olması</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Gerekli belgelerin eksiksiz yüklenmesi</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Etik kurul onayının varlığı</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Veri toplama araçlarının uygunluğu</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-xl text-red-600 mb-4">İçerik Kriterleri</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Araştırmanın amacının açık belirtilmesi</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Örneklem/çalışma grubunun uygun seçimi</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Veri analiz yöntemlerinin belirtilmesi</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Millî ve manevi değerlere uygunluk</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                    <p class="text-gray-700">Reklam unsuru içermemesi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 p-6 bg-red-50 rounded-lg">
+                        <h4 class="font-bold text-lg text-red-700 mb-3">Önemli Uyarılar</h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• Sistemde yer alan il sayısına göre başvuru değerlendirme yetkilisi belirlenir</li>
+                            <li>• 1-6 il: İl Millî Eğitim Müdürlükleri</li>
+                            <li>• 7-12 il: Bakanlık Merkez Birimleri</li>
+                            <li>• 13+ il: Talim ve Terbiye Kurulu Başkanlığı</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sıkça Sorulan Sorular Section -->
+            <section id="sss" class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Sıkça Sorulan Sorular</h2>
+                <div class="space-y-4">
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Öğrenci başvurularını kim yapar?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Zorunlu eğitime devam eden öğrencilerin başvuruları danışmanı tarafından, üniversite öğrencilerinin başvuruları ise bizzat kendileri tarafından yapılır.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Uygulama yapılacak MEB teşkilatı nasıl seçilir?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Uygulama il/ilçe müdürlük personeli ile yapılacaksa "il/ilçe millî eğitim müdürlükleri", okul personeli/öğrenci/veli ile yapılacaksa "okul/kurum" seçeneği kullanılır. Aktif derse girenler için "öğretmen", diğerleri için "görevli öğretmen" seçilmelidir.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Uygulama süresi nasıl belirtilmelidir?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Uygulama süresi, araştırma modeline uygun olarak "ders saati" şeklinde yazılmalıdır. Gün veya ay olarak belirtilirse toplam kaç ders saatine ihtiyaç duyulduğu açıklanmalıdır.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Hangi durumlarda Etik Kurul Onay Belgesi istenmez?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>1. Zorunlu eğitime devam eden öğrencilerin araştırmaları.<br>2. İl/ilçe millî eğitim müdürlükleri ve bağlı birimler adına yapılan araştırmalar (Bu durumda "En Üst Makamdan Alınan Olur Belgesi" istenir).<br>3. Millî eğitim uzman yardımcılarının uzmanlık tezleri.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Hangi araştırmalar Yönerge kapsamında değildir?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Yükseköğretim kurumlarında uygulama gerektiren, MEB bünyesinde olmayan kişilerle yapılan, okul dışı mekan (cami vb.) araştırmaları, mimari projeler, Türkiye Maarif Vakfı gibi kurumlara bağlı okullardaki araştırmalar ve sadece doküman/arşiv taraması gerektiren (bilgi/belge talebi olan) çalışmalar bu Yönerge kapsamında değildir.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Araştırma uygulama izni ne kadar süre geçerlidir?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Uygulama izni, iznin verildiği eğitim öğretim yılı için geçerlidir. Bu izin, iznin biteceği tarihten 3 ay öncesinden talep edilmesi halinde bir defaya mahsus olmak üzere 6 ay uzatılabilir.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Yönergeye aykırı işlem yapılması durumunda ne olur?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Yönerge hükümlerine aykırı işlem gerçekleştirdiği tespit edilen araştırmacılar, başvuru yaptığı eğitim öğretim yılı dahil olmak üzere toplamda iki eğitim öğretim yılı boyunca yeni başvuruda bulunamaz. İkinci kez aykırı işlemde bulunması halinde, ilgili kişi bir daha başvuruda bulunamaz.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item bg-white rounded-lg shadow-md">
+                        <button class="faq-question w-full flex justify-between items-center p-6 text-left">
+                            <span class="font-semibold text-lg">Tezsiz yüksek lisans araştırması için ne seçilmelidir?</span>
+                            <i class="fas fa-plus icon-plus text-red-600 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer px-6 pb-6 text-gray-600">
+                            <p>Araştırma tezsiz yüksek lisans kapsamında ise sistemde araştırma niteliği olarak "Araştırma" seçilmelidir. Araştırma niteliğinin doğru seçilmesi son derece önemlidir çünkü bu bilgi, sistemde yer alan sonraki adımlar için bağlayıcı niteliktedir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white mt-24">
+            <div class="container mx-auto px-6 py-8 text-center">
+                <p>&copy; 2025 T.C. Millî Eğitim Bakanlığı. Tüm hakları saklıdır.</p>
+                <p class="text-sm text-gray-400 mt-2">Bu web sitesi, başvuru sahiplerine kolaylık sağlamak amacıyla hazırlanmış bir rehberdir. Resmi ve güncel bilgiler için <a href="https://ttkb.meb.gov.tr/" target="_blank" class="underline hover:text-red-400">Talim ve Terbiye Kurulu Başkanlığı</a> web sitesini ziyaret ediniz.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Canlı Destek Widget (Sağ Alt) -->
+    <div id="canned-chat-widget" class="chat-widget">
+        <div id="canned-chat-window" class="chat-window hidden scale-0 opacity-0">
+            <!-- Chat Header -->
+            <div class="chat-header text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold">Canlı Destek</h3>
+                <button id="close-canned-chat" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Messages -->
+            <div id="canned-chat-messages" class="flex-1 p-4 space-y-4 overflow-y-auto flex flex-col">
+                 <div class="chat-message canned-agent-message agent-message">Merhaba! Araştırma izinleri başvuru süreci hakkında size nasıl yardımcı olabilirim?</div>
+            </div>
+            <!-- Input -->
+            <div class="p-4 bg-gray-100">
+                <form id="canned-chat-form" class="flex space-x-2">
+                    <input type="text" id="canned-chat-input" placeholder="Mesajınızı yazın..." class="flex-1 px-3 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <button type="submit" class="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button id="canned-chat-button" class="chat-button">
+            <i id="canned-chat-icon" class="fas fa-comments fa-lg"></i>
+        </button>
+    </div>
+
+    <!-- LLM Destekli Chatbot Widget (Sol Alt) -->
+    <div id="llm-chat-widget" class="chat-widget">
+        <div id="llm-chat-window" class="chat-window hidden scale-0 opacity-0">
+            <div class="chat-header text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold">Yapay Zeka Asistan</h3>
+                <button id="close-llm-chat" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="llm-chat-messages" class="flex-1 p-4 space-y-4 overflow-y-auto flex flex-col">
+                 <div class="chat-message llm-agent-message agent-message">Merhaba! Ben yapay zeka asistanınız. Bu site içeriğiyle ilgili sorularınızı yanıtlayabilirim.</div>
+            </div>
+            <div class="p-4 bg-gray-100">
+                <form id="llm-chat-form" class="flex space-x-2">
+                    <input type="text" id="llm-chat-input" placeholder="Sorunuzu yazın..." class="flex-1 px-3 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-700">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button id="llm-chat-button" class="chat-button">
+            <i id="llm-chat-icon" class="fas fa-robot fa-lg"></i>
+        </button>
+    </div>
+
+    <script>
+        // --- Password Protection ---
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const errorMessage = document.getElementById('error-message');
+        const passwordModal = document.getElementById('password-modal');
+        const pageContent = document.getElementById('page-content');
+        const CORRECT_PASSWORD = '3610';
+
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (passwordInput.value === CORRECT_PASSWORD) {
+                passwordModal.style.display = 'none';
+                pageContent.style.display = 'block';
+            } else {
+                errorMessage.textContent = 'Hatalı şifre. Lütfen tekrar deneyin.';
+                passwordInput.classList.add('border-red-500');
+                passwordInput.value = '';
+            }
+        });
+
+        // --- Page Content Logic ---
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                faqItems.forEach(otherItem => otherItem.classList.remove('open'));
+                if (!isOpen) {
+                    item.classList.toggle('open');
+                }
+            });
+        });
+
+        // --- Canned (Rule-based) Live Chat Logic ---
+        const cannedChatButton = document.getElementById('canned-chat-button');
+        const cannedChatWindow = document.getElementById('canned-chat-window');
+        const closeCannedChatButton = document.getElementById('close-canned-chat');
+        const cannedChatIcon = document.getElementById('canned-chat-icon');
+        const cannedChatForm = document.getElementById('canned-chat-form');
+        const cannedChatInput = document.getElementById('canned-chat-input');
+        const cannedChatMessages = document.getElementById('canned-chat-messages');
+
+        function toggleCannedChatWindow() {
+            const isHidden = cannedChatWindow.classList.contains('hidden');
+            if (isHidden) {
+                cannedChatWindow.classList.remove('hidden');
+                setTimeout(() => cannedChatWindow.classList.remove('scale-0', 'opacity-0'), 10);
+                cannedChatIcon.classList.replace('fa-comments', 'fa-times');
+            } else {
+                cannedChatWindow.classList.add('scale-0', 'opacity-0');
+                setTimeout(() => cannedChatWindow.classList.add('hidden'), 300);
+                cannedChatIcon.classList.replace('fa-times', 'fa-comments');
+            }
+        }
+
+        cannedChatButton.addEventListener('click', toggleCannedChatWindow);
+        closeCannedChatButton.addEventListener('click', toggleCannedChatWindow);
+
+        cannedChatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageText = cannedChatInput.value.trim();
+            if (messageText === '') return;
+            
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chat-message canned-user-message user-message';
+            userMessage.textContent = messageText;
+            cannedChatMessages.appendChild(userMessage);
+            cannedChatInput.value = '';
+            cannedChatMessages.scrollTop = cannedChatMessages.scrollHeight;
+
+            setTimeout(() => {
+                const agentMessage = document.createElement('div');
+                agentMessage.className = 'chat-message canned-agent-message agent-message';
+                agentMessage.textContent = getCannedResponse(messageText);
+                cannedChatMessages.appendChild(agentMessage);
+                cannedChatMessages.scrollTop = cannedChatMessages.scrollHeight;
+            }, 1000);
+        });
+
+        function getCannedResponse(userMessage) {
+            const lowerCaseMessage = userMessage.toLowerCase();
+            const intents = [
+                { name: 'belgeler', keywords: ['belge', 'doküman', 'evrak', 'gerekli', 'lazım'], response: 'Gerekli belgeler başvuru türünüze göre değişir. "Gerekli Belgeler" bölümünü inceleyebilirsiniz.' },
+                { name: 'süreç', keywords: ['süreç', 'nasıl başvururum', 'adımlar', 'işliyor'], response: 'Başvuru adımları "Adım Adım Başvuru Süreci" bölümünde detaylıca anlatılmıştır.' },
+                { name: 'selamlama', keywords: ['merhaba', 'selam'], response: 'Merhaba, size nasıl yardımcı olabilirim?' },
+                { name: 'teşekkür', keywords: ['teşekkür', 'sağ ol'], response: 'Rica ederim!' }
+            ];
+            for (const intent of intents) {
+                if (intent.keywords.some(kw => lowerCaseMessage.includes(kw))) {
+                    return intent.response;
+                }
+            }
+            return 'Anlayamadım. Sorunuzu farklı bir şekilde sorabilir misiniz?';
+        }
+
+        // --- LLM-Powered Chat Logic ---
+        const llmChatButton = document.getElementById('llm-chat-button');
+        const llmChatWindow = document.getElementById('llm-chat-window');
+        const closeLlmChatButton = document.getElementById('close-llm-chat');
+        const llmChatIcon = document.getElementById('llm-chat-icon');
+        const llmChatForm = document.getElementById('llm-chat-form');
+        const llmChatInput = document.getElementById('llm-chat-input');
+        const llmChatMessages = document.getElementById('llm-chat-messages');
+
+        function toggleLlmChatWindow() {
+            const isHidden = llmChatWindow.classList.contains('hidden');
+            if (isHidden) {
+                llmChatWindow.classList.remove('hidden');
+                setTimeout(() => llmChatWindow.classList.remove('scale-0', 'opacity-0'), 10);
+                llmChatIcon.classList.replace('fa-robot', 'fa-times');
+            } else {
+                llmChatWindow.classList.add('scale-0', 'opacity-0');
+                setTimeout(() => llmChatWindow.classList.add('hidden'), 300);
+                llmChatIcon.classList.replace('fa-times', 'fa-robot');
+            }
+        }
+
+        llmChatButton.addEventListener('click', toggleLlmChatWindow);
+        closeLlmChatButton.addEventListener('click', toggleLlmChatWindow);
+        
+        function getWebsiteContext() {
+            const hero = document.getElementById('hero').innerText;
+            const surec = document.getElementById('surec').innerText;
+            const belgeler = document.getElementById('belgeler').innerText;
+            const sss = document.getElementById('sss').innerText;
+            return `Site İçeriği:\n\nBölüm: Ana Sayfa\n${hero}\n\nBölüm: Başvuru Süreci\n${surec}\n\nBölüm: Gerekli Belgeler\n${belgeler}\n\nBölüm: Sıkça Sorulan Sorular\n${sss}`;
+        }
+
+        llmChatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const messageText = llmChatInput.value.trim();
+            if (messageText === '') return;
+
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'chat-message llm-user-message user-message';
+            userMessageDiv.textContent = messageText;
+            llmChatMessages.appendChild(userMessageDiv);
+            llmChatInput.value = '';
+            llmChatMessages.scrollTop = llmChatMessages.scrollHeight;
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chat-message llm-agent-message agent-message loading-dots';
+            loadingDiv.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+            llmChatMessages.appendChild(loadingDiv);
+            llmChatMessages.scrollTop = llmChatMessages.scrollHeight;
+
+            const responseText = await getLlmResponse(messageText);
+            loadingDiv.remove();
+
+            const agentMessageDiv = document.createElement('div');
+            agentMessageDiv.className = 'chat-message llm-agent-message agent-message';
+            agentMessageDiv.textContent = responseText;
+            llmChatMessages.appendChild(agentMessageDiv);
+            llmChatMessages.scrollTop = llmChatMessages.scrollHeight;
+        });
+
+        async function getLlmResponse(userMessage) {
+            const apiKey = "AIzaSyARHPiocODfXmySP2Ln6Ij_CN2NspzzoTg"; // Gemini 2.0 API anahtarınızı buraya yapıştırın.
+            if (!apiKey) {
+                return "API anahtarı yapılandırılmamış. Lütfen site yöneticisi ile iletişime geçin.";
+            }
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const context = getWebsiteContext();
+            const prompt = `Sen Milli Eğitim Bakanlığı Araştırma İzinleri portalı için bir yardımcı asistansın. Sadece ve sadece aşağıda sana verilen "Site İçeriği" metnini referans alarak cevap ver. Kullanıcının sorusu bu içerikle ilgiliyse, cevabı bu içerikten çıkararak ver. Eğer kullanıcının sorusunun cevabı bu içerikte yoksa veya soru içerikle alakasızsa, kesinlikle "Bu bilgi mevcut değildir, size sadece site içeriği hakkında yardımcı olabilirim." şeklinde cevap ver. Asla içerik dışında bilgi uydurma.\n\n${context}\n\nKullanıcı Sorusu: "${userMessage}"`;
+
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    console.error("API Error:", errorResult);
+                    return `API Hatası: ${errorResult.error.message}. Lütfen API anahtarınızı kontrol edin.`;
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    return "Yapay zekadan bir cevap alınamadı. Lütfen tekrar deneyin.";
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                return "Yapay zeka ile iletişim kurarken bir hata oluştu.";
+            }
+        }
+
+    </script>
+
+</body>
+</html>
