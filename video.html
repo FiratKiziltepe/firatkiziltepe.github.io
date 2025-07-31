@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Üzerinde Hata Notu Ekle</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    video { width: 100%; max-width: 800px; margin-bottom: 1rem; }
+    #annotations { margin-top: 2rem; }
+    .note { border-bottom: 1px solid #ccc; padding: 0.5rem 0; cursor: pointer; }
+    .note:hover { background-color: #f0f0f0; }
+    label, input, textarea, button, select { display: block; width: 100%; margin-bottom: 0.5rem; }
+    button { padding: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h2>Video Hata Notları Aracı</h2>
+  <input type="file" id="videoUpload" accept="video/*" />
+  <video id="videoPlayer" controls></video>
+
+  <form id="noteForm">
+    <label>Duraklatılan Saniye:</label>
+    <input type="text" id="timeInput" readonly />
+
+    <label>Kriter:</label>
+    <select id="mainCriterion" required>
+      <option value="">Bir kriter seçin</option>
+      <option value="Anayasa">Anayasa</option>
+      <option value="Bilimsel">Bilimsel</option>
+    </select>
+
+    <label>Alt Kriter:</label>
+    <select id="subCriterion" required>
+      <option value="">Önce kriter seçin</option>
+    </select>
+
+    <label>Açıklama:</label>
+    <textarea id="noteText" placeholder="Buraya hatayı yazın..." required></textarea>
+
+    <button type="submit">Hata Girişi Yap</button>
+  </form>
+
+  <div id="annotations">
+    <h3>Eklenen Notlar</h3>
+    <div id="noteList"></div>
+  </div>
+
+  <script>
+    const video = document.getElementById('videoPlayer');
+    const upload = document.getElementById('videoUpload');
+    const timeInput = document.getElementById('timeInput');
+    const form = document.getElementById('noteForm');
+    const mainCriterion = document.getElementById('mainCriterion');
+    const subCriterion = document.getElementById('subCriterion');
+    const noteText = document.getElementById('noteText');
+    const noteList = document.getElementById('noteList');
+
+    const annotations = [];
+
+    const subCriteriaOptions = {
+      Anayasa: ['Eşitlik İlkesi', 'Temel Haklar', 'Laiklik'],
+      Bilimsel: ['Bilimsel Geçerlilik', 'Kaynak Belirtme', 'Yöntem Tutarlılığı']
+    };
+
+    mainCriterion.addEventListener('change', () => {
+      const selected = mainCriterion.value;
+      subCriterion.innerHTML = '<option value="">Alt kriter seçin</option>';
+      if (subCriteriaOptions[selected]) {
+        subCriteriaOptions[selected].forEach(option => {
+          const opt = document.createElement('option');
+          opt.value = option;
+          opt.textContent = option;
+          subCriterion.appendChild(opt);
+        });
+      }
+    });
+
+    upload.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        video.src = url;
+      }
+    });
+
+    video.addEventListener('pause', () => {
+      timeInput.value = video.currentTime.toFixed(2) + ' saniye';
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const seconds = parseFloat(video.currentTime.toFixed(2));
+      const main = mainCriterion.value;
+      const sub = subCriterion.value;
+      const note = noteText.value.trim();
+      if (!note || !main || !sub) return;
+
+      const annotation = { time: seconds, main, sub, note };
+      annotations.push(annotation);
+
+      const item = document.createElement('div');
+      item.className = 'note';
+      item.textContent = `⏱ ${seconds} sn - [${main} > ${sub}] 📝 ${note}`;
+      item.dataset.time = seconds;
+
+      item.addEventListener('click', () => {
+        video.currentTime = annotation.time;
+        video.play();
+      });
+
+      noteList.appendChild(item);
+
+      form.reset();
+      subCriterion.innerHTML = '<option value="">Önce kriter seçin</option>';
+      timeInput.value = '';
+      console.log('Tüm Notlar:', annotations);
+    });
+  </script>
+</body>
+</html>
