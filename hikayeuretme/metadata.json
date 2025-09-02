@@ -1,0 +1,6 @@
+{
+  "name": "Kişiye Özel Hikâye Üretme",
+  "description": "An interactive storytelling web application that uses AI to generate personalized stories and illustrations for children based on their preferences.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
