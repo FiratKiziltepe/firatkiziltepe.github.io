@@ -1,0 +1,680 @@
+2560297575 - 2560297575 - 2560297575 - 2560297575
+2
+İÇİNDEKİLER
+1 | GİRİŞ ............................................................................................................................. 3
+1.1. Amaç ........................................................................................................................... 3
+1.2. Dayanak ...................................................................................................................... 3
+2 | ARAŞTIRMA UYGULAMA İZİNLERİ BAŞVURU VE DEĞERLENDİRME SİSTEMİ ................... 3
+2.1. Başvuru Süreci ............................................................................................................. 3
+2.1.1. Sisteme Giriş ................................................................................................................ 3
+2.2. Başvuru Şekilleri .......................................................................................................... 3
+2.2.1 Zorunlu Eğitime Devam Eden Öğrenciler ..................................................................... 4
+2.2.2. Akademisyenler ve Öğrenciler .................................................................................... 4
+2.2.3. Kamu Kurum ve Kuruluşları ile Sivil Toplum Kuruluşları Temsilcileri ........................... 4
+2.2.4. Bağımsız Araştırmacılar ............................................................................................... 4
+2.2.5. Millî Eğitim Müdürlüklerine Bağlı Birim Temsilcileri .................................................... 4
+2.3. Başvuruda İstenen Bilgiler ........................................................................................... 4
+2.4. Başvuruda İstenen Belgeler ......................................................................................... 5
+2.5. Başvurunun Tamamlanması ....................................................................................... 10
+2.6. Başvuru Değerlendirme Süreci ................................................................................... 11
+2.6.1. Sistemde Yer Alan Kullanıcı Rolleri ............................................................................ 11
+2.6.2. Başvuruların Sistem Üzerinden Birimlere Yönlendirilmesi ve Değerlendirilmesi ...... 13
+2.7. Başvuru Takibi ........................................................................................................... 14
+3 | ARAŞTIRMA UYGULAMA İZNİ BAŞVURU DEĞERLENDİRME KRİTERLERİ ....................... 14
+4 | ARAŞTIRMA UYGULAMASININ YAPILMASI .................................................................. 14
+5 | YÖNERGE’YE AYKIRI YAPILAN İŞLEMLER ...................................................................... 15
+6 | DİĞER HUSUSLAR ........................................................................................................ 16
+7 | BAŞKANLIK GÖRÜŞÜ ................................................................................................... 18
+8 | SON HÜKÜMLER ......................................................................................................... 18
+8.1. Yürürlük .................................................................................................................... 18
+8.2. Yürütme .................................................................................................................... 18
+EK 1 | ARAŞTIRMA UYGULAMA İZNİ BAŞVURU DEĞERLENDİRME KRİTERLERİ ................... 19
+EK 2 | SIKÇA SORULAN SORULAR ...................................................................................... 21
+2560297575 - 2560297575 - 2560297575 - 2560297575
+3
+1 | GİRİŞ
+1.1. Amaç
+Bu kılavuz, Millî Eğitim Bakanlığına bağlı merkez, taşra ve yurt dışı teşkilatlarında yapılacak
+ulusal ve uluslararası araştırma uygulama izinlerinin yürürlükte olan tüm yasal düzenlemeler
+ile Türk millî eğitiminin genel ve özel amaçlarına uygun olacak şekilde hazırlanması,
+planlanması ve uygulanmasına ilişkin iş ve işlemler gerçekleştirilirken uyulacak usul ve esasları
+açıklamaktadır. Araştırma Uygulama İzinleri Yönergesi’nde yer almayan hususlar ile istisnai
+durumlara ilişkin açıklamalar bu kılavuzda düzenlenmiştir.
+1.2. Dayanak
+Kılavuz, aşağıdaki yasal mevzuata dayanmaktadır:
+• 1739 sayılı Millî Eğitim Temel Kanunu,
+• 1 sayılı Cumhurbaşkanlığı Teşkilatı Hakkında Cumhurbaşkanlığı Kararnamesi,
+• Talim ve Terbiye Kurulu Başkanlığı Yönetmeliği,
+• Araştırma Uygulama İzinleri Yönergesi
+2 | ARAŞTIRMA UYGULAMA İZİNLERİ BAŞVURU VE DEĞERLENDİRME SİSTEMİ
+Araştırma uygulama izni başvuruları Araştırma Uygulama İzinleri Başvuru ve Değerlendirme
+Sistemi üzerinden yapılmakta ve değerlendirilmektedir.
+2.1. Başvuru Süreci
+Araştırma uygulama izni başvuruları “Araştırma Uygulama İzinleri Başvuru ve Değerlendirme
+Sistemi” üzerinden çevrim içi olarak alınmakta ve değerlendirilmektedir. Sisteme
+https://arastirmaizinleri.meb.gov.tr/ adresinden erişilir.
+2.1.1. Sisteme Giriş
+Araştırmacılar sisteme “e-Devlet bilgileri” ile giriş yapar.
+Bakanlık merkez birimleri ve il/ilçe millî eğitim müdürlükleri yetkilileri sisteme “MEBBİS
+Kullanıcı Bilgileri” ile erişir.
+2.2. Başvuru Şekilleri
+Akademisyenler ve öğrenciler, kamu kurum ve kuruluşları ile sivil toplum kuruluşları
+temsilcileri, bağımsız araştırmacılar ve millî eğitim müdürlüklerine bağlı birim temsilcileri Millî
+Eğitim Bakanlığına bağlı merkez, taşra ve yurt dışı teşkilatlarında ulusal ve uluslararası
+2560297575 - 2560297575 - 2560297575 - 2560297575
+4
+araştırma uygulama izni başvurusunda bulunabilirler. Başvuru şekilleri ve bu şekillerle ilgili
+bilgiler aşağıda açıklanmıştır:
+2.2.1 Zorunlu Eğitime Devam Eden Öğrenciler
+Zorunlu eğitime devam eden öğrenciler adına danışmanları aracılığıyla yapılan başvuruları
+kapsar. Bu durumda başvuru, öğrenci adına danışmanı tarafından yapılır. Başvuru sırasında
+danışmanın mesleği ve kurum bilgileri esas alınır.
+2.2.2. Akademisyenler ve Öğrenciler
+Üniversitelerde görev yapan akademik personel ya da ön lisans, yüksekokul, lisans, yüksek
+lisans, doktora düzeyindeki öğrenciler tarafından yapılan başvuruları kapsar. Öğrenciler
+başvurularını bizzat kendileri yapar; danışmanları onların adına başvuru yapamaz.
+2.2.3. Kamu Kurum ve Kuruluşları ile Sivil Toplum Kuruluşları Temsilcileri
+Millî Eğitim Bakanlığı dışındaki kamu kurum ve kuruluşları ile sivil toplum kuruluşları tarafından
+yapılan başvuruları kapsar. Kurum/kuruluş adına başvuru yapılır ve işlemler, kurum/kuruluş
+tarafından yetkilendirilen personel aracılığıyla yürütülür.
+2.2.4. Bağımsız Araştırmacılar
+Herhangi bir üniversitede akademik personel ya da öğrenci olmayan, kamu kurumuna ya da
+sivil toplum kuruluşuna bağlı görev yapmayan araştırmacılar tarafından yapılan başvuruları
+kapsar. Bu araştırmacılar, araştırmalarını kurum/kuruluş adına değil kendi adlarına yaparlar.
+Kişisel olarak yürütülen araştırmalarda bu başvuru şekli kullanılır.
+2.2.5. Millî Eğitim Müdürlüklerine Bağlı Birim Temsilcileri
+Millî eğitim müdürlükleri ve müdürlüklere bağlı birimler ile merkezler tarafından birimleri
+adına yapılan başvuruları kapsar. Okul/kurumlarda görev yapan öğretmen ya da yöneticilerin
+bireysel olarak yürüttüğü araştırmalarda bu başvuru şekli kullanılmaz; bu durumda "Bağımsız
+Araştırmacılar" seçeneği tercih edilir.
+2.3. Başvuruda İstenen Bilgiler
+Sistemde girilecek bilgiler, başvuru şekline göre değişiklik göstermektedir. Aşağıda istenen
+bilgiler yer almaktadır:
+Kişisel Bilgiler: Başvuru sahibi veya yetkilisinin kimlik ve iletişim bilgilerini içerir (Bkz. Ek 2
+S.S.S.1).
+2560297575 - 2560297575 - 2560297575 - 2560297575
+5
+Başvuru Bilgileri: Başvuru şekli ve başvurunun yapıldığı ülke gibi bilgileri içerir. Ayrıca başvuru
+şekline uygun olarak gerekli bilgiler, sistem tarafından dinamik olarak yönlendirilmektedir
+(Bkz. Ek 2 S.S.S.2).
+Araştırma Bilgileri: Araştırmanın adı, konusu, ilişkili konular, anahtar kelimeler, araştırmanın
+niteliği, araştırma içeriğinin eğitim teknolojileriyle ilişkisi veya akademik başarı ölçümüne
+yönelik olup olmadığı bilgileri girilir. Araştırma niteliği, başvuru bilgilerinde yer alan başvuru
+şeklindeki seçime göre listelenmektedir. Araştırma niteliği; lisans bitirme, yüksek lisans tezi,
+doktora tezi, makale, bildiri, araştırma, proje, öğrenci projeleri şeklindedir (Bkz. Ek 2 S.S.S.3).
+Uygulama Bilgileri: Araştırmanın örneklemi/çalışma grubu, uygulama yapılacak Millî Eğitim
+Bakanlığı teşkilatı, örneklem/çalışma grubuna dair varsa özel bilgiler ve uygulama süresi yer
+alır. Seçilen örneklem/çalışma grubuna göre girilecek diğer bilgiler değişmektedir. Uygulama
+bilgileri kapsamında yapılacak tüm seçimlerin (örneklem /çalışma grubu, uygulama yapılacak
+MEB teşkilatı, il, ilçe, okul/kurum türü) tez önerisinde ya da araştırma/proje bilgileri adlı
+belgede belirtilen bilgilerle tutarlı olması gerekmektedir. Aksi durumda başvuru reddedilir.
+Uygulama yapılacak MEB teşkilatı (il/ilçe millî eğitim müdürlükleri, okul/kurum)
+örneklem/çalışma grubu (öğrenci, öğretmen, görevli öğretmen, yönetici, veli vb.) dikkate
+alınarak seçilir (Bkz. Ek 2 S.S.S.4).
+Uygulama süresi araştırma modeline uygun olarak ders saati şeklinde yazılmalıdır (Bkz. Ek 2
+S.S.S.5).
+2.4. Başvuruda İstenen Belgeler
+Başvuru şekline göre seçilen araştırma nitelikleri değişmektedir. Dolayısıyla başvuru şekli ve
+araştırma niteliğine göre zorunlu olan belgeler farklılık göstermektedir. Aşağıda yüklenmesi
+gereken belgeler hakkında bilgi verilmiştir:
+Belgeler arasında ifade edilen Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru
+Taahhütnamesi, Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu, Veli Onam Formu,
+Araştırma/Proje Bilgileri, Tercüme Doğruluk Beyanı Araştırma Uygulama İzinleri Yönergesi
+eklerinde yer almaktadır.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+6
+Başvuru şekli olarak zorunlu eğitime devam eden öğrenciler ve araştırma niteliği olarak
+öğrenci projeleri/araştırmaları, TÜBİTAK 2204-A Lise Öğrencileri Araştırma Projeleri
+Yarışması, TÜBİTAK 2204-B Ortaokul Öğrencileri Araştırma Projeleri Yarışması, TÜBİTAK
+4006 Bilim Fuarları, TÜBİTAK 2204-C Lise Öğrencileri Kutup Araştırma Projeleri Yarışması
+ve 2204-D Lise Öğrencileri İklim Değişikliği Araştırma Projeleri Yarışması seçenlerin
+yükleyeceği belgeler:
+• Araştırma/Proje Bilgileri adlı belge,
+• Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi (Taahhütname
+danışman tarafından imzalanmalıdır.),
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+• Yabancı dilde hazırlanan belgeler var ise belgelerin asılları, Türkçe tercümeleri ve
+Tercüme Doğruluk Beyanı (Söz konusu doğruluk beyanı danışman tarafından
+hazırlanmalıdır.).
+Zorunlu eğitime devam eden öğrencilerin proje/araştırmalarında etik kurul onay
+belgesi talep edilmemektedir.
+Başvuru şekli olarak bağımsız araştırmacılar ve araştırma niteliği olarak lisans bitirme,
+makale, bildiri, araştırma, proje seçenlerin yükleyeceği belgeler:
+• Araştırma/Proje Bilgileri adlı belge,
+• Etik Kurul Onay Belgesi,
+• Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi,
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+2560297575 - 2560297575 - 2560297575 - 2560297575
+7
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+• Yabancı dilde hazırlanan belgeler var ise belgelerin asılları, Türkçe tercümeleri ve
+Tercüme Doğruluk Beyanı (Söz konusu doğruluk beyanı lisans bitirme için danışman
+tarafından diğer durumlarda araştırmacı tarafından hazırlanmalıdır.).
+Başvuru şekli olarak akademisyenler ve öğrenciler ile araştırma niteliği olarak yüksek lisans
+ya da doktora seçenlerin yükleyeceği belgeler:
+• Tez Önerisi,
+• Enstitü Yönetim Kurulu Kararı,
+• Etik Kurul Onay Belgesi,
+• Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi,
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+• Yabancı dilde hazırlanan belgeler var ise belgelerin asılları, Türkçe tercümeleri ve
+Tercüme Doğruluk Beyanı (Yüksek lisans veya doktora kapsamındaki tez araştırmaları
+için öğrencinin danışmanı tarafından tercüme doğruluk beyanı hazırlanmalı ve beyan
+araştırmacı tarafından sisteme yüklenmelidir. Araştırmacı yurt dışında öğrenci ise
+tercüme doğruluk beyanı araştırmacı tarafından hazırlanmalıdır.).
+Tez önerisinin enstitünün onayladığı hâli sisteme yüklenmelidir. Onaylanan tez
+önerisi için daha sonra değişiklik yapılması gerektiği hâlde enstitü yönetim kurulu
+kararında/tez önerisinde değişiklik yapılamaması durumunda danışman
+tarafından değişiklikle ilgili yazılan ve imzalanan dilekçe ya da (varsa) tez izleme
+komitesi kararı sisteme yüklenmelidir. Danışman onayı olmadan tez önerisinde
+ekleme, çıkarma ya da düzeltme yapılmamalıdır. Araştırmanın adı/başlığı
+dışındaki tüm değişiklikler için bu durum geçerlidir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+8
+Üniversitelerin tez öneri içeriklerinde farklılıklar olabilmektedir. Tez önerilerinde
+araştırma/proje bilgileri adlı belgede olduğu gibi başlıklar net değildir. Bu nedenle
+tez önerisinin içeriğinde yer alan başlıklar üzerinden bir değerlendirme
+yapılmamalıdır. Fakat uygulama bakımından örneklem/çalışma grubuna ilişkin
+önemli olan bilgiler ve veri toplama araçları tez önerisinde yer almalıdır. Bu
+bilgilerin ve veri toplama araçlarının onaylanan tez önerisinde yer almaması
+durumunda söz konusu bilgileri içeren ve danışman tarafından yazılan ve
+imzalanan belge tez önerisinin devamına eklenerek sisteme yüklenmelidir.
+Reddedilen başvurularda ret gerekçelerine ilişkin düzenleme yapıldığında da aynı
+durum geçerlidir.
+Tez önerisinin onaylandığına dair enstitü yönetim kurulu kararı ya da enstitü
+tarafından tez önerisinin onaylandığı tarih ve sayıyı içeren resmî yazı sisteme
+yüklenmelidir. Enstitü yönetim kurulu kararı ile etik kuruldan alınan onay belgesi
+farklı belgelerdir. Sistemde iki ayrı yere aynı belge yüklenmemelidir.
+Araştırmacı yurt dışında öğrenci ise tez önerisinin, enstitünün/danışmanının
+onayladığı hâli sisteme yüklenmelidir. Ayrıca tez önerisine ilişkin enstitü yönetim
+kurulu kararı ya da enstitü tarafından tez önerisinin onaylandığı tarih ve sayıyı
+içeren resmî yazı yok ise tez önerisinin danışman tarafından onaylandığını
+gösteren belge sisteme yüklenmelidir.
+Başvuru şekli olarak akademisyenler ve öğrenciler ile araştırma niteliği olarak makale,
+bildiri, araştırma, proje seçenlerin yükleyeceği belgeler:
+• Araştırma/Proje Bilgileri adlı belge,
+• Etik Kurul Onay Belgesi,
+• Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi,
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+2560297575 - 2560297575 - 2560297575 - 2560297575
+9
+• Yabancı dilde hazırlanan belgeler var ise belgelerin asılları, Türkçe tercümeleri ve
+Tercüme Doğruluk Beyanı (Söz konusu doğruluk beyanı araştırmacı tarafından
+hazırlanmalıdır.).
+Başvuru şekli olarak kamu kurum ve kuruluşları ile sivil toplum kuruluşları temsilcileri ve
+araştırma niteliği olarak makale, bildiri, araştırma, proje seçenlerin yükleyeceği belgeler:
+• Araştırma/Proje Bilgileri adlı belge,
+• Etik Kurul Onay Belgesi,
+• Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi,
+• İzin Belgesi (Araştırmayı kurum/kuruluş adına yürüten personele kurum/kuruluş adına
+araştırma yapılmasına izin verildiğini gösteren belge sisteme yüklenmelidir.),
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+• Yabancı dilde hazırlanan belgeler var ise belgelerin asılları, Türkçe Tercümeleri ve
+Tercüme Doğruluk Beyanı (Söz konusu doğruluk beyanı araştırmacı tarafından
+hazırlanmalıdır.).
+Başvuru şekli olarak millî eğitim müdürlüklerine bağlı birim temsilcileri ve araştırma niteliği
+olarak makale, bildiri, araştırma, proje seçenlerin yükleyeceği belgeler:
+• Araştırma/Proje Bilgileri adlı belge,
+• Araştırma Yürütülen Birimdeki En Üst Makamdan Alınan Olur Belgesi,
+• Araştırma Uygulama İzni Başvuru Taahhütnamesi,
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu,
+• Veri Toplama Aracı/Araçları,
+• Araştırmanın örneklem/çalışma grubunda öğrenci var ise Veli Onam Formu,
+• Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyor ise Veri Toplama
+Aracı Kullanım İzni (Aracın kullanımına ilişkin izin gerekli değil ise araştırma/proje
+bilgileri adlı belgede açıklama yapılmalı, aracın geliştiricisine ve kaynağına yer
+verilmelidir.),
+2560297575 - 2560297575 - 2560297575 - 2560297575
+10
+• Yabancı dilde hazırlanan dokümanlar var ise belgelerin asılları, Türkçe tercümeleri ve
+Tercüme Doğruluk Beyanı (Söz konusu doğruluk beyanı araştırmacı tarafından
+hazırlanmalıdır.).
+İl millî eğitim müdürlükleri ve müdürlüklere bağlı birimler ile merkezler tarafından
+birimler adına yapılacak araştırma uygulama izin başvuruları için “Etik Kurul Onay
+Belgesi” yerine “Araştırma Yürütülen Birimdeki En Üst Makamdan Alınan Olur
+Belgesi” sisteme yüklenmelidir. Birimler adına yapılacak araştırmalarda,
+araştırmanın yürütüldüğü birimdeki en üst makamdan Olur alınmalıdır. İl millî
+eğitim müdürlüğü bünyesindeki bir birimin (Örneğin AR-GE) yapacağı
+araştırmalarda Olur ilgili birim tarafından değil il millî eğitim müdürü tarafından
+verilmelidir.
+İlçe millî eğitim müdürlüğü bünyesindeki bir birimin (Örneğin RAM, BİLSEM)
+yapacağı araştırmalarda Olur ilgili birim tarafından değil ilçe millî eğitim müdürü
+tarafından verilmelidir. Eğer bir ilçe birimi birden fazla ilçede araştırma
+yapacaksa Olur il millî eğitim müdürü tarafından verilmelidir.
+Olur’da “Birim adına yapılacak araştırmanın hangi birim tarafından yapılacağı,
+araştırmanın adı ve hangi ilçelerde yürütüleceği” ifade edilmelidir. Sistemdeki
+bilgiler ile Olur’da ifade edilen bilgiler aynı olmalıdır.
+Bireysel araştırmalar bu kapsamda değildir, birim adına yapılan araştırmalar bu
+kapsamdadır.
+2.5. Başvurunun Tamamlanması
+Tüm alanlar eksiksiz doldurulup gerekli belgeler yüklendikten sonra sistemde “Özet Başvuru
+Bilgileri” ekranı açılır. Araştırmacı, bu ekranda yer alan bilgi ve belgelerin doğruluğunu kontrol
+ederek başvurusunu tamamlar. Başvuru tamamlandıktan ve ilgili birim değerlendirme sürecine
+başladıktan sonra başvuru üzerinde herhangi bir değişiklik yapılamaz, başvuru değerlendirme
+sürecinin tamamlanması gerekmektedir. Araştırmacının değerlendirme sürecinde devam
+eden bir başvurusu bulunuyor ise aynı ya da benzer araştırma adıyla yeni bir başvuru
+yapılmasına sistem tarafından izin verilmez. Eğer başvuru reddedilirse ve araştırmacı belirtilen
+ret gerekçelerini düzelterek söz konusu araştırma için yeniden başvuru yapmak isterse
+“Mevcut Başvurumu Düzenle” seçeneğini kullanarak yeniden başvuru yapabilmektedir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+11
+2.6. Başvuru Değerlendirme Süreci
+2.6.1. Sistemde Yer Alan Kullanıcı Rolleri
+Araştırma uygulama izni başvuru değerlendirme sürecinde Bakanlık merkez birimleri ve il millî
+eğitim müdürlükleri tarafından belirlenen personel yer alır. 09.05.2025 tarihli ve 130787425
+sayılı Makam Olur’u ile yürürlüğe giren “İl Millî Eğitim Müdürlükleri Araştırma Geliştirme
+Birimleri Yönergesi” gereğince il millî eğitim müdürlüklerinde araştırma uygulama izni başvuru
+değerlendirme süreci ile ilgili iş ve işlemler AR-GE birimleri tarafından koordine edilir.
+Araştırma uygulama izni başvuru değerlendirme sürecinde değerlendirici ve koordinatör
+rollerinde yer alan personelin lisansüstü eğitimini tamamlamış ya da lisansüstü eğitimine
+devam edenlerden seçilmesi önceliklidir.
+Bakanlık merkez birimleri ile il millî eğitim müdürlüklerinde araştırma uygulama izni başvuru
+değerlendirme sürecindeki iş ve işlemleri yürütmeleri için sistemde aşağıda yer alan kullanıcı
+rolleri tanımlanmıştır:
+Bakanlık Merkez Birimleri Kullanıcı Rolleri
+Sistemde Bakanlık merkez birimleri için araştırma uygulama izni başvuru değerlendirme
+sürecinde yer alan kullanıcı rolleri değerlendirici, koordinatör, daire başkanı/birim sorumlusu,
+genel müdür/genel müdür yardımcısıdır.
+Değerlendirici: Araştırma uygulama izni başvurularını Yönerge hükümlerine göre
+değerlendirme yapmak üzere birim koordinatörü tarafından yetkilendirilen personeldir.
+Değerlendirici rolü ile yetkilendirilen personelde ünvan koşulu bulunmamaktadır.
+Değerlendiricinin sorumluluklarına aşağıda yer verilmiştir:
+• Koordinatör tarafından yetkilendirilen başvuru için bilgi ve belgeleri değerlendirir.
+• Değerlendirme doğrultusunda başvuru ile ilgili ret ya da onay kararını verir.
+Koordinatör: Araştırma uygulama izni başvuru değerlendirme sürecini Yönerge hükümlerine
+göre koordine eden, bağlı olduğu birim tarafından yetkilendirilen personeldir. Koordinatör
+rolü ile yetkilendirilen personelde ünvan koşulu bulunmamaktadır.
+Koordinatörün sorumluluklarına aşağıda yer verilmiştir:
+• Sisteme değerlendirici ve yönetici rollerini tanımlar.
+• Her bir başvuru için en az iki değerlendiriciyi sistemde yetkilendirir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+12
+• Değerlendiricilerin kararı sonrası başvuruyu değerlendirir ve başvuruya ilişkin onay ya
+da ret kararını verir.
+Daire Başkanı/Birim Sorumlusu: Araştırma uygulama izni başvuru değerlendirme sürecini
+yürüten koordinatörün yaptığı iş ve işlemlere yönelik karar veren amirdir. Daire başkanı/birim
+sorumlusunun sorumluluklarına aşağıda yer verilmiştir:
+• Araştırma uygulama izni başvuru değerlendirme sürecini koordine etmek üzere bir
+koordinatörü resmî olarak yetkilendirir.
+• Koordinatörün onay ya da ret kararından sonra başvuruya ilişkin onay ya da ret kararını
+verir.
+Genel Müdür/Genel Müdür Yardımcısı: Araştırma uygulama izni başvuru değerlendirme
+sürecini yöneten ve başvuruya ilişkin nihai kararı veren ilgili birimin en yetkili amiridir.
+Yöneticinin sorumluluklarına aşağıda yer verilmiştir:
+• Daire başkanı/birim sorumlusu kararından sonra başvuruya ilişkin nihai kararı verir.
+• Araştırma uygulama izni başvuru değerlendirme süreci ile ilgili tüm süreci yönetir.
+İl Millî Eğitim Müdürlükleri Kullanıcı Rolleri
+Sistemde il millî eğitim müdürlükleri için araştırma uygulama izni başvuru değerlendirme
+sürecinde yer alan kullanıcı rolleri değerlendirici, koordinatör ve yöneticidir.
+Değerlendirici: Araştırma uygulama izni başvurularını Yönerge hükümlerine göre
+değerlendirme yapmak üzere birim koordinatörü tarafından yetkilendirilen personeldir.
+Değerlendirici rolü ile yetkilendirilen personelde ünvan koşulu bulunmamaktadır.
+Değerlendiricinin sorumluluklarına aşağıda yer verilmiştir:
+• Koordinatör tarafından yetkilendirilen başvuru için bilgi ve belgeleri değerlendirir.
+• Değerlendirme doğrultusunda başvuru ile ilgili ret ya da onay kararını verir.
+Koordinatör: Araştırma uygulama izni başvuru değerlendirme sürecini Yönerge hükümlerine
+göre koordine eden, bağlı olduğu birim tarafından yetkilendirilen personeldir. Koordinatör
+rolü ile yetkilendirilen personelde ünvan koşulu bulunmamaktadır.
+Koordinatörün sorumluluklarına aşağıda yer verilmiştir:
+• Sisteme değerlendirici ve yönetici rollerini tanımlar.
+• Her bir başvuru için en az iki değerlendiriciyi sistemde yetkilendirir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+13
+• Değerlendiricilerin kararı sonrası başvuruyu değerlendirir ve başvuruya ilişkin onay ya
+da ret kararını verir.
+• Onay kararı verilen başvurular için araştırmacının seçtiği okul türleri ve
+örneklem/çalışma grubu ile ilgili varsa özel bilgileri dikkate alarak veri toplanacak
+uygun okul/kurum isimlerini ilgili il millî eğitim müdürlüğü adına belirler.
+Yönetici: Araştırma uygulama izni başvuru değerlendirme sürecini yöneten ve başvuruya ilişkin
+nihai kararı veren ilgili birimin en yetkili amiridir. Yönetici rolü ile yetkilendirilen personel il
+millî eğitim müdürü ya da il millî eğitim müdür yardımcısı olmalıdır.
+Yöneticinin sorumluluklarına aşağıda yer verilmiştir:
+• Koordinatör kararından sonra başvuruya ilişkin nihai kararı verir.
+• Araştırma uygulama izni başvuru değerlendirme süreci ile ilgili tüm süreci yönetir.
+2.6.2. Başvuruların Sistem Üzerinden Birimlere Yönlendirilmesi ve Değerlendirilmesi
+Araştırma uygulama izni başvuruları, başvuru bilgilerine göre sistem tarafından otomatik bir
+şekilde ilgili birime yönlendirilir. Bu yönlendirmeler aşağıda belirtildiği gibi yapılır:
+1 ile 6 Arasında İli Kapsayan Araştırmalar
+Örneklemi/Çalışma grubu 1 ile 6 arasında ili kapsayan araştırmalar için uygulama izni işlemleri
+ilgili il millî eğitim müdürlüğü/müdürlükleri tarafından yürütülür. İlgili il millî eğitim
+müdürlüğü/müdürlükleri sisteme yüklenen bilgi ve belgelerin Yönerge’ye uygunluğunu
+denetler ve uygun bulunan başvuruları onaylar, uygun bulunmayan başvuruları
+gerekçelendirerek reddeder. İl millî eğitim müdürlüklerinin başvuruyu değerlendirmeleri
+sonucunda en az bir farklı karar oluşur ise başvuru Bakanlık ilgili merkez birimine/birimlerine
+yönlendirilir. Bakanlık ilgili merkez birimi/birimleri, ret gerekçelerini inceleyerek başvuruyu
+değerlendirir.
+Örneklemi/Çalışma Grubu 7 ile 12 Arasında İli Kapsayan Araştırmalar
+Örneklemi/çalışma grubu 7 ile 12 ili kapsayan başvurular Bakanlık ilgili merkez birimleri
+tarafından değerlendirilir. Bakanlık ilgili merkez birimi/birimleri sisteme yüklenen bilgi ve
+belgelerin Yönerge’ye uygunluğunu denetler ve uygun bulunan başvuruları onaylar, uygun
+bulunmayan başvuruları gerekçelendirerek reddeder. Bakanlık merkez birimlerinin başvuruyu
+değerlendirmeleri sonucunda en az bir farklı karar oluşur ise başvuru Talim ve Terbiye Kurulu
+Başkanlığına yönlendirilir. Başkanlık, ret gerekçelerini inceleyerek başvuruyu değerlendirir.
+Başvuruya ilişkin son kararı Başkanlık verir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+14
+Örneklemi/Çalışma Grubu 13 ve Üzeri İli Kapsayan Araştırmalar
+Örneklemi/Çalışma grubu 13 ve üzeri ili kapsayan araştırmalarda, başvuru ilk olarak Başkanlığa
+yönlendirilir. Araştırmacı tarafından sunulan il sayısı, örneklem büyüklüğü/çalışma grubundaki
+kişi sayısına ilişkin bilimsel gerekçe, Başkanlık tarafından değerlendirilir. Gerekçenin uygun
+bulunması hâlinde uygulama izni işlemleri Bakanlık ilgili merkez birimi/birimleri tarafından
+yürütülür.
+Yurt Dışı Teşkilatlarını (Temsilcilik/Okullar) İlgilendiren Araştırmalar
+Yurt dışı teşkilatlarını ilgilendiren her türlü uygulama izni işlemleri Yükseköğretim ve Yurt Dışı
+Eğitim Genel Müdürlüğü tarafından yürütülür. Yükseköğretim ve Yurt Dışı Eğitim Genel
+Müdürlüğü sisteme yüklenen bilgi ve belgelerin Yönerge’ye uygunluğunu denetler ve uygun
+bulunan başvuruları onaylar, uygun bulunmayan başvuruları gerekçelendirerek reddeder.
+2.7. Başvuru Takibi
+Araştırmacılar başvurularının durumunu sistem üzerinden takip eder. Araştırmacı sisteme giriş
+yaptıktan sonra “Başvurularım” bölümünden başvurularının durumunu, başvuruya ilişkin ret
+kararı söz konusu ise ret gerekçelerini ve onaylanan başvurular için modül tarafından üretilen
+araştırma uygulama izni belgelerini sistem üzerinden görüntüler.
+3 | ARAŞTIRMA UYGULAMA İZNİ BAŞVURU DEĞERLENDİRME KRİTERLERİ
+Araştırma uygulama izni başvuruları Araştırma Uygulama İzinleri Yönergesi dikkate alınarak
+incelenir. Araştırma uygulama izni başvuru değerlendirme sürecinde birimler arasında
+birliktelik oluşturmak amacıyla başvuru değerlendirme kriterleri hazırlanmıştır. Başvuru
+değerlendirme sürecinde kullanılan kriterler Ek 1’de belirtilmiştir.
+4 | ARAŞTIRMA UYGULAMASININ YAPILMASI
+Araştırmanın uygulanacağı okul/kurum türü araştırmacı tarafından seçilir.
+Araştırmacının veri toplaması için uygun okul/kurum isimleri ilgili il millî eğitim müdürlüğü
+tarafından belirlenir. Eylem araştırması, deneysel araştırmalar ya da belli bir aracın
+uygulanmasını gerektiren araştırmalarda araştırmacı okul/kurum isimlerini sistem üzerinden
+başvuru yaparken “Örneklem Çalışma Grubuyla İlgili Varsa Özel Bilgiler” bölümünde
+belirtebilir. Ancak anket, ölçek uygulamaları veya görüşme yapılacağında okul/kurum isimleri
+araştırmacı tarafından belirlenemez.
+Araştırma uygulamaları eğitim ve öğretime engel olmayacak şekilde planlanır ve başvurular
+Yönerge’nin 12. maddesinin 1. fıkrasında belirtilen başvuru değerlendirme süreleri dikkate
+2560297575 - 2560297575 - 2560297575 - 2560297575
+15
+alınarak yapılır. İzin onaylandığında okul/kurum yöneticilerinin uygun bulduğu zamanda
+uygulama gerçekleştirilir.
+Uygulama izni alındıktan sonra uygulamanın gerçekleştirileceği okul/kurumlarla uygulama
+öncesinde araştırmacı irtibata geçerek bilgilendirme yapmalıdır. Veri toplama araçlarının
+uygulanması için gereken süre eğitim ve öğretimi aksatmayacak şekilde asgari düzeyde
+planlanır. Araştırmacı, belirttiği uygulama süresini aşmamalıdır.
+Uygulama izni, iznin verildiği eğitim öğretim yılı için geçerlidir. Bu izin, iznin biteceği tarihten 3
+ay öncesinde talep edilmesi hâlinde iznin biteceği tarihten itibaren bir defaya mahsus olmak
+üzere 6 ay uzatılır. Uzatma işlemleri sistem üzerinden yürütülür.
+Eğitim öğretim yılı olarak Millî Eğitim Bakanlığı tarafından yayımlanan çalışma takviminde
+belirtilen tarihler esas alınır. Ancak Millî Eğitim Bakanlığı, bir sonraki eğitim öğretim yılına ait
+çalışma takvimini genellikle her yılın mayıs ayı içerisinde çoğunlukla da ayın son haftasında
+duyurmaktadır. Diğer yandan Yönerge gereği üretilen izin belgelerinde araştırma uygulama
+izninin bitiş tarihinin, eğitim öğretim yılının bitiş tarihine göre belirlenmesi gerekmekte olup
+bu tarihin çok daha erken bir dönemde öngörülebilir olması önem arz etmektedir. Bu nedenle
+uygulamada birliğin sağlanması amacıyla eğitim öğretim yılının başlangıcı olarak eylül ayının
+ikinci haftasının pazartesi günü referans alınmıştır.
+Araştırma uygulama izni alınan araştırma kapsamında mücbir sebeplerden dolayı uygulama
+yapılacak Bakanlık teşkilatı birimlerinde bir değişiklik yapılması gerektiğinde araştırmacı
+dilekçe ile ilgili il millî eğitim müdürlüğüne veya Bakanlık merkez birimlerine başvurur. Bu
+durumda araştırmacı uygulama yapacağı okul/kurumlarda değişiklik ve uygulama süresini
+uzatma talebinde bulunabilir.
+5 | YÖNERGE’YE AYKIRI YAPILAN İŞLEMLER
+Sistemde yer alan uygulama izni belgesi, onaylanan veri toplama araçları ve uygulama
+süreçlerinden farklı bir içerikte veya yapıda, Yönerge hükümlerine aykırı biçimde uygulama
+yapılamaz. Aykırı bir durumun tespiti hâlinde, ilgili birim tarafından usulüne uygun şekilde
+tutanak düzenlenir ve tutanak, gerekçeleriyle birlikte Başkanlığa iletilir. Başkanlık, söz konusu
+tespiti değerlendirir. Başkanlık, gerekli gördüğünde ilgili araştırmaya verilmiş olan izni iptal
+eder ve iptal kararını işlem yapılmak üzere ilgili birim/birimlere bildirir. İzin iptalinin ardından,
+ilgili birim/birimler uygulamaya derhâl son verir, ilgili birim/birimler tarafından yasal yollara
+başvurulur. Ortaya çıkabilecek her türlü zarardan genel hükümler çerçevesinde araştırmacı
+sorumlu olur. Yönerge hükümlerine aykırı işlem gerçekleştirdiği tespit edilen araştırmacılar,
+2560297575 - 2560297575 - 2560297575 - 2560297575
+16
+başvuru yaptığı eğitim öğretim yılı dâhil olmak üzere toplamda iki eğitim öğretim yılı boyunca
+yeni bir başvuruda bulunamaz. Ayrıca, aynı araştırmacının ikinci kez Yönerge’ye aykırı işlemde
+bulunması hâlinde, ilgili kişi bir daha başvuruda bulunamaz.
+Araştırma uygulama izni başvuru değerlendirme sürecinde Bakanlık merkez birimleri ve il millî
+eğitim müdürlükleri tarafından sehven Yönerge hükümlerine aykırı biçimde değerlendirme
+yapılması hâlinde ilgili birim tarafından Başkanlığa yapılan işlemi açıklayan resmî yazı yazılır.
+Başkanlık, yapılan işlemi değerlendirir ve gerekli gördüğünde ilgili araştırmaya verilmiş olan
+izni iptal eder ve iptal kararını işlem yapılmak üzere ilgili birim/birimlere bildirir. İzin iptalinin
+ardından, ilgili birim/birimler uygulamaya derhâl son verir. Söz konusu durum Başkanlığın,
+Yönerge’ye ve Kılavuza aykırı işlem yapıldığını bizzat tespit etmesi hâlinde de geçerlidir.
+6 | DİĞER HUSUSLAR
+Araştırma uygulama izinleri kapsamında aşağıda belirtilen hususlara dikkat edilmelidir:
+• Araştırma uygulama izni başvurusunda bulunan araştırmacılar, çocukların bedensel,
+ruhsal ve sosyal bütünlüklerinin korunmasına yönelik alınan önlemleri açıkça
+belirtmeli; güvenlik, gizlilik, mahremiyet ve ayrımcılıktan korunma gibi temel hakların
+nasıl gözetileceğini ayrıntılı şekilde açıklamalıdır. Araştırmanın, çocukların üstün yararı
+ilkesine uygun olarak nasıl tasarlandığına yer verilmelidir. Araştırmacı, çocukların
+araştırma sebebiyle karşı karşıya kalabilecekleri olası riskleri belirtmeli ve bu risklere
+karşı alınacak önlemleri açık bir şekilde ifade etmelidir.
+• Millî Eğitim Bakanlığına bağlı merkez, taşra ve yurt dışı teşkilatlarında yapılan araştırma
+uygulama izni başvurularının eğitim ve öğretimle ilişkilendirilmesi zorunludur. Eğitim
+ve öğretim ile ilişkilendirilmeyen durumlar Yönerge kapsamında değildir (Bkz. Ek 2
+S.S.S.6).
+• Araştırma uygulama sürecinde kişilere yönetici/öğretmen kimlikleri üzerinden Millî
+Eğitim Bakanlığı bünyesindeki görevleri esas alınarak ulaşılması durumunda Yönerge
+hükümleri geçerlidir. Bu durum yöneticilerle/öğretmenlerle okul dışında yürütülen
+araştırmalarda da geçerlidir. Veri toplama şekli (okul içinde/dışında, yüz yüze/çevrim
+içi) bu durumu değiştirmemektedir. Millî Eğitim Bakanlığı bünyesindeki personel ile
+eğitim öğretim süreci kapsamında yapılacak her türlü araştırmada Yönerge esas
+alınmalıdır. Öğrencilerle yapılan araştırmalarda da söz konusu durum geçerlidir.
+• MEB teşkilatında uygulama gerektiren araştırmalar için Yönerge kapsamında başvuru
+yapılmalıdır. MEB’e bağlı özel öğretim kurumlarında yapılacak araştırma uygulamaları
+da Yönerge kapsamındadır.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+17
+• Yönerge’ye göre zorunlu eğitime devam eden öğrenciler, millî eğitim müdürlüklerine
+bağlı birim temsilcileri tarafından yapılan başvurular ile millî eğitim uzman
+yardımcılarının hazırlayacakları uzmanlık tezleri için Etik Kurul Onay Belgesi talep
+edilmemektedir (Bkz. Ek 2 S.S.S.7).
+• Araştırmacıların çalışma takvimlerinde belirttikleri ay, hafta gibi zaman belirten
+ifadelerde araştırma sürecinde değişiklikler yaşandığından takvim yerine uygulama
+süresi esas alınmalıdır.
+• Araştırma uygulama izni başvurusunun uygulama tarihinden en az 90 gün önce
+yapılması ile yarıyıl tatili ve yaz tatilinden üç hafta öncesine kadar araştırmaların
+tamamlanması şartı kaldırılmıştır.
+• Uygulamada kullanılacak veri toplama cihazlarına göre yetkili etik kuruldan onay
+belgesi alınmalıdır. Tıbbi Cihaz Yönetmeliği kapsamında değerlendirilen araçlar için
+Klinik Araştırmalar Etik Kurulu Onayı gerekmektedir.
+• Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu ile Veli Onam formlarında
+katılımcıların/velilerin ad soyadı bilgileri istenirken veri toplama araçlarında (ölçek,
+anket vb.) katılımcıların ad soyadı bilgileri gibi kişisel bilgiler istenmemelidir.
+• Uygulama yapılacak örneklem/çalışma grubuna sunulacak formlarda, veri toplama
+araçlarında ve araştırmanın başlığında reklam unsuru içeren ögeler bulunmamalıdır. Bu
+belgelerde marka adları yerine genel ifadeler kullanılmalıdır. Örneğin, “WhatsApp”
+yerine “mesajlaşma uygulaması” gibi genel terimler tercih edilmelidir.
+• Araştırmanın/projenin doğası gereği uzun süreli olarak planlanmış olması durumunda
+(örneğin, boylamsal araştırmalar) araştırma kapsamındaki bilgi ve belgelerin
+değişmemesi kaydıyla araştırmacının uygulama iznini uzatmaya ilişkin gerekçeli talebi
+Başkanlık tarafından değerlendirilir.
+• Araştırma kapsamında süreç içerisinde araştırmaya farklı veri toplama araçları dâhil
+edilecekse veya veri toplama araçlarında değişiklik yapılacaksa yeni yapılacak her bir
+uygulama için ayrı başvuruda bulunulmalıdır.
+• Araştırmacı aynı araştırma için farklı illere farklı başvurularda bulunamaz. Araştırmacı
+uygulama yapacağı illeri tek bir başvuruda seçmelidir. Aksi takdirde ilgili araştırmaya
+verilmiş olan izin Başkanlık tarafından iptal edilir ve iptal kararı işlem yapılmak üzere
+ilgili birim/birimlere bildirilir.
+• Tıpta uzmanlık gibi özel alanlarda enstitü yönetim kurulu kararı temin edilemediğinde
+anabilim dalı kararı geçerli sayılır.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+18
+7 | BAŞKANLIK GÖRÜŞÜ
+Aşağıdaki durumlarda Başkanlığın görüşü alınır ve Başkanlıkça verilen görüş doğrultusunda
+işlem yapılır:
+• Araştırma Uygulama İzinleri Yönergesi’nde ve Araştırma Uygulama İzinleri Başvuru ve
+Değerlendirme Kılavuzu’nda belirtilmeyen hususlar,
+• Araştırmacı tarafından sunulan bilgiler ve belgeler hakkında tereddüde düşülmesi,
+araştırmacı tarafından yürütülen uygulama sürecinde veya yetkililer tarafından
+başvuru değerlendirme sürecinde Yönerge’ye aykırı yapılan işlemler.
+Araştırma Uygulama İzinleri Başvuru ve Değerlendirme Sistemi duyurular bölümünde yer alan
+açıklamalar Başkanlık görüşü hükmündedir.
+8 | SON HÜKÜMLER
+8.1. Yürürlük
+Araştırma Uygulama İzinleri Başvuru ve Değerlendirme Kılavuzu yayımlandığı tarihte yürürlüğe
+girer.
+8.2. Yürütme
+Araştırma Uygulama İzinleri Başvuru ve Değerlendirme Kılavuzu hükümlerini Talim ve Terbiye
+Kurulu Başkanlığı yürütür.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+19
+EK 1 | ARAŞTIRMA UYGULAMA İZNİ BAŞVURU DEĞERLENDİRME KRİTERLERİ
+1. Araştırma ve veri toplama araçlarının (anket, görüşme-gözlem formları) içeriği
+Türkiye Cumhuriyeti Anayasası, taraf olunan uluslararası anlaşmalar ve sözleşmeler
+başta olmak üzere, 6698 sayılı Kişisel Verilerin Korunması Kanunu ile yürürlükte olan
+tüm yasal düzenlemeler ve Türk millî eğitiminin genel ve özel amaçlarına uygun olacak
+şekilde hazırlanmıştır.
+2. Araştırmacının kişisel bilgileri (adres, telefon, e-posta) belirtilmiştir.
+3. Araştırmacının başvuru bilgileri (başvurunun yapıldığı ülke, başvuru şekli, başvuran
+ünvanı, meslek, çalıştığı kurum, bağlı olduğu kurum) belirtilmiştir.
+4. Başvuru şekli kamu kurum/kuruluşu ya da sivil toplum kuruluşu temsilcileri ise
+kurum/kuruluşları veya sivil toplum kuruluşları adı, sorumlu kişinin ünvanı belirtilmiş
+ve “İlgili Araştırmayı Yürüteceğine Dair İmzalı İzin Belgesi” yüklenmiştir. Başvuru şekli
+millî eğitim müdürlüklerine bağlı birim temsilcileri ise “Araştırma Yürütülen Birimdeki
+En Üst Makamdan Alınan Olur” belgesi sisteme yüklenmiştir.
+5. Araştırmacı öğrenci ise “Tez önerisi” ve tez önerisinin onaylandığına dair “Enstitü
+Yönetim Kurulu Kararı/Resmî Yazı/Belge” yüklenmiştir.
+6. Araştırmacı öğrenci değil ise Araştırma/Proje Bilgileri adlı belge yüklenmiştir.
+Araştırma/Proje Bilgileri adlı belgede olması gereken içerikler yer almıştır.
+7. “Millî Eğitim Bakanlığı Araştırma Uygulama İzni Başvuru Taahhütnamesi” imzalı hâli
+yüklenmiştir.
+8. “Yetkili Etik Kuruldan Alınan Onay Belgesi” yüklenmiştir.
+9. Alan yazında daha önce kullanılmış veri toplama aracı tercih ediliyorsa “Veri Toplama
+Aracı Kullanım İzni” yüklenmiştir. Aracın kullanımına ilişkin izin gerekli değil ise
+araştırmacı açıklama yapmış, aracın geliştiricisine ve kaynağına yer vermiştir.
+10. Araştırma uygulama izni başvurularında yabancı dilde hazırlanan belgeler için sisteme
+belgelerin asılları, Türkçe tercümeleri, Tercüme Doğruluk Beyanı yüklenmiştir.
+11. “Ayrıntılı Bilgilendirme ve Gönüllü Katılım Formu” yüklenmiştir.
+Örneklemdeki/Çalışma grubundaki kişilerin reşit olmamaları durumunda “Veli Onam
+Formu” yüklenmiştir. Araştırmada ses veya görüntü kaydı alınacaksa ses veya görüntü
+kaydına dair bilgilere öneride ya da araştırma/proje bilgileri adlı belgede yer
+verilmiştir. Ses görüntü kaydı onamına, Ayrıntılı Bilgilendirme ve Gönüllü Katılım
+Formu veya Veli Onam Formu’nda yer verilmiş ya da ayrı belge olarak sunulmuştur.
+12. Araştırmanın içeriği (başlığı) eğitim ve öğretim ile ilişkilidir. Başvuru “Araştırma
+Uygulama İzinleri Yönergesi” kapsamındadır.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+20
+13. Araştırmanın amacı eğitim ve öğretim ile ilişkilidir.
+14. Araştırmanın problem durumu eğitim ve öğretim ile ilişkilidir.
+15. Araştırmanın önemi eğitim ve öğretim ile ilişkilidir.
+16. Araştırmanın modeli/deseni belirtilmiştir.
+17. Araştırmanın örneklem/çalışma grubu belirtilmiştir. Sistemde yapılan seçimler ile tez
+önerisi ya da Araştırma/Proje Bilgileri adlı belgede belirtilen örneklem/çalışma
+grubuna ilişkin bilgiler uyuşmaktadır. Araştırma kapsamında yer alan illerin hangi
+kriterlere göre seçildiğine ve örneklem büyüklüğüne ilişkin bilimsel bir açıklamaya yer
+verilmiştir. Araştırma kapsamında uygulama yapılacak örneklem/çalışma grubuna
+ilişkin sistem üzerinden seçilen uygulama yapılacak birim doğrudur.
+18. Araştırmanın örneklemi/çalışma grubu ekonomik, ulaşılabilir ve uygulanabilir şekilde
+belirlenmiştir.
+19. Veri toplama sürecine ilişkin bilgi verilmiştir.
+20. Veri toplama aracı/araçlarının başlıkları ile sisteme yüklenen araç/araçlar aynıdır. Veri
+toplama araçlarının tamamı (anket, görüşme formu vb.) yüklenmiştir.
+21. Veri toplama aracı/araçları araştırmanın amacına ve konusuna uygun şekilde
+belirlenmiştir.
+22. Veri toplama aracı/araçlarındaki maddeler açık ve anlaşılır şekilde oluşturulmuştur.
+23. Veri toplama aracı/araçlarındaki maddeler uygulama yapacağı grubun seviyesine
+uygun olarak hazırlanmıştır.
+24. Veri analizine ilişkin bilgiye yer verilmiştir.
+25. Kaynakça yer almaktadır.
+26. Uygulama süresine ilişkin bilgiye yer verilmiştir.
+27. Araştırmada katılımcıların kişilik haklarını, kurum ve kuruluşlarının haklarını ihlal eder
+nitelikte unsur(lar)a yer verilmemiştir.
+28. İçerikteki unsurlarda millî ve manevi değerler, toplumsal hassasiyetler göz önünde
+bulundurulmuştur.
+29. Araştırma kapsamında uygulama yapılacak örneklem/çalışma grubunun bizzat
+göreceği belgelerde (formlar, veri toplama araçları) veya araştırmanın başlığında
+herhangi bir kişi, kurum, ürün, organizasyon lehine veya aleyhine reklam unsuru yer
+almamaktadır.
+30. Aynı araştırma ile ilgili mükerrer (tekrar eden) başvuru yapılmamıştır. Aynı araştırma
+kapsamında uygulama açısından bir farklılık gerekmedikçe yeni bir başvuru izninde
+bulunulmamıştır.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+21
+EK 2 | SIKÇA SORULAN SORULAR
+S.S.S.1 | Zorunlu eğitime devam eden öğrencilerin ve üniversite öğrencilerinin başvuruları
+kim tarafından yapılır?
+Zorunlu eğitime devam eden öğrencilerin başvuruları danışmanı tarafından yapılırken
+üniversite öğrencilerinin başvuruları kendileri tarafından yapılır.
+S.S.S.2 | Başvuru şekli “Kamu Kurum ve Kuruluşları ile Sivil Toplum Kuruluşları Temsilcileri”
+olarak seçildiğinde sisteme başvuru bilgilerinde yüklenmesi gereken belge nedir? Başvuru
+şekli “Millî Eğitim Müdürlüklerine Bağlı Birim Temsilcileri” olarak seçildiğinde sistemde
+başvuru bilgilerinde ne yazılır?
+Başvuru şekli “Kamu Kurum ve Kuruluşları ile Sivil Toplum Kuruluşları Temsilcileri”
+olarak seçildiğinde araştırmayı kurum/kuruluş adına yürüten personele
+kurum/kuruluş adına araştırma yapılmasına izin verildiğini gösteren belge sisteme
+yüklenir. Başvuru şekli “Millî Eğitim Müdürlüklerine Bağlı Birim Temsilcileri”
+seçildiğinde AR-GE, BİLSEM gibi araştırmayı yürüten alt birim adı sisteme yazılır.
+S.S.S.3 | Araştırma tezsiz yüksek lisans kapsamında ise araştırma niteliği olarak sistemde ne
+seçilmelidir?
+Araştırma tezsiz yüksek lisans kapsamında ise sistemde araştırma niteliği olarak
+“Araştırma” seçilmelidir. Araştırma niteliğinin doğru seçilmesi son derece önemlidir.
+Çünkü bu bilgi, sistemde yer alan sonraki adımlar için bağlayıcı niteliktedir.
+S.S.S.4 | Uygulama yapılacak MEB teşkilatı seçimi neye göre yapılır?
+Araştırmacı il/ilçe millî eğitim müdürlüklerinde görev yapan personel ile uygulama
+yapacaksa MEB teşkilatı olarak “il/ilçe millî eğitim müdürlükleri” seçilir. Eğer
+örneklem/çalışma grubu kapsamında okulda/kurumda bulunan
+öğrenci/öğretmen/yönetici ya da veli ile uygulama yapılacaksa uygulama bilgileri
+adımında uygulama yapılacak MEB teşkilatı olarak “okul/kurum” seçeneği kullanılır.
+Ayrıca uygulama bilgileri seçilirken öğretmen/görevli öğretmen ayrımına dikkat
+edilmelidir. Okullarda aktif olarak derse giren öğretmenlerle uygulama yapılacak ise
+“öğretmen”, aktif olarak derse girmeyip Bakanlık merkez birimleri, il/ilçe milli eğitim
+müdürlüklerinde görev yapan öğretmenlerle uygulama yapılacak ise “görevli
+öğretmen” seçeneği tercih edilmelidir.
+2560297575 - 2560297575 - 2560297575 - 2560297575
+22
+S.S.S.5 | Başvuru yaparken uygulama süresi neye göre belirlenir?
+Uygulama süresi araştırma modeline uygun olarak ders saati şeklinde yazılmalıdır.
+Gün ve ay olarak ifade edildiğinde belirtilen gün veya ayda uygulama için toplam kaç
+ders saatine ihtiyaç duyulduğu açıklanmalıdır. Araştırmacı tez önerisinde,
+araştırma/proje bilgileri adlı belgede veya sistem üzerinde uygulama süresine ilişkin
+bilgiye yer verir. Belge ya da sistemde uygulama süresinin yer alması yeterlidir.
+Okul/kurum dışında yapılacak araştırmalarda ihtiyaç duyulan uygulama süresi saat
+olarak ifade edilmelidir.
+S.S.S.6 | Hangi durumlar Araştırma Uygulama İzinleri Yönergesinin kapsamında değildir?
+Yükseköğretim kurumlarında uygulama gerektiren araştırmalar, MEB bünyesinde yer
+almayan kişilerle yapılan araştırmalar, bitkiler üzerinde yürütülen araştırmalar, cami
+ve haziresi gibi okul/kurum dışı mekânlarda yapılan araştırmalar, mimari projeler,
+okul bina tasarımları ile ilgili araştırmalar için Yönerge kapsamında başvuru
+gerçekleştirilmemelidir.
+Türkiye Maarif Vakfı, Yunus Emre Enstitüsü, Türkiye Diyanet Vakfı gibi kurumlara bağlı
+okullarda gerçekleştirilecek araştırmalar için söz konusu Yönerge kapsamında
+başvuru yapılmamalıdır.
+Millî Eğitim Bakanlığına bağlı genel müdürlük/okul/kurumlardan herhangi bir bilgi ya
+da belge talebi olan doküman inceleme, arşiv taraması gerektiren araştırmalar için
+sistem üzerinden başvuru yapılmamalıdır. Bilgi ya da belgenin talep edildiği ilgili
+birime başvurulmalıdır.
+S.S.S.7 | Hangi durumlarda Etik Kurul Onay Belgesi talep edilmemektedir?
+Zorunlu eğitime devam eden öğrencilerin danışmanları aracılığı ile yaptıkları
+araştırma uygulama izni başvurularında etik kuruldan alınan onay belgesi talep
+edilmemektedir.
+İl millî eğitim müdürlükleri ve müdürlüklere bağlı birimler ile merkezler tarafından
+birimler adına yapılacak araştırma uygulama izni başvurularında etik kuruldan alınan
+onay belgesi talep edilmemektedir. İl millî eğitim müdürlükleri ve müdürlüklere bağlı
+birimler ile merkezler tarafından birimler adına yapılacak araştırma uygulama izin
+başvuruları için “Etik Kurul Onay Belgesi” yerine “Araştırma Yürütülen Birimdeki En
+Üst Makamdan Alınan Olur Belgesi” istenmektedir.
+Millî eğitim uzman yardımcılarının hazırlayacakları uzmanlık tezleri kapsamında
+yapılan araştırmalarda etik kuruldan alınan onay belgesi talep edilmemektedir. Millî
+eğitim uzman yardımcılarının kadrolu görevde bulunduğu Bakanlık merkez
+birimindeki “En Üst Makamdan Alınan Olur Belgesi” istenmektedir.
+2560297575 - 2560297575 - 2560297575 - 2560297575

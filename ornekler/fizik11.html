@@ -1,0 +1,2459 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11. Sınıf Fizik Eğitim Platformu (Geliştirilmiş)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOva2IM3dSHF5ZO1JiYwMoCqdPuiTxI4kLJQoezMIZCrfaAgtor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctMQanyse" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Koyu Gri */
+            color: #F3F4F6; /* Açık Gri */
+        }
+        .canvas-container {
+            background-color: #1F2937; /* Daha Açık Koyu Gri */
+            border: 1px solid #4B5563; /* Gri Sınır */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+        .btn-primary {
+            background-color: #3B82F6; /* Mavi */
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2563EB; /* Koyu Mavi */
+        }
+        .btn-secondary {
+            background-color: #4B5563; /* Gri */
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #6B7280; /* Açık Gri */
+        }
+        .info-box {
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #4B5563;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        canvas {
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        /* Denklem Kutusu Stili */
+        .formula-box {
+            background-color: #1F2937;
+            border-left: 4px solid #A78BFA;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            font-size: 1.1rem;
+            color: #E5E7EB;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        /* Örnek Soru Kutusu Stili */
+        .example-box {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-left-width: 4px;
+            border-left-color: #34D399;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        /* Slider stilleri */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+            width: 100%;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background: #4B5563;
+            height: 0.5rem;
+            border-radius: 0.25rem;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -4px;
+            background-color: #3B82F6;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 50%;
+        }
+        .katex-display {
+            margin: 0.5em 0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Başlık Bölümü -->
+    <header class="text-center py-8 md:py-12 bg-gray-900/50 border-b border-gray-700">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight gradient-text">11. Sınıf Fizik Eğitim Platformu</h1>
+        <div class="mt-6 text-xs text-gray-500">
+            <p class="mb-1">Hazırlayan: <a href="https://www.linkedin.com/in/bur%C3%A7in-%C3%BCnl%C3%BC-28368327/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Burçin Ünlü</a></p>
+            <p class="mb-1">Bu interaktif eğitim materyali, genel fizik prensipleri temel alınarak AI tarafından oluşturulmuştur.</p>
+            <p>İçerik oluşturulurken <a href="https://ogmmateryal.eba.gov.tr/panel/upload/pdf/dnllmwgvcnx.pdf" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Milli Eğitim Bakanlığı (MEB) 11. Sınıf Fizik ders kitabından</a> yararlanılmıştır.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8 space-y-16">
+
+        <!-- 1. Bölüm: Vektörün Tanımı ve Özellikleri -->
+        <section id="vector-properties">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">1. Vektörün Tanımı ve Özellikleri</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Fizikte nicelikler, <strong class="text-purple-400">skaler</strong> ve <strong class="text-purple-400">vektörel</strong> olmak üzere ikiye ayrılır. Skaler nicelikler sadece bir sayı ve birimle ifade edilirken (örn: 3 kg kütle), vektörel niceliklerin tam olarak tanımlanabilmesi için sayı ve birimin yanı sıra yön ve doğrultuya da ihtiyaç vardır (örn: 10 N'luk kuvvet).</p>
+                    <p>Bir vektörün dört temel özelliği vardır:</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li><strong class="text-blue-300">Başlangıç (Uygulama) Noktası:</strong> Vektörün başladığı yer.</li>
+                        <li><strong class="text-blue-300">Doğrultu:</strong> Vektörün üzerinde bulunduğu çizgi.</li>
+                        <li><strong class="text-blue-300">Yön:</strong> Doğrultu üzerindeki iki yönden biri (ok ile gösterilir).</li>
+                        <li><strong class="text-blue-300">Büyüklük (Şiddet):</strong> Vektörün uzunluğu ile orantılı olan sayısal değer.</li>
+                    </ul>
+                    <p class="mt-4">Aşağıdaki interaktif alanda kendi vektörünüzü çizerek bu özellikleri canlı olarak gözlemleyin!</p>
+                </div>
+                <div class="canvas-container rounded-xl p-4">
+                    <canvas id="vectorCanvas"></canvas>
+                    <div id="vectorInfo" class="mt-4 text-center font-mono text-sm p-4 rounded-lg bg-gray-800 text-gray-300">Tuvale tıklayıp sürükleyerek bir vektör çizin.</div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Ağırlığı G olan bir cisme, ağırlığının iki katı büyüklüğünde bir F kuvveti x doğrultusunda uygulanmaktadır. Cismin üzerine etki eden kuvvetleri çiziniz.</p>
+                <p><strong>Çözüm:</strong> Ağırlık vektörü ($\vec{G}$) düşey aşağı doğrudur. $\vec{F}$ kuvveti ise bunun iki katı büyüklükte ve yatay (x doğrultusunda) olacaktır. Bu kuvvet $+x$ (sağa doğru) veya $-x$ (sola doğru) yönünde olabilir. Her iki durum da sorunun şartını sağlar.</p>
+            </div>
+        </section>
+
+        <!-- 2. Bölüm: Vektörlerin Toplanması (Bileşke Vektör) -->
+        <section id="vector-addition">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">2. Vektörlerin Toplanması (Bileşke Vektör)</h2>
+            <div class="text-gray-300 mb-8 leading-relaxed">
+                <p>Aynı cins iki ya da daha fazla vektörün toplanmasıyla elde edilen tek vektöre <strong class="text-purple-400">bileşke vektör ($\vec{R}$)</strong> denir. Bileşke vektörü bulmak için genellikle iki yöntem kullanılır. Aşağıdaki tuvalde iki vektör oluşturun ve toplama yöntemlerini deneyin.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 canvas-container rounded-xl p-4">
+                    <canvas id="additionCanvas"></canvas>
+                </div>
+                <div class="space-y-4">
+                    <div class="info-box p-4 rounded-lg">
+                        <h3 class="font-semibold mb-2 text-lg text-purple-300">Kontrol Paneli</h3>
+                        <p class="text-sm text-gray-400 mb-4">Tuvale tıklayarak A ve B vektörlerini oluşturun.</p>
+                        <div class="space-y-3">
+                            <button id="addTipToTail" class="w-full btn-primary text-white font-bold py-2 px-4 rounded-lg">Uç Uca Ekleme</button>
+                            <button id="addParallelogram" class="w-full btn-primary text-white font-bold py-2 px-4 rounded-lg">Paralel Kenar</button>
+                            <button id="resetAddition" class="w-full btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                        </div>
+                    </div>
+                    <div id="additionInfo" class="info-box p-4 rounded-lg font-mono text-sm text-gray-300 space-y-2">
+                        <p>Vektör A: Henüz çizilmedi.</p>
+                        <p>Vektör B: Henüz çizilmedi.</p>
+                        <p class="text-green-400">Bileşke R: Bekleniyor...</p>
+                    </div>
+                </div>
+            </div>
+             <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Aynı noktaya etki eden, büyüklükleri $F_1=3 \text{ N}$ ve $F_2=4 \text{ N}$ olan iki kuvvet arasındaki açı $90^\circ$ ise bileşke kuvvetin büyüklüğü kaç N'dur?</p>
+                <p><strong>Çözüm:</strong> Kuvvetler birbirine dik olduğu için Pisagor teoremi uygulanır. <br> $R^2 = F_1^2 + F_2^2 \Rightarrow R^2 = 3^2 + 4^2 = 9 + 16 = 25$ <br> $R = \sqrt{25} = 5 \text{ N}$.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Büyüklükleri eşit ve 10 N olan iki kuvvet arasındaki açı $120^\circ$ olduğunda bileşke vektörün büyüklüğü kaç N olur?</p>
+                <p><strong>Çözüm:</strong> İki eşit büyüklükteki vektör arasındaki açı $120^\circ$ ise bileşke vektörün büyüklüğü, vektörlerden birinin büyüklüğüne eşittir. Bu özel bir durumdur. Dolayısıyla, R = 10 N'dur.</p>
+            </div>
+        </section>
+
+        <!-- 3. Bölüm: Vektörün Bileşenleri -->
+        <section id="vector-components">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">3. Vektörün Bileşenlerine Ayrılması</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Bir vektörün koordinat sistemindeki eksenler üzerindeki izdüşümlerine <strong class="text-purple-400">vektörün bileşenleri</strong> denir. Bu yöntem, özellikle farklı doğrultulardaki vektörlerle işlem yaparken büyük kolaylık sağlar.</p>
+                    <p>Bir $\vec{F}$ vektörünün x ve y bileşenleri trigonometri kullanılarak hesaplanır:</p>
+                    <div class="formula-box">
+                        <p>$F_x = |\vec{F}| \cdot \cos(\alpha)$</p>
+                        <p>$F_y = |\vec{F}| \cdot \sin(\alpha)$</p>
+                    </div>
+                    <p class="mt-4">Yandaki alanda bir vektör çizerek bileşenlerinin nasıl oluştuğunu ve hesaplandığını interaktif olarak görün.</p>
+                </div>
+                <div class="canvas-container rounded-xl p-4">
+                    <canvas id="componentsCanvas"></canvas>
+                    <div id="componentsInfo" class="mt-4 text-center font-mono text-sm p-4 rounded-lg bg-gray-800 text-gray-300">Bir vektör çizin.</div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Büyüklüğü 20N olan bir $\vec{F}$ kuvveti, yatay düzlemle $37^\circ$ açı yapmaktadır. Kuvvetin yatay ($F_x$) ve düşey ($F_y$) bileşenlerini bulunuz. ($\sin(37^\circ) = 0,6$; $\cos(37^\circ) = 0,8$)</p>
+                <p><strong>Çözüm:</strong> <br> $F_x = F \cdot \cos(37^\circ) = 20 \cdot 0,8 = 16 \text{ N}$. <br> $F_y = F \cdot \sin(37^\circ) = 20 \cdot 0,6 = 12 \text{ N}$.</p>
+            </div>
+             <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Koordinatları $\vec{K}(4,2)$ ve $\vec{L}(-2,3)$ olan vektörleri kartezyen koordinat sisteminde gösteriniz.</p>
+                <p><strong>Çözüm:</strong> $\vec{K}$ vektörü için, orijinden başlayarak x ekseninde 4 birim sağa, y ekseninde 2 birim yukarı gidilir. $\vec{L}$ vektörü için ise orijinden başlayarak x ekseninde 2 birim sola, y ekseninde 3 birim yukarı gidilir. Her iki vektör de orijinden bu son noktalara çizilen oklardır.</p>
+            </div>
+        </section>
+
+        <!-- 4. Bölüm: Bağıl Hareket -->
+        <section id="relative-motion">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">4. Bağıl Hareket</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Bir cismin hareketi, seçilen bir referans noktasına veya gözlemciye göre farklı yorumlanabilir. Hareketin bu göreceli doğası <strong class="text-purple-400">bağıl hareket</strong> olarak adlandırılır. Bir hareketlinin başka bir hareketli gözlemciye göre hızına ise <strong class="text-purple-400">bağıl hız</strong> denir.</p>
+                    <p>Bağıl hız, vektörel bir çıkarma işlemi ile bulunur:</p>
+                    <div class="formula-box">
+                        <p>$\vec{v}_{\text{bağıl}} = \vec{v}_{\text{gözlenen}} - \vec{v}_{\text{gözlemci}}$</p>
+                    </div>
+                     <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                        <li>$\vec{v}_{\text{bağıl}}$: Gözlemciye göre gözlenen cismin hızı.</li>
+                        <li>$\vec{v}_{\text{gözlenen}}$: Gözlenen cismin yere göre hızı.</li>
+                        <li>$\vec{v}_{\text{gözlemci}}$: Gözlemcinin yere göre hızı.</li>
+                    </ul>
+                    <p class="mt-4">Yandaki simülasyonda iki aracın hız vektörlerini çizin ve gözlemciyi seçerek bağıl hızın nasıl değiştiğini keşfedin!</p>
+                </div>
+                <div class="canvas-container rounded-xl p-4">
+                    <canvas id="relativeCanvas"></canvas>
+                    <div class="mt-4 flex justify-center items-center space-x-6">
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" id="observerA" name="observer" value="A" checked class="form-radio h-4 w-4 text-blue-600 bg-gray-700 border-gray-600">
+                            <label for="observerA">Gözlemci: Araç A</label>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" id="observerB" name="observer" value="B" class="form-radio h-4 w-4 text-pink-600 bg-gray-700 border-gray-600">
+                            <label for="observerB">Gözlemci: Araç B</label>
+                        </div>
+                         <button id="resetRelative" class="btn-secondary text-white font-bold py-1 px-3 rounded-lg text-sm">Sıfırla</button>
+                    </div>
+                    <div id="relativeInfo" class="mt-4 font-mono text-sm p-4 rounded-lg bg-gray-800 text-gray-300 space-y-2">
+                        <p>Araç A Hızı ($v_A$): Çizim bekliyor...</p>
+                        <p>Araç B Hızı ($v_B$): Çizim bekliyor...</p>
+                        <p class="text-green-400">Bağıl Hız ($v_{BA}$): Bekleniyor...</p>
+                    </div>
+                </div>
+            </div>
+             <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Doğuya doğru 80 km/h hızla giden bir A aracının sürücüsü, aynı yönde 110 km/h hızla giden bir B aracını nasıl görür?</p>
+                <p><strong>Çözüm:</strong> Gözlemci A aracıdır. $v_{\text{bağıl}} = v_{\text{gözlenen}} - v_{\text{gözlemci}} = v_B - v_A$. Doğu yönünü (+) alırsak: <br> $v_{\text{bağıl}} = (+110) - (+80) = +30 \text{ km/h}$. <br> A aracı, B aracını doğuya doğru 30 km/h hızla gidiyormuş gibi görür.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Batı yönünde 60 km/h sabit hızla hareket eden bir motosikletli, güney yönünde 80 km/h hızla hareket eden bir otomobili hangi yönde ve kaç km/h hızla gidiyor gibi görür?</p>
+                <p><strong>Çözüm:</strong> Gözlemci motosikletlidir. $\vec{v}_{\text{bağıl}} = \vec{v}_{\text{otomobil}} - \vec{v}_{\text{motosiklet}}$. Bu bir vektörel çıkarma işlemidir. $\vec{v}_{\text{otomobil}}$ vektörü (80 km/h, güney) ile $-\vec{v}_{\text{motosiklet}}$ vektörünü (60 km/h, doğu) toplarız. Bileşke hızın büyüklüğü Pisagor teoreminden $R^2 = 80^2 + 60^2 = 6400 + 3600 = 10000$, yani $R = 100 \text{ km/h}$ olur. Yönü ise güneydoğu'dur.</p>
+            </div>
+        </section>
+        
+        <!-- 5. Bölüm: Newton'ın Hareket Yasaları -->
+        <section id="newton-laws">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">5. Newton’ın Hareket Yasaları</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-purple-300 mb-2">I. Yasa: Eylemsizlik Prensibi</h3>
+                        <p>Bir cisme etki eden net kuvvet sıfır ise, cisim duruyorsa durmaya, hareket ediyorsa sabit hızla hareketine devam eder. Cisimlerin hareket durumlarını koruma eğilimine <strong class="text-purple-400">eylemsizlik</strong> denir.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-purple-300 mb-2">II. Yasa: Dinamiğin Temel Prensibi</h3>
+                        <p>Bir cisme etki eden net kuvvet sıfırdan farklı ise, cisim bu kuvvet yönünde bir ivme kazanır. İvme, net kuvvetle doğru, cismin kütlesiyle ters orantılıdır.</p>
+                        <div class="formula-box">
+                            <p>$\vec{F}_{\text{Net}} = m \cdot \vec{a}$</p>
+                        </div>
+                        <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                            <li>$\vec{F}_{\text{Net}}$: Cisme etki eden net kuvvet (Newton, N).</li>
+                            <li>$m$: Cismin kütlesi (kilogram, kg).</li>
+                            <li>$\vec{a}$: Cismin ivmesi (metre/saniye², m/s²).</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-semibold text-purple-300 mb-2">III. Yasa: Etki-Tepki Prensibi</h3>
+                        <p>Her etkiye karşılık, eşit büyüklükte ve zıt yönde bir tepki kuvveti vardır. Etki ve tepki kuvvetleri farklı cisimler üzerine etki eder.</p>
+                    </div>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Newton'un 2. Yasası Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="newtonCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-sm">
+                        <div id="newtonInfoForce" class="bg-gray-800 p-2 rounded">Kuvvet: 50 N</div>
+                        <div id="newtonInfoMass" class="bg-gray-800 p-2 rounded">Kütle: 5 kg</div>
+                        <div id="newtonInfoAcceleration" class="bg-gray-800 p-2 rounded">İvme: 10.0 m/s²</div>
+                        <div id="newtonInfoVelocity" class="bg-gray-800 p-2 rounded">Hız: 0.0 m/s</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="forceLabel" for="forceSlider" class="block mb-1 text-sm">Uygulanan Kuvvet (N)</label>
+                            <input type="range" id="forceSlider" min="0" max="200" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label id="massLabel" for="massSlider" class="block mb-1 text-sm">Cisim Kütlesi (kg)</label>
+                            <input type="range" id="massSlider" min="1" max="50" value="5" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopNewton" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Başlat</button>
+                        <button id="resetNewton" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Sürtünmesiz yatay düzlemde durmakta olan 4 kg kütleli bir cisme 20 N'luk yatay bir kuvvet uygulanıyor. Cismin ivmesi kaç m/s² olur?</p>
+                <p><strong>Çözüm:</strong> $F_{\text{net}} = m \cdot a \Rightarrow 20 = 4 \cdot a \Rightarrow a = \frac{20}{4} = 5 \text{ m/s}^2$.</p>
+            </div>
+             <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Sürtünmesiz yatay düzlemde durmakta olan 5 kg kütleli bir cisme, büyüklükleri 25 N ve 15 N olan zıt yönlü iki yatay kuvvet etki etmektedir. Cismin ivmesini bulunuz.</p>
+                <p><strong>Çözüm:</strong> Net kuvvet, kuvvetlerin vektörel toplamıdır. Zıt yönlü oldukları için $F_{\text{net}} = 25 - 15 = 10 \text{ N}$. Dinamiğin temel prensibinden $F_{\text{net}} = m \cdot a \Rightarrow 10 = 5 \cdot a \Rightarrow a = 2 \text{ m/s}^2$. Hareket, büyük olan kuvvetin yönündedir.</p>
+            </div>
+        </section>
+
+        <!-- 6. Bölüm: Sürtünme Kuvveti -->
+        <section id="friction-force">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">6. Sürtünme Kuvveti</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Temas hâlinde olan yüzeyler arasında, harekete veya hareket etme eğilimine karşı oluşan kuvvete <strong class="text-purple-400">sürtünme kuvveti ($f_s$)</strong> denir. İki türü vardır:</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li><strong class="text-blue-300">Statik Sürtünme:</strong> Duran bir cismi harekete geçirmek için gereken kuvvete karşı koyar. Uygulanan kuvvete eşit ve zıt yönlüdür, maksimum bir değeri vardır.</li>
+                        <li><strong class="text-blue-300">Kinetik Sürtünme:</strong> Hareket hâlindeki bir cisme etki eden sürtünme kuvvetidir. Genellikle statik sürtünmenin maksimum değerinden küçüktür ve büyüklüğü sabittir.</li>
+                    </ul>
+                    <p>Sürtünme kuvveti, yüzeyin tepki kuvveti ($N$) ve sürtünme katsayısı ($\mu$) ile ilişkilidir.</p>
+                    <div class="formula-box">
+                        <p>Kinetik Sürtünme: $f_k = \mu_k \cdot N$</p>
+                    </div>
+                    <p>Yatay düzlemde duran bir cisim için tepki kuvveti, cismin ağırlığına ($G=mg$) eşittir. Bu durumda net kuvvet:</p>
+                     <div class="formula-box">
+                        <p>$F_{\text{Net}} = F_{\text{uygulanan}} - f_k$</p>
+                    </div>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Sürtünmeli Yüzey Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="frictionCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-sm">
+                        <div id="frictionInfoNetForce" class="bg-gray-800 p-2 rounded">Net Kuvvet: 0 N</div>
+                        <div id="frictionInfoFriction" class="bg-gray-800 p-2 rounded">Sürtünme: 0 N</div>
+                        <div id="frictionInfoAcceleration" class="bg-gray-800 p-2 rounded col-span-2">İvme: 0.0 m/s²</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="frictionForceLabel" for="frictionForceSlider" class="block mb-1 text-sm">Uygulanan Kuvvet (N)</label>
+                            <input type="range" id="frictionForceSlider" min="0" max="200" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label id="frictionMassLabel" for="frictionMassSlider" class="block mb-1 text-sm">Cisim Kütlesi (kg)</label>
+                            <input type="range" id="frictionMassSlider" min="1" max="50" value="10" class="w-full">
+                        </div>
+                        <div>
+                            <label id="frictionCoeffLabel" for="frictionCoeffSlider" class="block mb-1 text-sm">Kinetik Sürtünme Katsayısı ($\mu_k$)</label>
+                            <input type="range" id="frictionCoeffSlider" min="0" max="1" value="0.3" step="0.05" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopFriction" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Başlat</button>
+                        <button id="resetFriction" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Yatay bir yolda durmakta olan 10 kg kütleli bir sandığa 50 N'luk yatay bir kuvvet uygulanıyor. Sandık ile yüzey arasındaki kinetik sürtünme katsayısı 0,4 ise sandığın ivmesi ne olur? ($g=10 \text{ m/s}^2$)</p>
+                <p><strong>Çözüm:</strong> Önce sürtünme kuvvetini bulalım. $N = mg = 10 \cdot 10 = 100 \text{ N}$. <br> $f_k = \mu_k \cdot N = 0,4 \cdot 100 = 40 \text{ N}$. <br> Net kuvvet: $F_{\text{net}} = F_{\text{uygulanan}} - f_k = 50 - 40 = 10 \text{ N}$. <br> İvme: $F_{\text{net}} = m \cdot a \Rightarrow 10 = 10 \cdot a \Rightarrow a = 1 \text{ m/s}^2$.</p>
+            </div>
+        </section>
+        
+        <!-- 7. Bölüm: Bir Boyutta Sabit İvmeli Hareket -->
+        <section id="constant-acceleration">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">7. Bir Boyutta Sabit İvmeli Hareket</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-6">
+                    <p>Doğrusal bir yolda hızı düzgün olarak artan ya da azalan cisimlerin yaptığı harekete <strong class="text-purple-400">bir boyutta sabit ivmeli hareket</strong> denir. Bu hareket, cisme etki eden net kuvvetin sabit olmasıyla gerçekleşir.</p>
+                    <p>Hareket denklemleri:</p>
+                    <div class="formula-box">
+                        <p>$v = v_0 + a t$</p>
+                        <p>$\Delta x = v_0 t + \frac{1}{2} a t^2$</p>
+                        <p>$v^2 = v_0^2 + 2 a \Delta x$</p>
+                    </div>
+                    <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                        <li>$v$: Son hız (m/s)</li>
+                        <li>$v_0$: İlk hız (m/s)</li>
+                        <li>$a$: İvme (m/s²)</li>
+                        <li>$t$: Zaman (s)</li>
+                        <li>$\Delta x$: Yer değiştirme (m)</li>
+                    </ul>
+                    <p class="mt-4">Yandaki simülasyonda ilk hızı ve ivmeyi ayarlayarak bir arabanın hareketini ve bu hareketin grafiklerini inceleyin.</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Sabit İvmeli Hareket Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="accelerationCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="canvas-container rounded-lg p-1"><canvas id="posTimeGraph"></canvas></div>
+                        <div class="canvas-container rounded-lg p-1"><canvas id="velTimeGraph"></canvas></div>
+                        <div class="canvas-container rounded-lg p-1"><canvas id="accTimeGraph"></canvas></div>
+                    </div>
+                     <div class="grid grid-cols-3 gap-4 font-mono text-sm">
+                        <div id="accInfoTime" class="bg-gray-800 p-2 rounded text-center">Zaman: 0.0s</div>
+                        <div id="accInfoPosition" class="bg-gray-800 p-2 rounded text-center">Konum: 0.0m</div>
+                        <div id="accInfoVelocity" class="bg-gray-800 p-2 rounded text-center">Hız: 5.0m/s</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="initialVelocityLabel" for="initialVelocitySlider" class="block mb-1 text-sm">İlk Hız ($v_0$): 5.0 m/s</label>
+                            <input type="range" id="initialVelocitySlider" min="-20" max="20" value="5" class="w-full">
+                        </div>
+                        <div>
+                            <label id="accelerationLabel" for="accelerationSlider" class="block mb-1 text-sm">İvme (a): 2.0 m/s²</label>
+                            <input type="range" id="accelerationSlider" min="-5" max="5" value="2" step="0.1" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopAcc" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Başlat</button>
+                        <button id="resetAcc" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> İlk hızı 10 m/s olan bir araba, 2 m/s²'lik sabit ivmeyle hızlanmaya başlıyor. 5 saniye sonra arabanın hızı ve aldığı yol ne kadar olur?</p>
+                <p><strong>Çözüm:</strong> <br> Hız: $v = v_0 + a t = 10 + 2 \cdot 5 = 20 \text{ m/s}$. <br> Yol: $\Delta x = v_0 t + \frac{1}{2} a t^2 = 10 \cdot 5 + \frac{1}{2} \cdot 2 \cdot (5)^2 = 50 + 25 = 75 \text{ m}$.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Sürtünmesiz bir ortamda, belirli bir yükseklikten serbest bırakılan bir cisim 3 saniyede yere düşüyor. Cismin bırakıldığı yükseklik nedir? ($g=10 \text{ m/s}^2$)</p>
+                <p><strong>Çözüm:</strong> Serbest düşme, sabit ivmeli bir harekettir ($a=g$). İlk hız ($v_0$) sıfırdır. <br> $h = v_0 t + \frac{1}{2} g t^2 \Rightarrow h = 0 \cdot 3 + \frac{1}{2} \cdot 10 \cdot (3)^2 = 0 + 5 \cdot 9 = 45 \text{ m}$.</p>
+            </div>
+        </section>
+
+        <!-- 8. BÖLÜM: İKİ BOYUTTA HAREKET (EĞİK ATIŞ) -->
+        <section id="projectile-motion">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">8. İki Boyutta Hareket (Eğik Atış)</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Bir cismin yer çekimi etkisi altında, yatay ve düşeyde aynı anda hareket etmesine <strong class="text-purple-400">eğik atış hareketi</strong> denir. Bu hareket, iki bağımsız hareketin birleşimidir:</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li><strong class="text-blue-300">Yatayda (x ekseni):</strong> Hava sürtünmesi ihmal edildiğinde, sabit hızlı hareket ($v_x = \text{sabit}$).</li>
+                        <li><strong class="text-blue-300">Düşeyde (y ekseni):</strong> Yer çekimi ivmesiyle ($g$) yavaşlayan ve sonra hızlanan hareket.</li>
+                    </ul>
+                    <p class="mt-4">Simülasyonda başlangıç hızını ve fırlatma açısını ayarlayarak merminin yörüngesini, menzilini ve maksimum yüksekliğini gözlemleyin.</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Eğik Atış Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="projectileCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-sm">
+                        <div id="projectileInfoTime" class="bg-gray-800 p-2 rounded">Zaman: 0.0s</div>
+                        <div id="projectileInfoPos" class="bg-gray-800 p-2 rounded">Konum (x,y): (0, 0)m</div>
+                        <div id="projectileInfoVel" class="bg-gray-800 p-2 rounded">Hız (vx,vy): (0, 0)m/s</div>
+                        <div id="projectileInfoMax" class="bg-gray-800 p-2 rounded">Maks. Yükseklik: 0m</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="initialSpeedLabel" for="initialSpeedSlider" class="block mb-1 text-sm">Başlangıç Hızı ($v_0$): 50 m/s</label>
+                            <input type="range" id="initialSpeedSlider" min="10" max="100" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label id="angleLabel" for="angleSlider" class="block mb-1 text-sm">Fırlatma Açısı ($\alpha$): 45°</label>
+                            <input type="range" id="angleSlider" min="10" max="80" value="45" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopProjectile" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Fırlat</button>
+                        <button id="resetProjectile" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Bir cisim, yatayla $53^\circ$ açı yapacak şekilde 50 m/s hızla fırlatılıyor. Cismin uçuş süresini ve maksimum yüksekliğini bulunuz. ($g=10 \text{ m/s}^2$, $\sin(53^\circ)=0,8$, $\cos(53^\circ)=0,6$)</p>
+                <p><strong>Çözüm:</strong> <br> Düşey hız: $v_{0y} = v_0 \cdot \sin(53^\circ) = 50 \cdot 0,8 = 40 \text{ m/s}$. <br> Tepeye çıkış süresi: $t_{\text{çıkış}} = v_{0y} / g = 40 / 10 = 4 \text{ s}$. <br> Uçuş süresi: $t_{\text{uçuş}} = 2 \cdot t_{\text{çıkış}} = 8 \text{ s}$. <br> Maksimum yükseklik: $h_{\text{max}} = \frac{v_{0y}^2}{2g} = \frac{40^2}{2 \cdot 10} = \frac{1600}{20} = 80 \text{ m}$.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> 45 m yükseklikten 30 m/s'lik yatay hızla atılan bir cismin menzil uzaklığı ne kadardır? ($g=10 \text{ m/s}^2$)</p>
+                <p><strong>Çözüm:</strong> Önce cismin havada kalma süresini bulmalıyız. Bu, serbest düşme formülüyle hesaplanır: $h = \frac{1}{2} g t^2 \Rightarrow 45 = \frac{1}{2} \cdot 10 \cdot t^2 \Rightarrow 45 = 5 t^2 \Rightarrow t^2 = 9 \Rightarrow t = 3 \text{ s}$. <br> Menzil, yatay hız ile uçuş süresinin çarpımıdır: $X_{\text{menzil}} = v_{0x} \cdot t = 30 \cdot 3 = 90 \text{ m}$.</p>
+            </div>
+        </section>
+
+        <!-- 9. Bölüm: İş ve Enerji -->
+        <section id="work-energy">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">9. İş ve Enerji</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Fizikte <strong class="text-purple-400">iş</strong>, bir cisme uygulanan kuvvet ile cismin o kuvvet doğrultusunda yaptığı yer değiştirmenin çarpımıdır. Hareket doğrultusundaki kuvvetler iş yaparken, harekete dik kuvvetler iş yapmaz.</p>
+                    <div class="formula-box"><p>$W = F \cdot \Delta x \cdot \cos(\theta)$</p></div>
+                     <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                        <li>$W$: Yapılan iş (Joule, J)</li>
+                        <li>$F$: Uygulanan kuvvet (Newton, N)</li>
+                        <li>$\Delta x$: Yer değiştirme (metre, m)</li>
+                        <li>$\theta$: Kuvvet ile yer değiştirme arasındaki açı.</li>
+                    </ul>
+                    <p>Bir cismin hareketinden dolayı sahip olduğu enerjiye <strong class="text-green-400">kinetik enerji</strong> denir.</p>
+                    <div class="formula-box"><p>$E_k = \frac{1}{2} m v^2$</p></div>
+                    <p><strong class="text-yellow-400">İş-Enerji Teoremi:</strong> Bir cisim üzerine yapılan net iş, cismin kinetik enerjisindeki değişime eşittir. Pozitif iş cismin kinetik enerjisini artırırken, negatif iş (sürtünme gibi) azaltır.</p>
+                    <div class="formula-box"><p>$W_{\text{net}} = \Delta E_k = E_{k, \text{son}} - E_{k, \text{ilk}}$</p></div>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">İş-Enerji Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="workEnergyCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-sm">
+                        <div id="workInfoWork" class="bg-gray-800 p-2 rounded">Yapılan İş: 0 J</div>
+                        <div id="workInfoKE" class="bg-gray-800 p-2 rounded">Kinetik Enerji: 0 J</div>
+                        <div id="workInfoVelocity" class="bg-gray-800 p-2 rounded">Hız: 0.0 m/s</div>
+                        <div id="workInfoPosition" class="bg-gray-800 p-2 rounded">Konum: 0 m</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="workForceLabel" for="workForceSlider" class="block mb-1 text-sm">Kuvvet (F): 50 N</label>
+                            <input type="range" id="workForceSlider" min="10" max="150" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label id="workMassLabel" for="workMassSlider" class="block mb-1 text-sm">Kütle (m): 10 kg</label>
+                            <input type="range" id="workMassSlider" min="1" max="50" value="10" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopWork" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Başlat</button>
+                        <button id="resetWork" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Sürtünmesiz yatay düzlemde durmakta olan 5 kg kütleli bir cisme 10 N'luk kuvvet 6 metre boyunca uygulanıyor. Cismin son hızı ne olur?</p>
+                <p><strong>Çözüm:</strong> Yapılan iş, kinetik enerjideki değişime eşittir. $W = \Delta E_k$. <br> $F \cdot \Delta x = \frac{1}{2} m v^2 - \frac{1}{2} m v_0^2$. İlk hız 0 olduğundan: <br> $10 \cdot 6 = \frac{1}{2} \cdot 5 \cdot v^2 \Rightarrow 60 = 2.5 \cdot v^2 \Rightarrow v^2 = 24 \Rightarrow v = \sqrt{24} \approx 4.9 \text{ m/s}$.</p>
+            </div>
+        </section>
+        
+        <!-- 10. Bölüm: İtme ve Çizgisel Momentum -->
+        <section id="momentum-impulse">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">10. İtme ve Çizgisel Momentum</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p><strong class="text-purple-400">Çizgisel Momentum ($\vec{p}$)</strong>, bir cismin kütlesi ile hızının çarpımıdır ve hareketin miktarını ifade eden vektörel bir büyüklüktür.</p>
+                    <div class="formula-box"><p>$\vec{p} = m \vec{v}$</p></div>
+                    <p><strong class="text-purple-400">İtme ($\vec{I}$)</strong>, bir cisme belirli bir süre etki eden kuvvetin yarattığı etkidir. Cisimlerin momentumunda değişime neden olur.</p>
+                    <div class="formula-box"><p>$\vec{I} = \vec{F} \Delta t$</p></div>
+                    <p><strong class="text-yellow-400">İtme-Momentum Teoremi</strong>'ne göre bir cisme uygulanan itme, cismin momentumundaki değişime eşittir.</p>
+                    <div class="formula-box"><p>$\vec{I} = \Delta \vec{p} = \vec{p}_{\text{son}} - \vec{p}_{\text{ilk}}$</p></div>
+                     <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                        <li>$\vec{I}$: İtme (N·s)</li>
+                        <li>$\Delta \vec{p}$: Momentum değişimi (kg·m/s)</li>
+                    </ul>
+                    <p>Dış bir kuvvetin olmadığı kapalı sistemlerde, cisimler arası etkileşimlerde (çarpışmalar gibi) toplam momentum daima korunur. Bu ilkeye <strong class="text-yellow-400">Momentumun Korunumu</strong> denir.</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Çarpışma Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="momentumCanvas"></canvas>
+                    </div>
+                    <div id="momentumInfoPanel" class="grid grid-cols-3 gap-2 font-mono text-xs text-center">
+                        <div class="bg-gray-800 p-2 rounded"><span></span></div>
+                        <div class="bg-gray-800 p-2 rounded text-cyan-400">Top A</div>
+                        <div class="bg-gray-800 p-2 rounded text-pink-400">Top B</div>
+                        <div class="bg-gray-800 p-2 rounded">P (önce)</div>
+                        <div id="p_a_before" class="bg-gray-800 p-2 rounded">0</div>
+                        <div id="p_b_before" class="bg-gray-800 p-2 rounded">0</div>
+                        <div class="bg-gray-800 p-2 rounded">P (sonra)</div>
+                        <div id="p_a_after" class="bg-gray-800 p-2 rounded">0</div>
+                        <div id="p_b_after" class="bg-gray-800 p-2 rounded">0</div>
+                        <div class="bg-gray-800 p-2 rounded text-yellow-400 col-span-2">Toplam Momentum</div>
+                        <div id="p_total" class="bg-gray-800 p-2 rounded text-yellow-400">0</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label id="massALabel" for="massASlider" class="block mb-1 text-sm text-cyan-400">Top A Kütle: 5 kg</label>
+                            <input type="range" id="massASlider" min="1" max="20" value="5" class="w-full">
+                        </div>
+                         <div>
+                            <label id="velALabel" for="velASlider" class="block mb-1 text-sm text-cyan-400">Top A Hız: 10 m/s</label>
+                            <input type="range" id="velASlider" min="-20" max="20" value="10" class="w-full">
+                        </div>
+                        <div>
+                            <label id="massBLabel" for="massBSlider" class="block mb-1 text-sm text-pink-400">Top B Kütle: 10 kg</label>
+                            <input type="range" id="massBSlider" min="1" max="20" value="10" class="w-full">
+                        </div>
+                        <div>
+                            <label id="velBLabel" for="velBSlider" class="block mb-1 text-sm text-pink-400">Top B Hız: -5 m/s</label>
+                            <input type="range" id="velBSlider" min="-20" max="20" value="-5" class="w-full">
+                        </div>
+                        <div class="col-span-2">
+                            <label id="restitutionLabel" for="restitutionSlider" class="block mb-1 text-sm text-yellow-300">Esneklik (e): 1.0</label>
+                            <input type="range" id="restitutionSlider" min="0" max="1" value="1" step="0.1" class="w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="startStopMomentum" class="btn-primary text-white font-bold py-2 px-4 rounded-lg">Başlat</button>
+                        <button id="resetMomentum" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> 2 kg kütleli bir top duvara 10 m/s hızla çarpıp 8 m/s hızla geri dönüyor. Duvarın topa uyguladığı itmenin büyüklüğü nedir?</p>
+                <p><strong>Çözüm:</strong> İtme, momentum değişimine eşittir ($I = \Delta p$). Sağ yönü (+) alalım. <br> $p_{\text{ilk}} = 2 \cdot (+10) = 20 \text{ kg} \cdot \text{m/s}$. <br> $p_{\text{son}} = 2 \cdot (-8) = -16 \text{ kg} \cdot \text{m/s}$. <br> $I = p_{\text{son}} - p_{\text{ilk}} = -16 - 20 = -36 \text{ N} \cdot \text{s}$. <br> İtmenin büyüklüğü $36 \text{ N} \cdot \text{s}$'dir.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Durmakta olan 3 kg kütleli bir cisme 5 saniye boyunca 12 N'luk bir kuvvet uygulanıyor. Cismin son hızı ne olur?</p>
+                <p><strong>Çözüm:</strong> İtme-Momentum teoreminden $I = \Delta p$. <br> $F \cdot \Delta t = m \cdot v_{\text{son}} - m \cdot v_{\text{ilk}}$. <br> $12 \cdot 5 = 3 \cdot v_{\text{son}} - 3 \cdot 0$ <br> $60 = 3 \cdot v_{\text{son}} \Rightarrow v_{\text{son}} = 20 \text{ m/s}$.</p>
+            </div>
+        </section>
+
+        <!-- 11. Bölüm: Tork (Kuvvet Momenti) -->
+        <section id="torque">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">11. Tork (Kuvvet Momenti)</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Tork, bir kuvvetin bir cismi bir eksen etrafında döndürme etkisidir. Vektörel bir büyüklüktür ve genellikle <strong class="text-purple-400">$\tau$ (tau)</strong> harfi ile gösterilir. Kapıyı açarken veya bir vidayı sıkarken tork uygularız.</p>
+                    <p>Torkun büyüklüğü üç faktöre bağlıdır:</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li><strong class="text-red-400">Kuvvetin Büyüklüğü (F):</strong> Daha büyük kuvvet, daha büyük tork oluşturur.</li>
+                        <li><strong class="text-blue-400">Kuvvet Kolu (r):</strong> Kuvvetin uygulandığı noktanın dönme eksenine olan dik uzaklığıdır. Uzaklık arttıkça tork artar.</li>
+                        <li><strong class="text-green-400">Açı ($\theta$):</strong> Kuvvet ile kuvvet kolu arasındaki açıdır. Kuvvet, kuvvet koluna dik ($90^\circ$) uygulandığında tork maksimum olur.</li>
+                    </ul>
+                    <div class="formula-box"><p>$\tau = r \cdot F \cdot \sin(\theta)$</p></div>
+                    <p><strong class="text-yellow-400">Torkun Yönü</strong>, sağ el kuralı ile bulunur. Sağ elin dört parmağı kuvvet kolu yönünden kuvvetin yönüne doğru kıvrıldığında, başparmak torkun yönünü gösterir (sayfa düzleminden dışarı veya içeri).</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Tork Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="torqueCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-sm">
+                        <div id="torqueValue" class="bg-gray-800 p-2 rounded col-span-2 text-center text-lg">Tork: 0.0 N·m</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label id="torqueForceLabel" for="torqueForceSlider" class="block mb-1 text-sm">Kuvvet (F): 50 N</label>
+                            <input type="range" id="torqueForceSlider" min="0" max="100" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label id="torqueDistanceLabel" for="torqueDistanceSlider" class="block mb-1 text-sm">Uzaklık (r): 1.0 m</label>
+                            <input type="range" id="torqueDistanceSlider" min="0.2" max="1.5" value="1.0" step="0.1" class="w-full">
+                        </div>
+                        <div>
+                            <label id="torqueAngleLabel" for="torqueAngleSlider" class="block mb-1 text-sm">Açı ($\theta$): 90°</label>
+                            <input type="range" id="torqueAngleSlider" min="0" max="180" value="90" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Bir kapı koluna, dönme ekseninden 0,8 m uzakta, kola dik olarak 10 N'luk bir kuvvet uygulanıyor. Uygulanan torkun büyüklüğü nedir?</p>
+                <p><strong>Çözüm:</strong> $\tau = r \cdot F \cdot \sin(\theta)$. Kuvvet dik olduğu için $\theta=90^\circ$ ve $\sin(90^\circ)=1$. <br> $\tau = 0,8 \cdot 10 \cdot 1 = 8 \text{ N} \cdot \text{m}$.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> 40 cm uzunluğundaki bir çubuğun bir ucuna, yatayla $53^\circ$ açı yapacak şekilde 20 N'lık bir kuvvet uygulanıyor. Diğer ucu etrafında dönebilen çubuğa uygulanan tork nedir? ($\sin(53^\circ) = 0,8$)</p>
+                <p><strong>Çözüm:</strong> Önce uzunluğu metreye çeviririz: 40 cm = 0,4 m. Tork formülü $\tau = r \cdot F \cdot \sin(\theta)$'dır. <br> $\tau = 0,4 \cdot 20 \cdot \sin(53^\circ) = 0,4 \cdot 20 \cdot 0,8 = 6,4 \text{ N} \cdot \text{m}$.</p>
+            </div>
+        </section>
+        
+        <!-- 12. Bölüm: Denge ve Denge Şartları -->
+        <section id="equilibrium">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">12. Denge ve Denge Şartları</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Bir cismin veya sistemin hareket durumunu korumasına <strong class="text-purple-400">denge</strong> denir. Cisim ya duruyordur (statik denge) ya da sabit hızla hareket ediyordur (kinetik denge). Bir cismin dengede kalabilmesi için iki temel şartın aynı anda sağlanması gerekir:</p>
+                    <p><strong class="text-yellow-400">1. Denge Şartı (Öteleme Dengesi):</strong> Cisme etki eden kuvvetlerin bileşkesi (net kuvvet) sıfır olmalıdır. Bu, cismin ivmelenmesini önler.</p>
+                    <div class="formula-box"><p>$\sum \vec{F} = \vec{F}_{\text{net}} = 0$</p></div>
+                    <p><strong class="text-yellow-400">2. Denge Şartı (Dönme Dengesi):</strong> Cisme herhangi bir eksene göre etki eden toplam tork (net tork) sıfır olmalıdır. Bu, cismin dönme ivmesi kazanmasını önler.</p>
+                    <div class="formula-box"><p>$\sum \tau = \tau_{\text{net}} = 0$</p></div>
+                     <ul class="list-disc list-inside space-y-2 pl-4 text-sm">
+                        <li>$\sum$: Toplam anlamına gelen sigma sembolü.</li>
+                    </ul>
+                    <p>Yandaki simülasyonda, bir tahterevalliyi dengeye getirmek için kütleleri ve destek noktasına olan uzaklıklarını ayarlayarak bu iki şartı interaktif olarak test edin.</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Denge Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="equilibriumCanvas"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 font-mono text-xs text-center">
+                        <div class="bg-gray-800 p-2 rounded"></div>
+                        <div class="bg-gray-800 p-2 rounded text-orange-400">Sol Tork ($\tau_1$)</div>
+                        <div class="bg-gray-800 p-2 rounded text-teal-400">Sağ Tork ($\tau_2$)</div>
+                        <div class="bg-gray-800 p-2 rounded">Değer</div>
+                        <div id="torque1Value" class="bg-gray-800 p-2 rounded text-orange-400">0 N·m</div>
+                        <div id="torque2Value" class="bg-gray-800 p-2 rounded text-teal-400">0 N·m</div>
+                        <div class="bg-gray-800 p-2 rounded text-yellow-400 col-span-2">Net Tork ($\tau_1 - \tau_2$)</div>
+                        <div id="netTorqueValue" class="bg-gray-800 p-2 rounded text-yellow-400">0 N·m</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label id="mass1Label" for="mass1Slider" class="block mb-1 text-sm text-orange-400">Kütle 1: 10 kg</label>
+                            <input type="range" id="mass1Slider" min="1" max="20" value="10" class="w-full">
+                        </div>
+                         <div>
+                            <label id="distance1Label" for="distance1Slider" class="block mb-1 text-sm text-orange-400">Uzaklık 1: 2.0 m</label>
+                            <input type="range" id="distance1Slider" min="0.5" max="2.5" value="2.0" step="0.1" class="w-full">
+                        </div>
+                        <div>
+                            <label id="mass2Label" for="mass2Slider" class="block mb-1 text-sm text-teal-400">Kütle 2: 10 kg</label>
+                            <input type="range" id="mass2Slider" min="1" max="20" value="10" class="w-full">
+                        </div>
+                        <div>
+                            <label id="distance2Label" for="distance2Slider" class="block mb-1 text-sm text-teal-400">Uzaklık 2: 2.0 m</label>
+                            <input type="range" id="distance2Slider" min="0.5" max="2.5" value="2.0" step="0.1" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Ağırlığı önemsiz bir çubuğun bir ucundan 2 metre uzağa 30 N'luk bir yük asılmıştır. Çubuğun destek noktasına göre dengede kalması için diğer tarafta destekten 3 metre uzağa asılması gereken yük kaç N olmalıdır?</p>
+                <p><strong>Çözüm:</strong> Denge için net tork sıfır olmalıdır ($\sum \tau = 0$), yani saat yönündeki torkların toplamı, tersi yöndeki torkların toplamına eşit olmalıdır. <br> $\tau_{\text{sol}} = \tau_{\text{sağ}} \Rightarrow F_1 d_1 = F_2 d_2$ <br> $30 \cdot 2 = F_2 \cdot 3 \Rightarrow 60 = 3 F_2 \Rightarrow F_2 = 20 \text{ N}$.</p>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Ağırlığı 20 N olan eşit bölmeli, türdeş bir çubuk, bir destek üzerinde dengededir. Çubuğun bir ucuna 10 N'luk bir yük asıldığında, desteğin dengeyi sağlamak için nereye kaydırılması gerekir?</p>
+                <p><strong>Çözüm:</strong> Başlangıçta destek, çubuğun tam ortasındadır (ağırlık merkezinde). Yük asıldığında, yükün ve çubuğun ağırlığının torklarının dengelendiği yeni bir nokta bulunmalıdır. Bu yeni nokta, sistemin yeni ağırlık merkezi olacaktır ve ilk duruma göre yüke doğru kayacaktır.</p>
+            </div>
+        </section>
+
+        <!-- 13. Bölüm: Kütle ve Ağırlık Merkezi -->
+        <section id="center-of-mass">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">13. Kütle ve Ağırlık Merkezi</h2>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="text-gray-300 leading-relaxed space-y-4">
+                    <p>Bir cismi veya sistemi oluşturan tüm parçacıkların kütlelerinin toplandığı varsayılan noktaya <strong class="text-purple-400">kütle merkezi</strong> denir. Bir cisme etki eden yer çekimi kuvvetlerinin bileşkesinin uygulama noktasına ise <strong class="text-purple-400">ağırlık merkezi</strong> denir.</p>
+                    <p>Küçük cisimler için yer çekimi ivmesi ($g$) her noktada aynı kabul edildiğinden, kütle merkezi ile ağırlık merkezi aynı noktadadır. Ancak gökdelen gibi çok büyük yapılar için bu iki nokta arasında küçük bir fark oluşur.</p>
+                    <p>Birden fazla noktasal kütleden oluşan bir sistemin kütle merkezinin koordinatları ($X_{KM}, Y_{KM}$) aşağıdaki formüllerle hesaplanır:</p>
+                    <div class="formula-box">
+                        <p>$X_{KM} = \frac{m_1 x_1 + m_2 x_2 + \dots + m_n x_n}{m_1 + m_2 + \dots + m_n} = \frac{\sum m_i x_i}{\sum m_i}$</p>
+                        <p>$Y_{KM} = \frac{m_1 y_1 + m_2 y_2 + \dots + m_n y_n}{m_1 + m_2 + \dots + m_n} = \frac{\sum m_i y_i}{\sum m_i}$</p>
+                    </div>
+                    <p>Türdeş ve simetrik geometrik cisimlerin kütle merkezi, geometrik merkezleridir. Yandaki simülasyonda tuvale tıklayarak farklı kütleler ekleyin ve sistemin kütle merkezinin nasıl değiştiğini gözlemleyin.</p>
+                </div>
+                <div class="info-box p-4 rounded-lg space-y-4">
+                    <h3 class="font-semibold text-lg text-center text-purple-300">Kütle Merkezi Simülasyonu</h3>
+                    <div class="canvas-container rounded-lg overflow-hidden">
+                        <canvas id="centerOfMassCanvas"></canvas>
+                    </div>
+                     <div class="space-y-3 p-4">
+                        <div>
+                            <label id="massValueLabel" for="massValueSlider" class="block mb-1 text-sm">Eklenecek Kütle (kg): 5 kg</label>
+                            <input type="range" id="massValueSlider" min="1" max="20" value="5" class="w-full">
+                        </div>
+                        <button id="resetCenterOfMass" class="w-full btn-secondary text-white font-bold py-2 px-4 rounded-lg">Sıfırla</button>
+                    </div>
+                    <div id="centerOfMassInfo" class="font-mono text-sm p-4 rounded-lg bg-gray-800 text-gray-300 text-center">
+                        Tuvale tıklayarak kütle ekleyin.
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <h4 class="font-bold text-lg text-green-400 mb-2">MEB Uyumlu Örnek Soru</h4>
+                <p class="mb-2"><strong>Soru:</strong> Koordinatları (0, 0), (6, 0) ve (3, 4) olan noktalara sırasıyla 2 kg, 2 kg ve 1 kg kütleli cisimler yerleştirilmiştir. Sistemin kütle merkezinin koordinatlarını bulunuz.</p>
+                <p><strong>Çözüm:</strong> Kütle merkezinin koordinatlarını formülleri kullanarak bulalım. <br>
+                $m_1=2\text{ kg}, x_1=0, y_1=0$ <br>
+                $m_2=2\text{ kg}, x_2=6, y_2=0$ <br>
+                $m_3=1\text{ kg}, x_3=3, y_3=4$ <br>
+                $X_{KM} = \frac{(2 \cdot 0) + (2 \cdot 6) + (1 \cdot 3)}{2 + 2 + 1} = \frac{0 + 12 + 3}{5} = \frac{15}{5} = 3$ <br>
+                $Y_{KM} = \frac{(2 \cdot 0) + (2 \cdot 0) + (1 \cdot 4)}{2 + 2 + 1} = \frac{0 + 0 + 4}{5} = \frac{4}{5} = 0.8$ <br>
+                Sistemin kütle merkezi (3, 0.8) noktasındadır.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Alt Bilgi (Footer) Bölümü -->
+    <footer class="mt-16 py-8 border-t border-gray-700 bg-gray-900/50">
+        <div class="container mx-auto text-center text-gray-400 text-sm">
+            <p class="mb-2">Hazırlayan: <a href="https://www.linkedin.com/in/bur%C3%A7in-%C3%BCnl%C3%BC-28368327/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Burçin Ünlü</a></p>
+            <p class="mb-2">Bu interaktif eğitim materyali, genel fizik prensipleri temel alınarak AI tarafından oluşturulmuştur.</p>
+            <p>İçerik oluşturulurken <a href="https://ogmmateryal.eba.gov.tr/panel/upload/pdf/dnllmwgvcnx.pdf" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Milli Eğitim Bakanlığı (MEB) 11. Sınıf Fizik ders kitabından</a> yararlanılmıştır.</p>
+        </div>
+    </footer>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Render all math expressions on the page
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+
+        // --- Genel Yardımcı Fonksiyonlar ---
+        const drawArrow = (ctx, fromx, fromy, tox, toy, color = 'white', lineWidth = 2) => {
+            const headlen = 10;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        const drawGrid = (ctx, width, height, step) => {
+            ctx.save();
+            ctx.strokeStyle = '#374151'; // Koyu Gri Grid
+            ctx.lineWidth = 0.5;
+            for (let x = step; x < width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = step; y < height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            ctx.restore();
+        };
+
+        // --- 1. BÖLÜM: VEKTÖR ÖZELLİKLERİ ---
+        (() => {
+            const canvas = document.getElementById('vectorCanvas');
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('vectorInfo');
+
+            let isDrawing = false;
+            let startPos = { x: 0, y: 0 };
+            let endPos = { x: 0, y: 0 };
+            let hasDrawn = false;
+
+            const redrawCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(ctx, canvas.width, canvas.height, 25);
+                if (hasDrawn) {
+                    drawArrow(ctx, startPos.x, startPos.y, endPos.x, endPos.y, '#A78BFA', 3);
+                    const dx = endPos.x - startPos.x;
+                    const dy = endPos.y - startPos.y;
+                    const magnitude = Math.sqrt(dx * dx + dy * dy).toFixed(1);
+                    const angle = (Math.atan2(-dy, dx) * 180 / Math.PI).toFixed(1);
+                    info.innerHTML = `Büyüklük: <span class="text-yellow-300">${magnitude} br</span> | Açı: <span class="text-yellow-300">${angle}°</span>`;
+                } else {
+                    info.innerHTML = 'Tuvale tıklayıp sürükleyerek bir vektör çizin.';
+                }
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (4 / 5);
+                redrawCanvas();
+            };
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                hasDrawn = true;
+                const rect = canvas.getBoundingClientRect();
+                startPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                endPos = { ...startPos };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                endPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                redrawCanvas();
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                isDrawing = false;
+            });
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 2. BÖLÜM: VEKTÖR TOPLAMA ---
+        (() => {
+            const canvas = document.getElementById('additionCanvas');
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('additionInfo');
+
+            let vectors = [];
+            let drawingVector = null;
+            let resultantVector = null;
+            let displayVectors = [];
+
+            const redrawCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(ctx, canvas.width, canvas.height, 25);
+
+                displayVectors.forEach((v, i) => {
+                    const color = v.color || (i === 0 ? '#60A5FA' : '#F472B6');
+                    const label = v.label || (i === 0 ? 'A' : 'B');
+                    const width = v.width || 3;
+                    drawArrow(ctx, v.start.x, v.start.y, v.end.x, v.end.y, color, width);
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText(label, v.start.x - 20, v.start.y);
+                });
+
+                if (resultantVector) {
+                    drawArrow(ctx, resultantVector.start.x, resultantVector.start.y, resultantVector.end.x, resultantVector.end.y, '#34D399', 4);
+                    ctx.fillStyle = '#34D399';
+                    ctx.font = 'bold 18px Inter';
+                    ctx.fillText('R', resultantVector.start.x - 25, resultantVector.start.y);
+                }
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (5 / 7);
+                redrawCanvas();
+            };
+            
+            const updateAdditionInfo = () => {
+                let infoText = '';
+                const vecA = vectors[0];
+                const vecB = vectors[1];
+
+                if (vecA) {
+                    const dx = vecA.end.x - vecA.start.x;
+                    const dy = vecA.end.y - vecA.start.y;
+                    infoText += `<p>Vektör A: (${dx.toFixed(0)}, ${(-dy).toFixed(0)})</p>`;
+                } else {
+                    infoText += `<p>Vektör A: Henüz çizilmedi.</p>`;
+                }
+
+                if (vecB) {
+                    const dx = vecB.end.x - vecB.start.x;
+                    const dy = vecB.end.y - vecB.start.y;
+                    infoText += `<p>Vektör B: (${dx.toFixed(0)}, ${(-dy).toFixed(0)})</p>`;
+                } else {
+                    infoText += `<p>Vektör B: Henüz çizilmedi.</p>`;
+                }
+
+                if (resultantVector) {
+                    const dx = resultantVector.end.x - resultantVector.start.x;
+                    const dy = resultantVector.end.y - resultantVector.start.y;
+                    const mag = Math.sqrt(dx*dx + dy*dy).toFixed(1);
+                    infoText += `<p class="text-green-400">Bileşke R: (${dx.toFixed(0)}, ${(-dy).toFixed(0)}) | Büyüklük: ${mag}</p>`;
+                } else {
+                    infoText += `<p class="text-green-400">Bileşke R: Bekleniyor...</p>`;
+                }
+                info.innerHTML = infoText;
+            };
+
+            const reset = () => {
+                vectors = [];
+                resultantVector = null;
+                displayVectors = [];
+                redrawCanvas();
+                updateAdditionInfo();
+            };
+            
+            document.getElementById('resetAddition').addEventListener('click', reset);
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (vectors.length >= 2) return;
+                const rect = canvas.getBoundingClientRect();
+                drawingVector = {
+                    start: { x: e.clientX - rect.left, y: e.clientY - rect.top },
+                    end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
+                };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!drawingVector) return;
+                const rect = canvas.getBoundingClientRect();
+                drawingVector.end = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                displayVectors = [...vectors, drawingVector];
+                redrawCanvas();
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                if (drawingVector && vectors.length < 2) {
+                    vectors.push(drawingVector);
+                }
+                drawingVector = null;
+                displayVectors = [...vectors];
+                redrawCanvas();
+                updateAdditionInfo();
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                if (drawingVector) {
+                    canvas.dispatchEvent(new Event('mouseup'));
+                }
+            });
+
+            document.getElementById('addTipToTail').addEventListener('click', () => {
+                if (vectors.length < 2) return;
+                const vecA = { ...vectors[0] };
+                const vecB = { ...vectors[1] };
+                const vecB_moved = {
+                    start: { ...vecA.end },
+                    end: { x: vecA.end.x + (vecB.end.x - vecB.start.x), y: vecA.end.y + (vecB.end.y - vecB.start.y) },
+                    color: '#F472B6', width: 2, label: 'B\''
+                };
+                resultantVector = {
+                    start: { ...vecA.start },
+                    end: { ...vecB_moved.end }
+                };
+                displayVectors = [vecA, vecB_moved];
+                redrawCanvas();
+                updateAdditionInfo();
+            });
+
+            document.getElementById('addParallelogram').addEventListener('click', () => {
+                if (vectors.length < 2) return;
+                const commonStart = {x: canvas.width * 0.2, y: canvas.height * 0.8};
+                
+                const vecA_moved = {
+                    start: commonStart,
+                    end: { x: commonStart.x + (vectors[0].end.x - vectors[0].start.x), y: commonStart.y + (vectors[0].end.y - vectors[0].start.y) }
+                };
+                const vecB_moved = {
+                    start: commonStart,
+                    end: { x: commonStart.x + (vectors[1].end.x - vectors[1].start.x), y: commonStart.y + (vectors[1].end.y - vectors[1].start.y) }
+                };
+                resultantVector = {
+                    start: commonStart,
+                    end: { x: vecA_moved.end.x + (vecB_moved.end.x - vecB_moved.start.x), y: vecA_moved.end.y + (vecB_moved.end.y - vecB_moved.start.y) }
+                };
+                
+                const helperA = { start: {...vecB_moved.end}, end: {...resultantVector.end}, color: '#60A5FA', width: 1, label: ''};
+                const helperB = { start: {...vecA_moved.end}, end: {...resultantVector.end}, color: '#F472B6', width: 1, label: ''};
+
+                displayVectors = [vecA_moved, vecB_moved, helperA, helperB];
+                redrawCanvas();
+                updateAdditionInfo();
+            });
+
+            window.addEventListener('resize', resizeCanvas);
+            reset();
+            resizeCanvas();
+        })();
+
+        // --- 3. BÖLÜM: VEKTÖR BİLEŞENLERİ ---
+        (() => {
+            const canvas = document.getElementById('componentsCanvas');
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('componentsInfo');
+
+            let isDrawing = false;
+            let startPos = { x: 0, y: 0 };
+            let endPos = { x: 0, y: 0 };
+            let hasDrawn = false;
+
+            const redrawCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(ctx, canvas.width, canvas.height, 25);
+                
+                startPos = { x: canvas.width / 2, y: canvas.height / 2 };
+
+                // Axes
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, startPos.y); ctx.lineTo(canvas.width, startPos.y);
+                ctx.moveTo(startPos.x, 0); ctx.lineTo(startPos.x, canvas.height);
+                ctx.stroke();
+                ctx.fillStyle = '#9CA3AF';
+                ctx.fillText('x', canvas.width - 10, startPos.y - 5);
+                ctx.fillText('y', startPos.x + 5, 10);
+
+                if (hasDrawn) {
+                    drawArrow(ctx, startPos.x, startPos.y, endPos.x, endPos.y, '#A78BFA', 3);
+                    ctx.fillStyle = '#A78BFA';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText('F', (startPos.x + endPos.x)/2 + 5, (startPos.y + endPos.y)/2 - 5);
+
+                    // Components
+                    drawArrow(ctx, startPos.x, startPos.y, endPos.x, startPos.y, '#F472B6', 2); // Fx
+                    drawArrow(ctx, startPos.x, startPos.y, startPos.x, endPos.y, '#60A5FA', 2); // Fy
+                    
+                    // Helper lines
+                    ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = '#6B7280';
+                    ctx.beginPath();
+                    ctx.moveTo(endPos.x, endPos.y); ctx.lineTo(endPos.x, startPos.y);
+                    ctx.moveTo(endPos.x, endPos.y); ctx.lineTo(startPos.x, endPos.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.fillStyle = '#F472B6';
+                    ctx.fillText('Fx', (startPos.x + endPos.x)/2, startPos.y + 15);
+                    ctx.fillStyle = '#60A5FA';
+                    ctx.fillText('Fy', startPos.x - 25, (startPos.y + endPos.y)/2);
+
+                    const dx = endPos.x - startPos.x;
+                    const dy = startPos.y - endPos.y;
+                    const magnitude = Math.sqrt(dx * dx + dy * dy);
+                    const angleRad = Math.atan2(dy, dx);
+                    const angleDeg = (angleRad * 180 / Math.PI);
+                    const Fx = (magnitude * Math.cos(angleRad)).toFixed(1);
+                    const Fy = (magnitude * Math.sin(angleRad)).toFixed(1);
+
+                    info.innerHTML = `
+                        <p>|F|: <span class="text-yellow-300">${magnitude.toFixed(1)}</span> | α: <span class="text-yellow-300">${angleDeg.toFixed(1)}°</span></p>
+                        <p>Fx = ${magnitude.toFixed(1)} * cos(${angleDeg.toFixed(1)}°) = <span class="text-pink-400">${Fx}</span></p>
+                        <p>Fy = ${magnitude.toFixed(1)} * sin(${angleDeg.toFixed(1)}°) = <span class="text-blue-400">${Fy}</span></p>
+                    `;
+                } else {
+                    info.innerHTML = 'Bir vektör çizin.';
+                }
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (4 / 5);
+                redrawCanvas();
+            };
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                hasDrawn = true;
+                const rect = canvas.getBoundingClientRect();
+                endPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                redrawCanvas();
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                endPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                redrawCanvas();
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                isDrawing = false;
+            });
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 4. BÖLÜM: BAĞIL HAREKET ---
+        (() => {
+            const canvas = document.getElementById('relativeCanvas');
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('relativeInfo');
+            const observerRadios = document.getElementsByName('observer');
+            const resetButton = document.getElementById('resetRelative');
+
+            let vectors = [];
+            let drawingVector = null;
+            let origin = { x: 0, y: 0 };
+
+            const getVectorInfo = (vec) => {
+                if (!vec) return 'Çizim Bekliyor...';
+                const dx = (vec.end.x - vec.start.x) / 10;
+                const dy = -(vec.end.y - vec.start.y) / 10;
+                return `(${(dx).toFixed(1)}, ${(dy).toFixed(1)}) km/h`;
+            };
+
+            const redrawCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(ctx, canvas.width, canvas.height, 25);
+                
+                origin = { x: canvas.width / 2, y: canvas.height / 2 };
+
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, origin.y); ctx.lineTo(canvas.width, origin.y);
+                ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, canvas.height);
+                ctx.stroke();
+
+                if (vectors[0]) {
+                    drawArrow(ctx, vectors[0].start.x, vectors[0].start.y, vectors[0].end.x, vectors[0].end.y, '#60A5FA', 3);
+                    ctx.fillStyle = '#60A5FA';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText('v_A', vectors[0].end.x + 5, vectors[0].end.y - 5);
+                }
+                if (vectors[1]) {
+                    drawArrow(ctx, vectors[1].start.x, vectors[1].start.y, vectors[1].end.x, vectors[1].end.y, '#F472B6', 3);
+                    ctx.fillStyle = '#F472B6';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText('v_B', vectors[1].end.x + 5, vectors[1].end.y - 5);
+                }
+
+                if (vectors.length === 2) {
+                    const observer = document.querySelector('input[name="observer"]:checked').value;
+                    const vA = { x: vectors[0].end.x - origin.x, y: vectors[0].end.y - origin.y };
+                    const vB = { x: vectors[1].end.x - origin.x, y: vectors[1].end.y - origin.y };
+                    
+                    let vRel = {};
+                    let vRelLabel = '';
+                    if (observer === 'A') {
+                        vRel = { x: vB.x - vA.x, y: vB.y - vA.y };
+                        vRelLabel = 'v_BA';
+                    } else {
+                        vRel = { x: vA.x - vB.x, y: vA.y - vB.y };
+                        vRelLabel = 'v_AB';
+                    }
+                    
+                    drawArrow(ctx, origin.x, origin.y, origin.x + vRel.x, origin.y + vRel.y, '#34D399', 4);
+                    
+                    const vRelMag = Math.sqrt(vRel.x**2 + vRel.y**2) / 10;
+                    info.innerHTML = `
+                        <p>Araç A Hızı ($v_A$): <span class="text-blue-400">${getVectorInfo(vectors[0])}</span></p>
+                        <p>Araç B Hızı ($v_B$): <span class="text-pink-400">${getVectorInfo(vectors[1])}</span></p>
+                        <p class="text-green-400">Bağıl Hız (${vRelLabel}): (${(vRel.x/10).toFixed(1)}, ${(-vRel.y/10).toFixed(1)}) | ${vRelMag.toFixed(1)} km/h</p>
+                    `;
+                } else {
+                    info.innerHTML = `
+                        <p>Araç A Hızı ($v_A$): <span class="text-blue-400">${getVectorInfo(vectors[0])}</span></p>
+                        <p>Araç B Hızı ($v_B$): <span class="text-pink-400">${getVectorInfo(vectors[1])}</span></p>
+                        <p class="text-green-400">Bağıl Hız: Bekleniyor...</p>
+                    `;
+                }
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (4 / 5);
+                redrawCanvas();
+            };
+
+            const reset = () => {
+                vectors = [];
+                drawingVector = null;
+                redrawCanvas();
+            };
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (vectors.length >= 2) return;
+                const rect = canvas.getBoundingClientRect();
+                drawingVector = {
+                    start: origin,
+                    end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
+                };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!drawingVector) return;
+                const rect = canvas.getBoundingClientRect();
+                drawingVector.end = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                redrawCanvas();
+                const color = vectors.length === 0 ? '#60A5FA' : '#F472B6';
+                drawArrow(ctx, drawingVector.start.x, drawingVector.start.y, drawingVector.end.x, drawingVector.end.y, color, 3);
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                if (drawingVector && vectors.length < 2) {
+                    vectors.push(drawingVector);
+                }
+                drawingVector = null;
+                redrawCanvas();
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                if (drawingVector) {
+                    canvas.dispatchEvent(new Event('mouseup'));
+                }
+            });
+
+            observerRadios.forEach(radio => radio.addEventListener('change', redrawCanvas));
+            resetButton.addEventListener('click', reset);
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 5. BÖLÜM: NEWTON'IN HAREKET YASALARI ---
+        (() => {
+            const canvas = document.getElementById('newtonCanvas');
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const forceSlider = document.getElementById('forceSlider');
+            const massSlider = document.getElementById('massSlider');
+            const startStopBtn = document.getElementById('startStopNewton');
+            const resetBtn = document.getElementById('resetNewton');
+            const infoForce = document.getElementById('newtonInfoForce');
+            const infoMass = document.getElementById('newtonInfoMass');
+            const infoAcc = document.getElementById('newtonInfoAcceleration');
+            const infoVel = document.getElementById('newtonInfoVelocity');
+
+            let state = {
+                force: 50, mass: 5, acceleration: 10, velocity: 0,
+                position: 0, isRunning: false, animationId: null
+            };
+
+            const drawNewton = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const groundY = canvas.height - 50;
+                const boxSize = Math.min(50, canvas.width / 10);
+                const boxY = groundY - boxSize;
+                const boxX = state.position;
+
+                ctx.fillStyle = '#4B5563';
+                ctx.fillRect(0, groundY, canvas.width, 50);
+                ctx.fillStyle = '#3B82F6';
+                ctx.fillRect(boxX, boxY, boxSize, boxSize);
+
+                // Kütle etiketi
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.font = '14px Inter';
+                ctx.fillText(`${state.mass} kg`, boxX + boxSize / 2, boxY + boxSize / 2 + 5);
+
+                if (state.force > 0 && (state.isRunning || state.velocity > 0 || state.position > canvas.width * 0.1)) {
+                    const arrowStart = boxX + boxSize;
+                    const arrowEnd = arrowStart + state.force * 0.5;
+                    const arrowY = boxY + boxSize / 2;
+                    drawArrow(ctx, arrowStart, arrowY, arrowEnd, arrowY, '#FBBF24', 3);
+                    ctx.fillStyle = '#FBBF24';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText('F', arrowEnd + 10, arrowY + 5);
+                }
+                 ctx.textAlign = 'start'; // Reset alignment
+            };
+
+            const updateNewtonInfo = () => {
+                state.acceleration = state.force / state.mass;
+                infoForce.textContent = `Kuvvet: ${state.force} N`;
+                infoMass.textContent = `Kütle: ${state.mass} kg`;
+                infoAcc.textContent = `İvme: ${state.acceleration.toFixed(1)} m/s²`;
+                infoVel.textContent = `Hız: ${state.velocity.toFixed(1)} m/s`;
+            };
+
+            const resetNewton = () => {
+                state.isRunning = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Başlat';
+                state.velocity = 0;
+                state.position = canvas.width * 0.1;
+                updateNewtonInfo();
+                drawNewton();
+            };
+
+            const animateNewton = () => {
+                if (!state.isRunning) return;
+                const dt = 1 / 60;
+                state.velocity += state.acceleration * dt;
+                state.position += state.velocity * dt * 5; // scale for visibility
+                if (state.position > canvas.width) {
+                    state.position = -50;
+                }
+                updateNewtonInfo();
+                drawNewton();
+                state.animationId = requestAnimationFrame(animateNewton);
+            };
+            
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (3 / 5);
+                resetNewton();
+            };
+
+            forceSlider.addEventListener('input', (e) => {
+                state.force = Number(e.target.value);
+                updateNewtonInfo();
+                if(!state.isRunning) drawNewton();
+            });
+            massSlider.addEventListener('input', (e) => {
+                state.mass = Number(e.target.value);
+                updateNewtonInfo();
+                if(!state.isRunning) drawNewton();
+            });
+            startStopBtn.addEventListener('click', () => {
+                state.isRunning = !state.isRunning;
+                if (state.isRunning) {
+                    startStopBtn.textContent = 'Durdur';
+                    animateNewton();
+                } else {
+                    startStopBtn.textContent = 'Başlat';
+                    cancelAnimationFrame(state.animationId);
+                }
+            });
+            resetBtn.addEventListener('click', resetNewton);
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+        
+        // --- 6. BÖLÜM: SÜRTÜNME KUVVETİ ---
+        (() => {
+            const canvas = document.getElementById('frictionCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const forceSlider = document.getElementById('frictionForceSlider');
+            const massSlider = document.getElementById('frictionMassSlider');
+            const coeffSlider = document.getElementById('frictionCoeffSlider');
+            const startStopBtn = document.getElementById('startStopFriction');
+            const resetBtn = document.getElementById('resetFriction');
+            
+            const infoNetForce = document.getElementById('frictionInfoNetForce');
+            const infoFriction = document.getElementById('frictionInfoFriction');
+            const infoAcc = document.getElementById('frictionInfoAcceleration');
+            
+            const forceLabel = document.getElementById('frictionForceLabel');
+            const massLabel = document.getElementById('frictionMassLabel');
+            const coeffLabel = document.getElementById('frictionCoeffLabel');
+
+            const g = 9.81;
+            let state = {
+                appliedForce: 50, mass: 10, mu: 0.3,
+                frictionForce: 0, netForce: 0, acceleration: 0,
+                velocity: 0, position: 0,
+                isRunning: false, animationId: null
+            };
+
+            const drawFriction = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const groundY = canvas.height - 50;
+                const boxSize = Math.min(50, canvas.width / 10);
+                const boxY = groundY - boxSize;
+                const boxX = state.position;
+
+                ctx.fillStyle = '#6B7280';
+                ctx.fillRect(0, groundY, canvas.width, 50);
+                ctx.fillStyle = '#4B5563';
+                for(let i=0; i< canvas.width; i+=20){
+                    ctx.fillRect(i, groundY, 10, 2);
+                    ctx.fillRect(i+5, groundY+5, 10, 2);
+                }
+
+                ctx.fillStyle = '#3B82F6';
+                ctx.fillRect(boxX, boxY, boxSize, boxSize);
+
+                // Kütle etiketi
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.font = '14px Inter';
+                ctx.fillText(`${state.mass} kg`, boxX + boxSize / 2, boxY + boxSize / 2 + 5);
+
+                if (state.isRunning || state.appliedForce > 0) {
+                    const arrowY = boxY + boxSize / 2;
+                    // Applied Force
+                    const appliedArrowEnd = boxX + boxSize + state.appliedForce * 0.5;
+                    drawArrow(ctx, boxX + boxSize, arrowY, appliedArrowEnd, arrowY, '#FBBF24', 3);
+                    ctx.fillStyle = '#FBBF24';
+                    ctx.font = 'bold 14px Inter';
+                    ctx.fillText('F', appliedArrowEnd + 5, arrowY + 5);
+
+                    // Friction Force
+                    if (state.frictionForce > 0) {
+                        const frictionArrowEnd = boxX - state.frictionForce * 0.5;
+                        drawArrow(ctx, boxX, arrowY, frictionArrowEnd, arrowY, '#EF4444', 3);
+                        ctx.fillStyle = '#EF4444';
+                        ctx.font = 'bold 14px Inter';
+                        ctx.fillText('fₖ', frictionArrowEnd - 20, arrowY + 5);
+                    }
+                }
+                ctx.textAlign = 'start'; // Reset alignment
+            };
+
+            const updateFrictionInfo = () => {
+                const normalForce = state.mass * g;
+                const maxFriction = state.mu * normalForce;
+                
+                if (state.velocity > 0) { // Cisim hareket ediyorsa kinetik sürtünme
+                    state.frictionForce = maxFriction;
+                } else { // Cisim duruyorsa statik sürtünme
+                    state.frictionForce = Math.min(state.appliedForce, maxFriction);
+                }
+
+                state.netForce = state.appliedForce - state.frictionForce;
+                
+                if (state.netForce < 0 && state.velocity === 0) { // Cisim duruyorsa ve net kuvvet negatifse, hareket etmez
+                    state.netForce = 0;
+                }
+                
+                state.acceleration = state.netForce / state.mass;
+                
+                forceLabel.textContent = `Uygulanan Kuvvet: ${state.appliedForce.toFixed(0)} N`;
+                massLabel.textContent = `Cisim Kütlesi: ${state.mass} kg`;
+                coeffLabel.innerHTML = `Sürtünme Katsayısı (&mu;<sub>k</sub>): ${state.mu.toFixed(2)}`;
+                
+                infoNetForce.textContent = `Net Kuvvet: ${state.netForce.toFixed(1)} N`;
+                infoFriction.textContent = `Sürtünme: ${state.frictionForce.toFixed(1)} N`;
+                infoAcc.textContent = `İvme: ${(state.netForce > 0 ? state.acceleration : 0).toFixed(2)} m/s²`;
+            };
+
+            const resetFriction = () => {
+                state.isRunning = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Başlat';
+                state.velocity = 0;
+                state.position = canvas.width * 0.1;
+                state.appliedForce = Number(forceSlider.value);
+                state.mass = Number(massSlider.value);
+                state.mu = Number(coeffSlider.value);
+                updateFrictionInfo();
+                drawFriction();
+            };
+
+            const animateFriction = () => {
+                if (!state.isRunning) return;
+                
+                updateFrictionInfo(); // Her frame'de kuvvetleri yeniden hesapla
+                
+                const dt = 1 / 60;
+                state.velocity += state.acceleration * dt;
+                
+                if (state.velocity < 0) { // Sürtünme cismi ters yönde hareket ettiremez
+                    state.velocity = 0;
+                }
+                
+                state.position += state.velocity * dt * 5;
+                
+                if (state.position > canvas.width) {
+                    state.position = -50;
+                }
+                
+                drawFriction();
+                state.animationId = requestAnimationFrame(animateFriction);
+            };
+            
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (3 / 5);
+                resetFriction();
+            };
+
+            [forceSlider, massSlider, coeffSlider].forEach(slider => {
+                slider.addEventListener('input', () => {
+                    state.appliedForce = Number(forceSlider.value);
+                    state.mass = Number(massSlider.value);
+                    state.mu = Number(coeffSlider.value);
+                    if (!state.isRunning) {
+                         resetFriction();
+                    }
+                });
+            });
+
+            startStopBtn.addEventListener('click', () => {
+                state.isRunning = !state.isRunning;
+                if (state.isRunning) {
+                    startStopBtn.textContent = 'Durdur';
+                    if (state.velocity === 0 && state.position < canvas.width * 0.1 + 1) {
+                         state.position = canvas.width * 0.1;
+                    }
+                    animateFriction();
+                } else {
+                    startStopBtn.textContent = 'Başlat';
+                    cancelAnimationFrame(state.animationId);
+                }
+            });
+            resetBtn.addEventListener('click', resetFriction);
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 7. BÖLÜM: SABİT İVMELİ HAREKET ---
+        (() => {
+            const accCanvas = document.getElementById('accelerationCanvas');
+            if(!accCanvas) return;
+            const container = accCanvas.parentElement;
+            const ctx = accCanvas.getContext('2d');
+            const graphCanvases = {
+                pos: document.getElementById('posTimeGraph'),
+                vel: document.getElementById('velTimeGraph'),
+                acc: document.getElementById('accTimeGraph')
+            };
+            const graphCtxs = {
+                pos: graphCanvases.pos.getContext('2d'),
+                vel: graphCanvases.vel.getContext('2d'),
+                acc: graphCanvases.acc.getContext('2d')
+            };
+
+            const v0Slider = document.getElementById('initialVelocitySlider');
+            const aSlider = document.getElementById('accelerationSlider');
+            const startStopBtn = document.getElementById('startStopAcc');
+            const resetBtn = document.getElementById('resetAcc');
+            
+            const v0Label = document.getElementById('initialVelocityLabel');
+            const aLabel = document.getElementById('accelerationLabel');
+
+            const infoTime = document.getElementById('accInfoTime');
+            const infoPos = document.getElementById('accInfoPosition');
+            const infoVel = document.getElementById('accInfoVelocity');
+
+            let state = {
+                v0: 5, a: 2, t: 0, x: 0, v: 5,
+                isRunning: false, animationId: null,
+                history: []
+            };
+
+            const resetAcc = () => {
+                state.isRunning = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Başlat';
+                state.v0 = Number(v0Slider.value);
+                state.a = Number(aSlider.value);
+                state.t = 0;
+                state.x = 0;
+                state.v = state.v0;
+                state.history = [{t: 0, x: 0, v: state.v0, a: state.a}];
+                drawAllAcc();
+            };
+            
+            const drawCar = () => {
+                ctx.clearRect(0, 0, accCanvas.width, accCanvas.height);
+                const groundY = accCanvas.height - 20;
+                const carHeight = accCanvas.height * 0.2;
+                const carWidth = carHeight * 1.33;
+                
+                ctx.fillStyle = '#4B5563';
+                ctx.fillRect(0, groundY, accCanvas.width, 20);
+                
+                let carX = accCanvas.width * 0.05 + state.x * (accCanvas.width / 200);
+                
+                ctx.fillStyle = '#A78BFA';
+                ctx.fillRect(carX, groundY - carHeight, carWidth, carHeight);
+
+                // Etiketler
+                ctx.fillStyle = '#F3F4F6';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                const labelX = carX + carWidth / 2;
+                const labelY = groundY - carHeight - 5;
+                ctx.fillText(`v: ${state.v.toFixed(1)} m/s`, labelX, labelY - 15);
+                ctx.fillText(`a: ${state.a.toFixed(1)} m/s²`, labelX, labelY);
+                ctx.textAlign = 'start'; // Reset
+            };
+
+            const drawGraph = (gCtx, data, color, label, yMax) => {
+                const w = gCtx.canvas.width;
+                const h = gCtx.canvas.height;
+                gCtx.clearRect(0, 0, w, h);
+                
+                // Draw axes
+                gCtx.strokeStyle = '#4B5563';
+                gCtx.lineWidth = 1;
+                gCtx.beginPath();
+                gCtx.moveTo(0, h/2); gCtx.lineTo(w, h/2); // x-axis
+                gCtx.moveTo(5, 0); gCtx.lineTo(5, h); // y-axis
+                gCtx.stroke();
+
+                gCtx.fillStyle = '#9CA3AF';
+                gCtx.font = '10px Inter';
+                gCtx.fillText(label, 10, 10);
+                
+                if (data.length < 2) return;
+
+                gCtx.beginPath();
+                gCtx.strokeStyle = color;
+                gCtx.lineWidth = 2;
+                
+                const tMax = 10;
+                
+                data.forEach((point, i) => {
+                    const gx = 5 + (point.t / tMax) * (w - 5);
+                    const gy = h/2 - (point.y / yMax) * (h/2);
+                    if (i === 0) gCtx.moveTo(gx, gy);
+                    else gCtx.lineTo(gx, gy);
+                });
+                gCtx.stroke();
+            };
+
+            const drawAllAcc = () => {
+                infoTime.textContent = `Zaman: ${state.t.toFixed(1)}s`;
+                infoPos.textContent = `Konum: ${state.x.toFixed(1)}m`;
+                infoVel.textContent = `Hız: ${state.v.toFixed(1)}m/s`;
+                drawCar();
+                drawGraph(graphCtxs.pos, state.history.map(p => ({t: p.t, y: p.x})), '#60A5FA', 'x-t', 150);
+                drawGraph(graphCtxs.vel, state.history.map(p => ({t: p.t, y: p.v})), '#34D399', 'v-t', 50);
+                drawGraph(graphCtxs.acc, state.history.map(p => ({t: p.t, y: p.a})), '#F472B6', 'a-t', 6);
+            };
+
+            const animateAcc = () => {
+                if (!state.isRunning) return;
+                
+                const dt = 1/60;
+                state.t += dt;
+                state.v = state.v0 + state.a * state.t;
+                state.x = state.v0 * state.t + 0.5 * state.a * state.t**2;
+                
+                state.history.push({t: state.t, x: state.x, v: state.v, a: state.a});
+                if (state.t > 10) {
+                    resetAcc();
+                    return;
+                }
+                
+                drawAllAcc();
+                state.animationId = requestAnimationFrame(animateAcc);
+            };
+            
+            const resizeCanvases = () => {
+                const rect = container.getBoundingClientRect();
+                accCanvas.width = rect.width;
+                accCanvas.height = rect.width * 0.3; // Aspect ratio for main canvas
+
+                const graphContainer = document.querySelector('#constant-acceleration .grid.grid-cols-3.gap-2');
+                const graphRect = graphContainer.getBoundingClientRect();
+                const graphWidth = (graphRect.width - 16) / 3; // 16 for gap-2 * 2
+                const graphHeight = graphWidth * 0.75;
+
+                for (const key in graphCanvases) {
+                    graphCanvases[key].width = graphWidth;
+                    graphCanvases[key].height = graphHeight;
+                }
+                resetAcc();
+            };
+
+            v0Slider.addEventListener('input', e => {
+                v0Label.innerHTML = `İlk Hız (v<sub>0</sub>): ${Number(e.target.value).toFixed(1)} m/s`;
+                if (!state.isRunning) resetAcc();
+            });
+            aSlider.addEventListener('input', e => {
+                aLabel.textContent = `İvme (a): ${Number(e.target.value).toFixed(1)} m/s²`;
+                if (!state.isRunning) resetAcc();
+            });
+            startStopBtn.addEventListener('click', () => {
+                if (state.isRunning) {
+                    state.isRunning = false;
+                    startStopBtn.textContent = 'Başlat';
+                    cancelAnimationFrame(state.animationId);
+                } else {
+                    resetAcc();
+                    state.isRunning = true;
+                    startStopBtn.textContent = 'Durdur';
+                    animateAcc();
+                }
+            });
+            resetBtn.addEventListener('click', resetAcc);
+            
+            window.addEventListener('resize', resizeCanvases);
+            resizeCanvases();
+        })();
+
+        // --- 8. BÖLÜM: EĞİK ATIŞ ---
+        (() => {
+            const canvas = document.getElementById('projectileCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const v0Slider = document.getElementById('initialSpeedSlider');
+            const angleSlider = document.getElementById('angleSlider');
+            const startStopBtn = document.getElementById('startStopProjectile');
+            const resetBtn = document.getElementById('resetProjectile');
+            
+            const v0Label = document.getElementById('initialSpeedLabel');
+            const angleLabel = document.getElementById('angleLabel');
+
+            const infoTime = document.getElementById('projectileInfoTime');
+            const infoPos = document.getElementById('projectileInfoPos');
+            const infoVel = document.getElementById('projectileInfoVel');
+            const infoMax = document.getElementById('projectileInfoMax');
+            
+            const g_projectile = 9.81;
+            let state = {
+                v0: 50, angle: 45, t: 0,
+                x: 0, y: 0, vx: 0, vy: 0,
+                isRunning: false, animationId: null,
+                path: [], hMax: 0
+            };
+
+            const resetProjectile = () => {
+                state.isRunning = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Fırlat';
+                state.v0 = Number(v0Slider.value);
+                state.angle = Number(angleSlider.value);
+                state.t = 0; state.x = 0; state.y = 0;
+                state.path = [{x: 0, y: 0}];
+                state.hMax = 0;
+                
+                const angleRad = state.angle * Math.PI / 180;
+                state.vx = state.v0 * Math.cos(angleRad);
+                state.vy = state.v0 * Math.sin(angleRad);
+                
+                drawProjectile();
+                updateProjectileInfo(true);
+            };
+
+            const updateProjectileInfo = (isReset = false) => {
+                const currentVx = state.vx;
+                const currentVy = state.vy - g_projectile * state.t;
+                infoTime.textContent = `Zaman: ${state.t.toFixed(1)}s`;
+                infoPos.textContent = `Konum (x,y): (${state.x.toFixed(0)}, ${state.y.toFixed(0)})m`;
+                infoVel.textContent = `Hız (vx,vy): (${currentVx.toFixed(1)}, ${currentVy.toFixed(1)})m/s`;
+                if(isReset) {
+                    const hMaxCalc = (state.vy ** 2) / (2 * g_projectile);
+                    infoMax.textContent = `Maks. Yükseklik: ${hMaxCalc.toFixed(0)}m`;
+                }
+            };
+
+            const drawProjectile = () => {
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+                const groundH = h * 0.05;
+                ctx.fillStyle = '#4B5563';
+                ctx.fillRect(0, h - groundH, w, groundH);
+
+                const range = state.vx * (2 * state.vy / g_projectile);
+                const hMax = (state.vy ** 2) / (2 * g_projectile);
+                
+                const scaleX = w / (range * 1.1);
+                const scaleY = (h - groundH) / (hMax * 1.2);
+                const scale = Math.min(scaleX, scaleY, 10);
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#A78BFA';
+                ctx.lineWidth = 2;
+                state.path.forEach((p, i) => {
+                    const px = p.x * scale;
+                    const py = h - groundH - p.y * scale;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                });
+                ctx.stroke();
+
+                const projX = state.x * scale;
+                const projY = h - groundH - state.y * scale;
+                ctx.beginPath();
+                ctx.arc(projX, projY, 8, 0, 2 * Math.PI);
+                ctx.fillStyle = '#FBBF24';
+                ctx.fill();
+            };
+
+            const animateProjectile = () => {
+                if (!state.isRunning) return;
+
+                const dt = 1/60;
+                state.t += dt;
+                
+                state.x = state.vx * state.t;
+                state.y = state.vy * state.t - 0.5 * g_projectile * state.t**2;
+                
+                if (state.y < 0) {
+                    state.y = 0;
+                    state.isRunning = false;
+                    startStopBtn.textContent = 'Fırlat';
+                }
+                
+                state.path.push({x: state.x, y: state.y});
+                
+                drawProjectile();
+                updateProjectileInfo();
+                
+                if (state.isRunning) {
+                    state.animationId = requestAnimationFrame(animateProjectile);
+                }
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (2/3);
+                resetProjectile();
+            };
+
+            v0Slider.addEventListener('input', e => {
+                v0Label.innerHTML = `Başlangıç Hızı (v<sub>0</sub>): ${e.target.value} m/s`;
+                if (!state.isRunning) resetProjectile();
+            });
+            angleSlider.addEventListener('input', e => {
+                angleLabel.innerHTML = `Fırlatma Açısı (&alpha;): ${e.target.value}°`;
+                if (!state.isRunning) resetProjectile();
+            });
+            startStopBtn.addEventListener('click', () => {
+                if (state.isRunning) return;
+                resetProjectile();
+                state.isRunning = true;
+                startStopBtn.textContent = 'Uçuşta...';
+                animateProjectile();
+            });
+            resetBtn.addEventListener('click', resetProjectile);
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+        
+        // --- 9. BÖLÜM: İŞ VE ENERJİ ---
+        (() => {
+            const canvas = document.getElementById('workEnergyCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const forceSlider = document.getElementById('workForceSlider');
+            const massSlider = document.getElementById('workMassSlider');
+            const startStopBtn = document.getElementById('startStopWork');
+            const resetBtn = document.getElementById('resetWork');
+            
+            const infoWork = document.getElementById('workInfoWork');
+            const infoKE = document.getElementById('workInfoKE');
+            const infoVel = document.getElementById('workInfoVelocity');
+            const infoPos = document.getElementById('workInfoPosition');
+            const forceLabel = document.getElementById('workForceLabel');
+            const massLabel = document.getElementById('workMassLabel');
+
+            let state = {
+                force: 50, mass: 10, position: 0, velocity: 0,
+                work: 0, ke: 0, isRunning: false, animationId: null, startPosition: 0
+            };
+
+            const resetWork = () => {
+                state.isRunning = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Başlat';
+                state.force = Number(forceSlider.value);
+                state.mass = Number(massSlider.value);
+                state.startPosition = canvas.width * 0.05;
+                state.position = state.startPosition;
+                state.velocity = 0; state.work = 0; state.ke = 0;
+                drawWork();
+                updateWorkInfo();
+            };
+
+            const updateWorkInfo = () => {
+                forceLabel.textContent = `Kuvvet (F): ${state.force} N`;
+                massLabel.textContent = `Kütle (m): ${state.mass} kg`;
+                infoWork.textContent = `Yapılan İş: ${state.work.toFixed(0)} J`;
+                infoKE.textContent = `Kinetik Enerji: ${state.ke.toFixed(0)} J`;
+                infoVel.textContent = `Hız: ${state.velocity.toFixed(1)} m/s`;
+                const displacement = (state.position - state.startPosition) / 10;
+                infoPos.textContent = `Konum: ${displacement.toFixed(1)} m`;
+            };
+
+            const drawWork = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const groundY = canvas.height - 50;
+                const boxSize = Math.min(50, canvas.width / 12);
+                ctx.fillStyle = '#4B5563';
+                ctx.fillRect(0, groundY, canvas.width, 50);
+                ctx.fillStyle = '#34D399';
+                ctx.fillRect(state.position, groundY - boxSize, boxSize, boxSize);
+
+                // Kuvvet oku ve etiketi
+                const arrowY = groundY - boxSize / 2;
+                const arrowStart = state.position + boxSize;
+                const arrowEnd = arrowStart + state.force * 0.3;
+                drawArrow(ctx, arrowStart, arrowY, arrowEnd, arrowY, '#FBBF24', 3);
+                ctx.fillStyle = '#FBBF24';
+                ctx.font = 'bold 16px Inter';
+                ctx.fillText('F', arrowEnd + 5, arrowY + 5);
+            };
+
+            const animateWork = () => {
+                if (!state.isRunning) return;
+
+                const dt = 1 / 60;
+                const acceleration = state.force / state.mass;
+                state.velocity += acceleration * dt;
+                state.position += state.velocity * dt * 5;
+                
+                const displacement = (state.position - state.startPosition) / 10; // Scaled displacement
+                state.work = state.force * displacement;
+                state.ke = 0.5 * state.mass * state.velocity**2;
+
+                if (state.position > canvas.width) {
+                    resetWork();
+                    return;
+                }
+
+                drawWork();
+                updateWorkInfo();
+                state.animationId = requestAnimationFrame(animateWork);
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * 0.5;
+                resetWork();
+            };
+
+            forceSlider.addEventListener('input', () => { if (!state.isRunning) resetWork(); });
+            massSlider.addEventListener('input', () => { if (!state.isRunning) resetWork(); });
+            startStopBtn.addEventListener('click', () => {
+                state.isRunning = !state.isRunning;
+                if (state.isRunning) {
+                    startStopBtn.textContent = 'Durdur';
+                    animateWork();
+                } else {
+                    cancelAnimationFrame(state.animationId);
+                    startStopBtn.textContent = 'Başlat';
+                }
+            });
+            resetBtn.addEventListener('click', resetWork);
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 10. BÖLÜM: İTME VE MOMENTUM (GÜNCELLENDİ) ---
+        (() => {
+            const canvas = document.getElementById('momentumCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const massASlider = document.getElementById('massASlider');
+            const velASlider = document.getElementById('velASlider');
+            const massBSlider = document.getElementById('massBSlider');
+            const velBSlider = document.getElementById('velBSlider');
+            const restitutionSlider = document.getElementById('restitutionSlider');
+            const startStopBtn = document.getElementById('startStopMomentum');
+            const resetBtn = document.getElementById('resetMomentum');
+            
+            const massALabel = document.getElementById('massALabel');
+            const velALabel = document.getElementById('velALabel');
+            const massBLabel = document.getElementById('massBLabel');
+            const velBLabel = document.getElementById('velBLabel');
+            const restitutionLabel = document.getElementById('restitutionLabel');
+
+            const p_a_before = document.getElementById('p_a_before');
+            const p_b_before = document.getElementById('p_b_before');
+            const p_a_after = document.getElementById('p_a_after');
+            const p_b_after = document.getElementById('p_b_after');
+            const p_total = document.getElementById('p_total');
+
+            let ballA, ballB;
+            let state = { isRunning: false, animationId: null, hasCollided: false };
+            
+            const createBall = (mass, velocity, x, color, restitution) => ({
+                mass, velocity, x, y: canvas.height / 2, radius: 10 + mass, color, initialVelocity: velocity, restitution
+            });
+
+            const resetMomentum = () => {
+                state.isRunning = false;
+                state.hasCollided = false;
+                cancelAnimationFrame(state.animationId);
+                startStopBtn.textContent = 'Başlat';
+
+                const restitution = Number(restitutionSlider.value);
+                ballA = createBall(Number(massASlider.value), Number(velASlider.value), canvas.width * 0.2, '#06B6D4', restitution);
+                ballB = createBall(Number(massBSlider.value), Number(velBSlider.value), canvas.width * 0.8, '#DB2777', restitution);
+
+                p_a_before.textContent = (ballA.mass * ballA.velocity).toFixed(1);
+                p_b_before.textContent = (ballB.mass * ballB.velocity).toFixed(1);
+                p_a_after.textContent = '-';
+                p_b_after.textContent = '-';
+                p_total.textContent = (ballA.mass * ballA.velocity + ballB.mass * ballB.velocity).toFixed(1);
+                
+                updateMomentumLabels();
+                drawMomentum();
+            };
+
+            const updateMomentumLabels = () => {
+                massALabel.textContent = `Top A Kütle: ${ballA.mass} kg`;
+                velALabel.textContent = `Top A Hız: ${ballA.initialVelocity} m/s`;
+                massBLabel.textContent = `Top B Kütle: ${ballB.mass} kg`;
+                velBLabel.textContent = `Top B Hız: ${ballB.initialVelocity} m/s`;
+                restitutionLabel.textContent = `Esneklik (e): ${ballA.restitution.toFixed(1)}`;
+            };
+
+            const drawMomentum = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const groundY = canvas.height - 50;
+                ctx.fillStyle = '#4B5563';
+                ctx.fillRect(0, groundY, canvas.width, 50);
+                
+                [ballA, ballB].forEach(ball => {
+                    ctx.beginPath();
+                    ctx.arc(ball.x, groundY - ball.radius, ball.radius, 0, 2 * Math.PI);
+                    ctx.fillStyle = ball.color;
+                    ctx.fill();
+                    // Etiket
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText(ball === ballA ? 'A' : 'B', ball.x, groundY - ball.radius - 5);
+                });
+                ctx.textAlign = 'start'; // Reset
+            };
+
+            const animateMomentum = () => {
+                if (!state.isRunning) return;
+
+                const dt = 1/60;
+                ballA.x += ballA.velocity * dt * 5;
+                ballB.x += ballB.velocity * dt * 5;
+
+                const distance = Math.abs(ballA.x - ballB.x);
+                if (distance < ballA.radius + ballB.radius && !state.hasCollided) {
+                    state.hasCollided = true;
+                    const v1i = ballA.velocity, v2i = ballB.velocity, m1 = ballA.mass, m2 = ballB.mass, e = ballA.restitution;
+                    
+                    const v1f = (m1 * v1i + m2 * v2i - m2 * e * (v1i - v2i)) / (m1 + m2);
+                    const v2f = (m1 * v1i + m2 * v2i + m1 * e * (v1i - v2i)) / (m1 + m2);
+
+                    ballA.velocity = v1f;
+                    ballB.velocity = v2f;
+                    
+                    p_a_after.textContent = (ballA.mass * ballA.velocity).toFixed(1);
+                    p_b_after.textContent = (ballB.mass * ballB.velocity).toFixed(1);
+                }
+
+                if (ballA.x - ballA.radius < 0 || ballA.x + ballA.radius > canvas.width) ballA.velocity *= -1;
+                if (ballB.x - ballB.radius < 0 || ballB.x + ballB.radius > canvas.width) ballB.velocity *= -1;
+
+                drawMomentum();
+                state.animationId = requestAnimationFrame(animateMomentum);
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (250/600);
+                resetMomentum();
+            };
+
+            [massASlider, velASlider, massBSlider, velBSlider, restitutionSlider].forEach(slider => {
+                slider.addEventListener('input', () => { if (!state.isRunning) resetMomentum(); });
+            });
+            startStopBtn.addEventListener('click', () => {
+                state.isRunning = !state.isRunning;
+                if (state.isRunning) {
+                    startStopBtn.textContent = 'Durdur';
+                    animateMomentum();
+                } else {
+                    cancelAnimationFrame(state.animationId);
+                    startStopBtn.textContent = 'Başlat';
+                }
+            });
+            resetBtn.addEventListener('click', resetMomentum);
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 11. BÖLÜM: TORK ---
+        (() => {
+            const canvas = document.getElementById('torqueCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const forceSlider = document.getElementById('torqueForceSlider');
+            const distSlider = document.getElementById('torqueDistanceSlider');
+            const angleSlider = document.getElementById('torqueAngleSlider');
+            
+            const forceLabel = document.getElementById('torqueForceLabel');
+            const distLabel = document.getElementById('torqueDistanceLabel');
+            const angleLabel = document.getElementById('torqueAngleLabel');
+            const torqueValue = document.getElementById('torqueValue');
+            
+            const drawTorque = () => {
+                const force = Number(forceSlider.value);
+                const distance = Number(distSlider.value);
+                const angle = Number(angleSlider.value);
+                const angleRad = angle * Math.PI / 180;
+                const torque = distance * force * Math.sin(angleRad);
+                
+                forceLabel.textContent = `Kuvvet (F): ${force} N`;
+                distLabel.textContent = `Uzaklık (r): ${distance.toFixed(1)} m`;
+                angleLabel.innerHTML = `Açı (&theta;): ${angle}°`;
+                torqueValue.textContent = `Tork: ${torque.toFixed(1)} N·m`;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const pivot = { x: canvas.width * 0.15, y: canvas.height / 2 };
+                const scale = canvas.width * 0.5;
+
+                const armEndX = pivot.x + distance * (scale / 1.5);
+                ctx.beginPath();
+                ctx.moveTo(pivot.x, pivot.y);
+                ctx.lineTo(armEndX, pivot.y);
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.lineWidth = 5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(pivot.x, pivot.y - 20);
+                ctx.lineTo(pivot.x - 20, pivot.y + 20);
+                ctx.lineTo(pivot.x + 20, pivot.y + 20);
+                ctx.closePath();
+                ctx.fillStyle = '#4B5563';
+                ctx.fill();
+
+                const forceAngleRad = (180 - angle) * Math.PI / 180;
+                const forceVecLen = 20 + force * 0.8;
+                const forceVecX = armEndX + forceVecLen * Math.cos(forceAngleRad);
+                const forceVecY = pivot.y - forceVecLen * Math.sin(forceAngleRad);
+                drawArrow(ctx, armEndX, pivot.y, forceVecX, forceVecY, '#EF4444', 3);
+
+                // Etiketler
+                ctx.fillStyle = '#EF4444';
+                ctx.font = 'bold 16px Inter';
+                ctx.fillText('F', forceVecX + 5, forceVecY);
+                ctx.fillStyle = '#9CA3AF';
+                ctx.textAlign = 'center';
+                ctx.fillText('r', pivot.x + (armEndX - pivot.x) / 2, pivot.y - 10);
+                ctx.textAlign = 'start';
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (2/3);
+                drawTorque();
+            };
+
+            [forceSlider, distSlider, angleSlider].forEach(slider => {
+                slider.addEventListener('input', drawTorque);
+            });
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 12. BÖLÜM: DENGE (GÜNCELLENDİ) ---
+        (() => {
+            const canvas = document.getElementById('equilibriumCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const m1Slider = document.getElementById('mass1Slider');
+            const d1Slider = document.getElementById('distance1Slider');
+            const m2Slider = document.getElementById('mass2Slider');
+            const d2Slider = document.getElementById('distance2Slider');
+            
+            const m1Label = document.getElementById('mass1Label');
+            const d1Label = document.getElementById('distance1Label');
+            const m2Label = document.getElementById('mass2Label');
+            const d2Label = document.getElementById('distance2Label');
+            
+            const torque1Val = document.getElementById('torque1Value');
+            const torque2Val = document.getElementById('torque2Value');
+            const netTorqueVal = document.getElementById('netTorqueValue');
+
+            const g_eq = 9.81;
+
+            const drawEquilibrium = () => {
+                const m1 = Number(m1Slider.value);
+                const d1 = Number(d1Slider.value);
+                const m2 = Number(m2Slider.value);
+                const d2 = Number(d2Slider.value);
+
+                const torque1 = m1 * g_eq * d1;
+                const torque2 = m2 * g_eq * d2;
+                const netTorque = torque1 - torque2;
+                
+                m1Label.textContent = `Kütle 1: ${m1} kg`;
+                d1Label.textContent = `Uzaklık 1: ${d1.toFixed(1)} m`;
+                m2Label.textContent = `Kütle 2: ${m2} kg`;
+                d2Label.textContent = `Uzaklık 2: ${d2.toFixed(1)} m`;
+                torque1Val.textContent = `${torque1.toFixed(1)} N·m`;
+                torque2Val.textContent = `${torque2.toFixed(1)} N·m`;
+                netTorqueVal.textContent = `${netTorque.toFixed(1)} N·m`;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const pivot = { x: canvas.width / 2, y: canvas.height * 0.6 };
+                const scale = canvas.width / 6;
+
+                const rotationAngle = Math.atan(netTorque / 5000) * -1;
+
+                ctx.save();
+                ctx.translate(pivot.x, pivot.y);
+                ctx.rotate(rotationAngle);
+
+                ctx.fillStyle = '#9CA3AF';
+                ctx.fillRect(-canvas.width * 0.45, -10, canvas.width * 0.9, 20);
+
+                const x1 = -d1 * scale;
+                const r1 = 10 + m1;
+                ctx.fillStyle = '#F97316';
+                ctx.fillRect(x1 - r1, -10 - (r1 * 2), r1 * 2, r1 * 2);
+
+                const x2 = d2 * scale;
+                const r2 = 10 + m2;
+                ctx.fillStyle = '#14B8A6';
+                ctx.fillRect(x2 - r2, -10 - (r2 * 2), r2 * 2, r2 * 2);
+
+                // Etiketler
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 14px Inter';
+                ctx.fillText(`m₁=${m1}kg`, x1, -10 - (r1 * 2) - 5);
+                ctx.fillText(`m₂=${m2}kg`, x2, -10 - (r2 * 2) - 5);
+
+                ctx.font = '12px Inter';
+                ctx.fillStyle = '#F97316';
+                ctx.fillRect(x1, -5, -x1, 2); 
+                ctx.fillText(`d₁=${d1.toFixed(1)}m`, x1 / 2, -15);
+
+                ctx.fillStyle = '#14B8A6';
+                ctx.fillRect(0, -5, x2, 2); 
+                ctx.fillText(`d₂=${d2.toFixed(1)}m`, x2 / 2, -15);
+
+                ctx.restore();
+
+                ctx.beginPath();
+                ctx.moveTo(pivot.x, pivot.y);
+                ctx.lineTo(pivot.x - 30, pivot.y + 50);
+                ctx.lineTo(pivot.x + 30, pivot.y + 50);
+                ctx.closePath();
+                ctx.fillStyle = '#4B5563';
+                ctx.fill();
+            };
+
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (2/3);
+                drawEquilibrium();
+            };
+
+            [m1Slider, d1Slider, m2Slider, d2Slider].forEach(slider => {
+                slider.addEventListener('input', drawEquilibrium);
+            });
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+        // --- 13. BÖLÜM: KÜTLE MERKEZİ ---
+        (() => {
+            const canvas = document.getElementById('centerOfMassCanvas');
+            if(!canvas) return;
+            const container = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+            const massSlider = document.getElementById('massValueSlider');
+            const massLabel = document.getElementById('massValueLabel');
+            const resetBtn = document.getElementById('resetCenterOfMass');
+            const infoBox = document.getElementById('centerOfMassInfo');
+
+            let masses = [];
+            let centerOfMass = { x: 0, y: 0 };
+
+            const calculateCenterOfMass = () => {
+                if (masses.length === 0) {
+                    infoBox.innerHTML = "Tuvale tıklayarak kütle ekleyin.";
+                    return;
+                }
+
+                let totalMass = 0, weightedSumX = 0, weightedSumY = 0;
+
+                masses.forEach(m => {
+                    totalMass += m.mass;
+                    weightedSumX += m.mass * m.x;
+                    weightedSumY += m.mass * m.y;
+                });
+
+                centerOfMass.x = weightedSumX / totalMass;
+                centerOfMass.y = weightedSumY / totalMass;
+                
+                const origin = {x: canvas.width / 2, y: canvas.height / 2};
+                const scaledX = (centerOfMass.x - origin.x) / 10;
+                const scaledY = (origin.y - centerOfMass.y) / 10;
+
+                infoBox.innerHTML = `Toplam Kütle: <span class="text-yellow-300">${totalMass.toFixed(1)} kg</span><br>
+                                     Kütle Merkezi (X, Y): <span class="text-green-400">(${scaledX.toFixed(2)}, ${scaledY.toFixed(2)}) m</span>`;
+            };
+
+            const redrawComCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(ctx, canvas.width, canvas.height, 20);
+                const origin = {x: canvas.width / 2, y: canvas.height / 2};
+
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, origin.y); ctx.lineTo(canvas.width, origin.y);
+                ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, canvas.height);
+                ctx.stroke();
+
+                masses.forEach(m => {
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, 2 + m.mass, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#60A5FA';
+                    ctx.fill();
+                });
+
+                if (masses.length > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerOfMass.x - 10, centerOfMass.y - 10);
+                    ctx.lineTo(centerOfMass.x + 10, centerOfMass.y + 10);
+                    ctx.moveTo(centerOfMass.x - 10, centerOfMass.y + 10);
+                    ctx.lineTo(centerOfMass.x + 10, centerOfMass.y - 10);
+                    ctx.strokeStyle = '#F472B6';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    // Etiket
+                    ctx.fillStyle = '#F472B6';
+                    ctx.font = 'bold 14px Inter';
+                    ctx.fillText('KM', centerOfMass.x + 12, centerOfMass.y - 12);
+                }
+            };
+            
+            const resetCom = () => {
+                masses = [];
+                calculateCenterOfMass();
+                redrawComCanvas();
+            };
+            
+            const resizeCanvas = () => {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.width * (2/3);
+                resetCom();
+            };
+
+            massSlider.addEventListener('input', (e) => {
+                massLabel.textContent = `Eklenecek Kütle (kg): ${e.target.value} kg`;
+            });
+
+            canvas.addEventListener('mousedown', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const mass = Number(massSlider.value);
+                masses.push({ mass, x, y });
+                calculateCenterOfMass();
+                redrawComCanvas();
+            });
+            
+            resetBtn.addEventListener('click', resetCom);
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        })();
+
+    });
+    </script>
+</body>
+</html>
