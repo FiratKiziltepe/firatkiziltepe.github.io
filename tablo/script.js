@@ -8,7 +8,7 @@ class TableManager {
         this.sortColumn = null;
         this.sortDirection = 'asc';
         this.searchTimeout = null;
-        this.selectedValues = new Set();
+        this.selectedValue = '';
         this.allOptions = [];
         this.init();
     }
@@ -19,7 +19,7 @@ class TableManager {
     }
 
     bindEvents() {
-        this.setupMultiselect();
+        this.setupSimpleCombobox();
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
         document.getElementById('exportPdf').addEventListener('click', () => this.exportToPdf());
@@ -85,7 +85,7 @@ class TableManager {
         if (dersColumn) {
             const uniqueValues = [...new Set(this.data.map(row => row[dersColumn]).filter(val => val))];
             this.allOptions = uniqueValues.sort();
-            this.populateMultiselect(this.allOptions);
+            this.populateCombobox(this.allOptions);
         }
     }
 
@@ -96,176 +96,103 @@ class TableManager {
         );
     }
 
-    setupMultiselect() {
+    setupSimpleCombobox() {
         const input = document.getElementById('dersFilter');
-        const container = input.closest('.multiselect-container');
-        const inputContainer = container.querySelector('.multiselect-input-container');
+        const container = input.closest('.simple-combobox');
         const dropdown = document.getElementById('dersDropdown');
-        const selectAllBtn = document.getElementById('selectAllBtn');
-        const clearAllBtn = document.getElementById('clearAllBtn');
 
         // Input events
-        input.addEventListener('input', (e) => this.filterMultiselectOptions(e.target.value));
-        input.addEventListener('focus', () => this.showMultiselectDropdown());
+        input.addEventListener('input', (e) => {
+            this.filterComboboxOptions(e.target.value);
+            this.showComboboxDropdown();
+        });
         
-        // Container click
-        inputContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('tag-remove')) {
-                return; // Tag remove butonları için ayrı işlem
-            }
-            if (container.classList.contains('open')) {
-                this.hideMultiselectDropdown();
-            } else {
-                this.showMultiselectDropdown();
-                input.focus();
+        input.addEventListener('focus', () => {
+            this.showComboboxDropdown();
+        });
+
+        input.addEventListener('click', () => {
+            this.showComboboxDropdown();
+        });
+
+        // Dropdown events
+        dropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('combobox-option')) {
+                this.selectComboboxOption(e.target);
             }
         });
 
-        // Options container events
-        const optionsContainer = document.getElementById('multiselectOptions');
-        optionsContainer.addEventListener('click', (e) => {
-            const option = e.target.closest('.multiselect-option');
-            if (option) {
-                this.toggleMultiselectOption(option);
-            }
-        });
-
-        // Control buttons
-        selectAllBtn.addEventListener('click', () => this.selectAllOptions());
-        clearAllBtn.addEventListener('click', () => this.clearAllOptions());
-
-        // Escape key and outside click
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideMultiselectDropdown();
-            }
-        });
-
+        // Outside click
         document.addEventListener('click', (e) => {
             if (!container.contains(e.target)) {
-                this.hideMultiselectDropdown();
+                this.hideComboboxDropdown();
+            }
+        });
+
+        // Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideComboboxDropdown();
             }
         });
     }
 
-    populateMultiselect(options) {
-        const optionsContainer = document.getElementById('multiselectOptions');
-        optionsContainer.innerHTML = '';
+    populateCombobox(options) {
+        const dropdown = document.getElementById('dersDropdown');
+        
+        // Mevcut seçenekleri temizle (ilk seçenek hariç)
+        while (dropdown.children.length > 1) {
+            dropdown.removeChild(dropdown.lastChild);
+        }
         
         options.forEach(option => {
             const optionElement = document.createElement('div');
-            optionElement.className = 'multiselect-option';
+            optionElement.className = 'combobox-option';
             optionElement.setAttribute('data-value', option);
-            
-            optionElement.innerHTML = `
-                <div class="option-checkbox"></div>
-                <span class="option-text">${option}</span>
-            `;
-            
-            optionsContainer.appendChild(optionElement);
+            optionElement.textContent = option;
+            dropdown.appendChild(optionElement);
         });
     }
 
-    showMultiselectDropdown() {
-        const container = document.querySelector('.multiselect-container');
+    showComboboxDropdown() {
+        const container = document.querySelector('.simple-combobox');
         container.classList.add('open');
     }
 
-    hideMultiselectDropdown() {
-        const container = document.querySelector('.multiselect-container');
+    hideComboboxDropdown() {
+        const container = document.querySelector('.simple-combobox');
         container.classList.remove('open');
     }
 
-    filterMultiselectOptions(searchTerm) {
-        const options = document.querySelectorAll('.multiselect-option');
+    filterComboboxOptions(searchTerm) {
+        const options = document.querySelectorAll('.combobox-option');
         const term = searchTerm.toLowerCase();
 
         options.forEach(option => {
-            const text = option.querySelector('.option-text').textContent.toLowerCase();
+            const text = option.textContent.toLowerCase();
             if (text.includes(term)) {
                 option.classList.remove('hidden');
             } else {
                 option.classList.add('hidden');
             }
         });
-
-        this.showMultiselectDropdown();
     }
 
-    toggleMultiselectOption(option) {
+    selectComboboxOption(option) {
+        const input = document.getElementById('dersFilter');
         const value = option.getAttribute('data-value');
         
-        if (this.selectedValues.has(value)) {
-            this.selectedValues.delete(value);
-            option.classList.remove('selected');
-        } else {
-            this.selectedValues.add(value);
-            option.classList.add('selected');
-        }
+        input.value = option.textContent;
+        this.selectedValue = value;
         
-        this.updateSelectedTags();
+        this.hideComboboxDropdown();
         this.applyFilters();
-    }
 
-    selectAllOptions() {
-        const visibleOptions = document.querySelectorAll('.multiselect-option:not(.hidden)');
-        
-        visibleOptions.forEach(option => {
-            const value = option.getAttribute('data-value');
-            this.selectedValues.add(value);
-            option.classList.add('selected');
+        // Seçili option'ı işaretle
+        document.querySelectorAll('.combobox-option').forEach(opt => {
+            opt.classList.remove('selected');
         });
-        
-        this.updateSelectedTags();
-        this.applyFilters();
-    }
-
-    clearAllOptions() {
-        this.selectedValues.clear();
-        
-        document.querySelectorAll('.multiselect-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        
-        this.updateSelectedTags();
-        this.applyFilters();
-    }
-
-    updateSelectedTags() {
-        const tagsContainer = document.getElementById('selectedTags');
-        const input = document.getElementById('dersFilter');
-        
-        tagsContainer.innerHTML = '';
-        
-        if (this.selectedValues.size === 0) {
-            tagsContainer.innerHTML = '<span class="placeholder-text">Ders seçin veya arayın...</span>';
-        } else {
-            Array.from(this.selectedValues).forEach(value => {
-                const tag = document.createElement('div');
-                tag.className = 'tag';
-                tag.innerHTML = `
-                    <span class="tag-text">${value}</span>
-                    <button class="tag-remove" onclick="tableManager.removeTag('${value}')">&times;</button>
-                `;
-                tagsContainer.appendChild(tag);
-            });
-        }
-        
-        // Input değerini temizle
-        input.value = '';
-    }
-
-    removeTag(value) {
-        this.selectedValues.delete(value);
-        
-        // Option'ı unselect yap
-        const option = document.querySelector(`.multiselect-option[data-value="${value}"]`);
-        if (option) {
-            option.classList.remove('selected');
-        }
-        
-        this.updateSelectedTags();
-        this.applyFilters();
+        option.classList.add('selected');
     }
 
     applyFilters() {
@@ -275,10 +202,10 @@ class TableManager {
         const startTime = performance.now();
 
         this.filteredData = this.data.filter(row => {
-            // Ders filtresi - çoklu seçim kontrolü
+            // Ders filtresi - tek seçim kontrolü
             const dersColumn = this.findDersColumn();
-            if (this.selectedValues.size > 0 && dersColumn) {
-                if (!this.selectedValues.has(row[dersColumn])) {
+            if (this.selectedValue && dersColumn) {
+                if (row[dersColumn] !== this.selectedValue) {
                     return false;
                 }
             }
@@ -323,8 +250,12 @@ class TableManager {
         dersInput.value = '';
         document.getElementById('searchInput').value = '';
         
-        // Multiselect seçimlerini temizle
-        this.clearAllOptions();
+        // Combobox seçimini temizle
+        this.selectedValue = '';
+        document.querySelectorAll('.combobox-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        document.querySelector('.combobox-option[data-value=""]').classList.add('selected');
         
         this.filteredData = [...this.data];
         this.currentPage = 1;
@@ -607,10 +538,7 @@ class TableManager {
     }
 }
 
-// Global değişken (tag remove fonksiyonu için)
-let tableManager;
-
 // Sayfa yüklendiğinde başlat
 document.addEventListener('DOMContentLoaded', () => {
-    tableManager = new TableManager();
+    new TableManager();
 });

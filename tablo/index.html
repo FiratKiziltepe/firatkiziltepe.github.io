@@ -38,22 +38,11 @@
             <div class="filter-grid">
                 <div class="filter-item">
                     <label for="dersFilter" class="filter-label">Ders Seçimi</label>
-                    <div class="multiselect-container">
-                        <div class="multiselect-input-container">
-                            <div class="selected-tags" id="selectedTags">
-                                <span class="placeholder-text">Ders seçin veya arayın...</span>
-                            </div>
-                            <input type="text" id="dersFilter" class="multiselect-input" placeholder="" autocomplete="off">
-                            <span class="multiselect-arrow">▼</span>
-                        </div>
-                        <div class="multiselect-dropdown" id="dersDropdown">
-                            <div class="multiselect-controls">
-                                <button type="button" class="select-all-btn" id="selectAllBtn">Tümünü Seç</button>
-                                <button type="button" class="clear-all-btn" id="clearAllBtn">Temizle</button>
-                            </div>
-                            <div class="multiselect-options" id="multiselectOptions">
-                                <!-- Options will be populated here -->
-                            </div>
+                    <div class="simple-combobox">
+                        <input type="text" id="dersFilter" class="combobox-input" placeholder="Ders seçin veya arayın..." autocomplete="off">
+                        <span class="combobox-arrow">▼</span>
+                        <div class="combobox-dropdown" id="dersDropdown">
+                            <div class="combobox-option" data-value="">-- Tüm Dersler --</div>
                         </div>
                     </div>
                 </div>
