@@ -551,96 +551,82 @@ class TableManager {
 
         try {
             const { jsPDF } = window.jspdf;
-            
-            // PDF oluştur ve UTF-8 desteği ekle
-            const doc = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4',
-                putOnlyUsedFonts: true,
-                floatPrecision: 16
-            });
+            const doc = new jsPDF('landscape');
 
-            // UTF-8 encoding için font ayarları
-            doc.setFont('helvetica', 'normal');
-            doc.setLanguage('tr-TR');
+            // Türkçe karakterleri güvenli karakterlerle değiştir
+            const cleanTextForPdf = (text) => {
+                if (!text) return '';
+                return text.toString()
+                    .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
+                    .replace(/ü/g, 'u').replace(/Ü/g, 'U')
+                    .replace(/ş/g, 's').replace(/Ş/g, 'S')
+                    .replace(/ı/g, 'i').replace(/İ/g, 'I')
+                    .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+                    .replace(/ç/g, 'c').replace(/Ç/g, 'C')
+                    .replace(/[^\x00-\x7F]/g, ''); // Diğer non-ASCII karakterleri temizle
+            };
 
-            // PDF başlığı - Türkçe karakterleri koru
+            // PDF başlığı
             doc.setFontSize(16);
-            doc.text('E-İçerik Tablo Raporu', 20, 20);
+            doc.text('E-Icerik Tablo Raporu', 20, 20);
             
-            // Tarih
+            // Tarih ve bilgi
             doc.setFontSize(10);
-            doc.text(`Oluşturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
-            doc.text(`Kayıt Sayısı: ${this.filteredData.length}`, 20, 35);
+            doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+            doc.text(`Kayit Sayisi: ${this.filteredData.length}`, 20, 35);
 
-            // Tablo verilerini hazırla - Orijinal karakterleri koru
-            const headers = this.headers;
+            // Tablo verilerini hazırla
+            const headers = this.headers.map(header => cleanTextForPdf(header));
             const tableData = this.filteredData.map(row => 
                 this.headers.map(header => {
                     const value = row[header] || '';
-                    // Sadece çok uzun metinleri kısalt
-                    return value.toString().length > 150 ? 
-                        value.toString().substring(0, 150) + '...' : 
-                        value.toString();
+                    const cleanValue = cleanTextForPdf(value);
+                    // Çok uzun metinleri kısalt
+                    return cleanValue.length > 120 ? 
+                        cleanValue.substring(0, 120) + '...' : 
+                        cleanValue;
                 })
             );
 
-            // Tablo oluştur - UTF-8 destekli
+            // Tablo oluştur
             doc.autoTable({
                 head: [headers],
                 body: tableData,
                 startY: 45,
                 styles: {
-                    fontSize: 7,
-                    cellPadding: 1.5,
+                    fontSize: 6,
+                    cellPadding: 1,
                     font: 'helvetica',
                     textColor: [0, 0, 0],
-                    lineColor: [200, 200, 200],
-                    lineWidth: 0.1,
-                    overflow: 'linebreak',
-                    cellWidth: 'wrap'
+                    lineColor: [150, 150, 150],
+                    lineWidth: 0.1
                 },
                 headStyles: {
                     fillColor: [74, 144, 164],
                     textColor: [255, 255, 255],
-                    fontSize: 8,
+                    fontSize: 7,
                     fontStyle: 'bold',
-                    halign: 'center',
-                    valign: 'middle'
+                    halign: 'center'
                 },
                 bodyStyles: {
-                    fontSize: 6.5,
-                    cellPadding: 1.5,
-                    valign: 'top',
-                    overflow: 'linebreak'
+                    fontSize: 6,
+                    cellPadding: 1,
+                    valign: 'top'
                 },
                 columnStyles: {
-                    0: { cellWidth: 12 }, // SIRA NO
-                    1: { cellWidth: 35 }, // DERS ADI
-                    2: { cellWidth: 45 }, // UNITE TEMA
-                    3: { cellWidth: 55 }, // KAZANIM
-                    4: { cellWidth: 25 }, // E-ICERIK TURU
+                    0: { cellWidth: 10 }, // SIRA NO
+                    1: { cellWidth: 30 }, // DERS ADI
+                    2: { cellWidth: 40 }, // UNITE TEMA
+                    3: { cellWidth: 50 }, // KAZANIM
+                    4: { cellWidth: 20 }, // E-ICERIK TURU
                     5: { cellWidth: 'auto' } // ACIKLAMA
                 },
-                margin: { top: 45, left: 8, right: 8 },
-                tableWidth: 'auto',
-                theme: 'striped',
-                alternateRowStyles: {
-                    fillColor: [248, 249, 250]
-                },
+                margin: { top: 45, left: 5, right: 5 },
+                theme: 'grid',
                 didDrawPage: function (data) {
                     // Sayfa numarası
                     doc.setFontSize(8);
-                    doc.text(`Sayfa ${data.pageNumber}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                },
-                didParseCell: function (data) {
-                    // UTF-8 karakterleri korumak için özel işlem
-                    if (data.cell.text && Array.isArray(data.cell.text)) {
-                        data.cell.text = data.cell.text.map(text => 
-                            typeof text === 'string' ? text : String(text)
-                        );
-                    }
+                    doc.text(`Sayfa ${data.pageNumber}`, 10, doc.internal.pageSize.height - 10);
                 }
             });
 
