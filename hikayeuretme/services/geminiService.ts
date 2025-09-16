@@ -1,18 +1,16 @@
-import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { StoryConfig, StoryData, Scene, Gender, CharacterDescription, TtsProvider } from '../types';
 import { GEMINI_TEXT_MODEL, GEMINI_IMAGE_MODEL, SUPPORTED_LANGUAGES } from '../constants';
 
-// Ensure process.env.API_KEY is defined. In a real app, this would be handled by the build/environment setup.
-// For this environment, we assume it's globally available if set.
-const apiKey = process.env.API_KEY;
-if (!apiKey) {
-  console.warn("API_KEY environment variable not found. AI features will not work.");
-}
-const ai = new GoogleGenAI({ apiKey: apiKey || "MISSING_API_KEY" }); // Provide a fallback to avoid crashing GoogleGenAI constructor
+const getAiClient = (apiKey: string) => {
+    if (!apiKey) {
+        throw new Error("API Key is not configured. AI features will not work.");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
-export const generateDescriptionForImage = async (base64Data: string, mimeType: string): Promise<string> => {
-    if (!apiKey) throw new Error("API Key is not configured. Image analysis unavailable.");
-
+export const generateDescriptionForImage = async (base64Data: string, mimeType: string, apiKey: string): Promise<string> => {
+    const ai = getAiClient(apiKey);
     const imagePart = {
         inlineData: {
             data: base64Data,
@@ -25,11 +23,11 @@ export const generateDescriptionForImage = async (base64Data: string, mimeType: 
     };
 
     try {
-        const response = await ai.models.generateContent({
+        const result = await ai.models.generateContent({
             model: GEMINI_TEXT_MODEL,
-            contents: { parts: [imagePart, textPart] },
+            contents: [{ parts: [imagePart, textPart] }]
         });
-        return response.text;
+        return result.text;
     } catch (error) {
         console.error("Error generating description from image:", error);
         throw new Error(`Failed to generate character description: ${error instanceof Error ? error.message : String(error)}`);
@@ -37,9 +35,8 @@ export const generateDescriptionForImage = async (base64Data: string, mimeType: 
 };
 
 
-const generateStoryText = async (config: StoryConfig): Promise<Omit<StoryData, 'scenes' | 'language' | 'ttsProvider'> & { scenes: Array<Omit<Scene, 'imageUrl'>> }> => {
-  if (!apiKey) throw new Error("API Key is not configured. Story generation unavailable.");
-  
+const generateStoryText = async (config: StoryConfig, apiKey: string): Promise<Omit<StoryData, 'scenes' | 'language' | 'ttsProvider'> & { scenes: Array<Omit<Scene, 'imageUrl'>> }> => {
+  const ai = getAiClient(apiKey);
   const genderInstruction = config.gender !== Gender.NONE ? `The story may subtly reflect characteristics or scenarios sometimes associated with a ${config.gender.toLowerCase()} protagonist, but keep it universally appealing.` : '';
   const selectedLanguageName = SUPPORTED_LANGUAGES.find(lang => lang.code === config.language)?.name || 'English';
 
@@ -80,63 +77,28 @@ const generateStoryText = async (config: StoryConfig): Promise<Omit<StoryData, '
     
     Ensure the story is coherent, with a clear beginning, middle, and a positive ending. The entire output must be a single JSON object matching the provided schema.
   `;
-  
-  const storySchema = {
-    type: Type.OBJECT,
-    properties: {
-      title: {
-        type: Type.STRING,
-        description: `A catchy and relevant title for the story, in ${selectedLanguageName}.`
-      },
-      character_descriptions: {
-          type: Type.ARRAY,
-          description: "An array of objects, each containing a character's name and their detailed visual description. This should only be populated if personalized characters are NOT provided.",
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING, description: "The character's name." },
-              description: { type: Type.STRING, description: "The character's detailed visual description in English." }
-            },
-            required: ["name", "description"]
-          }
-      },
-      scenes: {
-        type: Type.ARRAY,
-        description: "An array of scene objects that make up the story.",
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            scene_text: {
-              type: Type.STRING,
-              description: `The narrative for the scene in ${selectedLanguageName}, age-appropriate and engaging. Can contain \\n for paragraphs.`
-            },
-            illustration_prompt: {
-              type: Type.STRING,
-              description: "A descriptive prompt (max 30 words, in English) for an image generation AI, focusing on key visual elements of the scene."
-            }
-          },
-          required: ["scene_text", "illustration_prompt"]
-        }
-      }
-    },
-    required: ["title", "scenes"]
-  };
 
   try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
+    const result = await ai.models.generateContent({
       model: GEMINI_TEXT_MODEL,
       contents: prompt,
-      config: {
+      generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: storySchema,
-        temperature: 0.7, 
+        temperature: 0.7,
       },
     });
     
-    const rawJsonText = response.text;
+    const rawJsonText = result.text;
+    
+    // Markdown formatındaki JSON wrapper'larını temizle
+    const cleanJsonText = rawJsonText
+        .replace(/^```json\s*/, '') // Başlangıçtaki ```json'ı kaldır
+        .replace(/\s*```$/, '')     // Sondaki ```'ı kaldır
+        .trim();
+    
     let parsedStory;
     try {
-        parsedStory = JSON.parse(rawJsonText);
+        parsedStory = JSON.parse(cleanJsonText);
     } catch(e) {
         console.error("Failed to parse JSON response:", e, "Original string:", rawJsonText);
         throw new Error("The AI returned an unexpected response format. Please try again.");
@@ -165,38 +127,43 @@ const generateStoryText = async (config: StoryConfig): Promise<Omit<StoryData, '
   }
 };
 
-const generateImage = async (prompt: string): Promise<string> => {
-  if (!apiKey) throw new Error("API Key is not configured. Image generation unavailable.");
+const generateImage = async (prompt: string, apiKey: string): Promise<string> => {
+  const ai = getAiClient(apiKey);
   try {
-    // Adding more detail to the image prompt for style.
-    const enhancedPrompt = `${prompt}. Child-friendly illustration, vibrant colors, whimsical and magical art style.`;
-    const response = await ai.models.generateImages({
+    const enhancedPrompt = `${prompt}. Child-friendly illustration, vibrant colors, whimsical and magical art style, suitable for children's book.`;
+    
+    const result = await ai.models.generateContent({
       model: GEMINI_IMAGE_MODEL,
-      prompt: enhancedPrompt,
-      config: { 
-        numberOfImages: 1, 
-        outputMimeType: 'image/jpeg', 
-        aspectRatio: '16:9' 
+      contents: enhancedPrompt,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
       },
     });
 
-    if (response.generatedImages && response.generatedImages.length > 0 && response.generatedImages[0].image.imageBytes) {
-      const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
-      return `data:image/jpeg;base64,${base64ImageBytes}`;
+    // Yanıttan görsel verisini çıkar
+    for (const part of result.candidates[0].content.parts) {
+      if (part.inlineData) {
+        // Base64 verisini data URL formatına çevir
+        const mimeType = part.inlineData.mimeType || 'image/png';
+        const base64Data = part.inlineData.data;
+        return `data:${mimeType};base64,${base64Data}`;
+      }
     }
-    throw new Error("No image generated or image data is missing.");
+    
+    console.warn("No image data found in response");
+    return "IMAGE_GENERATION_FAILED";
   } catch (error) {
     console.error("Error generating image:", error);
     if (error instanceof Error && error.message.includes("API key not valid")) {
-        throw new Error ("Invalid API Key. Please check your configuration for image generation.");
+        throw new Error("Invalid API Key. Please check your configuration for image generation.");
     }
     console.warn(`Failed to generate image. Details: ${error instanceof Error ? error.message : String(error)}`);
     return "IMAGE_GENERATION_FAILED"; 
   }
 };
 
-export const generateStoryWithImages = async (config: StoryConfig): Promise<StoryData> => {
-  const storyBase = await generateStoryText(config);
+export const generateStoryWithImages = async (config: StoryConfig, apiKey: string): Promise<StoryData> => {
+  const storyBase = await generateStoryText(config, apiKey);
   
   let characterContext = '';
   const personalizedChars = config.personalizedCharacters?.filter(c => c.description && c.name);
@@ -220,7 +187,7 @@ export const generateStoryWithImages = async (config: StoryConfig): Promise<Stor
   for (const sceneBase of storyBase.scenes) {
     try {
       const imagePromptForScene = `${characterContext}${sceneBase.illustration_prompt}`;
-      const imageUrl = await generateImage(imagePromptForScene);
+      const imageUrl = await generateImage(imagePromptForScene, apiKey);
       if (imageUrl === "IMAGE_GENERATION_FAILED") {
         scenesWithImages.push({ ...sceneBase, imageUrl: `https://picsum.photos/seed/${encodeURIComponent(sceneBase.illustration_prompt.slice(0,20))}/800/450?grayscale&blur=2` }); // More distinct placeholder
       } else {

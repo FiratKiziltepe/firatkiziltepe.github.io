@@ -8,9 +8,12 @@ interface StorySetupFormProps {
   onConfigChange: (newConfig: Partial<StoryConfig>) => void;
   onSubmit: () => void;
   onCharacterUpdate: (characterId: string, file: File) => void;
+  geminiApiKey: string;
+  elevenLabsApiKey: string;
+  onApiKeyChange: (type: 'gemini' | 'elevenlabs', key: string) => void;
 }
 
-export const StorySetupForm: React.FC<StorySetupFormProps> = ({ config, onConfigChange, onSubmit, onCharacterUpdate }) => {
+export const StorySetupForm: React.FC<StorySetupFormProps> = ({ config, onConfigChange, onSubmit, onCharacterUpdate, geminiApiKey, elevenLabsApiKey, onApiKeyChange }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === "age") {
@@ -65,6 +68,45 @@ export const StorySetupForm: React.FC<StorySetupFormProps> = ({ config, onConfig
     <div className="bg-white bg-opacity-20 backdrop-blur-md p-6 md:p-8 rounded-xl shadow-2xl max-w-2xl w-full">
       <h2 className="text-3xl font-bold text-white mb-6 text-center">Let's Weave a Story!</h2>
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
+        
+        {/* API Keys Section */}
+        <div className="border-t border-purple-300/50 pt-6 mt-6">
+            <h3 className="text-xl font-bold text-white mb-2">API Keys</h3>
+            <p className={`${formLabelClass} font-normal !text-purple-200 text-sm mb-4`}>
+                Enter your API keys to enable story generation and high-quality narration.
+            </p>
+            <div className="space-y-4">
+                <div>
+                    <label htmlFor="geminiApiKey" className={formLabelClass}>Gemini API Key:</label>
+                    <input
+                        type="password"
+                        name="geminiApiKey"
+                        id="geminiApiKey"
+                        value={geminiApiKey}
+                        onChange={(e) => onApiKeyChange('gemini', e.target.value)}
+                        className={formInputClass}
+                        placeholder="Enter your Gemini API Key"
+                        required
+                    />
+                </div>
+                {config.ttsProvider === TtsProvider.ELEVENLABS && (
+                    <div>
+                        <label htmlFor="elevenLabsApiKey" className={formLabelClass}>ElevenLabs API Key:</label>
+                        <input
+                            type="password"
+                            name="elevenLabsApiKey"
+                            id="elevenLabsApiKey"
+                            value={elevenLabsApiKey}
+                            onChange={(e) => onApiKeyChange('elevenlabs', e.target.value)}
+                            className={formInputClass}
+                            placeholder="Enter your ElevenLabs API Key"
+                            required
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+
         <div>
           <label htmlFor="theme" className={formLabelClass}>Story Theme/Topic:</label>
           <input

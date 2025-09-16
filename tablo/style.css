@@ -15,7 +15,7 @@ body {
 
 /* Header Stilları */
 .header-container {
-    background: linear-gradient(135deg, #4a90a4 0%, #5ba4b0 100%);
+    background: linear-gradient(135deg, #4472C4 0%, #70B7BA 100%);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
@@ -27,9 +27,9 @@ body {
 }
 
 .header-content {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 15px 30px;
+    padding: 20px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -38,26 +38,26 @@ body {
 .logo-section {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
 }
 
 .header-logo {
-    height: 45px;
+    height: 55px;
     width: auto;
     object-fit: contain;
 }
 
 .title-section h1 {
     color: #ffffff;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
-    margin-bottom: 2px;
-    letter-spacing: 1px;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
 }
 
 .subtitle {
     color: #e8f4f8;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     margin: 0;
 }
@@ -92,9 +92,9 @@ body {
 
 /* Ana Container */
 .main-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 30px;
+    padding: 30px 40px;
 }
 
 /* Kontrol Paneli */
@@ -121,7 +121,7 @@ body {
 
 .filter-grid {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 2fr 1fr auto;
     gap: 24px;
     padding: 24px;
     align-items: end;

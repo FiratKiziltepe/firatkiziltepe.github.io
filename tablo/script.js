@@ -40,7 +40,10 @@ class TableManager {
                 throw new Error('Veri formatı geçersiz');
             }
 
-            this.headers = Object.keys(jsonData[0]);
+            this.headers = Object.keys(jsonData[0]).filter(header => 
+                !header.toLowerCase().includes('işlem') && 
+                !header.toLowerCase().includes('action')
+            );
             this.data = jsonData.map((row, index) => ({ ...row, id: index }));
 
             // Veri yüklendikten sonra filtreleri kur
@@ -368,7 +371,7 @@ class TableManager {
         tagsContainer.innerHTML = '';
         
         if (this.selectedValues.size === 0) {
-            tagsContainer.innerHTML = '<span class="placeholder-text">Ders seçin veya arayın...</span>';
+            tagsContainer.innerHTML = '<span class="placeholder-text">Tüm Dersler</span>';
         } else {
             Array.from(this.selectedValues).forEach(value => {
                 const tag = document.createElement('div');

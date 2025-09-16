@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { StoryConfig, StoryData, Scene, TtsProvider } from './types';
 import { StorySetupForm } from './components/StorySetupForm';
 import { StoryDisplay } from './components/StoryDisplay';
@@ -15,6 +15,24 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentSceneIndex, setCurrentSceneIndex] = useState<number>(0);
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(() => localStorage.getItem('geminiApiKey') || '');
+  const [elevenLabsApiKey, setElevenLabsApiKey] = useState<string>(() => localStorage.getItem('elevenLabsApiKey') || '');
+
+  useEffect(() => {
+    localStorage.setItem('geminiApiKey', geminiApiKey);
+  }, [geminiApiKey]);
+
+  useEffect(() => {
+    localStorage.setItem('elevenLabsApiKey', elevenLabsApiKey);
+  }, [elevenLabsApiKey]);
+
+  const handleApiKeyChange = (type: 'gemini' | 'elevenlabs', key: string) => {
+    if (type === 'gemini') {
+      setGeminiApiKey(key);
+    } else {
+      setElevenLabsApiKey(key);
+    }
+  };
 
   const handleConfigChange = useCallback((newConfig: Partial<StoryConfig>) => {
     setStoryConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
@@ -35,7 +53,7 @@ const App: React.FC = () => {
       reader.onload = async () => {
         const base64String = (reader.result as string).split(',')[1];
         const mimeType = file.type;
-        const description = await generateDescriptionForImage(base64String, mimeType);
+        const description = await generateDescriptionForImage(base64String, mimeType, geminiApiKey);
         setStoryConfig(prevConfig => ({
             ...prevConfig,
             personalizedCharacters: prevConfig.personalizedCharacters.map(pc =>
@@ -58,7 +76,7 @@ const App: React.FC = () => {
             ),
         }));
     }
-  }, []);
+  }, [geminiApiKey]);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -67,7 +85,7 @@ const App: React.FC = () => {
     setCurrentSceneIndex(0);
 
     try {
-      const generatedStory = await generateStoryWithImages(storyConfig);
+      const generatedStory = await generateStoryWithImages(storyConfig, geminiApiKey);
       setStoryData(generatedStory);
     } catch (err) {
       console.error("Error generating story:", err);
@@ -112,7 +130,7 @@ const App: React.FC = () => {
       return { ...prevData, scenes: newScenes };
     });
     try {
-      const audioDataUrl = await generateSpeech(storyData.scenes[sceneIndex].scene_text);
+      const audioDataUrl = await generateSpeech(storyData.scenes[sceneIndex].scene_text, undefined, elevenLabsApiKey);
       setStoryData(prevData => {
         if (!prevData) return null;
         const newScenes = [...prevData.scenes];
@@ -130,7 +148,7 @@ const App: React.FC = () => {
         return { ...prevData, scenes: newScenes };
       });
     }
-  }, [storyData]);
+  }, [storyData, elevenLabsApiKey]);
 
   const handleExportElevenLabsAudiobook = useCallback(async () => {
     if (!storyData || storyData.ttsProvider !== TtsProvider.ELEVENLABS) return;
@@ -143,7 +161,7 @@ const App: React.FC = () => {
       for (let i = 0; i < scenesWithCompleteAudio.length; i++) {
         if (!scenesWithCompleteAudio[i].audioBase64) {
            setStoryData(prev => ({...prev!, exportProgress: `Generating audio ${i + 1}/${scenesWithCompleteAudio.length}...`}));
-           const audioDataUrl = await generateSpeech(scenesWithCompleteAudio[i].scene_text);
+           const audioDataUrl = await generateSpeech(scenesWithCompleteAudio[i].scene_text, undefined, elevenLabsApiKey);
            scenesWithCompleteAudio[i] = { ...scenesWithCompleteAudio[i], audioUrl: audioDataUrl, audioBase64: audioDataUrl };
            setStoryData(prev => {
              if (!prev) return null;
@@ -175,7 +193,7 @@ const App: React.FC = () => {
     } finally {
        setStoryData(prev => ({...prev!, isExporting: false, exportProgress: undefined}));
     }
-  }, [storyData]);
+  }, [storyData, elevenLabsApiKey]);
   
   const handleExportBrowserHtml = useCallback(() => {
     if (!storyData) return;
@@ -222,6 +240,9 @@ const App: React.FC = () => {
           onConfigChange={handleConfigChange}
           onSubmit={handleSubmit}
           onCharacterUpdate={handlePersonalizedCharacterUpdate}
+          geminiApiKey={geminiApiKey}
+          elevenLabsApiKey={elevenLabsApiKey}
+          onApiKeyChange={handleApiKeyChange}
         />
       )}
 
