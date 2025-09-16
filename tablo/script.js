@@ -551,36 +551,42 @@ class TableManager {
 
         try {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape');
+            
+            // PDF oluştur ve UTF-8 desteği ekle
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4',
+                putOnlyUsedFonts: true,
+                floatPrecision: 16
+            });
 
-            // Türkçe font desteği için Latin karakterleri kullan
-            const turkishToLatin = (text) => {
-                if (!text) return '';
-                return text.toString()
-                    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
-                    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
-                    .replace(/Ş/g, 'S').replace(/ş/g, 's')
-                    .replace(/İ/g, 'I').replace(/ı/g, 'i')
-                    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
-                    .replace(/Ç/g, 'C').replace(/ç/g, 'c');
-            };
+            // UTF-8 encoding için font ayarları
+            doc.setFont('helvetica', 'normal');
+            doc.setLanguage('tr-TR');
 
-            // PDF başlığı
+            // PDF başlığı - Türkçe karakterleri koru
             doc.setFontSize(16);
-            doc.text('E-Icerik Tablo Raporu', 20, 20);
+            doc.text('E-İçerik Tablo Raporu', 20, 20);
             
             // Tarih
             doc.setFontSize(10);
-            doc.text(`Olusturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
-            doc.text(`Kayit Sayisi: ${this.filteredData.length}`, 20, 35);
+            doc.text(`Oluşturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+            doc.text(`Kayıt Sayısı: ${this.filteredData.length}`, 20, 35);
 
-            // Tablo verilerini hazırla - Türkçe karakterleri değiştir
-            const headers = this.headers.map(header => turkishToLatin(header));
+            // Tablo verilerini hazırla - Orijinal karakterleri koru
+            const headers = this.headers;
             const tableData = this.filteredData.map(row => 
-                this.headers.map(header => turkishToLatin(row[header] || ''))
+                this.headers.map(header => {
+                    const value = row[header] || '';
+                    // Sadece çok uzun metinleri kısalt
+                    return value.toString().length > 150 ? 
+                        value.toString().substring(0, 150) + '...' : 
+                        value.toString();
+                })
             );
 
-            // Tablo oluştur
+            // Tablo oluştur - UTF-8 destekli
             doc.autoTable({
                 head: [headers],
                 body: tableData,
@@ -591,33 +597,50 @@ class TableManager {
                     font: 'helvetica',
                     textColor: [0, 0, 0],
                     lineColor: [200, 200, 200],
-                    lineWidth: 0.1
+                    lineWidth: 0.1,
+                    overflow: 'linebreak',
+                    cellWidth: 'wrap'
                 },
                 headStyles: {
                     fillColor: [74, 144, 164],
                     textColor: [255, 255, 255],
                     fontSize: 8,
                     fontStyle: 'bold',
-                    halign: 'center'
+                    halign: 'center',
+                    valign: 'middle'
                 },
                 bodyStyles: {
-                    fontSize: 7,
-                    cellPadding: 2
+                    fontSize: 6.5,
+                    cellPadding: 1.5,
+                    valign: 'top',
+                    overflow: 'linebreak'
                 },
                 columnStyles: {
-                    0: { cellWidth: 15 }, // SIRA NO
-                    1: { cellWidth: 40 }, // DERS ADI
-                    2: { cellWidth: 50 }, // UNITE TEMA
-                    3: { cellWidth: 60 }, // KAZANIM
+                    0: { cellWidth: 12 }, // SIRA NO
+                    1: { cellWidth: 35 }, // DERS ADI
+                    2: { cellWidth: 45 }, // UNITE TEMA
+                    3: { cellWidth: 55 }, // KAZANIM
                     4: { cellWidth: 25 }, // E-ICERIK TURU
                     5: { cellWidth: 'auto' } // ACIKLAMA
                 },
-                margin: { top: 45, left: 10, right: 10 },
+                margin: { top: 45, left: 8, right: 8 },
                 tableWidth: 'auto',
+                theme: 'striped',
+                alternateRowStyles: {
+                    fillColor: [248, 249, 250]
+                },
                 didDrawPage: function (data) {
                     // Sayfa numarası
                     doc.setFontSize(8);
                     doc.text(`Sayfa ${data.pageNumber}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                },
+                didParseCell: function (data) {
+                    // UTF-8 karakterleri korumak için özel işlem
+                    if (data.cell.text && Array.isArray(data.cell.text)) {
+                        data.cell.text = data.cell.text.map(text => 
+                            typeof text === 'string' ? text : String(text)
+                        );
+                    }
                 }
             });
 
