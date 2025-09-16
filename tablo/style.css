@@ -141,30 +141,98 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Simple Combobox Stilları */
-.simple-combobox {
+/* Multiselect Stilları */
+.multiselect-container {
     position: relative;
     width: 100%;
 }
 
-.combobox-input {
-    width: 100%;
-    padding: 10px 35px 10px 12px;
+.multiselect-input-container {
+    position: relative;
+    min-height: 42px;
     border: 1px solid #ced4da;
     border-radius: 6px;
-    font-size: 14px;
     background: #ffffff;
-    color: #495057;
+    cursor: pointer;
     transition: border-color 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    padding: 6px 35px 6px 8px;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
-.combobox-input:focus {
-    outline: none;
+.multiselect-input-container:focus-within {
     border-color: #4a90a4;
     box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
 }
 
-.combobox-arrow {
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    flex: 1;
+    min-height: 30px;
+}
+
+.placeholder-text {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 6px 4px;
+}
+
+.tag {
+    background: #4a90a4;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 150px;
+}
+
+.tag-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tag-remove {
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.tag-remove:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.multiselect-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: #495057;
+    flex: 1;
+    min-width: 120px;
+    margin: 6px 4px;
+}
+
+.multiselect-arrow {
     position: absolute;
     right: 12px;
     top: 50%;
@@ -173,14 +241,13 @@ body {
     pointer-events: none;
     font-size: 12px;
     transition: transform 0.2s ease;
-    cursor: pointer;
 }
 
-.simple-combobox.open .combobox-arrow {
+.multiselect-container.open .multiselect-arrow {
     transform: translateY(-50%) rotate(180deg);
 }
 
-.combobox-dropdown {
+.multiselect-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
@@ -189,40 +256,108 @@ body {
     border: 1px solid #ced4da;
     border-top: none;
     border-radius: 0 0 6px 6px;
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: 250px;
     z-index: 1000;
     display: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.simple-combobox.open .combobox-dropdown {
+.multiselect-container.open .multiselect-dropdown {
     display: block;
 }
 
-.combobox-option {
+.multiselect-controls {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    display: flex;
+    gap: 8px;
+}
+
+.select-all-btn,
+.clear-all-btn {
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #495057;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.select-all-btn:hover {
+    background: #4a90a4;
+    color: #ffffff;
+    border-color: #4a90a4;
+}
+
+.clear-all-btn:hover {
+    background: #dc3545;
+    color: #ffffff;
+    border-color: #dc3545;
+}
+
+.multiselect-options {
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.multiselect-option {
     padding: 10px 12px;
     cursor: pointer;
     border-bottom: 1px solid #f8f9fa;
     transition: background-color 0.2s ease;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.combobox-option:hover {
+.multiselect-option:hover {
     background-color: #f8f9fa;
 }
 
-.combobox-option.selected {
-    background-color: #4a90a4;
-    color: #ffffff;
+.multiselect-option.selected {
+    background-color: #e6f3f7;
+    color: #2c5aa0;
 }
 
-.combobox-option.hidden {
+.multiselect-option.hidden {
     display: none;
 }
 
-.combobox-option:last-child {
+.multiselect-option:last-child {
     border-bottom: none;
+}
+
+.option-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ced4da;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.multiselect-option.selected .option-checkbox {
+    background: #4a90a4;
+    border-color: #4a90a4;
+    color: #ffffff;
+}
+
+.option-checkbox::after {
+    content: '✓';
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.multiselect-option.selected .option-checkbox::after {
+    opacity: 1;
 }
 
 .search-container {

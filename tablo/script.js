@@ -8,7 +8,7 @@ class TableManager {
         this.sortColumn = null;
         this.sortDirection = 'asc';
         this.searchTimeout = null;
-        this.selectedValue = '';
+        this.selectedValues = new Set();
         this.allOptions = [];
         this.init();
     }
@@ -19,7 +19,9 @@ class TableManager {
     }
 
     bindEvents() {
-        this.setupSimpleCombobox();
+        // Sabit ders listesini hemen kur
+        this.setupFilters();
+        this.setupMultiselect();
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
         document.getElementById('exportPdf').addEventListener('click', () => this.exportToPdf());
@@ -44,7 +46,6 @@ class TableManager {
             this.headers = Object.keys(jsonData[0]);
             this.data = jsonData.map((row, index) => ({ ...row, id: index }));
 
-            this.setupFilters();
             this.filteredData = [...this.data];
             this.renderTable();
             this.renderPagination();
@@ -80,13 +81,141 @@ class TableManager {
     // Excel upload özelliği kaldırıldı - veriler JSON'dan otomatik yükleniyor
 
     setupFilters() {
-        // Ders filtresi için benzersiz değerleri bul
-        const dersColumn = this.findDersColumn();
-        if (dersColumn) {
-            const uniqueValues = [...new Set(this.data.map(row => row[dersColumn]).filter(val => val))];
-            this.allOptions = uniqueValues.sort();
-            this.populateCombobox(this.allOptions);
-        }
+        // Sabit ders listesi
+        this.allOptions = [
+            'Arapça 2',
+            'Arapça 5',
+            'Arapça 9',
+            'Biyoloji 10',
+            'Biyoloji 11',
+            'Biyoloji 12',
+            'Biyoloji 9',
+            'Coğrafya 10',
+            'Coğrafya 11',
+            'Coğrafya 12',
+            'Coğrafya 9',
+            'Din Kültürü ve Ahlak Bilgisi 10',
+            'Din Kültürü ve Ahlak Bilgisi 11',
+            'Din Kültürü ve Ahlak Bilgisi 12',
+            'Din Kültürü ve Ahlak Bilgisi 4',
+            'Din Kültürü ve Ahlak Bilgisi 5',
+            'Din Kültürü ve Ahlak Bilgisi 6',
+            'Din Kültürü ve Ahlak Bilgisi 7',
+            'Din Kültürü ve Ahlak Bilgisi 8',
+            'Din Kültürü ve Ahlak Bilgisi 9',
+            'Felsefe 10',
+            'Felsefe 11',
+            'Fen Bilimleri 3',
+            'Fen Bilimleri 4',
+            'Fen Bilimleri 5',
+            'Fen Bilimleri 6',
+            'Fen Bilimleri 7',
+            'Fen Bilimleri 8',
+            'Fen Lisesi Biyoloji 11',
+            'Fen Lisesi Biyoloji 12',
+            'Fen Lisesi Fizik 11',
+            'Fen Lisesi Fizik 12',
+            'Fen Lisesi Kimya 11',
+            'Fen Lisesi Kimya 12',
+            'Fen Lisesi Matematik 11',
+            'Fen Lisesi Matematik 12',
+            'Fizik 10',
+            'Fizik 11',
+            'Fizik 12',
+            'Fizik 9',
+            'Hayat Bilgisi 1',
+            'Hayat Bilgisi 2',
+            'Hayat Bilgisi 3',
+            'Hazırlık Sınıfı',
+            'Kimya 10',
+            'Kimya 11',
+            'Kimya 12',
+            'Kimya 9',
+            'Kur\'an-ı Kerim 10',
+            'Kur\'an-ı Kerim 11',
+            'Kur\'an-ı Kerim 12',
+            'Kur\'an-ı Kerim 6',
+            'Kur\'an-ı Kerim 7',
+            'Kur\'an-ı Kerim 8',
+            'Kur\'an-ı Kerim 5',
+            'Kur\'an-ı Kerim 9',
+            'Matematik 1',
+            'Matematik 10',
+            'Matematik 11',
+            'Matematik 12',
+            'Matematik 2',
+            'Matematik 3',
+            'Matematik 4',
+            'Matematik 5',
+            'Matematik 6',
+            'Matematik 7',
+            'Matematik 8',
+            'Matematik 9',
+            'Matematik hazırlık',
+            'Müzik 1',
+            'Müzik 2',
+            'Müzik 3',
+            'Müzik 4',
+            'Müzik 5',
+            'Müzik 6',
+            'Müzik 7',
+            'Müzik 8',
+            'Peygamberimizin Hayatı 10',
+            'Peygamberimizin Hayatı 11',
+            'Peygamberimizin Hayatı 12',
+            'Peygamberimizin Hayatı 5',
+            'Peygamberimizin Hayatı 6',
+            'Peygamberimizin Hayatı 7',
+            'Peygamberimizin Hayatı 8',
+            'Peygamberimizin Hayatı 9',
+            'Psikoloji 11',
+            'Sağlık Bilgisi ve Trafik Kültürü 9',
+            'Sosyal Bilgiler 4',
+            'Sosyal Bilgiler 5',
+            'Sosyal Bilgiler 6',
+            'Sosyal Bilgiler 7',
+            'T.C İnkılap Tarihi ve Atatürkçülük 12',
+            'T.C İnkılap Tarihi ve Atatürkçülük 8',
+            'Tarih 10',
+            'Tarih 11',
+            'Tarih 9',
+            'Temel Dini Bilgiler (İslam 1) 5, 6, 7, 8. Sınıflar',
+            'Temel Dini Bilgiler (İslam 1) Ortaöğretim Seviyesindeki Tüm Sınıflar',
+            'Temel Dini Bilgiler (İslam 2) 5, 6, 7, 8. Sınıflar',
+            'Temel Dini Bilgiler (İslam 2) Ortaöğretim Seviyesindeki Tüm Sınıflar',
+            'Temel Dinî Bilgiler 9',
+            'Temel Düzey Matematik 11',
+            'Temel Düzey Matematik 12',
+            'Trafik Güvenliği 4',
+            'Türk Dili ve Edebiyatı 10',
+            'Türk Dili ve Edebiyatı 11',
+            'Türk Dili ve Edebiyatı 12',
+            'Türk Dili ve Edebiyatı 9',
+            'Türk Dili ve Edebiyatı Hazırlık',
+            'Türkçe 1',
+            'Türkçe 2',
+            'Türkçe 3',
+            'Türkçe 4',
+            'Türkçe 5',
+            'Türkçe 6',
+            'Türkçe 7',
+            'Türkçe 8',
+            'Çağdaş Türk ve Dünya Tarihi',
+            'İngilizce 10',
+            'İngilizce 11',
+            'İngilizce 12',
+            'İngilizce 2',
+            'İngilizce 3',
+            'İngilizce 4',
+            'İngilizce 5',
+            'İngilizce 6',
+            'İngilizce 7',
+            'İngilizce 8',
+            'İngilizce 9 (Normal Lise)',
+            'İnsan Hakları, Yurttaşlık ve Demokrasi 4'
+        ];
+        
+        this.populateMultiselect(this.allOptions);
     }
 
     findDersColumn() {
@@ -96,103 +225,176 @@ class TableManager {
         );
     }
 
-    setupSimpleCombobox() {
+    setupMultiselect() {
         const input = document.getElementById('dersFilter');
-        const container = input.closest('.simple-combobox');
+        const container = input.closest('.multiselect-container');
+        const inputContainer = container.querySelector('.multiselect-input-container');
         const dropdown = document.getElementById('dersDropdown');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
 
         // Input events
-        input.addEventListener('input', (e) => {
-            this.filterComboboxOptions(e.target.value);
-            this.showComboboxDropdown();
-        });
+        input.addEventListener('input', (e) => this.filterMultiselectOptions(e.target.value));
+        input.addEventListener('focus', () => this.showMultiselectDropdown());
         
-        input.addEventListener('focus', () => {
-            this.showComboboxDropdown();
-        });
-
-        input.addEventListener('click', () => {
-            this.showComboboxDropdown();
-        });
-
-        // Dropdown events
-        dropdown.addEventListener('click', (e) => {
-            if (e.target.classList.contains('combobox-option')) {
-                this.selectComboboxOption(e.target);
+        // Container click
+        inputContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tag-remove')) {
+                return; // Tag remove butonları için ayrı işlem
+            }
+            if (container.classList.contains('open')) {
+                this.hideMultiselectDropdown();
+            } else {
+                this.showMultiselectDropdown();
+                input.focus();
             }
         });
 
-        // Outside click
-        document.addEventListener('click', (e) => {
-            if (!container.contains(e.target)) {
-                this.hideComboboxDropdown();
+        // Options container events
+        const optionsContainer = document.getElementById('multiselectOptions');
+        optionsContainer.addEventListener('click', (e) => {
+            const option = e.target.closest('.multiselect-option');
+            if (option) {
+                this.toggleMultiselectOption(option);
             }
         });
 
-        // Escape key
+        // Control buttons
+        selectAllBtn.addEventListener('click', () => this.selectAllOptions());
+        clearAllBtn.addEventListener('click', () => this.clearAllOptions());
+
+        // Escape key and outside click
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                this.hideComboboxDropdown();
+                this.hideMultiselectDropdown();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                this.hideMultiselectDropdown();
             }
         });
     }
 
-    populateCombobox(options) {
-        const dropdown = document.getElementById('dersDropdown');
-        
-        // Mevcut seçenekleri temizle (ilk seçenek hariç)
-        while (dropdown.children.length > 1) {
-            dropdown.removeChild(dropdown.lastChild);
-        }
+    populateMultiselect(options) {
+        const optionsContainer = document.getElementById('multiselectOptions');
+        optionsContainer.innerHTML = '';
         
         options.forEach(option => {
             const optionElement = document.createElement('div');
-            optionElement.className = 'combobox-option';
+            optionElement.className = 'multiselect-option';
             optionElement.setAttribute('data-value', option);
-            optionElement.textContent = option;
-            dropdown.appendChild(optionElement);
+            
+            optionElement.innerHTML = `
+                <div class="option-checkbox"></div>
+                <span class="option-text">${option}</span>
+            `;
+            
+            optionsContainer.appendChild(optionElement);
         });
     }
 
-    showComboboxDropdown() {
-        const container = document.querySelector('.simple-combobox');
+    showMultiselectDropdown() {
+        const container = document.querySelector('.multiselect-container');
         container.classList.add('open');
     }
 
-    hideComboboxDropdown() {
-        const container = document.querySelector('.simple-combobox');
+    hideMultiselectDropdown() {
+        const container = document.querySelector('.multiselect-container');
         container.classList.remove('open');
     }
 
-    filterComboboxOptions(searchTerm) {
-        const options = document.querySelectorAll('.combobox-option');
+    filterMultiselectOptions(searchTerm) {
+        const options = document.querySelectorAll('.multiselect-option');
         const term = searchTerm.toLowerCase();
 
         options.forEach(option => {
-            const text = option.textContent.toLowerCase();
+            const text = option.querySelector('.option-text').textContent.toLowerCase();
             if (text.includes(term)) {
                 option.classList.remove('hidden');
             } else {
                 option.classList.add('hidden');
             }
         });
+
+        this.showMultiselectDropdown();
     }
 
-    selectComboboxOption(option) {
-        const input = document.getElementById('dersFilter');
+    toggleMultiselectOption(option) {
         const value = option.getAttribute('data-value');
         
-        input.value = option.textContent;
-        this.selectedValue = value;
+        if (this.selectedValues.has(value)) {
+            this.selectedValues.delete(value);
+            option.classList.remove('selected');
+        } else {
+            this.selectedValues.add(value);
+            option.classList.add('selected');
+        }
         
-        this.hideComboboxDropdown();
+        this.updateSelectedTags();
         this.applyFilters();
+    }
 
-        // Seçili option'ı işaretle
-        document.querySelectorAll('.combobox-option').forEach(opt => {
-            opt.classList.remove('selected');
+    selectAllOptions() {
+        const visibleOptions = document.querySelectorAll('.multiselect-option:not(.hidden)');
+        
+        visibleOptions.forEach(option => {
+            const value = option.getAttribute('data-value');
+            this.selectedValues.add(value);
+            option.classList.add('selected');
         });
-        option.classList.add('selected');
+        
+        this.updateSelectedTags();
+        this.applyFilters();
+    }
+
+    clearAllOptions() {
+        this.selectedValues.clear();
+        
+        document.querySelectorAll('.multiselect-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        this.updateSelectedTags();
+        this.applyFilters();
+    }
+
+    updateSelectedTags() {
+        const tagsContainer = document.getElementById('selectedTags');
+        const input = document.getElementById('dersFilter');
+        
+        tagsContainer.innerHTML = '';
+        
+        if (this.selectedValues.size === 0) {
+            tagsContainer.innerHTML = '<span class="placeholder-text">Ders seçin veya arayın...</span>';
+        } else {
+            Array.from(this.selectedValues).forEach(value => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    <span class="tag-text">${value}</span>
+                    <button class="tag-remove" onclick="tableManager.removeTag('${value}')">&times;</button>
+                `;
+                tagsContainer.appendChild(tag);
+            });
+        }
+        
+        // Input değerini temizle
+        input.value = '';
+    }
+
+    removeTag(value) {
+        this.selectedValues.delete(value);
+        
+        // Option'ı unselect yap
+        const option = document.querySelector(`.multiselect-option[data-value="${value}"]`);
+        if (option) {
+            option.classList.remove('selected');
+        }
+        
+        this.updateSelectedTags();
+        this.applyFilters();
     }
 
     applyFilters() {
@@ -202,10 +404,10 @@ class TableManager {
         const startTime = performance.now();
 
         this.filteredData = this.data.filter(row => {
-            // Ders filtresi - tek seçim kontrolü
+            // Ders filtresi - çoklu seçim kontrolü
             const dersColumn = this.findDersColumn();
-            if (this.selectedValue && dersColumn) {
-                if (row[dersColumn] !== this.selectedValue) {
+            if (this.selectedValues.size > 0 && dersColumn) {
+                if (!this.selectedValues.has(row[dersColumn])) {
                     return false;
                 }
             }
@@ -250,12 +452,8 @@ class TableManager {
         dersInput.value = '';
         document.getElementById('searchInput').value = '';
         
-        // Combobox seçimini temizle
-        this.selectedValue = '';
-        document.querySelectorAll('.combobox-option').forEach(opt => {
-            opt.classList.remove('selected');
-        });
-        document.querySelector('.combobox-option[data-value=""]').classList.add('selected');
+        // Multiselect seçimlerini temizle
+        this.clearAllOptions();
         
         this.filteredData = [...this.data];
         this.currentPage = 1;
@@ -538,7 +736,10 @@ class TableManager {
     }
 }
 
+// Global değişken (tag remove fonksiyonu için)
+let tableManager;
+
 // Sayfa yüklendiğinde başlat
 document.addEventListener('DOMContentLoaded', () => {
-    new TableManager();
+    tableManager = new TableManager();
 });
