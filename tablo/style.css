@@ -10,7 +10,9 @@ body {
     background-color: #f8f9fa;
     color: #343a40;
     line-height: 1.6;
-    font-size: 14px;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
 }
 
 /* Header Stilları */
@@ -27,9 +29,10 @@ body {
 }
 
 .header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 40px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -92,9 +95,10 @@ body {
 
 /* Ana Container */
 .main-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 30px 40px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px 30px;
 }
 
 /* Kontrol Paneli */
@@ -114,7 +118,7 @@ body {
 }
 
 .panel-header h2 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #495057;
 }
@@ -147,7 +151,7 @@ body {
 }
 
 .filter-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #495057;
     text-transform: uppercase;
@@ -191,7 +195,7 @@ body {
 
 .placeholder-text {
     color: #6c757d;
-    font-size: 14px;
+    font-size: 15px;
     margin: 6px 4px;
 }
 
@@ -238,7 +242,7 @@ body {
     border: none;
     outline: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 15px;
     color: #495057;
     flex: 1;
     min-width: 120px;
@@ -381,10 +385,10 @@ body {
 
 .search-input {
     width: 100%;
-    padding: 10px 40px 10px 12px;
+    padding: 12px 40px 12px 14px;
     border: 1px solid #ced4da;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
     transition: border-color 0.2s ease;
 }
 
@@ -409,11 +413,11 @@ body {
 .btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
+    gap: 8px;
+    padding: 12px 18px;
     border: none;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -465,7 +469,7 @@ body {
 }
 
 .result-text {
-    font-size: 13px;
+    font-size: 15px;
     color: #1565c0;
     font-weight: 500;
 }
@@ -489,7 +493,7 @@ body {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .data-table thead {
@@ -500,7 +504,7 @@ body {
 }
 
 .data-table th {
-    padding: 14px 12px;
+    padding: 16px 14px;
     text-align: left;
     font-weight: 600;
     color: #495057;
@@ -511,7 +515,7 @@ body {
     transition: background-color 0.2s ease;
     position: relative;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.5px;
 }
 
@@ -555,11 +559,13 @@ body {
 }
 
 .data-table td {
-    padding: 12px;
+    padding: 14px;
     vertical-align: top;
     border-right: 1px solid #e9ecef;
     word-wrap: break-word;
     max-width: 300px;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .data-table td:last-child {
@@ -589,7 +595,7 @@ body {
 
 .pagination-text {
     color: #6c757d;
-    font-size: 13px;
+    font-size: 15px;
 }
 
 .pagination-controls {
@@ -605,16 +611,16 @@ body {
 }
 
 .control-label {
-    font-size: 13px;
+    font-size: 14px;
     color: #6c757d;
     font-weight: 500;
 }
 
 .page-size-select {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 14px;
     background: #ffffff;
 }
 
@@ -624,16 +630,16 @@ body {
 }
 
 .page-btn {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border: 1px solid #ced4da;
     background: #ffffff;
     color: #495057;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     transition: all 0.2s ease;
-    min-width: 36px;
+    min-width: 40px;
     text-align: center;
 }
 
