@@ -19,9 +19,6 @@ class TableManager {
     }
 
     bindEvents() {
-        // Sabit ders listesini hemen kur
-        this.setupFilters();
-        this.setupMultiselect();
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
         document.getElementById('exportPdf').addEventListener('click', () => this.exportToPdf());
@@ -47,6 +44,10 @@ class TableManager {
             this.headers = Object.keys(jsonData[0]);
             this.data = jsonData.map((row, index) => ({ ...row, id: index }));
 
+            // Veri yüklendikten sonra filtreleri kur
+            this.setupFilters();
+            this.setupMultiselect();
+            
             this.filteredData = [...this.data];
             this.renderTable();
             this.renderPagination();
