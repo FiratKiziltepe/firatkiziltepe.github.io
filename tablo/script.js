@@ -202,19 +202,21 @@ class TableManager {
 
         // DOM manipulation optimization
         const fragment = document.createDocumentFragment();
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
         
         pageData.forEach(row => {
             const tr = document.createElement('tr');
             this.headers.forEach(header => {
                 const td = document.createElement('td');
-                const value = row[header];
-                // Uzun metinleri kısalt (performans için)
-                if (value && value.length > 200) {
-                    td.textContent = value.substring(0, 200) + '...';
-                    td.title = value; // Tam metin için tooltip
+                const value = row[header] || '';
+                
+                // Arama terimi varsa highlight yap
+                if (searchTerm && value.toString().toLowerCase().includes(searchTerm)) {
+                    td.innerHTML = this.highlightText(value.toString(), searchTerm);
                 } else {
-                    td.textContent = value || '';
+                    td.textContent = value;
                 }
+                
                 tr.appendChild(td);
             });
             fragment.appendChild(tr);
@@ -411,6 +413,17 @@ class TableManager {
         }
         
         return button;
+    }
+
+    highlightText(text, searchTerm) {
+        if (!searchTerm || !text) return text;
+        
+        const regex = new RegExp(`(${this.escapeRegex(searchTerm)})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     showSections(show) {

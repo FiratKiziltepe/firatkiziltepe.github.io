@@ -3,66 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-İçerik Tablo Sistemi</title>
+    <title>Eğitim İçerik Yönetim Sistemi</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>E-İçerik Tablo Sistemi</h1>
-            <div class="controls">
-                <div class="data-status" id="dataStatus">
-                    <span>Veriler yükleniyor...</span>
+    <div class="header-container">
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>Eğitim İçerik Yönetim Sistemi</h1>
+                    <p class="subtitle">E-İçerik Veri Tabanı</p>
+                </div>
+                <div class="status-section">
+                    <div class="data-status" id="dataStatus">
+                        <span>Veriler yükleniyor...</span>
+                    </div>
                 </div>
             </div>
         </header>
+    </div>
 
-        <div class="filter-section" id="filterSection" style="display: none;">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="dersFilter">Ders:</label>
-                    <select id="dersFilter">
-                        <option value="">Tüm Dersler</option>
+    <div class="main-container">
+
+        <div class="control-panel" id="filterSection" style="display: none;">
+            <div class="panel-header">
+                <h2>Filtreleme ve Arama</h2>
+            </div>
+            
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label for="dersFilter" class="filter-label">Ders Seçimi</label>
+                    <select id="dersFilter" class="filter-select">
+                        <option value="">-- Tüm Dersler --</option>
                     </select>
                 </div>
                 
-                <div class="filter-group">
-                    <label for="searchInput">Arama:</label>
-                    <input type="text" id="searchInput" placeholder="Tablo içeriğinde ara...">
+                <div class="filter-item">
+                    <label for="searchInput" class="filter-label">Genel Arama</label>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="İçerikte arama yapın...">
+                        <span class="search-icon">🔍</span>
+                    </div>
                 </div>
                 
-                <div class="filter-group">
-                    <button id="clearFilters">Temizle</button>
-                    <button id="exportPdf">PDF İndir</button>
+                <div class="filter-item">
+                    <label class="filter-label">İşlemler</label>
+                    <div class="button-group">
+                        <button id="clearFilters" class="btn btn-secondary">
+                            <span class="btn-icon">🔄</span>
+                            Temizle
+                        </button>
+                        <button id="exportPdf" class="btn btn-primary">
+                            <span class="btn-icon">📄</span>
+                            PDF İndir
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="results-info" id="resultsInfo" style="display: none;">
-            <span id="resultCount"></span>
+        <div class="info-bar" id="resultsInfo" style="display: none;">
+            <div class="info-content">
+                <span id="resultCount" class="result-text"></span>
+            </div>
         </div>
 
-        <div class="table-container" id="tableContainer" style="display: none;">
-            <table id="dataTable">
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <div class="data-section" id="tableContainer" style="display: none;">
+            <div class="table-wrapper">
+                <table id="dataTable" class="data-table">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="pagination-container" id="paginationContainer" style="display: none;">
+        <div class="pagination-section" id="paginationContainer" style="display: none;">
             <div class="pagination-info">
-                <span id="paginationInfo"></span>
+                <span id="paginationInfo" class="pagination-text"></span>
             </div>
             <div class="pagination-controls">
-                <div class="page-size-selector">
-                    <select id="pageSize">
-                        <option value="10">10 / sayfa</option>
-                        <option value="25" selected>25 / sayfa</option>
-                        <option value="50">50 / sayfa</option>
-                        <option value="100">100 / sayfa</option>
+                <div class="page-size-control">
+                    <label for="pageSize" class="control-label">Sayfa başına:</label>
+                    <select id="pageSize" class="page-size-select">
+                        <option value="10">10 kayıt</option>
+                        <option value="25" selected>25 kayıt</option>
+                        <option value="50">50 kayıt</option>
+                        <option value="100">100 kayıt</option>
                     </select>
                 </div>
                 <div class="pagination-buttons" id="paginationButtons">
@@ -71,8 +99,11 @@
             </div>
         </div>
 
-        <div class="loading" id="loading" style="display: none;">
-            <p>Dosya yükleniyor...</p>
+        <div class="loading-overlay" id="loading" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Veriler yükleniyor...</p>
+            </div>
         </div>
     </div>
 
