@@ -21,7 +21,6 @@ class TableManager {
     bindEvents() {
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
-        document.getElementById('exportPdf').addEventListener('click', () => this.exportToPdf());
         document.getElementById('exportExcel').addEventListener('click', () => this.exportToExcel());
         document.getElementById('pageSize').addEventListener('change', (e) => this.changePageSize(e));
     }
@@ -543,102 +542,6 @@ class TableManager {
         }
     }
 
-    async exportToPdf() {
-        if (this.filteredData.length === 0) {
-            alert('PDF olarak dışa aktarılacak veri yok.');
-            return;
-        }
-
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape');
-
-            // Türkçe karakterleri güvenli karakterlerle değiştir
-            const cleanTextForPdf = (text) => {
-                if (!text) return '';
-                return text.toString()
-                    .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
-                    .replace(/ü/g, 'u').replace(/Ü/g, 'U')
-                    .replace(/ş/g, 's').replace(/Ş/g, 'S')
-                    .replace(/ı/g, 'i').replace(/İ/g, 'I')
-                    .replace(/ö/g, 'o').replace(/Ö/g, 'O')
-                    .replace(/ç/g, 'c').replace(/Ç/g, 'C')
-                    .replace(/[^\x00-\x7F]/g, ''); // Diğer non-ASCII karakterleri temizle
-            };
-
-            // PDF başlığı
-            doc.setFontSize(16);
-            doc.text('E-Icerik Tablo Raporu', 20, 20);
-            
-            // Tarih ve bilgi
-            doc.setFontSize(10);
-            doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
-            doc.text(`Kayit Sayisi: ${this.filteredData.length}`, 20, 35);
-
-            // Tablo verilerini hazırla
-            const headers = this.headers.map(header => cleanTextForPdf(header));
-            const tableData = this.filteredData.map(row => 
-                this.headers.map(header => {
-                    const value = row[header] || '';
-                    const cleanValue = cleanTextForPdf(value);
-                    // Çok uzun metinleri kısalt
-                    return cleanValue.length > 120 ? 
-                        cleanValue.substring(0, 120) + '...' : 
-                        cleanValue;
-                })
-            );
-
-            // Tablo oluştur
-            doc.autoTable({
-                head: [headers],
-                body: tableData,
-                startY: 45,
-                styles: {
-                    fontSize: 6,
-                    cellPadding: 1,
-                    font: 'helvetica',
-                    textColor: [0, 0, 0],
-                    lineColor: [150, 150, 150],
-                    lineWidth: 0.1
-                },
-                headStyles: {
-                    fillColor: [74, 144, 164],
-                    textColor: [255, 255, 255],
-                    fontSize: 7,
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
-                bodyStyles: {
-                    fontSize: 6,
-                    cellPadding: 1,
-                    valign: 'top'
-                },
-                columnStyles: {
-                    0: { cellWidth: 10 }, // SIRA NO
-                    1: { cellWidth: 30 }, // DERS ADI
-                    2: { cellWidth: 40 }, // UNITE TEMA
-                    3: { cellWidth: 50 }, // KAZANIM
-                    4: { cellWidth: 20 }, // E-ICERIK TURU
-                    5: { cellWidth: 'auto' } // ACIKLAMA
-                },
-                margin: { top: 45, left: 5, right: 5 },
-                theme: 'grid',
-                didDrawPage: function (data) {
-                    // Sayfa numarası
-                    doc.setFontSize(8);
-                    doc.text(`Sayfa ${data.pageNumber}`, 10, doc.internal.pageSize.height - 10);
-                }
-            });
-
-            // PDF'i indir
-            const fileName = `e-icerik-tablo-${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(fileName);
-
-        } catch (error) {
-            console.error('PDF oluşturma hatası:', error);
-            alert('PDF oluşturulurken bir hata oluştu.');
-        }
-    }
 
     exportToExcel() {
         if (this.filteredData.length === 0) {

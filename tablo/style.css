@@ -133,6 +133,19 @@ body {
     gap: 8px;
 }
 
+/* Genel arama kutusunu daralt */
+.filter-item:has(#searchInput) {
+    flex: 0 1 300px;
+    max-width: 300px;
+}
+
+/* Ders seçimi multiselect'i genişlet */
+.filter-item:has(.multiselect-container) {
+    flex: 1;
+    max-width: 500px;
+    min-width: 350px;
+}
+
 .filter-label {
     font-size: 13px;
     font-weight: 600;
