@@ -13,8 +13,11 @@
         <header class="main-header">
             <div class="header-content">
                 <div class="logo-section">
-                    <h1>Eğitim İçerik Yönetim Sistemi</h1>
-                    <p class="subtitle">E-İçerik Veri Tabanı</p>
+                    <img src="logo.png" alt="Logo" class="header-logo">
+                    <div class="title-section">
+                        <h1>DERS KİTAPLARI VE EĞİTİM ARAÇLARI E-İÇERİK TABLOSU</h1>
+                        <p class="subtitle">Ders Kitapları Elektronik Eğitim İçerikleri Tablosu</p>
+                    </div>
                 </div>
                 <div class="status-section">
                     <div class="data-status" id="dataStatus">
@@ -35,9 +38,24 @@
             <div class="filter-grid">
                 <div class="filter-item">
                     <label for="dersFilter" class="filter-label">Ders Seçimi</label>
-                    <select id="dersFilter" class="filter-select">
-                        <option value="">-- Tüm Dersler --</option>
-                    </select>
+                    <div class="multiselect-container">
+                        <div class="multiselect-input-container">
+                            <div class="selected-tags" id="selectedTags">
+                                <span class="placeholder-text">Ders seçin veya arayın...</span>
+                            </div>
+                            <input type="text" id="dersFilter" class="multiselect-input" placeholder="" autocomplete="off">
+                            <span class="multiselect-arrow">▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="dersDropdown">
+                            <div class="multiselect-controls">
+                                <button type="button" class="select-all-btn" id="selectAllBtn">Tümünü Seç</button>
+                                <button type="button" class="clear-all-btn" id="clearAllBtn">Temizle</button>
+                            </div>
+                            <div class="multiselect-options" id="multiselectOptions">
+                                <!-- Options will be populated here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="filter-item">
