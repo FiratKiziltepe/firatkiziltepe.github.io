@@ -25,6 +25,7 @@ class TableManager {
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
         document.getElementById('exportPdf').addEventListener('click', () => this.exportToPdf());
+        document.getElementById('exportExcel').addEventListener('click', () => this.exportToExcel());
         document.getElementById('pageSize').addEventListener('change', (e) => this.changePageSize(e));
     }
 
@@ -598,6 +599,68 @@ class TableManager {
         } catch (error) {
             console.error('PDF oluşturma hatası:', error);
             alert('PDF oluşturulurken bir hata oluştu.');
+        }
+    }
+
+    exportToExcel() {
+        if (this.filteredData.length === 0) {
+            alert('Excel olarak dışa aktarılacak veri yok.');
+            return;
+        }
+
+        try {
+            // Excel verileri için worksheet oluştur
+            const wsData = [];
+            
+            // Header satırını ekle
+            wsData.push(this.headers);
+            
+            // Data satırlarını ekle
+            this.filteredData.forEach(row => {
+                const rowData = this.headers.map(header => row[header] || '');
+                wsData.push(rowData);
+            });
+
+            // CSV formatında içerik oluştur
+            let csvContent = '';
+            wsData.forEach(row => {
+                const csvRow = row.map(field => {
+                    // Özel karakterleri ve virgülleri handle et
+                    const fieldStr = String(field);
+                    if (fieldStr.includes(',') || fieldStr.includes('\n') || fieldStr.includes('"')) {
+                        return `"${fieldStr.replace(/"/g, '""')}"`;
+                    }
+                    return fieldStr;
+                }).join(',');
+                csvContent += csvRow + '\n';
+            });
+
+            // BOM (Byte Order Mark) ekle - Türkçe karakterler için
+            const BOM = '\uFEFF';
+            csvContent = BOM + csvContent;
+
+            // Blob oluştur ve indir
+            const blob = new Blob([csvContent], { 
+                type: 'text/csv;charset=utf-8;' 
+            });
+            
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            const fileName = `e-icerik-tablo-${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log(`Excel dosyası indirildi: ${fileName}`);
+
+        } catch (error) {
+            console.error('Excel oluşturma hatası:', error);
+            alert('Excel dosyası oluşturulurken bir hata oluştu.');
         }
     }
 

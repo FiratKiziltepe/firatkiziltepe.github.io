@@ -428,6 +428,16 @@ body {
     transform: translateY(-1px);
 }
 
+.btn-success {
+    background: #28a745;
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
 .btn-icon {
     font-size: 12px;
 }
@@ -700,6 +710,7 @@ body {
 
     .button-group {
         flex-direction: column;
+        gap: 8px;
     }
 
     .pagination-section {
