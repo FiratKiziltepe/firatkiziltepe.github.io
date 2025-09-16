@@ -553,39 +553,67 @@ class TableManager {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape');
 
+            // Türkçe font desteği için Latin karakterleri kullan
+            const turkishToLatin = (text) => {
+                if (!text) return '';
+                return text.toString()
+                    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
+                    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
+                    .replace(/Ş/g, 'S').replace(/ş/g, 's')
+                    .replace(/İ/g, 'I').replace(/ı/g, 'i')
+                    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+                    .replace(/Ç/g, 'C').replace(/ç/g, 'c');
+            };
+
             // PDF başlığı
             doc.setFontSize(16);
-            doc.text('E-İçerik Tablo Raporu', 20, 20);
+            doc.text('E-Icerik Tablo Raporu', 20, 20);
             
             // Tarih
             doc.setFontSize(10);
-            doc.text(`Oluşturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
-            doc.text(`Kayıt Sayısı: ${this.filteredData.length}`, 20, 35);
+            doc.text(`Olusturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+            doc.text(`Kayit Sayisi: ${this.filteredData.length}`, 20, 35);
 
-            // Tablo verilerini hazırla
+            // Tablo verilerini hazırla - Türkçe karakterleri değiştir
+            const headers = this.headers.map(header => turkishToLatin(header));
             const tableData = this.filteredData.map(row => 
-                this.headers.map(header => row[header] || '')
+                this.headers.map(header => turkishToLatin(row[header] || ''))
             );
 
             // Tablo oluştur
             doc.autoTable({
-                head: [this.headers],
+                head: [headers],
                 body: tableData,
                 startY: 45,
                 styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
+                    fontSize: 7,
+                    cellPadding: 1.5,
+                    font: 'helvetica',
+                    textColor: [0, 0, 0],
+                    lineColor: [200, 200, 200],
+                    lineWidth: 0.1
                 },
                 headStyles: {
-                    fillColor: [102, 126, 234],
-                    textColor: 255,
-                    fontSize: 9,
-                    fontStyle: 'bold'
+                    fillColor: [74, 144, 164],
+                    textColor: [255, 255, 255],
+                    fontSize: 8,
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 7,
+                    cellPadding: 2
                 },
                 columnStyles: {
-                    // Sütun genişliklerini otomatik ayarla
+                    0: { cellWidth: 15 }, // SIRA NO
+                    1: { cellWidth: 40 }, // DERS ADI
+                    2: { cellWidth: 50 }, // UNITE TEMA
+                    3: { cellWidth: 60 }, // KAZANIM
+                    4: { cellWidth: 25 }, // E-ICERIK TURU
+                    5: { cellWidth: 'auto' } // ACIKLAMA
                 },
-                margin: { top: 45 },
+                margin: { top: 45, left: 10, right: 10 },
+                tableWidth: 'auto',
                 didDrawPage: function (data) {
                     // Sayfa numarası
                     doc.setFontSize(8);
@@ -610,7 +638,7 @@ class TableManager {
         }
 
         try {
-            // Excel verileri için worksheet oluştur
+            // Worksheet verileri hazırla
             const wsData = [];
             
             // Header satırını ekle
@@ -622,40 +650,45 @@ class TableManager {
                 wsData.push(rowData);
             });
 
-            // CSV formatında içerik oluştur
-            let csvContent = '';
-            wsData.forEach(row => {
-                const csvRow = row.map(field => {
-                    // Özel karakterleri ve virgülleri handle et
-                    const fieldStr = String(field);
-                    if (fieldStr.includes(',') || fieldStr.includes('\n') || fieldStr.includes('"')) {
-                        return `"${fieldStr.replace(/"/g, '""')}"`;
-                    }
-                    return fieldStr;
-                }).join(',');
-                csvContent += csvRow + '\n';
+            // Worksheet oluştur
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Sütun genişliklerini ayarla
+            const colWidths = this.headers.map((header, index) => {
+                const maxLength = Math.max(
+                    header.length,
+                    ...this.filteredData.map(row => 
+                        String(row[header] || '').length
+                    ).slice(0, 100) // Performans için ilk 100 satırı kontrol et
+                );
+                return { wch: Math.min(Math.max(maxLength, 10), 50) };
+            });
+            ws['!cols'] = colWidths;
+
+            // Workbook oluştur
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'E-İçerik Tablosu');
+
+            // Header styling
+            const headerStyle = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4472C4" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+
+            // Header hücrelerine stil uygula
+            this.headers.forEach((header, colIndex) => {
+                const cellRef = XLSX.utils.encode_cell({ r: 0, c: colIndex });
+                if (ws[cellRef]) {
+                    ws[cellRef].s = headerStyle;
+                }
             });
 
-            // BOM (Byte Order Mark) ekle - Türkçe karakterler için
-            const BOM = '\uFEFF';
-            csvContent = BOM + csvContent;
-
-            // Blob oluştur ve indir
-            const blob = new Blob([csvContent], { 
-                type: 'text/csv;charset=utf-8;' 
-            });
+            // Dosya adı oluştur
+            const fileName = `e-icerik-tablo-${new Date().toISOString().split('T')[0]}.xlsx`;
             
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            
-            const fileName = `e-icerik-tablo-${new Date().toISOString().split('T')[0]}.csv`;
-            link.setAttribute('download', fileName);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // Excel dosyasını indir
+            XLSX.writeFile(wb, fileName);
             
             console.log(`Excel dosyası indirildi: ${fileName}`);
 
