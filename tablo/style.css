@@ -321,14 +321,15 @@ body {
 }
 
 .multiselect-option {
-    padding: 10px 12px;
+    padding: 6px 12px;
     cursor: pointer;
     border-bottom: 1px solid #f8f9fa;
     transition: background-color 0.2s ease;
-    font-size: 14px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     gap: 8px;
+    line-height: 1.3;
 }
 
 .multiselect-option:hover {
@@ -346,16 +347,6 @@ body {
 
 .multiselect-option:last-child {
     border-bottom: none;
-}
-
-.multiselect-info {
-    padding: 8px 12px;
-    font-size: 12px;
-    color: #6c757d;
-    font-style: italic;
-    text-align: center;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
 }
 
 .multiselect-no-result {

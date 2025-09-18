@@ -285,10 +285,8 @@ class TableManager {
         const optionsContainer = document.getElementById('multiselectOptions');
         optionsContainer.innerHTML = '';
         
-        // İlk 15 seçeneği göster
-        const visibleOptions = options.slice(0, 15);
-        
-        visibleOptions.forEach(option => {
+        // Tüm seçenekleri göster
+        options.forEach(option => {
             const optionElement = document.createElement('div');
             optionElement.className = 'multiselect-option';
             optionElement.setAttribute('data-value', option);
@@ -300,14 +298,6 @@ class TableManager {
             
             optionsContainer.appendChild(optionElement);
         });
-        
-        // Eğer daha fazla seçenek varsa bilgi mesajı ekle
-        if (options.length > 15) {
-            const infoElement = document.createElement('div');
-            infoElement.className = 'multiselect-info';
-            infoElement.innerHTML = `<span>Daha fazla seçenek için arama yapın...</span>`;
-            optionsContainer.appendChild(infoElement);
-        }
     }
 
     showMultiselectDropdown() {
