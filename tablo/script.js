@@ -285,8 +285,8 @@ class TableManager {
         const optionsContainer = document.getElementById('multiselectOptions');
         optionsContainer.innerHTML = '';
         
-        // İlk 10 seçeneği göster
-        const visibleOptions = options.slice(0, 10);
+        // İlk 15 seçeneği göster
+        const visibleOptions = options.slice(0, 15);
         
         visibleOptions.forEach(option => {
             const optionElement = document.createElement('div');
@@ -302,7 +302,7 @@ class TableManager {
         });
         
         // Eğer daha fazla seçenek varsa bilgi mesajı ekle
-        if (options.length > 10) {
+        if (options.length > 15) {
             const infoElement = document.createElement('div');
             infoElement.className = 'multiselect-info';
             infoElement.innerHTML = `<span>Daha fazla seçenek için arama yapın...</span>`;
