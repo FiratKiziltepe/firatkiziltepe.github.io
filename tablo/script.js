@@ -20,6 +20,7 @@ class TableManager {
 
     bindEvents() {
         document.getElementById('searchInput').addEventListener('input', () => this.debouncedSearch());
+        document.getElementById('programTuru').addEventListener('change', () => this.applyFilters());
         document.getElementById('clearFilters').addEventListener('click', () => this.clearFilters());
         document.getElementById('exportExcel').addEventListener('click', () => this.exportToExcel());
         document.getElementById('pageSize').addEventListener('change', (e) => this.changePageSize(e));
@@ -441,6 +442,7 @@ class TableManager {
 
     applyFilters() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const programTuru = document.getElementById('programTuru').value;
 
         // Performans için önbellek oluştur
         const startTime = performance.now();
@@ -451,6 +453,20 @@ class TableManager {
             if (this.selectedValues.size > 0 && dersColumn) {
                 if (!this.selectedValues.has(row[dersColumn])) {
                     return false;
+                }
+            }
+
+            // Program türü filtresi
+            if (programTuru) {
+                const eIcerikTuru = row['E-İÇERİK TÜRÜ'] || '';
+                if (programTuru === 'TYMM') {
+                    if (!eIcerikTuru.includes('TYMM')) {
+                        return false;
+                    }
+                } else if (programTuru === 'Diğer') {
+                    if (eIcerikTuru.includes('TYMM')) {
+                        return false;
+                    }
                 }
             }
 
@@ -493,6 +509,7 @@ class TableManager {
         const dersInput = document.getElementById('dersFilter');
         dersInput.value = '';
         document.getElementById('searchInput').value = '';
+        document.getElementById('programTuru').value = '';
         
         // Multiselect seçimlerini temizle
         this.clearAllOptions();

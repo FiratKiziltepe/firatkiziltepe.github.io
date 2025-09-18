@@ -125,7 +125,7 @@ body {
 
 .filter-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr auto;
     gap: 24px;
     padding: 24px;
     align-items: end;
@@ -141,6 +141,12 @@ body {
 .filter-item:has(#searchInput) {
     flex: 0 1 300px;
     max-width: 300px;
+}
+
+/* Program türü select'i */
+.program-turu-item {
+    flex: 0 1 200px;
+    max-width: 200px;
 }
 
 /* Ders seçimi multiselect'i genişlet */
@@ -421,6 +427,37 @@ body {
     right: 12px;
     color: #6c757d;
     pointer-events: none;
+}
+
+/* Select Container */
+.select-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 15px;
+    background: #ffffff;
+    color: #495057;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.select-input:focus {
+    outline: none;
+    border-color: #4a90a4;
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
 }
 
 .button-group {
