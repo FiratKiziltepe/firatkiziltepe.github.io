@@ -458,13 +458,13 @@ class TableManager {
 
             // Program türü filtresi
             if (programTuru) {
-                const eIcerikTuru = row['E-İÇERİK TÜRÜ'] || '';
+                const programTuruValue = row['Program Türü'] || '';
                 if (programTuru === 'TYMM') {
-                    if (!eIcerikTuru.includes('TYMM')) {
+                    if (programTuruValue !== 'TYMM') {
                         return false;
                     }
                 } else if (programTuru === 'Diğer') {
-                    if (eIcerikTuru.includes('TYMM')) {
+                    if (programTuruValue === 'TYMM') {
                         return false;
                     }
                 }
