@@ -50,12 +50,11 @@ export const MIN_AGE = 2;
 export const MAX_AGE = 12;
 
 export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash';
-export const GEMINI_IMAGE_MODEL = 'imagen-3.0-generate-002';
+export const GEMINI_IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
 
 // == ElevenLabs Configuration ==
 // WARNING: Storing API keys in client-side code is a major security risk.
 // This key is visible to anyone inspecting the website's code.
 // In a production application, this should be handled via a backend proxy.
-export const ELEVENLABS_API_KEY = 'sk_d2274700894be3ce65f0cdb9cf3ea7d66cf2d1c8723c776b';
 export const ELEVENLABS_VOICE_ID = '6GYyziau4Hk8qdg7od5c';
 export const ELEVENLABS_API_BASE_URL = 'https://api.elevenlabs.io/v1';
