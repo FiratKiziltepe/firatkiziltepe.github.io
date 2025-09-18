@@ -285,7 +285,10 @@ class TableManager {
         const optionsContainer = document.getElementById('multiselectOptions');
         optionsContainer.innerHTML = '';
         
-        options.forEach(option => {
+        // İlk 10 seçeneği göster
+        const visibleOptions = options.slice(0, 10);
+        
+        visibleOptions.forEach(option => {
             const optionElement = document.createElement('div');
             optionElement.className = 'multiselect-option';
             optionElement.setAttribute('data-value', option);
@@ -297,6 +300,14 @@ class TableManager {
             
             optionsContainer.appendChild(optionElement);
         });
+        
+        // Eğer daha fazla seçenek varsa bilgi mesajı ekle
+        if (options.length > 10) {
+            const infoElement = document.createElement('div');
+            infoElement.className = 'multiselect-info';
+            infoElement.innerHTML = `<span>Daha fazla seçenek için arama yapın...</span>`;
+            optionsContainer.appendChild(infoElement);
+        }
     }
 
     showMultiselectDropdown() {
@@ -310,18 +321,46 @@ class TableManager {
     }
 
     filterMultiselectOptions(searchTerm) {
-        const options = document.querySelectorAll('.multiselect-option');
-        const term = searchTerm.toLowerCase();
-
-        options.forEach(option => {
-            const text = option.querySelector('.option-text').textContent.toLowerCase();
-            if (text.includes(term)) {
-                option.classList.remove('hidden');
-            } else {
-                option.classList.add('hidden');
+        const term = searchTerm.toLowerCase().trim();
+        const optionsContainer = document.getElementById('multiselectOptions');
+        
+        if (!term) {
+            // Arama terimi yoksa ilk 10 seçeneği göster
+            this.populateMultiselect(this.allOptions);
+        } else {
+            // Arama terimine göre filtrele ve tüm eşleşenleri göster
+            const filteredOptions = this.allOptions.filter(option => 
+                option.toLowerCase().includes(term)
+            );
+            
+            optionsContainer.innerHTML = '';
+            
+            filteredOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'multiselect-option';
+                optionElement.setAttribute('data-value', option);
+                
+                // Seçili olanları işaretle
+                if (this.selectedValues.has(option)) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionElement.innerHTML = `
+                    <div class="option-checkbox"></div>
+                    <span class="option-text">${option}</span>
+                `;
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            if (filteredOptions.length === 0) {
+                const noResultElement = document.createElement('div');
+                noResultElement.className = 'multiselect-no-result';
+                noResultElement.innerHTML = '<span>Sonuç bulunamadı</span>';
+                optionsContainer.appendChild(noResultElement);
             }
-        });
-
+        }
+        
         this.showMultiselectDropdown();
     }
 
@@ -370,10 +409,8 @@ class TableManager {
         
         tagsContainer.innerHTML = '';
         
-        if (this.selectedValues.size === 0) {
-            tagsContainer.innerHTML = '<span class="placeholder-text">Tüm Dersler</span>';
-        } else {
-            Array.from(this.selectedValues).forEach(value => {
+        if (this.selectedValues.size > 0) {
+            Array.from(this.selectedValues).slice(0, 3).forEach(value => {
                 const tag = document.createElement('div');
                 tag.className = 'tag';
                 tag.innerHTML = `
@@ -382,6 +419,13 @@ class TableManager {
                 `;
                 tagsContainer.appendChild(tag);
             });
+            
+            if (this.selectedValues.size > 3) {
+                const moreTag = document.createElement('div');
+                moreTag.className = 'tag more-tag';
+                moreTag.innerHTML = `<span class="tag-text">+${this.selectedValues.size - 3} daha</span>`;
+                tagsContainer.appendChild(moreTag);
+            }
         }
         
         // Input değerini temizle
