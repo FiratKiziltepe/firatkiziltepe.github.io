@@ -7791,7 +7791,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.1.1. Gerçek sayıların üslü ve köklü gösterimleriyle yapılan işlemlere dair muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video/Etkileşimli İçerik",
     "AÇIKLAMA": "Mühendislik, astronomi gibi gerçek yaşam durumlarında üslü, köklü ve irrasyonel sayıların kullanımı ile ilgili video veya etkileşimli içerik hazırlanır. ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 2,
@@ -7800,7 +7800,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.1.2. Gerçek sayı aralıklarının gösteriminde ve aralıklarla ilgili işlemlerde küme sembol ve işlemlerinden yararlanabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Küme kavramına ilişkin temel bilgiler, sembol ve işlemler (eleman olma-olmama, eleman sayısı, listeleme ve ortak özellik yöntemleri, alt küme, boş küme, birleşim, kesişim, fark, tümleme işlemleri) elemanları sayılar olan küme örnekleri üzerinden incelenebileceği etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 3,
@@ -7809,7 +7809,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.1.3. Farklı sayı kümelerinin özellikleri hakkında muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Bir işlem özelliğinin hangi sayı kümeleri için geçerli olduğunu, hangileri için geçerli olmadığını belirlemelerine olanak sağlayan etkileşimli içerik hazırlanır.\n\nSayı kümelerinin özellikleri ile ilgili bir çalışma kâğıdı hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 4,
@@ -7818,7 +7818,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.1.4. Gerçek sayıların işlem özelliklerini cebirsel olarak ifade etmede analojik akıl yü­rütebilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Üslü veya köklü gösterimlerle işlemler içeren problemlerde farklı çözüm stratejisi olarak özdeşliklerden yararlanmayı gerektiren etkileşimli içerik hazırlanır.\n\nÖğrencilere sayı kümelerinin işlem özelliklerine yönelik önermelerden ve cebirsel özdeşliklerin kullanımına yönelik sorulardan oluşan içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 5,
@@ -7827,7 +7827,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.1. Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a≠0) doğ­rusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Gerçek sayılarda f(x)=x şeklinde tanımlanan f fonksiyonunun grafiğinden yararlanılarak g(x)=ax şeklinde tanımlı doğrusal fonksiyonların grafiklerinin nasıl elde edileceği ile ilgili matematik yazılımı kullanılan video hazırlanır.  ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 6,
@@ -7836,7 +7836,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.1. Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a≠0) doğ­rusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Gerçek sayılarda f(x)=x şeklinde tanımlanan f fonksiyonunun grafiğinden yararlanılarak g(x)=x+b şeklinde tanımlı doğrusal fonksiyonların grafiklerinin nasıl elde edileceği ile ilgili matematik yazılımı kullanılan video hazırlanır.  ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 7,
@@ -7845,7 +7845,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.1. Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a≠0) doğ­rusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Gerçek sayılarda f(x)=x şeklinde tanımlanan f fonksiyonunun grafiğinden yararlanılarak g(x)=ax±b şeklinde tanımlı doğrusal fonksiyonların grafiklerinin nasıl elde edileceği ile ilgili matematik yazılımı kullanılan video hazırlanır. ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 8,
@@ -7854,7 +7854,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.1. Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a≠0) doğ­rusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Gerçek sayılarda f(x)=x şeklinde tanımlanan f fonksiyonunun grafiğinden yararlanılarak g(x)=a . f(x±r) ±k şeklinde tanımlı doğrusal fonksiyonların grafiklerinin nasıl elde edileceği ile ilgili matematik yazılımı kullanılan video hazırlanır.  ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 9,
@@ -7863,7 +7863,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.1. Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a≠0) doğ­rusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Farklı bir disipline ait verilerin elektronik tablolara yansıtılarak oluşan fonksiyonun grafiğinin incelendiği ve bu grafiğe ilişkin elde edilen parçalı gösterimli fonksiyonun cebirsel temsilinin yapıldığı etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 10,
@@ -7872,7 +7872,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.2. Gerçek sayılarda f(x) = ± |ax ± b| ± c (a, b, c ∈ℝ, a ≠ 0) şeklinde tanımlı mutlak değer fonksiyonlarının nitel özelliklerini incelemek için doğrusal fonksiyonlara bağlı analojik akıl yürütebilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Gerçek sayılarda f(x) = x şeklinde tanımlı referans fonksiyonun nitel özellikleri dikkate alınarak gerçek sayılarda g(x) = ± |x| şeklinde tanımlı fonksiyonun grafik çizimi ile ilgili matematik yazılımının kullanıldığı video hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 11,
@@ -7881,7 +7881,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.2.2. Gerçek sayılarda f(x) = ± |ax ± b| ± c (a, b, c ∈ℝ, a ≠ 0) şeklinde tanımlı mutlak değer fonksiyonlarının nitel özelliklerini incelemek için doğrusal fonksiyonlara bağlı analojik akıl yürütebilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Doğrusal referans fonksiyonu ile gerçek sayılarda k(x) = ± |h(x)| ± c ( c∈ℝ) şeklinde tanımlı mutlak değer fonksiyonunun cebirsel ve grafiksel ilişkileri ile fonksiyonların nitel özellikleri arasındaki farklılıkların incelendiği matematik yazılımının kullanıldığı video hazırlanır. ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 12,
@@ -7899,7 +7899,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.4.1. Üçgende açı ve kenarla ilgili özellikleri, üçgenin açı ve kenarları arasındaki ilişkileri doğrulayabilme veya ispatlayabilme  ",
     "E-İÇERİK TÜRÜ": "Video/Etkileşimli İçerik",
     "AÇIKLAMA": "Düzlemde verilen bir üçgenin dış açı ölçülerinin toplamının 360° olduğuna dair önermenin farklı ispatlarının ispat adımları ve gerekçeleriyle ilgili boşluk doldurma etkinliği içeren etkileşimli içerik hazırlanır.\n \nÜçgende açı ve kenar ilişkilerini içeren video veya etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 14,
@@ -7908,7 +7908,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.5.1. Geometrik dönüşümlerle ilgili çıkarım yapabilme  ",
     "E-İÇERİK TÜRÜ": "Video",
     "AÇIKLAMA": "Öğrencilerin geometrik dönüşümlerle ilgili çıkarım yapmalarını kolaylaştırmak için geometrik şekiller ve şekillerin dönüşümler altındaki görüntülerinin karşılaştırıldığı matematik yazılımlarının kullanıldığı video hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 15,
@@ -7917,7 +7917,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.5.2. İki üçgenin eş veya benzer olması için gerekli olan asgari koşullarla ilgili çıka­rım yapabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Üçgenlerin eşlik ve benzerlik koşullarının incelendiği etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 16,
@@ -7926,7 +7926,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.5.3. Bir üçgenden hareketle ona benzer üçgenler oluşturma ile ilgili yansıtma yapabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Bir üçgene benzer üçgenler oluşturmayı gerektirecek farklı durumlara ilişkin örnek ve problemler içeren etkileşimli içerik hazırlanır.\n\nÖğrencilere benzer üçgenler oluşturma ile ilgili yansıtma yapabileceği içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 17,
@@ -7935,7 +7935,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.5.4. Tales, Öklid ve Pisagor teoremlerini ispatlayabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Öğrencilere Tales, Öklid ile Pisagor teoremlerini, ispatlarını kullanabileceği ve farklı soru türlerinin bulunduğu etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 18,
@@ -7953,7 +7953,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.3.1. Algoritma temelli yaklaşımlarla problem çözebilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Öğrencilerin algoritmik düşünme becerilerini geliştirmek için tasarlanmış, farklı zorluk seviyelerinde problem senaryoları sunan ve problemleri algoritmik adımlarla çözmeye olanak sağlayan etkileşimli içerik hazırlanır. ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 20,
@@ -7962,7 +7962,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.3.2. Algoritmik yapılar içerisindeki mantık bağlaçlarını ve niceleyicileri çözümleye­bilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Algoritmik yapılar içindeki mantık bağlaçlarına ve niceleyicilere yönelik farklı türde sorular içeren etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 21,
@@ -7971,7 +7971,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.3.3. Mantık bağlaçları ve niceleyicilerin algoritmalarda kullanımına yönelik edindiği deneyimi farklı matematiksel görev ve problemlere yansıtabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Algoritmik yapılarda, matematiksel önerme ve ispatlarda kullanılan mantık bağlaçları ve niceleyicilerin anlamlarını çözümleme ve yorumlama yapmaya olanak sağlayan etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 22,
@@ -7980,7 +7980,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.6.1. Tek nicel değişkenli veri dağılımları ile çalışabilme ve tek nicel değişken içeren veriye dayalı karar verebilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Araştırma sorusu verilerek istatistiksel araştırma sorusu olup olmadığı, ölçütleri (amacın net olması, araştırmaya değer olması gibi) sağlayıp sağlamadığını ölçen, araştırma sorusu niteliğinde olmayanların ise tek nicel veriye dayalı araştırma sorusu oluşturmalarının istendiği etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 23,
@@ -7989,7 +7989,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.6.2. Başkaları tarafından oluşturulan tek nicel değişkenli veri dağılımlarına ilişkin istatistiksel sonuç veya yorumları tartışabilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Nicel veri dağılımına ilişkin hatalı/yanlı sonuç, yorum çıkarım veya tahminleri içeren etkileşimli içerik hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 24,
@@ -7998,7 +7998,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.7.1. Olayların olasılığını gözleme dayalı tahmin edebilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Verilen bir olaya ait deneylerin tekrarlanması sonucu elde edilen verileri girebileceği çetele ve sıklık tablolarının ve sütun grafiklerini çizebileceği grafiklerin yer aldığı etkileşimli içerik hazırlanır.     ",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": 25,
@@ -8007,7 +8007,7 @@
     "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM": "MAT.9.7.2. Olayların olasılığına ilişkin tümevarımsal akıl yürütebilme  ",
     "E-İÇERİK TÜRÜ": "Etkileşimli İçerik",
     "AÇIKLAMA": "Olayların olasılığına ilişkin tümevarımsal akıl yürütebilmesini sağlayıcı benzetim / simülasyon hazırlanır.",
-    "Program Türü": "Diğer"
+    "Program Türü": "TYMM"
   },
   {
     "SIRA NO": "SIRA NO",
