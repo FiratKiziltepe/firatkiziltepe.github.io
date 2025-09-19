@@ -533,25 +533,24 @@ class TableManager {
     renderTableHeader() {
         const thead = document.getElementById('tableHead');
         
-        // İlk kez oluşturuyorsa başlığı oluştur
-        if (thead.children.length === 0) {
-            const headerRow = document.createElement('tr');
-            const dersColumn = this.findDersColumn();
+        // Başlığı temizle ve yeniden oluştur
+        thead.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        const dersColumn = this.findDersColumn();
+        
+        this.headers.forEach((header) => {
+            const th = document.createElement('th');
+            th.textContent = header;
             
-            this.headers.forEach((header) => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                
-                // Sadece ders sütununda sıralama
-                if (header === dersColumn) {
-                    th.classList.add('sortable');
-                    th.addEventListener('click', () => this.handleSort(header));
-                }
-                
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-        }
+            // Sadece ders sütununda sıralama
+            if (header === dersColumn) {
+                th.classList.add('sortable');
+                th.addEventListener('click', () => this.handleSort(header));
+            }
+            
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
     }
 
     renderTable() {
