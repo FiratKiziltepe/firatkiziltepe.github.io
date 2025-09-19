@@ -464,10 +464,12 @@ class TableManager {
             if (programTuru) {
                 const programTuruValue = row['Program Türü'] || '';
                 if (programTuru === 'TYMM') {
+                    // TYMM seçiliyse sadece TYMM olanları göster
                     if (programTuruValue !== 'TYMM') {
                         return false;
                     }
                 } else if (programTuru === 'Diğer') {
+                    // Diğer seçiliyse TYMM olmayanları göster (boş olanlar da dahil)
                     if (programTuruValue === 'TYMM') {
                         return false;
                     }
@@ -530,43 +532,33 @@ class TableManager {
 
     renderTableHeader() {
         const thead = document.getElementById('tableHead');
-        const programTuru = document.getElementById('programTuru').value;
         
-        // Başlığı yeniden oluştur
-        thead.innerHTML = '';
-        const headerRow = document.createElement('tr');
-        const dersColumn = this.findDersColumn();
-        
-        this.headers.forEach((header) => {
-            // "Diğer" seçiliyken Program Türü sütununu gizle
-            if (header === 'Program Türü' && programTuru === 'Diğer') {
-                return; // Bu sütunu eklemeden geç
-            }
+        // İlk kez oluşturuyorsa başlığı oluştur
+        if (thead.children.length === 0) {
+            const headerRow = document.createElement('tr');
+            const dersColumn = this.findDersColumn();
             
-            const th = document.createElement('th');
-            th.textContent = header;
-            
-            // Sadece ders sütununda sıralama
-            if (header === dersColumn) {
-                th.classList.add('sortable');
-                th.addEventListener('click', () => this.handleSort(header));
-            }
-            
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
+            this.headers.forEach((header) => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                
+                // Sadece ders sütununda sıralama
+                if (header === dersColumn) {
+                    th.classList.add('sortable');
+                    th.addEventListener('click', () => this.handleSort(header));
+                }
+                
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+        }
     }
 
     renderTable() {
         const thead = document.getElementById('tableHead');
         const tbody = document.getElementById('tableBody');
-        const programTuru = document.getElementById('programTuru').value;
 
-        // Başlık varsa sıralama durumunu güncelle
-        if (thead.children.length > 0) {
-            this.updateSortingUI();
-        }
-
+        // Sıralama durumunu güncelle
         this.updateSortingUI();
 
         // Sayfalama için veriyi hazırla
@@ -581,11 +573,6 @@ class TableManager {
         pageData.forEach(row => {
             const tr = document.createElement('tr');
             this.headers.forEach(header => {
-                // "Diğer" seçiliyken Program Türü sütununu gizle
-                if (header === 'Program Türü' && programTuru === 'Diğer') {
-                    return; // Bu sütunu eklemeden geç
-                }
-                
                 const td = document.createElement('td');
                 const value = row[header] || '';
                 
@@ -608,19 +595,10 @@ class TableManager {
 
     updateSortingUI() {
         const thead = document.getElementById('tableHead');
-        const programTuru = document.getElementById('programTuru').value;
-        
-        // Program Türü filtresine göre görünür header indekslerini hesapla
-        let visibleHeaders = this.headers.filter(header => {
-            if (header === 'Program Türü' && programTuru === 'Diğer') {
-                return false;
-            }
-            return true;
-        });
         
         thead.querySelectorAll('th').forEach((th, index) => {
             th.classList.remove('sort-asc', 'sort-desc');
-            if (this.sortColumn === visibleHeaders[index]) {
+            if (this.sortColumn === this.headers[index]) {
                 th.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
             }
         });
