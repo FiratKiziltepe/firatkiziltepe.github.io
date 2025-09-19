@@ -552,7 +552,7 @@ body {
 }
 
 .data-table thead {
-    background: #4472C4;
+    background: #495057;
 }
 
 .data-table th {
@@ -560,8 +560,8 @@ body {
     text-align: left;
     font-weight: 600;
     color: #ffffff;
-    border-bottom: 2px solid #3a5998;
-    border-right: 1px solid #3a5998;
+    border-bottom: 2px solid #343a40;
+    border-right: 1px solid #343a40;
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s ease;
@@ -572,7 +572,7 @@ body {
 }
 
 .data-table th:hover {
-    background-color: #3a5998;
+    background-color: #343a40;
 }
 
 .data-table th.sortable::after {
@@ -639,10 +639,10 @@ body {
 
 .data-table th:nth-child(3),
 .data-table td:nth-child(3) {
-    /* E-İçerik Türü - otomatik sığdır */
+    /* E-İçerik Türü - içeriğe göre otomatik ayarla */
     width: auto;
-    min-width: 100px;
-    max-width: 150px;
+    min-width: 120px;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(4),
@@ -655,10 +655,11 @@ body {
 
 .data-table th:nth-child(5),
 .data-table td:nth-child(5) {
-    /* Program Türü - daralt */
-    width: 80px;
-    max-width: 80px;
-    min-width: 70px;
+    /* Program Türü - E-İçerik Türü gibi daralt */
+    width: auto;
+    min-width: 80px;
+    max-width: 120px;
+    white-space: nowrap;
 }
 
 .data-table td:last-child {
