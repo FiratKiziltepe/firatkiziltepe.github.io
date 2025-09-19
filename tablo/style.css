@@ -620,62 +620,58 @@ body {
     line-height: 1.5;
 }
 
-/* Sütun genişlik ayarları */
+/* Sütun genişlik ayarları - orantılı düzenleme */
+.data-table {
+    table-layout: fixed;
+}
+
 .data-table th:nth-child(1),
 .data-table td:nth-child(1) {
-    /* Sıra No - daralt */
-    width: 60px;
-    max-width: 60px;
-    min-width: 60px;
+    /* Sıra No */
+    width: 4%;
+    min-width: 50px;
 }
 
 .data-table th:nth-child(2),
 .data-table td:nth-child(2) {
-    /* Ders Adı - daralt */
-    width: 150px;
-    max-width: 150px;
+    /* Ders Adı */
+    width: 12%;
     min-width: 120px;
 }
 
 .data-table th:nth-child(3),
 .data-table td:nth-child(3) {
-    /* Ünite/Tema - orta genişlik */
-    width: 200px;
-    max-width: 250px;
-    min-width: 180px;
+    /* Ünite/Tema/Öğrenme Alanı */
+    width: 18%;
+    min-width: 150px;
 }
 
 .data-table th:nth-child(4),
 .data-table td:nth-child(4) {
-    /* Kazanım/Öğrenme - orta genişlik */
-    width: 250px;
-    max-width: 300px;
-    min-width: 200px;
+    /* Kazanım/Öğrenme Çıktısı/Bölüm */
+    width: 20%;
+    min-width: 180px;
 }
 
 .data-table th:nth-child(5),
 .data-table td:nth-child(5) {
-    /* E-İçerik Türü - içeriğe göre otomatik ayarla */
-    width: auto;
-    min-width: 120px;
-    white-space: nowrap;
+    /* E-İçerik Türü */
+    width: 10%;
+    min-width: 100px;
 }
 
 .data-table th:nth-child(6),
 .data-table td:nth-child(6) {
-    /* Açıklama - genişlet */
-    width: 400px;
-    min-width: 300px;
-    max-width: 500px;
+    /* Açıklama */
+    width: 28%;
+    min-width: 250px;
 }
 
 .data-table th:nth-child(7),
 .data-table td:nth-child(7) {
-    /* Program Türü - daralt */
-    width: auto;
+    /* Program Türü */
+    width: 8%;
     min-width: 80px;
-    max-width: 120px;
-    white-space: nowrap;
 }
 
 .data-table td:last-child {

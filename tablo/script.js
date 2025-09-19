@@ -462,15 +462,15 @@ class TableManager {
 
             // Program türü filtresi
             if (programTuru) {
-                const programTuruValue = row['Program Türü'] || '';
+                const programTuruValue = (row['Program Türü'] || '').toString().trim();
                 if (programTuru === 'TYMM') {
                     // TYMM seçiliyse sadece TYMM olanları göster
                     if (programTuruValue !== 'TYMM') {
                         return false;
                     }
                 } else if (programTuru === 'Diğer') {
-                    // Diğer seçiliyse TYMM olmayanları göster (boş olanlar da dahil)
-                    if (programTuruValue === 'TYMM') {
+                    // Diğer seçiliyse sadece Program Türü'nde "Diğer" yazanları göster
+                    if (programTuruValue !== 'Diğer') {
                         return false;
                     }
                 }
