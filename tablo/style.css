@@ -512,6 +512,7 @@ body {
 
 .btn-icon {
     font-size: 12px;
+    color: #edeff1;
 }
 
 /* Info Bar */
@@ -551,16 +552,16 @@ body {
 }
 
 .data-table thead {
-    background: #f8f9fa;
+    background: #4472C4;
 }
 
 .data-table th {
     padding: 16px 14px;
     text-align: left;
     font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #e9ecef;
-    border-right: 1px solid #e9ecef;
+    color: #ffffff;
+    border-bottom: 2px solid #3a5998;
+    border-right: 1px solid #3a5998;
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s ease;
@@ -571,7 +572,7 @@ body {
 }
 
 .data-table th:hover {
-    background-color: #e9ecef;
+    background-color: #3a5998;
 }
 
 .data-table th.sortable::after {
@@ -584,12 +585,12 @@ body {
 
 .data-table th.sort-asc::after {
     content: '↑';
-    color: #4a90a4;
+    color: #ffffff;
 }
 
 .data-table th.sort-desc::after {
     content: '↓';
-    color: #4a90a4;
+    color: #ffffff;
 }
 
 .data-table tbody tr {
@@ -617,6 +618,47 @@ body {
     max-width: 300px;
     font-size: 14px;
     line-height: 1.5;
+}
+
+/* Sütun genişlik ayarları */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+    /* Sıra No - daralt */
+    width: 60px;
+    max-width: 60px;
+    min-width: 60px;
+}
+
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+    /* Ders Adı - daralt */
+    width: 150px;
+    max-width: 150px;
+    min-width: 120px;
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+    /* E-İçerik Türü - otomatik sığdır */
+    width: auto;
+    min-width: 100px;
+    max-width: 150px;
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+    /* Açıklama - genişlet */
+    width: 400px;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) {
+    /* Program Türü - daralt */
+    width: 80px;
+    max-width: 80px;
+    min-width: 70px;
 }
 
 .data-table td:last-child {

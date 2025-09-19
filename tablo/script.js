@@ -52,6 +52,7 @@ class TableManager {
             this.setupMultiselect();
             
             this.filteredData = [...this.data];
+            this.renderTableHeader();
             this.renderTable();
             this.renderPagination();
             this.updateResultCount();
@@ -444,6 +445,9 @@ class TableManager {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
         const programTuru = document.getElementById('programTuru').value;
 
+        // Tablo başlığını yeniden oluştur (Program Türü sütunu görünürlüğü için)
+        this.renderTableHeader();
+
         // Performans için önbellek oluştur
         const startTime = performance.now();
 
@@ -524,37 +528,46 @@ class TableManager {
         this.updateResultCount();
     }
 
+    renderTableHeader() {
+        const thead = document.getElementById('tableHead');
+        const programTuru = document.getElementById('programTuru').value;
+        
+        // Başlığı yeniden oluştur
+        thead.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        const dersColumn = this.findDersColumn();
+        
+        this.headers.forEach((header) => {
+            // "Diğer" seçiliyken Program Türü sütununu gizle
+            if (header === 'Program Türü' && programTuru === 'Diğer') {
+                return; // Bu sütunu eklemeden geç
+            }
+            
+            const th = document.createElement('th');
+            th.textContent = header;
+            
+            // Sadece ders sütununda sıralama
+            if (header === dersColumn) {
+                th.classList.add('sortable');
+                th.addEventListener('click', () => this.handleSort(header));
+            }
+            
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+    }
+
     renderTable() {
         const thead = document.getElementById('tableHead');
         const tbody = document.getElementById('tableBody');
+        const programTuru = document.getElementById('programTuru').value;
 
-        // Performance optimization - sadece değişiklik varsa başlıkları yeniden oluştur
-        if (thead.children.length === 0) {
-            const headerRow = document.createElement('tr');
-            const dersColumn = this.findDersColumn();
-            
-            this.headers.forEach((header) => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                
-                // Sadece ders sütununda sıralama
-                if (header === dersColumn) {
-                    th.classList.add('sortable');
-                    th.addEventListener('click', () => this.handleSort(header));
-                }
-                
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
+        // Başlık varsa sıralama durumunu güncelle
+        if (thead.children.length > 0) {
+            this.updateSortingUI();
         }
 
-        // Sıralama durumunu güncelle
-        thead.querySelectorAll('th').forEach((th, index) => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            if (this.sortColumn === this.headers[index]) {
-                th.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-            }
-        });
+        this.updateSortingUI();
 
         // Sayfalama için veriyi hazırla
         const startIndex = (this.currentPage - 1) * this.pageSize;
@@ -568,6 +581,11 @@ class TableManager {
         pageData.forEach(row => {
             const tr = document.createElement('tr');
             this.headers.forEach(header => {
+                // "Diğer" seçiliyken Program Türü sütununu gizle
+                if (header === 'Program Türü' && programTuru === 'Diğer') {
+                    return; // Bu sütunu eklemeden geç
+                }
+                
                 const td = document.createElement('td');
                 const value = row[header] || '';
                 
@@ -586,6 +604,26 @@ class TableManager {
         // Tek seferde DOM'a ekle
         tbody.innerHTML = '';
         tbody.appendChild(fragment);
+    }
+
+    updateSortingUI() {
+        const thead = document.getElementById('tableHead');
+        const programTuru = document.getElementById('programTuru').value;
+        
+        // Program Türü filtresine göre görünür header indekslerini hesapla
+        let visibleHeaders = this.headers.filter(header => {
+            if (header === 'Program Türü' && programTuru === 'Diğer') {
+                return false;
+            }
+            return true;
+        });
+        
+        thead.querySelectorAll('th').forEach((th, index) => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            if (this.sortColumn === visibleHeaders[index]) {
+                th.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+        });
     }
 
     updateResultCount() {
