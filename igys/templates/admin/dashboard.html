@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - TTKB İnceleme Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+    <div>
+        <button class="btn btn-success me-2" onclick="showContentModal()">
+            <i class="fas fa-plus me-1"></i>Yeni İçerik
+        </button>
+        <button class="btn btn-primary" onclick="showCommissionModal()">
+            <i class="fas fa-users me-1"></i>Yeni Komisyon
+        </button>
+    </div>
+</div>
+
+<!-- İstatistikler -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Toplam İçerik</h6>
+                        <h3>{{ contents|length }}</h3>
+                    </div>
+                    <div>
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Aktif Komisyon</h6>
+                        <h3>{{ commissions|length }}</h3>
+                    </div>
+                    <div>
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Toplam Kullanıcı</h6>
+                        <h3>{{ users|length }}</h3>
+                    </div>
+                    <div>
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Bekleyen İşler</h6>
+                        <h3>{{ contents|selectattr('durum', 'equalto', 'beklemede')|list|length }}</h3>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- İçerikler Tablosu -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-list me-2"></i>İçerik Listesi</h5>
+    </div>
+    <div class="card-body">
+        {% if contents %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Başlık</th>
+                        <th>Durum</th>
+                        <th>Oluşturulma</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for content in contents %}
+                    <tr>
+                        <td>{{ content.id }}</td>
+                        <td>{{ content.baslik }}</td>
+                        <td>
+                            {% if content.durum == 'beklemede' %}
+                                <span class="badge bg-warning">Beklemede</span>
+                            {% elif content.durum == 'incelemede' %}
+                                <span class="badge bg-info">İncelemede</span>
+                            {% elif content.durum == 'tamamlandi' %}
+                                <span class="badge bg-success">Tamamlandı</span>
+                            {% elif content.durum == 'yegitek' %}
+                                <span class="badge bg-primary">Yeğitek'te</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ content.olusturma_tarihi.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>
+                            {% if content.durum == 'beklemede' %}
+                            <button class="btn btn-sm btn-outline-primary" onclick="assignToCommission({{ content.id }})">
+                                <i class="fas fa-user-plus"></i> Komisyon Ata
+                            </button>
+                            {% elif content.durum == 'tamamlandi' %}
+                            <button class="btn btn-sm btn-outline-success" onclick="sendToYegitek({{ content.id }})">
+                                <i class="fas fa-paper-plane"></i> Yeğitek'e Gönder
+                            </button>
+                            {% elif content.durum == 'yegitek' %}
+                            <a href="{{ url_for('correction_form', content_id=content.id) }}" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-edit"></i> Düzeltme Formu
+                            </a>
+                            {% else %}
+                            <span class="badge bg-info">{{ content.durum.title() }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Henüz içerik bulunmuyor.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Yeni İçerik Modal -->
+<div class="modal fade" id="contentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni İçerik Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="contentForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="contentTitle" class="form-label">İçerik Başlığı</label>
+                        <input type="text" class="form-control" id="contentTitle" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-success">Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Komisyon Modal -->
+<div class="modal fade" id="commissionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Komisyon Oluştur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="commissionForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="commissionName" class="form-label">Komisyon Adı</label>
+                        <input type="text" class="form-control" id="commissionName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="commissionChair" class="form-label">Komisyon Başkanı</label>
+                        <select class="form-control" id="commissionChair" required>
+                            <option value="">Başkan Seçin</option>
+                            {% for user in users %}
+                                {% if user.rol == 'baskan' %}
+                                <option value="{{ user.id }}">{{ user.ad }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="commissionMembers" class="form-label">Komisyon Üyeleri</label>
+                        <select class="form-control" id="commissionMembers" multiple>
+                            {% for user in users %}
+                                {% if user.rol == 'uye' %}
+                                <option value="{{ user.id }}">{{ user.ad }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Ctrl+click ile birden fazla üye seçebilirsiniz</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="commissionDuration" class="form-label">İnceleme Süresi (Gün)</label>
+                        <input type="number" class="form-control" id="commissionDuration" value="7" min="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Oluştur</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Komisyon Atama Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Komisyon Atama</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="assignForm">
+                <div class="modal-body">
+                    <div id="assignContent">
+                        <!-- Atama içeriği buraya yüklenecek -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Ata</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showContentModal() {
+    new bootstrap.Modal(document.getElementById('contentModal')).show();
+}
+
+function showCommissionModal() {
+    new bootstrap.Modal(document.getElementById('commissionModal')).show();
+}
+
+function assignToCommission(contentId) {
+    fetch(`/admin/assign-modal/${contentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('assignContent').innerHTML = data.html;
+                document.getElementById('assignForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    const commissionId = document.getElementById('assignCommission').value;
+                    if (!commissionId) {
+                        alert('Lütfen bir komisyon seçin');
+                        return;
+                    }
+                    
+                    fetch(`/admin/content/${contentId}/assign`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content_id: contentId,
+                            commission_id: commissionId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert(result.message);
+                            location.reload();
+                        } else {
+                            alert('Hata: ' + result.message);
+                        }
+                    });
+                };
+                new bootstrap.Modal(document.getElementById('assignModal')).show();
+            } else {
+                alert('Hata: ' + data.message);
+            }
+        });
+}
+
+function sendToYegitek(contentId) {
+    if (confirm('Bu içeriği Yeğitek\'e göndermek istediğinizden emin misiniz?')) {
+        fetch(`/admin/content/${contentId}/send-yegitek`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Hata: ' + data.message);
+            }
+        });
+    }
+}
+
+// Form submit handlers
+document.getElementById('contentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const title = document.getElementById('contentTitle').value;
+    
+    fetch('/admin/content/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({title: title})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    });
+});
+
+document.getElementById('commissionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('commissionName').value);
+    formData.append('chair_id', document.getElementById('commissionChair').value);
+    formData.append('duration', document.getElementById('commissionDuration').value);
+    
+    const selectedMembers = Array.from(document.getElementById('commissionMembers').selectedOptions)
+        .map(option => option.value);
+    formData.append('member_ids', JSON.stringify(selectedMembers));
+    
+    fetch('/admin/commission/add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    });
+});
+</script>
+{% endblock %}

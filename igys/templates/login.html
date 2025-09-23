@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş - TTKB İnceleme Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4><i class="fas fa-sign-in-alt me-2"></i>Sistem Girişi</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    <div class="mt-3">
+                        <h6>Demo Hesaplar:</h6>
+                        <small class="text-muted">
+                            <strong>Admin:</strong> admin@ttkb.gov.tr / admin123<br>
+                            <strong>Başkan:</strong> baskan@ttkb.gov.tr / baskan123<br>
+                            <strong>Üye:</strong> uye@ttkb.gov.tr / uye123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

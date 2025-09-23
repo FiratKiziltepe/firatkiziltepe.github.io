@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Düzeltme Formu - TTKB İnceleme Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit me-2"></i>Düzeltme Formu</h2>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">{{ content.baslik }} - Düzeltme Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <form id="correctionForm">
+                    <input type="hidden" id="contentId" value="{{ content.id }}">
+                    
+                    {% if findings %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tespit Eden</th>
+                                    <th>Kategori</th>
+                                    <th>Açıklama</th>
+                                    <th>Düzeltme Durumu</th>
+                                    <th>Yeğitek Açıklaması</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for finding in findings %}
+                                <tr>
+                                    <td>{{ finding.review.user.ad }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ finding.kategori }}</span>
+                                    </td>
+                                    <td>{{ finding.aciklama }}</td>
+                                    <td>
+                                        <select class="form-control form-control-sm correction-status" 
+                                                data-finding-id="{{ finding.id }}">
+                                            <option value="duzeltildi">Düzeltildi</option>
+                                            <option value="duzeltilmedi">Düzeltilmedi</option>
+                                            <option value="kismen">Kısmen Düzeltildi</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <textarea class="form-control form-control-sm correction-explanation" 
+                                                  data-finding-id="{{ finding.id }}"
+                                                  rows="2" 
+                                                  placeholder="Düzeltme açıklaması..."></textarea>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Genel Değerlendirme</h6>
+                        <textarea class="form-control" id="generalEvaluation" rows="4" 
+                                  placeholder="Genel düzeltme değerlendirmesi..."></textarea>
+                    </div>
+                    
+                    <div class="mt-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-warning" onclick="returnToCommission()">
+                            <i class="fas fa-undo me-1"></i>Komisyona Geri Gönder
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-1"></i>Düzeltmeleri Kaydet
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Bu içerik için henüz tespit bulunamadı</h5>
+                        <p class="text-muted">İnceleme süreci tamamlandıktan sonra düzeltme formu doldurulabilir.</p>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle me-2"></i>İçerik Bilgileri</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><strong>Başlık:</strong> {{ content.baslik }}</li>
+                    <li><strong>Durum:</strong> 
+                        <span class="badge bg-primary">{{ content.durum.title() }}</span>
+                    </li>
+                    <li><strong>Oluşturulma:</strong> {{ content.olusturma_tarihi.strftime('%d.%m.%Y %H:%M') }}</li>
+                    {% if content.reviews %}
+                    <li><strong>İnceleme Komisyonu:</strong> {{ content.reviews[0].commission.isim }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        {% if findings %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-pie me-2"></i>Tespit İstatistikleri</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-danger">{{ findings|length }}</h4>
+                        <small>Toplam Tespit</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info">{{ findings|groupby('kategori')|list|length }}</h4>
+                        <small>Farklı Kategori</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6>Kategoriler:</h6>
+                {% for kategori, tespit_list in findings|groupby('kategori') %}
+                <div class="d-flex justify-content-between">
+                    <span>{{ kategori }}</span>
+                    <span class="badge bg-secondary">{{ tespit_list|list|length }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Komisyona Geri Gönderme Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Komisyona Geri Gönder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="returnReason" class="form-label">Geri Gönderme Nedeni</label>
+                    <textarea class="form-control" id="returnReason" rows="3" 
+                              placeholder="Neden tekrar incelenmesi gerekiyor?"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="returnCommission" class="form-label">Komisyon Seçin</label>
+                    <select class="form-control" id="returnCommission">
+                        <option value="same">Aynı Komisyon</option>
+                        <option value="new">Yeni Komisyon</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-warning" onclick="confirmReturn()">Geri Gönder</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function returnToCommission() {
+    new bootstrap.Modal(document.getElementById('returnModal')).show();
+}
+
+function confirmReturn() {
+    const reason = document.getElementById('returnReason').value;
+    const commissionType = document.getElementById('returnCommission').value;
+    const contentId = document.getElementById('contentId').value;
+    
+    if (!reason.trim()) {
+        alert('Lütfen geri gönderme nedenini belirtin');
+        return;
+    }
+    
+    fetch(`/admin/content/${contentId}/return-to-commission`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            reason: reason,
+            commission_type: commissionType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = '/admin';
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    });
+}
+
+document.getElementById('correctionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const contentId = document.getElementById('contentId').value;
+    const corrections = [];
+    
+    // Her tespit için düzeltme bilgilerini topla
+    document.querySelectorAll('.correction-status').forEach(select => {
+        const findingId = select.dataset.findingId;
+        const status = select.value;
+        const explanation = document.querySelector(`.correction-explanation[data-finding-id="${findingId}"]`).value;
+        
+        corrections.push({
+            finding_id: findingId,
+            status: status,
+            explanation: explanation
+        });
+    });
+    
+    const generalEvaluation = document.getElementById('generalEvaluation').value;
+    
+    fetch(`/admin/content/${contentId}/save-corrections`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            corrections: corrections,
+            general_evaluation: generalEvaluation
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Düzeltmeler başarıyla kaydedildi!');
+            window.location.href = '/admin';
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    });
+});
+</script>
+{% endblock %}
