@@ -297,6 +297,11 @@ class TableManager {
             optionElement.className = 'multiselect-option';
             optionElement.setAttribute('data-value', option);
             
+            // Seçili olanları işaretle
+            if (this.selectedValues.has(option)) {
+                optionElement.classList.add('selected');
+            }
+            
             optionElement.innerHTML = `
                 <div class="option-checkbox"></div>
                 <span class="option-text">${option}</span>
@@ -321,8 +326,10 @@ class TableManager {
         const optionsContainer = document.getElementById('multiselectOptions');
         
         if (!term) {
-            // Arama terimi yoksa ilk 10 seçeneği göster
+            // Arama terimi yoksa tüm seçenekleri göster
             this.populateMultiselect(this.allOptions);
+            // Seçili olanları işaretle
+            this.updateMultiselectSelectedState();
         } else {
             // Arama terimine göre filtrele ve tüm eşleşenleri göster
             const filteredOptions = this.allOptions.filter(option => 
@@ -358,6 +365,18 @@ class TableManager {
         }
         
         this.showMultiselectDropdown();
+    }
+
+    updateMultiselectSelectedState() {
+        const options = document.querySelectorAll('.multiselect-option');
+        options.forEach(option => {
+            const value = option.getAttribute('data-value');
+            if (this.selectedValues.has(value)) {
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
+            }
+        });
     }
 
     toggleMultiselectOption(option) {
