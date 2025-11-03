@@ -467,6 +467,13 @@ class TableManager {
         });
         
         this.updateSelectedTags();
+        
+        // Input alanını temizle ve listeyi yenile
+        const input = document.getElementById('dersFilter');
+        input.value = '';
+        this.populateMultiselect(this.allOptions);
+        this.updateMultiselectSelectedState();
+        
         this.applyFilters();
     }
 
