@@ -409,10 +409,18 @@ class TableManager {
             Array.from(this.selectedValues).slice(0, 3).forEach(value => {
                 const tag = document.createElement('div');
                 tag.className = 'tag';
-                tag.innerHTML = `
-                    <span class="tag-text">${value}</span>
-                    <button class="tag-remove" onclick="tableManager.removeTag('${value}')">&times;</button>
-                `;
+                
+                const tagText = document.createElement('span');
+                tagText.className = 'tag-text';
+                tagText.textContent = value;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'tag-remove';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => this.removeTag(value);
+                
+                tag.appendChild(tagText);
+                tag.appendChild(removeBtn);
                 tagsContainer.appendChild(tag);
             });
             
@@ -432,10 +440,12 @@ class TableManager {
         this.selectedValues.delete(value);
         
         // Option'ı unselect yap
-        const option = document.querySelector(`.multiselect-option[data-value="${value}"]`);
-        if (option) {
-            option.classList.remove('selected');
-        }
+        const options = document.querySelectorAll('.multiselect-option');
+        options.forEach(option => {
+            if (option.getAttribute('data-value') === value) {
+                option.classList.remove('selected');
+            }
+        });
         
         this.updateSelectedTags();
         this.applyFilters();

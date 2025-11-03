@@ -522,6 +522,13 @@ body {
     border-radius: 6px;
     padding: 12px 20px;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.info-content {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .result-text {
