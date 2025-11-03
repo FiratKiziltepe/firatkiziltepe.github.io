@@ -15,18 +15,18 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #f8f9fa;
             color: #343a40;
-            padding: 20px;
+            padding: 15px;
         }
 
         .header-container {
             background: linear-gradient(135deg, #4472C4 0%, #70B7BA 100%);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-radius: 8px;
         }
 
         .header-content {
-            padding: 20px 30px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -35,26 +35,26 @@
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .header-logo {
-            height: 70px;
+            height: 50px;
             width: auto;
             object-fit: contain;
         }
 
         .title-section h1 {
             color: #ffffff;
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             letter-spacing: 0.5px;
         }
 
         .subtitle {
             color: #e8f4f8;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 400;
         }
 
@@ -69,11 +69,11 @@
         .report-header {
             background: #f8f9fa;
             border-bottom: 2px solid #4472C4;
-            padding: 20px;
+            padding: 12px 15px;
         }
 
         .report-header h2 {
-            font-size: 20px;
+            font-size: 16px;
             color: #495057;
             font-weight: 600;
         }
@@ -85,7 +85,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         thead {
@@ -93,19 +93,24 @@
         }
 
         th {
-            padding: 14px 12px;
+            padding: 10px 8px;
             text-align: center;
             font-weight: 600;
             color: #ffffff;
             border: 1px solid #2c5aa0;
             text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            letter-spacing: 0.3px;
         }
 
         th:first-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        th:nth-child(2) {
             text-align: left;
-            padding-left: 20px;
+            padding-left: 15px;
         }
 
         tbody tr {
@@ -126,15 +131,22 @@
         }
 
         td {
-            padding: 12px;
+            padding: 8px;
             border: 1px solid #e9ecef;
             text-align: center;
         }
 
         td:first-child {
+            text-align: center;
+            font-weight: 500;
+            color: #6c757d;
+            width: 60px;
+        }
+
+        td:nth-child(2) {
             text-align: left;
             font-weight: 500;
-            padding-left: 20px;
+            padding-left: 15px;
             color: #495057;
         }
 
@@ -146,13 +158,17 @@
         tfoot td {
             color: #ffffff;
             border: 1px solid #6c757d;
-            padding: 14px 12px;
-            font-size: 14px;
+            padding: 10px 8px;
+            font-size: 13px;
         }
 
         tfoot td:first-child {
+            text-align: center;
+        }
+
+        tfoot td:nth-child(2) {
             text-align: left;
-            padding-left: 20px;
+            padding-left: 15px;
         }
 
         .loading-overlay {
@@ -226,6 +242,7 @@
             <table id="reportTable">
                 <thead>
                     <tr>
+                        <th>Sıra No</th>
                         <th>Ders Adı</th>
                         <th>Diğer</th>
                         <th>TYMM</th>
@@ -285,7 +302,8 @@
                     const dersAdi = row['DERS ADI'];
                     const programTuru = row['Program Türü'] || '';
                     
-                    if (!dersAdi) return;
+                    // DERS ADI satırını ve boş satırları hariç tut
+                    if (!dersAdi || dersAdi === 'DERS ADI') return;
                     
                     if (!reportData[dersAdi]) {
                         reportData[dersAdi] = {
@@ -317,7 +335,7 @@
                 let totalTYMM = 0;
                 let totalGenel = 0;
 
-                sortedDersler.forEach(ders => {
+                sortedDersler.forEach((ders, index) => {
                     const data = reportData[ders];
                     const row = document.createElement('tr');
                     
@@ -326,6 +344,7 @@
                     const genelValue = data['Genel Toplam'];
                     
                     row.innerHTML = `
+                        <td>${index + 1}</td>
                         <td>${ders}</td>
                         <td>${digerValue}</td>
                         <td>${tymmValue}</td>
@@ -343,6 +362,7 @@
                 const tfoot = document.getElementById('reportFooter');
                 tfoot.innerHTML = `
                     <tr>
+                        <td></td>
                         <td>Genel Toplam</td>
                         <td>${totalDiger}</td>
                         <td>${totalTYMM}</td>
