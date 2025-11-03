@@ -51,14 +51,23 @@ class TableManager {
             this.setupFilters();
             this.setupMultiselect();
             
-            this.filteredData = [...this.data];
+            // DERS ADI satırlarını hariç tutarak filtreleme yap
+            const dersColumn = this.findDersColumn();
+            this.filteredData = this.data.filter(row => 
+                !dersColumn || row[dersColumn] !== 'DERS ADI'
+            );
+            
             this.renderTableHeader();
             this.renderTable();
             this.renderPagination();
             this.updateResultCount();
             this.showSections(true);
             
-            this.updateStatus(`${this.data.length} kayıt yüklendi`, 'loaded');
+            // DERS ADI satırları hariç toplam kayıt sayısı
+            const totalRecords = this.data.filter(row => 
+                !dersColumn || row[dersColumn] !== 'DERS ADI'
+            ).length;
+            this.updateStatus(`${totalRecords} kayıt yüklendi`, 'loaded');
 
         } catch (error) {
             console.error('Veri yükleme hatası:', error);
@@ -490,6 +499,12 @@ class TableManager {
         this.filteredData = this.data.filter(row => {
             // Ders filtresi - çoklu seçim kontrolü
             const dersColumn = this.findDersColumn();
+            
+            // DERS ADI satırlarını hariç tut
+            if (dersColumn && row[dersColumn] === 'DERS ADI') {
+                return false;
+            }
+            
             if (this.selectedValues.size > 0 && dersColumn) {
                 if (!this.selectedValues.has(row[dersColumn])) {
                     return false;
@@ -556,7 +571,12 @@ class TableManager {
         // Multiselect seçimlerini temizle
         this.clearAllOptions();
         
-        this.filteredData = [...this.data];
+        // DERS ADI satırlarını hariç tut
+        const dersColumn = this.findDersColumn();
+        this.filteredData = this.data.filter(row => 
+            !dersColumn || row[dersColumn] !== 'DERS ADI'
+        );
+        
         this.currentPage = 1;
         this.sortColumn = null;
         this.sortDirection = 'asc';
@@ -641,7 +661,12 @@ class TableManager {
 
     updateResultCount() {
         const resultCount = document.getElementById('resultCount');
-        const total = this.data.length;
+        
+        // DERS ADI satırlarını hariç tut
+        const dersColumn = this.findDersColumn();
+        const total = this.data.filter(row => 
+            !dersColumn || row[dersColumn] !== 'DERS ADI'
+        ).length;
         const filtered = this.filteredData.length;
         
         if (filtered === total) {
