@@ -60,7 +60,11 @@ csvFileInput.addEventListener('change', async (e) => {
             return;
         }
 
-        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır! (ID, Title, Abstract sütunları otomatik seçildi)`);
+        const loadedColumns = ['ID', 'Title', 'Abstract'];
+        if (csvData[0] && csvData[0].Authors) loadedColumns.push('Authors');
+        if (csvData[0] && csvData[0].Year) loadedColumns.push('Year');
+
+        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır! (${loadedColumns.join(', ')} sütunları yüklendi)`);
         analyzeBtn.disabled = false;
     } catch (error) {
         showError(error.message);
@@ -102,10 +106,12 @@ function parseCSV(text) {
     const headers = lines[0].split('\t').map(h => h.trim());
     const data = [];
 
-    // ID, Title, Abstract sütunlarının indekslerini bul
+    // ID, Title, Abstract, Authors, Year sütunlarının indekslerini bul
     const idIndex = headers.findIndex(h => h.toLowerCase() === 'id');
     const titleIndex = headers.findIndex(h => h.toLowerCase() === 'title');
     const abstractIndex = headers.findIndex(h => h.toLowerCase() === 'abstract');
+    const authorsIndex = headers.findIndex(h => h.toLowerCase() === 'authors');
+    const yearIndex = headers.findIndex(h => h.toLowerCase().includes('year') || h.toLowerCase().includes('publication year'));
 
     // Title ve Abstract zorunlu
     if (titleIndex === -1 || abstractIndex === -1) {
@@ -119,7 +125,9 @@ function parseCSV(text) {
         const row = {
             ID: idIndex !== -1 ? (values[idIndex] ? values[idIndex].trim() : String(i)) : String(i),
             Title: values[titleIndex] ? values[titleIndex].trim() : '',
-            Abstract: values[abstractIndex] ? values[abstractIndex].trim() : ''
+            Abstract: values[abstractIndex] ? values[abstractIndex].trim() : '',
+            Authors: authorsIndex !== -1 && values[authorsIndex] ? values[authorsIndex].trim() : '',
+            Year: yearIndex !== -1 && values[yearIndex] ? values[yearIndex].trim() : ''
         };
 
         // Boş satırları atla
@@ -145,10 +153,12 @@ function parseExcel(arrayBuffer) {
     // İlk satırdan sütun isimlerini al ve temizle
     const headers = Object.keys(jsonData[0]).map(h => h.trim());
 
-    // ID, Title, Abstract sütunlarını bul (case-insensitive, trim ile)
+    // ID, Title, Abstract, Authors, Year sütunlarını bul (case-insensitive, trim ile)
     const idKey = headers.find(h => h.toLowerCase().trim() === 'id');
     const titleKey = headers.find(h => h.toLowerCase().trim() === 'title');
     const abstractKey = headers.find(h => h.toLowerCase().trim() === 'abstract');
+    const authorsKey = headers.find(h => h.toLowerCase().trim() === 'authors');
+    const yearKey = headers.find(h => h.toLowerCase().trim().includes('year') || h.toLowerCase().trim() === 'publication year');
 
     // Title ve Abstract zorunlu
     if (!titleKey || !abstractKey) {
@@ -161,12 +171,16 @@ function parseExcel(arrayBuffer) {
     const originalIdKey = originalHeaders.find(h => h.trim().toLowerCase() === 'id');
     const originalTitleKey = originalHeaders.find(h => h.trim().toLowerCase() === 'title');
     const originalAbstractKey = originalHeaders.find(h => h.trim().toLowerCase() === 'abstract');
+    const originalAuthorsKey = originalHeaders.find(h => h.trim().toLowerCase() === 'authors');
+    const originalYearKey = originalHeaders.find(h => h.trim().toLowerCase().includes('year') || h.trim().toLowerCase() === 'publication year');
 
     // Sadece gerekli sütunları filtrele ve standart isimlere çevir
     const filteredData = jsonData.map((row, index) => ({
         ID: originalIdKey ? String(row[originalIdKey] || index + 1) : String(index + 1),
         Title: originalTitleKey ? String(row[originalTitleKey] || '').trim() : '',
-        Abstract: originalAbstractKey ? String(row[originalAbstractKey] || '').trim() : ''
+        Abstract: originalAbstractKey ? String(row[originalAbstractKey] || '').trim() : '',
+        Authors: originalAuthorsKey ? String(row[originalAuthorsKey] || '').trim() : '',
+        Year: originalYearKey ? String(row[originalYearKey] || '').trim() : ''
     })).filter(row => row.Title || row.Abstract); // Boş satırları atla
 
     return filteredData;
@@ -274,7 +288,9 @@ async function analyzeArticle(article, instructions) {
 ---
 
 MAKALE:
+${article.Authors ? `Yazar(lar): ${article.Authors}` : ''}
 Başlık: ${article.Title}
+${article.Year ? `Yıl: ${article.Year}` : ''}
 Özet: ${article.Abstract}
 
 Lütfen bu makaleyi değerlendir ve yanıtını JSON formatında ver.`;
