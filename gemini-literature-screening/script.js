@@ -142,24 +142,31 @@ function parseExcel(arrayBuffer) {
 
     if (jsonData.length === 0) return [];
 
-    // İlk satırdan sütun isimlerini al
-    const headers = Object.keys(jsonData[0]);
+    // İlk satırdan sütun isimlerini al ve temizle
+    const headers = Object.keys(jsonData[0]).map(h => h.trim());
 
-    // ID, Title, Abstract sütunlarını bul (case-insensitive)
-    const idKey = headers.find(h => h.toLowerCase() === 'id');
-    const titleKey = headers.find(h => h.toLowerCase() === 'title');
-    const abstractKey = headers.find(h => h.toLowerCase() === 'abstract');
+    // ID, Title, Abstract sütunlarını bul (case-insensitive, trim ile)
+    const idKey = headers.find(h => h.toLowerCase().trim() === 'id');
+    const titleKey = headers.find(h => h.toLowerCase().trim() === 'title');
+    const abstractKey = headers.find(h => h.toLowerCase().trim() === 'abstract');
 
     // Title ve Abstract zorunlu
     if (!titleKey || !abstractKey) {
-        throw new Error('Excel dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+        const availableColumns = headers.slice(0, 10).join(', '); // İlk 10 sütunu göster
+        throw new Error(`Excel dosyası "Title" ve "Abstract" sütunlarını içermelidir!\n\nBulunan sütunlar: ${availableColumns}${headers.length > 10 ? '...' : ''}`);
     }
+
+    // Orijinal sütun isimlerini bul (trim edilmemiş)
+    const originalHeaders = Object.keys(jsonData[0]);
+    const originalIdKey = originalHeaders.find(h => h.trim().toLowerCase() === 'id');
+    const originalTitleKey = originalHeaders.find(h => h.trim().toLowerCase() === 'title');
+    const originalAbstractKey = originalHeaders.find(h => h.trim().toLowerCase() === 'abstract');
 
     // Sadece gerekli sütunları filtrele ve standart isimlere çevir
     const filteredData = jsonData.map((row, index) => ({
-        ID: idKey ? String(row[idKey] || index + 1) : String(index + 1),
-        Title: row[titleKey] ? String(row[titleKey]).trim() : '',
-        Abstract: row[abstractKey] ? String(row[abstractKey]).trim() : ''
+        ID: originalIdKey ? String(row[originalIdKey] || index + 1) : String(index + 1),
+        Title: originalTitleKey ? String(row[originalTitleKey] || '').trim() : '',
+        Abstract: originalAbstractKey ? String(row[originalAbstractKey] || '').trim() : ''
     })).filter(row => row.Title || row.Abstract); // Boş satırları atla
 
     return filteredData;
