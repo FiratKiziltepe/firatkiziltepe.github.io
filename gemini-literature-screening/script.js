@@ -6,6 +6,7 @@ let apiKey = '';
 // DOM elementi referansları
 const apiKeyInput = document.getElementById('apiKey');
 const batchSizeInput = document.getElementById('batchSize');
+const delayBetweenRequestsInput = document.getElementById('delayBetweenRequests');
 const delayInput = document.getElementById('delayBetweenBatches');
 const instructionsInput = document.getElementById('instructions');
 const csvFileInput = document.getElementById('csvFile');
@@ -121,6 +122,7 @@ async function startAnalysis() {
     results = [];
 
     const batchSize = parseInt(batchSizeInput.value);
+    const delayBetweenRequests = parseFloat(delayBetweenRequestsInput.value);
     const delaySeconds = parseInt(delayInput.value);
     const instructions = instructionsInput.value;
 
@@ -140,7 +142,7 @@ async function startAnalysis() {
             progressText.textContent = `Batch ${batchIndex + 1}/${batches.length} işleniyor... (${processedCount}/${totalCount} makale)`;
 
             // Batch'i işle
-            const batchResults = await processBatch(batch, instructions);
+            const batchResults = await processBatch(batch, instructions, delayBetweenRequests);
             results.push(...batchResults);
 
             processedCount += batch.length;
@@ -167,16 +169,23 @@ async function startAnalysis() {
 }
 
 // Batch işleme
-async function processBatch(batch, instructions) {
+async function processBatch(batch, instructions, delayBetweenRequests) {
     const batchResults = [];
 
-    for (const article of batch) {
+    for (let i = 0; i < batch.length; i++) {
+        const article = batch[i];
+
         try {
             const result = await analyzeArticle(article, instructions);
             batchResults.push({
                 id: article.ID || '',
                 ...result
             });
+
+            // Son makale değilse ve delay varsa bekle
+            if (i < batch.length - 1 && delayBetweenRequests > 0) {
+                await sleep(delayBetweenRequests * 1000);
+            }
         } catch (error) {
             console.error('Error processing article:', article, error);
             batchResults.push({
@@ -188,6 +197,11 @@ async function processBatch(batch, instructions) {
                 decision: 'Maybe',
                 rationale: 'API hatası nedeniyle değerlendirilemedi'
             });
+
+            // Hata durumunda da bekle (rate limit olabilir)
+            if (i < batch.length - 1 && delayBetweenRequests > 0) {
+                await sleep(delayBetweenRequests * 1000);
+            }
         }
     }
 
@@ -243,8 +257,8 @@ Lütfen bu makaleyi değerlendir ve yanıtını JSON formatında ver.`;
     }
 }
 
-// Gemini API çağrısı
-async function callGeminiAPI(prompt) {
+// Gemini API çağrısı (retry mekanizması ile)
+async function callGeminiAPI(prompt, retryCount = 0, maxRetries = 5) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const requestBody = {
@@ -261,26 +275,50 @@ async function callGeminiAPI(prompt) {
         }
     };
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-    });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            // 429 (Rate Limit) hatası için retry yap
+            if (response.status === 429 && retryCount < maxRetries) {
+                const waitTime = Math.pow(2, retryCount) * 2; // Exponential backoff: 2, 4, 8, 16, 32 saniye
+                console.log(`Rate limit hit. Retrying in ${waitTime} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+
+                await sleep(waitTime * 1000);
+                return callGeminiAPI(prompt, retryCount + 1, maxRetries);
+            }
+
+            throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error('API yanıtı boş');
+        }
+
+        return data.candidates[0].content.parts[0].text;
+
+    } catch (error) {
+        // Network hatası veya diğer hatalar için de retry
+        if (retryCount < maxRetries && (error.message.includes('fetch') || error.message.includes('network'))) {
+            const waitTime = Math.pow(2, retryCount) * 2;
+            console.log(`Network error. Retrying in ${waitTime} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+
+            await sleep(waitTime * 1000);
+            return callGeminiAPI(prompt, retryCount + 1, maxRetries);
+        }
+
+        throw error;
     }
-
-    const data = await response.json();
-
-    if (!data.candidates || data.candidates.length === 0) {
-        throw new Error('API yanıtı boş');
-    }
-
-    return data.candidates[0].content.parts[0].text;
 }
 
 // Yardımcı fonksiyonlar - metin içinden alan çıkarma
