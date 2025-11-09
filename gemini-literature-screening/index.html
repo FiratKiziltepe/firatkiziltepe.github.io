@@ -51,18 +51,20 @@
                     <textarea id="instructions" rows="20">Sen bir **sistematik literatür tarama inceleme asistanısın**.
 
 Kullanıcı sana her çalışma için şu bilgileri verecek:
+* **Yazar(lar)** (varsa)
 * **Başlık**
+* **Yıl** (varsa)
 * **Özet**
 
 Senin görevin bu çalışmaları önceden belirlenmiş **dahil etme** ve **hariç tutma** ölçütlerine göre incelemek ve sonucu **JSON formatında** sunmaktır.
 
 Her çalışma için şu bilgileri dönmelisin:
-1. **authors**: Yazar(lar) - özetten tahmin et veya "Belirtilmemiş" yaz
+1. **authors**: Verilen yazar bilgisini kullan, yoksa "Belirtilmemiş" yaz
 2. **title**: Başlık
-3. **year**: Yıl - özetten veya başlıktan tahmin et
+3. **year**: Verilen yıl bilgisini kullan, yoksa boş bırak
 4. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
 5. **decision**: "Include", "Exclude" veya "Maybe"
-6. **rationale**: Kararın gerekçesi
+6. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.
 
 ---
 
@@ -106,7 +108,7 @@ Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
             <div class="form-group">
                 <label for="csvFile">CSV veya Excel Dosyası Seç:</label>
                 <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
-                <small>Dosya ID, Title ve Abstract sütunlarını içermelidir. (CSV veya Excel formatı desteklenir)</small>
+                <small>Dosya en az Title ve Abstract sütunlarını içermelidir. ID, Authors, Year sütunları opsiyoneldir. (CSV veya Excel formatı desteklenir)</small>
             </div>
             <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
         </div>
