@@ -259,7 +259,7 @@ Lütfen bu makaleyi değerlendir ve yanıtını JSON formatında ver.`;
 
 // Gemini API çağrısı (retry mekanizması ile)
 async function callGeminiAPI(prompt, retryCount = 0, maxRetries = 5) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     const requestBody = {
         contents: [{
