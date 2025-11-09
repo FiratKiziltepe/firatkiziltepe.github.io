@@ -30,8 +30,14 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="delayBetweenRequests">Makale Arası Bekleme (saniye):</label>
+                    <input type="number" id="delayBetweenRequests" value="3" min="1" max="30" step="0.5">
+                    <small>Her makale arasında beklenecek süre (Rate limit için ÖNEMLİ)</small>
+                </div>
+
+                <div class="form-group">
                     <label for="delayBetweenBatches">Batch'ler Arası Bekleme (saniye):</label>
-                    <input type="number" id="delayBetweenBatches" value="2" min="0" max="60">
+                    <input type="number" id="delayBetweenBatches" value="5" min="0" max="60">
                     <small>Her batch arasında beklenecek süre</small>
                 </div>
             </div>
