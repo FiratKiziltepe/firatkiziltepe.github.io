@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Literatür Tarama Aracı</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Gemini Literatür Tarama Aracı</h1>
+            <p>Sistematik literatür taraması için yapay zeka destekli otomatik tarama sistemi</p>
+        </header>
+
+        <div class="config-section">
+            <div class="card">
+                <h2>⚙️ Ayarlar</h2>
+
+                <div class="form-group">
+                    <label for="apiKey">Gemini API Key:</label>
+                    <input type="password" id="apiKey" placeholder="API anahtarınızı buraya girin">
+                    <small>API anahtarınız tarayıcıda saklanır ve hiçbir yere gönderilmez.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchSize">Batch Size (Parti Boyutu):</label>
+                    <input type="number" id="batchSize" value="5" min="1" max="20">
+                    <small>Her seferde işlenecek makale sayısı (Rate limit için)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="delayBetweenBatches">Batch'ler Arası Bekleme (saniye):</label>
+                    <input type="number" id="delayBetweenBatches" value="2" min="0" max="60">
+                    <small>Her batch arasında beklenecek süre</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📝 Tarama Talimatı</h2>
+                <div class="form-group">
+                    <label for="instructions">Screening Talimatı (Değiştirilebilir):</label>
+                    <textarea id="instructions" rows="20">Sen bir **sistematik literatür tarama inceleme asistanısın**.
+
+Kullanıcı sana her çalışma için şu bilgileri verecek:
+* **Başlık**
+* **Özet**
+
+Senin görevin bu çalışmaları önceden belirlenmiş **dahil etme** ve **hariç tutma** ölçütlerine göre incelemek ve sonucu **JSON formatında** sunmaktır.
+
+Her çalışma için şu bilgileri dönmelisin:
+1. **authors**: Yazar(lar) - özetten tahmin et veya "Belirtilmemiş" yaz
+2. **title**: Başlık
+3. **year**: Yıl - özetten veya başlıktan tahmin et
+4. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
+5. **decision**: "Include", "Exclude" veya "Maybe"
+6. **rationale**: Kararın gerekçesi
+
+---
+
+## ✅ Dahil Etme Ölçütleri
+
+* Odak: Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) **öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine** odaklanan çalışmalar.
+* Araştırma deseni: **Ampirik çalışmalar**.
+
+---
+
+## ❌ Hariç Tutma Ölçütleri
+
+* Kişiselleştirilmiş önerilere odaklanmayan (ör. yalnızca öngörü analitiği yapan, genel öneri sistemlerini inceleyen veya e-öğrenmenin başka yönlerine odaklanan) çalışmalar.
+* Yayın türü: **Konferans bildirileri, sunumlar, raporlar, kitaplar, tezler**.
+* Araştırma deseni: **Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları**.
+
+---
+
+ÇIKTI FORMATI:
+Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
+
+{
+  "results": [
+    {
+      "authors": "Yazar adı",
+      "title": "Başlık",
+      "year": "Yıl",
+      "summary_tr": "Türkçe özet",
+      "decision": "Include/Exclude/Maybe",
+      "rationale": "Gerekçe"
+    }
+  ]
+}</textarea>
+                    <small>Bu talimatı araştırma kriterlerinize göre düzenleyebilirsiniz.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section card">
+            <h2>📤 CSV Dosyası Yükle</h2>
+            <div class="form-group">
+                <label for="csvFile">CSV Dosyası Seç:</label>
+                <input type="file" id="csvFile" accept=".csv">
+                <small>CSV dosyası ID, Title ve Abstract sütunlarını içermelidir.</small>
+            </div>
+            <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
+        </div>
+
+        <div id="progressSection" class="progress-section" style="display: none;">
+            <h2>⏳ İlerleme</h2>
+            <div class="progress-bar">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <p id="progressText">Hazırlanıyor...</p>
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h2>📊 Sonuçlar</h2>
+                <button id="downloadBtn" class="btn-secondary">💾 CSV İndir</button>
+            </div>
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Yazar(lar)</th>
+                            <th>Başlık</th>
+                            <th>Yıl</th>
+                            <th>Kısa Özet (TR)</th>
+                            <th>Karar</th>
+                            <th>Gerekçe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="stats">
+                <div class="stat-card include">
+                    <h3>✅ Include</h3>
+                    <p id="includeCount">0</p>
+                </div>
+                <div class="stat-card exclude">
+                    <h3>❌ Exclude</h3>
+                    <p id="excludeCount">0</p>
+                </div>
+                <div class="stat-card maybe">
+                    <h3>❓ Maybe</h3>
+                    <p id="maybeCount">0</p>
+                </div>
+                <div class="stat-card total">
+                    <h3>📚 Toplam</h3>
+                    <p id="totalCount">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
