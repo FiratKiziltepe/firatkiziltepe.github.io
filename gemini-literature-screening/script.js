@@ -8,7 +8,9 @@ const apiKeyInput = document.getElementById('apiKey');
 const batchSizeInput = document.getElementById('batchSize');
 const delayBetweenRequestsInput = document.getElementById('delayBetweenRequests');
 const delayInput = document.getElementById('delayBetweenBatches');
-const instructionsInput = document.getElementById('instructions');
+const systemPromptInput = document.getElementById('systemPrompt');
+const inclusionCriteriaInput = document.getElementById('inclusionCriteria');
+const exclusionCriteriaInput = document.getElementById('exclusionCriteria');
 const csvFileInput = document.getElementById('csvFile');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const downloadCsvBtn = document.getElementById('downloadCsvBtn');
@@ -19,11 +21,60 @@ const progressText = document.getElementById('progressText');
 const resultsSection = document.getElementById('resultsSection');
 const resultsBody = document.getElementById('resultsBody');
 
-// API key'i localStorage'dan yükle
+// JSON format şablonu (sabit)
+const JSON_FORMAT = `
+---
+
+ÇIKTI FORMATI:
+Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
+
+{
+  "results": [
+    {
+      "title": "Başlık",
+      "summary_tr": "Türkçe özet",
+      "decision": "Include/Exclude/Maybe",
+      "rationale": "Gerekçe"
+    }
+  ]
+}`;
+
+// Tüm talimatı birleştir
+function buildInstructions() {
+    const systemPrompt = systemPromptInput.value.trim();
+    const inclusionCriteria = inclusionCriteriaInput.value.trim();
+    const exclusionCriteria = exclusionCriteriaInput.value.trim();
+
+    let instructions = systemPrompt + '\n\n---\n\n';
+
+    if (inclusionCriteria) {
+        instructions += '## ✅ Dahil Etme Ölçütleri\n\n' + inclusionCriteria + '\n\n---\n\n';
+    }
+
+    if (exclusionCriteria) {
+        instructions += '## ❌ Hariç Tutma Ölçütleri\n\n' + exclusionCriteria + '\n\n';
+    }
+
+    instructions += JSON_FORMAT;
+
+    return instructions;
+}
+
+// localStorage'dan yükle
 window.addEventListener('DOMContentLoaded', () => {
     const savedApiKey = localStorage.getItem('gemini_api_key');
     if (savedApiKey) {
         apiKeyInput.value = savedApiKey;
+    }
+
+    const savedInclusion = localStorage.getItem('inclusion_criteria');
+    if (savedInclusion) {
+        inclusionCriteriaInput.value = savedInclusion;
+    }
+
+    const savedExclusion = localStorage.getItem('exclusion_criteria');
+    if (savedExclusion) {
+        exclusionCriteriaInput.value = savedExclusion;
     }
 });
 
@@ -33,6 +84,18 @@ apiKeyInput.addEventListener('change', () => {
     if (key) {
         localStorage.setItem('gemini_api_key', key);
     }
+});
+
+// Dahil etme kriterleri değiştiğinde kaydet
+inclusionCriteriaInput.addEventListener('change', () => {
+    const criteria = inclusionCriteriaInput.value.trim();
+    localStorage.setItem('inclusion_criteria', criteria);
+});
+
+// Hariç tutma kriterleri değiştiğinde kaydet
+exclusionCriteriaInput.addEventListener('change', () => {
+    const criteria = exclusionCriteriaInput.value.trim();
+    localStorage.setItem('exclusion_criteria', criteria);
 });
 
 // Dosya seçildiğinde (CSV veya Excel)
@@ -198,7 +261,7 @@ async function startAnalysis() {
     const batchSize = parseInt(batchSizeInput.value);
     const delayBetweenRequests = parseFloat(delayBetweenRequestsInput.value);
     const delaySeconds = parseInt(delayInput.value);
-    const instructions = instructionsInput.value;
+    const instructions = buildInstructions();
 
     // Batch'lere böl
     const batches = [];

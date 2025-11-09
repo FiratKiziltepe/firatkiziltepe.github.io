@@ -46,9 +46,10 @@
 
             <div class="card">
                 <h2>📝 Tarama Talimatı</h2>
+
                 <div class="form-group">
-                    <label for="instructions">Screening Talimatı (Değiştirilebilir):</label>
-                    <textarea id="instructions" rows="20">Sen bir **sistematik literatür tarama inceleme asistanısın**.
+                    <label>Sistem Promptu (Sabit):</label>
+                    <textarea id="systemPrompt" rows="12" readonly style="background-color: #f5f5f5; cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**.
 
 Kullanıcı sana her çalışma için şu bilgileri verecek:
 * **Başlık**
@@ -61,39 +62,23 @@ Her çalışma için şu bilgileri dönmelisin:
 1. **title**: Başlık
 2. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
 3. **decision**: "Include", "Exclude" veya "Maybe"
-4. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.
+4. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.</textarea>
+                    <small>Bu bölüm sabittir ve değiştirilemez.</small>
+                </div>
 
----
+                <div class="form-group">
+                    <label for="inclusionCriteria">✅ Dahil Etme Ölçütleri:</label>
+                    <textarea id="inclusionCriteria" rows="5" placeholder="Dahil etme kriterlerinizi buraya girin...">* Odak: Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) **öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine** odaklanan çalışmalar.
+* Araştırma deseni: **Ampirik çalışmalar**.</textarea>
+                    <small>Dahil etme kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
+                </div>
 
-## ✅ Dahil Etme Ölçütleri
-
-* Odak: Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) **öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine** odaklanan çalışmalar.
-* Araştırma deseni: **Ampirik çalışmalar**.
-
----
-
-## ❌ Hariç Tutma Ölçütleri
-
-* Kişiselleştirilmiş önerilere odaklanmayan (ör. yalnızca öngörü analitiği yapan, genel öneri sistemlerini inceleyen veya e-öğrenmenin başka yönlerine odaklanan) çalışmalar.
+                <div class="form-group">
+                    <label for="exclusionCriteria">❌ Hariç Tutma Ölçütleri:</label>
+                    <textarea id="exclusionCriteria" rows="5" placeholder="Hariç tutma kriterlerinizi buraya girin...">* Kişiselleştirilmiş önerilere odaklanmayan (ör. yalnızca öngörü analitiği yapan, genel öneri sistemlerini inceleyen veya e-öğrenmenin başka yönlerine odaklanan) çalışmalar.
 * Yayın türü: **Konferans bildirileri, sunumlar, raporlar, kitaplar, tezler**.
-* Araştırma deseni: **Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları**.
-
----
-
-ÇIKTI FORMATI:
-Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
-
-{
-  "results": [
-    {
-      "title": "Başlık",
-      "summary_tr": "Türkçe özet",
-      "decision": "Include/Exclude/Maybe",
-      "rationale": "Gerekçe"
-    }
-  ]
-}</textarea>
-                    <small>Bu talimatı araştırma kriterlerinize göre düzenleyebilirsiniz.</small>
+* Araştırma deseni: **Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları**.</textarea>
+                    <small>Hariç tutma kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
                 </div>
             </div>
         </div>
