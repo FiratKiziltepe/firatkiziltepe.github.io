@@ -45,6 +45,41 @@
             </div>
 
             <div class="card">
+                <h2>⚡ Rate Limit Hesaplayıcı</h2>
+                <div class="rate-limit-info">
+                    <div class="api-limits">
+                        <h3>Gemini 2.5 Flash-Lite (Free Tier)</h3>
+                        <ul>
+                            <li>📊 <strong>RPM (Requests Per Minute):</strong> 15</li>
+                            <li>📄 <strong>TPM (Tokens Per Minute):</strong> 250,000</li>
+                            <li>📅 <strong>RPD (Requests Per Day):</strong> 1,000</li>
+                        </ul>
+                    </div>
+                    <div class="rate-calculator">
+                        <h3>Mevcut Ayarlarınız</h3>
+                        <div id="rateCalculation" class="calculation-result">
+                            <div class="calc-item">
+                                <span class="calc-label">Dakikada İşlenecek Makale:</span>
+                                <span class="calc-value" id="articlesPerMinute">-</span>
+                            </div>
+                            <div class="calc-item">
+                                <span class="calc-label">Dakikalık API İsteği:</span>
+                                <span class="calc-value" id="requestsPerMinute">-</span>
+                            </div>
+                            <div class="calc-item">
+                                <span class="calc-label">Rate Limit Durumu:</span>
+                                <span class="calc-value" id="rateLimitStatus">-</span>
+                            </div>
+                            <div class="calc-item">
+                                <span class="calc-label">Tahmini Süre (100 makale):</span>
+                                <span class="calc-value" id="estimatedTime">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
                 <h2>📝 Tarama Talimatı</h2>
 
                 <div class="form-group">
@@ -148,6 +183,6 @@ Her çalışma için şu bilgileri dönmelisin:
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>

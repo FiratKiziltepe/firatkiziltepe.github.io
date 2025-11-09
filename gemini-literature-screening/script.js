@@ -76,6 +76,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedExclusion) {
         exclusionCriteriaInput.value = savedExclusion;
     }
+
+    // Rate limit hesaplayıcısını başlat
+    calculateRateLimits();
 });
 
 // API key değiştiğinde kaydet
@@ -97,6 +100,73 @@ exclusionCriteriaInput.addEventListener('change', () => {
     const criteria = exclusionCriteriaInput.value.trim();
     localStorage.setItem('exclusion_criteria', criteria);
 });
+
+// Rate limit hesaplayıcısı
+const GEMINI_LIMITS = {
+    RPM: 15,        // Requests Per Minute
+    TPM: 250000,    // Tokens Per Minute
+    RPD: 1000       // Requests Per Day
+};
+
+function calculateRateLimits() {
+    const batchSize = parseInt(batchSizeInput.value) || 5;
+    const delayBetweenRequests = parseFloat(delayBetweenRequestsInput.value) || 3;
+    const delayBetweenBatches = parseInt(delayInput.value) || 5;
+
+    // Ortalama API yanıt süresi (saniye) - tahmin
+    const avgApiResponseTime = 2;
+
+    // Bir batch'i işlemek için gereken süre (saniye)
+    const timePerBatch =
+        (batchSize * avgApiResponseTime) +                  // API yanıt süreleri
+        ((batchSize - 1) * delayBetweenRequests) +          // Makale arası bekleme (son makaleden sonra yok)
+        delayBetweenBatches;                                // Batch arası bekleme
+
+    // Dakikada kaç batch işlenebilir
+    const batchesPerMinute = 60 / timePerBatch;
+
+    // Dakikada kaç makale işlenebilir
+    const articlesPerMinute = Math.floor(batchesPerMinute * batchSize);
+
+    // Dakikalık API isteği (her makale = 1 istek)
+    const requestsPerMinute = articlesPerMinute;
+
+    // Rate limit durumu
+    let status = '';
+    let statusClass = '';
+
+    if (requestsPerMinute <= GEMINI_LIMITS.RPM * 0.8) {
+        status = '✅ Güvenli';
+        statusClass = 'status-safe';
+    } else if (requestsPerMinute <= GEMINI_LIMITS.RPM) {
+        status = '⚠️ Limit Yakını';
+        statusClass = 'status-warning';
+    } else {
+        status = '❌ Limit Aşımı';
+        statusClass = 'status-danger';
+    }
+
+    // 100 makale için tahmini süre (dakika)
+    const estimatedMinutesFor100 = 100 / articlesPerMinute;
+    const estimatedTimeText = estimatedMinutesFor100 >= 60
+        ? `${Math.floor(estimatedMinutesFor100 / 60)} saat ${Math.round(estimatedMinutesFor100 % 60)} dakika`
+        : `${Math.round(estimatedMinutesFor100)} dakika`;
+
+    // DOM'u güncelle
+    document.getElementById('articlesPerMinute').textContent = `~${articlesPerMinute} makale/dk`;
+    document.getElementById('requestsPerMinute').textContent = `${requestsPerMinute}/${GEMINI_LIMITS.RPM}`;
+
+    const statusElement = document.getElementById('rateLimitStatus');
+    statusElement.textContent = status;
+    statusElement.className = 'calc-value ' + statusClass;
+
+    document.getElementById('estimatedTime').textContent = estimatedTimeText;
+}
+
+// Ayarlar değiştiğinde hesapla
+batchSizeInput.addEventListener('input', calculateRateLimits);
+delayBetweenRequestsInput.addEventListener('input', calculateRateLimits);
+delayInput.addEventListener('input', calculateRateLimits);
 
 // Dosya seçildiğinde (CSV veya Excel)
 csvFileInput.addEventListener('change', async (e) => {
