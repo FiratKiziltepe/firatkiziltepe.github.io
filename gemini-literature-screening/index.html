@@ -51,20 +51,17 @@
                     <textarea id="instructions" rows="20">Sen bir **sistematik literatür tarama inceleme asistanısın**.
 
 Kullanıcı sana her çalışma için şu bilgileri verecek:
-* **Yazar(lar)** (varsa)
 * **Başlık**
-* **Yıl** (varsa)
+* **Yıl** (varsa - dahil etme/hariç tutma kriterlerinde yıl şartı varsa kullan)
 * **Özet**
 
 Senin görevin bu çalışmaları önceden belirlenmiş **dahil etme** ve **hariç tutma** ölçütlerine göre incelemek ve sonucu **JSON formatında** sunmaktır.
 
 Her çalışma için şu bilgileri dönmelisin:
-1. **authors**: Verilen yazar bilgisini kullan, yoksa "Belirtilmemiş" yaz
-2. **title**: Başlık
-3. **year**: Verilen yıl bilgisini kullan, yoksa boş bırak
-4. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
-5. **decision**: "Include", "Exclude" veya "Maybe"
-6. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.
+1. **title**: Başlık
+2. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
+3. **decision**: "Include", "Exclude" veya "Maybe"
+4. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.
 
 ---
 
@@ -89,9 +86,7 @@ Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
 {
   "results": [
     {
-      "authors": "Yazar adı",
       "title": "Başlık",
-      "year": "Yıl",
       "summary_tr": "Türkçe özet",
       "decision": "Include/Exclude/Maybe",
       "rationale": "Gerekçe"
