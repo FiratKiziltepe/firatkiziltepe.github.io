@@ -317,9 +317,10 @@ async function processBatch(batch, instructions, delayBetweenRequests) {
             batchResults.push({
                 id: article.ID || '',
                 ...result,
-                // Excel'den gelen Authors ve Year'ı kullan (varsa)
+                // Excel'den gelen Authors, Year ve Abstract'ı kullan (varsa)
                 authors: article.Authors || 'Belirtilmemiş',
-                year: article.Year || ''
+                year: article.Year || '',
+                abstract: article.Abstract || ''
             });
 
             // Son makale değilse ve delay varsa bekle
@@ -333,6 +334,7 @@ async function processBatch(batch, instructions, delayBetweenRequests) {
                 authors: article.Authors || 'Hata',
                 title: article.Title || '',
                 year: article.Year || '',
+                abstract: article.Abstract || '',
                 summary_tr: 'İşlenirken hata oluştu: ' + error.message,
                 decision: 'Maybe',
                 rationale: 'API hatası nedeniyle değerlendirilemedi'
@@ -509,6 +511,7 @@ function displayResults() {
             <td>${result.authors || 'Belirtilmemiş'}</td>
             <td>${result.title || ''}</td>
             <td>${result.year || ''}</td>
+            <td>${result.abstract || ''}</td>
             <td>${result.summary_tr || ''}</td>
             <td><span class="${decisionClass}">${decision}</span></td>
             <td>${result.rationale || ''}</td>
@@ -526,12 +529,13 @@ function displayResults() {
 
 // CSV olarak indir
 function downloadResultsAsCSV() {
-    const headers = ['ID', 'Yazar(lar)', 'Başlık', 'Yıl', 'Kısa Özet (TR)', 'Karar', 'Gerekçe'];
+    const headers = ['ID', 'Yazar(lar)', 'Başlık', 'Yıl', 'Abstract (Orijinal)', 'Kısa Özet (TR)', 'Karar', 'Gerekçe'];
     const rows = results.map(r => [
         r.id || '',
         r.authors || 'Belirtilmemiş',
         r.title || '',
         r.year || '',
+        r.abstract || '',
         r.summary_tr || '',
         r.decision || 'Maybe',
         r.rationale || ''
@@ -562,6 +566,7 @@ function downloadResultsAsExcel() {
         'Yazar(lar)': r.authors || 'Belirtilmemiş',
         'Başlık': r.title || '',
         'Yıl': r.year || '',
+        'Abstract (Orijinal)': r.abstract || '',
         'Kısa Özet (TR)': r.summary_tr || '',
         'Karar': r.decision || 'Maybe',
         'Gerekçe': r.rationale || ''
@@ -578,6 +583,7 @@ function downloadResultsAsExcel() {
         { wch: 30 },  // Yazar(lar)
         { wch: 50 },  // Başlık
         { wch: 10 },  // Yıl
+        { wch: 80 },  // Abstract (Orijinal)
         { wch: 60 },  // Kısa Özet (TR)
         { wch: 12 },  // Karar
         { wch: 60 }   // Gerekçe
