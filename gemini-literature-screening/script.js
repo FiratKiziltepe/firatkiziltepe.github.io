@@ -45,11 +45,11 @@ csvFileInput.addEventListener('change', async (e) => {
         const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
 
         if (isExcel) {
-            // Excel dosyası
+            // Excel dosyası - parseExcel otomatik olarak sadece ID, Title, Abstract alır
             const arrayBuffer = await file.arrayBuffer();
             csvData = parseExcel(arrayBuffer);
         } else {
-            // CSV dosyası
+            // CSV dosyası - parseCSV otomatik olarak sadece ID, Title, Abstract alır
             const text = await file.text();
             csvData = parseCSV(text);
         }
@@ -60,22 +60,10 @@ csvFileInput.addEventListener('change', async (e) => {
             return;
         }
 
-        // Gerekli sütunları içerip içermediğini kontrol et
-        const requiredColumns = ['Title', 'Abstract'];
-        const hasRequiredColumns = requiredColumns.every(col =>
-            csvData[0].hasOwnProperty(col)
-        );
-
-        if (!hasRequiredColumns) {
-            showError('Dosya "Title" ve "Abstract" sütunlarını içermelidir!');
-            analyzeBtn.disabled = true;
-            return;
-        }
-
-        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır!`);
+        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır! (ID, Title, Abstract sütunları otomatik seçildi)`);
         analyzeBtn.disabled = false;
     } catch (error) {
-        showError('Dosya okunurken hata oluştu: ' + error.message);
+        showError(error.message);
         analyzeBtn.disabled = true;
     }
 });
@@ -90,7 +78,7 @@ analyzeBtn.addEventListener('click', async () => {
     }
 
     if (csvData.length === 0) {
-        showError('Lütfen önce CSV dosyası yükleyin!');
+        showError('Lütfen önce bir dosya yükleyin!');
         return;
     }
 
@@ -106,7 +94,7 @@ downloadExcelBtn.addEventListener('click', () => {
     downloadResultsAsExcel();
 });
 
-// CSV parsing fonksiyonu
+// CSV parsing fonksiyonu - sadece gerekli sütunları alır
 function parseCSV(text) {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
@@ -114,21 +102,36 @@ function parseCSV(text) {
     const headers = lines[0].split('\t').map(h => h.trim());
     const data = [];
 
+    // ID, Title, Abstract sütunlarının indekslerini bul
+    const idIndex = headers.findIndex(h => h.toLowerCase() === 'id');
+    const titleIndex = headers.findIndex(h => h.toLowerCase() === 'title');
+    const abstractIndex = headers.findIndex(h => h.toLowerCase() === 'abstract');
+
+    // Title ve Abstract zorunlu
+    if (titleIndex === -1 || abstractIndex === -1) {
+        throw new Error('CSV dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+    }
+
     for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split('\t');
-        const row = {};
 
-        headers.forEach((header, index) => {
-            row[header] = values[index] ? values[index].trim() : '';
-        });
+        // Sadece gerekli sütunları al
+        const row = {
+            ID: idIndex !== -1 ? (values[idIndex] ? values[idIndex].trim() : String(i)) : String(i),
+            Title: values[titleIndex] ? values[titleIndex].trim() : '',
+            Abstract: values[abstractIndex] ? values[abstractIndex].trim() : ''
+        };
 
-        data.push(row);
+        // Boş satırları atla
+        if (row.Title || row.Abstract) {
+            data.push(row);
+        }
     }
 
     return data;
 }
 
-// Excel parsing fonksiyonu
+// Excel parsing fonksiyonu - sadece gerekli sütunları alır
 function parseExcel(arrayBuffer) {
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     const firstSheetName = workbook.SheetNames[0];
@@ -137,7 +140,29 @@ function parseExcel(arrayBuffer) {
     // Excel'i JSON'a çevir
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-    return jsonData;
+    if (jsonData.length === 0) return [];
+
+    // İlk satırdan sütun isimlerini al
+    const headers = Object.keys(jsonData[0]);
+
+    // ID, Title, Abstract sütunlarını bul (case-insensitive)
+    const idKey = headers.find(h => h.toLowerCase() === 'id');
+    const titleKey = headers.find(h => h.toLowerCase() === 'title');
+    const abstractKey = headers.find(h => h.toLowerCase() === 'abstract');
+
+    // Title ve Abstract zorunlu
+    if (!titleKey || !abstractKey) {
+        throw new Error('Excel dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+    }
+
+    // Sadece gerekli sütunları filtrele ve standart isimlere çevir
+    const filteredData = jsonData.map((row, index) => ({
+        ID: idKey ? String(row[idKey] || index + 1) : String(index + 1),
+        Title: row[titleKey] ? String(row[titleKey]).trim() : '',
+        Abstract: row[abstractKey] ? String(row[abstractKey]).trim() : ''
+    })).filter(row => row.Title || row.Abstract); // Boş satırları atla
+
+    return filteredData;
 }
 
 // Analizi başlat
