@@ -60,9 +60,10 @@ csvFileInput.addEventListener('change', async (e) => {
             return;
         }
 
-        const loadedColumns = ['ID', 'Title', 'Abstract'];
-        if (csvData[0] && csvData[0].Authors) loadedColumns.push('Authors');
-        if (csvData[0] && csvData[0].Year) loadedColumns.push('Year');
+        const loadedColumns = ['Title', 'Abstract'];
+        if (csvData[0] && csvData[0].ID) loadedColumns.unshift('ID');
+        if (csvData[0] && csvData[0].hasOwnProperty('Authors')) loadedColumns.push('Authors');
+        if (csvData[0] && csvData[0].hasOwnProperty('Year')) loadedColumns.push('Year');
 
         showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır! (${loadedColumns.join(', ')} sütunları yüklendi)`);
         analyzeBtn.disabled = false;
@@ -252,7 +253,10 @@ async function processBatch(batch, instructions, delayBetweenRequests) {
             const result = await analyzeArticle(article, instructions);
             batchResults.push({
                 id: article.ID || '',
-                ...result
+                ...result,
+                // Excel'den gelen Authors ve Year'ı kullan (varsa)
+                authors: article.Authors || 'Belirtilmemiş',
+                year: article.Year || ''
             });
 
             // Son makale değilse ve delay varsa bekle
@@ -263,9 +267,9 @@ async function processBatch(batch, instructions, delayBetweenRequests) {
             console.error('Error processing article:', article, error);
             batchResults.push({
                 id: article.ID || '',
-                authors: 'Hata',
+                authors: article.Authors || 'Hata',
                 title: article.Title || '',
-                year: '',
+                year: article.Year || '',
                 summary_tr: 'İşlenirken hata oluştu: ' + error.message,
                 decision: 'Maybe',
                 rationale: 'API hatası nedeniyle değerlendirilemedi'
@@ -288,7 +292,6 @@ async function analyzeArticle(article, instructions) {
 ---
 
 MAKALE:
-${article.Authors ? `Yazar(lar): ${article.Authors}` : ''}
 Başlık: ${article.Title}
 ${article.Year ? `Yıl: ${article.Year}` : ''}
 Özet: ${article.Abstract}
