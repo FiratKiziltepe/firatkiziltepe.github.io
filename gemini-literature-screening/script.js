@@ -11,7 +11,8 @@ const delayInput = document.getElementById('delayBetweenBatches');
 const instructionsInput = document.getElementById('instructions');
 const csvFileInput = document.getElementById('csvFile');
 const analyzeBtn = document.getElementById('analyzeBtn');
-const downloadBtn = document.getElementById('downloadBtn');
+const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const progressSection = document.getElementById('progressSection');
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
@@ -34,37 +35,35 @@ apiKeyInput.addEventListener('change', () => {
     }
 });
 
-// CSV dosyası seçildiğinde
+// Dosya seçildiğinde (CSV veya Excel)
 csvFileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
-        const text = await file.text();
-        csvData = parseCSV(text);
+        const fileName = file.name.toLowerCase();
+        const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+
+        if (isExcel) {
+            // Excel dosyası - parseExcel otomatik olarak sadece ID, Title, Abstract alır
+            const arrayBuffer = await file.arrayBuffer();
+            csvData = parseExcel(arrayBuffer);
+        } else {
+            // CSV dosyası - parseCSV otomatik olarak sadece ID, Title, Abstract alır
+            const text = await file.text();
+            csvData = parseCSV(text);
+        }
 
         if (csvData.length === 0) {
-            showError('CSV dosyası boş veya geçersiz!');
+            showError('Dosya boş veya geçersiz!');
             analyzeBtn.disabled = true;
             return;
         }
 
-        // CSV'nin gerekli sütunları içerip içermediğini kontrol et
-        const requiredColumns = ['Title', 'Abstract'];
-        const hasRequiredColumns = requiredColumns.every(col =>
-            csvData[0].hasOwnProperty(col)
-        );
-
-        if (!hasRequiredColumns) {
-            showError('CSV dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
-            analyzeBtn.disabled = true;
-            return;
-        }
-
-        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır!`);
+        showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır! (ID, Title, Abstract sütunları otomatik seçildi)`);
         analyzeBtn.disabled = false;
     } catch (error) {
-        showError('CSV dosyası okunurken hata oluştu: ' + error.message);
+        showError(error.message);
         analyzeBtn.disabled = true;
     }
 });
@@ -79,19 +78,23 @@ analyzeBtn.addEventListener('click', async () => {
     }
 
     if (csvData.length === 0) {
-        showError('Lütfen önce CSV dosyası yükleyin!');
+        showError('Lütfen önce bir dosya yükleyin!');
         return;
     }
 
     await startAnalysis();
 });
 
-// İndirme butonuna tıklandığında
-downloadBtn.addEventListener('click', () => {
+// İndirme butonlarına tıklandığında
+downloadCsvBtn.addEventListener('click', () => {
     downloadResultsAsCSV();
 });
 
-// CSV parsing fonksiyonu
+downloadExcelBtn.addEventListener('click', () => {
+    downloadResultsAsExcel();
+});
+
+// CSV parsing fonksiyonu - sadece gerekli sütunları alır
 function parseCSV(text) {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
@@ -99,18 +102,67 @@ function parseCSV(text) {
     const headers = lines[0].split('\t').map(h => h.trim());
     const data = [];
 
+    // ID, Title, Abstract sütunlarının indekslerini bul
+    const idIndex = headers.findIndex(h => h.toLowerCase() === 'id');
+    const titleIndex = headers.findIndex(h => h.toLowerCase() === 'title');
+    const abstractIndex = headers.findIndex(h => h.toLowerCase() === 'abstract');
+
+    // Title ve Abstract zorunlu
+    if (titleIndex === -1 || abstractIndex === -1) {
+        throw new Error('CSV dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+    }
+
     for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split('\t');
-        const row = {};
 
-        headers.forEach((header, index) => {
-            row[header] = values[index] ? values[index].trim() : '';
-        });
+        // Sadece gerekli sütunları al
+        const row = {
+            ID: idIndex !== -1 ? (values[idIndex] ? values[idIndex].trim() : String(i)) : String(i),
+            Title: values[titleIndex] ? values[titleIndex].trim() : '',
+            Abstract: values[abstractIndex] ? values[abstractIndex].trim() : ''
+        };
 
-        data.push(row);
+        // Boş satırları atla
+        if (row.Title || row.Abstract) {
+            data.push(row);
+        }
     }
 
     return data;
+}
+
+// Excel parsing fonksiyonu - sadece gerekli sütunları alır
+function parseExcel(arrayBuffer) {
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+
+    // Excel'i JSON'a çevir
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    if (jsonData.length === 0) return [];
+
+    // İlk satırdan sütun isimlerini al
+    const headers = Object.keys(jsonData[0]);
+
+    // ID, Title, Abstract sütunlarını bul (case-insensitive)
+    const idKey = headers.find(h => h.toLowerCase() === 'id');
+    const titleKey = headers.find(h => h.toLowerCase() === 'title');
+    const abstractKey = headers.find(h => h.toLowerCase() === 'abstract');
+
+    // Title ve Abstract zorunlu
+    if (!titleKey || !abstractKey) {
+        throw new Error('Excel dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+    }
+
+    // Sadece gerekli sütunları filtrele ve standart isimlere çevir
+    const filteredData = jsonData.map((row, index) => ({
+        ID: idKey ? String(row[idKey] || index + 1) : String(index + 1),
+        Title: row[titleKey] ? String(row[titleKey]).trim() : '',
+        Abstract: row[abstractKey] ? String(row[abstractKey]).trim() : ''
+    })).filter(row => row.Title || row.Abstract); // Boş satırları atla
+
+    return filteredData;
 }
 
 // Analizi başlat
@@ -412,6 +464,40 @@ function downloadResultsAsCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// Excel olarak indir
+function downloadResultsAsExcel() {
+    const data = results.map(r => ({
+        'ID': r.id || '',
+        'Yazar(lar)': r.authors || 'Belirtilmemiş',
+        'Başlık': r.title || '',
+        'Yıl': r.year || '',
+        'Kısa Özet (TR)': r.summary_tr || '',
+        'Karar': r.decision || 'Maybe',
+        'Gerekçe': r.rationale || ''
+    }));
+
+    // Yeni workbook oluştur
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Screening Results');
+
+    // Sütun genişliklerini ayarla
+    const columnWidths = [
+        { wch: 10 },  // ID
+        { wch: 30 },  // Yazar(lar)
+        { wch: 50 },  // Başlık
+        { wch: 10 },  // Yıl
+        { wch: 60 },  // Kısa Özet (TR)
+        { wch: 12 },  // Karar
+        { wch: 60 }   // Gerekçe
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Excel dosyasını indir
+    const fileName = `screening_results_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
 }
 
 // Yardımcı fonksiyonlar

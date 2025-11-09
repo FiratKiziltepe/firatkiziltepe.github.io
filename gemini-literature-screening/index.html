@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Literatür Tarama Aracı</title>
     <link rel="stylesheet" href="style.css">
+    <!-- SheetJS for Excel support -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -100,11 +102,11 @@ Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
         </div>
 
         <div class="upload-section card">
-            <h2>📤 CSV Dosyası Yükle</h2>
+            <h2>📤 Dosya Yükle</h2>
             <div class="form-group">
-                <label for="csvFile">CSV Dosyası Seç:</label>
-                <input type="file" id="csvFile" accept=".csv">
-                <small>CSV dosyası ID, Title ve Abstract sütunlarını içermelidir.</small>
+                <label for="csvFile">CSV veya Excel Dosyası Seç:</label>
+                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
+                <small>Dosya ID, Title ve Abstract sütunlarını içermelidir. (CSV veya Excel formatı desteklenir)</small>
             </div>
             <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
         </div>
@@ -120,7 +122,10 @@ Yanıtını mutlaka şu JSON formatında ver, başka hiçbir açıklama ekleme:
         <div id="resultsSection" class="results-section" style="display: none;">
             <div class="results-header">
                 <h2>📊 Sonuçlar</h2>
-                <button id="downloadBtn" class="btn-secondary">💾 CSV İndir</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="downloadCsvBtn" class="btn-secondary">💾 CSV İndir</button>
+                    <button id="downloadExcelBtn" class="btn-secondary">📊 Excel İndir</button>
+                </div>
             </div>
             <div class="table-container">
                 <table id="resultsTable">
