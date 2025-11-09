@@ -11,7 +11,8 @@ const delayInput = document.getElementById('delayBetweenBatches');
 const instructionsInput = document.getElementById('instructions');
 const csvFileInput = document.getElementById('csvFile');
 const analyzeBtn = document.getElementById('analyzeBtn');
-const downloadBtn = document.getElementById('downloadBtn');
+const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const progressSection = document.getElementById('progressSection');
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
@@ -34,29 +35,39 @@ apiKeyInput.addEventListener('change', () => {
     }
 });
 
-// CSV dosyası seçildiğinde
+// Dosya seçildiğinde (CSV veya Excel)
 csvFileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
-        const text = await file.text();
-        csvData = parseCSV(text);
+        const fileName = file.name.toLowerCase();
+        const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+
+        if (isExcel) {
+            // Excel dosyası
+            const arrayBuffer = await file.arrayBuffer();
+            csvData = parseExcel(arrayBuffer);
+        } else {
+            // CSV dosyası
+            const text = await file.text();
+            csvData = parseCSV(text);
+        }
 
         if (csvData.length === 0) {
-            showError('CSV dosyası boş veya geçersiz!');
+            showError('Dosya boş veya geçersiz!');
             analyzeBtn.disabled = true;
             return;
         }
 
-        // CSV'nin gerekli sütunları içerip içermediğini kontrol et
+        // Gerekli sütunları içerip içermediğini kontrol et
         const requiredColumns = ['Title', 'Abstract'];
         const hasRequiredColumns = requiredColumns.every(col =>
             csvData[0].hasOwnProperty(col)
         );
 
         if (!hasRequiredColumns) {
-            showError('CSV dosyası "Title" ve "Abstract" sütunlarını içermelidir!');
+            showError('Dosya "Title" ve "Abstract" sütunlarını içermelidir!');
             analyzeBtn.disabled = true;
             return;
         }
@@ -64,7 +75,7 @@ csvFileInput.addEventListener('change', async (e) => {
         showSuccess(`${csvData.length} makale yüklendi. Analiz için hazır!`);
         analyzeBtn.disabled = false;
     } catch (error) {
-        showError('CSV dosyası okunurken hata oluştu: ' + error.message);
+        showError('Dosya okunurken hata oluştu: ' + error.message);
         analyzeBtn.disabled = true;
     }
 });
@@ -86,9 +97,13 @@ analyzeBtn.addEventListener('click', async () => {
     await startAnalysis();
 });
 
-// İndirme butonuna tıklandığında
-downloadBtn.addEventListener('click', () => {
+// İndirme butonlarına tıklandığında
+downloadCsvBtn.addEventListener('click', () => {
     downloadResultsAsCSV();
+});
+
+downloadExcelBtn.addEventListener('click', () => {
+    downloadResultsAsExcel();
 });
 
 // CSV parsing fonksiyonu
@@ -111,6 +126,18 @@ function parseCSV(text) {
     }
 
     return data;
+}
+
+// Excel parsing fonksiyonu
+function parseExcel(arrayBuffer) {
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+
+    // Excel'i JSON'a çevir
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    return jsonData;
 }
 
 // Analizi başlat
@@ -412,6 +439,40 @@ function downloadResultsAsCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// Excel olarak indir
+function downloadResultsAsExcel() {
+    const data = results.map(r => ({
+        'ID': r.id || '',
+        'Yazar(lar)': r.authors || 'Belirtilmemiş',
+        'Başlık': r.title || '',
+        'Yıl': r.year || '',
+        'Kısa Özet (TR)': r.summary_tr || '',
+        'Karar': r.decision || 'Maybe',
+        'Gerekçe': r.rationale || ''
+    }));
+
+    // Yeni workbook oluştur
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Screening Results');
+
+    // Sütun genişliklerini ayarla
+    const columnWidths = [
+        { wch: 10 },  // ID
+        { wch: 30 },  // Yazar(lar)
+        { wch: 50 },  // Başlık
+        { wch: 10 },  // Yıl
+        { wch: 60 },  // Kısa Özet (TR)
+        { wch: 12 },  // Karar
+        { wch: 60 }   // Gerekçe
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Excel dosyasını indir
+    const fileName = `screening_results_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
 }
 
 // Yardımcı fonksiyonlar
