@@ -321,3 +321,100 @@ tr:hover {
     margin: 10px 0;
     border-left: 4px solid #155724;
 }
+
+/* Rate Limit Hesaplayıcı */
+.rate-limit-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .rate-limit-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+.api-limits {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.api-limits h3 {
+    color: #667eea;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.api-limits ul {
+    list-style: none;
+    padding: 0;
+}
+
+.api-limits li {
+    padding: 8px 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.rate-calculator {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+}
+
+.rate-calculator h3 {
+    color: #28a745;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.calculation-result {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.calc-item:last-child {
+    border-bottom: none;
+}
+
+.calc-label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.calc-value {
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 4px 12px;
+    border-radius: 4px;
+    background: white;
+}
+
+.status-safe {
+    color: #28a745;
+    background: #d4edda !important;
+}
+
+.status-warning {
+    color: #ffc107;
+    background: #fff3cd !important;
+}
+
+.status-danger {
+    color: #dc3545;
+    background: #f8d7da !important;
+}
