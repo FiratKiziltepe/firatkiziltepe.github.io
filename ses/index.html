@@ -331,8 +331,9 @@
 
         <div class="main-content">
             <div class="info-box">
-                <strong>Features:</strong> Upload any audio file • Automatic transcription • Speaker detection •
-                Synchronized playback • Edit transcript • Download results • No length limit • 100% Free
+                <strong>Features:</strong> Upload audio files • Automatic transcription • Speaker detection •
+                Synchronized playback • Edit transcript • Download results • 100% Free<br>
+                <strong>Note:</strong> For best results, use audio files under 10 minutes. Longer files may work but could exceed browser memory limits.
             </div>
 
             <div class="upload-section" id="uploadSection">
@@ -437,9 +438,15 @@
 
             // Show progress section
             document.getElementById('progressSection').style.display = 'block';
-            updateProgress(0, 'Loading model... This may take a moment on first use.');
+            updateProgress(0, 'Checking audio file...');
 
             try {
+                // Check file size (recommend max 50MB for browser processing)
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    throw new Error(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). For best browser performance, please use files under 50MB (approximately 30-45 minutes of audio). Consider compressing or splitting your audio file.`);
+                }
+
                 // Load audio file
                 const audioUrl = URL.createObjectURL(file);
                 const audioPlayer = document.getElementById('audioPlayer');
@@ -448,7 +455,7 @@
 
                 // Initialize transcriber
                 if (!transcriber) {
-                    updateProgress(10, 'Loading Whisper Tiny model... (Optimized for browsers)');
+                    updateProgress(10, 'Loading Whisper Tiny model... (First time: ~1 minute)');
                     transcriber = await pipeline(
                         'automatic-speech-recognition',
                         'Xenova/whisper-tiny',  // Tiny model is optimized for browser use
@@ -462,10 +469,26 @@
 
                 // Get audio data
                 const arrayBuffer = await file.arrayBuffer();
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                    sampleRate: 16000  // Whisper expects 16kHz
+                });
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-                // Convert to mono and get audio data
+                // Check duration
+                const durationMinutes = audioBuffer.duration / 60;
+                if (durationMinutes > 30) {
+                    const proceed = confirm(
+                        `This audio is ${durationMinutes.toFixed(1)} minutes long. Processing may take a while and could fail due to memory limits. Continue?`
+                    );
+                    if (!proceed) {
+                        document.getElementById('progressSection').style.display = 'none';
+                        return;
+                    }
+                }
+
+                updateProgress(40, `Processing ${durationMinutes.toFixed(1)} minute audio...`);
+
+                // Convert to mono and resample to 16kHz
                 let audioData;
                 if (audioBuffer.numberOfChannels === 1) {
                     audioData = audioBuffer.getChannelData(0);
@@ -479,7 +502,7 @@
                     }
                 }
 
-                updateProgress(50, 'Transcribing... This may take a while for long audio files.');
+                updateProgress(50, 'Transcribing... Please be patient for long files.');
 
                 // Get selected language
                 const language = document.getElementById('languageSelect').value;
@@ -491,10 +514,24 @@
 
                 if (language !== 'auto') {
                     transcribeOptions.language = language;
+                    transcribeOptions.task = 'transcribe';
                 }
 
-                // Transcribe
-                const output = await transcriber(audioData, transcribeOptions);
+                // Transcribe with error handling
+                let output;
+                try {
+                    output = await transcriber(audioData, transcribeOptions);
+                } catch (transcribeError) {
+                    if (transcribeError.message && transcribeError.message.includes('error code = 6')) {
+                        throw new Error(
+                            `Out of memory! Your audio file (${durationMinutes.toFixed(1)} min) is too large for browser processing. ` +
+                            `Try: 1) Use a shorter audio file (under 10 minutes works best), ` +
+                            `2) Compress your audio to lower quality, or ` +
+                            `3) Split into smaller segments. Browser memory is limited compared to desktop applications.`
+                        );
+                    }
+                    throw transcribeError;
+                }
 
                 updateProgress(80, 'Processing results and detecting speakers...');
 
@@ -512,12 +549,25 @@
                 // Hide progress after a moment
                 setTimeout(() => {
                     document.getElementById('progressSection').style.display = 'none';
-                }, 1000);
+                }, 1500);
 
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('statusMessage').innerHTML =
-                    `<div class="error-message">Error: ${error.message}</div>`;
+                const errorHtml = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        <strong>Tips:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px; text-align: left;">
+                            <li>Use shorter audio files (5-10 minutes works best in browsers)</li>
+                            <li>Close other browser tabs to free up memory</li>
+                            <li>Try compressing your audio file to a smaller size</li>
+                            <li>For long recordings, consider using desktop transcription software</li>
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('statusMessage').innerHTML = errorHtml;
+                document.getElementById('progressSection').style.display = 'block';
             }
         }
 

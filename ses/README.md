@@ -7,7 +7,7 @@ A powerful, free, browser-based audio transcription tool using OpenAI's Whisper 
 ### Core Functionality
 - **High-Quality Transcription**: Uses Whisper Tiny AI model optimized for browser performance
 - **Multi-Language Support**: Supports English, Turkish, and 10+ other languages
-- **No Length Limit**: Process audio files of any duration
+- **Best for Short-Medium Files**: Optimized for 5-10 minute audio files (longer files may work but could hit browser memory limits)
 - **100% Free**: No API keys, no subscriptions, completely free
 - **Privacy First**: All processing happens in your browser - no data sent to servers
 - **Browser-Optimized**: Lightweight model designed for efficient in-browser processing
@@ -122,20 +122,32 @@ The app works on mobile devices but:
 
 ## ⚡ Troubleshooting
 
+### Out of Memory Errors
+If you see "Error: failed to call OrtRun(). error code = 6" or similar:
+- **Your audio file is too long/large for browser memory**
+- Use shorter audio files (5-10 minutes recommended)
+- Compress your audio file to reduce file size
+- Close other browser tabs and applications
+- Try a browser with more available memory
+- For files longer than 30 minutes, consider desktop transcription software
+
 ### Model Won't Load
 - Check internet connection (needed for first download)
 - Clear browser cache and try again
 - Try a different browser
+- First-time load takes 30-60 seconds for the model download
 
-### Transcription Errors
-- Ensure audio quality is good
-- Select the correct language manually
+### Poor Transcription Quality
+- Ensure audio quality is good (clear speech, minimal background noise)
+- Select the correct language manually instead of auto-detect
 - Check for background noise in audio
+- Whisper Tiny prioritizes speed over perfection - some errors are normal
 
 ### Performance Issues
-- Close other browser tabs
-- Use a more powerful device for large files
-- Consider splitting very long audio files
+- Close other browser tabs to free memory
+- Use a more powerful device for larger files
+- Recommended: Use files under 10 minutes for best performance
+- Consider splitting very long audio files into segments
 
 ## 🎓 Use Cases
 
