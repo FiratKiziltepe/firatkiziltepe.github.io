@@ -391,8 +391,8 @@
         </div>
 
         <footer>
-            <p>Powered by Whisper AI via Transformers.js • Free & Open Source • No data sent to servers</p>
-            <p style="margin-top: 5px; font-size: 0.9em;">All processing happens in your browser</p>
+            <p>Powered by Whisper Tiny AI via Transformers.js • Free & Open Source • No data sent to servers</p>
+            <p style="margin-top: 5px; font-size: 0.9em;">All processing happens in your browser • Browser-optimized for best performance</p>
         </footer>
     </div>
 
@@ -448,10 +448,10 @@
 
                 // Initialize transcriber
                 if (!transcriber) {
-                    updateProgress(10, 'Loading Whisper model... (First time may take a few minutes)');
+                    updateProgress(10, 'Loading Whisper Tiny model... (Optimized for browsers)');
                     transcriber = await pipeline(
                         'automatic-speech-recognition',
-                        'Xenova/whisper-small',
+                        'Xenova/whisper-tiny',  // Tiny model is optimized for browser use
                         {
                             quantized: true,  // Use quantized model for better memory efficiency
                         }

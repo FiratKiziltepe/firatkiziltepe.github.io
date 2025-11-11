@@ -5,11 +5,12 @@ A powerful, free, browser-based audio transcription tool using OpenAI's Whisper 
 ## ✨ Features
 
 ### Core Functionality
-- **High-Quality Transcription**: Uses Whisper AI model for accurate speech-to-text conversion
+- **High-Quality Transcription**: Uses Whisper Tiny AI model optimized for browser performance
 - **Multi-Language Support**: Supports English, Turkish, and 10+ other languages
 - **No Length Limit**: Process audio files of any duration
 - **100% Free**: No API keys, no subscriptions, completely free
 - **Privacy First**: All processing happens in your browser - no data sent to servers
+- **Browser-Optimized**: Lightweight model designed for efficient in-browser processing
 
 ### User Experience
 - **Drag & Drop Upload**: Easy file upload with drag-and-drop support
@@ -71,7 +72,7 @@ A powerful, free, browser-based audio transcription tool using OpenAI's Whisper 
 ## 🔧 Technical Details
 
 ### Technology Stack
-- **Whisper AI**: OpenAI's state-of-the-art speech recognition model
+- **Whisper Tiny**: OpenAI's lightweight speech recognition model optimized for browsers
 - **Transformers.js**: Runs transformer models directly in the browser
 - **Web Audio API**: For audio processing and playback synchronization
 - **Vanilla JavaScript**: No frameworks, lightweight and fast
@@ -83,10 +84,10 @@ The app uses a pause-detection algorithm to identify speaker changes:
 - Shows timestamps for each speaker segment
 
 ### Performance
-- **First Load**: 2-5 minutes (model download, ~150MB)
-- **Subsequent Loads**: Instant (model cached)
+- **First Load**: 30-60 seconds (model download, ~40MB quantized)
+- **Subsequent Loads**: Instant (model cached in browser)
 - **Processing Speed**: ~1-2x real-time (varies by device)
-- **Memory Usage**: ~500MB-1GB during processing
+- **Memory Usage**: ~200-400MB during processing (browser-friendly)
 
 ## 💡 Tips for Best Results
 
