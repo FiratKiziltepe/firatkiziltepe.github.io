@@ -205,8 +205,17 @@ async function processImage(fileObj, language) {
 
     updateProgress(fileObj.id, 80);
 
-    // Create searchable PDF
-    const pdfBytes = await createSearchablePDF(blob, text, fileObj.type);
+    // Get image dimensions for proper scaling
+    const img = await createImageBitmap(blob);
+
+    // Create searchable PDF with HOCR positioning
+    const pdfBytes = await createSearchablePDFWithHOCR([{
+        blob,
+        width: img.width,
+        height: img.height,
+        hocr: hocr,
+        text: text
+    }]);
 
     updateProgress(fileObj.id, 100);
 
@@ -221,12 +230,34 @@ async function processPDF(fileObj, language) {
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const numPages = pdf.numPages;
 
-    updateProgress(fileObj.id, 10);
+    updateProgress(fileObj.id, 8);
 
-    const allText = [];
-    const images = [];
+    // Check if PDF already has searchable text
+    let hasSearchableText = false;
+    let totalTextLength = 0;
 
-    // Process each page
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        totalTextLength += pageText.trim().length;
+    }
+
+    // If PDF has significant text content (more than 50 chars), it's already searchable
+    hasSearchableText = totalTextLength > 50;
+
+    if (hasSearchableText) {
+        // PDF is already searchable, return it as is
+        updateProgress(fileObj.id, 100);
+        fileObj.result = new Uint8Array(arrayBuffer);
+        return;
+    }
+
+    updateProgress(fileObj.id, 15);
+
+    // PDF needs OCR - process each page with HOCR for positioning
+    const pagesData = [];
+
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 2.0 });
@@ -242,9 +273,9 @@ async function processPDF(fileObj, language) {
         // Convert canvas to blob
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
-        // OCR the page
-        const baseProgress = 10 + ((pageNum - 1) / numPages) * 60;
-        const { data: { text } } = await Tesseract.recognize(
+        // OCR the page with HOCR
+        const baseProgress = 15 + ((pageNum - 1) / numPages) * 60;
+        const result = await Tesseract.recognize(
             blob,
             language,
             {
@@ -257,14 +288,19 @@ async function processPDF(fileObj, language) {
             }
         );
 
-        allText.push(text);
-        images.push({ blob, width: viewport.width, height: viewport.height });
+        pagesData.push({
+            blob,
+            width: viewport.width,
+            height: viewport.height,
+            hocr: result.data.hocr,
+            text: result.data.text
+        });
     }
 
-    updateProgress(fileObj.id, 75);
+    updateProgress(fileObj.id, 80);
 
-    // Create searchable PDF from all pages
-    const pdfBytes = await createSearchablePDFFromPages(images, allText);
+    // Create searchable PDF with proper text positioning
+    const pdfBytes = await createSearchablePDFWithHOCR(pagesData);
 
     updateProgress(fileObj.id, 100);
 
@@ -387,6 +423,84 @@ async function createSearchablePDFFromPages(images, texts) {
                 if (yPosition < 50) break;
             }
         }
+    }
+
+    return await pdfDoc.save();
+}
+
+async function createSearchablePDFWithHOCR(pagesData) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    for (let i = 0; i < pagesData.length; i++) {
+        const { blob, width, height, hocr } = pagesData[i];
+
+        // Calculate PDF page dimensions
+        const aspectRatio = width / height;
+        const pageWidth = 595.28; // A4 width in points
+        const pageHeight = pageWidth / aspectRatio;
+        const scale = pageWidth / width;
+
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+        // Embed and draw image
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const image = await pdfDoc.embedPng(uint8Array);
+
+        page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: pageWidth,
+            height: pageHeight,
+        });
+
+        // Parse HOCR and add text with proper positioning
+        const parser = new DOMParser();
+        const hocrDoc = parser.parseFromString(hocr, 'text/html');
+        const words = hocrDoc.querySelectorAll('.ocrx_word');
+
+        words.forEach(wordElement => {
+            const title = wordElement.getAttribute('title');
+            const bboxMatch = title.match(/bbox (\d+) (\d+) (\d+) (\d+)/);
+
+            if (bboxMatch) {
+                const x1 = parseInt(bboxMatch[1]);
+                const y1 = parseInt(bboxMatch[2]);
+                const x2 = parseInt(bboxMatch[3]);
+                const y2 = parseInt(bboxMatch[4]);
+
+                const wordText = wordElement.textContent.trim();
+
+                if (wordText) {
+                    try {
+                        const sanitizedText = sanitizeTextForPDF(wordText);
+
+                        // Calculate position and size
+                        const wordWidth = (x2 - x1) * scale;
+                        const wordHeight = (y2 - y1) * scale;
+                        const xPos = x1 * scale;
+                        // PDF coordinates are from bottom, HOCR is from top
+                        const yPos = pageHeight - (y2 * scale);
+
+                        // Calculate font size to fit the bbox
+                        const fontSize = Math.max(8, Math.min(wordHeight * 0.8, 20));
+
+                        page.drawText(sanitizedText, {
+                            x: xPos,
+                            y: yPos,
+                            size: fontSize,
+                            font: font,
+                            color: PDFLib.rgb(1, 1, 1),
+                            opacity: 0.01,
+                        });
+                    } catch (error) {
+                        // Skip words that cannot be encoded
+                        console.warn('Skipping word due to encoding error:', wordText, error.message);
+                    }
+                }
+            }
+        });
     }
 
     return await pdfDoc.save();
