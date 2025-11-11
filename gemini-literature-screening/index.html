@@ -42,39 +42,32 @@
                     <input type="number" id="delayBetweenBatches" value="5" min="0" max="60">
                     <small>Her batch arasında beklenecek süre</small>
                 </div>
-            </div>
 
-            <div class="card">
-                <h2>⚡ Rate Limit Hesaplayıcı</h2>
-                <div class="rate-limit-info">
-                    <div class="api-limits">
-                        <h3>Gemini 2.5 Flash-Lite (Free Tier)</h3>
-                        <ul>
-                            <li>📊 <strong>RPM (Requests Per Minute):</strong> 15</li>
-                            <li>📄 <strong>TPM (Tokens Per Minute):</strong> 250,000</li>
-                            <li>📅 <strong>RPD (Requests Per Day):</strong> 1,000</li>
-                        </ul>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+
+                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 15px;">⚡ Gemini 2.5 Flash-Lite (Free)</h3>
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                    <div style="font-size: 0.85rem; color: #666;">
+                        <strong>API Limitleri:</strong> RPM: 15 | TPM: 250K | RPD: 1,000
                     </div>
-                    <div class="rate-calculator">
-                        <h3>Mevcut Ayarlarınız</h3>
-                        <div id="rateCalculation" class="calculation-result">
-                            <div class="calc-item">
-                                <span class="calc-label">Dakikada İşlenecek Makale:</span>
-                                <span class="calc-value" id="articlesPerMinute">-</span>
-                            </div>
-                            <div class="calc-item">
-                                <span class="calc-label">Dakikalık API İsteği:</span>
-                                <span class="calc-value" id="requestsPerMinute">-</span>
-                            </div>
-                            <div class="calc-item">
-                                <span class="calc-label">Rate Limit Durumu:</span>
-                                <span class="calc-value" id="rateLimitStatus">-</span>
-                            </div>
-                            <div class="calc-item">
-                                <span class="calc-label">Tahmini Süre (100 makale):</span>
-                                <span class="calc-value" id="estimatedTime">-</span>
-                            </div>
-                        </div>
+                </div>
+
+                <div class="rate-stats">
+                    <div class="rate-stat-item">
+                        <span class="rate-label">Dakikada Makale:</span>
+                        <span class="rate-value" id="articlesPerMinute">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">API İsteği:</span>
+                        <span class="rate-value" id="requestsPerMinute">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">Durum:</span>
+                        <span class="rate-value" id="rateLimitStatus">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">100 Makale:</span>
+                        <span class="rate-value" id="estimatedTime">-</span>
                     </div>
                 </div>
             </div>
@@ -183,6 +176,6 @@ Her çalışma için şu bilgileri dönmelisin:
         </div>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>

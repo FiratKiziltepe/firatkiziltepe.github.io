@@ -128,6 +128,16 @@ function calculateRateLimits() {
     // Dakikada kaç makale işlenebilir
     const articlesPerMinute = Math.floor(batchesPerMinute * batchSize);
 
+    // Infinity veya NaN kontrolü
+    if (!isFinite(articlesPerMinute) || articlesPerMinute <= 0) {
+        document.getElementById('articlesPerMinute').textContent = '-';
+        document.getElementById('requestsPerMinute').textContent = '-';
+        document.getElementById('rateLimitStatus').textContent = '-';
+        document.getElementById('rateLimitStatus').className = 'rate-value';
+        document.getElementById('estimatedTime').textContent = '-';
+        return;
+    }
+
     // Dakikalık API isteği (her makale = 1 istek)
     const requestsPerMinute = articlesPerMinute;
 
@@ -153,12 +163,12 @@ function calculateRateLimits() {
         : `${Math.round(estimatedMinutesFor100)} dakika`;
 
     // DOM'u güncelle
-    document.getElementById('articlesPerMinute').textContent = `~${articlesPerMinute} makale/dk`;
+    document.getElementById('articlesPerMinute').textContent = `~${articlesPerMinute}`;
     document.getElementById('requestsPerMinute').textContent = `${requestsPerMinute}/${GEMINI_LIMITS.RPM}`;
 
     const statusElement = document.getElementById('rateLimitStatus');
     statusElement.textContent = status;
-    statusElement.className = 'calc-value ' + statusClass;
+    statusElement.className = 'rate-value ' + statusClass;
 
     document.getElementById('estimatedTime').textContent = estimatedTimeText;
 }
