@@ -311,14 +311,21 @@ async function createSearchablePDF(imageBlob, text, imageType) {
 
     for (const line of lines) {
         if (line.trim()) {
-            page.drawText(line, {
-                x: 50,
-                y: yPosition,
-                size: fontSize,
-                font: font,
-                color: PDFLib.rgb(1, 1, 1), // White text (invisible on white background)
-                opacity: 0.01, // Nearly invisible
-            });
+            try {
+                // Sanitize text to handle Turkish and special characters
+                const sanitizedLine = sanitizeTextForPDF(line);
+                page.drawText(sanitizedLine, {
+                    x: 50,
+                    y: yPosition,
+                    size: fontSize,
+                    font: font,
+                    color: PDFLib.rgb(1, 1, 1), // White text (invisible on white background)
+                    opacity: 0.01, // Nearly invisible
+                });
+            } catch (error) {
+                // Skip lines that cannot be encoded
+                console.warn('Skipping line due to encoding error:', error.message);
+            }
             yPosition -= fontSize + 5;
             if (yPosition < 50) break; // Prevent overflow
         }
@@ -361,14 +368,21 @@ async function createSearchablePDFFromPages(images, texts) {
 
         for (const line of lines) {
             if (line.trim()) {
-                page.drawText(line, {
-                    x: 50,
-                    y: yPosition,
-                    size: fontSize,
-                    font: font,
-                    color: PDFLib.rgb(1, 1, 1),
-                    opacity: 0.01,
-                });
+                try {
+                    // Sanitize text to handle Turkish and special characters
+                    const sanitizedLine = sanitizeTextForPDF(line);
+                    page.drawText(sanitizedLine, {
+                        x: 50,
+                        y: yPosition,
+                        size: fontSize,
+                        font: font,
+                        color: PDFLib.rgb(1, 1, 1),
+                        opacity: 0.01,
+                    });
+                } catch (error) {
+                    // Skip lines that cannot be encoded
+                    console.warn('Skipping line due to encoding error:', error.message);
+                }
                 yPosition -= fontSize + 5;
                 if (yPosition < 50) break;
             }
@@ -425,4 +439,47 @@ function formatFileSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function sanitizeTextForPDF(text) {
+    // Map Turkish and special characters to WinAnsi compatible alternatives
+    const charMap = {
+        'ı': 'i', 'İ': 'I',
+        'ğ': 'g', 'Ğ': 'G',
+        'ü': 'u', 'Ü': 'U',
+        'ş': 's', 'Ş': 'S',
+        'ö': 'o', 'Ö': 'O',
+        'ç': 'c', 'Ç': 'C',
+        'â': 'a', 'Â': 'A',
+        'î': 'i', 'Î': 'I',
+        'û': 'u', 'Û': 'U',
+        'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+        'É': 'E', 'È': 'E', 'Ê': 'E', 'Ë': 'E',
+        'á': 'a', 'à': 'a', 'ä': 'a', 'å': 'a',
+        'Á': 'A', 'À': 'A', 'Ä': 'A', 'Å': 'A',
+        'ó': 'o', 'ò': 'o', 'ô': 'o',
+        'Ó': 'O', 'Ò': 'O', 'Ô': 'O',
+        'ú': 'u', 'ù': 'u',
+        'Ú': 'U', 'Ù': 'U',
+        'ñ': 'n', 'Ñ': 'N',
+        '–': '-', '—': '-',
+        ''': "'", ''': "'", '"': '"', '"': '"',
+        '…': '...',
+        '€': 'EUR',
+        '£': 'GBP',
+        '¥': 'YEN',
+        '©': '(c)',
+        '®': '(r)',
+        '™': '(tm)'
+    };
+
+    let sanitized = text;
+    for (const [char, replacement] of Object.entries(charMap)) {
+        sanitized = sanitized.split(char).join(replacement);
+    }
+
+    // Remove any remaining non-ASCII characters that might cause issues
+    sanitized = sanitized.replace(/[^\x00-\x7F]/g, '');
+
+    return sanitized;
 }
