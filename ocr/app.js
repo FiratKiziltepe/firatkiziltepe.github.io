@@ -1,0 +1,428 @@
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// State management
+const state = {
+    files: [],
+    processing: false
+};
+
+// DOM elements
+const uploadBox = document.getElementById('uploadBox');
+const fileInput = document.getElementById('fileInput');
+const filesContainer = document.getElementById('filesContainer');
+const ocrLanguage = document.getElementById('ocrLanguage');
+const progressInfo = document.getElementById('progressInfo');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+// Event listeners
+uploadBox.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', handleFileSelect);
+
+// Drag and drop handlers
+uploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadBox.classList.add('drag-over');
+});
+
+uploadBox.addEventListener('dragleave', () => {
+    uploadBox.classList.remove('drag-over');
+});
+
+uploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadBox.classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+});
+
+// File handling
+function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+    fileInput.value = ''; // Reset input
+}
+
+function handleFiles(files) {
+    const validFiles = files.filter(file => {
+        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+        return validTypes.includes(file.type);
+    });
+
+    if (validFiles.length === 0) {
+        alert('Lütfen geçerli bir dosya formatı seçin (PDF, JPG, PNG, BMP, GIF)');
+        return;
+    }
+
+    validFiles.forEach(file => {
+        const fileId = Date.now() + Math.random();
+        const fileObj = {
+            id: fileId,
+            file: file,
+            name: file.name,
+            size: formatFileSize(file.size),
+            type: file.type,
+            status: 'pending',
+            progress: 0,
+            result: null
+        };
+        state.files.push(fileObj);
+        renderFileCard(fileObj);
+    });
+
+    // Start processing automatically
+    processNextFile();
+}
+
+function renderFileCard(fileObj) {
+    const card = document.createElement('div');
+    card.className = 'file-card';
+    card.id = `file-${fileObj.id}`;
+
+    const icon = fileObj.type.startsWith('image/') ? 'fa-image' : 'fa-file-pdf';
+
+    card.innerHTML = `
+        <div class="file-header">
+            <i class="fas ${icon} file-icon"></i>
+            <div class="file-info">
+                <h4>${fileObj.name}</h4>
+                <p>${fileObj.size}</p>
+            </div>
+        </div>
+        <canvas class="file-preview" id="preview-${fileObj.id}"></canvas>
+        <div class="file-status status-pending" id="status-${fileObj.id}">
+            <i class="fas fa-clock"></i> Beklemede
+        </div>
+        <div class="file-progress">
+            <div class="file-progress-bar" id="progress-${fileObj.id}" style="width: 0%"></div>
+        </div>
+        <div class="file-actions">
+            <button class="btn-download" id="download-${fileObj.id}" disabled>
+                <i class="fas fa-download"></i> İndir
+            </button>
+            <button class="btn-remove" onclick="removeFile(${fileObj.id})">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+    filesContainer.appendChild(card);
+
+    // Generate preview
+    generatePreview(fileObj);
+}
+
+async function generatePreview(fileObj) {
+    const canvas = document.getElementById(`preview-${fileObj.id}`);
+    const ctx = canvas.getContext('2d');
+
+    if (fileObj.type.startsWith('image/')) {
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        };
+        img.src = URL.createObjectURL(fileObj.file);
+    } else if (fileObj.type === 'application/pdf') {
+        try {
+            const arrayBuffer = await fileObj.file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 0.5 });
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        } catch (error) {
+            console.error('Preview error:', error);
+        }
+    }
+}
+
+async function processNextFile() {
+    if (state.processing) return;
+
+    const nextFile = state.files.find(f => f.status === 'pending');
+    if (!nextFile) return;
+
+    state.processing = true;
+    await processFile(nextFile);
+    state.processing = false;
+
+    // Process next file if any
+    processNextFile();
+}
+
+async function processFile(fileObj) {
+    updateFileStatus(fileObj.id, 'processing', '<i class="fas fa-spinner fa-spin"></i> İşleniyor...');
+
+    try {
+        const language = ocrLanguage.value;
+
+        if (fileObj.type.startsWith('image/')) {
+            await processImage(fileObj, language);
+        } else if (fileObj.type === 'application/pdf') {
+            await processPDF(fileObj, language);
+        }
+
+        updateFileStatus(fileObj.id, 'completed', '<i class="fas fa-check-circle"></i> Tamamlandı');
+        fileObj.status = 'completed';
+
+        // Enable download button
+        const downloadBtn = document.getElementById(`download-${fileObj.id}`);
+        downloadBtn.disabled = false;
+        downloadBtn.onclick = () => downloadFile(fileObj);
+    } catch (error) {
+        console.error('Processing error:', error);
+        updateFileStatus(fileObj.id, 'error', '<i class="fas fa-exclamation-circle"></i> Hata oluştu');
+        fileObj.status = 'error';
+    }
+}
+
+async function processImage(fileObj, language) {
+    updateProgress(fileObj.id, 10);
+
+    // Read image
+    const imageData = await fileObj.file.arrayBuffer();
+    const blob = new Blob([imageData], { type: fileObj.type });
+
+    updateProgress(fileObj.id, 20);
+
+    // Perform OCR
+    const { data: { text, hocr } } = await Tesseract.recognize(
+        blob,
+        language,
+        {
+            logger: m => {
+                if (m.status === 'recognizing text') {
+                    const progress = 20 + (m.progress * 60);
+                    updateProgress(fileObj.id, progress);
+                }
+            }
+        }
+    );
+
+    updateProgress(fileObj.id, 80);
+
+    // Create searchable PDF
+    const pdfBytes = await createSearchablePDF(blob, text, fileObj.type);
+
+    updateProgress(fileObj.id, 100);
+
+    fileObj.result = pdfBytes;
+}
+
+async function processPDF(fileObj, language) {
+    updateProgress(fileObj.id, 5);
+
+    // Load PDF
+    const arrayBuffer = await fileObj.file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages = pdf.numPages;
+
+    updateProgress(fileObj.id, 10);
+
+    const allText = [];
+    const images = [];
+
+    // Process each page
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.0 });
+
+        // Render page to canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+        // Convert canvas to blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+        // OCR the page
+        const baseProgress = 10 + ((pageNum - 1) / numPages) * 60;
+        const { data: { text } } = await Tesseract.recognize(
+            blob,
+            language,
+            {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        const progress = baseProgress + (m.progress * (60 / numPages));
+                        updateProgress(fileObj.id, progress);
+                    }
+                }
+            }
+        );
+
+        allText.push(text);
+        images.push({ blob, width: viewport.width, height: viewport.height });
+    }
+
+    updateProgress(fileObj.id, 75);
+
+    // Create searchable PDF from all pages
+    const pdfBytes = await createSearchablePDFFromPages(images, allText);
+
+    updateProgress(fileObj.id, 100);
+
+    fileObj.result = pdfBytes;
+}
+
+async function createSearchablePDF(imageBlob, text, imageType) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+
+    // Get image dimensions
+    const img = await createImageBitmap(imageBlob);
+    const aspectRatio = img.width / img.height;
+    const pageWidth = 595.28; // A4 width in points
+    const pageHeight = pageWidth / aspectRatio;
+
+    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+    // Embed image
+    let image;
+    const arrayBuffer = await imageBlob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    if (imageType === 'image/jpeg' || imageType === 'image/jpg') {
+        image = await pdfDoc.embedJpg(uint8Array);
+    } else {
+        image = await pdfDoc.embedPng(uint8Array);
+    }
+
+    // Draw image
+    page.drawImage(image, {
+        x: 0,
+        y: 0,
+        width: pageWidth,
+        height: pageHeight,
+    });
+
+    // Add invisible text layer for searchability
+    const fontSize = 12;
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    // Split text into lines and add to PDF
+    const lines = text.split('\n');
+    let yPosition = pageHeight - 50;
+
+    for (const line of lines) {
+        if (line.trim()) {
+            page.drawText(line, {
+                x: 50,
+                y: yPosition,
+                size: fontSize,
+                font: font,
+                color: PDFLib.rgb(1, 1, 1), // White text (invisible on white background)
+                opacity: 0.01, // Nearly invisible
+            });
+            yPosition -= fontSize + 5;
+            if (yPosition < 50) break; // Prevent overflow
+        }
+    }
+
+    return await pdfDoc.save();
+}
+
+async function createSearchablePDFFromPages(images, texts) {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+
+    for (let i = 0; i < images.length; i++) {
+        const { blob, width, height } = images[i];
+        const text = texts[i];
+
+        const aspectRatio = width / height;
+        const pageWidth = 595.28; // A4 width
+        const pageHeight = pageWidth / aspectRatio;
+
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+        // Embed image
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const image = await pdfDoc.embedPng(uint8Array);
+
+        // Draw image
+        page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: pageWidth,
+            height: pageHeight,
+        });
+
+        // Add invisible text layer
+        const fontSize = 12;
+        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+        const lines = text.split('\n');
+        let yPosition = pageHeight - 50;
+
+        for (const line of lines) {
+            if (line.trim()) {
+                page.drawText(line, {
+                    x: 50,
+                    y: yPosition,
+                    size: fontSize,
+                    font: font,
+                    color: PDFLib.rgb(1, 1, 1),
+                    opacity: 0.01,
+                });
+                yPosition -= fontSize + 5;
+                if (yPosition < 50) break;
+            }
+        }
+    }
+
+    return await pdfDoc.save();
+}
+
+function downloadFile(fileObj) {
+    if (!fileObj.result) return;
+
+    const blob = new Blob([fileObj.result], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileObj.name.replace(/\.[^/.]+$/, '') + '_searchable.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function removeFile(fileId) {
+    const index = state.files.findIndex(f => f.id === fileId);
+    if (index > -1) {
+        state.files.splice(index, 1);
+    }
+
+    const card = document.getElementById(`file-${fileId}`);
+    if (card) {
+        card.remove();
+    }
+}
+
+function updateFileStatus(fileId, statusClass, statusText) {
+    const statusElement = document.getElementById(`status-${fileId}`);
+    if (statusElement) {
+        statusElement.className = `file-status status-${statusClass}`;
+        statusElement.innerHTML = statusText;
+    }
+}
+
+function updateProgress(fileId, progress) {
+    const progressBar = document.getElementById(`progress-${fileId}`);
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}

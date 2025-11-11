@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR - Aranabilir PDF Dönüştürücü</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">OCR PDF Dönüştürücü</div>
+        <div class="nav-links">
+            <a href="../index.html"><i class="fas fa-home"></i> Ana Sayfa</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-file-pdf"></i> Aranabilir PDF Dönüştürücü</h1>
+            <p>PDF'leri ve görselleri OCR ile aranabilir PDF formatına dönüştürün</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Dosyaları Sürükle-Bırak veya Tıkla</h3>
+                <p>PDF, JPG, PNG, BMP, GIF formatları desteklenir</p>
+                <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.bmp,.gif" hidden>
+                <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i> Dosya Seç
+                </button>
+            </div>
+
+            <div class="language-selector">
+                <label for="ocrLanguage"><i class="fas fa-language"></i> OCR Dili:</label>
+                <select id="ocrLanguage">
+                    <option value="tur">Türkçe</option>
+                    <option value="eng">English</option>
+                    <option value="tur+eng">Türkçe + English</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="files-container" id="filesContainer">
+            <!-- File cards will be added here dynamically -->
+        </div>
+
+        <div class="progress-info" id="progressInfo" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">İşleniyor...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
