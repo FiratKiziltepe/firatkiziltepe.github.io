@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretim Teknolojilerinin Evrimi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            border: 4px solid #1F8A70;
+            top: 1.25rem;
+            left: -10px;
+            z-index: 10;
+        }
+        @media (min-width: 768px) {
+            .timeline-item::before {
+                left: 50%;
+                margin-left: -10px;
+                top: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto max-w-6xl px-6 py-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold" style="color: #004358;">Öğretim Teknolojilerinin Evrimi</h1>
+            <p class="text-lg md:text-xl mt-4 text-gray-600">Araç Kullanımından Süreç ve Performans Yönetimine</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto max-w-6xl p-4 md:p-8 mt-6">
+
+        <section class="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
+            <h2 class="text-3xl font-bold text-center mb-6" style="color: #004358;">Temel Kavramlar ve Alanın Kapsamı</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #1F8A70;">1. Öğretim ve Teknoloji Nedir?</h3>
+                    <p class="text-gray-600 mb-2"><strong>Öğretim (Instruction):</strong> Öğrenmenin (belirli hedefler doğrultusunda) kasıtlı olarak kolaylaştırılmasıdır. Davranışta istendik değişiklikler yaratma süreci olarak da tanımlanabilir.</p>
+                    <p class="text-gray-600"><strong>Teknoloji (Technology):</strong> Sadece makine veya araç demek değildir. Yunanca "techne" (zanaat/beceri) ve "logia" (bilim/çalışma) kelimelerinden gelir. Temelde, bilimsel veya organize bilginin pratik sorunlara sistematik olarak uygulanmasıdır. Bir "süreç" veya "yaklaşım" ifade eder.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #1F8A70;">2. Eğitim Teknolojisi vs. Öğretim Teknolojisi</h3>
+                    <p class="text-gray-600 mb-2">Bu iki kavram sıklıkla birbirinin yerine kullanılsa da aralarında nüans vardır:</p>
+                    <p class="text-gray-600 mb-2"><strong>Eğitim Teknolojisi (Educational Technology):</strong> Daha geniş bir şemsiye kavramdır. Öğrenmenin gerçekleştiği *tüm* bağlamlardaki (örneğin; okul yönetimi, rehberlik, müfredat) teknolojik süreç ve kaynakları inceler. AECT 1977 ve 2007 tanımları bu geniş kapsamı kullanır.</p>
+                    <p class="text-gray-600"><strong>Öğretim Teknolojisi (Instructional Technology):</strong> Daha odaklı bir alt kümedir. Doğrudan "öğretim" (instruction) süreciyle, yani öğrenme hedeflerine ulaşmak için tasarlanan ve uygulanan süreç ve kaynaklarla ilgilenir. AECT 1994 tanımı bu odaklı alanı "Öğretim Teknolojisi" olarak adlandırmıştır.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
+            <h2 class="text-3xl font-bold text-center mb-6" style="color: #004358;">Dönüşümü Tetikleyen 3 Ana Faktör</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">
+                Öğretim teknolojileri alanının evrimi, sadece teknolojik icatlarla değil, aynı zamanda büyük toplumsal ve jeopolitik olaylarla da şekillenmiştir. Kaynak dokümana göre, üç temel olay bu alandaki paradigmayı kökten değiştirmiştir.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="border-l-4 p-6 rounded-r-lg shadow-sm" style="border-color: #1F8A70; background-color: #f0f9f8;">
+                    <span class="text-5xl">⚔️</span>
+                    <h3 class="text-xl font-semibold mt-4 mb-2" style="color: #004358;">II. Dünya Savaşı</h3>
+                    <p class="text-gray-600">Kısa sürede kitlesel eğitim ihtiyacı, görsel-işitsel materyallerin (özellikle eğitim filmlerinin) sistematik ve yaygın kullanımını zorunlu kıldı.</p>
+                </div>
+                <div class="border-l-4 p-6 rounded-r-lg shadow-sm" style="border-color: #FD7400; background-color: #fff8f0;">
+                    <span class="text-5xl">🛰️</span>
+                    <h3 class="text-xl font-semibold mt-4 mb-2" style="color: #004358;">Sputnik I'in Fırlatılması</h3>
+                    <p class="text-gray-600">(1957) ABD'de eğitimi sorgulattı ve "sistematik yaklaşımların" doğuşunu tetikleyerek alanın bilimsel temellerini güçlendirdi.</p>
+                </div>
+                <div class="border-l-4 p-6 rounded-r-lg shadow-sm" style="border-color: #BEDB39; background-color: #fbfef4;">
+                    <span class="text-5xl">💻</span>
+                    <h3 class="text-xl font-semibold mt-4 mb-2" style="color: #004358;">Mikrobilgisayar Devrimi</h3>
+                    <p class="text-gray-600">(1980'ler) Bireyselleştirilmiş öğretimi ve "çoklu ortam" (multimedia) uygulamalarını mümkün kılarak alanın odağını tamamen değiştirdi.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-3xl font-bold text-center mb-12" style="color: #004358;">Tarihsel Gelişim Zaman Çizelgesi</h2>
+            <div class="relative max-w-4xl mx-auto">
+                <div class="absolute left-[9px] md:left-1/2 w-1 h-full bg-gray-300 transform md:-translate-x-1/2"></div>
+                
+                <div class="relative mb-8 timeline-item">
+                    <div class="md:flex items-center md:space-x-8">
+                        <div class="md:w-1/2">
+                            <div class="bg-white rounded-lg shadow-md p-6 relative">
+                                <span class="font-bold text-sm" style="color: #FD7400;">Antik Çağ - 19. Yüzyıl</span>
+                                <h3 class="text-xl font-bold mt-2 mb-3" style="color: #004358;">Alanın Kökleri: Sistematik İletişim</h3>
+                                <p class="text-gray-600">ÖT'nin kökleri, bilginin kaydedilmesi ve iletilmesi çabasına (hiyeroglifler) dayanır. Antik Çağ'da Sofistler, materyallerin "sistematik düzenlenmesini" vurgulayarak ilk temelleri atmıştır. 1658'de Comenius'un "Orbis Pictus" (ilk resimli kitap) eseri, "görsel eğitim" hareketinin başlangıcı sayılır.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative mb-8 timeline-item">
+                    <div class="md:flex items-center md:flex-row-reverse md:space-x-8 md:space-x-reverse">
+                        <div class="md:w-1/2">
+                            <div class="bg-white rounded-lg shadow-md p-6 relative">
+                                <span class="font-bold text-sm" style="color: #FD7400;">1900'ler – 1940'lar</span>
+                                <h3 class="text-xl font-bold mt-2 mb-3" style="color: #004358;">Görsel-İşitsel Hareket Dönemi</h3>
+                                <p class="text-gray-600">Odak noktası "Görsel Eğitim" (eğitici filmler, okul müzeleri) ile başlar. 1930'larda ses kaydı ve radyonun eklenmesiyle "Görsel-İşitsel" (Audio-Visual) döneme evrilir. II. Dünya Savaşı'nın kitle eğitimi ihtiyacı, bu araçların sistematik kullanımını zorunlu kılmış ve alanı tetiklemiştir. Odak noktası "araçların" kendisidir.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative mb-8 timeline-item">
+                    <div class="md:flex items-center md:space-x-8">
+                        <div class="md:w-1/2">
+                            <div class="bg-white rounded-lg shadow-md p-6 relative">
+                                <span class="font-bold text-sm" style="color: #FD7400;">1950'ler – 1960'lar</span>
+                                <h3 class="text-xl font-bold mt-2 mb-3" style="color: #004358;">Davranışçılık ve Sistem Yaklaşımının Doğuşu</h3>
+                                <p class="text-gray-600 mb-3">Bu dönemde iki büyük etki görülür: <strong>1. Davranışçılık (Skinner):</strong> Programlı öğretim ve öğretim makineleri (1958) ile öğrenmeyi ölçülebilir, adımlara bölünmüş bir süreç olarak ele alır. <strong>2. Sputnik (1957):</strong> Eğitimde sistematik yaklaşımlara olan ihtiyacı doğurur.</p>
+                                <blockquote class="mt-4 p-3 border-l-4" style="border-color: #1F8A70; background-color: #f0f9f8;">
+                                    <p class="text-sm italic text-gray-700"><strong>1963 DAVI Tanımı:</strong> "...öğrenme sürecini kontrol eden <strong>mesajların tasarımı ve kullanımı</strong> ile ilgilenen dalıdır..."</p>
+                                    <p class="text-sm italic text-gray-700 mt-2"><strong>Analiz:</strong> Bu tanım, odağı "araçlardan" (filmler) "mesaja" ve "öğrenme" kavramına kaydırarak alanda bir devrim yaratmıştır. Artık teknoloji, bir süreç (tasarım) olarak görülmeye başlanmıştır.</p>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative mb-8 timeline-item">
+                    <div class="md:flex items-center md:flex-row-reverse md:space-x-8 md:space-x-reverse">
+                        <div class="md:w-1/2">
+                            <div class="bg-white rounded-lg shadow-md p-6 relative">
+                                <span class="font-bold text-sm" style="color: #FD7400;">1970'ler – 1990'lar</span>
+                                <h3 class="text-xl font-bold mt-2 mb-3" style="color: #004358;">Bilişselcilik ve Süreç Olarak Teknoloji</h3>
+                                <p class="text-gray-600 mb-3">Davranışçılığın yerini <strong>Bilişselcilik (Cognitivism)</strong> ve <strong>Yapılandırmacılık (Constructivism)</strong> alır. Öğrenme, artık sadece bir davranış değil, karmaşık bir zihinsel süreçtir. Mikrobilgisayar devrimi (1980'ler) bireysel öğrenmeyi mümkün kılar. Alan "süreç" odaklı hale gelir.</p>
+                                <blockquote class="mt-4 p-3 border-l-4" style="border-color: #BEDB39; background-color: #fbfef4;">
+                                    <p class="text-sm italic text-gray-700 mb-2"><strong>1972 Tanımı:</strong> "...tüm <strong>öğrenme kaynaklarının sistematik tanımlanması, geliştirilmesi...</strong> ve bu süreçlerin yönetimi..."</p>
+                                    <p class="text-sm italic text-gray-700 mb-2"><strong>1977 Tanımı:</strong> "...insanları, prosedürleri, fikirleri, araçları ve organizasyonu içeren <strong>karmaşık tümleşik bir süreçtir.</strong>"</p>
+                                    <p class="text-sm italic text-gray-700"><strong>1994 Tanımı:</strong> "...öğrenme amaçlı süreç ve kaynakların <strong>tasarımı, gelişimi, kullanımı, yönetimi ve değerlendirmesinin</strong> teorisi ve uygulamasıdır."</p>
+                                    <p class="text-sm italic text-gray-700 mt-2"><strong>Analiz:</strong> 1972 ve 1977 tanımları "sistematik" ve "süreç" vurgusunu güçlendirir. 1994 tanımı ise, yapılandırmacı yaklaşımları da kapsayabilmek için "sistematik" kelimesini bilinçli olarak çıkarır ve alanın 5 temel işlevini (Tasarım, Gelişim vb.) netleştirir.</p>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative mb-8 timeline-item">
+                    <div class="md:flex items-center md:space-x-8">
+                        <div class="md:w-1/2">
+                            <div class="bg-white rounded-lg shadow-md p-6 relative">
+                                <span class="font-bold text-sm" style="color: #FD7400;">2000'ler ve Sonrası</span>
+                                <h3 class="text-xl font-bold mt-2 mb-3" style="color: #004358;">Ağ Toplumu, Performans ve Etik</h3>
+                                <p class="text-gray-600 mb-3">İnternet, e-öğrenme ve kablosuz teknolojiler "Sayısal Ağlar Dönemi"ni başlatır. Öğrenme yaklaşımları (örn: Bağlantıcılık) bilginin ağlarda var olduğunu savunur. Odak noktası sadece "öğrenme" değil, aynı zamanda kurumsal verimlilik, yani "performans" olur.</p>
+                                <blockquote class="mt-4 p-3 border-l-4" style="border-color: #FD7400; background-color: #fff8f0;">
+                                    <p class="text-sm italic text-gray-700"><strong>2007 Tanımı:</strong> "...öğrenmeyi kolaylaştırma ve <strong>performans artırmanın</strong> çalışması ve <strong>etik uygulamasıdır.</strong>"</p>
+                                    <p class="text-sm italic text-gray-700 mt-2"><strong>Analiz:</strong> Bu tanım, alanı okul dışına taşıyarak (örn: kurumsal eğitim) "performans artırma" kavramını ve teknolojinin getirdiği sorumlulukları yansıtan "etik uygulama"yı ilk kez merkeze alır. Teknoloji artık her yerdedir.</p>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-center mb-6" style="color: #004358;">1994 AECT Tanımı: Alanın 5 Bileşeni</h2>
+                <p class="text-gray-600 text-center mb-6">1994 yılındaki AECT tanımı, alanın "araçlardan" ibaret olmadığını, 5 temel süreci kapsayan bir disiplin olduğunu vurgulamıştır. Bu tanım, alanın modern kimliğini oluşturan bir kilometre taşıdır.</p>
+                <div class="chart-container h-[300px] md:h-[350px]">
+                    <canvas id="definitionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-center mb-6" style="color: #004358;">Kavramsal Evrim: Araçtan Performansa</h2>
+                <p class="text-gray-600 text-center mb-6">Tarihsel süreç, alandaki vurgunun nasıl değiştiğini açıkça göstermektedir. Başlangıçta odak noktası "ne öğretildiği" (araç) iken, zamanla "nasıl öğretildiği" (süreç) ve son olarak "öğrenmenin nasıl iyileştirilip performansın artırıldığı" (performans & etik) haline gelmiştir.</p>
+                <div class="flex flex-col md:flex-row items-center justify-around h-[300px] md:h-[350px] space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center p-6 rounded-lg shadow-inner" style="background-color: #f0f9f8;">
+                        <span class="text-4xl">🛠️</span>
+                        <h3 class="text-lg font-semibold mt-2" style="color: #1F8A70;">Araç Odaklı</h3>
+                        <p class="text-sm text-gray-600">(1900-1950'ler)</p>
+                        <p class="text-gray-700">Filmler, Radyo, TV</p>
+                    </div>
+                    <span class="text-4xl font-bold transform rotate-90 md:rotate-0" style="color: #FD7400;">→</span>
+                    <div class="text-center p-6 rounded-lg shadow-inner" style="background-color: #fbfef4;">
+                        <span class="text-4xl">⚙️</span>
+                        <h3 class="text-lg font-semibold mt-2" style="color: #BEDB39;">Süreç Odaklı</h3>
+                        <p class="text-sm text-gray-600">(1960-1990'lar)</p>
+                        <p class="text-gray-700">Sistem Yaklaşımı, Tasarım</p>
+                    </div>
+                    <span class="text-4xl font-bold transform rotate-90 md:rotate-0" style="color: #FD7400;">→</span>
+                    <div class="text-center p-6 rounded-lg shadow-inner" style="background-color: #fff8f0;">
+                        <span class="text-4xl">📈</span>
+                        <h3 class="text-lg font-semibold mt-2" style="color: #FD7400;">Performans & Etik</h3>
+                        <p class="text-sm text-gray-600">(2000'ler+)</p>
+                        <p class="text-gray-700">Analitikler, Verimlilik, Etik</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
+            <h2 class="text-3xl font-bold text-center mb-6" style="color: #004358;">Günümüz ve Yakın Gelecek: Yükselen Teknolojiler</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">
+                2000'ler sonrası "Sayısal Ağlar Dönemi" olarak adlandırılır. Günümüzde ve yakın gelecekte, öğrenme ve performans; yapay zekâ, veri analitiği ve sürükleyici teknolojiler tarafından yönlendirilmektedir. Bu teknolojiler, öğrenmeyi <strong>kişiselleştirilmiş (personalized)</strong> ve <strong>uyarlanabilir (adaptive)</strong> hale getirerek, alanın "performans artırma" hedefini daha da ileriye taşımaktadır.
+            </p>
+            <div class="chart-container h-[400px] md:h-[450px] max-w-4xl">
+                <canvas id="futureTechChart"></canvas>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 mt-8" style="background-color: #004358;">
+        <p class="text-gray-300 text-sm">Saettler, P. (1990). Beginnings of a science and technology of instruction: 1900-1950. In The evolution of American Educational Technology (Ch. 3, pp. 53-86). Englewood, CO: Libraries Unlimited.</p>
+    <p class="text-gray-300 text-sm mt-2">Reiser, R. A. (2007a). What field did you say you were in? Defining and naming our field. In R. A. Reiser & J. V. Dempsey (Eds.), Trends and issues in instructional design and technology (Ch. 1). Pearson.
+    </p><p class="text-gray-300 text-sm mt-2">Reiser, R.A. (2007b). A History of Instructional Design and Technology. Ch 3 in Trends and issues in instructional design and technology. Reiser, R.A., & Dempsey, J.A. (Eds.). Upper Saddle River, New Jersey: Merrill/Prentice Hall.</p>
+<p class="text-gray-300 text-sm mt-2">Seels, B. B., & Richey, R. C. (1994). Instructional technology: The definition and domains of the field. Washington, DC: Association for Educational Communications and Technology.</p>    
+<p class="text-gray-300 text-sm mt-2">Bu sayfa, yukarıdaki kaynaklardan derlenen bilgilerle hazırlanmıştır.</p>
+</footer>
+
+    <script>
+        (function() {
+            const wrapLabel = (label) => {
+                const maxLen = 16;
+                if (typeof label !== 'string' || label.length <= maxLen) {
+                    return label;
+                }
+                const words = label.split(' ');
+                const lines = [];
+                let currentLine = '';
+                for (const word of words) {
+                    if ((currentLine + word).length > maxLen && currentLine.length > 0) {
+                        lines.push(currentLine.trim());
+                        currentLine = word + ' ';
+                    } else {
+                        currentLine += word + ' ';
+                    }
+                }
+                lines.push(currentLine.trim());
+                return lines;
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+
+            const commonOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            color: '#333'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#333' },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#333' },
+                        grid: { display: true, color: '#e0e0e0' }
+                    }
+                }
+            };
+            
+            const brilliantBlues = ['#1F8A70', '#BEDB39', '#FFE11A', '#FD7400', '#004358'];
+
+            var ctxDonut = document.getElementById('definitionChart');
+            if (ctxDonut) {
+                new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tasarım', 'Gelişim', 'Kullanım', 'Yönetim', 'Değerlendirme'],
+                        datasets: [{
+                            label: 'AECT 1994 Tanımı',
+                            data: [1, 1, 1, 1, 1],
+                            backgroundColor: brilliantBlues,
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: tooltipTitleCallback
+                                }
+                            },
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#333',
+                                    padding: 15,
+                                    font: { size: 14 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            var ctxBar = document.getElementById('futureTechChart');
+            if (ctxBar) {
+                const futureLabels = [
+                    'Yapay Zekâ (AI)',
+                    'Öğrenme Analitikleri',
+                    'Sanal & Artırılmış Gerçeklik (VR/AR)',
+                    'Oyunlaştırma',
+                    'Giyilebilir Teknolojiler',
+                    '3-D Baskı'
+                ].map(wrapLabel);
+
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: futureLabels,
+                        datasets: [{
+                            label: 'Gelecekteki Etki Puanı (Göreli)',
+                            data: [90, 85, 75, 70, 60, 50],
+                            backgroundColor: '#1F8A70',
+                            borderColor: '#004358',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                ...commonOptions.scales.x,
+                                grid: { display: true, color: '#e0e0e0' }
+                            },
+                            y: {
+                                ...commonOptions.scales.y,
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            ...commonOptions.plugins,
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
