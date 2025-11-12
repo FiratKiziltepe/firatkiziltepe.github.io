@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medya-Yöntem Tartışması: Clark vs. Kozma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+    Internal Planning & Justification Comments (as required by prompt):
+    
+    Narrative & Structure Plan:
+    1.  Header: Title of the debate.
+    2.  Introduction: The core dilemma from the source text.
+    3.  Section 1: The Core Debate (Clark vs. Kozma). A side-by-side (md:grid-cols-2) card layout comparing the two main analogies ("Market Kamyonu" vs. "Soğutuculu Kamyon") and their core theses.
+    4.  Section 2: Comparing Perspectives (Visualization). A Radar Chart to visually contrast the *focus* of each theory (e.g., Method-Focused vs. Interaction-Focused).
+    5.  Section 3: The "How". A grid layout showing Kozma's 3-Part Framework (as an HTML/CSS diagram) and Clark's 2-Part Critique (as an HTML list).
+    6.  Section 4: The Evolution: "Bilişsel Verimlilik" (Cognitive Efficiency). A Bar Chart to visualize the one quantitative-like concept from the text (Section 3.2), showing how media can improve efficiency (reduce effort) even if the learning outcome is the same.
+    7.  Section 5: The Synthesis (Balanced View). A 3-point list of styled HTML cards for the pragmatic, balanced perspective.
+    8.  Section 6: The Future: AI (Araç vs. Etken). A side-by-side card layout applying the debate to AI.
+    9.  Conclusion: The final synthesis from the text.
+    
+    Color Palette Selection:
+    - Chosen Palette: "Brilliant Blues" (Vibrant & Professional)
+    - Colors: #005f73 (Dark Blue), #0a9396 (Teal), #94d2bd (Mint), #e9d8a6 (Beige), #ee9b00 (Orange)
+    
+    Visualization Selection & Justification:
+    1.  Clark vs. Kozma (Core):
+        - Goal: Compare.
+        - Viz: HTML/CSS Cards (md:grid-cols-2).
+        - Justification: Clearly compares the two central, qualitative arguments. NO SVG/Mermaid.
+    2.  Comparing Perspectives:
+        - Goal: Compare.
+        - Viz: Radar Chart (Chart.js).
+        - Justification: Visually contrasts the *focus* of the two theories across multiple dimensions. Uses Chart.js/Canvas (NO SVG).
+    3.  Kozma's Framework:
+        - Goal: Organize.
+        - Viz: HTML/CSS Styled List/Diagram.
+        - Justification: Clearly presents the 3-part framework. NO SVG/Mermaid.
+    4.  Clark's Critique:
+        - Goal: Organize.
+        - Viz: HTML/CSS Styled List.
+        - Justification: Clearly lists the 2 confounding variables. NO SVG/Mermaid.
+    5.  Cognitive Efficiency:
+        - Goal: Compare.
+        - Viz: Bar Chart (Chart.js).
+        - Justification: Visualizes the "cognitive efficiency" concept (Section 3.2), showing reduced effort. Uses Chart.js/Canvas (NO SVG).
+    6.  Balanced View:
+        - Goal: Organize.
+        - Viz: HTML/CSS Cards.
+        - Justification: Clearly lists the 3 key synthesis points. NO SVG/Mermaid.
+    7.  AI (Araç vs. Etken):
+        - Goal: Compare.
+        - Viz: HTML/CSS Cards (md:grid-cols-2).
+        - Justification: Applies the original debate to the modern AI context. NO SVG/Mermaid.
+    
+    Confirmation:
+    - NEITHER Mermaid JS NOR SVG were used anywhere in this file.
+    - All charts are rendered via Chart.js to a Canvas.
+    - All diagrams (e.g., Kozma's framework) are built using styled HTML and Tailwind CSS.
+    -->
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#005f73',
+                        'primary-teal': '#0a9396',
+                        'primary-mint': '#94d2bd',
+                        'primary-beige': '#e9d8a6',
+                        'primary-orange': '#ee9b00',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-8">
+
+        <header class="text-center my-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-primary-dark mb-2">Eğitim Teknolojisinde Medya-Yöntem Tartışması</h1>
+            <p class="text-xl md:text-2xl text-primary-teal">Clark'ın "Araç" ve Kozma'nın "Etken" Perspektifleri</p>
+        </header>
+
+        <section class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-10">
+            <h2 class="text-2xl font-bold text-primary-dark mb-4 text-center">Giriş: Temel İkilem</h2>
+            <p class="text-lg text-center">Eğitim teknolojisinin temel gerilimi şudur: Medya, öğretim için yalnızca nötr bir dağıtım aracı mıdır (Clark), yoksa öğrenme sürecini aktif olarak şekillendirebilen bir etken midir (Kozma)? Bu infografik, bu iki karşıt bakış açısını, sentezlerini ve yapay zeka çağındaki modern yorumlarını analiz etmektedir.</p>
+        </section>
+
+        <section class="my-10">
+            <h2 class="text-3xl font-bold text-primary-dark mb-6 text-center">İki Karşıt Tez: Araç mı, Etken mi?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-3 text-center">Richard Clark: Medya Sadece bir "Araç"tır</h3>
+                    <p class="text-4xl text-center mb-4">🚚</p>
+                    <h4 class="text-lg font-semibold text-center text-primary-dark">"Market Kamyonu" Analojisi</h4>
+                    <p class="text-center mb-4 flex-grow">"Medya, sadece öğretimi ileten araçlardır ve öğrenci başarısını, market alışverişimizi getiren kamyonun beslenmemizde değişikliğe neden olmasından daha fazla etkilemez."</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-primary-dark">Temel Çıkarım:</h5>
+                        <p>Öğrenmedeki tek aktif bileşen <span class="font-bold text-primary-orange">öğretim yöntemidir</span>. Medya seçimi, pedagojik değil, <span class="font-bold">lojistik</span> (maliyet, dağıtım) bir karardır.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-3 text-center">Robert Kozma: Medya bir "Etken"dir</h3>
+                    <p class="text-4xl text-center mb-4">🧊</p>
+                    <h4 class="text-lg font-semibold text-center text-primary-dark">"Soğutuculu Kamyon" Analojisi</h4>
+                    <p class="text-center mb-4 flex-grow">"Tıpkı dondurulmuş gıdaların soğutma özelliğine sahip bir kamyon gerektirmesi gibi, bazı öğretim yöntemleri de etkili olabilmek için belirli niteliklere sahip bir medya gerektirir."</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-primary-dark">Temel Çıkarım:</h5>
+                        <p><span class="font-bold text-primary-orange">Yöntem ve medya</span>, öğrenmeyi sağlamak için <span class="font-bold">bütünleşmelidir</span>. Medya, başka türlü imkansız olacak yeni pedagojik yöntemleri mümkün kılar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="my-10 bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-primary-dark mb-4 text-center">Perspektiflerin Karşılaştırması</h2>
+            <p class="text-lg text-center mb-6">Bu radar grafiği, iki teorinin felsefi odak noktalarını karşılaştırmaktadır. Clark'ın tezi "Yöntem" ve "Maliyet"e odaklanırken, Kozma'nın tezi "Etkileşim" ve "Pedagojik Rol"e ağırlık vermektedir.</p>
+            <div class="chart-container">
+                <canvas id="perspectivesRadarChart"></canvas>
+            </div>
+        </section>
+
+        <section class="my-10">
+            <h2 class="text-3xl font-bold text-primary-dark mb-6 text-center">Medya Nasıl Etkiler (veya Etkilemez)?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-4 text-center">Kozma: Bilişsel İlgili Yetenekler</h3>
+                    <p class="text-center mb-4">Kozma'ya göre medya, bu üç yeteneği aracılığıyla öğrencinin bilişsel süreçlerine aktif olarak katılır ve zihinsel modeller inşa etmesine yardımcı olur.</p>
+                    <div class="space-y-4">
+                        <div class="bg-primary-mint bg-opacity-30 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-primary-dark">1. Teknoloji</h4>
+                            <p>Fiziksel ve elektronik özellikler (örn. bilgisayarın işlem gücü).</p>
+                        </div>
+                        <div class="text-center text-2xl text-primary-teal">↓</div>
+                        <div class="bg-primary-mint bg-opacity-60 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-primary-dark">2. Sembol Sistemleri</h4>
+                            <p>Temsil biçimleri (örn. metin, grafik, dinamik görsel anlatı).</p>
+                        </div>
+                        <div class="text-center text-2xl text-primary-teal">↓</div>
+                        <div class="bg-primary-mint bg-opacity-90 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-primary-dark">3. İşlem Yetenekleri</h4>
+                            <p>Semboller üzerinde işlem yapma (örn. simülasyon, dönüştürme).</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-4 text-center">Clark: Medya Çalışmalarının Eleştirisi</h3>
+                    <p class="text-center mb-4">Clark, medyayı karşılaştıran çalışmalarda bulunan "anlamlı bir fark olmadığını" savunur. Bulunan nadir olumlu sonuçları iki temel karıştırıcı değişkene bağlar:</p>
+                    <ul class="space-y-4">
+                        <li class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-primary-dark">1. Kontrol Altına Alınmamış Yöntem</h4>
+                            <p>Gözlemlenen kazanım, yeni medyadan değil, o medya için daha iyi tasarlanmış <span class="font-bold">öğretim yönteminden</span> kaynaklanır.</p>
+                        </li>
+                        <li class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-primary-dark">2. Yenilik Etkisi</h4>
+                            <p>Teknolojinin <span class="font-bold">yeniliğinden</span> kaynaklanan geçici öğrenci motivasyonu. Bu etki zamanla azalır.</p>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+        
+        <section class="my-10 bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-primary-dark mb-4 text-center">Tartışmanın Evrimi: Bilişsel Verimlilik</h2>
+            <p class="text-lg text-center mb-6">Clark, sonraki yazılarında "bilişsel verimlilik" kavramını öne sürmüştür. Bu grafikte görüldüğü gibi, nihai öğrenme çıktısı aynı olsa bile, iyi tasarlanmış bir medya (Kozma'nın "etken" tanımına yaklaşarak), öğrenme görevi için gereken <span class="font-bold text-primary-orange">bilişsel çabayı</span> veya zamanı azaltabilir.</p>
+            <div class="chart-container">
+                <canvas id="efficiencyBarChart"></canvas>
+            </div>
+        </section>
+
+        <section class="my-10">
+            <h2 class="text-3xl font-bold text-primary-dark mb-6 text-center">Araştırmacılar ve Uygulayıcılar için Dengeli Bakış Açısı</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-xl font-bold text-primary-teal mb-2">1. Yöntem Önceliklidir</h3>
+                    <p>Clark'ın temel noktası geçerlidir: Hiçbir teknoloji, kusurlu bir öğretim yöntemini telafi edemez. Sağlam pedagoji temeldir.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-xl font-bold text-primary-teal mb-2">2. Medya, Yöntemi Güçlendirir</h3>
+                    <p>Kozma'nın öngörüsü kritiktir: Bir medyanın benzersiz yetenekleri, başka türlü imkansız olacak yeni ve daha güçlü yöntemleri mümkün kılabilir.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h3 class="text-xl font-bold text-primary-teal mb-2">3. Bağlam ve Öğrenci Belirleyicidir</h3>
+                    <p>En iyi kombinasyon, öğrencinin ön bilgisine, öğrenme görevine ve bağlama bağlıdır. Amaç, tek bir üstün medya bulmak değil, ihtiyaçlarla eşleştirmektir.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="my-10">
+            <h2 class="text-3xl font-bold text-primary-dark mb-6 text-center">Modern Yorum: Yapay Zeka Destekli Eğitim</h2>
+            <p class="text-lg text-center mb-6 max-w-4xl mx-auto">Tarihsel tartışma, yapay zeka çağıyla yeni bir anlam kazanmaktadır. Yapay zeka, hem bir "araç" hem de bir "etken" olarak görülebilir.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-3 text-center">Yapay Zeka bir "Araç" (Clark)</h3>
+                    <p class="text-center mb-4 flex-grow">Yapay zeka, kanıtlanmış öğretim yöntemlerini (ustalık öğrenmesi, aralıklı tekrar) daha verimli ve kişiye özel bir şekilde sunan güçlü bir "dağıtım kamyonudur".</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-primary-dark">Örnek:</h5>
+                        <p>Kişiselleştirilmiş bir alıştırma sistemi. Öğrenmeye neden olan yapay zeka değil, yürüttüğü <span class="font-bold text-primary-orange">uyarlanabilir sıralama</span> yöntemidir.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                    <h3 class="text-2xl font-bold text-primary-teal mb-3 text-center">Yapay Zeka bir "Etken" (Kozma)</h3>
+                    <p class="text-center mb-4 flex-grow">Yapay zekanın benzersiz "işlem yetenekleri", öğretim yönteminden ayrılamaz hale gelir ve <span class="font-bold">yeni pedagojik yöntemler</span> yaratır.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-primary-dark">Örnek:</h5>
+                        <p>Dinamik tıbbi teşhis simülatörü. Yöntem, yapay zekanın karmaşık bir sistemi gerçek zamanlı olarak <span class="font-bold text-primary-orange">modelleyebilme</span> yeteneğinin ta kendisidir.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center my-10 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-primary-dark mb-4">Sonuç: Tartışmanın Ötesinde Bir Sentez</h2>
+            <p class="text-lg">Clark-Kozma tartışması, birbirini dışlayan bir tercih değildir. Etkili eğitim teknolojisinin geleceği, Clark'ın sağlam pedagojik yöntemlere olan titiz odaklanmasını, Kozma'nın savunduğu yeni medyanın (özellikle yapay zekanın) dönüştürücü potansiyeline uygulamakta yatmaktadır. Amaç, yöntem ve medyanın düşünceli bir şekilde bütünleştirilmesidir.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        };
+        
+        const radarCtx = document.getElementById('perspectivesRadarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Yöntem Odaklı', 'Maliyet Odaklı', 'Teknoloji Odaklı', 'Etkileşim Odaklı', 'Pedagojik Rol'],
+                datasets: [
+                    {
+                        label: 'Clark (1983)',
+                        data: [10, 9, 2, 1, 1],
+                        backgroundColor: 'rgba(238, 155, 0, 0.2)',
+                        borderColor: 'rgba(238, 155, 0, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(238, 155, 0, 1)'
+                    },
+                    {
+                        label: 'Kozma (1991)',
+                        data: [7, 4, 8, 10, 10],
+                        backgroundColor: 'rgba(10, 147, 150, 0.2)',
+                        borderColor: 'rgba(10, 147, 150, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(10, 147, 150, 1)'
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: '#ccc'
+                        },
+                        grid: {
+                            color: '#ddd'
+                        },
+                        pointLabels: {
+                            color: '#005f73',
+                            font: {
+                                size: 13,
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            backdropColor: 'white',
+                            color: 'black',
+                            stepSize: 2,
+                            beginAtZero: true
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+
+        const barCtx = document.getElementById('efficiencyBarChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Geleneksel Yöntem', 'Yöntem + Yetersiz Medya', ['Yöntem +', 'Verimli Medya']],
+                datasets: [{
+                    label: 'Gereken Bilişsel Çaba (Tahmini)',
+                    data: [10, 8, 5],
+                    backgroundColor: [
+                        'rgba(148, 210, 189, 0.7)',
+                        'rgba(233, 216, 166, 0.7)',
+                        'rgba(10, 147, 150, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(148, 210, 189, 1)',
+                        'rgba(233, 216, 166, 1)',
+                        'rgba(10, 147, 150, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Gereken Bilişsel Çaba (Düşük = Daha Verimli)',
+                            color: '#005f73',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#005f73',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
