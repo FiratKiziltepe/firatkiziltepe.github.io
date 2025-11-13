@@ -99,16 +99,16 @@
             transform: translateY(0);
         }
 
-        .language-selector {
+        .selector-group {
             margin: 20px 0;
         }
 
-        .language-selector label {
+        .selector-group label {
             font-weight: bold;
             margin-right: 10px;
         }
 
-        .language-selector select {
+        .selector-group select {
             padding: 10px 20px;
             border: 2px solid #667eea;
             border-radius: 8px;
@@ -346,7 +346,7 @@
                     <input type="file" id="audioFile" accept="audio/*">
                 </div>
 
-                <div class="language-selector">
+                <div class="selector-group">
                     <label for="languageSelect">Language:</label>
                     <select id="languageSelect">
                         <option value="auto">Auto-detect</option>
@@ -360,6 +360,16 @@
                         <option value="ru">Russian</option>
                         <option value="ja">Japanese</option>
                         <option value="zh">Chinese</option>
+                    </select>
+                </div>
+
+                <div class="selector-group">
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect">
+                        <option value="tiny">Tiny (Fastest, lowest memory)</option>
+                        <option value="base">Base (Balanced)</option>
+                        <option value="small" selected>Small (Better accuracy)</option>
+                        <option value="medium">Medium (High accuracy, high memory)</option>
                     </select>
                 </div>
             </div>
@@ -402,13 +412,41 @@
         // Disable local model loading
         env.allowLocalModels = false;
 
-        let transcriber = null;
+        const MODEL_CONFIGS = {
+            tiny: {
+                label: 'Tiny',
+                model: 'Xenova/whisper-tiny',
+                quantized: true,
+                description: 'Fastest and lowest memory usage. Recommended for mobile devices.'
+            },
+            base: {
+                label: 'Base',
+                model: 'Xenova/whisper-base',
+                quantized: true,
+                description: 'Balanced option with moderate accuracy and memory usage.'
+            },
+            small: {
+                label: 'Small',
+                model: 'Xenova/whisper-small',
+                quantized: true,
+                description: 'Higher accuracy but needs more memory.'
+            },
+            medium: {
+                label: 'Medium',
+                model: 'Xenova/whisper-medium',
+                quantized: true,
+                description: 'Best accuracy but very heavy. Requires a powerful device.'
+            }
+        };
+
+        const transcribers = {};
         let audioContext = null;
         let currentTranscript = [];
         let isEditing = false;
 
         // Initialize
         document.getElementById('audioFile').addEventListener('change', handleFileSelect);
+        const modelSelect = document.getElementById('modelSelect');
 
         // Drag and drop
         const uploadSection = document.getElementById('uploadSection');
@@ -437,31 +475,48 @@
 
             // Show progress section
             document.getElementById('progressSection').style.display = 'block';
-            updateProgress(0, 'Loading model... This may take a moment on first use.');
+            updateProgress(0, 'Preparing transcription...');
 
             try {
+                const modelKey = modelSelect.value;
+                const modelConfig = MODEL_CONFIGS[modelKey] || MODEL_CONFIGS.small;
+
+                if (!transcribers[modelKey]) {
+                    updateProgress(5, `Loading ${modelConfig.label} Whisper model... (first load may take a few minutes)`);
+                    try {
+                        transcribers[modelKey] = await pipeline(
+                            'automatic-speech-recognition',
+                            modelConfig.model,
+                            {
+                                quantized: modelConfig.quantized,
+                            }
+                        );
+                    } catch (modelError) {
+                        console.error('Model load error:', modelError);
+                        if (modelError?.message?.includes('OrtRun') || modelError?.message?.toLowerCase().includes('memory')) {
+                            throw new Error(`Unable to load the ${modelConfig.label} model. Please try selecting the Tiny or Base model for lower memory usage.`);
+                        }
+                        throw modelError;
+                    }
+                } else {
+                    updateProgress(5, `Using cached ${modelConfig.label} model...`);
+                }
+
+                const transcriber = transcribers[modelKey];
+
                 // Load audio file
                 const audioUrl = URL.createObjectURL(file);
                 const audioPlayer = document.getElementById('audioPlayer');
                 audioPlayer.src = audioUrl;
                 document.getElementById('audioPlayerSection').style.display = 'block';
 
-                // Initialize transcriber
-                if (!transcriber) {
-                    updateProgress(10, 'Loading Whisper model... (First time may take a few minutes)');
-                    transcriber = await pipeline(
-                        'automatic-speech-recognition',
-                        'Xenova/whisper-small',
-                        {
-                            quantized: false,
-                        }
-                    );
-                }
-
                 updateProgress(30, 'Processing audio file...');
 
                 // Get audio data
                 const arrayBuffer = await file.arrayBuffer();
+                if (audioContext) {
+                    try { await audioContext.close(); } catch (closeError) { console.warn('AudioContext close error:', closeError); }
+                }
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
@@ -516,8 +571,13 @@
 
             } catch (error) {
                 console.error('Error:', error);
+                let friendlyMessage = error.message || 'An unexpected error occurred.';
+                if (friendlyMessage.includes('OrtRun')) {
+                    friendlyMessage = 'The selected model ran out of memory. Please choose a smaller model such as Tiny or Base and try again.';
+                }
+
                 document.getElementById('statusMessage').innerHTML =
-                    `<div class="error-message">Error: ${error.message}</div>`;
+                    `<div class="error-message">Error: ${friendlyMessage}</div>`;
             }
         }
 
