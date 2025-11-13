@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Karşılaştırma</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">PDF Karşılaştırma</div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-arrow-left"></i> Geri</a>
+            <a href="../index.html">Ana Sayfa</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2><i class="fas fa-file-upload"></i> PDF Dosyalarını Yükle</h2>
+            <p>Karşılaştırmak istediğiniz iki PDF dosyasını seçin</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                <div>
+                    <h4><i class="fas fa-file-pdf"></i> İlk PDF Dosyası</h4>
+                    <div class="file-input-wrapper">
+                        <div class="file-input-button">
+                            <i class="fas fa-file-pdf"></i> PDF 1 Seç
+                        </div>
+                        <input type="file" id="pdfFile1" accept=".pdf">
+                    </div>
+                    <div id="fileName1" style="margin-top: 0.5rem; color: #666;"></div>
+                </div>
+
+                <div>
+                    <h4><i class="fas fa-file-pdf"></i> İkinci PDF Dosyası</h4>
+                    <div class="file-input-wrapper">
+                        <div class="file-input-button">
+                            <i class="fas fa-file-pdf"></i> PDF 2 Seç
+                        </div>
+                        <input type="file" id="pdfFile2" accept=".pdf">
+                    </div>
+                    <div id="fileName2" style="margin-top: 0.5rem; color: #666;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="processing-options">
+            <h3><i class="fas fa-cog"></i> Karşılaştırma Seçenekleri</h3>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="ignoreCase" checked>
+                    Büyük/Küçük Harf Duyarsız
+                </label>
+                <label>
+                    <input type="checkbox" id="ignoreWhitespace" checked>
+                    Boşlukları Yoksay
+                </label>
+                <label>
+                    <input type="checkbox" id="ignorePunctuation">
+                    Noktalama İşaretlerini Yoksay
+                </label>
+                <label>
+                    <input type="checkbox" id="showLineNumbers" checked>
+                    Satır Numaralarını Göster
+                </label>
+            </div>
+
+            <button class="btn" id="compareBtn" disabled>
+                <i class="fas fa-balance-scale"></i> Karşılaştır
+            </button>
+            <button class="btn btn-success" id="exportBtn" style="display:none;">
+                <i class="fas fa-file-export"></i> Rapor İndir
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>PDF dosyaları işleniyor ve karşılaştırılıyor...</p>
+        </div>
+
+        <div class="results-section" id="results" style="display:none;">
+            <div class="stats-section">
+                <h3><i class="fas fa-chart-pie"></i> Karşılaştırma İstatistikleri</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="similarityScore">0%</div>
+                        <div class="stat-label">Benzerlik Oranı</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalLines">0</div>
+                        <div class="stat-label">Toplam Satır</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="differentLines">0</div>
+                        <div class="stat-label">Farklı Satır</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="identicalLines">0</div>
+                        <div class="stat-label">Aynı Satır</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Renk Kodları:</strong>
+                <span class="diff-added">Yeşil: Sadece PDF 2'de var</span> |
+                <span class="diff-removed">Kırmızı: Sadece PDF 1'de var</span> |
+                <span class="diff-changed">Sarı: Değiştirilmiş satırlar</span>
+            </div>
+
+            <div class="comparison-container">
+                <div class="pdf-column">
+                    <h3><i class="fas fa-file-pdf"></i> PDF 1 İçeriği</h3>
+                    <div class="text-display" id="pdf1Text"></div>
+                </div>
+
+                <div class="pdf-column">
+                    <h3><i class="fas fa-file-pdf"></i> PDF 2 İçeriği</h3>
+                    <div class="text-display" id="pdf2Text"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h3><i class="fas fa-list"></i> Farklılıklar Detayı</h3>
+                <div class="text-output" id="diffDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="pdf-compare.js"></script>
+</body>
+</html>
