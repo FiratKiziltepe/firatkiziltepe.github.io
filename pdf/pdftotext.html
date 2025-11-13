@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF'den Metne Dönüştürme</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">PDF'den Metne Dönüştürme</div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-arrow-left"></i> Geri</a>
+            <a href="../index.html">Ana Sayfa</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2><i class="fas fa-file-upload"></i> PDF Dosyası Yükle</h2>
+            <p>PDF dosyanızı seçin ve metin formatına dönüştürün</p>
+
+            <div class="file-input-wrapper">
+                <div class="file-input-button">
+                    <i class="fas fa-file-pdf"></i> PDF Dosyası Seç
+                </div>
+                <input type="file" id="pdfFile" accept=".pdf">
+            </div>
+
+            <div id="fileName" style="margin-top: 1rem; color: #666;"></div>
+        </div>
+
+        <div class="processing-options">
+            <h3><i class="fas fa-cog"></i> Veri Ön İşleme Seçenekleri</h3>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="removeStopWords" checked>
+                    Stop Words Temizle (Türkçe/İngilizce)
+                </label>
+                <label>
+                    <input type="checkbox" id="removePunctuation" checked>
+                    Noktalama İşaretlerini Kaldır
+                </label>
+                <label>
+                    <input type="checkbox" id="toLowerCase" checked>
+                    Küçük Harfe Dönüştür
+                </label>
+                <label>
+                    <input type="checkbox" id="removeNumbers">
+                    Sayıları Kaldır
+                </label>
+                <label>
+                    <input type="checkbox" id="removeExtraSpaces" checked>
+                    Fazla Boşlukları Temizle
+                </label>
+            </div>
+
+            <button class="btn" id="processBtn" disabled>
+                <i class="fas fa-play"></i> İşlemeyi Başlat
+            </button>
+            <button class="btn btn-success" id="downloadBtn" style="display:none;">
+                <i class="fas fa-download"></i> Metni İndir (.txt)
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>PDF işleniyor, lütfen bekleyin...</p>
+        </div>
+
+        <div class="results-section" id="results" style="display:none;">
+            <div class="stats-section">
+                <h3><i class="fas fa-chart-bar"></i> İstatistikler</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pageCount">0</div>
+                        <div class="stat-label">Sayfa Sayısı</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="wordCount">0</div>
+                        <div class="stat-label">Kelime Sayısı</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="charCount">0</div>
+                        <div class="stat-label">Karakter Sayısı</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="paragraphCount">0</div>
+                        <div class="stat-label">Paragraf Sayısı</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3><i class="fas fa-file-alt"></i> Ham Metin</h3>
+            <div class="text-output" id="rawText"></div>
+
+            <h3><i class="fas fa-broom"></i> İşlenmiş Metin</h3>
+            <div class="text-output" id="processedText"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="pdf-processor.js"></script>
+</body>
+</html>
