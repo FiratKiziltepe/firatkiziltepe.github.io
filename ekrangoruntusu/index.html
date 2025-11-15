@@ -1688,6 +1688,123 @@
             }, 3000);
         }
 
+        // Area Selection
+        let selectedArea = null;
+
+        async function showAreaSelector(displayStream) {
+            return new Promise((resolve) => {
+                // Create fullscreen overlay
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                overlay.style.zIndex = '10000';
+                overlay.style.cursor = 'crosshair';
+
+                const instruction = document.createElement('div');
+                instruction.textContent = 'Kaydetmek istediğiniz alanı seçmek için fareyle dikdörtgen çizin';
+                instruction.style.position = 'absolute';
+                instruction.style.top = '20px';
+                instruction.style.left = '50%';
+                instruction.style.transform = 'translateX(-50%)';
+                instruction.style.color = 'white';
+                instruction.style.fontSize = '20px';
+                instruction.style.fontWeight = 'bold';
+                instruction.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                instruction.style.padding = '15px 30px';
+                instruction.style.borderRadius = '8px';
+                overlay.appendChild(instruction);
+
+                let selectionBox = null;
+                let startX, startY;
+                let isSelecting = false;
+
+                overlay.addEventListener('mousedown', (e) => {
+                    isSelecting = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+
+                    if (selectionBox) {
+                        selectionBox.remove();
+                    }
+
+                    selectionBox = document.createElement('div');
+                    selectionBox.style.position = 'absolute';
+                    selectionBox.style.border = '3px dashed #2196F3';
+                    selectionBox.style.backgroundColor = 'rgba(33, 150, 243, 0.2)';
+                    selectionBox.style.left = startX + 'px';
+                    selectionBox.style.top = startY + 'px';
+                    overlay.appendChild(selectionBox);
+                });
+
+                overlay.addEventListener('mousemove', (e) => {
+                    if (!isSelecting || !selectionBox) return;
+
+                    const currentX = e.clientX;
+                    const currentY = e.clientY;
+
+                    const width = currentX - startX;
+                    const height = currentY - startY;
+
+                    if (width > 0) {
+                        selectionBox.style.width = width + 'px';
+                        selectionBox.style.left = startX + 'px';
+                    } else {
+                        selectionBox.style.width = Math.abs(width) + 'px';
+                        selectionBox.style.left = currentX + 'px';
+                    }
+
+                    if (height > 0) {
+                        selectionBox.style.height = height + 'px';
+                        selectionBox.style.top = startY + 'px';
+                    } else {
+                        selectionBox.style.height = Math.abs(height) + 'px';
+                        selectionBox.style.top = currentY + 'px';
+                    }
+                });
+
+                overlay.addEventListener('mouseup', (e) => {
+                    if (!isSelecting || !selectionBox) return;
+
+                    isSelecting = false;
+                    const currentX = e.clientX;
+                    const currentY = e.clientY;
+
+                    const x = Math.min(startX, currentX);
+                    const y = Math.min(startY, currentY);
+                    const width = Math.abs(currentX - startX);
+                    const height = Math.abs(currentY - startY);
+
+                    if (width > 50 && height > 50) {
+                        selectedArea = { x, y, width, height };
+                        overlay.remove();
+                        resolve(selectedArea);
+                    } else {
+                        showNotification('Lütfen daha büyük bir alan seçin (minimum 50x50 piksel)', 'warning');
+                        if (selectionBox) {
+                            selectionBox.remove();
+                            selectionBox = null;
+                        }
+                    }
+                });
+
+                // ESC to cancel
+                const escHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        overlay.remove();
+                        document.removeEventListener('keydown', escHandler);
+                        resolve(null);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
+
+                document.body.appendChild(overlay);
+            });
+        }
+
         // Recording Functions
         async function startRecording() {
             try {
@@ -1704,7 +1821,7 @@
                 // Get display media
                 const displayConstraints = {
                     video: {
-                        displaySurface: mode === 'window' ? 'window' : mode === 'tab' ? 'browser' : 'monitor',
+                        displaySurface: mode === 'window' ? 'window' : mode === 'tab' ? 'browser' : mode === 'area' ? 'monitor' : 'monitor',
                         cursor: 'always'
                     },
                     audio: systemAudio
@@ -1712,25 +1829,42 @@
 
                 const displayStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
 
-                // Setup webcam if enabled
-                const webcamEnabled = document.getElementById('webcamEnabled').checked;
-                if (webcamEnabled) {
-                    webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // If area mode, show area selector
+                if (mode === 'area') {
+                    const area = await showAreaSelector(displayStream);
+                    if (!area) {
+                        // User cancelled
+                        displayStream.getTracks().forEach(track => track.stop());
+                        showNotification('Alan seçimi iptal edildi', 'info');
+                        return;
+                    }
+                    selectedArea = area;
+                }
 
-                    // Create composite canvas for webcam overlay
+                // Setup webcam if enabled OR area selection
+                const webcamEnabled = document.getElementById('webcamEnabled').checked;
+                const needsComposite = webcamEnabled || (mode === 'area' && selectedArea);
+
+                if (needsComposite) {
+                    if (webcamEnabled) {
+                        webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    }
+
+                    // Create composite canvas
                     compositeCanvas = document.createElement('canvas');
                     compositeContext = compositeCanvas.getContext('2d');
 
                     const videoTrack = displayStream.getVideoTracks()[0];
                     const settings = videoTrack.getSettings();
-                    compositeCanvas.width = settings.width || 1920;
-                    compositeCanvas.height = settings.height || 1080;
 
-                    // Create video element for webcam
-                    webcamVideo = document.createElement('video');
-                    webcamVideo.srcObject = webcamStream;
-                    webcamVideo.muted = true;
-                    webcamVideo.play();
+                    // Set canvas size based on area selection or full screen
+                    if (mode === 'area' && selectedArea) {
+                        compositeCanvas.width = selectedArea.width;
+                        compositeCanvas.height = selectedArea.height;
+                    } else {
+                        compositeCanvas.width = settings.width || 1920;
+                        compositeCanvas.height = settings.height || 1080;
+                    }
 
                     // Create video element for display stream
                     const displayVideo = document.createElement('video');
@@ -1738,74 +1872,96 @@
                     displayVideo.muted = true;
                     displayVideo.play();
 
+                    // Create video element for webcam if enabled
+                    if (webcamEnabled) {
+                        webcamVideo = document.createElement('video');
+                        webcamVideo.srcObject = webcamStream;
+                        webcamVideo.muted = true;
+                        webcamVideo.play();
+                    }
+
                     // Get webcam settings
-                    const webcamSize = parseInt(document.getElementById('webcamSize').value);
-                    const webcamPosition = document.getElementById('webcamPosition').value;
-                    const webcamShape = document.getElementById('webcamShape').value;
+                    let webcamSize, webcamX, webcamY, webcamShape;
+                    if (webcamEnabled) {
+                        webcamSize = parseInt(document.getElementById('webcamSize').value);
+                        const webcamPosition = document.getElementById('webcamPosition').value;
+                        webcamShape = document.getElementById('webcamShape').value;
 
-                    // Calculate webcam position
-                    let webcamX, webcamY;
-                    const padding = 20;
+                        // Calculate webcam position
+                        const padding = 20;
 
-                    switch (webcamPosition) {
-                        case 'top-left':
-                            webcamX = padding;
-                            webcamY = padding;
-                            break;
-                        case 'top-right':
-                            webcamX = compositeCanvas.width - webcamSize - padding;
-                            webcamY = padding;
-                            break;
-                        case 'bottom-left':
-                            webcamX = padding;
-                            webcamY = compositeCanvas.height - webcamSize - padding;
-                            break;
-                        case 'bottom-right':
-                        default:
-                            webcamX = compositeCanvas.width - webcamSize - padding;
-                            webcamY = compositeCanvas.height - webcamSize - padding;
-                            break;
+                        switch (webcamPosition) {
+                            case 'top-left':
+                                webcamX = padding;
+                                webcamY = padding;
+                                break;
+                            case 'top-right':
+                                webcamX = compositeCanvas.width - webcamSize - padding;
+                                webcamY = padding;
+                                break;
+                            case 'bottom-left':
+                                webcamX = padding;
+                                webcamY = compositeCanvas.height - webcamSize - padding;
+                                break;
+                            case 'bottom-right':
+                            default:
+                                webcamX = compositeCanvas.width - webcamSize - padding;
+                                webcamY = compositeCanvas.height - webcamSize - padding;
+                                break;
+                        }
                     }
 
                     // Composite the streams
                     function drawComposite() {
                         if (!compositeCanvas) return;
 
-                        // Draw display stream
-                        compositeContext.drawImage(displayVideo, 0, 0, compositeCanvas.width, compositeCanvas.height);
-
-                        // Draw webcam overlay
-                        compositeContext.save();
-
-                        if (webcamShape === 'circle') {
-                            compositeContext.beginPath();
-                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
-                            compositeContext.closePath();
-                            compositeContext.clip();
-                        } else if (webcamShape === 'rounded') {
-                            const radius = 12;
-                            compositeContext.beginPath();
-                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, radius);
-                            compositeContext.closePath();
-                            compositeContext.clip();
+                        // Draw display stream (crop to selected area if needed)
+                        if (mode === 'area' && selectedArea) {
+                            // Crop the video to the selected area
+                            compositeContext.drawImage(
+                                displayVideo,
+                                selectedArea.x, selectedArea.y, selectedArea.width, selectedArea.height,
+                                0, 0, compositeCanvas.width, compositeCanvas.height
+                            );
+                        } else {
+                            // Draw full screen
+                            compositeContext.drawImage(displayVideo, 0, 0, compositeCanvas.width, compositeCanvas.height);
                         }
 
-                        compositeContext.drawImage(webcamVideo, webcamX, webcamY, webcamSize, webcamSize);
-                        compositeContext.restore();
+                        // Draw webcam overlay if enabled
+                        if (webcamEnabled && webcamVideo) {
+                            compositeContext.save();
 
-                        // Draw border
-                        compositeContext.strokeStyle = 'white';
-                        compositeContext.lineWidth = 3;
-                        if (webcamShape === 'circle') {
-                            compositeContext.beginPath();
-                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
-                            compositeContext.stroke();
-                        } else if (webcamShape === 'rounded') {
-                            compositeContext.beginPath();
-                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, 12);
-                            compositeContext.stroke();
-                        } else {
-                            compositeContext.strokeRect(webcamX, webcamY, webcamSize, webcamSize);
+                            if (webcamShape === 'circle') {
+                                compositeContext.beginPath();
+                                compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                                compositeContext.closePath();
+                                compositeContext.clip();
+                            } else if (webcamShape === 'rounded') {
+                                const radius = 12;
+                                compositeContext.beginPath();
+                                compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, radius);
+                                compositeContext.closePath();
+                                compositeContext.clip();
+                            }
+
+                            compositeContext.drawImage(webcamVideo, webcamX, webcamY, webcamSize, webcamSize);
+                            compositeContext.restore();
+
+                            // Draw border
+                            compositeContext.strokeStyle = 'white';
+                            compositeContext.lineWidth = 3;
+                            if (webcamShape === 'circle') {
+                                compositeContext.beginPath();
+                                compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                                compositeContext.stroke();
+                            } else if (webcamShape === 'rounded') {
+                                compositeContext.beginPath();
+                                compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, 12);
+                                compositeContext.stroke();
+                            } else {
+                                compositeContext.strokeRect(webcamX, webcamY, webcamSize, webcamSize);
+                            }
                         }
 
                         requestAnimationFrame(drawComposite);
@@ -1813,7 +1969,11 @@
 
                     await new Promise(resolve => {
                         displayVideo.onloadedmetadata = () => {
-                            webcamVideo.onloadedmetadata = resolve;
+                            if (webcamEnabled && webcamVideo) {
+                                webcamVideo.onloadedmetadata = resolve;
+                            } else {
+                                resolve();
+                            }
                         };
                     });
 
@@ -1825,6 +1985,9 @@
                 } else {
                     recordingStream = displayStream;
                 }
+
+                // Reset selectedArea after starting recording
+                selectedArea = null;
 
                 // Add microphone if needed
                 if (micAudio) {
@@ -1865,7 +2028,7 @@
 
                 // Show preview
                 const previewVideo = document.getElementById('previewVideo');
-                if (webcamEnabled && compositeCanvas) {
+                if (needsComposite && compositeCanvas) {
                     previewVideo.srcObject = compositeCanvas.captureStream(30);
                 } else {
                     previewVideo.srcObject = recordingStream;
