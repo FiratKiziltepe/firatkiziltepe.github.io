@@ -56,8 +56,7 @@ async function addFiles(files) {
             pdfFiles.push({
                 id: Date.now() + Math.random(),
                 name: file.name,
-                file: file,
-                bytes: arrayBuffer,
+                file: file, // File nesnesini sakla, her kullanımda yeniden okuyacağız
                 pageCount: pdfDoc.numPages,
                 size: file.size
             });
@@ -172,7 +171,9 @@ async function mergePDFs() {
 
         // Her PDF'i sırayla ekle
         for (const pdf of pdfFiles) {
-            const pdfDoc = await PDFLib.PDFDocument.load(pdf.bytes);
+            // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+            const arrayBuffer = await pdf.file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             const pageIndices = pdfDoc.getPageIndices();
 
             // Tüm sayfaları kopyala
