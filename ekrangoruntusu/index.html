@@ -1693,64 +1693,80 @@
 
         async function showAreaSelector(displayStream, videoSettings) {
             return new Promise((resolve) => {
-                // Get video dimensions and screen dimensions
+                // Get video dimensions
                 const videoWidth = videoSettings.width || 1920;
                 const videoHeight = videoSettings.height || 1080;
-                const screenWidth = window.innerWidth;
-                const screenHeight = window.innerHeight;
 
-                // Calculate scale factor
-                const scaleX = videoWidth / screenWidth;
-                const scaleY = videoHeight / screenHeight;
-
-                // Create fullscreen overlay with video preview
+                // Create fullscreen overlay
                 const overlay = document.createElement('div');
                 overlay.style.position = 'fixed';
                 overlay.style.top = '0';
                 overlay.style.left = '0';
                 overlay.style.width = '100%';
                 overlay.style.height = '100%';
-                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
                 overlay.style.zIndex = '10000';
-                overlay.style.cursor = 'crosshair';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.alignItems = 'center';
+                overlay.style.justifyContent = 'center';
+                overlay.style.padding = '20px';
+
+                const instruction = document.createElement('div');
+                instruction.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 10px;">
+                            📺 Aşağıdaki önizleme üzerinde fareyle dikdörtgen çizerek kaydetmek istediğiniz alanı seçin
+                        </div>
+                        <div style="font-size: 16px; color: #FFD700;">
+                            ⚠️ Bu önizleme seçtiğiniz ekran/sekme/pencereyi gösteriyor • ESC ile iptal
+                        </div>
+                    </div>
+                `;
+                instruction.style.zIndex = '10002';
+                overlay.appendChild(instruction);
+
+                // Create video container with border
+                const videoContainer = document.createElement('div');
+                videoContainer.style.position = 'relative';
+                videoContainer.style.maxWidth = '95%';
+                videoContainer.style.maxHeight = 'calc(100vh - 150px)';
+                videoContainer.style.border = '4px solid #2196F3';
+                videoContainer.style.borderRadius = '8px';
+                videoContainer.style.overflow = 'hidden';
+                videoContainer.style.backgroundColor = '#000';
+                videoContainer.style.boxShadow = '0 0 30px rgba(33, 150, 243, 0.5)';
 
                 // Create video preview element
                 const previewVideo = document.createElement('video');
                 previewVideo.srcObject = displayStream;
-                previewVideo.style.position = 'absolute';
-                previewVideo.style.top = '0';
-                previewVideo.style.left = '0';
                 previewVideo.style.width = '100%';
                 previewVideo.style.height = '100%';
-                previewVideo.style.objectFit = 'contain';
-                previewVideo.style.opacity = '0.7';
+                previewVideo.style.display = 'block';
+                previewVideo.style.cursor = 'crosshair';
                 previewVideo.muted = true;
+                previewVideo.autoplay = true;
                 previewVideo.play();
-                overlay.appendChild(previewVideo);
+                videoContainer.appendChild(previewVideo);
 
-                const instruction = document.createElement('div');
-                instruction.textContent = 'Kaydetmek istediğiniz alanı seçmek için fareyle dikdörtgen çizin (ESC ile iptal)';
-                instruction.style.position = 'absolute';
-                instruction.style.top = '20px';
-                instruction.style.left = '50%';
-                instruction.style.transform = 'translateX(-50%)';
-                instruction.style.color = 'white';
-                instruction.style.fontSize = '18px';
-                instruction.style.fontWeight = 'bold';
-                instruction.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-                instruction.style.padding = '15px 30px';
-                instruction.style.borderRadius = '8px';
-                instruction.style.zIndex = '10001';
-                overlay.appendChild(instruction);
+                overlay.appendChild(videoContainer);
 
                 let selectionBox = null;
                 let startX, startY;
                 let isSelecting = false;
 
-                overlay.addEventListener('mousedown', (e) => {
+                // Wait for video to load
+                previewVideo.onloadedmetadata = () => {
+                    previewVideo.play();
+                };
+
+                videoContainer.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
                     isSelecting = true;
-                    startX = e.clientX;
-                    startY = e.clientY;
+
+                    const rect = videoContainer.getBoundingClientRect();
+                    startX = e.clientX - rect.left;
+                    startY = e.clientY - rect.top;
 
                     if (selectionBox) {
                         selectionBox.remove();
@@ -1758,19 +1774,22 @@
 
                     selectionBox = document.createElement('div');
                     selectionBox.style.position = 'absolute';
-                    selectionBox.style.border = '3px dashed #2196F3';
-                    selectionBox.style.backgroundColor = 'rgba(33, 150, 243, 0.3)';
+                    selectionBox.style.border = '3px dashed #FFD700';
+                    selectionBox.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
                     selectionBox.style.left = startX + 'px';
                     selectionBox.style.top = startY + 'px';
                     selectionBox.style.zIndex = '10001';
-                    overlay.appendChild(selectionBox);
+                    selectionBox.style.pointerEvents = 'none';
+                    videoContainer.appendChild(selectionBox);
                 });
 
-                overlay.addEventListener('mousemove', (e) => {
+                videoContainer.addEventListener('mousemove', (e) => {
                     if (!isSelecting || !selectionBox) return;
+                    e.stopPropagation();
 
-                    const currentX = e.clientX;
-                    const currentY = e.clientY;
+                    const rect = videoContainer.getBoundingClientRect();
+                    const currentX = e.clientX - rect.left;
+                    const currentY = e.clientY - rect.top;
 
                     const width = currentX - startX;
                     const height = currentY - startY;
@@ -1792,38 +1811,54 @@
                     }
                 });
 
-                overlay.addEventListener('mouseup', (e) => {
+                videoContainer.addEventListener('mouseup', (e) => {
                     if (!isSelecting || !selectionBox) return;
+                    e.stopPropagation();
 
                     isSelecting = false;
-                    const currentX = e.clientX;
-                    const currentY = e.clientY;
+
+                    const rect = videoContainer.getBoundingClientRect();
+                    const currentX = e.clientX - rect.left;
+                    const currentY = e.clientY - rect.top;
 
                     const screenX = Math.min(startX, currentX);
                     const screenY = Math.min(startY, currentY);
                     const screenW = Math.abs(currentX - startX);
                     const screenH = Math.abs(currentY - startY);
 
-                    if (screenW > 50 && screenH > 50) {
-                        // Convert screen coordinates to video coordinates
-                        const videoX = Math.round(screenX * scaleX);
-                        const videoY = Math.round(screenY * scaleY);
-                        const videoW = Math.round(screenW * scaleX);
-                        const videoH = Math.round(screenH * scaleY);
+                    if (screenW > 20 && screenH > 20) {
+                        // Video container size to video stream size ratio
+                        const containerWidth = rect.width;
+                        const containerHeight = rect.height;
+                        const videoScaleX = videoWidth / containerWidth;
+                        const videoScaleY = videoHeight / containerHeight;
+
+                        // Convert container coordinates to video coordinates
+                        const videoX = Math.round(screenX * videoScaleX);
+                        const videoY = Math.round(screenY * videoScaleY);
+                        const videoW = Math.round(screenW * videoScaleX);
+                        const videoH = Math.round(screenH * videoScaleY);
+
+                        // Ensure coordinates are within bounds
+                        const finalX = Math.max(0, Math.min(videoX, videoWidth));
+                        const finalY = Math.max(0, Math.min(videoY, videoHeight));
+                        const finalW = Math.min(videoW, videoWidth - finalX);
+                        const finalH = Math.min(videoH, videoHeight - finalY);
 
                         // Store video coordinates
                         selectedArea = {
-                            x: videoX,
-                            y: videoY,
-                            width: videoW,
-                            height: videoH
+                            x: finalX,
+                            y: finalY,
+                            width: finalW,
+                            height: finalH
                         };
 
                         previewVideo.srcObject = null;
                         overlay.remove();
+                        document.removeEventListener('keydown', escHandler);
                         resolve(selectedArea);
                     } else {
-                        showNotification('Lütfen daha büyük bir alan seçin (minimum 50x50 piksel)', 'warning');
+                        showNotification('Lütfen daha büyük bir alan seçin', 'warning');
                         if (selectionBox) {
                             selectionBox.remove();
                             selectionBox = null;
