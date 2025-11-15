@@ -418,20 +418,27 @@ async function extractTextWithPositions(pdf) {
             if (!item.str || item.str.trim() === '') return;
 
             const tx = item.transform;
-            // Transform coordinates to viewport space
+            // PDF coordinates: origin at bottom-left, Y increases upward
+            // Canvas coordinates: origin at top-left, Y increases downward
+            // So we flip Y: canvasY = viewportHeight - pdfY
+
             pagePositions.push({
                 text: item.str,
                 x: tx[4],
-                y: viewport.height - tx[5], // Flip Y coordinate (PDF coords are bottom-up)
+                y: tx[5], // Keep original Y for now, will flip during render
                 width: item.width,
                 height: item.height,
-                transform: tx
+                transform: tx,
+                // Store font info for better matching
+                fontName: item.fontName,
+                fontSize: Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])
             });
         });
 
         allTextPositions.push({
             pageNum: pageNum,
-            positions: pagePositions
+            positions: pagePositions,
+            viewport: viewport
         });
     }
 
@@ -538,6 +545,11 @@ function findTextInPositions(searchText, positions) {
 
     if (!searchNormalized) return matches;
 
+    // Split search text into words for better matching
+    const searchWords = searchNormalized.split(/\s+/).filter(w => w.length > 0);
+
+    if (searchWords.length === 0) return matches;
+
     // Build a continuous text from positions to find matches
     let fullText = '';
     const positionMap = [];
@@ -554,7 +566,9 @@ function findTextInPositions(searchText, positions) {
     });
 
     const fullTextNormalized = normalizeText(fullText);
-    const searchIdx = fullTextNormalized.indexOf(searchNormalized);
+
+    // Strategy 1: Try exact match first
+    let searchIdx = fullTextNormalized.indexOf(searchNormalized);
 
     if (searchIdx !== -1) {
         const searchEndIdx = searchIdx + searchNormalized.length;
@@ -563,6 +577,29 @@ function findTextInPositions(searchText, positions) {
         positionMap.forEach(mapItem => {
             if (mapItem.startIdx < searchEndIdx && mapItem.endIdx > searchIdx) {
                 matches.push(mapItem.position);
+            }
+        });
+    } else {
+        // Strategy 2: Match individual words if exact match fails
+        searchWords.forEach(word => {
+            if (word.length < 3) return; // Skip very short words
+
+            let wordIdx = fullTextNormalized.indexOf(word);
+            while (wordIdx !== -1) {
+                const wordEndIdx = wordIdx + word.length;
+
+                // Find positions that contain this word
+                positionMap.forEach(mapItem => {
+                    if (mapItem.startIdx <= wordIdx && mapItem.endIdx >= wordEndIdx) {
+                        // Avoid duplicates
+                        if (!matches.find(m => m === mapItem.position)) {
+                            matches.push(mapItem.position);
+                        }
+                    }
+                });
+
+                // Search for next occurrence
+                wordIdx = fullTextNormalized.indexOf(word, wordIdx + 1);
             }
         });
     }
@@ -953,7 +990,7 @@ function addHighlightInteraction(canvas, highlights, scale) {
 }
 
 // Draw highlights on canvas
-function drawHighlights(canvas, highlights, scale = 1) {
+function drawHighlights(canvas, highlights, scale = 1, viewport) {
     if (!canvas || !highlights) return;
 
     const ctx = canvas.getContext('2d');
@@ -979,9 +1016,11 @@ function drawHighlights(canvas, highlights, scale = 1) {
                 ctx.strokeStyle = 'rgba(128, 128, 128, 0.6)';
         }
 
-        // Draw rectangle
+        // Apply scale and flip Y coordinate
         const x = highlight.x * scale;
-        const y = highlight.y * scale;
+        // PDF Y starts at bottom, canvas Y starts at top
+        // So: canvasY = (viewport.height - pdfY - height) * scale
+        const y = viewport ? ((viewport.height - highlight.y - highlight.height) * scale) : (highlight.y * scale);
         const width = highlight.width * scale;
         const height = highlight.height * scale;
 
@@ -1030,6 +1069,11 @@ async function highlightChanges() {
 
         console.log('Highlights mapped:', state.comparison.highlights);
 
+        // Debug: Count total highlights
+        const pdf1Total = Object.values(state.comparison.highlights.pdf1).reduce((sum, arr) => sum + arr.length, 0);
+        const pdf2Total = Object.values(state.comparison.highlights.pdf2).reduce((sum, arr) => sum + arr.length, 0);
+        console.log(`Total highlights - PDF1: ${pdf1Total}, PDF2: ${pdf2Total}`);
+
     } catch (error) {
         console.error('Highlighting error:', error);
     } finally {
@@ -1038,13 +1082,14 @@ async function highlightChanges() {
 }
 
 // Render highlights for a specific page
-function renderPageHighlights(pdfNumber, pageNum) {
+async function renderPageHighlights(pdfNumber, pageNum) {
     if (!state.settings.highlightChanges) return;
 
     const canvas = pdfNumber === 1 ? elements.canvas1 : elements.canvas2;
     const overlayContainer = pdfNumber === 1 ? elements.overlay1 : elements.overlay2;
+    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
 
-    if (!canvas || !overlayContainer) return;
+    if (!canvas || !overlayContainer || !pdf.document) return;
 
     const highlights = state.comparison.highlights[`pdf${pdfNumber}`][pageNum] || [];
 
@@ -1057,14 +1102,18 @@ function renderPageHighlights(pdfNumber, pageNum) {
         return;
     }
 
+    // Get page viewport for coordinate transformation
+    const page = await pdf.document.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 1.0 });
+
     // Create highlight canvas
     const highlightCanvas = createHighlightCanvas(canvas, overlayContainer);
 
     // Get current scale
     const scale = state.settings.zoomLevel / 100;
 
-    // Draw highlights
-    drawHighlights(highlightCanvas, highlights, scale);
+    // Draw highlights with viewport for Y-axis transformation
+    drawHighlights(highlightCanvas, highlights, scale, viewport);
 
     // Add hover interaction
     addHighlightInteraction(highlightCanvas, highlights, scale);
