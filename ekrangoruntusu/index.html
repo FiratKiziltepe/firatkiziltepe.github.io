@@ -1058,6 +1058,7 @@
                                 <option value="screen">Tüm Ekran</option>
                                 <option value="window">Belirli Pencere</option>
                                 <option value="tab">Tarayıcı Sekmesi</option>
+                                <option value="area">Seçili Alan</option>
                             </select>
                         </div>
 
@@ -1226,7 +1227,7 @@
                     <div class="card">
                         <div class="card-title">📺 Önizleme</div>
                         <div class="preview-area" id="previewArea">
-                            <video id="previewVideo" class="preview-video hidden"></video>
+                            <video id="previewVideo" class="preview-video hidden" muted></video>
                             <div class="preview-placeholder" id="previewPlaceholder">
                                 Kayıt başladığında önizleme burada görünecek
                             </div>
@@ -1609,6 +1610,13 @@
         let currentCanvas;
         let currentVideoBlob;
         let currentVideoId;
+        let drawingCanvas;
+        let drawingContext;
+        let lastX = 0;
+        let lastY = 0;
+        let compositeCanvas;
+        let compositeContext;
+        let webcamVideo;
 
         // IndexedDB Setup
         function initDB() {
@@ -1702,7 +1710,121 @@
                     audio: systemAudio
                 };
 
-                recordingStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
+                const displayStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
+
+                // Setup webcam if enabled
+                const webcamEnabled = document.getElementById('webcamEnabled').checked;
+                if (webcamEnabled) {
+                    webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+                    // Create composite canvas for webcam overlay
+                    compositeCanvas = document.createElement('canvas');
+                    compositeContext = compositeCanvas.getContext('2d');
+
+                    const videoTrack = displayStream.getVideoTracks()[0];
+                    const settings = videoTrack.getSettings();
+                    compositeCanvas.width = settings.width || 1920;
+                    compositeCanvas.height = settings.height || 1080;
+
+                    // Create video element for webcam
+                    webcamVideo = document.createElement('video');
+                    webcamVideo.srcObject = webcamStream;
+                    webcamVideo.muted = true;
+                    webcamVideo.play();
+
+                    // Create video element for display stream
+                    const displayVideo = document.createElement('video');
+                    displayVideo.srcObject = displayStream;
+                    displayVideo.muted = true;
+                    displayVideo.play();
+
+                    // Get webcam settings
+                    const webcamSize = parseInt(document.getElementById('webcamSize').value);
+                    const webcamPosition = document.getElementById('webcamPosition').value;
+                    const webcamShape = document.getElementById('webcamShape').value;
+
+                    // Calculate webcam position
+                    let webcamX, webcamY;
+                    const padding = 20;
+
+                    switch (webcamPosition) {
+                        case 'top-left':
+                            webcamX = padding;
+                            webcamY = padding;
+                            break;
+                        case 'top-right':
+                            webcamX = compositeCanvas.width - webcamSize - padding;
+                            webcamY = padding;
+                            break;
+                        case 'bottom-left':
+                            webcamX = padding;
+                            webcamY = compositeCanvas.height - webcamSize - padding;
+                            break;
+                        case 'bottom-right':
+                        default:
+                            webcamX = compositeCanvas.width - webcamSize - padding;
+                            webcamY = compositeCanvas.height - webcamSize - padding;
+                            break;
+                    }
+
+                    // Composite the streams
+                    function drawComposite() {
+                        if (!compositeCanvas) return;
+
+                        // Draw display stream
+                        compositeContext.drawImage(displayVideo, 0, 0, compositeCanvas.width, compositeCanvas.height);
+
+                        // Draw webcam overlay
+                        compositeContext.save();
+
+                        if (webcamShape === 'circle') {
+                            compositeContext.beginPath();
+                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                            compositeContext.closePath();
+                            compositeContext.clip();
+                        } else if (webcamShape === 'rounded') {
+                            const radius = 12;
+                            compositeContext.beginPath();
+                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, radius);
+                            compositeContext.closePath();
+                            compositeContext.clip();
+                        }
+
+                        compositeContext.drawImage(webcamVideo, webcamX, webcamY, webcamSize, webcamSize);
+                        compositeContext.restore();
+
+                        // Draw border
+                        compositeContext.strokeStyle = 'white';
+                        compositeContext.lineWidth = 3;
+                        if (webcamShape === 'circle') {
+                            compositeContext.beginPath();
+                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                            compositeContext.stroke();
+                        } else if (webcamShape === 'rounded') {
+                            compositeContext.beginPath();
+                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, 12);
+                            compositeContext.stroke();
+                        } else {
+                            compositeContext.strokeRect(webcamX, webcamY, webcamSize, webcamSize);
+                        }
+
+                        requestAnimationFrame(drawComposite);
+                    }
+
+                    await new Promise(resolve => {
+                        displayVideo.onloadedmetadata = () => {
+                            webcamVideo.onloadedmetadata = resolve;
+                        };
+                    });
+
+                    drawComposite();
+
+                    // Get stream from composite canvas
+                    const compositeStream = compositeCanvas.captureStream(30);
+                    recordingStream = new MediaStream([...compositeStream.getVideoTracks(), ...displayStream.getAudioTracks()]);
+                } else {
+                    recordingStream = displayStream;
+                }
 
                 // Add microphone if needed
                 if (micAudio) {
@@ -1710,13 +1832,6 @@
                     audioStream.getAudioTracks().forEach(track => {
                         recordingStream.addTrack(track);
                     });
-                }
-
-                // Setup webcam if enabled
-                const webcamEnabled = document.getElementById('webcamEnabled').checked;
-                if (webcamEnabled) {
-                    webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    // In a real implementation, you would overlay this on the recording
                 }
 
                 // Setup MediaRecorder
@@ -1750,7 +1865,11 @@
 
                 // Show preview
                 const previewVideo = document.getElementById('previewVideo');
-                previewVideo.srcObject = recordingStream;
+                if (webcamEnabled && compositeCanvas) {
+                    previewVideo.srcObject = compositeCanvas.captureStream(30);
+                } else {
+                    previewVideo.srcObject = recordingStream;
+                }
                 previewVideo.classList.remove('hidden');
                 previewVideo.play();
                 document.getElementById('previewPlaceholder').classList.add('hidden');
@@ -1798,6 +1917,18 @@
 
                 if (webcamStream) {
                     webcamStream.getTracks().forEach(track => track.stop());
+                    webcamStream = null;
+                }
+
+                // Clean up composite canvas
+                if (compositeCanvas) {
+                    compositeContext = null;
+                    compositeCanvas = null;
+                }
+
+                if (webcamVideo) {
+                    webcamVideo.srcObject = null;
+                    webcamVideo = null;
                 }
 
                 // Update UI
@@ -1924,11 +2055,39 @@
             const preview = document.getElementById('screenshotPreview');
             preview.innerHTML = '';
 
+            // Create container for image and drawing canvas
+            const container = document.createElement('div');
+            container.style.position = 'relative';
+            container.style.display = 'inline-block';
+
             const img = document.createElement('img');
             img.src = canvas.toDataURL();
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
-            preview.appendChild(img);
+            img.style.display = 'block';
+            container.appendChild(img);
+
+            // Create drawing canvas overlay
+            drawingCanvas = document.createElement('canvas');
+            drawingCanvas.width = canvas.width;
+            drawingCanvas.height = canvas.height;
+            drawingCanvas.style.position = 'absolute';
+            drawingCanvas.style.top = '0';
+            drawingCanvas.style.left = '0';
+            drawingCanvas.style.maxWidth = '100%';
+            drawingCanvas.style.height = 'auto';
+            drawingCanvas.style.cursor = 'crosshair';
+            container.appendChild(drawingCanvas);
+
+            preview.appendChild(container);
+
+            drawingContext = drawingCanvas.getContext('2d');
+
+            // Setup drawing events
+            drawingCanvas.addEventListener('mousedown', startDrawing);
+            drawingCanvas.addEventListener('mousemove', draw);
+            drawingCanvas.addEventListener('mouseup', stopDrawing);
+            drawingCanvas.addEventListener('mouseout', stopDrawing);
 
             // Show editing toolbar
             document.getElementById('editingToolbar').classList.remove('hidden');
@@ -1938,12 +2097,241 @@
             editHistoryIndex = 0;
         }
 
+        function startDrawing(e) {
+            if (!currentTool) return;
+
+            isDrawing = true;
+            const rect = drawingCanvas.getBoundingClientRect();
+            const scaleX = drawingCanvas.width / rect.width;
+            const scaleY = drawingCanvas.height / rect.height;
+
+            lastX = (e.clientX - rect.left) * scaleX;
+            lastY = (e.clientY - rect.top) * scaleY;
+        }
+
+        function draw(e) {
+            if (!isDrawing || !currentTool) return;
+
+            const rect = drawingCanvas.getBoundingClientRect();
+            const scaleX = drawingCanvas.width / rect.width;
+            const scaleY = drawingCanvas.height / rect.height;
+
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            const color = document.getElementById('drawColor').value;
+            const size = document.getElementById('drawSize').value;
+
+            drawingContext.strokeStyle = color;
+            drawingContext.fillStyle = color;
+            drawingContext.lineWidth = size;
+            drawingContext.lineCap = 'round';
+            drawingContext.lineJoin = 'round';
+
+            if (currentTool === 'pen') {
+                drawingContext.beginPath();
+                drawingContext.moveTo(lastX, lastY);
+                drawingContext.lineTo(currentX, currentY);
+                drawingContext.stroke();
+                lastX = currentX;
+                lastY = currentY;
+            } else if (currentTool === 'highlighter') {
+                drawingContext.globalAlpha = 0.3;
+                drawingContext.lineWidth = size * 3;
+                drawingContext.beginPath();
+                drawingContext.moveTo(lastX, lastY);
+                drawingContext.lineTo(currentX, currentY);
+                drawingContext.stroke();
+                drawingContext.globalAlpha = 1.0;
+                lastX = currentX;
+                lastY = currentY;
+            } else if (currentTool === 'rectangle' || currentTool === 'circle' || currentTool === 'arrow') {
+                // For shapes, we need to clear and redraw on mouse move
+                // Store the shape start point and update on mouse up
+                e.currentTarget._shapeEndX = currentX;
+                e.currentTarget._shapeEndY = currentY;
+            } else if (currentTool === 'text') {
+                // Text will be handled on click
+            } else if (currentTool === 'blur') {
+                // Apply blur effect in a circular area
+                const blurRadius = size * 2;
+                const imageData = drawingContext.getImageData(
+                    Math.max(0, currentX - blurRadius),
+                    Math.max(0, currentY - blurRadius),
+                    blurRadius * 2,
+                    blurRadius * 2
+                );
+                // Simple pixelation effect
+                const pixelSize = 8;
+                for (let y = 0; y < imageData.height; y += pixelSize) {
+                    for (let x = 0; x < imageData.width; x += pixelSize) {
+                        const pixelIndex = (y * imageData.width + x) * 4;
+                        const r = imageData.data[pixelIndex];
+                        const g = imageData.data[pixelIndex + 1];
+                        const b = imageData.data[pixelIndex + 2];
+
+                        for (let py = 0; py < pixelSize && y + py < imageData.height; py++) {
+                            for (let px = 0; px < pixelSize && x + px < imageData.width; px++) {
+                                const index = ((y + py) * imageData.width + (x + px)) * 4;
+                                imageData.data[index] = r;
+                                imageData.data[index + 1] = g;
+                                imageData.data[index + 2] = b;
+                            }
+                        }
+                    }
+                }
+                drawingContext.putImageData(
+                    imageData,
+                    Math.max(0, currentX - blurRadius),
+                    Math.max(0, currentY - blurRadius)
+                );
+                lastX = currentX;
+                lastY = currentY;
+            }
+        }
+
+        function stopDrawing(e) {
+            if (isDrawing && currentTool) {
+                // Draw shapes on mouse up
+                if (currentTool === 'rectangle' && e && e.currentTarget._shapeEndX) {
+                    const color = document.getElementById('drawColor').value;
+                    const size = document.getElementById('drawSize').value;
+
+                    drawingContext.strokeStyle = color;
+                    drawingContext.lineWidth = size;
+
+                    const width = e.currentTarget._shapeEndX - lastX;
+                    const height = e.currentTarget._shapeEndY - lastY;
+                    drawingContext.strokeRect(lastX, lastY, width, height);
+
+                    delete e.currentTarget._shapeEndX;
+                    delete e.currentTarget._shapeEndY;
+                } else if (currentTool === 'circle' && e && e.currentTarget._shapeEndX) {
+                    const color = document.getElementById('drawColor').value;
+                    const size = document.getElementById('drawSize').value;
+
+                    drawingContext.strokeStyle = color;
+                    drawingContext.lineWidth = size;
+
+                    const radius = Math.sqrt(
+                        Math.pow(e.currentTarget._shapeEndX - lastX, 2) +
+                        Math.pow(e.currentTarget._shapeEndY - lastY, 2)
+                    );
+                    drawingContext.beginPath();
+                    drawingContext.arc(lastX, lastY, radius, 0, Math.PI * 2);
+                    drawingContext.stroke();
+
+                    delete e.currentTarget._shapeEndX;
+                    delete e.currentTarget._shapeEndY;
+                } else if (currentTool === 'arrow' && e && e.currentTarget._shapeEndX) {
+                    const color = document.getElementById('drawColor').value;
+                    const size = document.getElementById('drawSize').value;
+
+                    drawingContext.strokeStyle = color;
+                    drawingContext.fillStyle = color;
+                    drawingContext.lineWidth = size;
+
+                    const endX = e.currentTarget._shapeEndX;
+                    const endY = e.currentTarget._shapeEndY;
+
+                    // Draw line
+                    drawingContext.beginPath();
+                    drawingContext.moveTo(lastX, lastY);
+                    drawingContext.lineTo(endX, endY);
+                    drawingContext.stroke();
+
+                    // Draw arrowhead
+                    const angle = Math.atan2(endY - lastY, endX - lastX);
+                    const arrowLength = 20;
+
+                    drawingContext.beginPath();
+                    drawingContext.moveTo(endX, endY);
+                    drawingContext.lineTo(
+                        endX - arrowLength * Math.cos(angle - Math.PI / 6),
+                        endY - arrowLength * Math.sin(angle - Math.PI / 6)
+                    );
+                    drawingContext.lineTo(
+                        endX - arrowLength * Math.cos(angle + Math.PI / 6),
+                        endY - arrowLength * Math.sin(angle + Math.PI / 6)
+                    );
+                    drawingContext.closePath();
+                    drawingContext.fill();
+
+                    delete e.currentTarget._shapeEndX;
+                    delete e.currentTarget._shapeEndY;
+                } else if (currentTool === 'text' && e) {
+                    const text = prompt('Metin girin:');
+                    if (text) {
+                        const color = document.getElementById('drawColor').value;
+                        const size = document.getElementById('drawSize').value;
+
+                        drawingContext.fillStyle = color;
+                        drawingContext.font = `${size * 5}px Arial`;
+                        drawingContext.fillText(text, lastX, lastY);
+                    }
+                }
+
+                isDrawing = false;
+
+                // Save to history
+                mergeDrawingToScreenshot();
+            }
+        }
+
+        function mergeDrawingToScreenshot() {
+            if (!currentScreenshot || !drawingCanvas) return;
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = currentScreenshot.width;
+            tempCanvas.height = currentScreenshot.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // Draw original image
+            tempCtx.drawImage(currentScreenshot, 0, 0);
+
+            // Draw annotations on top
+            tempCtx.drawImage(drawingCanvas, 0, 0);
+
+            // Update current screenshot
+            currentScreenshot = tempCanvas;
+
+            // Clear drawing canvas
+            drawingContext.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+            // Add to history
+            if (editHistoryIndex < editHistory.length - 1) {
+                editHistory = editHistory.slice(0, editHistoryIndex + 1);
+            }
+            editHistory.push(tempCanvas.toDataURL());
+            editHistoryIndex++;
+        }
+
         function activateTool(tool) {
             currentTool = tool;
-            showNotification(`${tool} aracı seçildi`, 'info');
 
-            // In a real implementation, you would set up canvas event listeners here
-            // to handle drawing, cropping, etc.
+            const toolNames = {
+                'crop': '✂️ Kırp',
+                'pen': '✏️ Kalem',
+                'highlighter': '🖍️ Vurgulayıcı',
+                'arrow': '➡️ Ok',
+                'rectangle': '▭ Dikdörtgen',
+                'circle': '⭕ Daire',
+                'text': 'T Metin',
+                'blur': '🌫️ Bulanıklaştır'
+            };
+
+            showNotification(`${toolNames[tool] || tool} aracı seçildi`, 'info');
+
+            // Change cursor based on tool
+            if (drawingCanvas) {
+                if (tool === 'text') {
+                    drawingCanvas.style.cursor = 'text';
+                } else if (tool === 'crop') {
+                    drawingCanvas.style.cursor = 'crosshair';
+                } else {
+                    drawingCanvas.style.cursor = 'crosshair';
+                }
+            }
         }
 
         function undo() {
