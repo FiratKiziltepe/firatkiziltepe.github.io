@@ -19,6 +19,7 @@ const resultsDiv = document.getElementById('results');
 // Event listeners
 pdfFileInput.addEventListener('change', handleFileSelect);
 document.getElementById('pageInterval')?.addEventListener('input', updateIntervalPreview);
+document.getElementById('extractPages')?.addEventListener('input', updateExtractPreview);
 document.getElementById('customPages')?.addEventListener('input', updateCustomPreview);
 
 // Dosya seçimi
@@ -72,11 +73,24 @@ function selectOption(method) {
     const configMap = {
         'range': 'rangeConfig',
         'interval': 'intervalConfig',
+        'extract': 'extractConfig',
         'custom': 'customConfig'
     };
 
     if (configMap[method]) {
         document.getElementById(configMap[method]).classList.add('active');
+    }
+
+    // Buton metnini ve ikonunu güncelle
+    const btnTextElement = document.getElementById('btnText');
+    const splitBtnIcon = splitBtn.querySelector('i');
+
+    if (method === 'extract') {
+        splitBtnIcon.className = 'fas fa-file-export';
+        btnTextElement.textContent = ' Sayfaları Birleştir ve İndir';
+    } else {
+        splitBtnIcon.className = 'fas fa-cut';
+        btnTextElement.textContent = ' PDF\'i Böl ve İndir';
     }
 
     // Butonu aktif et
@@ -141,6 +155,31 @@ function updateIntervalPreview() {
     `;
 }
 
+// Extract önizlemesini güncelle
+function updateExtractPreview() {
+    const input = document.getElementById('extractPages').value;
+    const preview = document.getElementById('extractPreview');
+
+    if (!input.trim()) {
+        preview.innerHTML = '';
+        return;
+    }
+
+    const pages = input.split(',').map(p => parseInt(p.trim())).filter(p => p > 0 && p <= pdfDocument.numPages);
+    const sortedPages = [...new Set(pages)].sort((a, b) => a - b);
+
+    if (sortedPages.length === 0) {
+        preview.innerHTML = '<span style="color: #dc3545;">Geçersiz sayfa numaraları!</span>';
+        return;
+    }
+
+    preview.innerHTML = `
+        <strong>Önizleme:</strong><br>
+        <span style="color: #28a745;">✓ ${sortedPages.length} sayfa birleştirilecek:</span><br>
+        ${sortedPages.join(', ')}
+    `;
+}
+
 // Custom önizlemesini güncelle
 function updateCustomPreview() {
     const input = document.getElementById('customPages').value;
@@ -199,6 +238,9 @@ async function splitPDF() {
             case 'interval':
                 splitCount = await splitByInterval();
                 break;
+            case 'extract':
+                splitCount = await extractSelectedPages();
+                break;
             case 'custom':
                 splitCount = await splitByCustomPages();
                 break;
@@ -206,10 +248,17 @@ async function splitPDF() {
 
         // Sonuçları göster
         resultsDiv.style.display = 'block';
-        document.getElementById('resultsText').innerHTML = `
-            ✅ PDF başarıyla bölündü!<br>
-            <strong>${splitCount}</strong> adet PDF dosyası oluşturuldu ve indirildi.
-        `;
+        if (selectedMethod === 'extract') {
+            document.getElementById('resultsText').innerHTML = `
+                ✅ Sayfalar başarıyla birleştirildi!<br>
+                <strong>${splitCount}</strong> sayfa tek PDF'de birleştirildi ve indirildi.
+            `;
+        } else {
+            document.getElementById('resultsText').innerHTML = `
+                ✅ PDF başarıyla bölündü!<br>
+                <strong>${splitCount}</strong> adet PDF dosyası oluşturuldu ve indirildi.
+            `;
+        }
 
     } catch (error) {
         console.error('PDF bölme hatası:', error);
@@ -363,6 +412,40 @@ async function splitByCustomPages() {
     }
 
     return splitCount;
+}
+
+// Belirli sayfaları birleştir
+async function extractSelectedPages() {
+    const input = document.getElementById('extractPages').value;
+
+    if (!input.trim()) {
+        alert('Lütfen birleştirmek istediğiniz sayfa numaralarını girin!');
+        throw new Error('No pages selected');
+    }
+
+    const pages = input.split(',').map(p => parseInt(p.trim())).filter(p => p > 0 && p <= pdfDocument.numPages);
+    const sortedPages = [...new Set(pages)].sort((a, b) => a - b);
+
+    if (sortedPages.length === 0) {
+        alert('Lütfen geçerli sayfa numaraları girin!');
+        throw new Error('Invalid page numbers');
+    }
+
+    // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+    const newPdf = await PDFLib.PDFDocument.create();
+
+    // Seçili sayfaları sırayla birleştir
+    for (const pageNum of sortedPages) {
+        const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageNum - 1]);
+        newPdf.addPage(copiedPage);
+    }
+
+    const pdfBytes = await newPdf.save();
+    downloadPDF(pdfBytes, `secili_sayfalar_${sortedPages.join('_')}.pdf`);
+
+    return sortedPages.length;
 }
 
 // PDF'i indir

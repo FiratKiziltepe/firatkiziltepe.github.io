@@ -172,6 +172,19 @@
                 </div>
             </div>
 
+            <div class="split-option" onclick="selectOption('extract')">
+                <div class="option-content">
+                    <input type="radio" name="splitMethod" value="extract" id="extractRadio">
+                    <div class="option-icon">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <div class="option-details">
+                        <h3>Belirli Sayfaları Birleştir</h3>
+                        <p>Belirtilen sayfaları tek PDF'de birleştir (örn: 1,5,10)</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="split-option" onclick="selectOption('custom')">
                 <div class="option-content">
                     <input type="radio" name="splitMethod" value="custom" id="customRadio">
@@ -205,6 +218,15 @@
                 <div class="preview-info" id="intervalPreview"></div>
             </div>
 
+            <div id="extractConfig" class="split-config">
+                <div class="input-group">
+                    <label for="extractPages">Birleştirilecek Sayfa Numaraları</label>
+                    <input type="text" id="extractPages" placeholder="Örn: 1, 5, 10 (Bu sayfalar tek PDF'de birleştirilecek)">
+                    <small style="color: #666;">Virgülle ayırarak sayfa numaralarını girin</small>
+                </div>
+                <div class="preview-info" id="extractPreview"></div>
+            </div>
+
             <div id="customConfig" class="split-config">
                 <div class="input-group">
                     <label for="customPages">Bölme Noktaları (Sayfa Numaraları)</label>
@@ -216,7 +238,7 @@
 
             <div class="action-buttons">
                 <button class="btn btn-success" id="splitBtn" onclick="splitPDF()" disabled>
-                    <i class="fas fa-cut"></i> PDF'i Böl ve İndir
+                    <i class="fas fa-cut"></i> <span id="btnText">PDF'i Böl ve İndir</span>
                 </button>
             </div>
         </div>
