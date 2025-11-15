@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Sayfa Yönetimi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .page-item {
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+        }
+
+        .page-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .page-item.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .page-item canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .page-number {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .page-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .page-rotate {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .page-rotate:hover {
+            background: #5568d3;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .selection-info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">PDF Sayfa Yönetimi</div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-arrow-left"></i> Geri</a>
+            <a href="../index.html">Ana Sayfa</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2><i class="fas fa-file-upload"></i> PDF Dosyası Yükle</h2>
+            <p>PDF dosyanızı seçin ve sayfa düzenlemeleri yapın</p>
+
+            <div class="file-input-wrapper">
+                <div class="file-input-button">
+                    <i class="fas fa-file-pdf"></i> PDF Dosyası Seç
+                </div>
+                <input type="file" id="pdfFile" accept=".pdf">
+            </div>
+
+            <div id="fileName" style="margin-top: 1rem; color: #666;"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>PDF yükleniyor ve sayfalar oluşturuluyor...</p>
+        </div>
+
+        <div id="pdfControls" style="display:none;">
+            <div class="selection-info">
+                <strong><i class="fas fa-info-circle"></i> Seçim Bilgisi:</strong>
+                <span id="selectionInfo">Hiç sayfa seçilmedi</span>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="selectAll()">
+                    <i class="fas fa-check-double"></i> Tümünü Seç
+                </button>
+                <button class="btn" onclick="deselectAll()">
+                    <i class="fas fa-times"></i> Seçimi Temizle
+                </button>
+                <button class="btn" onclick="selectRange()">
+                    <i class="fas fa-list-ol"></i> Aralık Seç
+                </button>
+                <button class="btn btn-success" onclick="extractPages()">
+                    <i class="fas fa-file-export"></i> Seçili Sayfaları Kaydet
+                </button>
+                <button class="btn" style="background: #dc3545;" onclick="deletePages()">
+                    <i class="fas fa-trash"></i> Seçili Sayfaları Sil
+                </button>
+                <button class="btn" style="background: #ffc107; color: #000;" onclick="rotateSelected()">
+                    <i class="fas fa-redo"></i> Seçili Sayfaları Döndür
+                </button>
+                <button class="btn" style="background: #28a745;" onclick="downloadAll()">
+                    <i class="fas fa-download"></i> Tüm PDF'i İndir
+                </button>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>İpuçları:</strong>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li>Sayfaları seçmek için üzerlerine tıklayın</li>
+                    <li>"Seçili Sayfaları Kaydet" ile seçili sayfalardan yeni PDF oluşturun</li>
+                    <li>"Seçili Sayfaları Sil" ile seçili sayfalar hariç yeni PDF oluşturun</li>
+                    <li>Sayfa sağ üst köşesindeki <i class="fas fa-redo"></i> ile tek sayfa döndürün</li>
+                </ul>
+            </div>
+
+            <h3><i class="fas fa-file-pdf"></i> PDF Sayfaları (<span id="pageCount">0</span> sayfa)</h3>
+            <div class="page-grid" id="pageGrid"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="pdf-page-manager.js"></script>
+</body>
+</html>
