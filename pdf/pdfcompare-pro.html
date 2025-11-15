@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profesyonel PDF Karşılaştırma</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="pdfcompare-pro.css">
+</head>
+<body>
+    <!-- Top Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-section toolbar-left">
+            <button class="btn-back" onclick="window.location.href='index.html'" title="Geri">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="toolbar-title">
+                <i class="fas fa-balance-scale"></i>
+                Profesyonel PDF Karşılaştırma
+            </h1>
+        </div>
+
+        <div class="toolbar-section toolbar-center">
+            <!-- File Upload Areas -->
+            <div class="upload-container">
+                <div class="upload-box" id="uploadBox1">
+                    <input type="file" id="fileInput1" accept=".pdf" hidden>
+                    <div class="upload-content">
+                        <i class="fas fa-file-pdf"></i>
+                        <p class="upload-label">PDF 1</p>
+                        <p class="upload-hint">Tıklayın veya sürükleyin</p>
+                    </div>
+                    <div class="file-info" id="fileInfo1" style="display: none;">
+                        <span class="file-name"></span>
+                        <button class="btn-remove" title="Kaldır">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-swap" id="swapBtn" title="PDF'leri Değiştir" disabled>
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+
+                <div class="upload-box" id="uploadBox2">
+                    <input type="file" id="fileInput2" accept=".pdf" hidden>
+                    <div class="upload-content">
+                        <i class="fas fa-file-pdf"></i>
+                        <p class="upload-label">PDF 2</p>
+                        <p class="upload-hint">Tıklayın veya sürükleyin</p>
+                    </div>
+                    <div class="file-info" id="fileInfo2" style="display: none;">
+                        <span class="file-name"></span>
+                        <button class="btn-remove" title="Kaldır">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary btn-compare" id="compareBtn" disabled>
+                <i class="fas fa-play"></i>
+                Karşılaştır
+            </button>
+        </div>
+
+        <div class="toolbar-section toolbar-right">
+            <button class="btn-icon" id="settingsBtn" title="Ayarlar">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Control Bar -->
+    <div class="control-bar" id="controlBar" style="display: none;">
+        <div class="control-group">
+            <label>Görünüm:</label>
+            <div class="btn-group">
+                <button class="btn-control active" data-view="sideBySide" title="Yan Yana">
+                    <i class="fas fa-columns"></i>
+                </button>
+                <button class="btn-control" data-view="overlay" title="Üst Üste">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <button class="btn-control" data-view="single" title="Tek">
+                    <i class="fas fa-file"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Zoom:</label>
+            <div class="btn-group">
+                <button class="btn-control" id="zoomOut" title="Uzaklaştır">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <select class="zoom-select" id="zoomSelect">
+                    <option value="0.5">50%</option>
+                    <option value="0.75">75%</option>
+                    <option value="1" selected>100%</option>
+                    <option value="1.25">125%</option>
+                    <option value="1.5">150%</option>
+                    <option value="2">200%</option>
+                    <option value="fit-width">Genişliğe Sığdır</option>
+                    <option value="fit-page">Sayfaya Sığdır</option>
+                </select>
+                <button class="btn-control" id="zoomIn" title="Yakınlaştır">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Sayfa:</label>
+            <div class="btn-group">
+                <button class="btn-control" id="prevPage" title="Önceki Sayfa">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="page-info" id="pageInfo">1 / 1</span>
+                <button class="btn-control" id="nextPage" title="Sonraki Sayfa">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="syncScroll" checked>
+                <i class="fas fa-link"></i>
+                Senkronize Kaydırma
+            </label>
+        </div>
+
+        <div class="control-group">
+            <button class="btn-control" id="toggleChanges" title="Değişiklikleri Göster/Gizle">
+                <i class="fas fa-highlighter"></i>
+                Değişiklikleri Göster
+            </button>
+        </div>
+
+        <div class="control-group">
+            <button class="btn-control" id="toggleThumbnails" title="Küçük Resimleri Göster/Gizle">
+                <i class="fas fa-th"></i>
+                Küçük Resimler
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Thumbnails Panel -->
+        <div class="thumbnails-panel" id="thumbnailsPanel" style="display: none;">
+            <div class="panel-header">
+                <h3>Küçük Resimler</h3>
+                <button class="btn-close" id="closeThumbnails">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="thumbnails-container">
+                <div class="thumbnail-list" id="thumbnails1"></div>
+                <div class="thumbnail-divider"></div>
+                <div class="thumbnail-list" id="thumbnails2"></div>
+            </div>
+        </div>
+
+        <!-- PDF Viewers Container -->
+        <div class="viewers-container" id="viewersContainer">
+            <!-- Welcome Screen -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-content">
+                    <i class="fas fa-balance-scale"></i>
+                    <h2>Profesyonel PDF Karşılaştırma</h2>
+                    <p>İki PDF dosyasını yan yana karşılaştırın ve farklılıkları tespit edin</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Yan yana görünüm</li>
+                        <li><i class="fas fa-check"></i> Senkronize kaydırma</li>
+                        <li><i class="fas fa-check"></i> Değişiklik vurgulama</li>
+                        <li><i class="fas fa-check"></i> Metin ve görsel karşılaştırma</li>
+                        <li><i class="fas fa-check"></i> Detaylı karşılaştırma raporu</li>
+                    </ul>
+                    <p class="upload-instruction">Başlamak için yukarıdan iki PDF dosyası yükleyin</p>
+                </div>
+            </div>
+
+            <!-- Side by Side View -->
+            <div class="side-by-side-view" id="sideBySideView" style="display: none;">
+                <div class="pdf-viewer" id="viewer1">
+                    <div class="viewer-header">
+                        <h3>PDF 1</h3>
+                        <div class="viewer-info" id="viewerInfo1"></div>
+                    </div>
+                    <div class="viewer-content">
+                        <canvas id="canvas1"></canvas>
+                        <div class="changes-overlay" id="overlay1"></div>
+                    </div>
+                </div>
+
+                <div class="divider" id="divider"></div>
+
+                <div class="pdf-viewer" id="viewer2">
+                    <div class="viewer-header">
+                        <h3>PDF 2</h3>
+                        <div class="viewer-info" id="viewerInfo2"></div>
+                    </div>
+                    <div class="viewer-content">
+                        <canvas id="canvas2"></canvas>
+                        <div class="changes-overlay" id="overlay2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overlay View -->
+            <div class="overlay-view" id="overlayView" style="display: none;">
+                <div class="overlay-container">
+                    <canvas id="canvasOverlay1"></canvas>
+                    <canvas id="canvasOverlay2"></canvas>
+                </div>
+                <div class="overlay-controls">
+                    <label>Opaklık:</label>
+                    <input type="range" id="opacitySlider" min="0" max="100" value="50">
+                    <span id="opacityValue">50%</span>
+                </div>
+            </div>
+
+            <!-- Single View -->
+            <div class="single-view" id="singleView" style="display: none;">
+                <div class="single-tabs">
+                    <button class="tab-btn active" data-pdf="1">PDF 1</button>
+                    <button class="tab-btn" data-pdf="2">PDF 2</button>
+                </div>
+                <div class="single-container">
+                    <canvas id="canvasSingle"></canvas>
+                    <div class="changes-overlay" id="overlaySingle"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Changes Panel -->
+        <div class="changes-panel" id="changesPanel" style="display: none;">
+            <div class="panel-header">
+                <h3>Değişiklikler</h3>
+                <button class="btn-close" id="closeChanges">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="changes-summary" id="changesSummary">
+                <div class="summary-item">
+                    <div class="summary-icon added">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="summary-details">
+                        <span class="summary-count" id="addedCount">0</span>
+                        <span class="summary-label">Eklenen</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-icon deleted">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <div class="summary-details">
+                        <span class="summary-count" id="deletedCount">0</span>
+                        <span class="summary-label">Silinen</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-icon modified">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="summary-details">
+                        <span class="summary-count" id="modifiedCount">0</span>
+                        <span class="summary-label">Değiştirilen</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="changes-filters">
+                <label class="filter-checkbox">
+                    <input type="checkbox" class="change-filter" data-type="added" checked>
+                    Eklenen
+                </label>
+                <label class="filter-checkbox">
+                    <input type="checkbox" class="change-filter" data-type="deleted" checked>
+                    Silinen
+                </label>
+                <label class="filter-checkbox">
+                    <input type="checkbox" class="change-filter" data-type="modified" checked>
+                    Değiştirilen
+                </label>
+            </div>
+
+            <div class="changes-list" id="changesList"></div>
+
+            <div class="panel-footer">
+                <button class="btn-primary btn-export" id="exportReportBtn">
+                    <i class="fas fa-file-download"></i>
+                    Rapor İndir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Karşılaştırma Ayarları</h2>
+                <button class="btn-close" id="closeSettings">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <h3>Hassasiyet</h3>
+                    <div class="sensitivity-control">
+                        <input type="range" id="sensitivitySlider" min="1" max="3" value="2">
+                        <div class="sensitivity-labels">
+                            <span>Düşük</span>
+                            <span>Orta</span>
+                            <span>Yüksek</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Yoksayılacak Öğeler</h3>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="ignoreHeaders">
+                        Üstbilgi/Altbilgi
+                    </label>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="ignorePageNumbers" checked>
+                        Sayfa Numaraları
+                    </label>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="ignoreWhitespace" checked>
+                        Boşluklar
+                    </label>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="ignoreCase">
+                        Büyük/Küçük Harf
+                    </label>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Karşılaştırma Türü</h3>
+                    <label class="settings-radio">
+                        <input type="radio" name="compareType" value="both" checked>
+                        Metin ve Görsel
+                    </label>
+                    <label class="settings-radio">
+                        <input type="radio" name="compareType" value="text">
+                        Sadece Metin
+                    </label>
+                    <label class="settings-radio">
+                        <input type="radio" name="compareType" value="visual">
+                        Sadece Görsel
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="resetSettings">Sıfırla</button>
+                <button class="btn-primary" id="saveSettings">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText">İşleniyor...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <button class="btn-secondary" id="cancelBtn">İptal</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="pdfcompare-pro.js"></script>
+</body>
+</html>
