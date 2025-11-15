@@ -47,8 +47,8 @@ const elements = {
     uploadBox2: document.getElementById('uploadBox2'),
     fileInput1: document.getElementById('fileInput1'),
     fileInput2: document.getElementById('fileInput2'),
-    fileName1: document.getElementById('fileName1'),
-    fileName2: document.getElementById('fileName2'),
+    fileInfo1: document.getElementById('fileInfo1'),
+    fileInfo2: document.getElementById('fileInfo2'),
 
     // Toolbar
     compareBtn: document.getElementById('compareBtn'),
@@ -56,29 +56,28 @@ const elements = {
     // Control bar
     zoomIn: document.getElementById('zoomIn'),
     zoomOut: document.getElementById('zoomOut'),
-    zoomFit: document.getElementById('zoomFit'),
-    zoomLevel: document.getElementById('zoomLevel'),
+    zoomSelect: document.getElementById('zoomSelect'),
     prevPage: document.getElementById('prevPage'),
     nextPage: document.getElementById('nextPage'),
-    currentPage: document.getElementById('currentPage'),
-    totalPages: document.getElementById('totalPages'),
+    pageInfo: document.getElementById('pageInfo'),
     syncScrollToggle: document.getElementById('syncScroll'),
-
-    // View modes
-    viewSideBySide: document.getElementById('viewSideBySide'),
-    viewOverlay: document.getElementById('viewOverlay'),
-    viewSingle: document.getElementById('viewSingle'),
+    controlBar: document.getElementById('controlBar'),
 
     // Viewers
     viewer1: document.getElementById('viewer1'),
     viewer2: document.getElementById('viewer2'),
-    pdfCanvas1: document.getElementById('pdfCanvas1'),
-    pdfCanvas2: document.getElementById('pdfCanvas2'),
+    canvas1: document.getElementById('canvas1'),
+    canvas2: document.getElementById('canvas2'),
+    sideBySideView: document.getElementById('sideBySideView'),
+    overlayView: document.getElementById('overlayView'),
+    singleView: document.getElementById('singleView'),
+    welcomeScreen: document.getElementById('welcomeScreen'),
 
     // Panels
-    thumbnailPanel: document.getElementById('thumbnailPanel'),
+    thumbnailsPanel: document.getElementById('thumbnailsPanel'),
     changesPanel: document.getElementById('changesPanel'),
-    thumbnailsList: document.getElementById('thumbnailsList'),
+    thumbnails1: document.getElementById('thumbnails1'),
+    thumbnails2: document.getElementById('thumbnails2'),
     changesList: document.getElementById('changesList'),
 
     // Changes summary
@@ -95,7 +94,14 @@ const elements = {
     settingsBtn: document.getElementById('settingsBtn'),
     settingsModal: document.getElementById('settingsModal'),
     closeSettings: document.getElementById('closeSettings'),
-    saveSettings: document.getElementById('saveSettings')
+    saveSettings: document.getElementById('saveSettings'),
+
+    // Export
+    exportReportBtn: document.getElementById('exportReportBtn'),
+
+    // Toggle buttons
+    toggleThumbnails: document.getElementById('toggleThumbnails'),
+    toggleChanges: document.getElementById('toggleChanges')
 };
 
 // ==================== INITIALIZATION ====================
@@ -119,9 +125,23 @@ function setupEventListeners() {
     elements.compareBtn.addEventListener('click', comparePDFs);
 
     // Zoom controls
-    elements.zoomIn.addEventListener('click', () => setZoom(state.settings.zoomLevel + 25));
-    elements.zoomOut.addEventListener('click', () => setZoom(state.settings.zoomLevel - 25));
-    elements.zoomFit.addEventListener('click', fitToWidth);
+    elements.zoomIn.addEventListener('click', () => {
+        const currentZoom = parseFloat(elements.zoomSelect.value);
+        const newZoom = Math.min(2, currentZoom + 0.25);
+        elements.zoomSelect.value = newZoom;
+        setZoom(newZoom * 100);
+    });
+
+    elements.zoomOut.addEventListener('click', () => {
+        const currentZoom = parseFloat(elements.zoomSelect.value);
+        const newZoom = Math.max(0.5, currentZoom - 0.25);
+        elements.zoomSelect.value = newZoom;
+        setZoom(newZoom * 100);
+    });
+
+    elements.zoomSelect.addEventListener('change', (e) => {
+        setZoom(parseFloat(e.target.value) * 100);
+    });
 
     // Page navigation
     elements.prevPage.addEventListener('click', () => navigatePage(-1));
@@ -133,24 +153,31 @@ function setupEventListeners() {
     });
 
     // Synchronized scrolling
-    elements.viewer1.addEventListener('scroll', () => {
-        if (state.settings.syncScroll) {
-            elements.viewer2.scrollTop = elements.viewer1.scrollTop;
-            elements.viewer2.scrollLeft = elements.viewer1.scrollLeft;
-        }
-    });
+    if (elements.viewer1) {
+        elements.viewer1.addEventListener('scroll', () => {
+            if (state.settings.syncScroll && elements.viewer2) {
+                elements.viewer2.scrollTop = elements.viewer1.scrollTop;
+                elements.viewer2.scrollLeft = elements.viewer1.scrollLeft;
+            }
+        });
+    }
 
-    elements.viewer2.addEventListener('scroll', () => {
-        if (state.settings.syncScroll) {
-            elements.viewer1.scrollTop = elements.viewer2.scrollTop;
-            elements.viewer1.scrollLeft = elements.viewer2.scrollLeft;
-        }
-    });
+    if (elements.viewer2) {
+        elements.viewer2.addEventListener('scroll', () => {
+            if (state.settings.syncScroll && elements.viewer1) {
+                elements.viewer1.scrollTop = elements.viewer2.scrollTop;
+                elements.viewer1.scrollLeft = elements.viewer2.scrollLeft;
+            }
+        });
+    }
 
     // View mode toggles
-    elements.viewSideBySide.addEventListener('click', () => setViewMode('side-by-side'));
-    elements.viewOverlay.addEventListener('click', () => setViewMode('overlay'));
-    elements.viewSingle.addEventListener('click', () => setViewMode('single'));
+    document.querySelectorAll('[data-view]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const viewMode = e.currentTarget.getAttribute('data-view');
+            setViewMode(viewMode);
+        });
+    });
 
     // Settings modal
     elements.settingsBtn.addEventListener('click', () => {
@@ -170,11 +197,17 @@ function setupEventListeners() {
     });
 
     // Panel toggles
-    document.getElementById('toggleThumbnails')?.addEventListener('click', toggleThumbnailsPanel);
-    document.getElementById('toggleChanges')?.addEventListener('click', toggleChangesPanel);
+    if (elements.toggleThumbnails) {
+        elements.toggleThumbnails.addEventListener('click', toggleThumbnailsPanel);
+    }
+    if (elements.toggleChanges) {
+        elements.toggleChanges.addEventListener('click', toggleChangesPanel);
+    }
 
     // Export
-    document.getElementById('exportReport')?.addEventListener('click', exportReport);
+    if (elements.exportReportBtn) {
+        elements.exportReportBtn.addEventListener('click', exportReport);
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -213,7 +246,8 @@ function handleFileSelect(event, pdfNumber) {
 
 async function loadPDFFile(file, pdfNumber) {
     const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-    const fileNameElement = pdfNumber === 1 ? elements.fileName1 : elements.fileName2;
+    const uploadBox = pdfNumber === 1 ? elements.uploadBox1 : elements.uploadBox2;
+    const fileInfo = pdfNumber === 1 ? elements.fileInfo1 : elements.fileInfo2;
 
     showLoading(true, `PDF ${pdfNumber} yükleniyor...`);
 
@@ -224,19 +258,27 @@ async function loadPDFFile(file, pdfNumber) {
         pdf.totalPages = pdf.document.numPages;
         pdf.currentPage = 1;
 
-        fileNameElement.innerHTML = `
-            <i class="fas fa-check-circle" style="color: #28a745;"></i>
-            <strong>${file.name}</strong>
-            <span style="color: #666; margin-left: 10px;">(${pdf.totalPages} sayfa)</span>
-        `;
+        // Hide upload content, show file info
+        const uploadContent = uploadBox.querySelector('.upload-content');
+        if (uploadContent) uploadContent.style.display = 'none';
+
+        fileInfo.style.display = 'flex';
+        const fileNameSpan = fileInfo.querySelector('.file-name');
+        if (fileNameSpan) {
+            fileNameSpan.innerHTML = `
+                <i class="fas fa-check-circle" style="color: #28a745; margin-right: 5px;"></i>
+                <strong>${file.name}</strong>
+                <span style="color: #666; margin-left: 10px;">(${pdf.totalPages} sayfa)</span>
+            `;
+        }
 
         // Enable compare button if both PDFs loaded
         if (state.pdf1.document && state.pdf2.document) {
             elements.compareBtn.disabled = false;
         }
 
-        // Render first page
-        await renderPage(pdfNumber, 1);
+        // Render first page preview (optional)
+        // await renderPage(pdfNumber, 1);
 
     } catch (error) {
         console.error(`PDF ${pdfNumber} yükleme hatası:`, error);
@@ -249,7 +291,7 @@ async function loadPDFFile(file, pdfNumber) {
 // ==================== PDF RENDERING ====================
 async function renderPage(pdfNumber, pageNum) {
     const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-    const canvas = pdfNumber === 1 ? elements.pdfCanvas1 : elements.pdfCanvas2;
+    const canvas = pdfNumber === 1 ? elements.canvas1 : elements.canvas2;
 
     if (!pdf.document || pageNum < 1 || pageNum > pdf.totalPages) return;
 
@@ -404,9 +446,16 @@ async function comparePDFs() {
         updateChangesPanel();
         updatePageInfo();
 
-        // Show panels
-        elements.thumbnailPanel.style.display = 'block';
-        elements.changesPanel.style.display = 'block';
+        // Hide welcome screen, show viewers and panels
+        if (elements.welcomeScreen) elements.welcomeScreen.style.display = 'none';
+        if (elements.sideBySideView) elements.sideBySideView.style.display = 'flex';
+        if (elements.controlBar) elements.controlBar.style.display = 'flex';
+        if (elements.thumbnailsPanel) elements.thumbnailsPanel.style.display = 'block';
+        if (elements.changesPanel) elements.changesPanel.style.display = 'block';
+
+        // Render first pages
+        await renderPage(1, 1);
+        await renderPage(2, 1);
 
     } catch (error) {
         console.error('Karşılaştırma hatası:', error);
@@ -546,20 +595,29 @@ function computeTextDiff() {
 
 // ==================== THUMBNAILS ====================
 async function generateThumbnails() {
-    elements.thumbnailsList.innerHTML = '';
+    if (elements.thumbnails1) elements.thumbnails1.innerHTML = '';
+    if (elements.thumbnails2) elements.thumbnails2.innerHTML = '';
 
-    const maxPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
+    // Generate thumbnails for PDF1
+    for (let pageNum = 1; pageNum <= state.pdf1.totalPages; pageNum++) {
+        const thumbnail = await createThumbnail(pageNum, 1);
+        if (elements.thumbnails1) elements.thumbnails1.appendChild(thumbnail);
+    }
 
-    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-        const thumbnail = await createThumbnail(pageNum);
-        elements.thumbnailsList.appendChild(thumbnail);
+    // Generate thumbnails for PDF2
+    for (let pageNum = 1; pageNum <= state.pdf2.totalPages; pageNum++) {
+        const thumbnail = await createThumbnail(pageNum, 2);
+        if (elements.thumbnails2) elements.thumbnails2.appendChild(thumbnail);
     }
 }
 
-async function createThumbnail(pageNum) {
+async function createThumbnail(pageNum, pdfNumber) {
     const item = document.createElement('div');
     item.className = 'thumbnail-item';
-    if (pageNum === state.pdf1.currentPage) {
+
+    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
+
+    if (pageNum === pdf.currentPage) {
         item.classList.add('active');
     }
 
@@ -567,18 +625,11 @@ async function createThumbnail(pageNum) {
 
     // Create canvas for thumbnail
     const canvas = document.createElement('canvas');
-    const scale = 0.2;
+    const scale = 0.15;
 
-    // Try to render from PDF1, fallback to PDF2
     try {
-        let page = null;
-        if (pageNum <= state.pdf1.totalPages) {
-            page = await state.pdf1.document.getPage(pageNum);
-        } else if (pageNum <= state.pdf2.totalPages) {
-            page = await state.pdf2.document.getPage(pageNum);
-        }
-
-        if (page) {
+        if (pdf.document && pageNum <= pdf.totalPages) {
+            const page = await pdf.document.getPage(pageNum);
             const viewport = page.getViewport({ scale });
             canvas.height = viewport.height;
             canvas.width = viewport.width;
@@ -589,7 +640,7 @@ async function createThumbnail(pageNum) {
             }).promise;
         }
     } catch (error) {
-        console.error(`Thumbnail ${pageNum} hatası:`, error);
+        console.error(`Thumbnail PDF${pdfNumber} sayfa ${pageNum} hatası:`, error);
     }
 
     // Add change indicator
@@ -600,15 +651,18 @@ async function createThumbnail(pageNum) {
     if (hasChanges) {
         const indicator = document.createElement('div');
         indicator.className = 'change-indicator';
+        indicator.style.cssText = 'position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; background: #ff4444; border-radius: 50%;';
         item.appendChild(indicator);
     }
 
     const pageLabel = document.createElement('div');
     pageLabel.className = 'thumbnail-label';
-    pageLabel.textContent = `Sayfa ${pageNum}`;
+    pageLabel.textContent = `${pageNum}`;
+    pageLabel.style.cssText = 'text-align: center; padding: 5px; font-size: 12px;';
 
     item.appendChild(canvas);
     item.appendChild(pageLabel);
+    item.style.cssText = 'position: relative; cursor: pointer; margin: 5px; border: 2px solid #ddd; border-radius: 4px;';
 
     return item;
 }
@@ -727,23 +781,31 @@ function updatePageInfo() {
     const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
     const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
 
-    elements.currentPage.textContent = currentPage;
-    elements.totalPages.textContent = totalPages;
+    if (elements.pageInfo) {
+        elements.pageInfo.textContent = `${currentPage} / ${totalPages}`;
+    }
 
-    elements.prevPage.disabled = currentPage <= 1;
-    elements.nextPage.disabled = currentPage >= totalPages;
+    if (elements.prevPage) {
+        elements.prevPage.disabled = currentPage <= 1;
+    }
+    if (elements.nextPage) {
+        elements.nextPage.disabled = currentPage >= totalPages;
+    }
 }
 
 // ==================== ZOOM ====================
 function setZoom(level) {
     level = Math.max(50, Math.min(200, level));
     state.settings.zoomLevel = level;
-    elements.zoomLevel.textContent = `${level}%`;
 
     // Re-render current pages
     const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
-    renderPage(1, currentPage);
-    renderPage(2, currentPage);
+    if (state.pdf1.document && currentPage <= state.pdf1.totalPages) {
+        renderPage(1, currentPage);
+    }
+    if (state.pdf2.document && currentPage <= state.pdf2.totalPages) {
+        renderPage(2, currentPage);
+    }
 }
 
 async function fitToWidth() {
@@ -760,55 +822,70 @@ function setViewMode(mode) {
     state.settings.viewMode = mode;
 
     // Update button states
-    document.querySelectorAll('.view-toggle').forEach(btn => {
+    document.querySelectorAll('[data-view]').forEach(btn => {
         btn.classList.remove('active');
+        if (btn.getAttribute('data-view') === mode) {
+            btn.classList.add('active');
+        }
     });
 
-    if (mode === 'side-by-side') {
-        elements.viewSideBySide.classList.add('active');
-        document.querySelector('.viewer-container').className = 'viewer-container side-by-side-mode';
+    // Hide all views
+    if (elements.sideBySideView) elements.sideBySideView.style.display = 'none';
+    if (elements.overlayView) elements.overlayView.style.display = 'none';
+    if (elements.singleView) elements.singleView.style.display = 'none';
+
+    // Show selected view
+    if (mode === 'sideBySide') {
+        if (elements.sideBySideView) elements.sideBySideView.style.display = 'flex';
     } else if (mode === 'overlay') {
-        elements.viewOverlay.classList.add('active');
-        document.querySelector('.viewer-container').className = 'viewer-container overlay-mode';
-        elements.viewer2.style.opacity = '0.5';
+        if (elements.overlayView) elements.overlayView.style.display = 'flex';
     } else if (mode === 'single') {
-        elements.viewSingle.classList.add('active');
-        document.querySelector('.viewer-container').className = 'viewer-container single-mode';
+        if (elements.singleView) elements.singleView.style.display = 'flex';
     }
 }
 
 // ==================== PANELS ====================
 function toggleThumbnailsPanel() {
-    const panel = elements.thumbnailPanel;
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-    } else {
-        panel.style.display = 'none';
+    const panel = elements.thumbnailsPanel;
+    if (panel) {
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
     }
 }
 
 function toggleChangesPanel() {
     const panel = elements.changesPanel;
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-    } else {
-        panel.style.display = 'none';
+    if (panel) {
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
     }
 }
 
 // ==================== SETTINGS ====================
 function loadSettingsToModal() {
-    document.getElementById('settingIgnoreWhitespace').checked = state.settings.ignoreWhitespace;
-    document.getElementById('settingIgnoreCase').checked = state.settings.ignoreCase;
-    document.getElementById('settingHighlightChanges').checked = state.settings.highlightChanges;
+    const ignoreWhitespace = document.getElementById('ignoreWhitespace');
+    const ignoreCase = document.getElementById('ignoreCase');
+
+    if (ignoreWhitespace) ignoreWhitespace.checked = state.settings.ignoreWhitespace;
+    if (ignoreCase) ignoreCase.checked = state.settings.ignoreCase;
 }
 
 function saveSettingsFromModal() {
-    state.settings.ignoreWhitespace = document.getElementById('settingIgnoreWhitespace').checked;
-    state.settings.ignoreCase = document.getElementById('settingIgnoreCase').checked;
-    state.settings.highlightChanges = document.getElementById('settingHighlightChanges').checked;
+    const ignoreWhitespace = document.getElementById('ignoreWhitespace');
+    const ignoreCase = document.getElementById('ignoreCase');
 
-    elements.settingsModal.classList.remove('active');
+    if (ignoreWhitespace) state.settings.ignoreWhitespace = ignoreWhitespace.checked;
+    if (ignoreCase) state.settings.ignoreCase = ignoreCase.checked;
+
+    if (elements.settingsModal) {
+        elements.settingsModal.classList.remove('active');
+    }
 
     // Re-compare if already compared
     if (state.comparison.textDiff.length > 0) {
@@ -946,10 +1023,9 @@ function updateProgress(percent) {
 
 function updateUI() {
     // Initial UI state
-    elements.compareBtn.disabled = true;
-    elements.syncScrollToggle.checked = state.settings.syncScroll;
-    elements.zoomLevel.textContent = `${state.settings.zoomLevel}%`;
-    setViewMode('side-by-side');
+    if (elements.compareBtn) elements.compareBtn.disabled = true;
+    if (elements.syncScrollToggle) elements.syncScrollToggle.checked = state.settings.syncScroll;
+    if (elements.zoomSelect) elements.zoomSelect.value = state.settings.zoomLevel / 100;
 }
 
 function escapeHtml(text) {
