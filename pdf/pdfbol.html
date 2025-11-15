@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Bölme</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .split-option {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .split-option:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .split-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .split-option input[type="radio"] {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .option-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-right: 1.5rem;
+        }
+
+        .option-details h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-details p {
+            color: #666;
+            margin: 0;
+        }
+
+        .split-config {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .split-config.active {
+            display: block;
+        }
+
+        .input-group {
+            margin: 1rem 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .range-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .preview-info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">PDF Bölme</div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-arrow-left"></i> Geri</a>
+            <a href="../index.html">Ana Sayfa</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2><i class="fas fa-file-upload"></i> PDF Dosyası Yükle</h2>
+            <p>Bölmek istediğiniz PDF dosyasını seçin</p>
+
+            <div class="file-input-wrapper">
+                <div class="file-input-button">
+                    <i class="fas fa-file-pdf"></i> PDF Dosyası Seç
+                </div>
+                <input type="file" id="pdfFile" accept=".pdf">
+            </div>
+
+            <div id="fileName" style="margin-top: 1rem; color: #666;"></div>
+            <div id="pdfInfo" style="margin-top: 0.5rem; color: #667eea; font-weight: bold;"></div>
+        </div>
+
+        <div id="splitOptions" style="display:none;">
+            <h3><i class="fas fa-cog"></i> Bölme Yöntemini Seçin</h3>
+
+            <div class="split-option" onclick="selectOption('single')">
+                <div class="option-content">
+                    <input type="radio" name="splitMethod" value="single" id="singleRadio">
+                    <div class="option-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="option-details">
+                        <h3>Her Sayfa Ayrı PDF</h3>
+                        <p>PDF'deki her sayfayı ayrı bir PDF dosyası olarak kaydet</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-option" onclick="selectOption('range')">
+                <div class="option-content">
+                    <input type="radio" name="splitMethod" value="range" id="rangeRadio">
+                    <div class="option-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <div class="option-details">
+                        <h3>Sayfa Aralığına Göre Böl</h3>
+                        <p>Belirtilen sayfa aralıklarını ayrı PDF'ler olarak kaydet</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-option" onclick="selectOption('interval')">
+                <div class="option-content">
+                    <input type="radio" name="splitMethod" value="interval" id="intervalRadio">
+                    <div class="option-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="option-details">
+                        <h3>Belirli Sayfa Sayısına Göre Böl</h3>
+                        <p>Her X sayfada bir yeni PDF oluştur (örn: her 5 sayfa)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-option" onclick="selectOption('custom')">
+                <div class="option-content">
+                    <input type="radio" name="splitMethod" value="custom" id="customRadio">
+                    <div class="option-icon">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <div class="option-details">
+                        <h3>Özel Sayfa Numaralarına Göre Böl</h3>
+                        <p>Belirtilen sayfa numaralarından PDF'i böl</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Konfigürasyon panelleri -->
+            <div id="rangeConfig" class="split-config">
+                <h4>Sayfa Aralıkları</h4>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Her aralık için başlangıç ve bitiş sayfasını girin. Birden fazla aralık ekleyebilirsiniz.
+                </p>
+                <div id="rangeInputs"></div>
+                <button class="btn btn-small" onclick="addRangeInput()">
+                    <i class="fas fa-plus"></i> Yeni Aralık Ekle
+                </button>
+            </div>
+
+            <div id="intervalConfig" class="split-config">
+                <div class="input-group">
+                    <label for="pageInterval">Her Kaç Sayfada Böl?</label>
+                    <input type="number" id="pageInterval" min="1" placeholder="Örn: 5 (her 5 sayfada bir yeni PDF)">
+                </div>
+                <div class="preview-info" id="intervalPreview"></div>
+            </div>
+
+            <div id="customConfig" class="split-config">
+                <div class="input-group">
+                    <label for="customPages">Bölme Noktaları (Sayfa Numaraları)</label>
+                    <input type="text" id="customPages" placeholder="Örn: 3, 7, 10 (Bu sayfalarda PDF bölünecek)">
+                    <small style="color: #666;">Virgülle ayırarak sayfa numaralarını girin</small>
+                </div>
+                <div class="preview-info" id="customPreview"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-success" id="splitBtn" onclick="splitPDF()" disabled>
+                    <i class="fas fa-cut"></i> PDF'i Böl ve İndir
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>PDF bölünüyor, lütfen bekleyin...</p>
+        </div>
+
+        <div id="results" style="display:none;">
+            <div class="stats-section">
+                <h3><i class="fas fa-check-circle" style="color: green;"></i> Bölme İşlemi Tamamlandı!</h3>
+                <p id="resultsText"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="pdf-split.js"></script>
+</body>
+</html>
