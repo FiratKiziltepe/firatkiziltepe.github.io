@@ -3,7 +3,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 // Global değişkenler
 let pdfDocument = null;
-let pdfBytes = null;
+let pdfFile = null; // File nesnesini sakla, her kullanımda yeniden okuyacağız
 let selectedMethod = null;
 let rangeCounter = 0;
 
@@ -33,8 +33,10 @@ async function handleFileSelect(event) {
     resultsDiv.style.display = 'none';
 
     try {
-        pdfBytes = await file.arrayBuffer();
-        pdfDocument = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+        // File nesnesini sakla (detached ArrayBuffer sorununu önler)
+        pdfFile = file;
+        const arrayBuffer = await file.arrayBuffer();
+        pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
         pdfInfoDiv.innerHTML = `📄 ${pdfDocument.numPages} sayfa`;
 
@@ -219,7 +221,9 @@ async function splitPDF() {
 
 // Her sayfayı ayrı PDF olarak böl
 async function splitIntoSinglePages() {
-    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
     const totalPages = pdfDoc.getPageCount();
 
     for (let i = 0; i < totalPages; i++) {
@@ -259,7 +263,9 @@ async function splitByRanges() {
         throw new Error('No valid ranges');
     }
 
-    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
 
     for (let i = 0; i < ranges.length; i++) {
         const { start, end } = ranges[i];
@@ -288,7 +294,9 @@ async function splitByInterval() {
         throw new Error('Invalid interval');
     }
 
-    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
     const totalPages = pdfDoc.getPageCount();
     let splitCount = 0;
 
@@ -329,7 +337,9 @@ async function splitByCustomPages() {
         throw new Error('Invalid split points');
     }
 
-    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
     let splitCount = 0;
 
     for (let i = 0; i < splitPoints.length - 1; i++) {

@@ -3,7 +3,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 // Global değişkenler
 let pdfDocument = null;
-let pdfBytes = null;
+let pdfFile = null; // File nesnesini sakla, her kullanımda yeniden okuyacağız
 let selectedPages = new Set();
 let pageRotations = {}; // Sayfa dönüş açılarını sakla
 
@@ -31,11 +31,12 @@ async function handleFileSelect(event) {
     pageRotations = {};
 
     try {
-        // PDF'i byte array olarak oku
-        pdfBytes = await file.arrayBuffer();
+        // File nesnesini sakla (detached ArrayBuffer sorununu önler)
+        pdfFile = file;
+        const arrayBuffer = await file.arrayBuffer();
 
         // PDF.js ile yükle (önizleme için)
-        pdfDocument = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+        pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
         // Sayfaları göster
         await renderAllPages();
@@ -233,7 +234,9 @@ async function extractPages() {
     loadingDiv.classList.add('active');
 
     try {
-        const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+        // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+        const arrayBuffer = await pdfFile.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
         const newPdfDoc = await PDFLib.PDFDocument.create();
 
         // Seçili sayfaları sıraya göre kopyala
@@ -277,7 +280,9 @@ async function deletePages() {
     loadingDiv.classList.add('active');
 
     try {
-        const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+        // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+        const arrayBuffer = await pdfFile.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
         const newPdfDoc = await PDFLib.PDFDocument.create();
 
         // Seçilmeyen sayfaları kopyala
@@ -310,7 +315,9 @@ async function downloadAll() {
     loadingDiv.classList.add('active');
 
     try {
-        const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+        // Her seferinde File nesnesinden yeni ArrayBuffer oku (detached ArrayBuffer sorununu önler)
+        const arrayBuffer = await pdfFile.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
 
         // Dönüş açıları varsa uygula
         if (Object.keys(pageRotations).length > 0) {
@@ -330,7 +337,8 @@ async function downloadAll() {
             downloadPDF(newPdfBytes, 'duzenlenmis_pdf.pdf');
         } else {
             // Hiç değişiklik yoksa orijinali indir
-            downloadPDF(pdfBytes, 'pdf_kopyasi.pdf');
+            const originalBytes = await pdfDoc.save();
+            downloadPDF(originalBytes, 'pdf_kopyasi.pdf');
         }
 
     } catch (error) {
