@@ -1117,7 +1117,7 @@
                         </div>
 
                         <div class="checkbox-group">
-                            <input type="checkbox" id="microphoneAudio">
+                            <input type="checkbox" id="microphoneAudio" checked>
                             <label for="microphoneAudio">Mikrofon Kaydet</label>
                         </div>
 
@@ -1691,9 +1691,19 @@
         // Area Selection
         let selectedArea = null;
 
-        async function showAreaSelector(displayStream) {
+        async function showAreaSelector(displayStream, videoSettings) {
             return new Promise((resolve) => {
-                // Create fullscreen overlay
+                // Get video dimensions and screen dimensions
+                const videoWidth = videoSettings.width || 1920;
+                const videoHeight = videoSettings.height || 1080;
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+
+                // Calculate scale factor
+                const scaleX = videoWidth / screenWidth;
+                const scaleY = videoHeight / screenHeight;
+
+                // Create fullscreen overlay with video preview
                 const overlay = document.createElement('div');
                 overlay.style.position = 'fixed';
                 overlay.style.top = '0';
@@ -1704,18 +1714,33 @@
                 overlay.style.zIndex = '10000';
                 overlay.style.cursor = 'crosshair';
 
+                // Create video preview element
+                const previewVideo = document.createElement('video');
+                previewVideo.srcObject = displayStream;
+                previewVideo.style.position = 'absolute';
+                previewVideo.style.top = '0';
+                previewVideo.style.left = '0';
+                previewVideo.style.width = '100%';
+                previewVideo.style.height = '100%';
+                previewVideo.style.objectFit = 'contain';
+                previewVideo.style.opacity = '0.7';
+                previewVideo.muted = true;
+                previewVideo.play();
+                overlay.appendChild(previewVideo);
+
                 const instruction = document.createElement('div');
-                instruction.textContent = 'Kaydetmek istediğiniz alanı seçmek için fareyle dikdörtgen çizin';
+                instruction.textContent = 'Kaydetmek istediğiniz alanı seçmek için fareyle dikdörtgen çizin (ESC ile iptal)';
                 instruction.style.position = 'absolute';
                 instruction.style.top = '20px';
                 instruction.style.left = '50%';
                 instruction.style.transform = 'translateX(-50%)';
                 instruction.style.color = 'white';
-                instruction.style.fontSize = '20px';
+                instruction.style.fontSize = '18px';
                 instruction.style.fontWeight = 'bold';
-                instruction.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                instruction.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
                 instruction.style.padding = '15px 30px';
                 instruction.style.borderRadius = '8px';
+                instruction.style.zIndex = '10001';
                 overlay.appendChild(instruction);
 
                 let selectionBox = null;
@@ -1734,9 +1759,10 @@
                     selectionBox = document.createElement('div');
                     selectionBox.style.position = 'absolute';
                     selectionBox.style.border = '3px dashed #2196F3';
-                    selectionBox.style.backgroundColor = 'rgba(33, 150, 243, 0.2)';
+                    selectionBox.style.backgroundColor = 'rgba(33, 150, 243, 0.3)';
                     selectionBox.style.left = startX + 'px';
                     selectionBox.style.top = startY + 'px';
+                    selectionBox.style.zIndex = '10001';
                     overlay.appendChild(selectionBox);
                 });
 
@@ -1773,13 +1799,27 @@
                     const currentX = e.clientX;
                     const currentY = e.clientY;
 
-                    const x = Math.min(startX, currentX);
-                    const y = Math.min(startY, currentY);
-                    const width = Math.abs(currentX - startX);
-                    const height = Math.abs(currentY - startY);
+                    const screenX = Math.min(startX, currentX);
+                    const screenY = Math.min(startY, currentY);
+                    const screenW = Math.abs(currentX - startX);
+                    const screenH = Math.abs(currentY - startY);
 
-                    if (width > 50 && height > 50) {
-                        selectedArea = { x, y, width, height };
+                    if (screenW > 50 && screenH > 50) {
+                        // Convert screen coordinates to video coordinates
+                        const videoX = Math.round(screenX * scaleX);
+                        const videoY = Math.round(screenY * scaleY);
+                        const videoW = Math.round(screenW * scaleX);
+                        const videoH = Math.round(screenH * scaleY);
+
+                        // Store video coordinates
+                        selectedArea = {
+                            x: videoX,
+                            y: videoY,
+                            width: videoW,
+                            height: videoH
+                        };
+
+                        previewVideo.srcObject = null;
                         overlay.remove();
                         resolve(selectedArea);
                     } else {
@@ -1794,6 +1834,7 @@
                 // ESC to cancel
                 const escHandler = (e) => {
                     if (e.key === 'Escape') {
+                        previewVideo.srcObject = null;
                         overlay.remove();
                         document.removeEventListener('keydown', escHandler);
                         resolve(null);
@@ -1829,9 +1870,13 @@
 
                 const displayStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
 
+                // Get video settings
+                const videoTrack = displayStream.getVideoTracks()[0];
+                const videoSettings = videoTrack.getSettings();
+
                 // If area mode, show area selector
                 if (mode === 'area') {
-                    const area = await showAreaSelector(displayStream);
+                    const area = await showAreaSelector(displayStream, videoSettings);
                     if (!area) {
                         // User cancelled
                         displayStream.getTracks().forEach(track => track.stop());
@@ -1854,16 +1899,13 @@
                     compositeCanvas = document.createElement('canvas');
                     compositeContext = compositeCanvas.getContext('2d');
 
-                    const videoTrack = displayStream.getVideoTracks()[0];
-                    const settings = videoTrack.getSettings();
-
                     // Set canvas size based on area selection or full screen
                     if (mode === 'area' && selectedArea) {
                         compositeCanvas.width = selectedArea.width;
                         compositeCanvas.height = selectedArea.height;
                     } else {
-                        compositeCanvas.width = settings.width || 1920;
-                        compositeCanvas.height = settings.height || 1080;
+                        compositeCanvas.width = videoSettings.width || 1920;
+                        compositeCanvas.height = videoSettings.height || 1080;
                     }
 
                     // Create video element for display stream
@@ -1911,16 +1953,19 @@
                         }
                     }
 
+                    // Store selected area locally to avoid issues with closure
+                    const cropArea = mode === 'area' && selectedArea ? { ...selectedArea } : null;
+
                     // Composite the streams
                     function drawComposite() {
                         if (!compositeCanvas) return;
 
                         // Draw display stream (crop to selected area if needed)
-                        if (mode === 'area' && selectedArea) {
+                        if (cropArea) {
                             // Crop the video to the selected area
                             compositeContext.drawImage(
                                 displayVideo,
-                                selectedArea.x, selectedArea.y, selectedArea.width, selectedArea.height,
+                                cropArea.x, cropArea.y, cropArea.width, cropArea.height,
                                 0, 0, compositeCanvas.width, compositeCanvas.height
                             );
                         } else {
