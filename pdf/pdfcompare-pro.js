@@ -859,10 +859,13 @@ function createHighlightCanvas(pdfCanvas, overlayContainer) {
     highlightCanvas.width = pdfCanvas.width;
     highlightCanvas.height = pdfCanvas.height;
     highlightCanvas.style.cssText = `
-        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         pointer-events: auto;
         cursor: pointer;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     `;
 
     overlayContainer.appendChild(highlightCanvas);
