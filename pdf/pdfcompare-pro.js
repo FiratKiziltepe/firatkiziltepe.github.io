@@ -9,6 +9,7 @@ const state = {
         currentPage: 1,
         totalPages: 0,
         text: [],
+        textPositions: [], // Text with coordinates for highlighting
         canvases: []
     },
     pdf2: {
@@ -17,12 +18,14 @@ const state = {
         currentPage: 1,
         totalPages: 0,
         text: [],
+        textPositions: [], // Text with coordinates for highlighting
         canvases: []
     },
     comparison: {
         changes: [],
         textDiff: [],
-        visualDiff: []
+        visualDiff: [],
+        highlights: { pdf1: [], pdf2: [] } // Mapped highlights with coordinates
     },
     settings: {
         viewMode: 'side-by-side', // 'side-by-side', 'overlay', 'single'
@@ -68,6 +71,8 @@ const elements = {
     viewer2: document.getElementById('viewer2'),
     canvas1: document.getElementById('canvas1'),
     canvas2: document.getElementById('canvas2'),
+    overlay1: document.getElementById('overlay1'),
+    overlay2: document.getElementById('overlay2'),
     sideBySideView: document.getElementById('sideBySideView'),
     overlayView: document.getElementById('overlayView'),
     singleView: document.getElementById('singleView'),
@@ -201,7 +206,7 @@ function setupEventListeners() {
         elements.toggleThumbnails.addEventListener('click', toggleThumbnailsPanel);
     }
     if (elements.toggleChanges) {
-        elements.toggleChanges.addEventListener('click', toggleChangesPanel);
+        elements.toggleChanges.addEventListener('click', toggleHighlights);
     }
 
     // Export
@@ -312,6 +317,11 @@ async function renderPage(pdfNumber, pageNum) {
         pdf.currentPage = pageNum;
         updatePageInfo();
 
+        // Render highlights after PDF page is rendered
+        if (state.comparison.highlights) {
+            renderPageHighlights(pdfNumber, pageNum);
+        }
+
     } catch (error) {
         console.error(`Sayfa ${pageNum} render hatası:`, error);
     }
@@ -390,6 +400,174 @@ async function extractTextFromPDF(pdf) {
     }
 
     return fullText;
+}
+
+// ==================== TEXT POSITION EXTRACTION ====================
+// Extract text with position information for highlighting
+async function extractTextWithPositions(pdf) {
+    const allTextPositions = [];
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.0 }); // Use scale 1.0 as base
+        const textContent = await page.getTextContent();
+
+        const pagePositions = [];
+
+        textContent.items.forEach(item => {
+            if (!item.str || item.str.trim() === '') return;
+
+            const tx = item.transform;
+            // Transform coordinates to viewport space
+            pagePositions.push({
+                text: item.str,
+                x: tx[4],
+                y: viewport.height - tx[5], // Flip Y coordinate (PDF coords are bottom-up)
+                width: item.width,
+                height: item.height,
+                transform: tx
+            });
+        });
+
+        allTextPositions.push({
+            pageNum: pageNum,
+            positions: pagePositions
+        });
+    }
+
+    return allTextPositions;
+}
+
+// Map comparison changes to PDF coordinates for highlighting
+function mapChangesToCoordinates(changes, textPositions1, textPositions2) {
+    const highlights = { pdf1: {}, pdf2: {} };
+
+    // Initialize page arrays
+    for (let i = 1; i <= Math.max(textPositions1.length, textPositions2.length); i++) {
+        highlights.pdf1[i] = [];
+        highlights.pdf2[i] = [];
+    }
+
+    // Process modified pages
+    changes.modified.forEach(change => {
+        const pageNum = change.pageNum;
+        const page1Positions = textPositions1.find(p => p.pageNum === pageNum);
+        const page2Positions = textPositions2.find(p => p.pageNum === pageNum);
+
+        if (!page1Positions || !page2Positions) return;
+
+        // Process each diff item
+        change.diff.forEach(diffItem => {
+            if (diffItem.type === 'removed' && diffItem.line1) {
+                // Find text in PDF1
+                const matches = findTextInPositions(diffItem.line1, page1Positions.positions);
+                matches.forEach(match => {
+                    highlights.pdf1[pageNum].push({
+                        type: 'deleted',
+                        x: match.x,
+                        y: match.y,
+                        width: match.width,
+                        height: match.height,
+                        text: diffItem.line1
+                    });
+                });
+            } else if (diffItem.type === 'added' && diffItem.line2) {
+                // Find text in PDF2
+                const matches = findTextInPositions(diffItem.line2, page2Positions.positions);
+                matches.forEach(match => {
+                    highlights.pdf2[pageNum].push({
+                        type: 'added',
+                        x: match.x,
+                        y: match.y,
+                        width: match.width,
+                        height: match.height,
+                        text: diffItem.line2
+                    });
+                });
+            }
+        });
+    });
+
+    // Process added pages
+    changes.added.forEach(change => {
+        const pageNum = change.pageNum;
+        const page2Positions = textPositions2.find(p => p.pageNum === pageNum);
+
+        if (page2Positions) {
+            // Highlight all text on added page
+            page2Positions.positions.forEach(pos => {
+                highlights.pdf2[pageNum].push({
+                    type: 'added',
+                    x: pos.x,
+                    y: pos.y,
+                    width: pos.width,
+                    height: pos.height,
+                    text: pos.text
+                });
+            });
+        }
+    });
+
+    // Process deleted pages
+    changes.deleted.forEach(change => {
+        const pageNum = change.pageNum;
+        const page1Positions = textPositions1.find(p => p.pageNum === pageNum);
+
+        if (page1Positions) {
+            // Highlight all text on deleted page
+            page1Positions.positions.forEach(pos => {
+                highlights.pdf1[pageNum].push({
+                    type: 'deleted',
+                    x: pos.x,
+                    y: pos.y,
+                    width: pos.width,
+                    height: pos.height,
+                    text: pos.text
+                });
+            });
+        }
+    });
+
+    return highlights;
+}
+
+// Find text positions that match a given line of text
+function findTextInPositions(searchText, positions) {
+    const matches = [];
+    const searchNormalized = normalizeText(searchText);
+
+    if (!searchNormalized) return matches;
+
+    // Build a continuous text from positions to find matches
+    let fullText = '';
+    const positionMap = [];
+
+    positions.forEach((pos, idx) => {
+        const startIdx = fullText.length;
+        fullText += pos.text;
+        positionMap.push({
+            startIdx: startIdx,
+            endIdx: fullText.length,
+            position: pos
+        });
+        fullText += ' '; // Add space between text items
+    });
+
+    const fullTextNormalized = normalizeText(fullText);
+    const searchIdx = fullTextNormalized.indexOf(searchNormalized);
+
+    if (searchIdx !== -1) {
+        const searchEndIdx = searchIdx + searchNormalized.length;
+
+        // Find all positions that overlap with the search range
+        positionMap.forEach(mapItem => {
+            if (mapItem.startIdx < searchEndIdx && mapItem.endIdx > searchIdx) {
+                matches.push(mapItem.position);
+            }
+        });
+    }
+
+    return matches;
 }
 
 function normalizeText(text) {
@@ -668,12 +846,266 @@ async function createThumbnail(pageNum, pdfNumber) {
 }
 
 // ==================== CHANGE HIGHLIGHTING ====================
+// Create highlight canvas overlay on top of PDF canvas
+function createHighlightCanvas(pdfCanvas, overlayContainer) {
+    // Clear any existing highlight canvas
+    const existingCanvas = overlayContainer.querySelector('.highlight-canvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
+
+    const highlightCanvas = document.createElement('canvas');
+    highlightCanvas.className = 'highlight-canvas';
+    highlightCanvas.width = pdfCanvas.width;
+    highlightCanvas.height = pdfCanvas.height;
+    highlightCanvas.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: auto;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    `;
+
+    overlayContainer.appendChild(highlightCanvas);
+    return highlightCanvas;
+}
+
+// Create tooltip element
+function createTooltip() {
+    let tooltip = document.getElementById('highlight-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'highlight-tooltip';
+        tooltip.style.cssText = `
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+        document.body.appendChild(tooltip);
+    }
+    return tooltip;
+}
+
+// Add hover interaction to highlight canvas
+function addHighlightInteraction(canvas, highlights, scale) {
+    if (!canvas || !highlights) return;
+
+    const tooltip = createTooltip();
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / scale;
+        const y = (e.clientY - rect.top) / scale;
+
+        // Find highlight under cursor
+        let foundHighlight = null;
+        for (const highlight of highlights) {
+            const padding = 2;
+            if (x >= highlight.x - padding &&
+                x <= highlight.x + highlight.width + padding &&
+                y >= highlight.y - padding &&
+                y <= highlight.y + highlight.height + padding) {
+                foundHighlight = highlight;
+                break;
+            }
+        }
+
+        if (foundHighlight) {
+            // Show tooltip
+            const typeLabel = {
+                'added': 'Eklendi',
+                'deleted': 'Silindi',
+                'modified': 'Değiştirildi'
+            }[foundHighlight.type] || foundHighlight.type;
+
+            const textPreview = foundHighlight.text.length > 100
+                ? foundHighlight.text.substring(0, 100) + '...'
+                : foundHighlight.text;
+
+            tooltip.innerHTML = `
+                <strong style="color: ${
+                    foundHighlight.type === 'added' ? '#66b3ff' :
+                    foundHighlight.type === 'deleted' ? '#ff6666' :
+                    '#ffff66'
+                };">${typeLabel}</strong><br>
+                ${escapeHtml(textPreview)}
+            `;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        } else {
+            tooltip.style.display = 'none';
+        }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+    });
+}
+
+// Draw highlights on canvas
+function drawHighlights(canvas, highlights, scale = 1) {
+    if (!canvas || !highlights) return;
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    highlights.forEach(highlight => {
+        // Set color based on change type
+        switch(highlight.type) {
+            case 'added':
+                ctx.fillStyle = 'rgba(0, 120, 255, 0.3)'; // Blue
+                ctx.strokeStyle = 'rgba(0, 120, 255, 0.6)';
+                break;
+            case 'deleted':
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Red
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
+                break;
+            case 'modified':
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.3)'; // Yellow
+                ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
+                break;
+            default:
+                ctx.fillStyle = 'rgba(128, 128, 128, 0.3)';
+                ctx.strokeStyle = 'rgba(128, 128, 128, 0.6)';
+        }
+
+        // Draw rectangle
+        const x = highlight.x * scale;
+        const y = highlight.y * scale;
+        const width = highlight.width * scale;
+        const height = highlight.height * scale;
+
+        // Add some padding to make highlights more visible
+        const padding = 2;
+
+        ctx.fillRect(
+            x - padding,
+            y - padding,
+            width + padding * 2,
+            height + padding * 2
+        );
+
+        // Draw border
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+            x - padding,
+            y - padding,
+            width + padding * 2,
+            height + padding * 2
+        );
+    });
+}
+
+// Main highlight function - extracts positions and draws highlights
 async function highlightChanges() {
+    if (!state.settings.highlightChanges) {
+        // Clear highlights if disabled
+        clearHighlights();
+        return;
+    }
+
+    showLoading(true, 'Metin pozisyonları çıkarılıyor...');
+
+    try {
+        // Extract text positions from both PDFs
+        state.pdf1.textPositions = await extractTextWithPositions(state.pdf1.document);
+        state.pdf2.textPositions = await extractTextWithPositions(state.pdf2.document);
+
+        // Map changes to coordinates
+        state.comparison.highlights = mapChangesToCoordinates(
+            state.comparison.changes,
+            state.pdf1.textPositions,
+            state.pdf2.textPositions
+        );
+
+        console.log('Highlights mapped:', state.comparison.highlights);
+
+    } catch (error) {
+        console.error('Highlighting error:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Render highlights for a specific page
+function renderPageHighlights(pdfNumber, pageNum) {
     if (!state.settings.highlightChanges) return;
 
-    // This would overlay colored rectangles on the canvas
-    // For now, we'll update the changes panel
-    // Full implementation would require canvas manipulation
+    const canvas = pdfNumber === 1 ? elements.canvas1 : elements.canvas2;
+    const overlayContainer = pdfNumber === 1 ? elements.overlay1 : elements.overlay2;
+
+    if (!canvas || !overlayContainer) return;
+
+    const highlights = state.comparison.highlights[`pdf${pdfNumber}`][pageNum] || [];
+
+    if (highlights.length === 0) {
+        // Clear overlay if no highlights
+        const existingCanvas = overlayContainer.querySelector('.highlight-canvas');
+        if (existingCanvas) {
+            existingCanvas.remove();
+        }
+        return;
+    }
+
+    // Create highlight canvas
+    const highlightCanvas = createHighlightCanvas(canvas, overlayContainer);
+
+    // Get current scale
+    const scale = state.settings.zoomLevel / 100;
+
+    // Draw highlights
+    drawHighlights(highlightCanvas, highlights, scale);
+
+    // Add hover interaction
+    addHighlightInteraction(highlightCanvas, highlights, scale);
+}
+
+// Clear all highlights
+function clearHighlights() {
+    [elements.overlay1, elements.overlay2].forEach(overlay => {
+        if (overlay) {
+            const existingCanvas = overlay.querySelector('.highlight-canvas');
+            if (existingCanvas) {
+                existingCanvas.remove();
+            }
+        }
+    });
+}
+
+// Toggle highlights on/off
+function toggleHighlights() {
+    state.settings.highlightChanges = !state.settings.highlightChanges;
+
+    if (state.settings.highlightChanges) {
+        // Re-render current page highlights
+        const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
+        renderPageHighlights(1, currentPage);
+        renderPageHighlights(2, currentPage);
+    } else {
+        // Clear all highlights
+        clearHighlights();
+    }
+
+    // Update button appearance
+    const toggleBtn = elements.toggleChanges;
+    if (toggleBtn) {
+        if (state.settings.highlightChanges) {
+            toggleBtn.classList.add('active');
+        } else {
+            toggleBtn.classList.remove('active');
+        }
+    }
 }
 
 function updateChangesPanel() {
@@ -1026,6 +1458,11 @@ function updateUI() {
     if (elements.compareBtn) elements.compareBtn.disabled = true;
     if (elements.syncScrollToggle) elements.syncScrollToggle.checked = state.settings.syncScroll;
     if (elements.zoomSelect) elements.zoomSelect.value = state.settings.zoomLevel / 100;
+
+    // Set initial toggle button state for highlights
+    if (elements.toggleChanges && state.settings.highlightChanges) {
+        elements.toggleChanges.classList.add('active');
+    }
 }
 
 function escapeHtml(text) {
