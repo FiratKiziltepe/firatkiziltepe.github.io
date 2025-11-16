@@ -2119,7 +2119,7 @@
 
                 // Show preview
                 const previewVideo = document.getElementById('previewVideo');
-                if (needsComposite && compositeCanvas) {
+                if (compositeCanvas) {
                     previewVideo.srcObject = compositeCanvas.captureStream(30);
                 } else {
                     previewVideo.srcObject = recordingStream;
