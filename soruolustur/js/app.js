@@ -41,7 +41,7 @@ class Application {
 
         // Configuration
         this.config = {
-            model: 'gemini-2.0-flash-exp',
+            model: 'gemini-1.5-flash',
             questionsPerPage: 5,
             batchStrategy: 'page-by-page',
             batchSize: 5

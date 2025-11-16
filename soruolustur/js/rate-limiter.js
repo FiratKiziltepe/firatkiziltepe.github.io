@@ -5,37 +5,32 @@
 
 /**
  * Model Rate Limits (RPM = Requests Per Minute)
+ * Updated to use available Gemini 1.5 models
  */
 export const MODEL_LIMITS = {
-    'gemini-2.5-pro': {
+    'gemini-1.5-pro': {
         rpm: 2,
-        tpm: 125000,
+        tpm: 32000,
         rpd: 50,
         contextWindow: 2000000
     },
-    'gemini-2.5-flash': {
-        rpm: 10,
-        tpm: 250000,
-        rpd: 250,
-        contextWindow: 1000000
-    },
-    'gemini-2.5-flash-lite': {
-        rpm: 15,
-        tpm: 250000,
-        rpd: 1000,
-        contextWindow: 1000000
-    },
-    'gemini-2.0-flash-exp': {
+    'gemini-1.5-flash': {
         rpm: 15,
         tpm: 1000000,
-        rpd: 200,
+        rpd: 1500,
         contextWindow: 1000000
     },
-    'gemini-2.0-flash-lite': {
-        rpm: 30,
-        tpm: 1000000,
-        rpd: 200,
+    'gemini-1.5-flash-8b': {
+        rpm: 15,
+        tpm: 4000000,
+        rpd: 1500,
         contextWindow: 1000000
+    },
+    'gemini-pro': {
+        rpm: 2,
+        tpm: 32000,
+        rpd: 50,
+        contextWindow: 32000
     }
 };
 
@@ -45,7 +40,7 @@ export const MODEL_LIMITS = {
 export class RateLimiter {
     constructor(model) {
         this.model = model;
-        this.limits = MODEL_LIMITS[model] || MODEL_LIMITS['gemini-2.0-flash-exp'];
+        this.limits = MODEL_LIMITS[model] || MODEL_LIMITS['gemini-1.5-flash'];
         this.queue = [];
         this.processing = false;
         this.paused = false;

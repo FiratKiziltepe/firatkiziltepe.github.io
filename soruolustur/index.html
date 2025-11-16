@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Soru Oluşturucu - Gemini AI</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN (For rapid prototyping - Consider local build for production) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
@@ -121,13 +121,15 @@
 
                             <!-- Model Selection -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Gemini Modeli</label>
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Gemini Modeli
+                                    <span class="text-xs text-gray-500">(Önerilen: Flash)</span>
+                                </label>
                                 <select id="modelSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (15 RPM, 1M context)</option>
-                                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite (30 RPM, 1M context)</option>
-                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (10 RPM, 1M context)</option>
-                                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (15 RPM, 1M context)</option>
-                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (2 RPM, 2M context)</option>
+                                    <option value="gemini-1.5-flash" selected>⚡ Gemini 1.5 Flash (Hızlı & Dengeli - Önerilen)</option>
+                                    <option value="gemini-1.5-flash-8b">⚡⚡ Gemini 1.5 Flash-8B (En Hızlı)</option>
+                                    <option value="gemini-1.5-pro">⭐ Gemini 1.5 Pro (En İyi Kalite)</option>
+                                    <option value="gemini-pro">Gemini Pro (Standart)</option>
                                 </select>
                                 <div id="modelInfo" class="text-xs text-gray-600 bg-gray-50 p-3 rounded"></div>
                             </div>
@@ -421,23 +423,24 @@
             </div>
         </div>
 
-        <!-- Welcome Message (First Time Users) -->
-        <div id="welcomeMessage" class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-            <div class="flex items-start gap-4">
-                <div class="text-4xl">👋</div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Hoş Geldiniz!</h3>
-                    <p class="text-gray-700 mb-3">PDF dosyalarınızdan otomatik olarak çeşitli tipte sorular üreten bu uygulamayı kullanmaya başlamak için:</p>
-                    <ol class="list-decimal list-inside space-y-1 text-sm text-gray-600 mb-4">
-                        <li>Google Gemini API anahtarınızı girin</li>
-                        <li>PDF dosyanızı yükleyin</li>
-                        <li>Soru tiplerini ve ayarları yapılandırın</li>
-                        <li>Soru üretmeye başlayın ve Excel'e aktarın!</li>
-                    </ol>
-                    <button id="closeWelcome" class="text-sm text-blue-600 hover:underline">
-                        <i class="fas fa-times mr-1"></i>Bu mesajı kapat
-                    </button>
+        <!-- Welcome Message (First Time Users) - Simplified -->
+        <div id="welcomeMessage" class="bg-blue-50 border-l-4 border-blue-600 rounded-r-lg p-4 mb-6">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="text-3xl">🚀</div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Hemen Başlayın!</h3>
+                        <p class="text-sm text-gray-700">
+                            <span class="font-medium">1.</span> API anahtarı girin →
+                            <span class="font-medium">2.</span> PDF yükleyin →
+                            <span class="font-medium">3.</span> Soru üretin →
+                            <span class="font-medium">4.</span> Excel'e aktarın
+                        </p>
+                    </div>
                 </div>
+                <button id="closeWelcome" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
         </div>
     </main>
@@ -461,41 +464,65 @@
         </div>
     </footer>
 
-    <!-- Custom Type Modal -->
+    <!-- Custom Type Modal - Compact & User-Friendly -->
     <div id="customTypeModal" class="modal hidden">
         <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="text-lg font-semibold">Özel Soru Tipi Ekle</h3>
-                <button class="modal-close">
-                    <i class="fas fa-times"></i>
+        <div class="modal-content max-w-md">
+            <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
+                <div>
+                    <h3 class="text-lg font-semibold">Yeni Soru Tipi</h3>
+                    <p class="text-sm text-blue-100">Özel soru tipinizi tanımlayın</p>
+                </div>
+                <button class="modal-close text-white hover:text-blue-100">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="space-y-4">
+            <div class="modal-body space-y-3">
+                <!-- Tip Adı (Tek satır, iki dil) -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tip Adı (Türkçe)</label>
-                        <input type="text" id="customTypeName" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Türkçe Adı *</label>
+                        <input type="text" id="customTypeName" placeholder="Örn: Karşılaştırma"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tip Adı (İngilizce)</label>
-                        <input type="text" id="customTypeNameEn" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">İngilizce Adı *</label>
+                        <input type="text" id="customTypeNameEn" placeholder="e.g., Comparison"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
-                        <textarea id="customTypeDesc" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Örnek Soru</label>
-                        <input type="text" id="customTypeExample" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+
+                <!-- Açıklama -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Açıklama *</label>
+                    <textarea id="customTypeDesc" rows="2" placeholder="Bu soru tipi ne tür sorular içerir?"
+                              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <!-- Örnek Soru -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Örnek Soru *</label>
+                    <input type="text" id="customTypeExample" placeholder="Örn: X ile Y arasındaki fark nedir?"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Bilgilendirme -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="flex gap-2">
+                        <i class="fas fa-info-circle text-blue-600 text-sm mt-0.5"></i>
+                        <p class="text-xs text-blue-800">
+                            Özel soru tipleri kaydedilir ve sonraki kullanımlarınızda otomatik olarak yüklenir.
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="saveCustomType" class="btn-primary">
-                    <i class="fas fa-save mr-2"></i>Kaydet
+            <div class="modal-footer bg-gray-50 rounded-b-lg">
+                <button id="saveCustomType" class="btn-primary flex-1">
+                    <i class="fas fa-plus-circle mr-2"></i>Ekle
                 </button>
-                <button class="btn-outline modal-close">İptal</button>
+                <button class="btn-outline modal-close">
+                    <i class="fas fa-times mr-2"></i>İptal
+                </button>
             </div>
         </div>
     </div>

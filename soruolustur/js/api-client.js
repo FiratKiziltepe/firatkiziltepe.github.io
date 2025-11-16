@@ -7,7 +7,7 @@
  * Gemini API Client Class
  */
 export class GeminiAPIClient {
-    constructor(apiKey, model = 'gemini-2.0-flash-exp') {
+    constructor(apiKey, model = 'gemini-1.5-flash') {
         this.apiKey = apiKey;
         this.model = model;
         this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -212,32 +212,59 @@ JSON array formatında, her eleman şu alanları içermeli:
     }
 
     /**
-     * Test API connection
+     * Test API connection (simpler test without generating questions)
      */
     async testConnection() {
         try {
-            const testText = 'Bu bir test metnidir. Yapay zeka, insan zekasını taklit eden sistemlerdir.';
-            const testTypes = [
-                { name: 'Olgusal', nameEn: 'Factual' }
-            ];
+            // Use a simpler endpoint to test API key validity
+            const url = `${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`;
 
-            const result = await this.generateQuestions(testText, testTypes, 1);
+            const testBody = {
+                contents: [{
+                    parts: [{ text: "Test" }]
+                }]
+            };
 
-            if (result.success && result.questions.length > 0) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testBody)
+            });
+
+            if (response.ok) {
                 return {
                     success: true,
                     message: 'API bağlantısı başarılı'
                 };
-            } else {
+            } else if (response.status === 429) {
                 return {
                     success: false,
-                    message: 'API yanıt verdi ama soru üretilemedi'
+                    message: 'Rate limit - API key geçerli ama şu anda çok fazla istek var. Lütfen biraz bekleyin.'
+                };
+            } else if (response.status === 400) {
+                const errorData = await response.json().catch(() => ({}));
+                // Model might not exist, but key could be valid
+                if (errorData?.error?.message?.includes('models/') || errorData?.error?.message?.includes('not found')) {
+                    return {
+                        success: true,
+                        message: 'API key geçerli (model doğrulanamadı ancak key çalışıyor)'
+                    };
+                }
+                return {
+                    success: false,
+                    message: this.parseErrorMessage(response.status, errorData)
+                };
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                return {
+                    success: false,
+                    message: this.parseErrorMessage(response.status, errorData)
                 };
             }
         } catch (error) {
             return {
                 success: false,
-                message: error.message
+                message: `Bağlantı hatası: ${error.message}`
             };
         }
     }
