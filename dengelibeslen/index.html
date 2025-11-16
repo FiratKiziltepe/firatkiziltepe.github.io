@@ -84,6 +84,72 @@
                         <a href="https://aistudio.google.com/app/apikey" target="_blank">API anahtarı almak için tıklayın</a>
                     </p>
                 </div>
+
+                <div class="user-profile-section">
+                    <h3>👤 Kullanıcı Profili</h3>
+                    <p class="profile-info">Analizleri kişiselleştirmek için bilgilerinizi girin.</p>
+
+                    <div class="profile-group">
+                        <h4>Alerjiler</h4>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-peanuts" value="Fıstık">
+                                <span>Fıstık</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-dairy" value="Süt Ürünleri">
+                                <span>Süt Ürünleri</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-gluten" value="Gluten">
+                                <span>Gluten</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-soy" value="Soya">
+                                <span>Soya</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-eggs" value="Yumurta">
+                                <span>Yumurta</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergy-shellfish" value="Kabuklu Deniz Ürünleri">
+                                <span>Kabuklu Deniz Ürünleri</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="profile-group">
+                        <h4>Diyet Tercihleri</h4>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="diet-vegan" value="Vegan">
+                                <span>Vegan</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="diet-vegetarian" value="Vejetaryen">
+                                <span>Vejetaryen</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="diet-halal" value="Helal">
+                                <span>Helal</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="diet-kosher" value="Koşer">
+                                <span>Koşer</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="profile-group">
+                        <h4>Diğer Sağlık Durumları</h4>
+                        <textarea id="healthConditions" placeholder="Örn: Diyabet, hipertansiyon, kalp hastalığı vb." rows="3"></textarea>
+                    </div>
+
+                    <button id="saveProfileBtn" class="btn btn-primary">
+                        <span>💾 Profili Kaydet</span>
+                    </button>
+                </div>
             </main>
 
             <footer class="footer">
@@ -138,6 +204,12 @@
                 <div id="riskBadge" class="risk-badge">
                     <span class="risk-icon"></span>
                     <span class="risk-text"></span>
+                </div>
+
+                <!-- Size Özel Özet -->
+                <div id="personalizedSummary" class="personalized-summary" style="display: none;">
+                    <h3>👤 Size Özel Özet</h3>
+                    <p id="personalizedText"></p>
                 </div>
 
                 <!-- Genel Özet -->

@@ -329,6 +329,110 @@ body {
     text-decoration: underline;
 }
 
+/* ===== User Profile Section ===== */
+.user-profile-section {
+    background: #e3f2fd;
+    border: 2px solid #2196F3;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.user-profile-section h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.profile-info {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}
+
+.profile-group {
+    margin-bottom: 1.5rem;
+}
+
+.profile-group h4 {
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.checkbox-label:hover {
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.checkbox-label span {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.profile-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.profile-group textarea:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+}
+
+#saveProfileBtn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* ===== Personalized Summary ===== */
+.personalized-summary {
+    background: linear-gradient(135deg, #e3f2fd 0%, #fff9c4 100%);
+    border: 2px solid #2196F3;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.personalized-summary h3 {
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+    font-size: 1.2rem;
+}
+
+#personalizedText {
+    color: var(--text-dark);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
 /* ===== Footer ===== */
 .footer {
     padding: 1.5rem;

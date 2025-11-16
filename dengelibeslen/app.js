@@ -2,6 +2,7 @@
 let currentImage = null;
 let apiKey = localStorage.getItem('geminiApiKey') || '';
 let selectedModel = localStorage.getItem('geminiModel') || 'gemini-2.0-flash';
+let userProfile = JSON.parse(localStorage.getItem('userProfile') || '{"allergies":[],"diets":[],"healthConditions":""}');
 
 // ===== DOM Elements =====
 const pages = {
@@ -21,6 +22,8 @@ const elements = {
     saveApiKeyBtn: document.getElementById('saveApiKeyBtn'),
     modelSelect: document.getElementById('modelSelect'),
     modelDescription: document.getElementById('modelDescription'),
+    saveProfileBtn: document.getElementById('saveProfileBtn'),
+    healthConditions: document.getElementById('healthConditions'),
     backBtn: document.getElementById('backBtn'),
     analyzeBtn: document.getElementById('analyzeBtn'),
     previewImage: document.getElementById('previewImage'),
@@ -32,7 +35,9 @@ const elements = {
     riskBadge: document.getElementById('riskBadge'),
     summaryText: document.getElementById('summaryText'),
     ingredientsList: document.getElementById('ingredientsList'),
-    errorMessage: document.getElementById('errorMessage')
+    errorMessage: document.getElementById('errorMessage'),
+    personalizedSummary: document.getElementById('personalizedSummary'),
+    personalizedText: document.getElementById('personalizedText')
 };
 
 // ===== Page Navigation =====
@@ -82,6 +87,97 @@ elements.modelSelect.addEventListener('change', (event) => {
     localStorage.setItem('geminiModel', selectedModel);
     updateModelDescription();
 });
+
+// ===== User Profile Management =====
+const allergyCheckboxes = [
+    { id: 'allergy-peanuts', value: 'Fıstık' },
+    { id: 'allergy-dairy', value: 'Süt Ürünleri' },
+    { id: 'allergy-gluten', value: 'Gluten' },
+    { id: 'allergy-soy', value: 'Soya' },
+    { id: 'allergy-eggs', value: 'Yumurta' },
+    { id: 'allergy-shellfish', value: 'Kabuklu Deniz Ürünleri' }
+];
+
+const dietCheckboxes = [
+    { id: 'diet-vegan', value: 'Vegan' },
+    { id: 'diet-vegetarian', value: 'Vejetaryen' },
+    { id: 'diet-halal', value: 'Helal' },
+    { id: 'diet-kosher', value: 'Koşer' }
+];
+
+function loadUserProfile() {
+    // Load allergies
+    allergyCheckboxes.forEach(item => {
+        const checkbox = document.getElementById(item.id);
+        if (checkbox) {
+            checkbox.checked = userProfile.allergies.includes(item.value);
+        }
+    });
+
+    // Load diets
+    dietCheckboxes.forEach(item => {
+        const checkbox = document.getElementById(item.id);
+        if (checkbox) {
+            checkbox.checked = userProfile.diets.includes(item.value);
+        }
+    });
+
+    // Load health conditions
+    if (elements.healthConditions) {
+        elements.healthConditions.value = userProfile.healthConditions || '';
+    }
+}
+
+function saveUserProfile() {
+    // Save allergies
+    const allergies = [];
+    allergyCheckboxes.forEach(item => {
+        const checkbox = document.getElementById(item.id);
+        if (checkbox && checkbox.checked) {
+            allergies.push(item.value);
+        }
+    });
+
+    // Save diets
+    const diets = [];
+    dietCheckboxes.forEach(item => {
+        const checkbox = document.getElementById(item.id);
+        if (checkbox && checkbox.checked) {
+            diets.push(item.value);
+        }
+    });
+
+    // Save health conditions
+    const healthConditions = elements.healthConditions ? elements.healthConditions.value.trim() : '';
+
+    // Update global state
+    userProfile = { allergies, diets, healthConditions };
+
+    // Save to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+    alert('✅ Kullanıcı profili kaydedildi!');
+}
+
+elements.saveProfileBtn.addEventListener('click', saveUserProfile);
+
+function getUserProfileText() {
+    const parts = [];
+
+    if (userProfile.allergies.length > 0) {
+        parts.push(`Alerjiler: ${userProfile.allergies.join(', ')}`);
+    }
+
+    if (userProfile.diets.length > 0) {
+        parts.push(`Diyet Tercihleri: ${userProfile.diets.join(', ')}`);
+    }
+
+    if (userProfile.healthConditions) {
+        parts.push(`Sağlık Durumları: ${userProfile.healthConditions}`);
+    }
+
+    return parts.length > 0 ? parts.join(' | ') : null;
+}
 
 // ===== Image Upload Handlers =====
 elements.cameraBtn.addEventListener('click', () => {
@@ -166,8 +262,14 @@ async function analyzeImage() {
         // Extract base64 data
         const base64Data = currentImage.split(',')[1];
 
+        // Get user profile info
+        const profileText = getUserProfileText();
+        const profilePrompt = profileText
+            ? `\n\nKULLANICI PROFİLİ:\n${profileText}\n\nLütfen kullanıcının alerjileri ve diyet tercihlerine göre "personalized_summary" alanında özel bir özet ekle.`
+            : '';
+
         // Prepare Gemini API request
-        const prompt = `Bu gıda etiketindeki "İçindekiler" veya "Ingredients" bölümünü oku ve analiz et.
+        const prompt = `Bu gıda etiketindeki "İçindekiler" veya "Ingredients" bölümünü oku ve analiz et.${profilePrompt}
 
 Lütfen her bileşeni listele ve aşağıdaki JSON formatında yanıt ver:
 
@@ -181,7 +283,8 @@ Lütfen her bileşeni listele ve aşağıdaki JSON formatında yanıt ver:
     }
   ],
   "overall_risk": "low/medium/high",
-  "summary": "Genel değerlendirme (2-3 cümle, Türkçe)"
+  "summary": "Genel değerlendirme (2-3 cümle, Türkçe)",
+  "personalized_summary": "${profileText ? 'Kullanıcı profiline göre özel uyarılar ve öneriler (3-4 cümle)' : ''}"
 }
 
 Kurallar:
@@ -189,7 +292,9 @@ Kurallar:
 - Açıklamalar anlaşılır ve jargonsuz olmalı
 - E kodları varsa belirt
 - Yapay katkı maddeleri, koruyucular, renklendiriciler için özellikle dikkatli ol
-- Sadece JSON formatında yanıt ver, başka metin ekleme`;
+${profileText ? '- personalized_summary alanında kullanıcının alerjilerine ve diyet tercihlerine göre MUTLAKA özel uyarılar ver' : ''}
+- SADECE JSON formatında yanıt ver, başka metin ekleme
+- JSON dışında hiçbir açıklama veya metin yazma`;
 
         updateLoadingMessage('İçerikler analiz ediliyor...');
 
@@ -235,15 +340,37 @@ Kurallar:
         // Extract text from response
         const generatedText = data.candidates[0].content.parts[0].text;
 
-        // Parse JSON from response (handle markdown code blocks)
+        // Extract JSON from response (improved parsing)
         let jsonText = generatedText.trim();
-        if (jsonText.startsWith('```json')) {
-            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        } else if (jsonText.startsWith('```')) {
-            jsonText = jsonText.replace(/```\n?/g, '');
+
+        // Remove markdown code blocks
+        if (jsonText.includes('```json')) {
+            const match = jsonText.match(/```json\s*\n([\s\S]*?)\n```/);
+            if (match) {
+                jsonText = match[1];
+            }
+        } else if (jsonText.includes('```')) {
+            const match = jsonText.match(/```\s*\n([\s\S]*?)\n```/);
+            if (match) {
+                jsonText = match[1];
+            }
         }
 
-        const analysisResult = JSON.parse(jsonText);
+        // Try to find JSON object in text
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            jsonText = jsonMatch[0];
+        }
+
+        // Parse JSON
+        let analysisResult;
+        try {
+            analysisResult = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Generated text:', generatedText);
+            throw new Error('Yanıt JSON formatında değil. Lütfen tekrar deneyin.');
+        }
 
         // Display results
         displayResults(analysisResult);
@@ -275,6 +402,14 @@ function displayResults(result) {
         <span class="risk-icon">${config.icon}</span>
         <span class="risk-text">${config.text}</span>
     `;
+
+    // Display personalized summary if available
+    if (result.personalized_summary && result.personalized_summary.trim()) {
+        elements.personalizedSummary.style.display = 'block';
+        elements.personalizedText.textContent = result.personalized_summary;
+    } else {
+        elements.personalizedSummary.style.display = 'none';
+    }
 
     // Display summary
     elements.summaryText.textContent = result.summary || 'Analiz tamamlandı.';
@@ -396,6 +531,7 @@ function fallbackCopyToClipboard(text) {
 // ===== Initialization =====
 function init() {
     loadSettings();
+    loadUserProfile();
     showPage('home');
 }
 

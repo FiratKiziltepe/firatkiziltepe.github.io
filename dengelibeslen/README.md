@@ -9,6 +9,8 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 - **🤖 AI Analiz**: Gemini Vision API ile otomatik içerik tanıma ve analiz
 - **🎯 Risk Değerlendirmesi**: Düşük/Orta/Yüksek risk sınıflandırması
 - **⚙️ Model Seçimi**: 5 farklı Gemini modelinden seçim yapabilme
+- **👤 Kullanıcı Profili**: Alerji ve diyet tercihlerini kaydetme
+- **💡 Kişiselleştirilmiş Analiz**: Profilinize göre özel uyarılar ve öneriler
 - **📱 Mobil Uyumlu**: Responsive tasarım, her cihazda mükemmel çalışır
 - **🔒 Gizlilik**: Görselleriniz tarayıcınızda kalır, sunucuda saklanmaz
 
@@ -19,19 +21,26 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
    - Uygulamada "Model Seçimi" dropdown'ından tercih ettiğiniz modeli seçin (varsayılan: Gemini 2.0 Flash)
    - API anahtarınızı girin ve "Kaydet" butonuna tıklayın
 
-2. **Fotoğraf Çekin veya Yükleyin**
+2. **Kullanıcı Profilinizi Oluşturun** (Opsiyonel ama Önerilir)
+   - Alerjilerinizi seçin (Fıstık, Süt Ürünleri, Gluten, Soya, Yumurta, Kabuklu Deniz Ürünleri)
+   - Diyet tercihlerinizi belirtin (Vegan, Vejetaryen, Helal, Koşer)
+   - Sağlık durumlarınızı girin (Diyabet, hipertansiyon vb.)
+   - "Profili Kaydet" butonuna tıklayın
+
+3. **Fotoğraf Çekin veya Yükleyin**
    - "Fotoğraf Çek" butonu ile kameranızı kullanın
    - "Galeriden Yükle" ile mevcut fotoğrafı seçin
    - Gıda etiketinin "İçindekiler" bölümünü net çekin
 
-3. **Analiz Edin**
+4. **Analiz Edin**
    - "Analiz Et" butonuna tıklayın
    - Yapay zeka seçtiğiniz modelle etiketinizi okuyacak ve analiz edecek
 
-4. **Sonuçları İnceleyin**
-   - Risk seviyesini görün (🟢 Düşük / 🟡 Orta / 🔴 Yüksek)
-   - Her bileşenin detaylı açıklamasını okuyun
-   - Sağlık risklerini öğrenin
+5. **Sonuçları İnceleyin**
+   - **Size Özel Özet**: Profilinize göre kişiselleştirilmiş uyarılar (varsa)
+   - **Risk Seviyesi**: Düşük 🟢 / Orta 🟡 / Yüksek 🔴
+   - **İçerik Analizi**: Her bileşenin detaylı açıklaması
+   - **Sağlık Riskleri**: Potansiyel tehlikeler ve öneriler
 
 ## 🛠️ Teknolojiler
 
