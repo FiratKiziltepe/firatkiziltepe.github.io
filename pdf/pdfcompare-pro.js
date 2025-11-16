@@ -581,27 +581,30 @@ function findTextInPositions(searchText, positions) {
         });
     } else {
         // Strategy 2: Match individual words if exact match fails
-        searchWords.forEach(word => {
-            if (word.length < 3) return; // Skip very short words
+        // Only for longer, more unique words to reduce false positives
+        const significantWords = searchWords.filter(w => w.length >= 5);
 
-            let wordIdx = fullTextNormalized.indexOf(word);
-            while (wordIdx !== -1) {
-                const wordEndIdx = wordIdx + word.length;
+        // Only try word-by-word if we have at least 2 significant words
+        if (significantWords.length >= 2) {
+            significantWords.forEach(word => {
+                // Only find FIRST occurrence to avoid matching common words everywhere
+                let wordIdx = fullTextNormalized.indexOf(word);
 
-                // Find positions that contain this word
-                positionMap.forEach(mapItem => {
-                    if (mapItem.startIdx <= wordIdx && mapItem.endIdx >= wordEndIdx) {
-                        // Avoid duplicates
-                        if (!matches.find(m => m === mapItem.position)) {
-                            matches.push(mapItem.position);
+                if (wordIdx !== -1) {
+                    const wordEndIdx = wordIdx + word.length;
+
+                    // Find positions that contain this word
+                    positionMap.forEach(mapItem => {
+                        if (mapItem.startIdx <= wordIdx && mapItem.endIdx >= wordEndIdx) {
+                            // Avoid duplicates
+                            if (!matches.find(m => m === mapItem.position)) {
+                                matches.push(mapItem.position);
+                            }
                         }
-                    }
-                });
-
-                // Search for next occurrence
-                wordIdx = fullTextNormalized.indexOf(word, wordIdx + 1);
-            }
-        });
+                    });
+                }
+            });
+        }
     }
 
     return matches;
