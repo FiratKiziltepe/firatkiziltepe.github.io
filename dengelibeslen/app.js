@@ -1,6 +1,7 @@
 // ===== Global State =====
 let currentImage = null;
 let apiKey = localStorage.getItem('geminiApiKey') || '';
+let selectedModel = localStorage.getItem('geminiModel') || 'gemini-2.0-flash';
 
 // ===== DOM Elements =====
 const pages = {
@@ -18,6 +19,8 @@ const elements = {
     fileInput: document.getElementById('fileInput'),
     apiKeyInput: document.getElementById('apiKeyInput'),
     saveApiKeyBtn: document.getElementById('saveApiKeyBtn'),
+    modelSelect: document.getElementById('modelSelect'),
+    modelDescription: document.getElementById('modelDescription'),
     backBtn: document.getElementById('backBtn'),
     analyzeBtn: document.getElementById('analyzeBtn'),
     previewImage: document.getElementById('previewImage'),
@@ -38,10 +41,28 @@ function showPage(pageName) {
     pages[pageName].classList.add('active');
 }
 
-// ===== API Key Management =====
-function loadApiKey() {
+// ===== Model Descriptions =====
+const modelDescriptions = {
+    'gemini-2.0-flash': 'Hızlı ve dengeli performans. Ücretsiz kullanım için idealdir. (15 BGBG/gün, 1M token/dk)',
+    'gemini-2.0-flash-lite': 'En hızlı ve en yüksek ücretsiz quota. Basit analizler için önerilir. (30 BGBG/gün)',
+    'gemini-2.5-flash': 'Gelişmiş performans ve daha akıllı analizler. (10 BGBG/gün, 250K token/dk)',
+    'gemini-2.5-flash-lite': 'Hızlı ve yüksek quota. İyi denge sunar. (15 BGBG/gün)',
+    'gemini-2.5-pro': 'En gelişmiş model, en doğru sonuçlar. Düşük quota limiti. (2 BGBG/gün)'
+};
+
+function updateModelDescription() {
+    const description = modelDescriptions[selectedModel] || 'Model açıklaması mevcut değil.';
+    elements.modelDescription.textContent = description;
+}
+
+// ===== Settings Management =====
+function loadSettings() {
     if (apiKey) {
         elements.apiKeyInput.value = apiKey;
+    }
+    if (selectedModel) {
+        elements.modelSelect.value = selectedModel;
+        updateModelDescription();
     }
 }
 
@@ -54,6 +75,12 @@ elements.saveApiKeyBtn.addEventListener('click', () => {
     } else {
         alert('⚠️ Lütfen geçerli bir API anahtarı girin.');
     }
+});
+
+elements.modelSelect.addEventListener('change', (event) => {
+    selectedModel = event.target.value;
+    localStorage.setItem('geminiModel', selectedModel);
+    updateModelDescription();
 });
 
 // ===== Image Upload Handlers =====
@@ -166,9 +193,9 @@ Kurallar:
 
         updateLoadingMessage('İçerikler analiz ediliyor...');
 
-        // Call Gemini API
+        // Call Gemini API with selected model
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: {
@@ -368,7 +395,7 @@ function fallbackCopyToClipboard(text) {
 
 // ===== Initialization =====
 function init() {
-    loadApiKey();
+    loadSettings();
     showPage('home');
 }
 
