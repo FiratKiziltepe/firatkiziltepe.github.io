@@ -1,16 +1,22 @@
-/* Custom Styles for PDF Question Generator */
+/* Custom Styles for PDF Question Generator - Modernized */
 
-/* Tabs */
+/* =========================
+   TABS - MODERNIZED
+   ========================= */
 .tab-button {
-    @apply px-6 py-4 font-medium text-gray-600 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors;
+    @apply px-8 py-4 min-w-[140px] font-semibold text-base text-gray-600 border-b-4 border-transparent hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 rounded-t-lg flex items-center justify-center gap-3;
 }
 
 .tab-button.active {
-    @apply text-blue-600 border-blue-600;
+    @apply text-white bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-600 shadow-lg;
+}
+
+.tab-button i {
+    @apply text-xl;
 }
 
 .tab-content {
-    @apply transition-opacity duration-200;
+    @apply transition-opacity duration-300;
 }
 
 .tab-content.hidden {
@@ -21,64 +27,169 @@
     @apply opacity-100;
 }
 
-/* Buttons */
+/* =========================
+   BUTTONS - ENHANCED
+   ========================= */
 .btn-primary {
-    @apply bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center;
+    @apply bg-blue-600 text-white px-8 py-3 text-base rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center transform hover:scale-105;
 }
 
 .btn-secondary {
-    @apply bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-colors font-medium shadow-sm inline-flex items-center justify-center;
+    @apply bg-gray-600 text-white px-8 py-3 text-base rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg inline-flex items-center justify-center transform hover:scale-105;
 }
 
 .btn-success {
-    @apply bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors font-medium shadow-sm inline-flex items-center justify-center;
+    @apply bg-green-600 text-white px-8 py-3 text-base rounded-lg hover:bg-green-700 active:bg-green-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg inline-flex items-center justify-center transform hover:scale-105;
 }
 
 .btn-warning {
-    @apply bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 active:bg-yellow-800 transition-colors font-medium shadow-sm inline-flex items-center justify-center;
+    @apply bg-yellow-600 text-white px-8 py-3 text-base rounded-lg hover:bg-yellow-700 active:bg-yellow-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg inline-flex items-center justify-center transform hover:scale-105;
 }
 
 .btn-danger {
-    @apply bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-800 transition-colors font-medium shadow-sm inline-flex items-center justify-center;
+    @apply bg-red-600 text-white px-8 py-3 text-base rounded-lg hover:bg-red-700 active:bg-red-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg inline-flex items-center justify-center transform hover:scale-105;
 }
 
 .btn-outline {
-    @apply border-2 border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors font-medium inline-flex items-center justify-center;
+    @apply border-2 border-gray-300 text-gray-700 px-8 py-3 text-base rounded-lg hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-200 font-semibold inline-flex items-center justify-center;
 }
 
-/* Question Type Cards */
+/* =========================
+   QUESTION TYPE CARDS - MODERNIZED
+   ========================= */
 .question-type-card {
-    @apply border border-gray-300 rounded-lg p-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all;
+    @apply bg-white border-2 border-gray-200 rounded-xl p-5 cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
 }
 
 .question-type-card.selected {
-    @apply border-blue-600 bg-blue-50;
+    @apply border-blue-600 bg-blue-50 shadow-md;
 }
 
 .question-type-card input[type="checkbox"] {
-    @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500;
+    @apply w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500;
 }
 
-/* Statistics Cards */
+.question-type-card:hover {
+    @apply bg-gradient-to-br from-blue-50 to-indigo-50;
+}
+
+/* =========================
+   STEPPER / NUMBER INPUT
+   ========================= */
+.stepper-container {
+    @apply flex items-center gap-3 bg-white border-2 border-gray-300 rounded-lg p-2 w-fit;
+}
+
+.stepper-btn {
+    @apply w-10 h-10 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center justify-center font-bold text-lg;
+}
+
+.stepper-value {
+    @apply text-2xl font-bold text-gray-900 min-w-[60px] text-center;
+}
+
+/* =========================
+   TOGGLE SWITCH
+   ========================= */
+.toggle-switch {
+    @apply relative inline-block w-14 h-8;
+}
+
+.toggle-switch input {
+    @apply opacity-0 w-0 h-0;
+}
+
+.toggle-slider {
+    @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-full transition-all duration-300;
+}
+
+.toggle-slider:before {
+    @apply absolute content-[''] h-6 w-6 left-1 bottom-1 bg-white rounded-full transition-all duration-300;
+}
+
+input:checked + .toggle-slider {
+    @apply bg-blue-600;
+}
+
+input:checked + .toggle-slider:before {
+    @apply transform translate-x-6;
+}
+
+/* =========================
+   MULTI-STEP FORM
+   ========================= */
+.step-indicator {
+    @apply flex items-center justify-center mb-8;
+}
+
+.step {
+    @apply flex flex-col items-center flex-1;
+}
+
+.step-circle {
+    @apply w-12 h-12 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-lg mb-2 transition-all duration-300;
+}
+
+.step.active .step-circle {
+    @apply bg-blue-600 text-white shadow-lg scale-110;
+}
+
+.step.completed .step-circle {
+    @apply bg-green-600 text-white;
+}
+
+.step-label {
+    @apply text-sm font-medium text-gray-600;
+}
+
+.step.active .step-label {
+    @apply text-blue-600 font-semibold;
+}
+
+.step.completed .step-label {
+    @apply text-green-600;
+}
+
+.step-line {
+    @apply flex-1 h-1 bg-gray-300 mx-4 mt-6 transition-all duration-300;
+}
+
+.step.completed + .step .step-line {
+    @apply bg-green-600;
+}
+
+.form-step {
+    @apply hidden;
+}
+
+.form-step.active {
+    @apply block animate-fadeIn;
+}
+
+/* =========================
+   STATISTICS CARDS - ENHANCED
+   ========================= */
 .stat-card {
-    @apply bg-white border border-gray-200 rounded-lg p-4 flex items-center gap-4;
+    @apply bg-white border-2 border-gray-200 rounded-xl p-6 flex items-center gap-4 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
 }
 
 .stat-icon {
-    @apply w-12 h-12 rounded-lg flex items-center justify-center text-xl;
+    @apply w-14 h-14 rounded-xl flex items-center justify-center text-2xl;
 }
 
 .stat-value {
-    @apply text-2xl font-bold text-gray-900;
+    @apply text-3xl font-bold text-gray-900;
 }
 
 .stat-label {
-    @apply text-sm text-gray-600;
+    @apply text-base text-gray-600 font-medium;
 }
 
-/* Modals */
+/* =========================
+   MODALS - IMPROVED
+   ========================= */
 .modal {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm;
 }
 
 .modal.hidden {
@@ -86,35 +197,58 @@
 }
 
 .modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 transition-opacity;
+    @apply fixed inset-0 bg-black bg-opacity-60 transition-opacity;
 }
 
 .modal-content {
-    @apply relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto z-10;
+    @apply relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto z-10 animate-scaleIn;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-scaleIn {
+    animation: scaleIn 0.2s ease-out;
 }
 
 .modal-header {
-    @apply flex items-center justify-between p-6 border-b border-gray-200;
+    @apply flex items-center justify-between p-8 border-b border-gray-200;
 }
 
 .modal-body {
-    @apply p-6;
+    @apply p-8;
 }
 
 .modal-footer {
-    @apply flex items-center justify-end gap-3 p-6 border-t border-gray-200;
+    @apply flex items-center justify-end gap-4 p-8 border-t border-gray-200 bg-gray-50;
 }
 
 .modal-close {
-    @apply text-gray-400 hover:text-gray-600 transition-colors;
+    @apply text-gray-400 hover:text-gray-700 transition-colors text-2xl;
 }
 
-/* Drop Zone */
+/* =========================
+   DROP ZONE - ENHANCED
+   ========================= */
+#dropZone {
+    @apply transition-all duration-300;
+}
+
 #dropZone.dragover {
-    @apply border-blue-500 bg-blue-50;
+    @apply border-blue-500 bg-blue-50 shadow-lg scale-105;
 }
 
-/* Progress Bar Animation */
+/* =========================
+   PROGRESS BAR - MODERNIZED
+   ========================= */
 @keyframes shimmer {
     0% {
         background-position: -1000px 0;
@@ -130,7 +264,22 @@
     background-size: 1000px 100%;
 }
 
-/* Activity Log */
+/* Skeleton Loader */
+.skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+}
+
+.skeleton-text {
+    @apply h-4 bg-gray-200 rounded mb-2;
+}
+
+.skeleton-title {
+    @apply h-8 bg-gray-200 rounded mb-4;
+}
+
+/* =========================
+   ACTIVITY LOG
+   ========================= */
 #activityLog {
     scrollbar-width: thin;
     scrollbar-color: rgba(74, 222, 128, 0.5) rgba(17, 24, 39, 0.5);
@@ -189,9 +338,15 @@
     @apply text-blue-400;
 }
 
-/* Results Table */
+/* =========================
+   RESULTS TABLE
+   ========================= */
+#resultsTable tbody tr {
+    @apply transition-all duration-200;
+}
+
 #resultsTable tbody tr:hover {
-    @apply bg-gray-50;
+    @apply bg-blue-50 shadow-sm;
 }
 
 .table-row-new {
@@ -210,9 +365,11 @@
     }
 }
 
-/* Toast Notifications */
+/* =========================
+   TOAST NOTIFICATIONS
+   ========================= */
 .toast {
-    @apply fixed bottom-4 right-4 bg-white border-l-4 rounded-lg shadow-lg p-4 max-w-md z-50 animate-slideIn;
+    @apply fixed bottom-4 right-4 bg-white border-l-4 rounded-xl shadow-2xl p-5 max-w-md z-50 animate-slideIn;
 }
 
 @keyframes slideIn {
@@ -242,7 +399,9 @@
     @apply border-blue-500;
 }
 
-/* Tooltips */
+/* =========================
+   TOOLTIPS
+   ========================= */
 .tooltip {
     @apply relative inline-block;
 }
@@ -255,9 +414,11 @@
     @apply visible opacity-100;
 }
 
-/* Loading Spinner */
+/* =========================
+   LOADING SPINNER
+   ========================= */
 .spinner {
-    @apply inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin;
+    @apply inline-block w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin;
 }
 
 @keyframes spin {
@@ -270,28 +431,53 @@
     animation: spin 1s linear infinite;
 }
 
-/* Pagination */
+/* =========================
+   PAGINATION
+   ========================= */
 .page-number {
-    @apply px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer transition-colors;
+    @apply px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-100 cursor-pointer transition-all duration-200 font-medium;
 }
 
 .page-number.active {
-    @apply bg-blue-600 text-white border-blue-600;
+    @apply bg-blue-600 text-white border-blue-600 shadow-md;
 }
 
-/* Smooth Scrolling */
+/* =========================
+   GENERAL IMPROVEMENTS
+   ========================= */
 html {
     scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    @apply text-gray-900;
+}
+
+h1 {
+    @apply text-3xl font-bold;
+}
+
+h2 {
+    @apply text-2xl font-semibold;
+}
+
+h3 {
+    @apply text-xl font-semibold;
+}
+
+p {
+    @apply text-base leading-relaxed;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    @apply bg-gray-100 rounded-lg;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -302,15 +488,19 @@ html {
     @apply bg-gray-500;
 }
 
-/* Focus Styles for Accessibility */
+/* =========================
+   FOCUS STYLES (Accessibility)
+   ========================= */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+    @apply outline-none ring-4 ring-blue-500 ring-offset-2;
 }
 
-/* Print Styles */
+/* =========================
+   PRINT STYLES
+   ========================= */
 @media print {
     header,
     footer,
@@ -324,12 +514,9 @@ textarea:focus-visible {
     }
 }
 
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-    /* Can be implemented later if needed */
-}
-
-/* Animations */
+/* =========================
+   ANIMATIONS
+   ========================= */
 @keyframes pulse-slow {
     0%, 100% {
         opacity: 1;
@@ -343,27 +530,30 @@ textarea:focus-visible {
     animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Error States */
+/* =========================
+   STATES
+   ========================= */
 .input-error {
     @apply border-red-500 focus:ring-red-500;
 }
 
 .error-message {
-    @apply text-red-600 text-sm mt-1;
+    @apply text-red-600 text-sm mt-1 font-medium;
 }
 
-/* Success States */
 .input-success {
     @apply border-green-500 focus:ring-green-500;
 }
 
 .success-message {
-    @apply text-green-600 text-sm mt-1;
+    @apply text-green-600 text-sm mt-1 font-medium;
 }
 
-/* Badge */
+/* =========================
+   BADGE
+   ========================= */
 .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold;
 }
 
 .badge-primary {
@@ -382,16 +572,20 @@ textarea:focus-visible {
     @apply bg-red-100 text-red-800;
 }
 
-/* Empty State */
+/* =========================
+   EMPTY STATE
+   ========================= */
 .empty-state {
-    @apply flex flex-col items-center justify-center py-12 text-gray-500;
+    @apply flex flex-col items-center justify-center py-16 text-gray-500;
 }
 
 .empty-state i {
-    @apply text-6xl mb-4 opacity-50;
+    @apply text-7xl mb-4 opacity-50;
 }
 
-/* Utility Classes */
+/* =========================
+   UTILITY CLASSES
+   ========================= */
 .truncate-2-lines {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -404,4 +598,17 @@ textarea:focus-visible {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* =========================
+   RESPONSIVE UTILITIES
+   ========================= */
+@media (max-width: 640px) {
+    .tab-button {
+        @apply min-w-[100px] px-4 py-3 text-sm;
+    }
+
+    .tab-button i {
+        @apply text-base;
+    }
 }
