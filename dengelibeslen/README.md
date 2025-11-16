@@ -34,7 +34,7 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 ## 🛠️ Teknolojiler
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **API**: Google Gemini 2.0 Flash (Vision)
+- **API**: Google Gemini 1.5 Flash (Vision)
 - **Hosting**: GitHub Pages
 - **Tasarım**: Mobile-first, Responsive
 
