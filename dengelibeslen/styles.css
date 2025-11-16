@@ -1,0 +1,584 @@
+/* ===== CSS Değişkenleri ===== */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --danger-color: #f44336;
+    --warning-color: #ff9800;
+    --success-color: #4CAF50;
+    --text-dark: #333;
+    --text-light: #666;
+    --background: #f5f5f5;
+    --white: #ffffff;
+    --border-radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+}
+
+/* ===== Reset & Base ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* ===== Container ===== */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--white);
+    box-shadow: 0 0 40px rgba(0,0,0,0.2);
+}
+
+/* ===== Page System ===== */
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Header ===== */
+.header {
+    background: linear-gradient(135deg, var(--primary-color), #45a049);
+    color: var(--white);
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.tagline {
+    font-size: 0.95rem;
+    opacity: 0.95;
+    margin-top: 0.5rem;
+}
+
+/* ===== Main Content ===== */
+.main-content {
+    padding: 2rem 1.5rem;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.intro h2 {
+    font-size: 1.4rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+.intro p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* ===== Buttons ===== */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+
+.btn:active {
+    transform: translateY(2px);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: #45a049;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: var(--secondary-color);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background: #1976D2;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-back {
+    background: var(--background);
+    color: var(--text-dark);
+    padding: 0.75rem 1.25rem;
+    align-self: flex-start;
+}
+
+.btn-back:hover {
+    background: #e0e0e0;
+}
+
+.btn-large {
+    padding: 1.25rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.btn-save {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 0.75rem 1.5rem;
+    white-space: nowrap;
+}
+
+.btn-save:hover {
+    background: #45a049;
+}
+
+/* ===== How It Works ===== */
+.how-it-works {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.how-it-works h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.step p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* ===== API Key Section ===== */
+.api-key-section {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.api-key-section h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.api-info {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.api-help {
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.api-help a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.api-help a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Footer ===== */
+.footer {
+    padding: 1.5rem;
+    background: #fff3cd;
+    border-top: 2px solid #ffc107;
+}
+
+.disclaimer {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ===== Analysis Page ===== */
+.analysis-header {
+    padding: 1.5rem;
+    background: var(--background);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.analysis-header h2 {
+    font-size: 1.5rem;
+}
+
+.preview-section {
+    padding: 1.5rem;
+}
+
+.preview-section h3 {
+    margin-bottom: 1rem;
+}
+
+.image-preview {
+    width: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+}
+
+.image-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.preview-hint {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.analyze-section {
+    padding: 0 1.5rem 2rem;
+}
+
+.analyze-section .btn {
+    width: 100%;
+}
+
+/* ===== Loading Page ===== */
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--background);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-content h2 {
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+#loadingMessage {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* ===== Results Page ===== */
+.results-header {
+    padding: 1.5rem;
+    background: var(--background);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.results-header h2 {
+    font-size: 1.5rem;
+}
+
+.results-content {
+    padding: 1.5rem;
+}
+
+/* Risk Badge */
+.risk-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.risk-badge.low {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.risk-badge.medium {
+    background: #fff3cd;
+    color: #856404;
+    border: 2px solid #ffeaa7;
+}
+
+.risk-badge.high {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+.risk-icon {
+    font-size: 1.5rem;
+}
+
+/* Summary Card */
+.summary-card {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.summary-card h3 {
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+#summaryText {
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* Ingredients Section */
+.ingredients-section {
+    margin-bottom: 2rem;
+}
+
+.ingredients-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.ingredients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ingredient-card {
+    background: var(--white);
+    border: 2px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    transition: var(--transition);
+}
+
+.ingredient-card:hover {
+    box-shadow: var(--shadow);
+}
+
+.ingredient-card.risk-low {
+    border-left: 4px solid var(--success-color);
+}
+
+.ingredient-card.risk-medium {
+    border-left: 4px solid var(--warning-color);
+}
+
+.ingredient-card.risk-high {
+    border-left: 4px solid var(--danger-color);
+}
+
+.ingredient-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.ingredient-risk-icon {
+    font-size: 1.2rem;
+}
+
+.ingredient-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.ingredient-ecode {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.ingredient-explanation {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-top: 0.5rem;
+}
+
+/* ===== Error Page ===== */
+.error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.error-content h2 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+#errorMessage {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* ===== Responsive Design ===== */
+@media (min-width: 768px) {
+    .action-buttons {
+        flex-direction: row;
+    }
+
+    .steps {
+        flex-direction: row;
+    }
+
+    .step {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ===== Utilities ===== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gıda etiketlerini yapay zeka ile analiz edin, sağlık risklerini öğrenin">
+    <meta name="keywords" content="gıda, etiket, analiz, sağlık, yapay zeka, içerik">
+    <title>Dengeli Beslen - Gıda İçerik Analiz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Ana Konteyner -->
+    <div class="container">
+        <!-- Ana Sayfa -->
+        <div id="homePage" class="page active">
+            <header class="header">
+                <div class="logo">
+                    <span class="logo-icon">🥗</span>
+                    <h1>Dengeli Beslen</h1>
+                </div>
+                <p class="tagline">Gıda İçeriğini Analiz Et, Bilinçli Seç</p>
+            </header>
+
+            <main class="main-content">
+                <div class="intro">
+                    <h2>Etiket fotoğrafı çek, sağlık risklerini öğren</h2>
+                    <p>Yapay zeka destekli analiz ile gıda ürünlerindeki içerikleri anında değerlendirin</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="cameraBtn" class="btn btn-primary">
+                        <span class="btn-icon">📷</span>
+                        <span>Fotoğraf Çek</span>
+                    </button>
+                    <button id="galleryBtn" class="btn btn-secondary">
+                        <span class="btn-icon">🖼️</span>
+                        <span>Galeriden Yükle</span>
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                </div>
+
+                <div class="how-it-works">
+                    <h3>Nasıl Çalışır?</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <p>Etiketin "İçindekiler" bölümünün fotoğrafını çekin</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <p>Yapay zeka içerikleri okur ve analiz eder</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <p>Sağlık risklerini ve açıklamaları görün</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-key-section">
+                    <h3>API Anahtarı</h3>
+                    <p class="api-info">Gemini API anahtarınızı girin (anahtarınız tarayıcınızda saklanır)</p>
+                    <div class="input-group">
+                        <input type="password" id="apiKeyInput" placeholder="Gemini API Anahtarınız">
+                        <button id="saveApiKeyBtn" class="btn btn-save">Kaydet</button>
+                    </div>
+                    <p class="api-help">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank">API anahtarı almak için tıklayın</a>
+                    </p>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <p class="disclaimer">
+                    ⚠️ Bu uygulama bilgilendirme amaçlıdır. Verilen bilgiler tıbbi tavsiye yerine geçmez.
+                    Sağlık durumunuzla ilgili kararlar için lütfen bir sağlık profesyoneline danışın.
+                </p>
+            </footer>
+        </div>
+
+        <!-- Analiz Sayfası -->
+        <div id="analysisPage" class="page">
+            <div class="analysis-header">
+                <button id="backBtn" class="btn btn-back">← Geri</button>
+                <h2>Analiz</h2>
+            </div>
+
+            <div class="preview-section">
+                <h3>Yüklenen Görsel</h3>
+                <div class="image-preview">
+                    <img id="previewImage" src="" alt="Preview">
+                </div>
+                <p class="preview-hint">İçindekiler bölümü net görünüyor mu? Değilse yeni fotoğraf çekin.</p>
+            </div>
+
+            <div class="analyze-section">
+                <button id="analyzeBtn" class="btn btn-primary btn-large">
+                    <span class="btn-icon">✨</span>
+                    <span>Analiz Et</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Yükleniyor Sayfası -->
+        <div id="loadingPage" class="page">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h2>Analiz Ediliyor...</h2>
+                <p id="loadingMessage">Etiket okunuyor...</p>
+            </div>
+        </div>
+
+        <!-- Sonuç Sayfası -->
+        <div id="resultsPage" class="page">
+            <div class="results-header">
+                <button id="backToHomeBtn" class="btn btn-back">← Ana Sayfa</button>
+                <h2>Analiz Sonucu</h2>
+            </div>
+
+            <div class="results-content">
+                <!-- Risk Seviyesi Badge -->
+                <div id="riskBadge" class="risk-badge">
+                    <span class="risk-icon"></span>
+                    <span class="risk-text"></span>
+                </div>
+
+                <!-- Genel Özet -->
+                <div class="summary-card">
+                    <h3>Genel Değerlendirme</h3>
+                    <p id="summaryText"></p>
+                </div>
+
+                <!-- İçerikler Listesi -->
+                <div class="ingredients-section">
+                    <h3>Tespit Edilen İçerikler</h3>
+                    <div id="ingredientsList" class="ingredients-list">
+                        <!-- Dinamik olarak doldurulacak -->
+                    </div>
+                </div>
+
+                <!-- Aksiyon Butonları -->
+                <div class="action-buttons">
+                    <button id="newAnalysisBtn" class="btn btn-primary">
+                        <span>Yeni Analiz Yap</span>
+                    </button>
+                    <button id="shareBtn" class="btn btn-secondary">
+                        <span class="btn-icon">📤</span>
+                        <span>Paylaş</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hata Sayfası -->
+        <div id="errorPage" class="page">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <h2>Bir Hata Oluştu</h2>
+                <p id="errorMessage"></p>
+                <button id="retryBtn" class="btn btn-primary">Tekrar Dene</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
