@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tüm İçerikler - Fırat KIZILTEPE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .category-section {
+            margin: 40px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        .category-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .link-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .link-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .link-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        .link-card i {
+            margin-right: 10px;
+            color: #764ba2;
+        }
+        .back-home {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .back-home a {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+        .back-home a:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Fırat KIZILTEPE</div>
+        <div class="nav-links">
+            <a href="index.html">Ana Sayfa</a>
+            <a href="liste.html">Tüm İçerikler</a>
+            <a href="#contact">İletişim</a>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Tüm İçerikler</h1>
+            <p>Sitedeki tüm araçlar ve içeriklere buradan erişebilirsiniz</p>
+        </div>
+    </section>
+
+    <!-- Fizik Simülasyonları -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-atom"></i> Fizik Simülasyonları</h2>
+        <div class="links-grid">
+            <a href="yuzme_simulasyon/index.html" class="link-card">
+                <h3><i class="fas fa-swimmer"></i>Suda Yüzme Simülasyonu</h3>
+                <p>Suda yüzme fizik simülasyonu interaktif uygulaması</p>
+            </a>
+            <a href="yatay_atis/index.html" class="link-card">
+                <h3><i class="fas fa-baseball-ball"></i>Yatay Atış Simülasyonu</h3>
+                <p>Yatay atış fizik simülasyonu interaktif uygulaması</p>
+            </a>
+            <a href="isigin_kirilmasi/index.html" class="link-card">
+                <h3><i class="fas fa-lightbulb"></i>Işığın Kırılması Simülasyonu</h3>
+                <p>Işık kırılması fizik simülasyonu interaktif uygulaması</p>
+            </a>
+            <a href="sollama/index.html" class="link-card">
+                <h3><i class="fas fa-train"></i>Tren Sollama Simülasyonu</h3>
+                <p>Tren sollama interaktif uygulaması</p>
+            </a>
+            <a href="ball/game.html" class="link-card">
+                <h3><i class="fas fa-basketball-ball"></i>Top Oyunu</h3>
+                <p>Top fiziği simülasyonu ve oyun</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- PDF İşleme Araçları -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-file-pdf"></i> PDF İşleme Araçları</h2>
+        <div class="links-grid">
+            <a href="pdf/index.html" class="link-card">
+                <h3><i class="fas fa-home"></i>PDF Araçları Ana Sayfa</h3>
+                <p>PDF işleme araçlarına genel bakış</p>
+            </a>
+            <a href="pdf/pdftotext.html" class="link-card">
+                <h3><i class="fas fa-file-alt"></i>PDF'den Metne</h3>
+                <p>PDF dosyalarını metin formatına dönüştürün</p>
+            </a>
+            <a href="pdf/pdfkarsilastir.html" class="link-card">
+                <h3><i class="fas fa-exchange-alt"></i>PDF Karşılaştırma</h3>
+                <p>İki PDF dosyasını karşılaştırın</p>
+            </a>
+            <a href="pdf/pdfcompare-pro.html" class="link-card">
+                <h3><i class="fas fa-file-contract"></i>PDF Karşılaştırma Pro</h3>
+                <p>Gelişmiş PDF karşılaştırma aracı</p>
+            </a>
+            <a href="pdf/pdfbirlestir.html" class="link-card">
+                <h3><i class="fas fa-object-group"></i>PDF Birleştir</h3>
+                <p>Birden fazla PDF'yi tek dosyada birleştirin</p>
+            </a>
+            <a href="pdf/pdfbol.html" class="link-card">
+                <h3><i class="fas fa-cut"></i>PDF Böl</h3>
+                <p>PDF dosyalarını bölün ve sayfa çıkarın</p>
+            </a>
+            <a href="pdf/pdfsayfa.html" class="link-card">
+                <h3><i class="fas fa-file-invoice"></i>PDF Sayfa İşlemleri</h3>
+                <p>PDF sayfalarını düzenleyin</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Yapay Zeka Araçları -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-brain"></i> Yapay Zeka Araçları</h2>
+        <div class="links-grid">
+            <a href="yztools/index.html" class="link-card">
+                <h3><i class="fas fa-graduation-cap"></i>Öğretmenler İçin YZ Platformu</h3>
+                <p>Yapay zeka araçları ve eğitim içerikleri</p>
+            </a>
+            <a href="yztools/tool-database.html" class="link-card">
+                <h3><i class="fas fa-database"></i>YZ Araç Veritabanı</h3>
+                <p>Yapay zeka araçları koleksiyonu</p>
+            </a>
+            <a href="yztools/learn-hub.html" class="link-card">
+                <h3><i class="fas fa-book"></i>YZ Öğrenme Merkezi</h3>
+                <p>Yapay zeka öğrenme kaynakları</p>
+            </a>
+            <a href="yztools/step-guide.html" class="link-card">
+                <h3><i class="fas fa-list-ol"></i>YZ Adım Adım Rehber</h3>
+                <p>Yapay zeka kullanım rehberi</p>
+            </a>
+            <a href="yztools/goal-definition.html" class="link-card">
+                <h3><i class="fas fa-bullseye"></i>YZ Hedef Belirleme</h3>
+                <p>Eğitim hedeflerini yapay zeka ile tanımlama</p>
+            </a>
+            <a href="gemini-literature-screening/index.html" class="link-card">
+                <h3><i class="fas fa-search"></i>Gemini Literatür Tarama</h3>
+                <p>Gemini AI ile literatür tarama aracı</p>
+            </a>
+            <a href="aideneme/index.html" class="link-card">
+                <h3><i class="fas fa-flask"></i>AI Deneme</h3>
+                <p>Yapay zeka deneme uygulamaları</p>
+            </a>
+            <a href="YZ.html" class="link-card">
+                <h3><i class="fas fa-robot"></i>YZ Genel</h3>
+                <p>Yapay zeka genel bilgiler ve araçlar</p>
+            </a>
+            <a href="tools/YZ.html" class="link-card">
+                <h3><i class="fas fa-tools"></i>YZ Araçları</h3>
+                <p>Yapay zeka destekli araçlar</p>
+            </a>
+            <a href="gemini_kullanim.html" class="link-card">
+                <h3><i class="fas fa-gem"></i>Gemini Kullanımı</h3>
+                <p>Gemini AI kullanım kılavuzu</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Eğitim İçerikleri -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-book-open"></i> Eğitim İçerikleri</h2>
+        <div class="links-grid">
+            <a href="eicerik.html" class="link-card">
+                <h3><i class="fas fa-laptop"></i>E-İçerik</h3>
+                <p>Dijital eğitim içerikleri</p>
+            </a>
+            <a href="eicerikinceleme/index.html" class="link-card">
+                <h3><i class="fas fa-search-plus"></i>E-İçerik İnceleme</h3>
+                <p>E-içerik değerlendirme ve inceleme</p>
+            </a>
+            <a href="soruolustur/index.html" class="link-card">
+                <h3><i class="fas fa-question-circle"></i>Soru Oluşturma</h3>
+                <p>Otomatik soru oluşturma aracı</p>
+            </a>
+            <a href="kriter/eicerik.html" class="link-card">
+                <h3><i class="fas fa-clipboard-check"></i>E-İçerik Kriterleri</h3>
+                <p>E-içerik değerlendirme kriterleri</p>
+            </a>
+            <a href="kitapkriter/index.html" class="link-card">
+                <h3><i class="fas fa-book"></i>Kitap Kriterleri</h3>
+                <p>Ders kitabı değerlendirme kriterleri</p>
+            </a>
+            <a href="ornekler/fizik11.html" class="link-card">
+                <h3><i class="fas fa-atom"></i>Fizik 11 Örnekleri</h3>
+                <p>11. sınıf fizik ders örnekleri</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Hikaye ve İçerik Üretme -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-pen-fancy"></i> Hikaye ve İçerik Üretme</h2>
+        <div class="links-grid">
+            <a href="hikayeuretme/index.html" class="link-card">
+                <h3><i class="fas fa-book-reader"></i>Hikaye Üretme</h3>
+                <p>Otomatik hikaye oluşturma aracı</p>
+            </a>
+            <a href="ebook/kitap.html" class="link-card">
+                <h3><i class="fas fa-book"></i>E-Kitap</h3>
+                <p>Dijital kitap okuma</p>
+            </a>
+            <a href="ebook/durustluk.html" class="link-card">
+                <h3><i class="fas fa-heart"></i>Dürüstlük</h3>
+                <p>Dürüstlük konulu içerik</p>
+            </a>
+            <a href="ebook/ejderha.html" class="link-card">
+                <h3><i class="fas fa-dragon"></i>Ejderha</h3>
+                <p>Ejderha konulu hikaye</p>
+            </a>
+            <a href="ebook/fatma.html" class="link-card">
+                <h3><i class="fas fa-female"></i>Fatma</h3>
+                <p>Fatma konulu hikaye</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Dijital Araçlar -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-toolbox"></i> Dijital Araçlar</h2>
+        <div class="links-grid">
+            <a href="tools/index.html" class="link-card">
+                <h3><i class="fas fa-tools"></i>Dijital Araçlar Listesi</h3>
+                <p>Çeşitli dijital araçlar koleksiyonu</p>
+            </a>
+            <a href="ocr/index.html" class="link-card">
+                <h3><i class="fas fa-text-height"></i>OCR - Metin Tanıma</h3>
+                <p>Görüntüden metin çıkarma aracı</p>
+            </a>
+            <a href="ekrangoruntusu/index.html" class="link-card">
+                <h3><i class="fas fa-camera"></i>Ekran Görüntüsü</h3>
+                <p>Ekran görüntüsü alma aracı</p>
+            </a>
+            <a href="dosyadonusum/index.html" class="link-card">
+                <h3><i class="fas fa-exchange-alt"></i>Dosya Dönüşüm</h3>
+                <p>Dosya formatı dönüştürme araçları</p>
+            </a>
+            <a href="ses/index.html" class="link-card">
+                <h3><i class="fas fa-microphone"></i>Ses İşleme</h3>
+                <p>Ses kayıt ve işleme araçları</p>
+            </a>
+            <a href="tablo/index.html" class="link-card">
+                <h3><i class="fas fa-table"></i>Tablo Oluşturma</h3>
+                <p>Dinamik tablo oluşturma aracı</p>
+            </a>
+            <a href="tablo/rapor.html" class="link-card">
+                <h3><i class="fas fa-chart-bar"></i>Rapor Oluşturma</h3>
+                <p>Tablo raporu oluşturma</p>
+            </a>
+            <a href="video.html" class="link-card">
+                <h3><i class="fas fa-video"></i>Video Araçları</h3>
+                <p>Video işleme ve düzenleme</p>
+            </a>
+            <a href="kelime_oyunu.html" class="link-card">
+                <h3><i class="fas fa-gamepad"></i>Kelime Oyunu</h3>
+                <p>Eğitici kelime oyunu</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Sağlık ve Yaşam -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-heartbeat"></i> Sağlık ve Yaşam</h2>
+        <div class="links-grid">
+            <a href="dengelibeslen/index.html" class="link-card">
+                <h3><i class="fas fa-apple-alt"></i>Dengeli Beslenme</h3>
+                <p>Dengeli beslenme rehberi ve araçları</p>
+            </a>
+            <a href="ftr.html" class="link-card">
+                <h3><i class="fas fa-running"></i>Fizyoterapi</h3>
+                <p>Fizyoterapi bilgileri ve egzersizler</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Etik ve Yönetim -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-balance-scale"></i> Etik ve Yönetim</h2>
+        <div class="links-grid">
+            <a href="etik.html" class="link-card">
+                <h3><i class="fas fa-gavel"></i>Etik</h3>
+                <p>Etik kurallar ve ilkeler</p>
+            </a>
+            <a href="ethic/index.html" class="link-card">
+                <h3><i class="fas fa-university"></i>Etik Kurulu</h3>
+                <p>Etik kurul ana sayfası</p>
+            </a>
+            <a href="ethic/about.html" class="link-card">
+                <h3><i class="fas fa-info-circle"></i>Etik Hakkında</h3>
+                <p>Etik kurul hakkında bilgi</p>
+            </a>
+            <a href="ethic/principles.html" class="link-card">
+                <h3><i class="fas fa-list"></i>Etik İlkeler</h3>
+                <p>Temel etik ilkeler</p>
+            </a>
+            <a href="ethic/committee.html" class="link-card">
+                <h3><i class="fas fa-users"></i>Kurul Üyeleri</h3>
+                <p>Etik kurul üyeleri</p>
+            </a>
+            <a href="ethic/assessment.html" class="link-card">
+                <h3><i class="fas fa-clipboard-list"></i>Değerlendirme</h3>
+                <p>Etik değerlendirme süreci</p>
+            </a>
+            <a href="ethic/roadmap.html" class="link-card">
+                <h3><i class="fas fa-road"></i>Yol Haritası</h3>
+                <p>Etik kurul yol haritası</p>
+            </a>
+            <a href="ethic/resources.html" class="link-card">
+                <h3><i class="fas fa-folder-open"></i>Kaynaklar</h3>
+                <p>Etik kaynaklar</p>
+            </a>
+            <a href="ethic/international.html" class="link-card">
+                <h3><i class="fas fa-globe"></i>Uluslararası Etik</h3>
+                <p>Uluslararası etik standartlar</p>
+            </a>
+            <a href="ethic/contact.html" class="link-card">
+                <h3><i class="fas fa-envelope"></i>İletişim</h3>
+                <p>Etik kurul iletişim</p>
+            </a>
+            <a href="izin/izin.html" class="link-card">
+                <h3><i class="fas fa-check-circle"></i>İzin Formu</h3>
+                <p>İzin ve onay formları</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Diğer İçerikler -->
+    <section class="category-section">
+        <h2 class="category-title"><i class="fas fa-folder"></i> Diğer İçerikler</h2>
+        <div class="links-grid">
+            <a href="project/index.html" class="link-card">
+                <h3><i class="fas fa-project-diagram"></i>Projeler</h3>
+                <p>Genel projeler</p>
+            </a>
+            <a href="igys/index.html" class="link-card">
+                <h3><i class="fas fa-cogs"></i>İGYS</h3>
+                <p>İç Güvenlik Yönetim Sistemi</p>
+            </a>
+            <a href="yz/index.html" class="link-card">
+                <h3><i class="fas fa-robot"></i>YZ Araçları</h3>
+                <p>Yapay zeka araçları ve uygulamaları</p>
+            </a>
+            <a href="ott/clarkkozma.html" class="link-card">
+                <h3><i class="fas fa-book-open"></i>Clark & Kozma</h3>
+                <p>Clark ve Kozma tartışması</p>
+            </a>
+            <a href="ott/tarihselsurec.html" class="link-card">
+                <h3><i class="fas fa-history"></i>Tarihsel Süreç</h3>
+                <p>Tarihsel gelişim süreci</p>
+            </a>
+        </div>
+    </section>
+
+    <div class="back-home">
+        <a href="index.html"><i class="fas fa-home"></i> Ana Sayfaya Dön</a>
+    </div>
+
+    <section id="contact" class="contact">
+        <h2>İletişim</h2>
+        <div class="contact-content">
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            </div>
+            <p>E-posta:</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>
