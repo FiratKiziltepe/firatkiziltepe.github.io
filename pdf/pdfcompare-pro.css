@@ -467,6 +467,44 @@ body {
     background: white;
 }
 
+.textLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 1;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.textLayer span {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+}
+
+.textLayer span.highlight-deleted {
+    color: #dc3545;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.textLayer span.highlight-added {
+    color: #0078ff;
+    background-color: rgba(0, 120, 255, 0.1);
+    font-weight: 500;
+}
+
+.textLayer span.highlight-modified {
+    color: #ff8c00;
+    background-color: rgba(255, 140, 0, 0.1);
+}
+
 .changes-overlay {
     position: absolute;
     top: 0;
@@ -579,7 +617,9 @@ body {
 .changes-list {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1rem;
+    min-height: 0;
 }
 
 .panel-footer {

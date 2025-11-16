@@ -73,6 +73,8 @@ const elements = {
     canvas2: document.getElementById('canvas2'),
     overlay1: document.getElementById('overlay1'),
     overlay2: document.getElementById('overlay2'),
+    textLayer1: document.getElementById('textLayer1'),
+    textLayer2: document.getElementById('textLayer2'),
     sideBySideView: document.getElementById('sideBySideView'),
     overlayView: document.getElementById('overlayView'),
     singleView: document.getElementById('singleView'),
@@ -317,6 +319,9 @@ async function renderPage(pdfNumber, pageNum) {
         pdf.currentPage = pageNum;
         updatePageInfo();
 
+        // Render text layer
+        await renderTextLayer(pdfNumber, page, viewport);
+
         // Render highlights after PDF page is rendered
         if (state.comparison.highlights) {
             renderPageHighlights(pdfNumber, pageNum);
@@ -324,6 +329,48 @@ async function renderPage(pdfNumber, pageNum) {
 
     } catch (error) {
         console.error(`Sayfa ${pageNum} render hatası:`, error);
+    }
+}
+
+// Render text layer for precise text highlighting
+async function renderTextLayer(pdfNumber, page, viewport) {
+    const textLayerDiv = pdfNumber === 1 ? elements.textLayer1 : elements.textLayer2;
+
+    if (!textLayerDiv) return;
+
+    // Clear existing text layer
+    textLayerDiv.innerHTML = '';
+    textLayerDiv.style.width = viewport.width + 'px';
+    textLayerDiv.style.height = viewport.height + 'px';
+
+    try {
+        const textContent = await page.getTextContent();
+
+        textContent.items.forEach(item => {
+            if (!item.str || item.str.trim() === '') return;
+
+            const tx = item.transform;
+            const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+            const fontAscent = fontHeight;
+
+            const span = document.createElement('span');
+            span.textContent = item.str;
+            span.style.left = tx[4] + 'px';
+            span.style.top = (tx[5] - fontAscent) + 'px';
+            span.style.fontSize = fontHeight + 'px';
+            span.style.fontFamily = item.fontName;
+
+            // Store original text for matching
+            span.dataset.text = item.str;
+
+            textLayerDiv.appendChild(span);
+        });
+
+        // Apply highlights to text layer
+        highlightTextLayer(pdfNumber, page.pageNumber);
+
+    } catch (error) {
+        console.error('Text layer render error:', error);
     }
 }
 
@@ -885,6 +932,110 @@ async function createThumbnail(pageNum, pdfNumber) {
     return item;
 }
 
+// ==================== TEXT LAYER HIGHLIGHTING ====================
+// Apply highlights to text layer based on comparison results
+function highlightTextLayer(pdfNumber, pageNum) {
+    if (!state.settings.highlightChanges) return;
+    if (!state.comparison.changes) return;
+
+    const textLayerDiv = pdfNumber === 1 ? elements.textLayer1 : elements.textLayer2;
+    if (!textLayerDiv) return;
+
+    const spans = textLayerDiv.querySelectorAll('span');
+    if (spans.length === 0) return;
+
+    // Build full text from spans
+    let fullText = '';
+    const spanMap = [];
+
+    spans.forEach((span, idx) => {
+        const startIdx = fullText.length;
+        const text = span.dataset.text || span.textContent;
+        fullText += text;
+        spanMap.push({
+            startIdx: startIdx,
+            endIdx: fullText.length,
+            span: span,
+            text: text
+        });
+        fullText += ' ';
+    });
+
+    const fullTextNormalized = normalizeText(fullText);
+
+    // Get changes for this page
+    const { added, deleted, modified } = state.comparison.changes;
+
+    // Process deleted items (only for PDF1)
+    if (pdfNumber === 1) {
+        deleted.forEach(change => {
+            if (change.pageNum === pageNum) {
+                markTextInLayer(change.content, spanMap, fullTextNormalized, 'deleted');
+            }
+        });
+    }
+
+    // Process added items (only for PDF2)
+    if (pdfNumber === 2) {
+        added.forEach(change => {
+            if (change.pageNum === pageNum) {
+                markTextInLayer(change.content, spanMap, fullTextNormalized, 'added');
+            }
+        });
+    }
+
+    // Process modified items
+    modified.forEach(change => {
+        if (change.pageNum !== pageNum) return;
+
+        change.diff.forEach(diffItem => {
+            if (diffItem.type === 'removed' && pdfNumber === 1 && diffItem.line1) {
+                markTextInLayer(diffItem.line1, spanMap, fullTextNormalized, 'deleted');
+            } else if (diffItem.type === 'added' && pdfNumber === 2 && diffItem.line2) {
+                markTextInLayer(diffItem.line2, spanMap, fullTextNormalized, 'added');
+            }
+        });
+    });
+}
+
+// Mark text in text layer
+function markTextInLayer(searchText, spanMap, fullTextNormalized, highlightType) {
+    const searchNormalized = normalizeText(searchText);
+    if (!searchNormalized) return;
+
+    // Try exact match first
+    let searchIdx = fullTextNormalized.indexOf(searchNormalized);
+
+    if (searchIdx !== -1) {
+        const searchEndIdx = searchIdx + searchNormalized.length;
+
+        // Mark all spans that overlap with search range
+        spanMap.forEach(item => {
+            if (item.startIdx < searchEndIdx && item.endIdx > searchIdx) {
+                item.span.classList.add(`highlight-${highlightType}`);
+            }
+        });
+    } else {
+        // Fallback: word-by-word matching for partial matches
+        const significantWords = searchNormalized.split(/\s+/).filter(w => w.length >= 5);
+
+        if (significantWords.length >= 1) {
+            significantWords.forEach(word => {
+                let wordIdx = fullTextNormalized.indexOf(word);
+                if (wordIdx !== -1) {
+                    const wordEndIdx = wordIdx + word.length;
+
+                    spanMap.forEach(item => {
+                        if (item.startIdx <= wordIdx && item.endIdx >= wordEndIdx) {
+                            item.span.classList.add(`highlight-${highlightType}`);
+                        }
+                    });
+                }
+            });
+        }
+    }
+}
+
 // ==================== CHANGE HIGHLIGHTING ====================
 // Create highlight canvas overlay on top of PDF canvas
 function createHighlightCanvas(pdfCanvas, overlayContainer) {
@@ -1139,13 +1290,16 @@ function toggleHighlights() {
     state.settings.highlightChanges = !state.settings.highlightChanges;
 
     if (state.settings.highlightChanges) {
-        // Re-render current page highlights
+        // Re-render current page highlights (both canvas and text layer)
         const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
         renderPageHighlights(1, currentPage);
         renderPageHighlights(2, currentPage);
+        highlightTextLayer(1, currentPage);
+        highlightTextLayer(2, currentPage);
     } else {
-        // Clear all highlights
+        // Clear all highlights (both canvas and text layer)
         clearHighlights();
+        clearTextLayerHighlights();
     }
 
     // Update button appearance
@@ -1157,6 +1311,18 @@ function toggleHighlights() {
             toggleBtn.classList.remove('active');
         }
     }
+}
+
+// Clear text layer highlights
+function clearTextLayerHighlights() {
+    [elements.textLayer1, elements.textLayer2].forEach(textLayer => {
+        if (textLayer) {
+            const spans = textLayer.querySelectorAll('span');
+            spans.forEach(span => {
+                span.classList.remove('highlight-deleted', 'highlight-added', 'highlight-modified');
+            });
+        }
+    });
 }
 
 function updateChangesPanel() {
