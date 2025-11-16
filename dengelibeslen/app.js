@@ -269,9 +269,17 @@ async function analyzeImage() {
             : '';
 
         // Prepare Gemini API request
-        const prompt = `Bu gıda etiketindeki "İçindekiler" veya "Ingredients" bölümünü oku ve analiz et.${profilePrompt}
+        const prompt = `Bu gıda ürünü görselini analiz et.
 
-Lütfen her bileşeni listele ve aşağıdaki JSON formatında yanıt ver:
+ÖNEMLI:
+- Görselde "İçindekiler" veya "Ingredients" listesi varsa onu oku
+- İçindekiler listesi yoksa ama "Besin Değerleri" veya "Nutrition Facts" tablosu varsa onu analiz et
+- Ürün adı, marka bilgisi ve besin değerleri varsa bunlardan ürün hakkında çıkarım yap
+- Hiçbir bilgi yoksa açıkça belirt
+
+${profilePrompt}
+
+Lütfen aşağıdaki JSON formatında yanıt ver:
 
 {
   "ingredients": [
@@ -283,18 +291,20 @@ Lütfen her bileşeni listele ve aşağıdaki JSON formatında yanıt ver:
     }
   ],
   "overall_risk": "low/medium/high",
-  "summary": "Genel değerlendirme (2-3 cümle, Türkçe)",
+  "summary": "Genel değerlendirme (2-3 cümle, Türkçe). Eğer sadece besin değerleri tablosu varsa bunu belirt.",
   "personalized_summary": "${profileText ? 'Kullanıcı profiline göre özel uyarılar ve öneriler (3-4 cümle)' : ''}"
 }
 
-Kurallar:
+KURALLAR:
 - Risk seviyeleri: low (doğal, güvenli), medium (dikkatli tüketilmeli), high (potansiyel risk)
 - Açıklamalar anlaşılır ve jargonsuz olmalı
 - E kodları varsa belirt
 - Yapay katkı maddeleri, koruyucular, renklendiriciler için özellikle dikkatli ol
 ${profileText ? '- personalized_summary alanında kullanıcının alerjilerine ve diyet tercihlerine göre MUTLAKA özel uyarılar ver' : ''}
-- SADECE JSON formatında yanıt ver, başka metin ekleme
-- JSON dışında hiçbir açıklama veya metin yazma`;
+- Eğer sadece besin değerleri tablosu varsa, şeker/yağ/tuz/protein oranlarını değerlendir
+- SADECE JSON formatında yanıt ver
+- JSON içindeki string değerlerde çift tırnak (") kullanma, tek tırnak (') kullan veya kaçış karakteri kullan
+- JSON'ı doğru formatla, tırnak işaretlerini kapat`;
 
         updateLoadingMessage('İçerikler analiz ediliyor...');
 
@@ -337,8 +347,30 @@ ${profileText ? '- personalized_summary alanında kullanıcının alerjilerine v
 
         const data = await response.json();
 
+        // Check for safety filter blocks
+        if (!data.candidates || data.candidates.length === 0) {
+            console.error('API Response:', data);
+
+            // Check if blocked by safety filters
+            if (data.promptFeedback?.blockReason) {
+                throw new Error(`İçerik güvenlik filtreleri tarafından engellendi: ${data.promptFeedback.blockReason}`);
+            }
+
+            throw new Error('API yanıt vermedi. Lütfen farklı bir görsel deneyin veya model değiştirin.');
+        }
+
+        // Check if content was blocked
+        const candidate = data.candidates[0];
+        if (candidate.finishReason === 'SAFETY') {
+            throw new Error('İçerik güvenlik nedeniyle engellendi. Lütfen farklı bir görsel deneyin.');
+        }
+
+        if (!candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
+            throw new Error('API boş yanıt döndü. Lütfen tekrar deneyin.');
+        }
+
         // Extract text from response
-        const generatedText = data.candidates[0].content.parts[0].text;
+        const generatedText = candidate.content.parts[0].text;
 
         // Extract JSON from response (improved parsing)
         let jsonText = generatedText.trim();
@@ -362,6 +394,13 @@ ${profileText ? '- personalized_summary alanında kullanıcının alerjilerine v
             jsonText = jsonMatch[0];
         }
 
+        // Clean up potential JSON issues
+        jsonText = jsonText
+            .replace(/\n/g, ' ')  // Remove newlines
+            .replace(/\s+/g, ' ')  // Normalize whitespace
+            .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
+            .trim();
+
         // Parse JSON
         let analysisResult;
         try {
@@ -369,7 +408,10 @@ ${profileText ? '- personalized_summary alanında kullanıcının alerjilerine v
         } catch (parseError) {
             console.error('JSON parse error:', parseError);
             console.error('Generated text:', generatedText);
-            throw new Error('Yanıt JSON formatında değil. Lütfen tekrar deneyin.');
+            console.error('Cleaned JSON text:', jsonText);
+
+            // Try to create a fallback response
+            throw new Error('Yanıt işlenemedi. Lütfen farklı bir model seçerek tekrar deneyin.');
         }
 
         // Display results
