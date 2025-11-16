@@ -1,0 +1,427 @@
+{
+  "kategoriler": [
+    {
+      "id": "fizik",
+      "baslik": "Fizik Simülasyonları",
+      "ikon": "fas fa-atom",
+      "icerikler": [
+        {
+          "url": "yuzme_simulasyon/index.html",
+          "baslik": "Suda Yüzme Simülasyonu",
+          "aciklama": "Suda yüzme fizik simülasyonu interaktif uygulaması",
+          "ikon": "fas fa-swimmer"
+        },
+        {
+          "url": "yatay_atis/index.html",
+          "baslik": "Yatay Atış Simülasyonu",
+          "aciklama": "Yatay atış fizik simülasyonu interaktif uygulaması",
+          "ikon": "fas fa-baseball-ball"
+        },
+        {
+          "url": "isigin_kirilmasi/index.html",
+          "baslik": "Işığın Kırılması Simülasyonu",
+          "aciklama": "Işık kırılması fizik simülasyonu interaktif uygulaması",
+          "ikon": "fas fa-lightbulb"
+        },
+        {
+          "url": "sollama/index.html",
+          "baslik": "Tren Sollama Simülasyonu",
+          "aciklama": "Tren sollama interaktif uygulaması",
+          "ikon": "fas fa-train"
+        },
+        {
+          "url": "ball/game.html",
+          "baslik": "Top Oyunu",
+          "aciklama": "Top fiziği simülasyonu ve oyun",
+          "ikon": "fas fa-basketball-ball"
+        }
+      ]
+    },
+    {
+      "id": "pdf",
+      "baslik": "PDF İşleme Araçları",
+      "ikon": "fas fa-file-pdf",
+      "icerikler": [
+        {
+          "url": "pdf/index.html",
+          "baslik": "PDF Araçları Ana Sayfa",
+          "aciklama": "PDF işleme araçlarına genel bakış",
+          "ikon": "fas fa-home"
+        },
+        {
+          "url": "pdf/pdftotext.html",
+          "baslik": "PDF'den Metne",
+          "aciklama": "PDF dosyalarını metin formatına dönüştürün",
+          "ikon": "fas fa-file-alt"
+        },
+        {
+          "url": "pdf/pdfkarsilastir.html",
+          "baslik": "PDF Karşılaştırma",
+          "aciklama": "İki PDF dosyasını karşılaştırın",
+          "ikon": "fas fa-exchange-alt"
+        },
+        {
+          "url": "pdf/pdfcompare-pro.html",
+          "baslik": "PDF Karşılaştırma Pro",
+          "aciklama": "Gelişmiş PDF karşılaştırma aracı",
+          "ikon": "fas fa-file-contract"
+        },
+        {
+          "url": "pdf/pdfbirlestir.html",
+          "baslik": "PDF Birleştir",
+          "aciklama": "Birden fazla PDF'yi tek dosyada birleştirin",
+          "ikon": "fas fa-object-group"
+        },
+        {
+          "url": "pdf/pdfbol.html",
+          "baslik": "PDF Böl",
+          "aciklama": "PDF dosyalarını bölün ve sayfa çıkarın",
+          "ikon": "fas fa-cut"
+        },
+        {
+          "url": "pdf/pdfsayfa.html",
+          "baslik": "PDF Sayfa İşlemleri",
+          "aciklama": "PDF sayfalarını düzenleyin",
+          "ikon": "fas fa-file-invoice"
+        }
+      ]
+    },
+    {
+      "id": "yapay-zeka",
+      "baslik": "Yapay Zeka Araçları",
+      "ikon": "fas fa-brain",
+      "icerikler": [
+        {
+          "url": "yztools/index.html",
+          "baslik": "Öğretmenler İçin YZ Platformu",
+          "aciklama": "Yapay zeka araçları ve eğitim içerikleri",
+          "ikon": "fas fa-graduation-cap"
+        },
+        {
+          "url": "yztools/tool-database.html",
+          "baslik": "YZ Araç Veritabanı",
+          "aciklama": "Yapay zeka araçları koleksiyonu",
+          "ikon": "fas fa-database"
+        },
+        {
+          "url": "yztools/learn-hub.html",
+          "baslik": "YZ Öğrenme Merkezi",
+          "aciklama": "Yapay zeka öğrenme kaynakları",
+          "ikon": "fas fa-book"
+        },
+        {
+          "url": "yztools/step-guide.html",
+          "baslik": "YZ Adım Adım Rehber",
+          "aciklama": "Yapay zeka kullanım rehberi",
+          "ikon": "fas fa-list-ol"
+        },
+        {
+          "url": "yztools/goal-definition.html",
+          "baslik": "YZ Hedef Belirleme",
+          "aciklama": "Eğitim hedeflerini yapay zeka ile tanımlama",
+          "ikon": "fas fa-bullseye"
+        },
+        {
+          "url": "gemini-literature-screening/index.html",
+          "baslik": "Gemini Literatür Tarama",
+          "aciklama": "Gemini AI ile literatür tarama aracı",
+          "ikon": "fas fa-search"
+        },
+        {
+          "url": "aideneme/index.html",
+          "baslik": "AI Deneme",
+          "aciklama": "Yapay zeka deneme uygulamaları",
+          "ikon": "fas fa-flask"
+        },
+        {
+          "url": "YZ.html",
+          "baslik": "YZ Genel",
+          "aciklama": "Yapay zeka genel bilgiler ve araçlar",
+          "ikon": "fas fa-robot"
+        },
+        {
+          "url": "tools/YZ.html",
+          "baslik": "YZ Araçları",
+          "aciklama": "Yapay zeka destekli araçlar",
+          "ikon": "fas fa-tools"
+        },
+        {
+          "url": "gemini_kullanim.html",
+          "baslik": "Gemini Kullanımı",
+          "aciklama": "Gemini AI kullanım kılavuzu",
+          "ikon": "fas fa-gem"
+        }
+      ]
+    },
+    {
+      "id": "egitim",
+      "baslik": "Eğitim İçerikleri",
+      "ikon": "fas fa-book-open",
+      "icerikler": [
+        {
+          "url": "eicerik.html",
+          "baslik": "E-İçerik",
+          "aciklama": "Dijital eğitim içerikleri",
+          "ikon": "fas fa-laptop"
+        },
+        {
+          "url": "eicerikinceleme/index.html",
+          "baslik": "E-İçerik İnceleme",
+          "aciklama": "E-içerik değerlendirme ve inceleme",
+          "ikon": "fas fa-search-plus"
+        },
+        {
+          "url": "soruolustur/index.html",
+          "baslik": "Soru Oluşturma",
+          "aciklama": "Otomatik soru oluşturma aracı",
+          "ikon": "fas fa-question-circle"
+        },
+        {
+          "url": "kriter/eicerik.html",
+          "baslik": "E-İçerik Kriterleri",
+          "aciklama": "E-içerik değerlendirme kriterleri",
+          "ikon": "fas fa-clipboard-check"
+        },
+        {
+          "url": "kitapkriter/index.html",
+          "baslik": "Kitap Kriterleri",
+          "aciklama": "Ders kitabı değerlendirme kriterleri",
+          "ikon": "fas fa-book"
+        },
+        {
+          "url": "ornekler/fizik11.html",
+          "baslik": "Fizik 11 Örnekleri",
+          "aciklama": "11. sınıf fizik ders örnekleri",
+          "ikon": "fas fa-atom"
+        }
+      ]
+    },
+    {
+      "id": "hikaye",
+      "baslik": "Hikaye ve İçerik Üretme",
+      "ikon": "fas fa-pen-fancy",
+      "icerikler": [
+        {
+          "url": "hikayeuretme/index.html",
+          "baslik": "Hikaye Üretme",
+          "aciklama": "Otomatik hikaye oluşturma aracı",
+          "ikon": "fas fa-book-reader"
+        },
+        {
+          "url": "ebook/kitap.html",
+          "baslik": "E-Kitap",
+          "aciklama": "Dijital kitap okuma",
+          "ikon": "fas fa-book"
+        },
+        {
+          "url": "ebook/durustluk.html",
+          "baslik": "Dürüstlük",
+          "aciklama": "Dürüstlük konulu içerik",
+          "ikon": "fas fa-heart"
+        },
+        {
+          "url": "ebook/ejderha.html",
+          "baslik": "Ejderha",
+          "aciklama": "Ejderha konulu hikaye",
+          "ikon": "fas fa-dragon"
+        },
+        {
+          "url": "ebook/fatma.html",
+          "baslik": "Fatma",
+          "aciklama": "Fatma konulu hikaye",
+          "ikon": "fas fa-female"
+        }
+      ]
+    },
+    {
+      "id": "dijital-araclar",
+      "baslik": "Dijital Araçlar",
+      "ikon": "fas fa-toolbox",
+      "icerikler": [
+        {
+          "url": "tools/index.html",
+          "baslik": "Dijital Araçlar Listesi",
+          "aciklama": "Çeşitli dijital araçlar koleksiyonu",
+          "ikon": "fas fa-tools"
+        },
+        {
+          "url": "ocr/index.html",
+          "baslik": "OCR - Metin Tanıma",
+          "aciklama": "Görüntüden metin çıkarma aracı",
+          "ikon": "fas fa-text-height"
+        },
+        {
+          "url": "ekrangoruntusu/index.html",
+          "baslik": "Ekran Görüntüsü",
+          "aciklama": "Ekran görüntüsü alma aracı",
+          "ikon": "fas fa-camera"
+        },
+        {
+          "url": "dosyadonusum/index.html",
+          "baslik": "Dosya Dönüşüm",
+          "aciklama": "Dosya formatı dönüştürme araçları",
+          "ikon": "fas fa-exchange-alt"
+        },
+        {
+          "url": "ses/index.html",
+          "baslik": "Ses İşleme",
+          "aciklama": "Ses kayıt ve işleme araçları",
+          "ikon": "fas fa-microphone"
+        },
+        {
+          "url": "tablo/index.html",
+          "baslik": "Tablo Oluşturma",
+          "aciklama": "Dinamik tablo oluşturma aracı",
+          "ikon": "fas fa-table"
+        },
+        {
+          "url": "tablo/rapor.html",
+          "baslik": "Rapor Oluşturma",
+          "aciklama": "Tablo raporu oluşturma",
+          "ikon": "fas fa-chart-bar"
+        },
+        {
+          "url": "video.html",
+          "baslik": "Video Araçları",
+          "aciklama": "Video işleme ve düzenleme",
+          "ikon": "fas fa-video"
+        },
+        {
+          "url": "kelime_oyunu.html",
+          "baslik": "Kelime Oyunu",
+          "aciklama": "Eğitici kelime oyunu",
+          "ikon": "fas fa-gamepad"
+        }
+      ]
+    },
+    {
+      "id": "saglik",
+      "baslik": "Sağlık ve Yaşam",
+      "ikon": "fas fa-heartbeat",
+      "icerikler": [
+        {
+          "url": "dengelibeslen/index.html",
+          "baslik": "Dengeli Beslenme",
+          "aciklama": "Dengeli beslenme rehberi ve araçları",
+          "ikon": "fas fa-apple-alt"
+        },
+        {
+          "url": "ftr.html",
+          "baslik": "Fizyoterapi",
+          "aciklama": "Fizyoterapi bilgileri ve egzersizler",
+          "ikon": "fas fa-running"
+        }
+      ]
+    },
+    {
+      "id": "etik",
+      "baslik": "Etik ve Yönetim",
+      "ikon": "fas fa-balance-scale",
+      "icerikler": [
+        {
+          "url": "etik.html",
+          "baslik": "Etik",
+          "aciklama": "Etik kurallar ve ilkeler",
+          "ikon": "fas fa-gavel"
+        },
+        {
+          "url": "ethic/index.html",
+          "baslik": "Etik Kurulu",
+          "aciklama": "Etik kurul ana sayfası",
+          "ikon": "fas fa-university"
+        },
+        {
+          "url": "ethic/about.html",
+          "baslik": "Etik Hakkında",
+          "aciklama": "Etik kurul hakkında bilgi",
+          "ikon": "fas fa-info-circle"
+        },
+        {
+          "url": "ethic/principles.html",
+          "baslik": "Etik İlkeler",
+          "aciklama": "Temel etik ilkeler",
+          "ikon": "fas fa-list"
+        },
+        {
+          "url": "ethic/committee.html",
+          "baslik": "Kurul Üyeleri",
+          "aciklama": "Etik kurul üyeleri",
+          "ikon": "fas fa-users"
+        },
+        {
+          "url": "ethic/assessment.html",
+          "baslik": "Değerlendirme",
+          "aciklama": "Etik değerlendirme süreci",
+          "ikon": "fas fa-clipboard-list"
+        },
+        {
+          "url": "ethic/roadmap.html",
+          "baslik": "Yol Haritası",
+          "aciklama": "Etik kurul yol haritası",
+          "ikon": "fas fa-road"
+        },
+        {
+          "url": "ethic/resources.html",
+          "baslik": "Kaynaklar",
+          "aciklama": "Etik kaynaklar",
+          "ikon": "fas fa-folder-open"
+        },
+        {
+          "url": "ethic/international.html",
+          "baslik": "Uluslararası Etik",
+          "aciklama": "Uluslararası etik standartlar",
+          "ikon": "fas fa-globe"
+        },
+        {
+          "url": "ethic/contact.html",
+          "baslik": "İletişim",
+          "aciklama": "Etik kurul iletişim",
+          "ikon": "fas fa-envelope"
+        },
+        {
+          "url": "izin/izin.html",
+          "baslik": "İzin Formu",
+          "aciklama": "İzin ve onay formları",
+          "ikon": "fas fa-check-circle"
+        }
+      ]
+    },
+    {
+      "id": "diger",
+      "baslik": "Diğer İçerikler",
+      "ikon": "fas fa-folder",
+      "icerikler": [
+        {
+          "url": "project/index.html",
+          "baslik": "Projeler",
+          "aciklama": "Genel projeler",
+          "ikon": "fas fa-project-diagram"
+        },
+        {
+          "url": "igys/index.html",
+          "baslik": "İGYS",
+          "aciklama": "İç Güvenlik Yönetim Sistemi",
+          "ikon": "fas fa-cogs"
+        },
+        {
+          "url": "yz/index.html",
+          "baslik": "YZ Araçları",
+          "aciklama": "Yapay zeka araçları ve uygulamaları",
+          "ikon": "fas fa-robot"
+        },
+        {
+          "url": "ott/clarkkozma.html",
+          "baslik": "Clark & Kozma",
+          "aciklama": "Clark ve Kozma tartışması",
+          "ikon": "fas fa-book-open"
+        },
+        {
+          "url": "ott/tarihselsurec.html",
+          "baslik": "Tarihsel Süreç",
+          "aciklama": "Tarihsel gelişim süreci",
+          "ikon": "fas fa-history"
+        }
+      ]
+    }
+  ]
+}
