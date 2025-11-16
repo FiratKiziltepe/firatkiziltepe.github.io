@@ -1618,6 +1618,17 @@
         let compositeContext;
         let webcamVideo;
 
+        // Live drawing mode variables
+        let isDrawingModeActive = false;
+        let liveDrawingCanvas;
+        let liveDrawingContext;
+        let liveDrawingTool = 'pen';
+        let liveDrawingColor = '#FF0000';
+        let liveDrawingSize = 3;
+        let isLiveDrawing = false;
+        let liveLastX = 0;
+        let liveLastY = 0;
+
         // IndexedDB Setup
         function initDB() {
             const request = indexedDB.open('ScreenCaptureDB', 1);
@@ -2044,6 +2055,11 @@
                             }
                         }
 
+                        // Draw live drawing overlay if drawing mode is active
+                        if (isDrawingModeActive && liveDrawingCanvas) {
+                            compositeContext.drawImage(liveDrawingCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
+                        }
+
                         requestAnimationFrame(drawComposite);
                     }
 
@@ -2172,6 +2188,18 @@
                 if (webcamVideo) {
                     webcamVideo.srcObject = null;
                     webcamVideo = null;
+                }
+
+                // Clean up drawing mode
+                if (isDrawingModeActive) {
+                    isDrawingModeActive = false;
+                    const existingCanvas = document.getElementById('liveDrawingCanvas');
+                    if (existingCanvas) {
+                        existingCanvas.remove();
+                    }
+                    hideLiveDrawingToolbar();
+                    liveDrawingCanvas = null;
+                    liveDrawingContext = null;
                 }
 
                 // Update UI
@@ -3035,7 +3063,229 @@
 
         // Drawing Mode
         function toggleDrawingMode() {
-            showNotification('Çizim modu özelliği yakında eklenecek', 'info');
+            if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+                showNotification('Çizim modu sadece kayıt sırasında kullanılabilir', 'warning');
+                return;
+            }
+
+            isDrawingModeActive = !isDrawingModeActive;
+
+            if (isDrawingModeActive) {
+                // Create live drawing canvas
+                const previewVideo = document.getElementById('previewVideo');
+                const videoRect = previewVideo.getBoundingClientRect();
+
+                // Create canvas overlay on preview
+                liveDrawingCanvas = document.createElement('canvas');
+                liveDrawingCanvas.width = compositeCanvas.width;
+                liveDrawingCanvas.height = compositeCanvas.height;
+                liveDrawingCanvas.id = 'liveDrawingCanvas';
+                liveDrawingCanvas.style.position = 'absolute';
+                liveDrawingCanvas.style.top = '0';
+                liveDrawingCanvas.style.left = '0';
+                liveDrawingCanvas.style.width = '100%';
+                liveDrawingCanvas.style.height = '100%';
+                liveDrawingCanvas.style.cursor = 'crosshair';
+                liveDrawingCanvas.style.pointerEvents = 'auto';
+
+                liveDrawingContext = liveDrawingCanvas.getContext('2d');
+                liveDrawingContext.lineCap = 'round';
+                liveDrawingContext.lineJoin = 'round';
+
+                // Add canvas to preview area
+                const previewArea = document.getElementById('previewArea');
+                previewArea.style.position = 'relative';
+                previewArea.appendChild(liveDrawingCanvas);
+
+                // Add drawing event listeners
+                liveDrawingCanvas.addEventListener('mousedown', startLiveDrawing);
+                liveDrawingCanvas.addEventListener('mousemove', performLiveDrawing);
+                liveDrawingCanvas.addEventListener('mouseup', stopLiveDrawing);
+                liveDrawingCanvas.addEventListener('mouseleave', stopLiveDrawing);
+
+                // Show drawing toolbar
+                showLiveDrawingToolbar();
+
+                showNotification('Çizim modu aktif - Önizleme üzerine çizim yapabilirsiniz', 'success');
+            } else {
+                // Remove live drawing canvas
+                const existingCanvas = document.getElementById('liveDrawingCanvas');
+                if (existingCanvas) {
+                    existingCanvas.remove();
+                }
+
+                // Hide drawing toolbar
+                hideLiveDrawingToolbar();
+
+                showNotification('Çizim modu kapatıldı', 'info');
+            }
+        }
+
+        // Live drawing event handlers
+        function startLiveDrawing(e) {
+            isLiveDrawing = true;
+            const rect = liveDrawingCanvas.getBoundingClientRect();
+            const scaleX = liveDrawingCanvas.width / rect.width;
+            const scaleY = liveDrawingCanvas.height / rect.height;
+
+            liveLastX = (e.clientX - rect.left) * scaleX;
+            liveLastY = (e.clientY - rect.top) * scaleY;
+
+            if (liveDrawingTool === 'text') {
+                const text = prompt('Metin girin:');
+                if (text) {
+                    liveDrawingContext.fillStyle = liveDrawingColor;
+                    liveDrawingContext.font = `${liveDrawingSize * 10}px Arial`;
+                    liveDrawingContext.fillText(text, liveLastX, liveLastY);
+                }
+                isLiveDrawing = false;
+            }
+        }
+
+        function performLiveDrawing(e) {
+            if (!isLiveDrawing || liveDrawingTool === 'text') return;
+
+            const rect = liveDrawingCanvas.getBoundingClientRect();
+            const scaleX = liveDrawingCanvas.width / rect.width;
+            const scaleY = liveDrawingCanvas.height / rect.height;
+
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            liveDrawingContext.strokeStyle = liveDrawingColor;
+            liveDrawingContext.lineWidth = liveDrawingSize;
+
+            if (liveDrawingTool === 'pen') {
+                liveDrawingContext.globalAlpha = 1;
+                liveDrawingContext.beginPath();
+                liveDrawingContext.moveTo(liveLastX, liveLastY);
+                liveDrawingContext.lineTo(currentX, currentY);
+                liveDrawingContext.stroke();
+            } else if (liveDrawingTool === 'highlighter') {
+                liveDrawingContext.globalAlpha = 0.3;
+                liveDrawingContext.lineWidth = liveDrawingSize * 3;
+                liveDrawingContext.beginPath();
+                liveDrawingContext.moveTo(liveLastX, liveLastY);
+                liveDrawingContext.lineTo(currentX, currentY);
+                liveDrawingContext.stroke();
+                liveDrawingContext.globalAlpha = 1;
+            } else if (liveDrawingTool === 'arrow') {
+                // Arrows are drawn on mouseup
+            } else if (liveDrawingTool === 'rectangle') {
+                // Rectangles are drawn on mouseup
+            } else if (liveDrawingTool === 'circle') {
+                // Circles are drawn on mouseup
+            }
+
+            liveLastX = currentX;
+            liveLastY = currentY;
+        }
+
+        function stopLiveDrawing(e) {
+            if (!isLiveDrawing) return;
+
+            const rect = liveDrawingCanvas.getBoundingClientRect();
+            const scaleX = liveDrawingCanvas.width / rect.width;
+            const scaleY = liveDrawingCanvas.height / rect.height;
+
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            liveDrawingContext.strokeStyle = liveDrawingColor;
+            liveDrawingContext.fillStyle = liveDrawingColor;
+            liveDrawingContext.lineWidth = liveDrawingSize;
+
+            if (liveDrawingTool === 'arrow') {
+                drawArrow(liveDrawingContext, liveLastX, liveLastY, currentX, currentY);
+            } else if (liveDrawingTool === 'rectangle') {
+                const width = currentX - liveLastX;
+                const height = currentY - liveLastY;
+                liveDrawingContext.strokeRect(liveLastX, liveLastY, width, height);
+            } else if (liveDrawingTool === 'circle') {
+                const radius = Math.sqrt(Math.pow(currentX - liveLastX, 2) + Math.pow(currentY - liveLastY, 2));
+                liveDrawingContext.beginPath();
+                liveDrawingContext.arc(liveLastX, liveLastY, radius, 0, Math.PI * 2);
+                liveDrawingContext.stroke();
+            }
+
+            isLiveDrawing = false;
+        }
+
+        // Drawing toolbar functions
+        function showLiveDrawingToolbar() {
+            let toolbar = document.getElementById('liveDrawingToolbar');
+            if (!toolbar) {
+                toolbar = document.createElement('div');
+                toolbar.id = 'liveDrawingToolbar';
+                toolbar.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    padding: 15px;
+                    border-radius: 12px;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    z-index: 10000;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                `;
+
+                toolbar.innerHTML = `
+                    <button onclick="setLiveDrawingTool('pen')" class="btn btn-sm" style="padding: 8px 12px;" title="Kalem">🖊️</button>
+                    <button onclick="setLiveDrawingTool('highlighter')" class="btn btn-sm" style="padding: 8px 12px;" title="Fosforlu Kalem">🖍️</button>
+                    <button onclick="setLiveDrawingTool('arrow')" class="btn btn-sm" style="padding: 8px 12px;" title="Ok">➡️</button>
+                    <button onclick="setLiveDrawingTool('rectangle')" class="btn btn-sm" style="padding: 8px 12px;" title="Dikdörtgen">▭</button>
+                    <button onclick="setLiveDrawingTool('circle')" class="btn btn-sm" style="padding: 8px 12px;" title="Daire">⭕</button>
+                    <button onclick="setLiveDrawingTool('text')" class="btn btn-sm" style="padding: 8px 12px;" title="Metin">T</button>
+                    <input type="color" id="liveDrawColor" value="${liveDrawingColor}" onchange="liveDrawingColor = this.value" style="width: 40px; height: 36px; border: none; border-radius: 6px; cursor: pointer;">
+                    <input type="range" id="liveDrawSize" min="1" max="10" value="${liveDrawingSize}" onchange="liveDrawingSize = parseInt(this.value)" style="width: 100px;">
+                    <button onclick="clearLiveDrawing()" class="btn btn-sm btn-outline" style="padding: 8px 12px;" title="Temizle">🗑️</button>
+                `;
+
+                document.body.appendChild(toolbar);
+            }
+            toolbar.style.display = 'flex';
+        }
+
+        function hideLiveDrawingToolbar() {
+            const toolbar = document.getElementById('liveDrawingToolbar');
+            if (toolbar) {
+                toolbar.style.display = 'none';
+            }
+        }
+
+        function setLiveDrawingTool(tool) {
+            liveDrawingTool = tool;
+            showNotification(`Araç: ${tool}`, 'info');
+        }
+
+        function clearLiveDrawing() {
+            if (liveDrawingContext) {
+                liveDrawingContext.clearRect(0, 0, liveDrawingCanvas.width, liveDrawingCanvas.height);
+                showNotification('Çizimler temizlendi', 'success');
+            }
+        }
+
+        // Helper function to draw arrows
+        function drawArrow(ctx, fromX, fromY, toX, toY) {
+            const headLength = 15;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+
+            // Draw line
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            // Draw arrow head
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
         }
 
         // Range Input Updates
