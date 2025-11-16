@@ -1932,155 +1932,150 @@
                     selectedArea = area;
                 }
 
-                // Setup webcam if enabled OR area selection
+                // Setup webcam if enabled
                 const webcamEnabled = document.getElementById('webcamEnabled').checked;
-                const needsComposite = webcamEnabled || (mode === 'area' && selectedArea);
 
-                if (needsComposite) {
-                    if (webcamEnabled) {
-                        webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    }
-
-                    // Create composite canvas
-                    compositeCanvas = document.createElement('canvas');
-                    compositeContext = compositeCanvas.getContext('2d');
-
-                    // Set canvas size based on area selection or full screen
-                    if (mode === 'area' && selectedArea) {
-                        compositeCanvas.width = selectedArea.width;
-                        compositeCanvas.height = selectedArea.height;
-                    } else {
-                        compositeCanvas.width = videoSettings.width || 1920;
-                        compositeCanvas.height = videoSettings.height || 1080;
-                    }
-
-                    // Create video element for display stream
-                    const displayVideo = document.createElement('video');
-                    displayVideo.srcObject = displayStream;
-                    displayVideo.muted = true;
-                    displayVideo.play();
-
-                    // Create video element for webcam if enabled
-                    if (webcamEnabled) {
-                        webcamVideo = document.createElement('video');
-                        webcamVideo.srcObject = webcamStream;
-                        webcamVideo.muted = true;
-                        webcamVideo.play();
-                    }
-
-                    // Get webcam settings
-                    let webcamSize, webcamX, webcamY, webcamShape;
-                    if (webcamEnabled) {
-                        webcamSize = parseInt(document.getElementById('webcamSize').value);
-                        const webcamPosition = document.getElementById('webcamPosition').value;
-                        webcamShape = document.getElementById('webcamShape').value;
-
-                        // Calculate webcam position
-                        const padding = 20;
-
-                        switch (webcamPosition) {
-                            case 'top-left':
-                                webcamX = padding;
-                                webcamY = padding;
-                                break;
-                            case 'top-right':
-                                webcamX = compositeCanvas.width - webcamSize - padding;
-                                webcamY = padding;
-                                break;
-                            case 'bottom-left':
-                                webcamX = padding;
-                                webcamY = compositeCanvas.height - webcamSize - padding;
-                                break;
-                            case 'bottom-right':
-                            default:
-                                webcamX = compositeCanvas.width - webcamSize - padding;
-                                webcamY = compositeCanvas.height - webcamSize - padding;
-                                break;
-                        }
-                    }
-
-                    // Store selected area locally to avoid issues with closure
-                    const cropArea = mode === 'area' && selectedArea ? { ...selectedArea } : null;
-
-                    // Composite the streams
-                    function drawComposite() {
-                        if (!compositeCanvas) return;
-
-                        // Draw display stream (crop to selected area if needed)
-                        if (cropArea) {
-                            // Crop the video to the selected area
-                            compositeContext.drawImage(
-                                displayVideo,
-                                cropArea.x, cropArea.y, cropArea.width, cropArea.height,
-                                0, 0, compositeCanvas.width, compositeCanvas.height
-                            );
-                        } else {
-                            // Draw full screen
-                            compositeContext.drawImage(displayVideo, 0, 0, compositeCanvas.width, compositeCanvas.height);
-                        }
-
-                        // Draw webcam overlay if enabled
-                        if (webcamEnabled && webcamVideo) {
-                            compositeContext.save();
-
-                            if (webcamShape === 'circle') {
-                                compositeContext.beginPath();
-                                compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
-                                compositeContext.closePath();
-                                compositeContext.clip();
-                            } else if (webcamShape === 'rounded') {
-                                const radius = 12;
-                                compositeContext.beginPath();
-                                compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, radius);
-                                compositeContext.closePath();
-                                compositeContext.clip();
-                            }
-
-                            compositeContext.drawImage(webcamVideo, webcamX, webcamY, webcamSize, webcamSize);
-                            compositeContext.restore();
-
-                            // Draw border
-                            compositeContext.strokeStyle = 'white';
-                            compositeContext.lineWidth = 3;
-                            if (webcamShape === 'circle') {
-                                compositeContext.beginPath();
-                                compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
-                                compositeContext.stroke();
-                            } else if (webcamShape === 'rounded') {
-                                compositeContext.beginPath();
-                                compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, 12);
-                                compositeContext.stroke();
-                            } else {
-                                compositeContext.strokeRect(webcamX, webcamY, webcamSize, webcamSize);
-                            }
-                        }
-
-                        // Draw live drawing overlay if drawing mode is active
-                        if (isDrawingModeActive && liveDrawingCanvas) {
-                            compositeContext.drawImage(liveDrawingCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
-                        }
-
-                        requestAnimationFrame(drawComposite);
-                    }
-
-                    await new Promise(resolve => {
-                        displayVideo.onloadedmetadata = () => {
-                            if (webcamEnabled && webcamVideo) {
-                                webcamVideo.onloadedmetadata = resolve;
-                            } else {
-                                resolve();
-                            }
-                        };
-                    });
-
-                    drawComposite();
-
-                    // Get stream from composite canvas
-                    const compositeStream = compositeCanvas.captureStream(30);
-                    recordingStream = new MediaStream([...compositeStream.getVideoTracks(), ...displayStream.getAudioTracks()]);
-                } else {
-                    recordingStream = displayStream;
+                if (webcamEnabled) {
+                    webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 }
+
+                // Always create composite canvas (for webcam, area selection, or drawing mode)
+                compositeCanvas = document.createElement('canvas');
+                compositeContext = compositeCanvas.getContext('2d');
+
+                // Set canvas size based on area selection or full screen
+                if (mode === 'area' && selectedArea) {
+                    compositeCanvas.width = selectedArea.width;
+                    compositeCanvas.height = selectedArea.height;
+                } else {
+                    compositeCanvas.width = videoSettings.width || 1920;
+                    compositeCanvas.height = videoSettings.height || 1080;
+                }
+
+                // Create video element for display stream
+                const displayVideo = document.createElement('video');
+                displayVideo.srcObject = displayStream;
+                displayVideo.muted = true;
+                displayVideo.play();
+
+                // Create video element for webcam if enabled
+                if (webcamEnabled) {
+                    webcamVideo = document.createElement('video');
+                    webcamVideo.srcObject = webcamStream;
+                    webcamVideo.muted = true;
+                    webcamVideo.play();
+                }
+
+                // Get webcam settings
+                let webcamSize, webcamX, webcamY, webcamShape;
+                if (webcamEnabled) {
+                    webcamSize = parseInt(document.getElementById('webcamSize').value);
+                    const webcamPosition = document.getElementById('webcamPosition').value;
+                    webcamShape = document.getElementById('webcamShape').value;
+
+                    // Calculate webcam position
+                    const padding = 20;
+
+                    switch (webcamPosition) {
+                        case 'top-left':
+                            webcamX = padding;
+                            webcamY = padding;
+                            break;
+                        case 'top-right':
+                            webcamX = compositeCanvas.width - webcamSize - padding;
+                            webcamY = padding;
+                            break;
+                        case 'bottom-left':
+                            webcamX = padding;
+                            webcamY = compositeCanvas.height - webcamSize - padding;
+                            break;
+                        case 'bottom-right':
+                        default:
+                            webcamX = compositeCanvas.width - webcamSize - padding;
+                            webcamY = compositeCanvas.height - webcamSize - padding;
+                            break;
+                    }
+                }
+
+                // Store selected area locally to avoid issues with closure
+                const cropArea = mode === 'area' && selectedArea ? { ...selectedArea } : null;
+
+                // Composite the streams
+                function drawComposite() {
+                    if (!compositeCanvas) return;
+
+                    // Draw display stream (crop to selected area if needed)
+                    if (cropArea) {
+                        // Crop the video to the selected area
+                        compositeContext.drawImage(
+                            displayVideo,
+                            cropArea.x, cropArea.y, cropArea.width, cropArea.height,
+                            0, 0, compositeCanvas.width, compositeCanvas.height
+                        );
+                    } else {
+                        // Draw full screen
+                        compositeContext.drawImage(displayVideo, 0, 0, compositeCanvas.width, compositeCanvas.height);
+                    }
+
+                    // Draw webcam overlay if enabled
+                    if (webcamEnabled && webcamVideo) {
+                        compositeContext.save();
+
+                        if (webcamShape === 'circle') {
+                            compositeContext.beginPath();
+                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                            compositeContext.closePath();
+                            compositeContext.clip();
+                        } else if (webcamShape === 'rounded') {
+                            const radius = 12;
+                            compositeContext.beginPath();
+                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, radius);
+                            compositeContext.closePath();
+                            compositeContext.clip();
+                        }
+
+                        compositeContext.drawImage(webcamVideo, webcamX, webcamY, webcamSize, webcamSize);
+                        compositeContext.restore();
+
+                        // Draw border
+                        compositeContext.strokeStyle = 'white';
+                        compositeContext.lineWidth = 3;
+                        if (webcamShape === 'circle') {
+                            compositeContext.beginPath();
+                            compositeContext.arc(webcamX + webcamSize / 2, webcamY + webcamSize / 2, webcamSize / 2, 0, Math.PI * 2);
+                            compositeContext.stroke();
+                        } else if (webcamShape === 'rounded') {
+                            compositeContext.beginPath();
+                            compositeContext.roundRect(webcamX, webcamY, webcamSize, webcamSize, 12);
+                            compositeContext.stroke();
+                        } else {
+                            compositeContext.strokeRect(webcamX, webcamY, webcamSize, webcamSize);
+                        }
+                    }
+
+                    // Draw live drawing overlay if drawing mode is active
+                    if (isDrawingModeActive && liveDrawingCanvas) {
+                        compositeContext.drawImage(liveDrawingCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
+                    }
+
+                    requestAnimationFrame(drawComposite);
+                }
+
+                await new Promise(resolve => {
+                    displayVideo.onloadedmetadata = () => {
+                        if (webcamEnabled && webcamVideo) {
+                            webcamVideo.onloadedmetadata = resolve;
+                        } else {
+                            resolve();
+                        }
+                    };
+                });
+
+                drawComposite();
+
+                // Get stream from composite canvas
+                const compositeStream = compositeCanvas.captureStream(30);
+                recordingStream = new MediaStream([...compositeStream.getVideoTracks(), ...displayStream.getAudioTracks()]);
 
                 // Reset selectedArea after starting recording
                 selectedArea = null;
@@ -3077,8 +3072,20 @@
 
                 // Create canvas overlay on preview
                 liveDrawingCanvas = document.createElement('canvas');
-                liveDrawingCanvas.width = compositeCanvas.width;
-                liveDrawingCanvas.height = compositeCanvas.height;
+
+                // Set canvas size based on composite canvas if available, otherwise use video dimensions
+                if (compositeCanvas) {
+                    liveDrawingCanvas.width = compositeCanvas.width;
+                    liveDrawingCanvas.height = compositeCanvas.height;
+                } else if (previewVideo.videoWidth && previewVideo.videoHeight) {
+                    liveDrawingCanvas.width = previewVideo.videoWidth;
+                    liveDrawingCanvas.height = previewVideo.videoHeight;
+                } else {
+                    // Fallback to common resolution
+                    liveDrawingCanvas.width = 1920;
+                    liveDrawingCanvas.height = 1080;
+                }
+
                 liveDrawingCanvas.id = 'liveDrawingCanvas';
                 liveDrawingCanvas.style.position = 'absolute';
                 liveDrawingCanvas.style.top = '0';
