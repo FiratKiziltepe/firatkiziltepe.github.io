@@ -521,46 +521,72 @@ function highlightEntirePage(overlay, type) {
 }
 
 function highlightText(textLayer, searchText, type) {
-    if (!searchText || searchText.length < 3) return;
+    // Ignore very short texts to prevent false positives
+    if (!searchText || searchText.length < 10) return;
 
     const spans = Array.from(textLayer.querySelectorAll('span'));
     const fullText = spans.map(s => s.textContent).join(' ');
     const normalizedSearch = normalizeText(searchText);
     const normalizedFull = normalizeText(fullText);
 
-    // Find position in full text
+    // Strategy 1: Try exact match first (PREFERRED)
     const index = normalizedFull.indexOf(normalizedSearch);
-    if (index === -1) {
-        // Try word-by-word matching
-        const words = normalizedSearch.split(/\s+/).filter(w => w.length >= 5);
-        words.forEach(word => {
-            spans.forEach(span => {
-                const spanText = normalizeText(span.textContent);
-                if (spanText.includes(word)) {
-                    span.classList.add(`highlight-${type}`);
-                }
-            });
+    if (index !== -1) {
+        // Calculate which spans contain this text
+        let currentPos = 0;
+        const matchStart = index;
+        const matchEnd = index + normalizedSearch.length;
+
+        spans.forEach(span => {
+            const spanText = normalizeText(span.textContent);
+            const spanStart = currentPos;
+            const spanEnd = currentPos + spanText.length;
+
+            // Check if span overlaps with match
+            if (spanStart < matchEnd && spanEnd > matchStart) {
+                span.classList.add(`highlight-${type}`);
+            }
+
+            currentPos = spanEnd + 1; // +1 for space
         });
         return;
     }
 
-    // Calculate which spans contain this text
-    let currentPos = 0;
-    const matchStart = index;
-    const matchEnd = index + normalizedSearch.length;
+    // Strategy 2: Word-by-word matching (STRICT RULES to avoid false positives)
+    // Split into significant words (8+ chars, avoid common words)
+    const words = normalizedSearch.split(/\s+/).filter(w => w.length >= 8);
 
-    spans.forEach(span => {
-        const spanText = normalizeText(span.textContent);
-        const spanStart = currentPos;
-        const spanEnd = currentPos + spanText.length;
+    // Need at least 2 significant words to attempt word matching
+    if (words.length < 2) return;
 
-        // Check if span overlaps with match
-        if (spanStart < matchEnd && spanEnd > matchStart) {
-            span.classList.add(`highlight-${type}`);
-        }
+    // Track which words were found to ensure minimum match
+    let foundWords = 0;
+    const matchedSpans = new Set();
 
-        currentPos = spanEnd + 1; // +1 for space
+    words.forEach(word => {
+        // Find FIRST occurrence only
+        let found = false;
+        spans.forEach(span => {
+            if (found) return; // Only match first occurrence
+
+            const spanText = normalizeText(span.textContent);
+
+            // STRICT: Must be exact word match (not just contains)
+            const spanWords = spanText.split(/\s+/);
+            if (spanWords.includes(word)) {
+                matchedSpans.add(span);
+                found = true;
+                foundWords++;
+            }
+        });
     });
+
+    // Only apply highlights if we found at least half of the significant words
+    if (foundWords >= Math.ceil(words.length / 2)) {
+        matchedSpans.forEach(span => {
+            span.classList.add(`highlight-${type}`);
+        });
+    }
 }
 
 function normalizeText(text) {
@@ -707,33 +733,69 @@ function toggleHighlights() {
 // ==================== Export ====================
 function exportReport() {
     let report = '='.repeat(80) + '\n';
-    report += 'PDF KARŞILAŞTIRMA RAPORU\n';
+    report += 'PDF KARŞILAŞTIRMA RAPORU (PROFESYONEL)\n';
     report += '='.repeat(80) + '\n\n';
 
-    report += 'DOSYALAR:\n';
+    report += 'DOSYA BİLGİLERİ:\n';
+    report += '-'.repeat(80) + '\n';
     report += `PDF 1: ${state.pdf1.file ? state.pdf1.file.name : 'N/A'} (${state.pdf1.totalPages} sayfa)\n`;
     report += `PDF 2: ${state.pdf2.file ? state.pdf2.file.name : 'N/A'} (${state.pdf2.totalPages} sayfa)\n\n`;
 
-    report += 'ÖZET:\n';
+    report += 'DEĞİŞİKLİK ÖZETİ:\n';
+    report += '-'.repeat(80) + '\n';
     const stats = calculateStats();
     report += `Eklenen Sayfalar: ${stats.addedPages}\n`;
     report += `Silinen Sayfalar: ${stats.deletedPages}\n`;
-    report += `Değiştirilen Sayfalar: ${stats.modifiedPages}\n`;
-    report += `Toplam Eklenen Kelime: ${stats.totalAddedWords}\n`;
-    report += `Toplam Silinen Kelime: ${stats.totalDeletedWords}\n\n`;
+    report += `Değiştirilen Sayfalar: ${stats.modifiedPages}\n\n`;
 
     report += 'DETAYLI DEĞİŞİKLİKLER:\n';
     report += '-'.repeat(80) + '\n';
 
-    state.comparison.changes.forEach(change => {
-        report += `\nSayfa ${change.pageNum} - ${change.type.toUpperCase()}\n`;
-        if (change.type === 'modified') {
-            report += `  +${change.addedWords} kelime eklendi\n`;
-            report += `  -${change.deletedWords} kelime silindi\n`;
-        }
-    });
+    // Added pages
+    const addedPages = state.comparison.changes.filter(c => c.type === 'added');
+    if (addedPages.length > 0) {
+        report += '\n[EKLENMİŞ SAYFALAR]\n\n';
+        addedPages.forEach(change => {
+            report += `Sayfa ${change.pageNum}:\n`;
+            report += `${change.addedText.substring(0, 500)}${change.addedText.length > 500 ? '...' : ''}\n\n`;
+        });
+    }
 
-    report += '\n' + '='.repeat(80) + '\n';
+    // Deleted pages
+    const deletedPages = state.comparison.changes.filter(c => c.type === 'deleted');
+    if (deletedPages.length > 0) {
+        report += '\n[SİLİNMİŞ SAYFALAR]\n\n';
+        deletedPages.forEach(change => {
+            report += `Sayfa ${change.pageNum}:\n`;
+            report += `${change.deletedText.substring(0, 500)}${change.deletedText.length > 500 ? '...' : ''}\n\n`;
+        });
+    }
+
+    // Modified pages
+    const modifiedPages = state.comparison.changes.filter(c => c.type === 'modified');
+    if (modifiedPages.length > 0) {
+        report += '\n[DEĞİŞTİRİLMİŞ SAYFALAR]\n\n';
+        modifiedPages.forEach(change => {
+            report += `Sayfa ${change.pageNum}:\n`;
+
+            // Process diffs to show actual changes
+            if (change.diffs && change.diffs.length > 0) {
+                change.diffs.forEach(([operation, text]) => {
+                    const trimmedText = text.trim();
+                    if (trimmedText.length === 0) return;
+
+                    if (operation === -1) { // DIFF_DELETE
+                        report += `- ${trimmedText}\n`;
+                    } else if (operation === 1) { // DIFF_INSERT
+                        report += `+ ${trimmedText}\n`;
+                    }
+                });
+            }
+            report += '\n';
+        });
+    }
+
+    report += '='.repeat(80) + '\n';
     report += `Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}\n`;
 
     // Download
