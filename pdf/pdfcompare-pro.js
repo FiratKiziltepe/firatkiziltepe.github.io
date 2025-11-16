@@ -1,310 +1,212 @@
-// PDF.js worker'ını ayarla
+/*
+ * DRAFTABLE-STYLE PDF COMPARISON
+ * Simple, Clean Implementation
+ * Using: PDF.js + diff_match_patch
+ */
+
+// ==================== PDF.js Setup ====================
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ==================== GLOBAL STATE ====================
+// ==================== Global State ====================
 const state = {
     pdf1: {
         file: null,
         document: null,
         currentPage: 1,
         totalPages: 0,
-        text: [],
-        textPositions: [], // Text with coordinates for highlighting
-        canvases: []
+        text: [] // Array of {pageNum, text}
     },
     pdf2: {
         file: null,
         document: null,
         currentPage: 1,
         totalPages: 0,
-        text: [],
-        textPositions: [], // Text with coordinates for highlighting
-        canvases: []
+        text: []
     },
     comparison: {
-        changes: [],
-        textDiff: [],
-        visualDiff: [],
-        highlights: { pdf1: [], pdf2: [] } // Mapped highlights with coordinates
+        diffs: [], // diff_match_patch results
+        changes: [], // Processed changes with page info
+        highlights: { pdf1: {}, pdf2: {} } // Page-wise highlights
     },
     settings: {
-        viewMode: 'side-by-side', // 'side-by-side', 'overlay', 'single'
+        zoomLevel: 1.0,
         syncScroll: true,
-        highlightChanges: true,
-        ignoreWhitespace: true,
-        ignoreCase: false,
-        zoomLevel: 100,
-        showThumbnails: true,
-        showChangesPanel: true
+        showHighlights: true
     },
     ui: {
-        isComparing: false,
-        progressValue: 0
+        currentPage: 1,
+        isComparing: false
     }
 };
 
-// ==================== DOM ELEMENTS ====================
-const elements = {
+// ==================== DOM Elements ====================
+const el = {
     // Upload
-    uploadBox1: document.getElementById('uploadBox1'),
-    uploadBox2: document.getElementById('uploadBox2'),
+    uploadBtn1: document.getElementById('uploadBtn1'),
+    uploadBtn2: document.getElementById('uploadBtn2'),
     fileInput1: document.getElementById('fileInput1'),
     fileInput2: document.getElementById('fileInput2'),
-    fileInfo1: document.getElementById('fileInfo1'),
-    fileInfo2: document.getElementById('fileInfo2'),
+    fileName1: document.getElementById('fileName1'),
+    fileName2: document.getElementById('fileName2'),
 
-    // Toolbar
+    // Canvas
+    canvas1: document.getElementById('canvas1'),
+    canvas2: document.getElementById('canvas2'),
+    leftCanvasContainer: document.getElementById('leftCanvasContainer'),
+    rightCanvasContainer: document.getElementById('rightCanvasContainer'),
+    textLayer1: document.getElementById('textLayer1'),
+    textLayer2: document.getElementById('textLayer2'),
+    highlightOverlay1: document.getElementById('highlightOverlay1'),
+    highlightOverlay2: document.getElementById('highlightOverlay2'),
+
+    // Controls
     compareBtn: document.getElementById('compareBtn'),
-
-    // Control bar
     zoomIn: document.getElementById('zoomIn'),
     zoomOut: document.getElementById('zoomOut'),
     zoomSelect: document.getElementById('zoomSelect'),
     prevPage: document.getElementById('prevPage'),
     nextPage: document.getElementById('nextPage'),
     pageInfo: document.getElementById('pageInfo'),
-    syncScrollToggle: document.getElementById('syncScroll'),
-    controlBar: document.getElementById('controlBar'),
+    syncScrollBtn: document.getElementById('syncScrollBtn'),
+    toggleHighlights: document.getElementById('toggleHighlights'),
+    prevChange: document.getElementById('prevChange'),
+    nextChange: document.getElementById('nextChange'),
 
-    // Viewers
-    viewer1: document.getElementById('viewer1'),
-    viewer2: document.getElementById('viewer2'),
-    canvas1: document.getElementById('canvas1'),
-    canvas2: document.getElementById('canvas2'),
-    overlay1: document.getElementById('overlay1'),
-    overlay2: document.getElementById('overlay2'),
-    textLayer1: document.getElementById('textLayer1'),
-    textLayer2: document.getElementById('textLayer2'),
-    sideBySideView: document.getElementById('sideBySideView'),
-    overlayView: document.getElementById('overlayView'),
-    singleView: document.getElementById('singleView'),
-    welcomeScreen: document.getElementById('welcomeScreen'),
-
-    // Panels
-    thumbnailsPanel: document.getElementById('thumbnailsPanel'),
-    changesPanel: document.getElementById('changesPanel'),
-    thumbnails1: document.getElementById('thumbnails1'),
-    thumbnails2: document.getElementById('thumbnails2'),
+    // Sidebar
+    changesSidebar: document.getElementById('changesSidebar'),
     changesList: document.getElementById('changesList'),
-
-    // Changes summary
     addedCount: document.getElementById('addedCount'),
     deletedCount: document.getElementById('deletedCount'),
     modifiedCount: document.getElementById('modifiedCount'),
+    movedCount: document.getElementById('movedCount'),
+    totalAdded: document.getElementById('totalAdded'),
+    totalDeleted: document.getElementById('totalDeleted'),
+    totalModified: document.getElementById('totalModified'),
+    totalMoved: document.getElementById('totalMoved'),
+    totalAddedWords: document.getElementById('totalAddedWords'),
+    totalDeletedWords: document.getElementById('totalDeletedWords'),
+    exportBtn: document.getElementById('exportBtn'),
+
+    // Content panels
+    leftContent: document.getElementById('leftContent'),
+    rightContent: document.getElementById('rightContent'),
 
     // Loading
     loadingOverlay: document.getElementById('loadingOverlay'),
-    progressBar: document.getElementById('progressFill'),
     loadingText: document.getElementById('loadingText'),
-
-    // Settings
-    settingsBtn: document.getElementById('settingsBtn'),
-    settingsModal: document.getElementById('settingsModal'),
-    closeSettings: document.getElementById('closeSettings'),
-    saveSettings: document.getElementById('saveSettings'),
-
-    // Export
-    exportReportBtn: document.getElementById('exportReportBtn'),
-
-    // Toggle buttons
-    toggleThumbnails: document.getElementById('toggleThumbnails'),
-    toggleChanges: document.getElementById('toggleChanges')
+    progressFill: document.getElementById('progressFill')
 };
 
-// ==================== INITIALIZATION ====================
+// ==================== Initialization ====================
 function init() {
     setupEventListeners();
-    updateUI();
 }
 
 function setupEventListeners() {
     // File upload
-    elements.uploadBox1.addEventListener('click', () => elements.fileInput1.click());
-    elements.uploadBox2.addEventListener('click', () => elements.fileInput2.click());
-    elements.fileInput1.addEventListener('change', (e) => handleFileSelect(e, 1));
-    elements.fileInput2.addEventListener('change', (e) => handleFileSelect(e, 2));
-
-    // Drag & drop
-    setupDragAndDrop(elements.uploadBox1, 1);
-    setupDragAndDrop(elements.uploadBox2, 2);
+    el.uploadBtn1.addEventListener('click', () => el.fileInput1.click());
+    el.uploadBtn2.addEventListener('click', () => el.fileInput2.click());
+    el.fileInput1.addEventListener('change', (e) => handleFileSelect(e, 1));
+    el.fileInput2.addEventListener('change', (e) => handleFileSelect(e, 2));
 
     // Compare button
-    elements.compareBtn.addEventListener('click', comparePDFs);
+    el.compareBtn.addEventListener('click', startComparison);
 
     // Zoom controls
-    elements.zoomIn.addEventListener('click', () => {
-        const currentZoom = parseFloat(elements.zoomSelect.value);
-        const newZoom = Math.min(2, currentZoom + 0.25);
-        elements.zoomSelect.value = newZoom;
-        setZoom(newZoom * 100);
-    });
-
-    elements.zoomOut.addEventListener('click', () => {
-        const currentZoom = parseFloat(elements.zoomSelect.value);
-        const newZoom = Math.max(0.5, currentZoom - 0.25);
-        elements.zoomSelect.value = newZoom;
-        setZoom(newZoom * 100);
-    });
-
-    elements.zoomSelect.addEventListener('change', (e) => {
-        setZoom(parseFloat(e.target.value) * 100);
+    el.zoomIn.addEventListener('click', () => changeZoom(0.25));
+    el.zoomOut.addEventListener('click', () => changeZoom(-0.25));
+    el.zoomSelect.addEventListener('change', (e) => {
+        state.settings.zoomLevel = parseFloat(e.target.value);
+        renderCurrentPage();
     });
 
     // Page navigation
-    elements.prevPage.addEventListener('click', () => navigatePage(-1));
-    elements.nextPage.addEventListener('click', () => navigatePage(1));
+    el.prevPage.addEventListener('click', () => navigatePage(-1));
+    el.nextPage.addEventListener('click', () => navigatePage(1));
 
-    // Sync scroll
-    elements.syncScrollToggle.addEventListener('change', (e) => {
-        state.settings.syncScroll = e.target.checked;
-    });
+    // Sync scroll toggle
+    el.syncScrollBtn.addEventListener('click', toggleSyncScroll);
 
-    // Synchronized scrolling
-    if (elements.viewer1) {
-        elements.viewer1.addEventListener('scroll', () => {
-            if (state.settings.syncScroll && elements.viewer2) {
-                elements.viewer2.scrollTop = elements.viewer1.scrollTop;
-                elements.viewer2.scrollLeft = elements.viewer1.scrollLeft;
-            }
-        });
-    }
+    // Highlights toggle
+    el.toggleHighlights.addEventListener('click', toggleHighlights);
 
-    if (elements.viewer2) {
-        elements.viewer2.addEventListener('scroll', () => {
-            if (state.settings.syncScroll && elements.viewer1) {
-                elements.viewer1.scrollTop = elements.viewer2.scrollTop;
-                elements.viewer1.scrollLeft = elements.viewer2.scrollLeft;
-            }
-        });
-    }
-
-    // View mode toggles
-    document.querySelectorAll('[data-view]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const viewMode = e.currentTarget.getAttribute('data-view');
-            setViewMode(viewMode);
-        });
-    });
-
-    // Settings modal
-    elements.settingsBtn.addEventListener('click', () => {
-        elements.settingsModal.classList.add('active');
-        loadSettingsToModal();
-    });
-    elements.closeSettings.addEventListener('click', () => {
-        elements.settingsModal.classList.remove('active');
-    });
-    elements.saveSettings.addEventListener('click', saveSettingsFromModal);
-
-    // Close modal on outside click
-    elements.settingsModal.addEventListener('click', (e) => {
-        if (e.target === elements.settingsModal) {
-            elements.settingsModal.classList.remove('active');
-        }
-    });
-
-    // Panel toggles
-    if (elements.toggleThumbnails) {
-        elements.toggleThumbnails.addEventListener('click', toggleThumbnailsPanel);
-    }
-    if (elements.toggleChanges) {
-        elements.toggleChanges.addEventListener('click', toggleHighlights);
-    }
+    // Change navigation
+    el.prevChange.addEventListener('click', () => navigateChange(-1));
+    el.nextChange.addEventListener('click', () => navigateChange(1));
 
     // Export
-    if (elements.exportReportBtn) {
-        elements.exportReportBtn.addEventListener('click', exportReport);
-    }
+    el.exportBtn.addEventListener('click', exportReport);
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', handleKeyboardShortcuts);
-}
-
-// ==================== FILE UPLOAD ====================
-function setupDragAndDrop(element, pdfNumber) {
-    element.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        element.classList.add('drag-over');
+    // Synchronized scrolling
+    el.leftContent.addEventListener('scroll', () => {
+        if (state.settings.syncScroll) {
+            el.rightContent.scrollTop = el.leftContent.scrollTop;
+            el.rightContent.scrollLeft = el.leftContent.scrollLeft;
+        }
     });
 
-    element.addEventListener('dragleave', () => {
-        element.classList.remove('drag-over');
-    });
-
-    element.addEventListener('drop', (e) => {
-        e.preventDefault();
-        element.classList.remove('drag-over');
-
-        const file = e.dataTransfer.files[0];
-        if (file && file.type === 'application/pdf') {
-            loadPDFFile(file, pdfNumber);
-        } else {
-            alert('Lütfen geçerli bir PDF dosyası seçin!');
+    el.rightContent.addEventListener('scroll', () => {
+        if (state.settings.syncScroll) {
+            el.leftContent.scrollTop = el.rightContent.scrollTop;
+            el.leftContent.scrollLeft = el.rightContent.scrollLeft;
         }
     });
 }
 
-function handleFileSelect(event, pdfNumber) {
+// ==================== File Upload ====================
+async function handleFileSelect(event, pdfNum) {
     const file = event.target.files[0];
-    if (file) {
-        loadPDFFile(file, pdfNumber);
+    if (!file || file.type !== 'application/pdf') {
+        alert('Lütfen geçerli bir PDF dosyası seçin!');
+        return;
     }
-}
 
-async function loadPDFFile(file, pdfNumber) {
-    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-    const uploadBox = pdfNumber === 1 ? elements.uploadBox1 : elements.uploadBox2;
-    const fileInfo = pdfNumber === 1 ? elements.fileInfo1 : elements.fileInfo2;
-
-    showLoading(true, `PDF ${pdfNumber} yükleniyor...`);
+    showLoading(true, `PDF ${pdfNum} yükleniyor...`);
 
     try {
+        const pdf = pdfNum === 1 ? state.pdf1 : state.pdf2;
         pdf.file = file;
+
         const arrayBuffer = await file.arrayBuffer();
         pdf.document = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         pdf.totalPages = pdf.document.numPages;
         pdf.currentPage = 1;
 
-        // Hide upload content, show file info
-        const uploadContent = uploadBox.querySelector('.upload-content');
-        if (uploadContent) uploadContent.style.display = 'none';
+        // Update UI
+        const fileName = pdfNum === 1 ? el.fileName1 : el.fileName2;
+        fileName.textContent = `${file.name} (${pdf.totalPages} sayfa)`;
 
-        fileInfo.style.display = 'flex';
-        const fileNameSpan = fileInfo.querySelector('.file-name');
-        if (fileNameSpan) {
-            fileNameSpan.innerHTML = `
-                <i class="fas fa-check-circle" style="color: #28a745; margin-right: 5px;"></i>
-                <strong>${file.name}</strong>
-                <span style="color: #666; margin-left: 10px;">(${pdf.totalPages} sayfa)</span>
-            `;
-        }
+        // Hide welcome, show canvas
+        const container = pdfNum === 1 ? el.leftCanvasContainer : el.rightCanvasContainer;
+        container.style.display = 'block';
+        container.previousElementSibling.style.display = 'none'; // Hide welcome message
 
-        // Enable compare button if both PDFs loaded
+        // Render first page
+        await renderPage(pdfNum, 1);
+
+        // Show compare button if both PDFs loaded
         if (state.pdf1.document && state.pdf2.document) {
-            elements.compareBtn.disabled = false;
+            el.compareBtn.style.display = 'flex';
         }
-
-        // Render first page preview (optional)
-        // await renderPage(pdfNumber, 1);
 
     } catch (error) {
-        console.error(`PDF ${pdfNumber} yükleme hatası:`, error);
-        alert(`PDF ${pdfNumber} yüklenirken bir hata oluştu: ${error.message}`);
+        console.error(`PDF ${pdfNum} yükleme hatası:`, error);
+        alert(`PDF ${pdfNum} yüklenirken bir hata oluştu: ${error.message}`);
     } finally {
         showLoading(false);
     }
 }
 
-// ==================== PDF RENDERING ====================
-async function renderPage(pdfNumber, pageNum) {
-    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-    const canvas = pdfNumber === 1 ? elements.canvas1 : elements.canvas2;
+// ==================== PDF Rendering ====================
+async function renderPage(pdfNum, pageNum) {
+    const pdf = pdfNum === 1 ? state.pdf1 : state.pdf2;
+    const canvas = pdfNum === 1 ? el.canvas1 : el.canvas2;
 
     if (!pdf.document || pageNum < 1 || pageNum > pdf.totalPages) return;
 
     try {
         const page = await pdf.document.getPage(pageNum);
-        const viewport = page.getViewport({ scale: state.settings.zoomLevel / 100 });
+        const viewport = page.getViewport({ scale: state.settings.zoomLevel });
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
@@ -317,31 +219,29 @@ async function renderPage(pdfNumber, pageNum) {
         await page.render(renderContext).promise;
 
         pdf.currentPage = pageNum;
-        updatePageInfo();
 
-        // Render text layer
-        await renderTextLayer(pdfNumber, page, viewport);
+        // Render text layer for selection
+        await renderTextLayer(pdfNum, page, viewport);
 
-        // Render highlights after PDF page is rendered
-        if (state.comparison.highlights) {
-            renderPageHighlights(pdfNumber, pageNum);
+        // Render highlights if comparison done
+        if (state.comparison.changes.length > 0) {
+            renderHighlights(pdfNum, pageNum);
         }
+
+        updatePageInfo();
 
     } catch (error) {
         console.error(`Sayfa ${pageNum} render hatası:`, error);
     }
 }
 
-// Render text layer for precise text highlighting
-async function renderTextLayer(pdfNumber, page, viewport) {
-    const textLayerDiv = pdfNumber === 1 ? elements.textLayer1 : elements.textLayer2;
+async function renderTextLayer(pdfNum, page, viewport) {
+    const textLayer = pdfNum === 1 ? el.textLayer1 : el.textLayer2;
 
-    if (!textLayerDiv) return;
-
-    // Clear existing text layer
-    textLayerDiv.innerHTML = '';
-    textLayerDiv.style.width = viewport.width + 'px';
-    textLayerDiv.style.height = viewport.height + 'px';
+    // Clear existing
+    textLayer.innerHTML = '';
+    textLayer.style.width = viewport.width + 'px';
+    textLayer.style.height = viewport.height + 'px';
 
     try {
         const textContent = await page.getTextContent();
@@ -351,329 +251,64 @@ async function renderTextLayer(pdfNumber, page, viewport) {
 
             const tx = item.transform;
             const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
-            const fontAscent = fontHeight;
 
             const span = document.createElement('span');
             span.textContent = item.str;
             span.style.left = tx[4] + 'px';
-            span.style.top = (tx[5] - fontAscent) + 'px';
+            span.style.top = (tx[5] - fontHeight) + 'px';
             span.style.fontSize = fontHeight + 'px';
             span.style.fontFamily = item.fontName;
 
-            // Store original text for matching
+            // Store text for matching
             span.dataset.text = item.str;
+            span.dataset.x = tx[4];
+            span.dataset.y = tx[5];
 
-            textLayerDiv.appendChild(span);
+            textLayer.appendChild(span);
         });
 
-        // Apply highlights to text layer
-        highlightTextLayer(pdfNumber, page.pageNumber);
-
     } catch (error) {
-        console.error('Text layer render error:', error);
+        console.error('Text layer error:', error);
     }
 }
 
-async function renderAllPages() {
-    showLoading(true, 'Sayfalar render ediliyor...');
+async function renderCurrentPage() {
+    const pageNum = state.ui.currentPage;
 
-    try {
-        const maxPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-
-        for (let i = 1; i <= maxPages; i++) {
-            updateProgress((i / maxPages) * 100);
-
-            if (i <= state.pdf1.totalPages) {
-                await renderPage(1, i);
-            }
-            if (i <= state.pdf2.totalPages) {
-                await renderPage(2, i);
-            }
-        }
-
-    } finally {
-        showLoading(false);
+    if (pageNum <= state.pdf1.totalPages) {
+        await renderPage(1, pageNum);
+    }
+    if (pageNum <= state.pdf2.totalPages) {
+        await renderPage(2, pageNum);
     }
 }
 
-// ==================== TEXT EXTRACTION ====================
-async function extractTextFromPDF(pdf) {
-    const fullText = [];
+// ==================== Text Extraction ====================
+async function extractAllText(pdf) {
+    const allText = [];
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
 
         let pageText = '';
-        let lastY = null;
-        let currentLine = '';
-
-        textContent.items.forEach((item, index) => {
-            const text = item.str;
-            const y = item.transform[5];
-            const nextItem = textContent.items[index + 1];
-
-            // New line detection
-            if (lastY !== null && Math.abs(y - lastY) > 5) {
-                if (currentLine.trim()) {
-                    pageText += currentLine.trim() + '\n';
-                }
-                currentLine = '';
+        textContent.items.forEach(item => {
+            if (item.str) {
+                pageText += item.str + ' ';
             }
-
-            if (text) {
-                currentLine += text;
-                // Add space between words
-                if (nextItem && nextItem.transform[5] === y) {
-                    const currentX = item.transform[4] + item.width;
-                    const nextX = nextItem.transform[4];
-                    if (nextX - currentX > 1) {
-                        currentLine += ' ';
-                    }
-                }
-            }
-
-            lastY = y;
         });
 
-        if (currentLine.trim()) {
-            pageText += currentLine.trim() + '\n';
-        }
-
-        fullText.push({
+        allText.push({
             pageNum: pageNum,
             text: pageText.trim()
         });
     }
 
-    return fullText;
+    return allText;
 }
 
-// ==================== TEXT POSITION EXTRACTION ====================
-// Extract text with position information for highlighting
-async function extractTextWithPositions(pdf) {
-    const allTextPositions = [];
-
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 1.0 }); // Use scale 1.0 as base
-        const textContent = await page.getTextContent();
-
-        const pagePositions = [];
-
-        textContent.items.forEach(item => {
-            if (!item.str || item.str.trim() === '') return;
-
-            const tx = item.transform;
-            // PDF coordinates: origin at bottom-left, Y increases upward
-            // Canvas coordinates: origin at top-left, Y increases downward
-            // So we flip Y: canvasY = viewportHeight - pdfY
-
-            pagePositions.push({
-                text: item.str,
-                x: tx[4],
-                y: tx[5], // Keep original Y for now, will flip during render
-                width: item.width,
-                height: item.height,
-                transform: tx,
-                // Store font info for better matching
-                fontName: item.fontName,
-                fontSize: Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])
-            });
-        });
-
-        allTextPositions.push({
-            pageNum: pageNum,
-            positions: pagePositions,
-            viewport: viewport
-        });
-    }
-
-    return allTextPositions;
-}
-
-// Map comparison changes to PDF coordinates for highlighting
-function mapChangesToCoordinates(changes, textPositions1, textPositions2) {
-    const highlights = { pdf1: {}, pdf2: {} };
-
-    // Initialize page arrays
-    for (let i = 1; i <= Math.max(textPositions1.length, textPositions2.length); i++) {
-        highlights.pdf1[i] = [];
-        highlights.pdf2[i] = [];
-    }
-
-    // Process modified pages
-    changes.modified.forEach(change => {
-        const pageNum = change.pageNum;
-        const page1Positions = textPositions1.find(p => p.pageNum === pageNum);
-        const page2Positions = textPositions2.find(p => p.pageNum === pageNum);
-
-        if (!page1Positions || !page2Positions) return;
-
-        // Process each diff item
-        change.diff.forEach(diffItem => {
-            if (diffItem.type === 'removed' && diffItem.line1) {
-                // Find text in PDF1
-                const matches = findTextInPositions(diffItem.line1, page1Positions.positions);
-                matches.forEach(match => {
-                    highlights.pdf1[pageNum].push({
-                        type: 'deleted',
-                        x: match.x,
-                        y: match.y,
-                        width: match.width,
-                        height: match.height,
-                        text: diffItem.line1
-                    });
-                });
-            } else if (diffItem.type === 'added' && diffItem.line2) {
-                // Find text in PDF2
-                const matches = findTextInPositions(diffItem.line2, page2Positions.positions);
-                matches.forEach(match => {
-                    highlights.pdf2[pageNum].push({
-                        type: 'added',
-                        x: match.x,
-                        y: match.y,
-                        width: match.width,
-                        height: match.height,
-                        text: diffItem.line2
-                    });
-                });
-            }
-        });
-    });
-
-    // Process added pages
-    changes.added.forEach(change => {
-        const pageNum = change.pageNum;
-        const page2Positions = textPositions2.find(p => p.pageNum === pageNum);
-
-        if (page2Positions) {
-            // Highlight all text on added page
-            page2Positions.positions.forEach(pos => {
-                highlights.pdf2[pageNum].push({
-                    type: 'added',
-                    x: pos.x,
-                    y: pos.y,
-                    width: pos.width,
-                    height: pos.height,
-                    text: pos.text
-                });
-            });
-        }
-    });
-
-    // Process deleted pages
-    changes.deleted.forEach(change => {
-        const pageNum = change.pageNum;
-        const page1Positions = textPositions1.find(p => p.pageNum === pageNum);
-
-        if (page1Positions) {
-            // Highlight all text on deleted page
-            page1Positions.positions.forEach(pos => {
-                highlights.pdf1[pageNum].push({
-                    type: 'deleted',
-                    x: pos.x,
-                    y: pos.y,
-                    width: pos.width,
-                    height: pos.height,
-                    text: pos.text
-                });
-            });
-        }
-    });
-
-    return highlights;
-}
-
-// Find text positions that match a given line of text
-function findTextInPositions(searchText, positions) {
-    const matches = [];
-    const searchNormalized = normalizeText(searchText);
-
-    if (!searchNormalized) return matches;
-
-    // Split search text into words for better matching
-    const searchWords = searchNormalized.split(/\s+/).filter(w => w.length > 0);
-
-    if (searchWords.length === 0) return matches;
-
-    // Build a continuous text from positions to find matches
-    let fullText = '';
-    const positionMap = [];
-
-    positions.forEach((pos, idx) => {
-        const startIdx = fullText.length;
-        fullText += pos.text;
-        positionMap.push({
-            startIdx: startIdx,
-            endIdx: fullText.length,
-            position: pos
-        });
-        fullText += ' '; // Add space between text items
-    });
-
-    const fullTextNormalized = normalizeText(fullText);
-
-    // Strategy 1: Try exact match first
-    let searchIdx = fullTextNormalized.indexOf(searchNormalized);
-
-    if (searchIdx !== -1) {
-        const searchEndIdx = searchIdx + searchNormalized.length;
-
-        // Find all positions that overlap with the search range
-        positionMap.forEach(mapItem => {
-            if (mapItem.startIdx < searchEndIdx && mapItem.endIdx > searchIdx) {
-                matches.push(mapItem.position);
-            }
-        });
-    } else {
-        // Strategy 2: Match individual words if exact match fails
-        // Only for longer, more unique words to reduce false positives
-        const significantWords = searchWords.filter(w => w.length >= 5);
-
-        // Only try word-by-word if we have at least 2 significant words
-        if (significantWords.length >= 2) {
-            significantWords.forEach(word => {
-                // Only find FIRST occurrence to avoid matching common words everywhere
-                let wordIdx = fullTextNormalized.indexOf(word);
-
-                if (wordIdx !== -1) {
-                    const wordEndIdx = wordIdx + word.length;
-
-                    // Find positions that contain this word
-                    positionMap.forEach(mapItem => {
-                        if (mapItem.startIdx <= wordIdx && mapItem.endIdx >= wordEndIdx) {
-                            // Avoid duplicates
-                            if (!matches.find(m => m === mapItem.position)) {
-                                matches.push(mapItem.position);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    return matches;
-}
-
-function normalizeText(text) {
-    let normalized = text.trim();
-
-    if (state.settings.ignoreCase) {
-        normalized = normalized.toLowerCase();
-    }
-
-    if (state.settings.ignoreWhitespace) {
-        normalized = normalized.replace(/\s+/g, ' ').trim();
-        normalized = normalized.replace(/^\s+|\s+$/gm, '');
-    }
-
-    return normalized;
-}
-
-// ==================== COMPARISON ====================
-async function comparePDFs() {
+// ==================== Comparison (diff_match_patch) ====================
+async function startComparison() {
     if (!state.pdf1.document || !state.pdf2.document) {
         alert('Lütfen iki PDF dosyası yükleyin!');
         return;
@@ -684,914 +319,419 @@ async function comparePDFs() {
 
     try {
         // Extract text from both PDFs
-        updateProgress(10);
-        elements.loadingText.textContent = 'Metinler çıkarılıyor...';
-        state.pdf1.text = await extractTextFromPDF(state.pdf1.document);
+        updateProgress(20);
+        el.loadingText.textContent = 'Metinler çıkarılıyor...';
+        state.pdf1.text = await extractAllText(state.pdf1.document);
 
-        updateProgress(30);
-        state.pdf2.text = await extractTextFromPDF(state.pdf2.document);
+        updateProgress(40);
+        state.pdf2.text = await extractAllText(state.pdf2.document);
 
-        // Perform text comparison
-        updateProgress(50);
-        elements.loadingText.textContent = 'Metin karşılaştırması yapılıyor...';
-        await performTextComparison();
+        // Perform comparison
+        updateProgress(60);
+        el.loadingText.textContent = 'Karşılaştırma yapılıyor...';
+        performComparison();
 
-        // Generate thumbnails
-        updateProgress(70);
-        elements.loadingText.textContent = 'Thumbnail\'ler oluşturuluyor...';
-        await generateThumbnails();
-
-        // Highlight changes
-        updateProgress(90);
-        elements.loadingText.textContent = 'Değişiklikler vurgulanıyor...';
-        await highlightChanges();
+        // Extract text positions for highlighting
+        updateProgress(80);
+        el.loadingText.textContent = 'Vurgulama hazırlanıyor...';
+        await prepareHighlights();
 
         // Update UI
         updateProgress(100);
         updateChangesPanel();
-        updatePageInfo();
+        renderCurrentPage();
 
-        // Hide welcome screen, show viewers and panels
-        if (elements.welcomeScreen) elements.welcomeScreen.style.display = 'none';
-        if (elements.sideBySideView) elements.sideBySideView.style.display = 'flex';
-        if (elements.controlBar) elements.controlBar.style.display = 'flex';
-        if (elements.thumbnailsPanel) elements.thumbnailsPanel.style.display = 'block';
-        if (elements.changesPanel) elements.changesPanel.style.display = 'block';
-
-        // Render first pages
-        await renderPage(1, 1);
-        await renderPage(2, 1);
+        // Show changes sidebar
+        el.changesSidebar.style.display = 'flex';
 
     } catch (error) {
         console.error('Karşılaştırma hatası:', error);
-        alert('PDF karşılaştırma sırasında bir hata oluştu: ' + error.message);
+        alert('Karşılaştırma sırasında hata oluştu: ' + error.message);
     } finally {
         showLoading(false);
         state.ui.isComparing = false;
     }
 }
 
-async function performTextComparison() {
-    const changes = {
-        added: [],
-        deleted: [],
-        modified: []
-    };
+function performComparison() {
+    const dmp = new diff_match_patch();
+    state.comparison.changes = [];
 
     const maxPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
 
     for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-        const text1 = state.pdf1.text.find(p => p.pageNum === pageNum);
-        const text2 = state.pdf2.text.find(p => p.pageNum === pageNum);
+        const page1 = state.pdf1.text.find(p => p.pageNum === pageNum);
+        const page2 = state.pdf2.text.find(p => p.pageNum === pageNum);
 
-        if (!text1 && text2) {
-            // Page added in PDF2
-            changes.added.push({
+        if (!page1 && page2) {
+            // Page added
+            state.comparison.changes.push({
                 pageNum: pageNum,
-                type: 'page',
-                content: text2.text
-            });
-        } else if (text1 && !text2) {
-            // Page deleted from PDF1
-            changes.deleted.push({
-                pageNum: pageNum,
-                type: 'page',
-                content: text1.text
-            });
-        } else if (text1 && text2) {
-            // Compare page content
-            const normalized1 = normalizeText(text1.text);
-            const normalized2 = normalizeText(text2.text);
-
-            if (normalized1 !== normalized2) {
-                // Page modified
-                const lineDiff = computeLineDiff(
-                    text1.text.split('\n'),
-                    text2.text.split('\n')
-                );
-
-                changes.modified.push({
-                    pageNum: pageNum,
-                    type: 'content',
-                    diff: lineDiff
-                });
-            }
-        }
-    }
-
-    state.comparison.changes = changes;
-    state.comparison.textDiff = computeTextDiff();
-}
-
-function computeLineDiff(lines1, lines2) {
-    const normalizedLines1 = lines1.map(normalizeText).filter(l => l.length > 0);
-    const normalizedLines2 = lines2.map(normalizeText).filter(l => l.length > 0);
-
-    const filteredLines1 = lines1.filter(l => normalizeText(l).length > 0);
-    const filteredLines2 = lines2.filter(l => normalizeText(l).length > 0);
-
-    return computeDiff(normalizedLines1, normalizedLines2, filteredLines1, filteredLines2);
-}
-
-function computeDiff(normalized1, normalized2, original1, original2) {
-    const m = normalized1.length;
-    const n = normalized2.length;
-    const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
-
-    // LCS (Longest Common Subsequence)
-    for (let i = 1; i <= m; i++) {
-        for (let j = 1; j <= n; j++) {
-            if (normalized1[i - 1] === normalized2[j - 1]) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-            } else {
-                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-
-    // Build diff
-    const diff = [];
-    let i = m, j = n;
-
-    while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && normalized1[i - 1] === normalized2[j - 1]) {
-            diff.unshift({
-                type: 'equal',
-                line1: original1[i - 1],
-                line2: original2[j - 1],
-                lineNum1: i,
-                lineNum2: j
-            });
-            i--;
-            j--;
-        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-            diff.unshift({
                 type: 'added',
-                line2: original2[j - 1],
-                lineNum2: j
+                addedText: page2.text,
+                deletedText: '',
+                wordCount: page2.text.split(/\s+/).length
             });
-            j--;
-        } else if (i > 0) {
-            diff.unshift({
-                type: 'removed',
-                line1: original1[i - 1],
-                lineNum1: i
+        } else if (page1 && !page2) {
+            // Page deleted
+            state.comparison.changes.push({
+                pageNum: pageNum,
+                type: 'deleted',
+                addedText: '',
+                deletedText: page1.text,
+                wordCount: page1.text.split(/\s+/).length
             });
-            i--;
-        }
-    }
+        } else if (page1 && page2) {
+            // Compare page text
+            if (page1.text !== page2.text) {
+                // Run diff
+                const diffs = dmp.diff_main(page1.text, page2.text);
+                dmp.diff_cleanupSemantic(diffs); // Cleanup for better readability
 
-    return diff;
-}
+                // Count changes
+                let addedWords = 0;
+                let deletedWords = 0;
+                let addedChars = 0;
+                let deletedChars = 0;
 
-function computeTextDiff() {
-    // Combine all text differences for export
-    const allDiff = [];
+                diffs.forEach(([operation, text]) => {
+                    const words = text.split(/\s+/).filter(w => w.length > 0).length;
+                    if (operation === 1) { // DIFF_INSERT
+                        addedWords += words;
+                        addedChars += text.length;
+                    } else if (operation === -1) { // DIFF_DELETE
+                        deletedWords += words;
+                        deletedChars += text.length;
+                    }
+                });
 
-    state.comparison.changes.modified.forEach(change => {
-        allDiff.push({
-            pageNum: change.pageNum,
-            diff: change.diff
-        });
-    });
-
-    return allDiff;
-}
-
-// ==================== THUMBNAILS ====================
-async function generateThumbnails() {
-    if (elements.thumbnails1) elements.thumbnails1.innerHTML = '';
-    if (elements.thumbnails2) elements.thumbnails2.innerHTML = '';
-
-    // Generate thumbnails for PDF1
-    for (let pageNum = 1; pageNum <= state.pdf1.totalPages; pageNum++) {
-        const thumbnail = await createThumbnail(pageNum, 1);
-        if (elements.thumbnails1) elements.thumbnails1.appendChild(thumbnail);
-    }
-
-    // Generate thumbnails for PDF2
-    for (let pageNum = 1; pageNum <= state.pdf2.totalPages; pageNum++) {
-        const thumbnail = await createThumbnail(pageNum, 2);
-        if (elements.thumbnails2) elements.thumbnails2.appendChild(thumbnail);
-    }
-}
-
-async function createThumbnail(pageNum, pdfNumber) {
-    const item = document.createElement('div');
-    item.className = 'thumbnail-item';
-
-    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-
-    if (pageNum === pdf.currentPage) {
-        item.classList.add('active');
-    }
-
-    item.onclick = () => navigateToPage(pageNum);
-
-    // Create canvas for thumbnail
-    const canvas = document.createElement('canvas');
-    const scale = 0.15;
-
-    try {
-        if (pdf.document && pageNum <= pdf.totalPages) {
-            const page = await pdf.document.getPage(pageNum);
-            const viewport = page.getViewport({ scale });
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            await page.render({
-                canvasContext: canvas.getContext('2d'),
-                viewport: viewport
-            }).promise;
-        }
-    } catch (error) {
-        console.error(`Thumbnail PDF${pdfNumber} sayfa ${pageNum} hatası:`, error);
-    }
-
-    // Add change indicator
-    const hasChanges = state.comparison.changes.modified.some(c => c.pageNum === pageNum) ||
-                      state.comparison.changes.added.some(c => c.pageNum === pageNum) ||
-                      state.comparison.changes.deleted.some(c => c.pageNum === pageNum);
-
-    if (hasChanges) {
-        const indicator = document.createElement('div');
-        indicator.className = 'change-indicator';
-        indicator.style.cssText = 'position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; background: #ff4444; border-radius: 50%;';
-        item.appendChild(indicator);
-    }
-
-    const pageLabel = document.createElement('div');
-    pageLabel.className = 'thumbnail-label';
-    pageLabel.textContent = `${pageNum}`;
-    pageLabel.style.cssText = 'text-align: center; padding: 5px; font-size: 12px;';
-
-    item.appendChild(canvas);
-    item.appendChild(pageLabel);
-    item.style.cssText = 'position: relative; cursor: pointer; margin: 5px; border: 2px solid #ddd; border-radius: 4px;';
-
-    return item;
-}
-
-// ==================== TEXT LAYER HIGHLIGHTING ====================
-// Apply highlights to text layer based on comparison results
-function highlightTextLayer(pdfNumber, pageNum) {
-    if (!state.settings.highlightChanges) return;
-    if (!state.comparison.changes) return;
-
-    const textLayerDiv = pdfNumber === 1 ? elements.textLayer1 : elements.textLayer2;
-    if (!textLayerDiv) return;
-
-    const spans = textLayerDiv.querySelectorAll('span');
-    if (spans.length === 0) return;
-
-    // Build full text from spans
-    let fullText = '';
-    const spanMap = [];
-
-    spans.forEach((span, idx) => {
-        const startIdx = fullText.length;
-        const text = span.dataset.text || span.textContent;
-        fullText += text;
-        spanMap.push({
-            startIdx: startIdx,
-            endIdx: fullText.length,
-            span: span,
-            text: text
-        });
-        fullText += ' ';
-    });
-
-    const fullTextNormalized = normalizeText(fullText);
-
-    // Get changes for this page
-    const { added, deleted, modified } = state.comparison.changes;
-
-    // Process deleted items (only for PDF1)
-    if (pdfNumber === 1) {
-        deleted.forEach(change => {
-            if (change.pageNum === pageNum) {
-                markTextInLayer(change.content, spanMap, fullTextNormalized, 'deleted');
-            }
-        });
-    }
-
-    // Process added items (only for PDF2)
-    if (pdfNumber === 2) {
-        added.forEach(change => {
-            if (change.pageNum === pageNum) {
-                markTextInLayer(change.content, spanMap, fullTextNormalized, 'added');
-            }
-        });
-    }
-
-    // Process modified items
-    modified.forEach(change => {
-        if (change.pageNum !== pageNum) return;
-
-        change.diff.forEach(diffItem => {
-            if (diffItem.type === 'removed' && pdfNumber === 1 && diffItem.line1) {
-                markTextInLayer(diffItem.line1, spanMap, fullTextNormalized, 'deleted');
-            } else if (diffItem.type === 'added' && pdfNumber === 2 && diffItem.line2) {
-                markTextInLayer(diffItem.line2, spanMap, fullTextNormalized, 'added');
-            }
-        });
-    });
-}
-
-// Mark text in text layer
-function markTextInLayer(searchText, spanMap, fullTextNormalized, highlightType) {
-    const searchNormalized = normalizeText(searchText);
-    if (!searchNormalized) return;
-
-    // Try exact match first
-    let searchIdx = fullTextNormalized.indexOf(searchNormalized);
-
-    if (searchIdx !== -1) {
-        const searchEndIdx = searchIdx + searchNormalized.length;
-
-        // Mark all spans that overlap with search range
-        spanMap.forEach(item => {
-            if (item.startIdx < searchEndIdx && item.endIdx > searchIdx) {
-                item.span.classList.add(`highlight-${highlightType}`);
-            }
-        });
-    } else {
-        // Fallback: word-by-word matching for partial matches
-        const significantWords = searchNormalized.split(/\s+/).filter(w => w.length >= 5);
-
-        if (significantWords.length >= 1) {
-            significantWords.forEach(word => {
-                let wordIdx = fullTextNormalized.indexOf(word);
-                if (wordIdx !== -1) {
-                    const wordEndIdx = wordIdx + word.length;
-
-                    spanMap.forEach(item => {
-                        if (item.startIdx <= wordIdx && item.endIdx >= wordEndIdx) {
-                            item.span.classList.add(`highlight-${highlightType}`);
-                        }
+                if (addedWords > 0 || deletedWords > 0) {
+                    state.comparison.changes.push({
+                        pageNum: pageNum,
+                        type: 'modified',
+                        diffs: diffs,
+                        addedWords: addedWords,
+                        deletedWords: deletedWords,
+                        addedChars: addedChars,
+                        deletedChars: deletedChars
                     });
                 }
-            });
-        }
-    }
-}
-
-// ==================== CHANGE HIGHLIGHTING ====================
-// Create highlight canvas overlay on top of PDF canvas
-function createHighlightCanvas(pdfCanvas, overlayContainer) {
-    // Clear any existing highlight canvas
-    const existingCanvas = overlayContainer.querySelector('.highlight-canvas');
-    if (existingCanvas) {
-        existingCanvas.remove();
-    }
-
-    const highlightCanvas = document.createElement('canvas');
-    highlightCanvas.className = 'highlight-canvas';
-    highlightCanvas.width = pdfCanvas.width;
-    highlightCanvas.height = pdfCanvas.height;
-    highlightCanvas.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        pointer-events: auto;
-        cursor: pointer;
-        background: transparent;
-    `;
-
-    overlayContainer.appendChild(highlightCanvas);
-    return highlightCanvas;
-}
-
-// Create tooltip element
-function createTooltip() {
-    let tooltip = document.getElementById('highlight-tooltip');
-    if (!tooltip) {
-        tooltip = document.createElement('div');
-        tooltip.id = 'highlight-tooltip';
-        tooltip.style.cssText = `
-            position: fixed;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 10000;
-            display: none;
-            max-width: 300px;
-            word-wrap: break-word;
-        `;
-        document.body.appendChild(tooltip);
-    }
-    return tooltip;
-}
-
-// Add hover interaction to highlight canvas
-function addHighlightInteraction(canvas, highlights, scale) {
-    if (!canvas || !highlights) return;
-
-    const tooltip = createTooltip();
-
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / scale;
-        const y = (e.clientY - rect.top) / scale;
-
-        // Find highlight under cursor
-        let foundHighlight = null;
-        for (const highlight of highlights) {
-            const padding = 2;
-            if (x >= highlight.x - padding &&
-                x <= highlight.x + highlight.width + padding &&
-                y >= highlight.y - padding &&
-                y <= highlight.y + highlight.height + padding) {
-                foundHighlight = highlight;
-                break;
             }
         }
+    }
 
-        if (foundHighlight) {
-            // Show tooltip
-            const typeLabel = {
-                'added': 'Eklendi',
-                'deleted': 'Silindi',
-                'modified': 'Değiştirildi'
-            }[foundHighlight.type] || foundHighlight.type;
+    console.log('Comparison complete:', state.comparison.changes);
+}
 
-            const textPreview = foundHighlight.text.length > 100
-                ? foundHighlight.text.substring(0, 100) + '...'
-                : foundHighlight.text;
+// ==================== Highlight Preparation ====================
+async function prepareHighlights() {
+    state.comparison.highlights = { pdf1: {}, pdf2: {} };
 
-            tooltip.innerHTML = `
-                <strong style="color: ${
-                    foundHighlight.type === 'added' ? '#66b3ff' :
-                    foundHighlight.type === 'deleted' ? '#ff6666' :
-                    '#ffff66'
-                };">${typeLabel}</strong><br>
-                ${escapeHtml(textPreview)}
-            `;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 15) + 'px';
-            tooltip.style.top = (e.clientY + 15) + 'px';
-        } else {
-            tooltip.style.display = 'none';
+    for (const change of state.comparison.changes) {
+        const pageNum = change.pageNum;
+
+        if (change.type === 'added') {
+            // Highlight entire page 2
+            state.comparison.highlights.pdf2[pageNum] = [{
+                type: 'added',
+                text: change.addedText,
+                fullPage: true
+            }];
+        } else if (change.type === 'deleted') {
+            // Highlight entire page 1
+            state.comparison.highlights.pdf1[pageNum] = [{
+                type: 'deleted',
+                text: change.deletedText,
+                fullPage: true
+            }];
+        } else if (change.type === 'modified') {
+            // Process diffs to find specific text locations
+            await processModifiedPage(pageNum, change.diffs);
         }
-    });
+    }
+}
 
-    canvas.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
+async function processModifiedPage(pageNum, diffs) {
+    if (!state.comparison.highlights.pdf1[pageNum]) {
+        state.comparison.highlights.pdf1[pageNum] = [];
+    }
+    if (!state.comparison.highlights.pdf2[pageNum]) {
+        state.comparison.highlights.pdf2[pageNum] = [];
+    }
+
+    // Extract deleted and added texts
+    diffs.forEach(([operation, text]) => {
+        if (operation === -1) { // DIFF_DELETE
+            state.comparison.highlights.pdf1[pageNum].push({
+                type: 'deleted',
+                text: text.trim()
+            });
+        } else if (operation === 1) { // DIFF_INSERT
+            state.comparison.highlights.pdf2[pageNum].push({
+                type: 'added',
+                text: text.trim()
+            });
+        }
     });
 }
 
-// Draw highlights on canvas
-function drawHighlights(canvas, highlights, scale = 1, viewport) {
-    if (!canvas || !highlights) return;
+// ==================== Highlight Rendering ====================
+function renderHighlights(pdfNum, pageNum) {
+    if (!state.settings.showHighlights) return;
 
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const highlights = state.comparison.highlights[`pdf${pdfNum}`][pageNum];
+    if (!highlights || highlights.length === 0) return;
 
+    const textLayer = pdfNum === 1 ? el.textLayer1 : el.textLayer2;
+    const overlay = pdfNum === 1 ? el.highlightOverlay1 : el.highlightOverlay2;
+
+    // Clear existing highlights
+    textLayer.querySelectorAll('span').forEach(span => {
+        span.classList.remove('highlight-added', 'highlight-deleted', 'highlight-modified');
+    });
+    overlay.innerHTML = '';
+
+    // Set overlay size to match canvas
+    const canvas = pdfNum === 1 ? el.canvas1 : el.canvas2;
+    overlay.setAttribute('width', canvas.width);
+    overlay.setAttribute('height', canvas.height);
+    overlay.style.width = canvas.width + 'px';
+    overlay.style.height = canvas.height + 'px';
+
+    // Apply highlights
     highlights.forEach(highlight => {
-        // Set color based on change type
-        switch(highlight.type) {
-            case 'added':
-                ctx.fillStyle = 'rgba(0, 120, 255, 0.3)'; // Blue
-                ctx.strokeStyle = 'rgba(0, 120, 255, 0.6)';
-                break;
-            case 'deleted':
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Red
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
-                break;
-            case 'modified':
-                ctx.fillStyle = 'rgba(255, 255, 0, 0.3)'; // Yellow
-                ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
-                break;
-            default:
-                ctx.fillStyle = 'rgba(128, 128, 128, 0.3)';
-                ctx.strokeStyle = 'rgba(128, 128, 128, 0.6)';
-        }
-
-        // Apply scale and flip Y coordinate
-        const x = highlight.x * scale;
-        // PDF Y starts at bottom, canvas Y starts at top
-        // So: canvasY = (viewport.height - pdfY - height) * scale
-        const y = viewport ? ((viewport.height - highlight.y - highlight.height) * scale) : (highlight.y * scale);
-        const width = highlight.width * scale;
-        const height = highlight.height * scale;
-
-        // Add some padding to make highlights more visible
-        const padding = 2;
-
-        ctx.fillRect(
-            x - padding,
-            y - padding,
-            width + padding * 2,
-            height + padding * 2
-        );
-
-        // Draw border
-        ctx.lineWidth = 1;
-        ctx.strokeRect(
-            x - padding,
-            y - padding,
-            width + padding * 2,
-            height + padding * 2
-        );
-    });
-}
-
-// Main highlight function - extracts positions and draws highlights
-async function highlightChanges() {
-    if (!state.settings.highlightChanges) {
-        // Clear highlights if disabled
-        clearHighlights();
-        return;
-    }
-
-    showLoading(true, 'Metin pozisyonları çıkarılıyor...');
-
-    try {
-        // Extract text positions from both PDFs
-        state.pdf1.textPositions = await extractTextWithPositions(state.pdf1.document);
-        state.pdf2.textPositions = await extractTextWithPositions(state.pdf2.document);
-
-        // Map changes to coordinates
-        state.comparison.highlights = mapChangesToCoordinates(
-            state.comparison.changes,
-            state.pdf1.textPositions,
-            state.pdf2.textPositions
-        );
-
-        console.log('Highlights mapped:', state.comparison.highlights);
-
-        // Debug: Count total highlights
-        const pdf1Total = Object.values(state.comparison.highlights.pdf1).reduce((sum, arr) => sum + arr.length, 0);
-        const pdf2Total = Object.values(state.comparison.highlights.pdf2).reduce((sum, arr) => sum + arr.length, 0);
-        console.log(`Total highlights - PDF1: ${pdf1Total}, PDF2: ${pdf2Total}`);
-
-    } catch (error) {
-        console.error('Highlighting error:', error);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Render highlights for a specific page
-async function renderPageHighlights(pdfNumber, pageNum) {
-    if (!state.settings.highlightChanges) return;
-
-    const canvas = pdfNumber === 1 ? elements.canvas1 : elements.canvas2;
-    const overlayContainer = pdfNumber === 1 ? elements.overlay1 : elements.overlay2;
-    const pdf = pdfNumber === 1 ? state.pdf1 : state.pdf2;
-
-    if (!canvas || !overlayContainer || !pdf.document) return;
-
-    const highlights = state.comparison.highlights[`pdf${pdfNumber}`][pageNum] || [];
-
-    if (highlights.length === 0) {
-        // Clear overlay if no highlights
-        const existingCanvas = overlayContainer.querySelector('.highlight-canvas');
-        if (existingCanvas) {
-            existingCanvas.remove();
-        }
-        return;
-    }
-
-    // Get page viewport for coordinate transformation
-    const page = await pdf.document.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 1.0 });
-
-    // Create highlight canvas
-    const highlightCanvas = createHighlightCanvas(canvas, overlayContainer);
-
-    // Get current scale
-    const scale = state.settings.zoomLevel / 100;
-
-    // Draw highlights with viewport for Y-axis transformation
-    drawHighlights(highlightCanvas, highlights, scale, viewport);
-
-    // Add hover interaction
-    addHighlightInteraction(highlightCanvas, highlights, scale);
-}
-
-// Clear all highlights
-function clearHighlights() {
-    [elements.overlay1, elements.overlay2].forEach(overlay => {
-        if (overlay) {
-            const existingCanvas = overlay.querySelector('.highlight-canvas');
-            if (existingCanvas) {
-                existingCanvas.remove();
-            }
-        }
-    });
-}
-
-// Toggle highlights on/off
-function toggleHighlights() {
-    state.settings.highlightChanges = !state.settings.highlightChanges;
-
-    if (state.settings.highlightChanges) {
-        // Re-render current page highlights (both canvas and text layer)
-        const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
-        renderPageHighlights(1, currentPage);
-        renderPageHighlights(2, currentPage);
-        highlightTextLayer(1, currentPage);
-        highlightTextLayer(2, currentPage);
-    } else {
-        // Clear all highlights (both canvas and text layer)
-        clearHighlights();
-        clearTextLayerHighlights();
-    }
-
-    // Update button appearance
-    const toggleBtn = elements.toggleChanges;
-    if (toggleBtn) {
-        if (state.settings.highlightChanges) {
-            toggleBtn.classList.add('active');
+        if (highlight.fullPage) {
+            // Highlight entire page
+            highlightEntirePage(overlay, highlight.type);
         } else {
-            toggleBtn.classList.remove('active');
-        }
-    }
-}
-
-// Clear text layer highlights
-function clearTextLayerHighlights() {
-    [elements.textLayer1, elements.textLayer2].forEach(textLayer => {
-        if (textLayer) {
-            const spans = textLayer.querySelectorAll('span');
-            spans.forEach(span => {
-                span.classList.remove('highlight-deleted', 'highlight-added', 'highlight-modified');
-            });
+            // Highlight specific text
+            highlightText(textLayer, highlight.text, highlight.type);
         }
     });
 }
 
+function highlightEntirePage(overlay, type) {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', '100%');
+    rect.setAttribute('class', `highlight-rect-${type}`);
+    overlay.appendChild(rect);
+}
+
+function highlightText(textLayer, searchText, type) {
+    if (!searchText || searchText.length < 3) return;
+
+    const spans = Array.from(textLayer.querySelectorAll('span'));
+    const fullText = spans.map(s => s.textContent).join(' ');
+    const normalizedSearch = normalizeText(searchText);
+    const normalizedFull = normalizeText(fullText);
+
+    // Find position in full text
+    const index = normalizedFull.indexOf(normalizedSearch);
+    if (index === -1) {
+        // Try word-by-word matching
+        const words = normalizedSearch.split(/\s+/).filter(w => w.length >= 5);
+        words.forEach(word => {
+            spans.forEach(span => {
+                const spanText = normalizeText(span.textContent);
+                if (spanText.includes(word)) {
+                    span.classList.add(`highlight-${type}`);
+                }
+            });
+        });
+        return;
+    }
+
+    // Calculate which spans contain this text
+    let currentPos = 0;
+    const matchStart = index;
+    const matchEnd = index + normalizedSearch.length;
+
+    spans.forEach(span => {
+        const spanText = normalizeText(span.textContent);
+        const spanStart = currentPos;
+        const spanEnd = currentPos + spanText.length;
+
+        // Check if span overlaps with match
+        if (spanStart < matchEnd && spanEnd > matchStart) {
+            span.classList.add(`highlight-${type}`);
+        }
+
+        currentPos = spanEnd + 1; // +1 for space
+    });
+}
+
+function normalizeText(text) {
+    return text.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+// ==================== Changes Panel ====================
 function updateChangesPanel() {
-    const { added, deleted, modified } = state.comparison.changes;
+    let totalAdded = 0;
+    let totalDeleted = 0;
+    let totalModified = 0;
+    let totalMoved = 0;
+    let totalAddedWords = 0;
+    let totalDeletedWords = 0;
+
+    let changesHTML = '';
+
+    state.comparison.changes.forEach(change => {
+        const { pageNum, type } = change;
+
+        if (type === 'added') {
+            totalAdded++;
+            totalAddedWords += change.wordCount || 0;
+            changesHTML += `
+                <div class="change-item" onclick="navigateToPage(${pageNum})">
+                    <div class="change-item-header">
+                        <span class="change-item-page">Sayfa ${pageNum}</span>
+                        <span class="change-badge added">Eklenen</span>
+                    </div>
+                    <div class="change-item-preview">Sayfa eklendi</div>
+                    <div class="change-item-stats">+${change.wordCount || 0} kelime</div>
+                </div>
+            `;
+        } else if (type === 'deleted') {
+            totalDeleted++;
+            totalDeletedWords += change.wordCount || 0;
+            changesHTML += `
+                <div class="change-item" onclick="navigateToPage(${pageNum})">
+                    <div class="change-item-header">
+                        <span class="change-item-page">Sayfa ${pageNum}</span>
+                        <span class="change-badge deleted">Silinen</span>
+                    </div>
+                    <div class="change-item-preview">Sayfa silindi</div>
+                    <div class="change-item-stats">-${change.wordCount || 0} kelime</div>
+                </div>
+            `;
+        } else if (type === 'modified') {
+            totalModified++;
+            totalAddedWords += change.addedWords || 0;
+            totalDeletedWords += change.deletedWords || 0;
+            changesHTML += `
+                <div class="change-item" onclick="navigateToPage(${pageNum})">
+                    <div class="change-item-header">
+                        <span class="change-item-page">Sayfa ${pageNum}</span>
+                        <span class="change-badge modified">Değişen</span>
+                    </div>
+                    <div class="change-item-stats">
+                        +${change.addedWords || 0} kelime eklendi, -${change.deletedWords || 0} kelime silindi
+                    </div>
+                </div>
+            `;
+        }
+    });
 
     // Update counts
-    elements.addedCount.textContent = added.length;
-    elements.deletedCount.textContent = deleted.length;
-    elements.modifiedCount.textContent = modified.length;
+    el.addedCount.textContent = totalAdded;
+    el.deletedCount.textContent = totalDeleted;
+    el.modifiedCount.textContent = totalModified;
+    el.movedCount.textContent = totalMoved;
 
-    // Build changes list
-    let html = '';
+    el.totalAdded.textContent = totalAdded + totalModified;
+    el.totalDeleted.textContent = totalDeleted + totalModified;
+    el.totalModified.textContent = totalModified;
+    el.totalMoved.textContent = totalMoved;
+    el.totalAddedWords.textContent = totalAddedWords;
+    el.totalDeletedWords.textContent = totalDeletedWords;
 
-    // Added changes
-    added.forEach(change => {
-        html += `
-            <div class="change-item added" onclick="navigateToPage(${change.pageNum})">
-                <div class="change-icon"><i class="fas fa-plus-circle"></i></div>
-                <div class="change-content">
-                    <div class="change-header">
-                        <strong>Sayfa ${change.pageNum}</strong>
-                        <span class="change-type added-badge">Eklendi</span>
-                    </div>
-                    <div class="change-preview">${escapeHtml(change.content.substring(0, 100))}...</div>
-                </div>
-            </div>
-        `;
-    });
-
-    // Deleted changes
-    deleted.forEach(change => {
-        html += `
-            <div class="change-item deleted" onclick="navigateToPage(${change.pageNum})">
-                <div class="change-icon"><i class="fas fa-minus-circle"></i></div>
-                <div class="change-content">
-                    <div class="change-header">
-                        <strong>Sayfa ${change.pageNum}</strong>
-                        <span class="change-type deleted-badge">Silindi</span>
-                    </div>
-                    <div class="change-preview">${escapeHtml(change.content.substring(0, 100))}...</div>
-                </div>
-            </div>
-        `;
-    });
-
-    // Modified changes
-    modified.forEach(change => {
-        const addedLines = change.diff.filter(d => d.type === 'added').length;
-        const removedLines = change.diff.filter(d => d.type === 'removed').length;
-
-        html += `
-            <div class="change-item modified" onclick="navigateToPage(${change.pageNum})">
-                <div class="change-icon"><i class="fas fa-edit"></i></div>
-                <div class="change-content">
-                    <div class="change-header">
-                        <strong>Sayfa ${change.pageNum}</strong>
-                        <span class="change-type modified-badge">Değiştirildi</span>
-                    </div>
-                    <div class="change-preview">
-                        +${addedLines} satır eklendi, -${removedLines} satır silindi
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-
-    if (html === '') {
-        html = '<div style="padding: 2rem; text-align: center; color: #28a745;"><i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i><br><strong>Hiç fark bulunamadı!</strong><br>PDF\'ler aynı içeriğe sahip.</div>';
+    // Update list
+    if (changesHTML === '') {
+        changesHTML = '<div style="padding: 40px; text-align: center; color: #999;">Hiç fark bulunamadı! PDF\'ler aynı.</div>';
     }
-
-    elements.changesList.innerHTML = html;
+    el.changesList.innerHTML = changesHTML;
 }
 
-// ==================== NAVIGATION ====================
+// ==================== Navigation ====================
 function navigatePage(delta) {
-    const currentPage = state.pdf1.currentPage;
     const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-    const newPage = Math.max(1, Math.min(totalPages, currentPage + delta));
-
+    const newPage = Math.max(1, Math.min(totalPages, state.ui.currentPage + delta));
     navigateToPage(newPage);
 }
 
-async function navigateToPage(pageNum) {
+function navigateToPage(pageNum) {
     const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-
     if (pageNum < 1 || pageNum > totalPages) return;
 
-    // Render both pages
-    if (pageNum <= state.pdf1.totalPages) {
-        await renderPage(1, pageNum);
-    }
-    if (pageNum <= state.pdf2.totalPages) {
-        await renderPage(2, pageNum);
-    }
+    state.ui.currentPage = pageNum;
+    renderCurrentPage();
+}
 
-    // Update thumbnail selection
-    document.querySelectorAll('.thumbnail-item').forEach((item, index) => {
-        item.classList.toggle('active', index + 1 === pageNum);
-    });
+function navigateChange(delta) {
+    const currentPage = state.ui.currentPage;
+    const changes = state.comparison.changes;
 
-    updatePageInfo();
+    if (changes.length === 0) return;
+
+    // Find current change index
+    let currentIndex = changes.findIndex(c => c.pageNum >= currentPage);
+    if (currentIndex === -1) currentIndex = 0;
+
+    // Navigate
+    const newIndex = currentIndex + delta;
+    if (newIndex >= 0 && newIndex < changes.length) {
+        navigateToPage(changes[newIndex].pageNum);
+    }
 }
 
 function updatePageInfo() {
-    const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
     const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
+    el.pageInfo.textContent = `Sayfa ${state.ui.currentPage} / ${totalPages}`;
 
-    if (elements.pageInfo) {
-        elements.pageInfo.textContent = `${currentPage} / ${totalPages}`;
-    }
-
-    if (elements.prevPage) {
-        elements.prevPage.disabled = currentPage <= 1;
-    }
-    if (elements.nextPage) {
-        elements.nextPage.disabled = currentPage >= totalPages;
-    }
+    el.prevPage.disabled = state.ui.currentPage <= 1;
+    el.nextPage.disabled = state.ui.currentPage >= totalPages;
 }
 
-// ==================== ZOOM ====================
-function setZoom(level) {
-    level = Math.max(50, Math.min(200, level));
-    state.settings.zoomLevel = level;
-
-    // Re-render current pages
-    const currentPage = Math.max(state.pdf1.currentPage, state.pdf2.currentPage);
-    if (state.pdf1.document && currentPage <= state.pdf1.totalPages) {
-        renderPage(1, currentPage);
-    }
-    if (state.pdf2.document && currentPage <= state.pdf2.totalPages) {
-        renderPage(2, currentPage);
-    }
+// ==================== Controls ====================
+function changeZoom(delta) {
+    state.settings.zoomLevel = Math.max(0.5, Math.min(2, state.settings.zoomLevel + delta));
+    el.zoomSelect.value = state.settings.zoomLevel;
+    renderCurrentPage();
 }
 
-async function fitToWidth() {
-    const viewerWidth = elements.viewer1.clientWidth;
-    const page = await state.pdf1.document.getPage(state.pdf1.currentPage);
-    const viewport = page.getViewport({ scale: 1 });
-    const scale = (viewerWidth - 40) / viewport.width;
-
-    setZoom(Math.round(scale * 100));
+function toggleSyncScroll() {
+    state.settings.syncScroll = !state.settings.syncScroll;
+    el.syncScrollBtn.setAttribute('data-active', state.settings.syncScroll);
+    el.syncScrollBtn.title = state.settings.syncScroll ? 'Scroll Kilidi ON' : 'Scroll Kilidi OFF';
 }
 
-// ==================== VIEW MODES ====================
-function setViewMode(mode) {
-    state.settings.viewMode = mode;
-
-    // Update button states
-    document.querySelectorAll('[data-view]').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-view') === mode) {
-            btn.classList.add('active');
-        }
-    });
-
-    // Hide all views
-    if (elements.sideBySideView) elements.sideBySideView.style.display = 'none';
-    if (elements.overlayView) elements.overlayView.style.display = 'none';
-    if (elements.singleView) elements.singleView.style.display = 'none';
-
-    // Show selected view
-    if (mode === 'sideBySide') {
-        if (elements.sideBySideView) elements.sideBySideView.style.display = 'flex';
-    } else if (mode === 'overlay') {
-        if (elements.overlayView) elements.overlayView.style.display = 'flex';
-    } else if (mode === 'single') {
-        if (elements.singleView) elements.singleView.style.display = 'flex';
-    }
+function toggleHighlights() {
+    state.settings.showHighlights = !state.settings.showHighlights;
+    el.toggleHighlights.setAttribute('data-active', state.settings.showHighlights);
+    renderCurrentPage();
 }
 
-// ==================== PANELS ====================
-function toggleThumbnailsPanel() {
-    const panel = elements.thumbnailsPanel;
-    if (panel) {
-        if (panel.style.display === 'none') {
-            panel.style.display = 'block';
-        } else {
-            panel.style.display = 'none';
-        }
-    }
-}
-
-function toggleChangesPanel() {
-    const panel = elements.changesPanel;
-    if (panel) {
-        if (panel.style.display === 'none') {
-            panel.style.display = 'block';
-        } else {
-            panel.style.display = 'none';
-        }
-    }
-}
-
-// ==================== SETTINGS ====================
-function loadSettingsToModal() {
-    const ignoreWhitespace = document.getElementById('ignoreWhitespace');
-    const ignoreCase = document.getElementById('ignoreCase');
-
-    if (ignoreWhitespace) ignoreWhitespace.checked = state.settings.ignoreWhitespace;
-    if (ignoreCase) ignoreCase.checked = state.settings.ignoreCase;
-}
-
-function saveSettingsFromModal() {
-    const ignoreWhitespace = document.getElementById('ignoreWhitespace');
-    const ignoreCase = document.getElementById('ignoreCase');
-
-    if (ignoreWhitespace) state.settings.ignoreWhitespace = ignoreWhitespace.checked;
-    if (ignoreCase) state.settings.ignoreCase = ignoreCase.checked;
-
-    if (elements.settingsModal) {
-        elements.settingsModal.classList.remove('active');
-    }
-
-    // Re-compare if already compared
-    if (state.comparison.textDiff.length > 0) {
-        comparePDFs();
-    }
-}
-
-// ==================== EXPORT ====================
+// ==================== Export ====================
 function exportReport() {
     let report = '='.repeat(80) + '\n';
-    report += 'PDF KARŞILAŞTIRMA RAPORU (PROFESYONEL)\n';
+    report += 'PDF KARŞILAŞTIRMA RAPORU\n';
     report += '='.repeat(80) + '\n\n';
 
-    report += 'DOSYA BİLGİLERİ:\n';
-    report += '-'.repeat(80) + '\n';
-    report += `PDF 1: ${state.pdf1.file ? state.pdf1.file.name : 'Yüklenmedi'} (${state.pdf1.totalPages} sayfa)\n`;
-    report += `PDF 2: ${state.pdf2.file ? state.pdf2.file.name : 'Yüklenmedi'} (${state.pdf2.totalPages} sayfa)\n\n`;
+    report += 'DOSYALAR:\n';
+    report += `PDF 1: ${state.pdf1.file ? state.pdf1.file.name : 'N/A'} (${state.pdf1.totalPages} sayfa)\n`;
+    report += `PDF 2: ${state.pdf2.file ? state.pdf2.file.name : 'N/A'} (${state.pdf2.totalPages} sayfa)\n\n`;
 
-    report += 'DEĞİŞİKLİK ÖZETİ:\n';
-    report += '-'.repeat(80) + '\n';
-    report += `Eklenen Sayfalar: ${state.comparison.changes.added.length}\n`;
-    report += `Silinen Sayfalar: ${state.comparison.changes.deleted.length}\n`;
-    report += `Değiştirilen Sayfalar: ${state.comparison.changes.modified.length}\n\n`;
+    report += 'ÖZET:\n';
+    const stats = calculateStats();
+    report += `Eklenen Sayfalar: ${stats.addedPages}\n`;
+    report += `Silinen Sayfalar: ${stats.deletedPages}\n`;
+    report += `Değiştirilen Sayfalar: ${stats.modifiedPages}\n`;
+    report += `Toplam Eklenen Kelime: ${stats.totalAddedWords}\n`;
+    report += `Toplam Silinen Kelime: ${stats.totalDeletedWords}\n\n`;
 
     report += 'DETAYLI DEĞİŞİKLİKLER:\n';
     report += '-'.repeat(80) + '\n';
 
-    // Added pages
-    if (state.comparison.changes.added.length > 0) {
-        report += '\n[EKLENMİŞ SAYFALAR]\n';
-        state.comparison.changes.added.forEach(change => {
-            report += `\nSayfa ${change.pageNum}:\n${change.content}\n`;
-        });
-    }
-
-    // Deleted pages
-    if (state.comparison.changes.deleted.length > 0) {
-        report += '\n[SİLİNMİŞ SAYFALAR]\n';
-        state.comparison.changes.deleted.forEach(change => {
-            report += `\nSayfa ${change.pageNum}:\n${change.content}\n`;
-        });
-    }
-
-    // Modified pages
-    if (state.comparison.changes.modified.length > 0) {
-        report += '\n[DEĞİŞTİRİLMİŞ SAYFALAR]\n';
-        state.comparison.changes.modified.forEach(change => {
-            report += `\nSayfa ${change.pageNum}:\n`;
-            change.diff.forEach(item => {
-                if (item.type === 'added') {
-                    report += `+ ${item.line2}\n`;
-                } else if (item.type === 'removed') {
-                    report += `- ${item.line1}\n`;
-                }
-            });
-        });
-    }
+    state.comparison.changes.forEach(change => {
+        report += `\nSayfa ${change.pageNum} - ${change.type.toUpperCase()}\n`;
+        if (change.type === 'modified') {
+            report += `  +${change.addedWords} kelime eklendi\n`;
+            report += `  -${change.deletedWords} kelime silindi\n`;
+        }
+    });
 
     report += '\n' + '='.repeat(80) + '\n';
     report += `Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}\n`;
@@ -1608,85 +748,42 @@ function exportReport() {
     URL.revokeObjectURL(url);
 }
 
-// ==================== KEYBOARD SHORTCUTS ====================
-function handleKeyboardShortcuts(e) {
-    // Prevent default for our shortcuts
-    if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-            case '=':
-            case '+':
-                e.preventDefault();
-                setZoom(state.settings.zoomLevel + 25);
-                break;
-            case '-':
-                e.preventDefault();
-                setZoom(state.settings.zoomLevel - 25);
-                break;
-            case '0':
-                e.preventDefault();
-                setZoom(100);
-                break;
-        }
-    }
+function calculateStats() {
+    let addedPages = 0;
+    let deletedPages = 0;
+    let modifiedPages = 0;
+    let totalAddedWords = 0;
+    let totalDeletedWords = 0;
 
-    // Page navigation
-    if (!e.ctrlKey && !e.metaKey) {
-        switch(e.key) {
-            case 'ArrowLeft':
-            case 'PageUp':
-                e.preventDefault();
-                navigatePage(-1);
-                break;
-            case 'ArrowRight':
-            case 'PageDown':
-                e.preventDefault();
-                navigatePage(1);
-                break;
-            case 'Home':
-                e.preventDefault();
-                navigateToPage(1);
-                break;
-            case 'End':
-                e.preventDefault();
-                navigateToPage(Math.max(state.pdf1.totalPages, state.pdf2.totalPages));
-                break;
+    state.comparison.changes.forEach(change => {
+        if (change.type === 'added') {
+            addedPages++;
+            totalAddedWords += change.wordCount || 0;
+        } else if (change.type === 'deleted') {
+            deletedPages++;
+            totalDeletedWords += change.wordCount || 0;
+        } else if (change.type === 'modified') {
+            modifiedPages++;
+            totalAddedWords += change.addedWords || 0;
+            totalDeletedWords += change.deletedWords || 0;
         }
-    }
+    });
+
+    return { addedPages, deletedPages, modifiedPages, totalAddedWords, totalDeletedWords };
 }
 
-// ==================== UI HELPERS ====================
+// ==================== UI Helpers ====================
 function showLoading(show, text = 'Yükleniyor...') {
+    el.loadingOverlay.style.display = show ? 'flex' : 'none';
     if (show) {
-        elements.loadingOverlay.classList.add('active');
-        elements.loadingText.textContent = text;
+        el.loadingText.textContent = text;
         updateProgress(0);
-    } else {
-        elements.loadingOverlay.classList.remove('active');
     }
 }
 
 function updateProgress(percent) {
-    state.ui.progressValue = percent;
-    elements.progressBar.style.width = `${percent}%`;
+    el.progressFill.style.width = `${percent}%`;
 }
 
-function updateUI() {
-    // Initial UI state
-    if (elements.compareBtn) elements.compareBtn.disabled = true;
-    if (elements.syncScrollToggle) elements.syncScrollToggle.checked = state.settings.syncScroll;
-    if (elements.zoomSelect) elements.zoomSelect.value = state.settings.zoomLevel / 100;
-
-    // Set initial toggle button state for highlights
-    if (elements.toggleChanges && state.settings.highlightChanges) {
-        elements.toggleChanges.classList.add('active');
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ==================== START APPLICATION ====================
+// ==================== Start ====================
 document.addEventListener('DOMContentLoaded', init);
