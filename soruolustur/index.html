@@ -465,61 +465,115 @@
         </div>
     </footer>
 
-    <!-- Custom Type Modal - Compact & User-Friendly -->
+    <!-- Custom Type Modal - Multi-Step Form -->
     <div id="customTypeModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
+            <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
                 <div>
-                    <h3 class="text-lg font-semibold">Yeni Soru Tipi</h3>
-                    <p class="text-sm text-blue-100">Özel soru tipinizi tanımlayın</p>
+                    <h3 class="text-2xl font-bold">Yeni Soru Tipi Oluştur</h3>
+                    <p class="text-sm text-blue-100 mt-1">Özel soru tipinizi 2 adımda tanımlayın</p>
                 </div>
                 <button class="modal-close text-white hover:text-blue-100">
-                    <i class="fas fa-times text-xl"></i>
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body space-y-3">
-                <!-- Tip Adı (Tek satır, iki dil) -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Türkçe Adı *</label>
-                        <input type="text" id="customTypeName" placeholder="Örn: Karşılaştırma"
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+
+            <!-- Step Indicator -->
+            <div class="step-indicator px-8 pt-6">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">
+                        <i class="fas fa-info-circle"></i>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">İngilizce Adı *</label>
-                        <input type="text" id="customTypeNameEn" placeholder="e.g., Comparison"
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <div class="step-label">Temel Bilgiler</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                    <div class="step-label">Açıklama & Örnek</div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Step 1: Basic Info -->
+                <div class="form-step active" data-step="1">
+                    <h4 class="text-xl font-semibold mb-6 text-gray-900">Temel Bilgiler</h4>
+                    <div class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Türkçe Adı *
+                                </label>
+                                <input type="text" id="customTypeName"
+                                       placeholder="Örn: Karşılaştırma"
+                                       class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Soru tipinin Türkçe adı</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    İngilizce Adı *
+                                </label>
+                                <input type="text" id="customTypeNameEn"
+                                       placeholder="e.g., Comparison"
+                                       class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">English name for the question type</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Açıklama -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Açıklama *</label>
-                    <textarea id="customTypeDesc" rows="2" placeholder="Bu soru tipi ne tür sorular içerir?"
-                              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
+                <!-- Step 2: Description & Example -->
+                <div class="form-step" data-step="2">
+                    <h4 class="text-xl font-semibold mb-6 text-gray-900">Açıklama & Örnek</h4>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Açıklama *
+                            </label>
+                            <textarea id="customTypeDesc" rows="4"
+                                      placeholder="Bu soru tipi ne tür sorular içerir? Hangi durumlarda kullanılır?"
+                                      class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Soru tipinin amacını ve kullanım alanını açıklayın</p>
+                        </div>
 
-                <!-- Örnek Soru -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Örnek Soru *</label>
-                    <input type="text" id="customTypeExample" placeholder="Örn: X ile Y arasındaki fark nedir?"
-                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Örnek Soru *
+                            </label>
+                            <input type="text" id="customTypeExample"
+                                   placeholder="Örn: X ile Y arasındaki temel fark nedir?"
+                                   class="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Bu tipte sorulabilecek örnek bir soru yazın</p>
+                        </div>
 
-                <!-- Bilgilendirme -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div class="flex gap-2">
-                        <i class="fas fa-info-circle text-blue-600 text-sm mt-0.5"></i>
-                        <p class="text-xs text-blue-800">
-                            Özel soru tipleri kaydedilir ve sonraki kullanımlarınızda otomatik olarak yüklenir.
-                        </p>
+                        <!-- Info Box -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+                            <div class="flex gap-3">
+                                <i class="fas fa-lightbulb text-blue-600 text-xl mt-1"></i>
+                                <div>
+                                    <p class="font-semibold text-blue-900 mb-1">İpucu</p>
+                                    <p class="text-sm text-blue-800">
+                                        Özel soru tipleri kaydedilir ve sonraki kullanımlarınızda otomatik olarak yüklenir.
+                                        İstediğiniz zaman silebilir veya düzenleyebilirsiniz.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-gray-50 rounded-b-lg">
-                <button id="saveCustomType" class="btn-primary flex-1">
-                    <i class="fas fa-plus-circle mr-2"></i>Ekle
+
+            <div class="modal-footer">
+                <button id="prevStepBtn" class="btn-outline hidden">
+                    <i class="fas fa-arrow-left mr-2"></i>Geri
+                </button>
+                <button id="nextStepBtn" class="btn-primary">
+                    İleri<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <button id="saveCustomType" class="btn-success hidden">
+                    <i class="fas fa-check-circle mr-2"></i>Kaydet
                 </button>
                 <button class="btn-outline modal-close">
                     <i class="fas fa-times mr-2"></i>İptal
