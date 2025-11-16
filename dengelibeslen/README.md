@@ -8,14 +8,16 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 - **🖼️ Galeri Yükleme**: Galeriden mevcut fotoğraf yükleme
 - **🤖 AI Analiz**: Gemini Vision API ile otomatik içerik tanıma ve analiz
 - **🎯 Risk Değerlendirmesi**: Düşük/Orta/Yüksek risk sınıflandırması
+- **⚙️ Model Seçimi**: 5 farklı Gemini modelinden seçim yapabilme
 - **📱 Mobil Uyumlu**: Responsive tasarım, her cihazda mükemmel çalışır
 - **🔒 Gizlilik**: Görselleriniz tarayıcınızda kalır, sunucuda saklanmaz
 
 ## 🚀 Kullanım
 
-1. **API Anahtarı Alın**
+1. **API Ayarlarını Yapın**
    - [Google AI Studio](https://aistudio.google.com/app/apikey) adresinden ücretsiz Gemini API anahtarı alın
-   - Anahtarınızı uygulamada "API Anahtarı" bölümüne girin ve kaydedin
+   - Uygulamada "Model Seçimi" dropdown'ından tercih ettiğiniz modeli seçin (varsayılan: Gemini 2.0 Flash)
+   - API anahtarınızı girin ve "Kaydet" butonuna tıklayın
 
 2. **Fotoğraf Çekin veya Yükleyin**
    - "Fotoğraf Çek" butonu ile kameranızı kullanın
@@ -24,7 +26,7 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 
 3. **Analiz Edin**
    - "Analiz Et" butonuna tıklayın
-   - Yapay zeka etiketinizi okuyacak ve analiz edecek
+   - Yapay zeka seçtiğiniz modelle etiketinizi okuyacak ve analiz edecek
 
 4. **Sonuçları İnceleyin**
    - Risk seviyesini görün (🟢 Düşük / 🟡 Orta / 🔴 Yüksek)
@@ -34,9 +36,21 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 ## 🛠️ Teknolojiler
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **API**: Google Gemini 2.0 Flash (Vision)
+- **API**: Google Gemini 2.x (Vision Models)
 - **Hosting**: GitHub Pages
 - **Tasarım**: Mobile-first, Responsive
+
+## 🤖 Desteklenen Gemini Modelleri
+
+| Model | BGBG/Gün | Token/Dk | Açıklama |
+|-------|----------|----------|----------|
+| **Gemini 2.0 Flash** ⭐ | 15 | 1M | Önerilen - Hızlı ve dengeli |
+| **Gemini 2.0 Flash-Lite** | 30 | 1M | En yüksek ücretsiz quota |
+| **Gemini 2.5 Flash** | 10 | 250K | Gelişmiş performans |
+| **Gemini 2.5 Flash-Lite** | 15 | 250K | İyi denge |
+| **Gemini 2.5 Pro** | 2 | 125K | En gelişmiş, en doğru |
+
+*BGBG: Bedava Günlük Başvuru Garantisi (Free Requests Per Day)*
 
 ## 📱 Canlı Demo
 
