@@ -1,6 +1,7 @@
 // Global değişkenler
 let uploadedFiles = [];
 let scormPackage = null;
+let scormConfig = {};
 
 // DOM elemanları
 const htmlFileInput = document.getElementById('htmlFile');
@@ -12,28 +13,12 @@ const convertBtn = document.getElementById('convertBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const progressBar = document.getElementById('progressBar');
 const statusDiv = document.getElementById('status');
-const previewSection = document.getElementById('previewSection');
-const packageInfo = document.getElementById('packageInfo');
-
-// Form elemanları
-const courseTitle = document.getElementById('courseTitle');
-const courseId = document.getElementById('courseId');
-const scoTitle = document.getElementById('scoTitle');
-const scoId = document.getElementById('scoId');
-const launchFile = document.getElementById('launchFile');
-const description = document.getElementById('description');
-const includeApi = document.getElementById('includeApi');
 
 // Event listeners
 htmlFileInput.addEventListener('change', handleSingleFileUpload);
 folderInput.addEventListener('change', handleFolderUpload);
 convertBtn.addEventListener('click', createSCORMPackage);
 downloadBtn.addEventListener('click', downloadPackage);
-
-// Form alanlarını izle
-[courseTitle, courseId, scoTitle, scoId, launchFile].forEach(input => {
-    input.addEventListener('input', validateForm);
-});
 
 /**
  * Tek HTML dosyası yükleme
@@ -46,10 +31,10 @@ function handleSingleFileUpload(e) {
         folderName.textContent = '';
         folderInput.value = '';
         displayFileList();
-        validateForm();
 
-        // Dosya adını launch file olarak ayarla
-        launchFile.value = file.name;
+        // Otomatik config oluştur
+        generateAutoConfig(file.name, file.name);
+        enableConvertButton();
     }
 }
 
@@ -65,14 +50,47 @@ function handleFolderUpload(e) {
         htmlFileName.textContent = '';
         htmlFileInput.value = '';
         displayFileList();
-        validateForm();
 
-        // index.html varsa launch file olarak ayarla
+        // index.html varsa launch file olarak ayarla, yoksa ilk HTML dosyası
         const indexFile = files.find(f => f.name === 'index.html');
+        let launchFileName;
+
         if (indexFile) {
-            launchFile.value = indexFile.webkitRelativePath.split('/').slice(1).join('/');
+            launchFileName = indexFile.webkitRelativePath.split('/').slice(1).join('/');
+        } else {
+            const firstHtmlFile = files.find(f => f.name.match(/\.html?$/i));
+            launchFileName = firstHtmlFile ? firstHtmlFile.webkitRelativePath.split('/').slice(1).join('/') : 'index.html';
         }
+
+        // Otomatik config oluştur
+        generateAutoConfig(folderPath, launchFileName);
+        enableConvertButton();
     }
+}
+
+/**
+ * Otomatik SCORM config oluştur
+ */
+function generateAutoConfig(baseName, launchFileName) {
+    const timestamp = Date.now();
+    const cleanName = baseName.replace(/\.(html?|htm)$/i, '');
+
+    scormConfig = {
+        courseTitle: cleanName,
+        courseId: `COURSE_${timestamp}`,
+        scoTitle: cleanName,
+        scoId: `SCO_${timestamp}`,
+        launchFile: launchFileName,
+        description: '',
+        includeApi: true
+    };
+}
+
+/**
+ * Convert butonunu etkinleştir
+ */
+function enableConvertButton() {
+    convertBtn.disabled = uploadedFiles.length === 0;
 }
 
 /**
@@ -116,19 +134,6 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
-/**
- * Form validasyonu
- */
-function validateForm() {
-    const isValid = uploadedFiles.length > 0 &&
-                   courseTitle.value.trim() !== '' &&
-                   courseId.value.trim() !== '' &&
-                   scoTitle.value.trim() !== '' &&
-                   scoId.value.trim() !== '' &&
-                   launchFile.value.trim() !== '';
-
-    convertBtn.disabled = !isValid;
-}
 
 /**
  * SCORM manifest dosyası oluştur
@@ -137,7 +142,7 @@ function generateManifest() {
     const timestamp = new Date().toISOString();
 
     return `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="${courseId.value}" version="1.0"
+<manifest identifier="${scormConfig.courseId}" version="1.0"
     xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
     xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -153,10 +158,10 @@ function generateManifest() {
              xsi:schemaLocation="http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd">
             <general>
                 <title>
-                    <langstring xml:lang="tr">${escapeXml(courseTitle.value)}</langstring>
+                    <langstring xml:lang="tr">${escapeXml(scormConfig.courseTitle)}</langstring>
                 </title>
-                ${description.value ? `<description>
-                    <langstring xml:lang="tr">${escapeXml(description.value)}</langstring>
+                ${scormConfig.description ? `<description>
+                    <langstring xml:lang="tr">${escapeXml(scormConfig.description)}</langstring>
                 </description>` : ''}
             </general>
             <metametadata>
@@ -169,17 +174,17 @@ function generateManifest() {
         </lom>
     </metadata>
 
-    <organizations default="${courseId.value}_org">
-        <organization identifier="${courseId.value}_org">
-            <title>${escapeXml(courseTitle.value)}</title>
-            <item identifier="${scoId.value}" identifierref="${scoId.value}_resource" isvisible="true">
-                <title>${escapeXml(scoTitle.value)}</title>
+    <organizations default="${scormConfig.courseId}_org">
+        <organization identifier="${scormConfig.courseId}_org">
+            <title>${escapeXml(scormConfig.courseTitle)}</title>
+            <item identifier="${scormConfig.scoId}" identifierref="${scormConfig.scoId}_resource" isvisible="true">
+                <title>${escapeXml(scormConfig.scoTitle)}</title>
             </item>
         </organization>
     </organizations>
 
     <resources>
-        <resource identifier="${scoId.value}_resource" type="webcontent" adlcp:scormtype="sco" href="${escapeXml(launchFile.value)}">
+        <resource identifier="${scormConfig.scoId}_resource" type="webcontent" adlcp:scormtype="sco" href="${escapeXml(scormConfig.launchFile)}">
             ${generateResourceFiles()}
         </resource>
     </resources>
@@ -204,7 +209,7 @@ function generateResourceFiles() {
     });
 
     // SCORM API wrapper dahilse ekle
-    if (includeApi.checked) {
+    if (scormConfig.includeApi) {
         filesXml += `            <file href="scorm-api-wrapper.js" />\n`;
     }
 
@@ -253,7 +258,7 @@ async function createSCORMPackage() {
         }
 
         // SCORM API wrapper ekle
-        if (includeApi.checked) {
+        if (scormConfig.includeApi) {
             const apiResponse = await fetch('scorm-api-wrapper.js');
             const apiContent = await apiResponse.text();
             zip.file('scorm-api-wrapper.js', apiContent);
@@ -269,9 +274,9 @@ async function createSCORMPackage() {
             compressionOptions: { level: 9 }
         });
 
-        showStatus('success', 'SCORM paketi başarıyla oluşturuldu!');
+        showStatus('success', 'SCORM paketi başarıyla oluşturuldu! İndirme için butona tıklayın.');
         progressBar.style.display = 'none';
-        showPreview();
+        downloadBtn.style.display = 'block';
 
     } catch (error) {
         console.error('Hata:', error);
@@ -309,7 +314,7 @@ function readFileAsText(file) {
  * HTML dosyasına SCORM API wrapper'ı enjekte et
  */
 async function injectAPIWrapper(zip) {
-    const launchFileName = launchFile.value;
+    const launchFileName = scormConfig.launchFile;
 
     // Launch dosyasını zip'ten al
     const launchFileContent = await zip.file(launchFileName).async('string');
@@ -338,33 +343,6 @@ async function injectAPIWrapper(zip) {
 }
 
 /**
- * Önizleme göster
- */
-function showPreview() {
-    previewSection.style.display = 'block';
-
-    const fileCount = uploadedFiles.length + (includeApi.checked ? 2 : 1); // +1 manifest, +1 api wrapper
-    const packageSize = formatFileSize(scormPackage.size);
-
-    packageInfo.innerHTML = `
-        <h3>Paket Bilgileri</h3>
-        <ul>
-            <li><strong>Kurs Başlığı:</strong> ${courseTitle.value}</li>
-            <li><strong>Kurs ID:</strong> ${courseId.value}</li>
-            <li><strong>SCO Başlığı:</strong> ${scoTitle.value}</li>
-            <li><strong>SCO ID:</strong> ${scoId.value}</li>
-            <li><strong>Başlangıç Dosyası:</strong> ${launchFile.value}</li>
-            <li><strong>Toplam Dosya:</strong> ${fileCount}</li>
-            <li><strong>Paket Boyutu:</strong> ${packageSize}</li>
-            <li><strong>SCORM Versiyonu:</strong> 1.2</li>
-            <li><strong>API Wrapper:</strong> ${includeApi.checked ? 'Dahil' : 'Dahil değil'}</li>
-        </ul>
-    `;
-
-    previewSection.scrollIntoView({ behavior: 'smooth' });
-}
-
-/**
  * Paketi indir
  */
 function downloadPackage() {
@@ -373,7 +351,7 @@ function downloadPackage() {
         return;
     }
 
-    const fileName = `${courseId.value}_scorm12.zip`;
+    const fileName = `${scormConfig.courseId}_scorm12.zip`;
     const url = URL.createObjectURL(scormPackage);
 
     const a = document.createElement('a');
@@ -402,6 +380,3 @@ function showStatus(type, message) {
         }, 5000);
     }
 }
-
-// Sayfa yüklendiğinde form validasyonu
-validateForm();

@@ -15,7 +15,7 @@
 
         <main>
             <section class="upload-section">
-                <h2>1. İçerik Yükle</h2>
+                <h2>İçerik Yükle</h2>
                 <div class="upload-options">
                     <div class="upload-method">
                         <h3>HTML Dosyası</h3>
@@ -37,65 +37,19 @@
                 <div id="fileList" class="file-list"></div>
             </section>
 
-            <section class="config-section">
-                <h2>2. SCORM Paket Bilgileri</h2>
-                <form id="scormConfig">
-                    <div class="form-group">
-                        <label for="courseTitle">Kurs Başlığı *</label>
-                        <input type="text" id="courseTitle" required placeholder="Örn: Web Geliştirme Kursu">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="courseId">Kurs ID *</label>
-                        <input type="text" id="courseId" required placeholder="Örn: COURSE_001">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="scoTitle">SCO Başlığı *</label>
-                        <input type="text" id="scoTitle" required placeholder="Örn: Modül 1">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="scoId">SCO ID *</label>
-                        <input type="text" id="scoId" required placeholder="Örn: SCO_001">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="launchFile">Başlangıç Dosyası *</label>
-                        <input type="text" id="launchFile" required placeholder="Örn: index.html" value="index.html">
-                        <small>Yüklenecek ana HTML dosyasının adı</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Açıklama</label>
-                        <textarea id="description" rows="3" placeholder="Kurs hakkında kısa açıklama"></textarea>
-                    </div>
-
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="includeApi" checked>
-                        <label for="includeApi">SCORM API Wrapper dahil et (önerilir)</label>
-                    </div>
-                </form>
-            </section>
-
             <section class="action-section">
-                <h2>3. Dönüştür ve İndir</h2>
                 <button id="convertBtn" class="btn-primary" disabled>
-                    🔄 SCORM Paketi Oluştur
+                    🔄 SCORM Paketine Dönüştür
                 </button>
 
                 <div id="progressBar" class="progress-bar" style="display: none;">
                     <div class="progress-fill"></div>
-                    <span class="progress-text">İşleniyor...</span>
+                    <span class="progress-text">Dönüştürülüyor...</span>
                 </div>
 
                 <div id="status" class="status"></div>
-            </section>
 
-            <section class="preview-section" id="previewSection" style="display: none;">
-                <h2>Paket Önizleme</h2>
-                <div id="packageInfo" class="package-info"></div>
-                <button id="downloadBtn" class="btn-success">
+                <button id="downloadBtn" class="btn-success" style="display: none;">
                     ⬇️ SCORM Paketini İndir (.zip)
                 </button>
             </section>
