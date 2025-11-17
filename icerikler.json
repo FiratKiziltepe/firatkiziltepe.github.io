@@ -134,6 +134,12 @@
           "ikon": "fas fa-flask"
         },
         {
+          "url": "ai-prompt-generator/index.html",
+          "baslik": "AI Prompt Oluşturucu",
+          "aciklama": "Kapsamlı yapay zeka prompt oluşturma platformu",
+          "ikon": "fas fa-magic"
+        },
+        {
           "url": "YZ.html",
           "baslik": "YZ Genel",
           "aciklama": "Yapay zeka genel bilgiler ve araçlar",
@@ -291,6 +297,18 @@
           "baslik": "Kelime Oyunu",
           "aciklama": "Eğitici kelime oyunu",
           "ikon": "fas fa-gamepad"
+        },
+        {
+          "url": "text-analysis-tool.html",
+          "baslik": "Metin Analiz Aracı",
+          "aciklama": "Kapsamlı metin analizi, duygu analizi ve istatistik araçları",
+          "ikon": "fas fa-analytics"
+        },
+        {
+          "url": "todo-app.html",
+          "baslik": "Yapılacaklar Listesi",
+          "aciklama": "Gelişmiş özellikli responsive todo uygulaması",
+          "ikon": "fas fa-tasks"
         }
       ]
     },
@@ -383,6 +401,19 @@
           "baslik": "İzin Formu",
           "aciklama": "İzin ve onay formları",
           "ikon": "fas fa-check-circle"
+        }
+      ]
+    },
+    {
+      "id": "oyunlar",
+      "baslik": "Oyunlar",
+      "ikon": "fas fa-gamepad",
+      "icerikler": [
+        {
+          "url": "space-explorer/index.html",
+          "baslik": "3D Uzay Keşif Oyunu",
+          "aciklama": "Three.js ile oluşturulmuş sürükleyici 3D uzay keşif oyunu",
+          "ikon": "fas fa-rocket"
         }
       ]
     },
