@@ -1222,3 +1222,304 @@ const GENERAL_WARMUP = {
   shoulder: "3-5 dakika omuz daireleri, kol salınımları, hafif direniş bantı çalışması.",
   arms: "2-3 dakika hafif kol salınımı, bilek rotasyonları, hafif curl hareketleri."
 };
+
+// ==================== HAZIR PROGRAMLAR ====================
+
+/**
+ * Hazır fitness programları - Haftada 3 gün, günde yaklaşık 1.5 saat
+ * Her program için Gün 1, Gün 2, Gün 3 egzersiz ID'leri
+ */
+const PRESET_PROGRAMS = [
+  {
+    id: "beginner_fullbody",
+    name: "Başlangıç - Tüm Vücut Programı",
+    description: "Haftada 3 gün, tüm vücut çalışması. Temel hareketlerle formunuzu geliştirin.",
+    level: "Başlangıç",
+    goal: "Genel form",
+    daysPerWeek: 3,
+    estimatedDuration: 90, // dakika
+    days: {
+      1: {
+        name: "Gün 1 - Üst Vücut & Core",
+        exercises: [
+          "fullbody_jumping_jack", // Isınma
+          "chest_wall_pushup",
+          "chest_knee_pushup",
+          "back_superman",
+          "back_prone_t_row",
+          "shoulder_front_raise",
+          "shoulder_lateral_raise",
+          "arm_bicep_curl",
+          "arm_tricep_dip_assisted",
+          "abs_crunch_basic",
+          "abs_plank_knee",
+          "abs_dead_bug"
+        ]
+      },
+      2: {
+        name: "Gün 2 - Alt Vücut & Kardiyovasküler",
+        exercises: [
+          "fullbody_jumping_jack", // Isınma
+          "leg_bodyweight_squat",
+          "leg_glute_bridge",
+          "leg_walking_lunge_basic",
+          "leg_calf_raise",
+          "abs_knee_tucks",
+          "abs_side_plank_knee",
+          "fullbody_high_knees",
+          "back_resistance_row"
+        ]
+      },
+      3: {
+        name: "Gün 3 - Tüm Vücut Mix",
+        exercises: [
+          "fullbody_jumping_jack", // Isınma
+          "chest_floor_press",
+          "back_resistance_row",
+          "shoulder_circles",
+          "arm_hammer_curl",
+          "leg_bodyweight_squat",
+          "leg_glute_bridge",
+          "abs_crunch_basic",
+          "abs_plank_knee",
+          "abs_knee_tucks",
+          "leg_calf_raise"
+        ]
+      }
+    }
+  },
+  {
+    id: "weightloss_cardio",
+    name: "Kilo Verme - Kardiyovasküler + Kuvvet",
+    description: "Haftada 3 gün, yoğun kardiyovasküler ve kuvvet çalışması. Kalori yakımını artırın.",
+    level: "Orta",
+    goal: "Kilo verme",
+    daysPerWeek: 3,
+    estimatedDuration: 90,
+    days: {
+      1: {
+        name: "Gün 1 - Kardiyovasküler Ağırlıklı",
+        exercises: [
+          "fullbody_jumping_jack",
+          "fullbody_high_knees",
+          "fullbody_burpee",
+          "abs_mountain_climber",
+          "leg_jump_squat",
+          "chest_pushup",
+          "abs_bicycle_crunch",
+          "abs_plank_full",
+          "leg_walking_lunge_basic",
+          "back_inverted_row"
+        ]
+      },
+      2: {
+        name: "Gün 2 - Kuvvet + Kardiyovasküler",
+        exercises: [
+          "fullbody_jumping_jack",
+          "chest_db_bench_press",
+          "back_bent_row",
+          "shoulder_db_press",
+          "leg_db_squat",
+          "leg_bulgarian_split",
+          "fullbody_burpee",
+          "abs_leg_raise",
+          "abs_russian_twist",
+          "arm_concentration_curl",
+          "arm_tricep_overhead"
+        ]
+      },
+      3: {
+        name: "Gün 3 - HIIT Tarzı Tüm Vücut",
+        exercises: [
+          "fullbody_high_knees",
+          "fullbody_burpee",
+          "abs_mountain_climber",
+          "chest_incline_pushup",
+          "leg_reverse_lunge",
+          "back_one_arm_row",
+          "shoulder_arnold_press",
+          "abs_bicycle_crunch",
+          "abs_plank_full",
+          "leg_step_up",
+          "fullbody_plank_to_pushup"
+        ]
+      }
+    }
+  },
+  {
+    id: "muscle_building",
+    name: "Kas Geliştirme - Ağır Kuvvet",
+    description: "Haftada 3 gün, kas kütlesi artırma odaklı ağır antrenman programı.",
+    level: "İleri",
+    goal: "Kas kazanımı",
+    daysPerWeek: 3,
+    estimatedDuration: 100,
+    days: {
+      1: {
+        name: "Gün 1 - Göğüs, Omuz, Triceps",
+        exercises: [
+          "fullbody_jumping_jack",
+          "chest_pushup",
+          "chest_db_bench_press",
+          "chest_db_fly",
+          "chest_decline_pushup",
+          "chest_weighted_pushup",
+          "shoulder_db_press",
+          "shoulder_arnold_press",
+          "shoulder_upright_row",
+          "arm_tricep_overhead",
+          "arm_close_grip_pushup",
+          "arm_weighted_dip"
+        ]
+      },
+      2: {
+        name: "Gün 2 - Sırt, Biceps, Core",
+        exercises: [
+          "fullbody_jumping_jack",
+          "back_pullup",
+          "back_bent_row",
+          "back_one_arm_row",
+          "back_weighted_pullup",
+          "back_inverted_row",
+          "arm_bicep_curl",
+          "arm_concentration_curl",
+          "arm_21s_curl",
+          "abs_hanging_leg_raise",
+          "abs_v_sit_up",
+          "abs_ab_wheel"
+        ]
+      },
+      3: {
+        name: "Gün 3 - Bacak, Kalça, Alt Vücut",
+        exercises: [
+          "fullbody_jumping_jack",
+          "leg_barbell_squat",
+          "leg_db_squat",
+          "leg_bulgarian_split",
+          "leg_walking_lunge_weighted",
+          "leg_glute_bridge",
+          "leg_step_up",
+          "leg_calf_raise",
+          "abs_plank_leg_lift",
+          "abs_russian_twist",
+          "abs_dragon_flag"
+        ]
+      }
+    }
+  },
+  {
+    id: "home_workout",
+    name: "Evde Antrenman - Ekipman Gerektirmez",
+    description: "Haftada 3 gün, hiçbir ekipman gerektirmeyen vücut ağırlığı antrenmanı.",
+    level: "Orta",
+    goal: "Genel form",
+    daysPerWeek: 3,
+    estimatedDuration: 85,
+    days: {
+      1: {
+        name: "Gün 1 - Üst Vücut Yoğun",
+        exercises: [
+          "fullbody_jumping_jack",
+          "chest_pushup",
+          "chest_incline_pushup",
+          "chest_decline_pushup",
+          "arm_close_grip_pushup",
+          "arm_diamond_pushup",
+          "back_superman",
+          "shoulder_circles",
+          "abs_plank_full",
+          "abs_plank_leg_lift",
+          "fullbody_plank_to_pushup"
+        ]
+      },
+      2: {
+        name: "Gün 2 - Alt Vücut & Core",
+        exercises: [
+          "fullbody_jumping_jack",
+          "leg_bodyweight_squat",
+          "leg_jump_squat",
+          "leg_walking_lunge_basic",
+          "leg_reverse_lunge",
+          "leg_glute_bridge",
+          "leg_calf_raise",
+          "abs_crunch_basic",
+          "abs_bicycle_crunch",
+          "abs_leg_raise",
+          "abs_v_sit_up"
+        ]
+      },
+      3: {
+        name: "Gün 3 - Tüm Vücut Kardiyovasküler",
+        exercises: [
+          "fullbody_jumping_jack",
+          "fullbody_burpee",
+          "fullbody_high_knees",
+          "abs_mountain_climber",
+          "chest_pushup",
+          "leg_bodyweight_squat",
+          "abs_plank_full",
+          "abs_russian_twist",
+          "back_superman",
+          "leg_walking_lunge_basic",
+          "abs_bicycle_crunch"
+        ]
+      }
+    }
+  },
+  {
+    id: "abs_focused",
+    name: "Karın Odaklı Program",
+    description: "Haftada 3 gün, karın ve core kaslarına yoğunlaşan program.",
+    level: "Orta",
+    goal: "Bölgesel sıkılaşma",
+    daysPerWeek: 3,
+    estimatedDuration: 75,
+    days: {
+      1: {
+        name: "Gün 1 - Ön Karın & Alt Karın",
+        exercises: [
+          "fullbody_jumping_jack",
+          "abs_crunch_basic",
+          "abs_bicycle_crunch",
+          "abs_leg_raise",
+          "abs_knee_tucks",
+          "abs_v_sit_up",
+          "abs_plank_full",
+          "abs_mountain_climber",
+          "chest_pushup",
+          "back_superman"
+        ]
+      },
+      2: {
+        name: "Gün 2 - Yan Karın & Core Stabilizasyon",
+        exercises: [
+          "fullbody_jumping_jack",
+          "abs_russian_twist",
+          "abs_side_plank_knee",
+          "abs_bicycle_crunch",
+          "abs_plank_leg_lift",
+          "abs_dead_bug",
+          "abs_mountain_climber",
+          "fullbody_plank_to_pushup",
+          "leg_bodyweight_squat",
+          "back_prone_t_row"
+        ]
+      },
+      3: {
+        name: "Gün 3 - İleri Seviye Core",
+        exercises: [
+          "fullbody_high_knees",
+          "abs_plank_full",
+          "abs_plank_leg_lift",
+          "abs_v_sit_up",
+          "abs_ab_wheel",
+          "abs_leg_raise",
+          "abs_bicycle_crunch",
+          "abs_russian_twist",
+          "fullbody_burpee",
+          "abs_mountain_climber"
+        ]
+      }
+    }
+  }
+];
