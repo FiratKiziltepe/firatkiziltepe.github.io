@@ -154,13 +154,13 @@ function createPresetProgramCard(program) {
     // Düğmeye event listener ekle
     const selectBtn = card.querySelector('.btn-preset-select');
     selectBtn.addEventListener('click', () => {
-        loadPresetProgram(program.id);
+        window.loadPresetProgram(program.id);
     });
 
     return card;
 }
 
-// Global fonksiyon - HTML'den çağrılabilmesi için
+// Global fonksiyon
 window.loadPresetProgram = function(programId) {
     const program = PRESET_PROGRAMS.find(p => p.id === programId);
     if (!program) {
@@ -1028,99 +1028,213 @@ function generatePDF() {
         yPos += 5;
 
         // === EGZERSİZLER ===
-        const groupedByRegion = {};
-        selectedExercises.forEach(exercise => {
-            const mainRegion = exercise.region[0];
-            if (!groupedByRegion[mainRegion]) {
-                groupedByRegion[mainRegion] = [];
-            }
-            groupedByRegion[mainRegion].push(exercise);
-        });
-
-        Object.entries(groupedByRegion).forEach(([region, exercises]) => {
-            checkAndAddPage(15);
-
-            // Bölge başlığı
-            doc.setFillColor(236, 254, 255); // Açık mavi
-            doc.rect(margin, yPos, contentWidth, 8, 'F');
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(region.toUpperCase(), margin + 3, yPos + 6);
-            yPos += 12;
-
-            exercises.forEach((exercise, index) => {
-                checkAndAddPage(35);
-
-                // Egzersiz kartı arka planı
-                doc.setFillColor(250, 250, 250);
-                doc.rect(margin + 2, yPos, contentWidth - 4, 28, 'F');
-
-                // Egzersiz adı
-                doc.setFontSize(11);
+        // Preset program varsa günlere göre, yoksa bölgelere göre yazdır
+        if (appState.currentPresetProgram) {
+            // Günlere göre PDF yazdır
+            const program = PRESET_PROGRAMS.find(p => p.id === appState.currentPresetProgram);
+            if (program) {
+                // Program adını yazdır
+                checkAndAddPage(15);
+                doc.setFillColor(102, 126, 234);
+                doc.rect(margin, yPos, contentWidth, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
                 doc.setFont(undefined, 'bold');
-                doc.text(`${index + 1}. ${exercise.name}`, margin + 5, yPos + 6);
-
-                // Seviye badge
-                doc.setFontSize(9);
-                doc.setFont(undefined, 'normal');
-                doc.setTextColor(100, 100, 100);
-                doc.text(`[${exercise.level}]`, margin + 5 + doc.getTextWidth(`${index + 1}. ${exercise.name}`) + 2, yPos + 6);
+                doc.text(program.name, pageWidth / 2, yPos + 7, { align: 'center' });
                 doc.setTextColor(0, 0, 0);
-                yPos += 10;
+                yPos += 15;
 
-                // Detaylar
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
+                // Her gün için
+                [1, 2, 3].forEach(dayNum => {
+                    const day = program.days[dayNum];
 
-                const sets = exercise.sets || exercise.defaultSets;
-                const reps = exercise.reps || exercise.defaultReps;
-                const timeSec = exercise.timeSec || exercise.defaultTimeSec;
-                const weightKg = exercise.weightKg !== undefined ? exercise.weightKg : exercise.defaultWeightKg;
+                    checkAndAddPage(15);
 
-                doc.setFont(undefined, 'bold');
-                doc.text('Set:', margin + 5, yPos);
-                doc.setFont(undefined, 'normal');
-                doc.text(`${sets}`, margin + 20, yPos);
-
-                if (exercise.type === 'reps') {
+                    // Gün başlığı
+                    doc.setFillColor(236, 254, 255);
+                    doc.rect(margin, yPos, contentWidth, 10, 'F');
+                    doc.setFontSize(13);
                     doc.setFont(undefined, 'bold');
-                    doc.text('Tekrar:', margin + 35, yPos);
-                    doc.setFont(undefined, 'normal');
-                    doc.text(`${reps}`, margin + 55, yPos);
-                } else {
-                    doc.setFont(undefined, 'bold');
-                    doc.text('Sure:', margin + 35, yPos);
-                    doc.setFont(undefined, 'normal');
-                    doc.text(`${timeSec}sn`, margin + 55, yPos);
-                }
-
-                doc.setFont(undefined, 'bold');
-                doc.text('Agirlik:', margin + 75, yPos);
-                doc.setFont(undefined, 'normal');
-                doc.text(`${weightKg}kg`, margin + 95, yPos);
-
-                doc.setFont(undefined, 'bold');
-                doc.text('Dinlenme:', margin + 115, yPos);
-                doc.setFont(undefined, 'normal');
-                doc.text(`${exercise.restSec}sn`, margin + 140, yPos);
-                yPos += 7;
-
-                // Notlar
-                if (exercise.notes) {
+                    doc.text(day.name, margin + 3, yPos + 7);
                     doc.setFontSize(9);
-                    doc.setFont(undefined, 'italic');
-                    doc.setTextColor(80, 80, 80);
-                    const notesLines = doc.splitTextToSize(`Not: ${exercise.notes}`, contentWidth - 14);
-                    doc.text(notesLines, margin + 5, yPos);
-                    yPos += notesLines.length * 4;
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`${day.exercises.length} egzersiz`, contentWidth + margin - 30, yPos + 7);
                     doc.setTextColor(0, 0, 0);
-                }
+                    yPos += 14;
 
-                yPos += 5;
+                    // Günün egzersizleri
+                    day.exercises.forEach((exerciseId, index) => {
+                        const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+                        if (exercise) {
+                            const data = appState.selectedExercises[exerciseId] || {};
+
+                            checkAndAddPage(35);
+
+                            // Egzersiz kartı
+                            doc.setFillColor(250, 250, 250);
+                            doc.rect(margin + 2, yPos, contentWidth - 4, 28, 'F');
+
+                            // Egzersiz adı
+                            doc.setFontSize(11);
+                            doc.setFont(undefined, 'bold');
+                            doc.text(`${index + 1}. ${exercise.name}`, margin + 5, yPos + 6);
+
+                            // Seviye
+                            doc.setFontSize(9);
+                            doc.setFont(undefined, 'normal');
+                            doc.setTextColor(100, 100, 100);
+                            doc.text(`[${exercise.level}]`, margin + 5 + doc.getTextWidth(`${index + 1}. ${exercise.name}`) + 2, yPos + 6);
+                            doc.setTextColor(0, 0, 0);
+                            yPos += 10;
+
+                            // Detaylar
+                            doc.setFontSize(10);
+                            const sets = data.sets || exercise.defaultSets;
+                            const reps = data.reps || exercise.defaultReps;
+                            const timeSec = data.timeSec || exercise.defaultTimeSec;
+                            const weightKg = data.weightKg !== undefined ? data.weightKg : exercise.defaultWeightKg;
+
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Set:', margin + 5, yPos);
+                            doc.setFont(undefined, 'normal');
+                            doc.text(`${sets}`, margin + 20, yPos);
+
+                            if (exercise.type === 'reps') {
+                                doc.setFont(undefined, 'bold');
+                                doc.text('Tekrar:', margin + 35, yPos);
+                                doc.setFont(undefined, 'normal');
+                                doc.text(`${reps}`, margin + 55, yPos);
+                            } else {
+                                doc.setFont(undefined, 'bold');
+                                doc.text('Sure:', margin + 35, yPos);
+                                doc.setFont(undefined, 'normal');
+                                doc.text(`${timeSec}sn`, margin + 55, yPos);
+                            }
+
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Agirlik:', margin + 75, yPos);
+                            doc.setFont(undefined, 'normal');
+                            doc.text(`${weightKg}kg`, margin + 95, yPos);
+
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Dinlenme:', margin + 115, yPos);
+                            doc.setFont(undefined, 'normal');
+                            doc.text(`${exercise.restSec}sn`, margin + 140, yPos);
+                            yPos += 7;
+
+                            // Notlar
+                            if (exercise.notes) {
+                                doc.setFontSize(9);
+                                doc.setFont(undefined, 'italic');
+                                doc.setTextColor(80, 80, 80);
+                                const notesLines = doc.splitTextToSize(`Not: ${exercise.notes}`, contentWidth - 14);
+                                doc.text(notesLines, margin + 5, yPos);
+                                yPos += notesLines.length * 4;
+                                doc.setTextColor(0, 0, 0);
+                            }
+
+                            yPos += 5;
+                        }
+                    });
+
+                    yPos += 3;
+                });
+            }
+        } else {
+            // Bölgelere göre PDF yazdır (custom program)
+            const groupedByRegion = {};
+            selectedExercises.forEach(exercise => {
+                const mainRegion = exercise.region[0];
+                if (!groupedByRegion[mainRegion]) {
+                    groupedByRegion[mainRegion] = [];
+                }
+                groupedByRegion[mainRegion].push(exercise);
             });
 
-            yPos += 3;
-        });
+            Object.entries(groupedByRegion).forEach(([region, exercises]) => {
+                checkAndAddPage(15);
+
+                // Bölge başlığı
+                doc.setFillColor(236, 254, 255);
+                doc.rect(margin, yPos, contentWidth, 8, 'F');
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text(region.toUpperCase(), margin + 3, yPos + 6);
+                yPos += 12;
+
+                exercises.forEach((exercise, index) => {
+                    checkAndAddPage(35);
+
+                    // Egzersiz kartı
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(margin + 2, yPos, contentWidth - 4, 28, 'F');
+
+                    // Egzersiz adı
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${index + 1}. ${exercise.name}`, margin + 5, yPos + 6);
+
+                    // Seviye
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`[${exercise.level}]`, margin + 5 + doc.getTextWidth(`${index + 1}. ${exercise.name}`) + 2, yPos + 6);
+                    doc.setTextColor(0, 0, 0);
+                    yPos += 10;
+
+                    // Detaylar
+                    doc.setFontSize(10);
+                    const sets = exercise.sets || exercise.defaultSets;
+                    const reps = exercise.reps || exercise.defaultReps;
+                    const timeSec = exercise.timeSec || exercise.defaultTimeSec;
+                    const weightKg = exercise.weightKg !== undefined ? exercise.weightKg : exercise.defaultWeightKg;
+
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Set:', margin + 5, yPos);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`${sets}`, margin + 20, yPos);
+
+                    if (exercise.type === 'reps') {
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Tekrar:', margin + 35, yPos);
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`${reps}`, margin + 55, yPos);
+                    } else {
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Sure:', margin + 35, yPos);
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`${timeSec}sn`, margin + 55, yPos);
+                    }
+
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Agirlik:', margin + 75, yPos);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`${weightKg}kg`, margin + 95, yPos);
+
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Dinlenme:', margin + 115, yPos);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`${exercise.restSec}sn`, margin + 140, yPos);
+                    yPos += 7;
+
+                    // Notlar
+                    if (exercise.notes) {
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'italic');
+                        doc.setTextColor(80, 80, 80);
+                        const notesLines = doc.splitTextToSize(`Not: ${exercise.notes}`, contentWidth - 14);
+                        doc.text(notesLines, margin + 5, yPos);
+                        yPos += notesLines.length * 4;
+                        doc.setTextColor(0, 0, 0);
+                    }
+
+                    yPos += 5;
+                });
+
+                yPos += 3;
+            });
+        }
 
         // Son sayfa numarası ve footer
         addPageNumber();
