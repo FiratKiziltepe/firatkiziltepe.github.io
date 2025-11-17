@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kişisel fitness programı oluşturucu - Vücut bölgelerini, seviyeni ve hareketlerini seç; kendi programını oluştur, kaydet ve PDF olarak indir.">
+    <title>Kişisel Fitness Programı Oluşturucu</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>🏋️ Kişisel Fitness Programı Oluşturucu</h1>
+            <p class="subtitle">Vücut bölgelerini, seviyeni ve hareketlerini seç; kendi programını oluştur, kaydet ve PDF olarak indir.</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Kullanıcı Bilgileri Bölümü -->
+            <section class="user-info-section card">
+                <h2>📋 Genel Bilgiler</h2>
+                <form id="userInfoForm" class="user-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userName">Adınız (isteğe bağlı):</label>
+                            <input type="text" id="userName" placeholder="Örn: Fırat">
+                        </div>
+                        <div class="form-group">
+                            <label for="userGoal">Hedefiniz:</label>
+                            <select id="userGoal">
+                                <option value="Kilo verme">Kilo verme</option>
+                                <option value="Kas kazanımı">Kas kazanımı</option>
+                                <option value="Genel form">Genel form</option>
+                                <option value="Bölgesel sıkılaşma">Bölgesel sıkılaşma</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="daysPerWeek">Haftalık antrenman günü:</label>
+                            <input type="number" id="daysPerWeek" min="1" max="7" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="sessionDuration">Antrenman süresi (dk):</label>
+                            <input type="number" id="sessionDuration" min="15" max="180" value="45">
+                        </div>
+                    </div>
+                    <button type="button" id="saveUserInfo" class="btn btn-secondary">Bilgileri Kaydet</button>
+                </form>
+            </section>
+
+            <!-- Isınma Bölümü -->
+            <section class="warmup-section card">
+                <h2>🔥 Isınma Önerileri</h2>
+                <div class="warmup-content">
+                    <div class="warmup-item">
+                        <strong>Genel Isınma:</strong>
+                        <p>5-10 dakika hafif tempo yürüyüş veya koşu. Kalp atışını yavaşça artır.</p>
+                    </div>
+                    <div id="dynamicWarmup" class="dynamic-warmup-container">
+                        <!-- Dinamik ısınma önerileri seçilen bölgelere göre burada görünecek -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtreler ve Egzersiz Listesi -->
+            <section class="exercises-section">
+                <div class="filters-container card">
+                    <h2>🔍 Filtreler</h2>
+
+                    <!-- Seviye Filtresi -->
+                    <div class="filter-group">
+                        <h3>Seviye:</h3>
+                        <div class="filter-options" id="levelFilters">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="Başlangıç" checked>
+                                <span>Başlangıç</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="Orta" checked>
+                                <span>Orta</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="İleri" checked>
+                                <span>İleri</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Bölge Filtresi -->
+                    <div class="filter-group">
+                        <h3>Vücut Bölgesi:</h3>
+                        <div class="filter-options" id="regionFilters">
+                            <!-- Bölge filtreleri JavaScript ile dinamik olarak eklenecek -->
+                        </div>
+                    </div>
+
+                    <!-- Filtre Butonları -->
+                    <div class="filter-actions">
+                        <button type="button" id="applyFilters" class="btn btn-primary">Filtreleri Uygula</button>
+                        <button type="button" id="resetFilters" class="btn btn-secondary">Sıfırla</button>
+                    </div>
+                </div>
+
+                <!-- Egzersiz Kartları -->
+                <div class="exercises-list">
+                    <div class="exercises-header">
+                        <h2>💪 Egzersizler</h2>
+                        <div class="exercise-count">
+                            <span id="exerciseCount">0</span> egzersiz gösteriliyor
+                        </div>
+                    </div>
+                    <div id="exerciseCards" class="exercise-cards-grid">
+                        <!-- Egzersiz kartları JavaScript ile dinamik olarak eklenecek -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seçili Program Özeti -->
+            <section class="program-summary card">
+                <h2>✅ Seçili Programınız</h2>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Seçilen Egzersiz:</span>
+                        <span class="stat-value" id="selectedCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Çalışılan Bölgeler:</span>
+                        <span class="stat-value" id="selectedRegions">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Tahmini Süre:</span>
+                        <span class="stat-value" id="estimatedTime">0 dk</span>
+                    </div>
+                </div>
+
+                <div class="program-actions">
+                    <button type="button" id="saveProgram" class="btn btn-success">
+                        💾 Kendi Programımı Oluştur (Kaydet)
+                    </button>
+                    <button type="button" id="downloadPDF" class="btn btn-primary">
+                        📄 PDF İndir
+                    </button>
+                    <button type="button" id="clearProgram" class="btn btn-danger">
+                        🗑️ Programı Temizle
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Bu program eğitim amaçlıdır. Sağlık durumunuz için profesyonel görüş alınız.</p>
+            <p>
+                <a href="https://github.com/FiratKiziltepe/firatkiziltepe.github.io" target="_blank">
+                    Source on GitHub
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Toast Bildirimleri -->
+    <div id="toast" class="toast"></div>
+
+    <!-- PDF Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Uygulama Scriptleri -->
+    <script src="exercises-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
