@@ -95,7 +95,10 @@ let presetProgramsListenerAdded = false;
 
 function renderPresetPrograms() {
     const container = document.getElementById('presetProgramsGrid');
-    if (!container) return;
+    if (!container) {
+        console.error('presetProgramsGrid container bulunamadı!');
+        return;
+    }
 
     container.innerHTML = '';
 
@@ -104,16 +107,22 @@ function renderPresetPrograms() {
         container.appendChild(card);
     });
 
+    console.log('Preset programlar render edildi, toplam:', PRESET_PROGRAMS.length);
+
     // Event delegation - container'a sadece BİR KERE listener ekle
     if (!presetProgramsListenerAdded) {
         container.addEventListener('click', function(e) {
+            console.log('Container tıklandı, hedef:', e.target);
             const btn = e.target.closest('.btn-preset-select');
+            console.log('Buton bulundu:', btn);
             if (btn) {
                 const programId = btn.getAttribute('data-program-id');
+                console.log('Program ID:', programId);
                 loadPresetProgram(programId);
             }
         });
         presetProgramsListenerAdded = true;
+        console.log('Event listener eklendi');
     }
 }
 
@@ -173,16 +182,22 @@ function createPresetProgramCard(program) {
 
 // loadPresetProgram artık global değil, normal fonksiyon
 function loadPresetProgram(programId) {
+    console.log('loadPresetProgram çağrıldı, programId:', programId);
+
     const program = PRESET_PROGRAMS.find(p => p.id === programId);
     if (!program) {
+        console.error('Program bulunamadı:', programId);
         showToast('Program bulunamadı!', 'error');
         return;
     }
+
+    console.log('Program bulundu:', program.name);
 
     // Önce tüm seçimleri temizle
     appState.selectedExercises = {};
 
     // Programdaki tüm egzersizleri seç
+    let totalExercises = 0;
     Object.values(program.days).forEach(day => {
         day.exercises.forEach(exerciseId => {
             const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
@@ -194,9 +209,12 @@ function loadPresetProgram(programId) {
                     timeSec: exercise.defaultTimeSec,
                     weightKg: exercise.defaultWeightKg
                 };
+                totalExercises++;
             }
         });
     });
+
+    console.log('Toplam egzersiz seçildi:', totalExercises);
 
     // Kullanıcı bilgilerini güncelle
     appState.userInfo.goal = program.goal;
@@ -218,9 +236,11 @@ function loadPresetProgram(programId) {
     // Egzersiz listesi sekmesinde de seçimleri göster
     renderExercises();
 
+    console.log('Toast gösteriliyor...');
     showToast(`"${program.name}" yüklendi! ${Object.keys(appState.selectedExercises).length} egzersiz seçildi.`, 'success');
 
     // Kendi programım sekmesine geç
+    console.log('Sekme değiştiriliyor: myprogram');
     switchTab('myprogram');
 };
 
