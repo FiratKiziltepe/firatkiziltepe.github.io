@@ -145,11 +145,17 @@ function createPresetProgramCard(program) {
         </div>
 
         <div class="preset-program-action">
-            <button class="btn" onclick="loadPresetProgram('${program.id}')">
+            <button class="btn btn-preset-select" data-program-id="${program.id}">
                 🚀 Bu Programı Seç
             </button>
         </div>
     `;
+
+    // Düğmeye event listener ekle
+    const selectBtn = card.querySelector('.btn-preset-select');
+    selectBtn.addEventListener('click', () => {
+        loadPresetProgram(program.id);
+    });
 
     return card;
 }
