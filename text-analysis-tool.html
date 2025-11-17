@@ -854,10 +854,66 @@
 
         // Keyword density analysis
         function analyzeKeywordDensity(text) {
+            // Turkish and English stop words
+            const stopWords = new Set([
+                // Turkish stop words
+                'acaba', 'altı', 'altmış', 'ama', 'ancak', 'arada', 'artık', 'asla', 'aslında',
+                'ayrıca', 'bana', 'bazen', 'bazı', 'bazıları', 'belki', 'ben', 'benden', 'beni',
+                'benim', 'beri', 'beş', 'bile', 'bilhassa', 'bin', 'bir', 'biraz', 'birçoğu',
+                'birçok', 'biri', 'birisi', 'birkaç', 'birşey', 'biz', 'bizden', 'bize', 'bizi',
+                'bizim', 'böyle', 'böylece', 'bu', 'buna', 'bunda', 'bundan', 'bunlar', 'bunları',
+                'bunların', 'bunu', 'bunun', 'burada', 'bütün', 'çoğu', 'çoğunu', 'çok', 'çünkü',
+                'daha', 'dahi', 'dan', 'defa', 'değil', 'diğer', 'diğeri', 'diğerleri', 'diye',
+                'doksan', 'dokuz', 'dolayı', 'dolayısıyla', 'dört', 'edecek', 'eden', 'ederek',
+                'edilecek', 'ediliyor', 'edilmesi', 'ediyor', 'eğer', 'elbette', 'elli', 'etmesi',
+                'etti', 'ettiği', 'ettiğini', 'fakat', 'falan', 'filan', 'gene', 'gereği', 'gerek',
+                'gibi', 'göre', 'hala', 'halde', 'halen', 'hangi', 'hangisi', 'hani', 'hatta',
+                'hem', 'henüz', 'hep', 'hepsi', 'her', 'herhangi', 'herkes', 'herkese', 'herkesi',
+                'herkesin', 'hiç', 'hiçbir', 'hiçbiri', 'için', 'içinde', 'iki', 'ile', 'ilgili',
+                'ise', 'işte', 'itibaren', 'itibariyle', 'kaç', 'kadar', 'karşın', 'kendi',
+                'kendilerine', 'kendine', 'kendini', 'kendisi', 'kendisine', 'kendisini', 'kez',
+                'kim', 'kime', 'kimi', 'kimin', 'kimisi', 'kimse', 'kırk', 'madem', 'mi', 'mı',
+                'milyar', 'milyon', 'mu', 'mü', 'nasıl', 'neden', 'nedenle', 'nerde', 'nerede',
+                'nereye', 'neyse', 'niçin', 'nin', 'nın', 'niye', 'nun', 'nün', 'öbür', 'olan',
+                'olarak', 'oldu', 'olduğu', 'olduğunu', 'olduklarını', 'olmadı', 'olmadığı',
+                'olmak', 'olması', 'olmayan', 'olmaz', 'olsa', 'olsun', 'olup', 'olur', 'olursa',
+                'oluyor', 'on', 'ön', 'ona', 'önce', 'ondan', 'onlar', 'onlara', 'onlardan',
+                'onları', 'onların', 'onu', 'onun', 'orada', 'öte', 'ötürü', 'otuz', 'öyle',
+                'oysa', 'pek', 'rağmen', 'sana', 'sanki', 'şayet', 'şekilde', 'sekiz', 'seksen',
+                'sen', 'senden', 'seni', 'senin', 'şey', 'şeyden', 'şeye', 'şeyi', 'şeyler',
+                'şimdi', 'siz', 'sizden', 'size', 'sizi', 'sizin', 'sonra', 'şöyle', 'şu', 'şuna',
+                'şunları', 'şunu', 'ta', 'tabii', 'tam', 'tamam', 'tamamen', 'tarafından', 'trilyon',
+                'tüm', 'tümü', 'üç', 'un', 'ün', 'üzere', 'var', 'vardı', 've', 'veya', 'ya',
+                'yani', 'yapacak', 'yapılan', 'yapılması', 'yapıyor', 'yapmak', 'yaptı', 'yaptığı',
+                'yaptığını', 'yaptıkları', 'ye', 'yedi', 'yerine', 'yetmiş', 'yi', 'yı', 'yine',
+                'yirmi', 'yoksa', 'yu', 'yüz', 'zaten', 'zira',
+                // English stop words
+                'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and',
+                'any', 'are', 'aren\'t', 'as', 'at', 'be', 'because', 'been', 'before', 'being',
+                'below', 'between', 'both', 'but', 'by', 'can\'t', 'cannot', 'could', 'couldn\'t',
+                'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'down', 'during',
+                'each', 'few', 'for', 'from', 'further', 'had', 'hadn\'t', 'has', 'hasn\'t',
+                'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'her', 'here',
+                'here\'s', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'i',
+                'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'if', 'in', 'into', 'is', 'isn\'t', 'it',
+                'it\'s', 'its', 'itself', 'let\'s', 'me', 'more', 'most', 'mustn\'t', 'my',
+                'myself', 'no', 'nor', 'not', 'of', 'off', 'on', 'once', 'only', 'or', 'other',
+                'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'same', 'shan\'t',
+                'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'so', 'some',
+                'such', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves',
+                'then', 'there', 'there\'s', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re',
+                'they\'ve', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',
+                'very', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'were',
+                'weren\'t', 'what', 'what\'s', 'when', 'when\'s', 'where', 'where\'s', 'which',
+                'while', 'who', 'who\'s', 'whom', 'why', 'why\'s', 'with', 'won\'t', 'would',
+                'wouldn\'t', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours',
+                'yourself', 'yourselves'
+            ]);
+
             const words = text.toLowerCase()
                 .replace(/[^\w\sçğıöşü]/gi, '')
                 .split(/\s+/)
-                .filter(w => w.length > 3); // Only words longer than 3 characters
+                .filter(w => w.length > 2 && !stopWords.has(w)); // Filter stop words and short words
 
             // Count word frequencies
             const wordFreq = {};
@@ -873,6 +929,11 @@
             const maxFreq = sorted[0]?.[1] || 1;
             const keywordList = document.getElementById('keywordList');
             keywordList.innerHTML = '';
+
+            if (sorted.length === 0) {
+                keywordList.innerHTML = '<div class="alert alert-info">Anlamlı anahtar kelime bulunamadı</div>';
+                return;
+            }
 
             sorted.forEach(([word, count]) => {
                 const percentage = ((count / words.length) * 100).toFixed(2);
@@ -893,72 +954,125 @@
             });
         }
 
-        // Sentiment analysis
+        // Sentiment analysis with improved Turkish and English lexicons
         function analyzeSentiment(text) {
-            // Turkish positive and negative words (basic lexicon)
-            const positiveWords = [
-                'güzel', 'harika', 'mükemmel', 'muhteşem', 'iyi', 'sevgi', 'mutlu', 'başarılı',
-                'kaliteli', 'eğlenceli', 'heyecan', 'şahane', 'olağanüstü', 'parlak', 'hoş',
-                'keyifli', 'sevinç', 'umut', 'iyimser', 'pozitif', 'hayranlık', 'beğeni'
-            ];
+            // Enhanced Turkish and English sentiment lexicons with weights
+            const sentimentLexicon = {
+                // Turkish positive words
+                'mükemmel': { score: 3, joy: 3 }, 'harika': { score: 3, joy: 3 }, 'muhteşem': { score: 3, joy: 3 },
+                'olağanüstü': { score: 3, joy: 3 }, 'fevkalade': { score: 3, joy: 3 }, 'şahane': { score: 3, joy: 3 },
+                'güzel': { score: 2, joy: 2 }, 'iyi': { score: 2, joy: 2 }, 'hoş': { score: 2, joy: 2 },
+                'sevindirici': { score: 2, joy: 3 }, 'keyifli': { score: 2, joy: 2 }, 'eğlenceli': { score: 2, joy: 2 },
+                'mutlu': { score: 2, joy: 3 }, 'neşeli': { score: 2, joy: 3 }, 'sevinçli': { score: 2, joy: 3 },
+                'başarılı': { score: 2, joy: 2 }, 'kaliteli': { score: 2, joy: 1 }, 'yararlı': { score: 2, joy: 1 },
+                'pozitif': { score: 2, joy: 1 }, 'iyimser': { score: 2, joy: 1 }, 'umutlu': { score: 2, joy: 1 },
+                'sevgi': { score: 2, joy: 2 }, 'aşk': { score: 2, joy: 2 }, 'dostluk': { score: 2, joy: 1 },
+                'heyecan': { score: 2, joy: 2 }, 'coşku': { score: 2, joy: 2 }, 'parlak': { score: 2, joy: 1 },
+                'süper': { score: 2, joy: 2 }, 'havalı': { score: 2, joy: 2 }, 'fena': { score: 1, joy: 1 },
+                'tatlı': { score: 2, joy: 1 }, 'nazik': { score: 2, joy: 1 }, 'kibar': { score: 2, joy: 1 },
+                'yardımsever': { score: 2, joy: 1 }, 'samimi': { score: 2, joy: 1 }, 'içten': { score: 2, joy: 1 },
 
-            const negativeWords = [
-                'kötü', 'berbat', 'korkunç', 'korkutucu', 'üzücü', 'acı', 'olumsuz', 'başarısız',
-                'kalitesiz', 'sıkıcı', 'kaygı', 'endişe', 'korku', 'nefret', 'öfke', 'kızgın',
-                'mutsuz', 'karanlık', 'umutsuz', 'kötümser', 'negatif', 'hayal kırıklığı'
-            ];
+                // Turkish negative words - general
+                'berbat': { score: -3, sadness: 2 }, 'korkunç': { score: -3, fear: 3 }, 'rezil': { score: -3, sadness: 2 },
+                'feci': { score: -3, sadness: 2 }, 'kötü': { score: -2, sadness: 2 }, 'kötümser': { score: -2, sadness: 2 },
+                'olumsuz': { score: -2, sadness: 1 }, 'negatif': { score: -2, sadness: 1 }, 'başarısız': { score: -2, sadness: 2 },
+                'kalitesiz': { score: -2, sadness: 1 }, 'zararlı': { score: -2, sadness: 1 }, 'kırgın': { score: -2, sadness: 2 },
+
+                // Turkish sadness words
+                'üzücü': { score: -2, sadness: 3 }, 'üzgün': { score: -2, sadness: 3 }, 'hüzün': { score: -2, sadness: 3 },
+                'mutsuz': { score: -2, sadness: 3 }, 'acı': { score: -2, sadness: 3 }, 'ağlama': { score: -2, sadness: 3 },
+                'keder': { score: -2, sadness: 3 }, 'elem': { score: -2, sadness: 3 }, 'tasa': { score: -2, sadness: 2 },
+                'sıkıntı': { score: -2, sadness: 2 }, 'bunalım': { score: -2, sadness: 2 }, 'depresyon': { score: -3, sadness: 3 },
+                'melankolik': { score: -2, sadness: 2 }, 'kasvetli': { score: -2, sadness: 2 },
+
+                // Turkish anger words
+                'öfke': { score: -2, anger: 3 }, 'öfkeli': { score: -2, anger: 3 }, 'kızgın': { score: -2, anger: 3 },
+                'sinirli': { score: -2, anger: 3 }, 'asabi': { score: -2, anger: 2 }, 'hiddet': { score: -2, anger: 3 },
+                'nefret': { score: -3, anger: 3 }, 'kin': { score: -2, anger: 3 }, 'tiksinme': { score: -2, anger: 2 },
+                'iğrenme': { score: -2, anger: 2 }, 'küfür': { score: -3, anger: 3 }, 'lanet': { score: -2, anger: 2 },
+                'kahretsin': { score: -2, anger: 2 },
+
+                // Turkish fear words
+                'korku': { score: -2, fear: 3 }, 'korkutucu': { score: -2, fear: 3 }, 'dehşet': { score: -3, fear: 3 },
+                'endişe': { score: -2, fear: 2 }, 'endişeli': { score: -2, fear: 2 }, 'kaygı': { score: -2, fear: 2 },
+                'kaygılı': { score: -2, fear: 2 }, 'telaş': { score: -2, fear: 2 }, 'panik': { score: -3, fear: 3 },
+                'ürpertici': { score: -2, fear: 2 }, 'tedirgin': { score: -2, fear: 2 }, 'gergin': { score: -2, fear: 2 },
+                'umutsuz': { score: -2, fear: 2, sadness: 2 }, 'karanlık': { score: -2, fear: 1, sadness: 1 },
+
+                // English positive words
+                'excellent': { score: 3, joy: 3 }, 'amazing': { score: 3, joy: 3 }, 'wonderful': { score: 3, joy: 3 },
+                'fantastic': { score: 3, joy: 3 }, 'great': { score: 2, joy: 2 }, 'good': { score: 2, joy: 2 },
+                'nice': { score: 2, joy: 2 }, 'happy': { score: 2, joy: 3 }, 'joyful': { score: 2, joy: 3 },
+                'delightful': { score: 2, joy: 2 }, 'pleased': { score: 2, joy: 2 }, 'love': { score: 2, joy: 2 },
+                'beautiful': { score: 2, joy: 2 }, 'brilliant': { score: 2, joy: 2 }, 'awesome': { score: 2, joy: 2 },
+                'perfect': { score: 3, joy: 2 }, 'superb': { score: 3, joy: 2 }, 'outstanding': { score: 3, joy: 2 },
+
+                // English negative words
+                'terrible': { score: -3, sadness: 2 }, 'horrible': { score: -3, sadness: 2 }, 'awful': { score: -3, sadness: 2 },
+                'bad': { score: -2, sadness: 2 }, 'poor': { score: -2, sadness: 1 }, 'sad': { score: -2, sadness: 3 },
+                'unhappy': { score: -2, sadness: 3 }, 'depressed': { score: -3, sadness: 3 }, 'miserable': { score: -3, sadness: 3 },
+                'angry': { score: -2, anger: 3 }, 'furious': { score: -3, anger: 3 }, 'hate': { score: -3, anger: 3 },
+                'fear': { score: -2, fear: 3 }, 'scared': { score: -2, fear: 3 }, 'afraid': { score: -2, fear: 3 },
+                'worried': { score: -2, fear: 2 }, 'anxious': { score: -2, fear: 2 }, 'terrified': { score: -3, fear: 3 }
+            };
 
             const words = text.toLowerCase().match(/\b[\wçğıöşü]+\b/gi) || [];
 
-            let positiveCount = 0;
-            let negativeCount = 0;
-            let joyCount = 0;
-            let sadnessCount = 0;
-            let angerCount = 0;
-            let fearCount = 0;
+            let totalScore = 0;
+            let totalWords = 0;
+            let joyScore = 0;
+            let sadnessScore = 0;
+            let angerScore = 0;
+            let fearScore = 0;
 
             words.forEach(word => {
-                if (positiveWords.includes(word)) {
-                    positiveCount++;
-                    joyCount++;
-                }
-                if (negativeWords.includes(word)) {
-                    negativeCount++;
-                    // Distribute among negative emotions
-                    if (['üzücü', 'acı', 'mutsuz'].includes(word)) sadnessCount++;
-                    if (['öfke', 'kızgın', 'nefret'].includes(word)) angerCount++;
-                    if (['korku', 'korkutucu', 'endişe'].includes(word)) fearCount++;
+                if (sentimentLexicon[word]) {
+                    const sentiment = sentimentLexicon[word];
+                    totalScore += sentiment.score;
+                    totalWords++;
+
+                    joyScore += sentiment.joy || 0;
+                    sadnessScore += sentiment.sadness || 0;
+                    angerScore += sentiment.anger || 0;
+                    fearScore += sentiment.fear || 0;
                 }
             });
 
-            const totalEmotional = positiveCount + negativeCount;
-            const score = totalEmotional > 0
-                ? ((positiveCount - negativeCount) / totalEmotional * 100).toFixed(1)
-                : 0;
+            // Calculate normalized sentiment score
+            let normalizedScore = 0;
+            if (totalWords > 0) {
+                normalizedScore = (totalScore / totalWords) * 33.33; // Scale to -100 to +100
+            }
 
             // Update sentiment display
             let emoji, label;
-            if (score > 30) {
+            if (normalizedScore > 20) {
                 emoji = '😊';
                 label = 'Pozitif';
-            } else if (score < -30) {
-                emoji = '😞';
-                label = 'Negatif';
-            } else {
+            } else if (normalizedScore > 5) {
+                emoji = '🙂';
+                label = 'Hafif Pozitif';
+            } else if (normalizedScore >= -5) {
                 emoji = '😐';
                 label = 'Nötr';
+            } else if (normalizedScore >= -20) {
+                emoji = '🙁';
+                label = 'Hafif Negatif';
+            } else {
+                emoji = '😞';
+                label = 'Negatif';
             }
 
             document.getElementById('sentimentEmoji').textContent = emoji;
             document.getElementById('sentimentLabel').textContent = label;
-            document.getElementById('sentimentScore').textContent = `Skor: ${score}`;
+            document.getElementById('sentimentScore').textContent = `Skor: ${normalizedScore.toFixed(1)}`;
 
             // Update emotion bars
-            const total = joyCount + sadnessCount + angerCount + fearCount || 1;
-            updateEmotionBar('joy', joyCount, total);
-            updateEmotionBar('sadness', sadnessCount, total);
-            updateEmotionBar('anger', angerCount, total);
-            updateEmotionBar('fear', fearCount, total);
+            const totalEmotions = joyScore + sadnessScore + angerScore + fearScore || 1;
+            updateEmotionBar('joy', joyScore, totalEmotions);
+            updateEmotionBar('sadness', sadnessScore, totalEmotions);
+            updateEmotionBar('anger', angerScore, totalEmotions);
+            updateEmotionBar('fear', fearScore, totalEmotions);
         }
 
         function updateEmotionBar(emotion, count, total) {
