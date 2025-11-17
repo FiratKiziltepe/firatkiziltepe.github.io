@@ -1281,6 +1281,11 @@ function setupEventListeners() {
     document.getElementById('saveProgram').addEventListener('click', saveProgram);
     document.getElementById('downloadPDF').addEventListener('click', generatePDF);
     document.getElementById('clearProgram').addEventListener('click', clearProgram);
+
+    // AI Asistan
+    document.getElementById('saveApiSettings').addEventListener('click', saveApiSettings);
+    document.getElementById('generateAiProgram').addEventListener('click', generateAiProgram);
+    document.getElementById('acceptAiProgram').addEventListener('click', acceptAiProgram);
 }
 
 // ==================== YARDIMCI FONKSİYONLAR ====================
@@ -1298,3 +1303,268 @@ function checkLocalStorageSupport() {
 }
 
 checkLocalStorageSupport();
+
+// ==================== AI ASISTAN ====================
+
+let aiSuggestedExerciseIds = [];
+
+// API ayarlarını kaydet
+function saveApiSettings() {
+    const apiKey = document.getElementById('geminiApiKey').value.trim();
+    const model = document.getElementById('geminiModel').value;
+
+    if (!apiKey) {
+        showToast('Lütfen API key girin!', 'error');
+        return;
+    }
+
+    localStorage.setItem('gemini_api_key', apiKey);
+    localStorage.setItem('gemini_model', model);
+
+    showToast('API ayarları kaydedildi!', 'success');
+}
+
+// API ayarlarını yükle
+function loadApiSettings() {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+
+    if (apiKey) {
+        document.getElementById('geminiApiKey').value = apiKey;
+    }
+    document.getElementById('geminiModel').value = model;
+}
+
+// AI program oluştur
+async function generateAiProgram() {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+    const userRequest = document.getElementById('aiUserRequest').value.trim();
+
+    if (!apiKey) {
+        showToast('Lütfen önce API ayarlarında API key girin!', 'error');
+        return;
+    }
+
+    if (!userRequest) {
+        showToast('Lütfen talebinizi yazın!', 'error');
+        return;
+    }
+
+    // Loading göster
+    document.getElementById('aiLoadingIndicator').style.display = 'flex';
+    document.getElementById('aiResponseSection').style.display = 'none';
+
+    try {
+        // Tüm egzersizlerin listesini hazırla
+        const exerciseList = EXERCISES_DATA.map(ex => ({
+            id: ex.id,
+            name: ex.name,
+            regions: ex.region.join(', '),
+            level: ex.level,
+            type: ex.type === 'reps' ? 'tekrarlı' : 'zamanlı',
+            sets: ex.defaultSets,
+            reps: ex.defaultReps,
+            timeSec: ex.defaultTimeSec,
+            notes: ex.notes
+        }));
+
+        // Prompt oluştur
+        const prompt = `Sen bir fitness koçusun. Kullanıcının isteğine göre aşağıdaki egzersiz listesinden uygun egzersizleri seçerek bir program oluştur.
+
+KULLANICI TALEBİ:
+${userRequest}
+
+MEVCUT EGZERSİZLER:
+${JSON.stringify(exerciseList, null, 2)}
+
+Lütfen şu formatta yanıt ver:
+
+AÇIKLAMA:
+[Kullanıcının durumuna göre kısa açıklama ve öneriler]
+
+SEÇİLEN_EGZERSİZ_IDS:
+[egzersiz_id_1, egzersiz_id_2, egzersiz_id_3, ...]
+
+Önemli:
+- Sadece yukarıdaki egzersiz listesinden seçim yap
+- Kullanıcının şikayetlerini dikkate al
+- Seviye olarak uygun egzersizler seç
+- 8-15 egzersiz arasında öner
+- SEÇİLEN_EGZERSİZ_IDS kısmında sadece ID'leri virgülle ayır`;
+
+        // Gemini API'ye istek at
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Hatası: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error('API yanıtı beklenen formatta değil');
+        }
+
+        const aiResponse = data.candidates[0].content.parts[0].text;
+
+        // Yanıtı parse et
+        const descriptionMatch = aiResponse.match(/AÇIKLAMA:\s*([\s\S]*?)(?=SEÇİLEN_EGZERSİZ_IDS:|$)/);
+        const idsMatch = aiResponse.match(/SEÇİLEN_EGZERSİZ_IDS:\s*\[(.*?)\]/);
+
+        let description = descriptionMatch ? descriptionMatch[1].trim() : aiResponse;
+        let exerciseIds = [];
+
+        if (idsMatch) {
+            const idsString = idsMatch[1];
+            exerciseIds = idsString.split(',').map(id => id.trim().replace(/['"]/g, '')).filter(id => id);
+        } else {
+            // Alternatif: Tüm yanıttan ID'leri bulmaya çalış
+            const allIds = EXERCISES_DATA.map(ex => ex.id);
+            exerciseIds = allIds.filter(id => aiResponse.includes(id));
+        }
+
+        // Geçerli ID'leri filtrele
+        aiSuggestedExerciseIds = exerciseIds.filter(id =>
+            EXERCISES_DATA.some(ex => ex.id === id)
+        );
+
+        if (aiSuggestedExerciseIds.length === 0) {
+            throw new Error('AI uygun egzersiz öneremedi. Lütfen talebinizi daha açık yazın.');
+        }
+
+        // Sonuçları göster
+        document.getElementById('aiResponseText').textContent = description;
+        renderAiSuggestedExercises();
+
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+        document.getElementById('aiResponseSection').style.display = 'block';
+
+        showToast(`${aiSuggestedExerciseIds.length} egzersiz önerildi!`, 'success');
+
+    } catch (error) {
+        console.error('AI hatası:', error);
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+        showToast('Hata: ' + error.message, 'error');
+    }
+}
+
+// Önerilen egzersizleri göster
+function renderAiSuggestedExercises() {
+    const container = document.getElementById('aiSuggestedExercises');
+    container.innerHTML = '';
+
+    aiSuggestedExerciseIds.forEach(exerciseId => {
+        const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+        if (!exercise) return;
+
+        const card = document.createElement('div');
+        card.className = 'ai-exercise-card';
+        card.dataset.exerciseId = exerciseId;
+
+        card.innerHTML = `
+            <div class="ai-exercise-card-header">
+                <h4>${exercise.name}</h4>
+                <div class="ai-exercise-card-badges">
+                    <span class="ai-exercise-badge">${exercise.level}</span>
+                    <span class="ai-exercise-badge">${exercise.region.join(', ')}</span>
+                </div>
+            </div>
+            <div class="ai-exercise-card-body">
+                <div class="ai-exercise-detail">
+                    <span class="ai-exercise-detail-label">Set:</span>
+                    <span>${exercise.defaultSets}</span>
+                </div>
+                <div class="ai-exercise-detail">
+                    <span class="ai-exercise-detail-label">${exercise.type === 'reps' ? 'Tekrar:' : 'Süre:'}</span>
+                    <span>${exercise.type === 'reps' ? exercise.defaultReps : exercise.defaultTimeSec + ' sn'}</span>
+                </div>
+                <div class="ai-exercise-detail">
+                    <span class="ai-exercise-detail-label">Dinlenme:</span>
+                    <span>${exercise.restSec} sn</span>
+                </div>
+            </div>
+            <div class="ai-exercise-card-actions">
+                <button class="ai-remove-exercise-btn" onclick="removeAiExercise('${exerciseId}')">
+                    ❌ Kaldır
+                </button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+// AI egzersizi kaldır
+window.removeAiExercise = function(exerciseId) {
+    const card = document.querySelector(`.ai-exercise-card[data-exercise-id="${exerciseId}"]`);
+    if (card) {
+        card.classList.add('removed');
+        const index = aiSuggestedExerciseIds.indexOf(exerciseId);
+        if (index > -1) {
+            aiSuggestedExerciseIds.splice(index, 1);
+        }
+
+        setTimeout(() => {
+            card.remove();
+            showToast('Egzersiz kaldırıldı', 'info');
+        }, 300);
+    }
+};
+
+// AI programını kabul et ve kaydet
+function acceptAiProgram() {
+    if (aiSuggestedExerciseIds.length === 0) {
+        showToast('Kabul edilecek egzersiz kalmadı!', 'error');
+        return;
+    }
+
+    // Önce tüm seçimleri temizle
+    appState.selectedExercises = {};
+    appState.currentPresetProgram = null;
+
+    // AI önerilerini seçili egzersizlere ekle
+    aiSuggestedExerciseIds.forEach(exerciseId => {
+        const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+        if (exercise) {
+            appState.selectedExercises[exerciseId] = {
+                selected: true,
+                sets: exercise.defaultSets,
+                reps: exercise.defaultReps,
+                timeSec: exercise.defaultTimeSec,
+                weightKg: exercise.defaultWeightKg
+            };
+        }
+    });
+
+    // Kaydet
+    saveToLocalStorage();
+
+    // UI'ı güncelle
+    updateProgramSummary();
+    updateDynamicWarmup();
+    updateMyProgramView();
+    renderExercises();
+
+    showToast(`${aiSuggestedExerciseIds.length} egzersiz programınıza eklendi!`, 'success');
+
+    // Kendi Programım sekmesine geç
+    switchTab('myprogram');
+}
+
+// Sayfa yüklendiğinde API ayarlarını yükle
+window.addEventListener('DOMContentLoaded', () => {
+    loadApiSettings();
+});
