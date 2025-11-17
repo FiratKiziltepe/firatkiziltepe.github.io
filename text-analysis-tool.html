@@ -472,7 +472,7 @@
 
                     <div class="button-group">
                         <div class="file-input-wrapper">
-                            <button>📁 Dosya Yükle</button>
+                            <button onclick="document.getElementById('fileInput').click()">📁 Dosya Yükle</button>
                             <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.csv,.xlsx">
                         </div>
                         <button onclick="analyzeText()">🔍 Analiz Et</button>
@@ -628,7 +628,13 @@
             <div class="card">
                 <h2>🔄 Metin Karşılaştırma</h2>
                 <textarea id="compareText" placeholder="Karşılaştırmak için ikinci metni buraya yapıştırın..." style="min-height: 100px; margin-bottom: 15px;"></textarea>
-                <button onclick="compareTexts()">📊 Metinleri Karşılaştır</button>
+                <div class="button-group" style="margin-top: 0;">
+                    <div class="file-input-wrapper">
+                        <button onclick="document.getElementById('compareFileInput').click()">📁 Dosya Yükle</button>
+                        <input type="file" id="compareFileInput" accept=".txt,.pdf,.doc,.docx,.csv,.xlsx">
+                    </div>
+                    <button onclick="compareTexts()">📊 Metinleri Karşılaştır</button>
+                </div>
                 <div class="comparison-result" id="comparisonResult" style="margin-top: 15px; display: none;">
                     <div>Benzerlik Oranı</div>
                     <div class="similarity-score" id="similarityScore">0%</div>
@@ -648,8 +654,9 @@
         let currentText = '';
         let analysisResults = {};
 
-        // File upload handler
+        // File upload handlers
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('compareFileInput').addEventListener('change', handleCompareFileUpload);
 
         async function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -676,6 +683,32 @@
                 analyzeText();
             } catch (error) {
                 alert('Dosya yüklenirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function handleCompareFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            let text = '';
+
+            try {
+                if (fileExtension === 'txt') {
+                    text = await file.text();
+                } else if (fileExtension === 'pdf') {
+                    text = await extractTextFromPDF(file);
+                } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+                    text = await extractTextFromWord(file);
+                } else if (fileExtension === 'csv') {
+                    text = await file.text();
+                } else if (fileExtension === 'xlsx') {
+                    text = await extractTextFromExcel(file);
+                }
+
+                document.getElementById('compareText').value = text;
+            } catch (error) {
+                alert('Karşılaştırma dosyası yüklenirken bir hata oluştu: ' + error.message);
             }
         }
 
