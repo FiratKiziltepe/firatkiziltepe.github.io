@@ -1,6 +1,6 @@
 /**
  * Fitness Program Oluşturucu - Ana Uygulama
- * Tüm uygulama mantığı ve etkileşimler
+ * Tab sistemi, hazır programlar, özel program oluşturma, lightbox ve tüm etkileşimler
  */
 
 // ==================== GLOBAL DEĞİŞKENLER ====================
@@ -19,7 +19,9 @@ const appState = {
     filters: {
         levels: ['Başlangıç', 'Orta', 'İleri'],
         regions: []
-    }
+    },
+    currentTab: 'preset', // 'preset', 'exercises', 'myprogram'
+    currentPresetProgram: null // Seçili hazır program ID'si
 };
 
 // ==================== BAŞLATMA ====================
@@ -34,10 +36,13 @@ function initializeApp() {
     loadFromLocalStorage();
 
     // UI bileşenlerini başlat
+    initializeTabs();
     initializeFilters();
+    renderPresetPrograms();
     renderExercises();
     updateProgramSummary();
     updateDynamicWarmup();
+    updateMyProgramView();
 
     // Event listener'ları ekle
     setupEventListeners();
@@ -45,7 +50,429 @@ function initializeApp() {
     // Kullanıcı bilgilerini formda göster
     populateUserInfoForm();
 
-    showToast('Uygulama hazır! Egzersizleri seçebilirsiniz.', 'success');
+    // Lightbox'ı başlat
+    initializeLightbox();
+
+    showToast('Uygulama hazır! Hazır programları inceleyin veya kendi programınızı oluşturun.', 'success');
+}
+
+// ==================== TAB SİSTEMİ ====================
+
+function initializeTabs() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+            switchTab(tabId);
+        });
+    });
+}
+
+function switchTab(tabId) {
+    appState.currentTab = tabId;
+
+    // Tüm tab butonlarını ve içerikleri pasif yap
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+    // Seçili olanı aktif yap
+    const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+    const activeContent = document.getElementById(`tab-${tabId}`);
+
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activeContent) activeContent.classList.add('active');
+
+    // Kendi programım sekmesine geçildiğinde view'i güncelle
+    if (tabId === 'myprogram') {
+        updateMyProgramView();
+    }
+}
+
+// ==================== HAZIR PROGRAMLAR ====================
+
+function renderPresetPrograms() {
+    const container = document.getElementById('presetProgramsGrid');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    PRESET_PROGRAMS.forEach(program => {
+        const card = createPresetProgramCard(program);
+        container.appendChild(card);
+    });
+}
+
+function createPresetProgramCard(program) {
+    const card = document.createElement('div');
+    card.className = 'preset-program-card';
+
+    // Gradient renkleri seviyeye göre değiştir
+    let gradient = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    if (program.level === 'Başlangıç') {
+        gradient = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+    } else if (program.level === 'İleri') {
+        gradient = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+    }
+
+    card.style.background = gradient;
+
+    card.innerHTML = `
+        <div class="preset-program-header">
+            <h3 class="preset-program-name">${program.name}</h3>
+            <div class="preset-program-badges">
+                <span class="preset-badge">${program.level}</span>
+                <span class="preset-badge">${program.goal}</span>
+            </div>
+            <p class="preset-program-description">${program.description}</p>
+        </div>
+
+        <div class="preset-program-details">
+            <div class="preset-detail">
+                <span class="preset-detail-value">${program.daysPerWeek}</span>
+                <span class="preset-detail-label">Gün/Hafta</span>
+            </div>
+            <div class="preset-detail">
+                <span class="preset-detail-value">${program.estimatedDuration}</span>
+                <span class="preset-detail-label">Dakika/Gün</span>
+            </div>
+        </div>
+
+        <div class="preset-program-days">
+            <div class="preset-day-item">📅 Gün 1: ${program.days[1].name}</div>
+            <div class="preset-day-item">📅 Gün 2: ${program.days[2].name}</div>
+            <div class="preset-day-item">📅 Gün 3: ${program.days[3].name}</div>
+        </div>
+
+        <div class="preset-program-action">
+            <button class="btn" onclick="loadPresetProgram('${program.id}')">
+                🚀 Bu Programı Seç
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+function loadPresetProgram(programId) {
+    const program = PRESET_PROGRAMS.find(p => p.id === programId);
+    if (!program) {
+        showToast('Program bulunamadı!', 'error');
+        return;
+    }
+
+    // Önce tüm seçimleri temizle
+    appState.selectedExercises = {};
+
+    // Programdaki tüm egzersizleri seç
+    Object.values(program.days).forEach(day => {
+        day.exercises.forEach(exerciseId => {
+            const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+            if (exercise) {
+                appState.selectedExercises[exerciseId] = {
+                    selected: true,
+                    sets: exercise.defaultSets,
+                    reps: exercise.defaultReps,
+                    timeSec: exercise.defaultTimeSec,
+                    weightKg: exercise.defaultWeightKg
+                };
+            }
+        });
+    });
+
+    // Kullanıcı bilgilerini güncelle
+    appState.userInfo.goal = program.goal;
+    appState.userInfo.daysPerWeek = program.daysPerWeek;
+    appState.userInfo.sessionDurationMin = program.estimatedDuration;
+    populateUserInfoForm();
+
+    // Mevcut programı kaydet
+    appState.currentPresetProgram = programId;
+
+    // Kaydet
+    saveToLocalStorage();
+
+    // UI'ı güncelle
+    updateProgramSummary();
+    updateDynamicWarmup();
+    updateMyProgramView();
+
+    // Egzersiz listesi sekmesinde de seçimleri göster
+    renderExercises();
+
+    showToast(`"${program.name}" yüklendi! ${Object.keys(appState.selectedExercises).length} egzersiz seçildi.`, 'success');
+
+    // Kendi programım sekmesine geç
+    switchTab('myprogram');
+}
+
+// ==================== KENDİ PROGRAMIM GÖRÜNÜMÜ ====================
+
+function updateMyProgramView() {
+    const container = document.getElementById('myProgramContent');
+    if (!container) return;
+
+    // Seçili egzersizleri al
+    const selectedExerciseIds = Object.entries(appState.selectedExercises)
+        .filter(([id, data]) => data.selected)
+        .map(([id]) => id);
+
+    if (selectedExerciseIds.length === 0) {
+        // Boş durum
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🏋️</div>
+                <h3>Henüz bir program oluşturmadınız</h3>
+                <p>"Egzersiz Listesi" sekmesinden egzersizleri seçin ve "Kendi Programımı Oluştur" butonuna tıklayın.</p>
+                <p>veya</p>
+                <p>"Hazır Programlar" sekmesinden hazır bir program seçin.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Egzersizleri al
+    const selectedExercises = selectedExerciseIds.map(id => {
+        const exercise = EXERCISES_DATA.find(ex => ex.id === id);
+        const data = appState.selectedExercises[id];
+        return { ...exercise, ...data };
+    }).filter(ex => ex !== undefined);
+
+    // Hazır programsa günlere göre göster
+    if (appState.currentPresetProgram) {
+        const program = PRESET_PROGRAMS.find(p => p.id === appState.currentPresetProgram);
+        if (program) {
+            renderPresetProgramView(container, program);
+            return;
+        }
+    }
+
+    // Özel program - bölgelere göre grupla
+    renderCustomProgramView(container, selectedExercises);
+}
+
+function renderPresetProgramView(container, program) {
+    let html = `
+        <div class="my-program-preset-info">
+            <h3 style="text-align:center; margin-bottom:2rem; color: var(--primary-color);">
+                📦 ${program.name}
+            </h3>
+        </div>
+    `;
+
+    // Her gün için
+    [1, 2, 3].forEach(dayNum => {
+        const day = program.days[dayNum];
+        html += `
+            <div class="my-program-day-section">
+                <div class="my-program-day-header">
+                    <h3 class="my-program-day-title">${day.name}</h3>
+                    <span style="color: var(--text-secondary);">${day.exercises.length} egzersiz</span>
+                </div>
+                <div class="my-program-exercises-grid">
+        `;
+
+        day.exercises.forEach(exerciseId => {
+            const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+            if (exercise) {
+                const data = appState.selectedExercises[exerciseId] || {};
+                html += createMyProgramExerciseCard(exercise, data);
+            }
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function renderCustomProgramView(container, exercises) {
+    // Bölgelere göre grupla
+    const groupedByRegion = {};
+    exercises.forEach(exercise => {
+        const mainRegion = exercise.region[0];
+        if (!groupedByRegion[mainRegion]) {
+            groupedByRegion[mainRegion] = [];
+        }
+        groupedByRegion[mainRegion].push(exercise);
+    });
+
+    let html = `
+        <div class="my-program-custom-info">
+            <h3 style="text-align:center; margin-bottom:2rem; color: var(--primary-color);">
+                ⭐ Özel Programınız
+            </h3>
+        </div>
+    `;
+
+    Object.entries(groupedByRegion).forEach(([region, exList]) => {
+        html += `
+            <div class="my-program-day-section">
+                <div class="my-program-day-header">
+                    <h3 class="my-program-day-title">${region}</h3>
+                    <span style="color: var(--text-secondary);">${exList.length} egzersiz</span>
+                </div>
+                <div class="my-program-exercises-grid">
+        `;
+
+        exList.forEach(exercise => {
+            html += createMyProgramExerciseCard(exercise, appState.selectedExercises[exercise.id]);
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function createMyProgramExerciseCard(exercise, data) {
+    const sets = data.sets || exercise.defaultSets;
+    const reps = data.reps || exercise.defaultReps;
+    const timeSec = data.timeSec || exercise.defaultTimeSec;
+    const weightKg = data.weightKg !== undefined ? data.weightKg : exercise.defaultWeightKg;
+
+    return `
+        <div class="exercise-card selected">
+            ${createExerciseImageHTML(exercise)}
+            <div class="exercise-card-title">
+                <h3>${exercise.name}</h3>
+                <span class="exercise-badge badge-level-${exercise.level}">${exercise.level}</span>
+            </div>
+            <div class="exercise-regions">
+                ${exercise.region.map(r => `<span class="region-tag">${r}</span>`).join('')}
+            </div>
+            <div class="exercise-details" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="detail-item">
+                    <strong>Set:</strong> ${sets}
+                </div>
+                ${exercise.type === 'reps' ? `
+                    <div class="detail-item">
+                        <strong>Tekrar:</strong> ${reps}
+                    </div>
+                ` : `
+                    <div class="detail-item">
+                        <strong>Süre:</strong> ${timeSec}sn
+                    </div>
+                `}
+                <div class="detail-item">
+                    <strong>Ağırlık:</strong> ${weightKg}kg
+                </div>
+                <div class="detail-item">
+                    <strong>Dinlenme:</strong> ${exercise.restSec}sn
+                </div>
+            </div>
+            ${exercise.notes ? `<div class="exercise-notes">💡 ${exercise.notes}</div>` : ''}
+        </div>
+    `;
+}
+
+// ==================== PLACEHOLDER GÖRSEL SİSTEMİ ====================
+
+/**
+ * Her egzersiz için placeholder görsel icon'u belirle
+ */
+function getExerciseIcon(exercise) {
+    // Bölgeye göre emoji icon'ları
+    const regionIcons = {
+        'Karın': '🦴',
+        'Göbek': '🦴',
+        'Bel': '🦴',
+        'Core': '🦴',
+        'Göğüs': '💪',
+        'Sırt': '🏋️',
+        'Omuz': '🤸',
+        'Kol': '💪',
+        'Biceps': '💪',
+        'Triceps': '💪',
+        'Bacak': '🦵',
+        'Kalça': '🍑',
+        'Ayak': '👟',
+        'Tüm Vücut': '🏃'
+    };
+
+    const mainRegion = exercise.region[0];
+    return regionIcons[mainRegion] || '🏋️';
+}
+
+function createExerciseImageHTML(exercise) {
+    const icon = getExerciseIcon(exercise);
+
+    // Eğer gerçek görsel URL'si varsa (# değilse) onu göster
+    if (exercise.imageUrl && exercise.imageUrl !== '#') {
+        return `
+            <div class="exercise-image-container" onclick="openLightbox('${exercise.imageUrl}', '${exercise.name}')">
+                <img src="${exercise.imageUrl}" alt="${exercise.name}" class="exercise-image">
+            </div>
+        `;
+    }
+
+    // Placeholder göster
+    return `
+        <div class="exercise-image-container" onclick="showToast('Görsel henüz eklenmedi', 'info')">
+            <div class="exercise-image-placeholder">
+                ${icon}
+                <div class="exercise-image-placeholder-text">Resim Eklenecek</div>
+            </div>
+        </div>
+    `;
+}
+
+// ==================== LIGHTBOX (GÖRSEL BÜYÜTME) ====================
+
+function initializeLightbox() {
+    const modal = document.getElementById('lightboxModal');
+    const closeBtn = document.querySelector('.lightbox-close');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeLightbox);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeLightbox();
+            }
+        });
+    }
+
+    // ESC tuşuyla kapatma
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        }
+    });
+}
+
+function openLightbox(imageUrl, caption) {
+    if (!imageUrl || imageUrl === '#') {
+        showToast('Görsel bulunamadı', 'error');
+        return;
+    }
+
+    const modal = document.getElementById('lightboxModal');
+    const img = document.getElementById('lightboxImage');
+    const captionText = document.getElementById('lightboxCaption');
+
+    if (modal && img) {
+        modal.classList.add('active');
+        img.src = imageUrl;
+        if (captionText) {
+            captionText.textContent = caption;
+        }
+    }
+}
+
+function closeLightbox() {
+    const modal = document.getElementById('lightboxModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
 }
 
 // ==================== LOCALSTORAGE İŞLEMLERİ ====================
@@ -56,14 +483,16 @@ function loadFromLocalStorage() {
         if (savedData) {
             const parsed = JSON.parse(savedData);
 
-            // Kullanıcı bilgilerini yükle
             if (parsed.userInfo) {
                 appState.userInfo = { ...appState.userInfo, ...parsed.userInfo };
             }
 
-            // Seçili egzersizleri yükle
             if (parsed.selectedExercises) {
                 appState.selectedExercises = parsed.selectedExercises;
+            }
+
+            if (parsed.currentPresetProgram) {
+                appState.currentPresetProgram = parsed.currentPresetProgram;
             }
 
             console.log('LocalStorage\'dan veri yüklendi:', parsed);
@@ -79,6 +508,7 @@ function saveToLocalStorage() {
         const dataToSave = {
             userInfo: appState.userInfo,
             selectedExercises: appState.selectedExercises,
+            currentPresetProgram: appState.currentPresetProgram,
             createdAt: new Date().toISOString()
         };
 
@@ -106,10 +536,9 @@ function clearLocalStorage() {
 // ==================== FİLTRELER ====================
 
 function initializeFilters() {
-    // Bölge filtrelerini oluştur
     const regionFiltersContainer = document.getElementById('regionFilters');
+    if (!regionFiltersContainer) return;
 
-    // Benzersiz bölgeleri al
     const uniqueRegions = [...new Set(REGIONS)].sort();
 
     uniqueRegions.forEach(region => {
@@ -130,11 +559,9 @@ function initializeFilters() {
 }
 
 function getActiveFilters() {
-    // Seviye filtreleri
     const levelCheckboxes = document.querySelectorAll('#levelFilters input[type="checkbox"]:checked');
     const levels = Array.from(levelCheckboxes).map(cb => cb.value);
 
-    // Bölge filtreleri
     const regionCheckboxes = document.querySelectorAll('#regionFilters input[type="checkbox"]:checked');
     const regions = Array.from(regionCheckboxes).map(cb => cb.value);
 
@@ -151,12 +578,10 @@ function applyFilters() {
 }
 
 function resetFilters() {
-    // Tüm seviye filtrelerini işaretle
     document.querySelectorAll('#levelFilters input[type="checkbox"]').forEach(cb => {
         cb.checked = true;
     });
 
-    // Tüm bölge filtrelerini temizle
     document.querySelectorAll('#regionFilters input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
     });
@@ -168,24 +593,20 @@ function resetFilters() {
 
 function renderExercises() {
     const container = document.getElementById('exerciseCards');
+    if (!container) return;
+
     const filters = appState.filters;
 
-    // Filtrelere göre egzersizleri süz
     let filteredExercises = EXERCISES_DATA.filter(exercise => {
-        // Seviye filtresi
         const levelMatch = filters.levels.length === 0 || filters.levels.includes(exercise.level);
-
-        // Bölge filtresi
         const regionMatch = filters.regions.length === 0 ||
             exercise.region.some(r => filters.regions.includes(r));
 
         return levelMatch && regionMatch;
     });
 
-    // Egzersiz sayısını güncelle
     document.getElementById('exerciseCount').textContent = filteredExercises.length;
 
-    // Kartları oluştur
     container.innerHTML = '';
 
     if (filteredExercises.length === 0) {
@@ -204,13 +625,11 @@ function createExerciseCard(exercise) {
     card.className = 'exercise-card';
     card.dataset.exerciseId = exercise.id;
 
-    // Seçili durumu kontrol et
     const isSelected = appState.selectedExercises[exercise.id]?.selected || false;
     if (isSelected) {
         card.classList.add('selected');
     }
 
-    // Kaydedilmiş değerleri al veya varsayılanları kullan
     const savedData = appState.selectedExercises[exercise.id] || {};
     const sets = savedData.sets || exercise.defaultSets;
     const reps = savedData.reps || exercise.defaultReps;
@@ -218,6 +637,8 @@ function createExerciseCard(exercise) {
     const weightKg = savedData.weightKg !== undefined ? savedData.weightKg : exercise.defaultWeightKg;
 
     card.innerHTML = `
+        ${createExerciseImageHTML(exercise)}
+
         <div class="exercise-card-header">
             <div class="exercise-card-title">
                 <h3>${exercise.name}</h3>
@@ -270,11 +691,9 @@ function createExerciseCard(exercise) {
         ${exercise.notes ? `<div class="exercise-notes">💡 ${exercise.notes}</div>` : ''}
     `;
 
-    // Event listener'lar
     const checkbox = card.querySelector('.exercise-checkbox');
     checkbox.addEventListener('change', (e) => handleExerciseSelection(exercise.id, card));
 
-    // Input değişikliklerini dinle
     card.querySelectorAll('input[type="number"]').forEach(input => {
         input.addEventListener('change', () => updateExerciseData(exercise.id, card));
     });
@@ -289,19 +708,15 @@ function handleExerciseSelection(exerciseId, cardElement) {
     const isSelected = checkbox.checked;
 
     if (isSelected) {
-        // Egzersizi seç
         cardElement.classList.add('selected');
 
-        // Veriyi kaydet
         if (!appState.selectedExercises[exerciseId]) {
             appState.selectedExercises[exerciseId] = {};
         }
         appState.selectedExercises[exerciseId].selected = true;
 
-        // Değerleri güncelle
         updateExerciseData(exerciseId, cardElement);
     } else {
-        // Egzersizi kaldır
         cardElement.classList.remove('selected');
         if (appState.selectedExercises[exerciseId]) {
             appState.selectedExercises[exerciseId].selected = false;
@@ -336,7 +751,6 @@ function updateExerciseData(exerciseId, cardElement) {
 // ==================== PROGRAM ÖZETİ ====================
 
 function updateProgramSummary() {
-    // Seçili egzersizleri say
     const selectedExercises = Object.entries(appState.selectedExercises)
         .filter(([id, data]) => data.selected)
         .map(([id]) => EXERCISES_DATA.find(ex => ex.id === id))
@@ -345,7 +759,6 @@ function updateProgramSummary() {
     const selectedCount = selectedExercises.length;
     document.getElementById('selectedCount').textContent = selectedCount;
 
-    // Çalışılan bölgeleri belirle
     const regionsSet = new Set();
     selectedExercises.forEach(exercise => {
         exercise.region.forEach(r => regionsSet.add(r));
@@ -353,11 +766,7 @@ function updateProgramSummary() {
     const regionsText = regionsSet.size > 0 ? Array.from(regionsSet).join(', ') : '-';
     document.getElementById('selectedRegions').textContent = regionsText;
 
-    // Tahmini süreyi hesapla
-    let totalTime = 0;
-
-    // Isınma süresi
-    totalTime += 10; // 10 dakika genel ısınma
+    let totalTime = 10;
 
     selectedExercises.forEach(exercise => {
         const data = appState.selectedExercises[exercise.id];
@@ -365,11 +774,9 @@ function updateProgramSummary() {
 
         if (exercise.type === 'reps') {
             const reps = data.reps || exercise.defaultReps;
-            // Her tekrar ~2 saniye + dinlenme
             totalTime += sets * ((reps * 2) / 60 + (exercise.restSec / 60));
         } else {
             const timeSec = data.timeSec || exercise.defaultTimeSec;
-            // Süre + dinlenme
             totalTime += sets * ((timeSec / 60) + (exercise.restSec / 60));
         }
     });
@@ -381,8 +788,8 @@ function updateProgramSummary() {
 
 function updateDynamicWarmup() {
     const container = document.getElementById('dynamicWarmup');
+    if (!container) return;
 
-    // Seçili egzersizlerden bölgeleri al
     const selectedExercises = Object.entries(appState.selectedExercises)
         .filter(([id, data]) => data.selected)
         .map(([id]) => EXERCISES_DATA.find(ex => ex.id === id))
@@ -393,7 +800,6 @@ function updateDynamicWarmup() {
         exercise.region.forEach(r => regionsSet.add(r));
     });
 
-    // Bölgelere göre ısınma önerileri
     const warmupSuggestions = [];
 
     if (Array.from(regionsSet).some(r => ['Karın', 'Göbek', 'Bel', 'Core'].includes(r))) {
@@ -412,7 +818,6 @@ function updateDynamicWarmup() {
         warmupSuggestions.push(GENERAL_WARMUP.legs);
     }
 
-    // HTML oluştur
     container.innerHTML = '';
     if (warmupSuggestions.length > 0) {
         warmupSuggestions.forEach(suggestion => {
@@ -449,7 +854,6 @@ function saveUserInfo() {
 // ==================== PROGRAM KAYDETME ====================
 
 function saveProgram() {
-    // En az bir egzersiz seçili mi kontrol et
     const selectedCount = Object.values(appState.selectedExercises)
         .filter(data => data.selected).length;
 
@@ -460,21 +864,22 @@ function saveProgram() {
 
     if (saveToLocalStorage()) {
         showToast(`Program kaydedildi! ${selectedCount} egzersiz seçildi.`, 'success');
+        updateMyProgramView();
+        switchTab('myprogram');
     }
 }
 
 function clearProgram() {
     if (confirm('Programı temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
-        // State'i sıfırla
         appState.selectedExercises = {};
+        appState.currentPresetProgram = null;
 
-        // LocalStorage'ı temizle
         clearLocalStorage();
 
-        // UI'ı güncelle
         renderExercises();
         updateProgramSummary();
         updateDynamicWarmup();
+        updateMyProgramView();
 
         showToast('Program temizlendi.', 'info');
     }
@@ -483,7 +888,6 @@ function clearProgram() {
 // ==================== PDF OLUŞTURMA ====================
 
 function generatePDF() {
-    // En az bir egzersiz seçili mi kontrol et
     const selectedExercises = Object.entries(appState.selectedExercises)
         .filter(([id, data]) => data.selected)
         .map(([id]) => {
@@ -501,7 +905,6 @@ function generatePDF() {
     try {
         showToast('PDF oluşturuluyor...', 'info');
 
-        // jsPDF örneği oluştur
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
@@ -510,13 +913,11 @@ function generatePDF() {
         const pageHeight = doc.internal.pageSize.height;
         const marginBottom = 20;
 
-        // Başlık
         doc.setFontSize(20);
         doc.setFont(undefined, 'bold');
         doc.text('Kişisel Fitness Programım', 105, yPos, { align: 'center' });
         yPos += 10;
 
-        // Kullanıcı Bilgileri
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
 
@@ -532,7 +933,6 @@ function generatePDF() {
         doc.text(`Oluşturma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, yPos);
         yPos += 10;
 
-        // Isınma Bölümü
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
         doc.text('Isınma', 20, yPos);
@@ -543,7 +943,6 @@ function generatePDF() {
         doc.text('Genel: 5-10 dakika hafif tempo yürüyüş veya koşu', 20, yPos);
         yPos += lineHeight;
 
-        // Dinamik ısınma önerileri
         const regionsSet = new Set();
         selectedExercises.forEach(exercise => {
             exercise.region.forEach(r => regionsSet.add(r));
@@ -575,7 +974,6 @@ function generatePDF() {
 
         yPos += 5;
 
-        // Bölgelere göre grupla
         const groupedByRegion = {};
         selectedExercises.forEach(exercise => {
             const mainRegion = exercise.region[0];
@@ -585,23 +983,18 @@ function generatePDF() {
             groupedByRegion[mainRegion].push(exercise);
         });
 
-        // Her bölge için egzersizleri listele
         Object.entries(groupedByRegion).forEach(([region, exercises]) => {
-            // Sayfa kontrolü
             if (yPos > pageHeight - marginBottom) {
                 doc.addPage();
                 yPos = 20;
             }
 
-            // Bölge başlığı
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
             doc.text(region, 20, yPos);
             yPos += lineHeight;
 
-            // Egzersizler
             exercises.forEach((exercise, index) => {
-                // Sayfa kontrolü
                 if (yPos > pageHeight - marginBottom - 30) {
                     doc.addPage();
                     yPos = 20;
@@ -639,13 +1032,11 @@ function generatePDF() {
             yPos += 3;
         });
 
-        // Alt bilgi (son sayfada)
         doc.setFontSize(8);
         doc.setFont(undefined, 'italic');
         const footerY = pageHeight - 10;
         doc.text('Bu program eğitim amaçlıdır. Sağlık durumunuz için profesyonel görüş alınız.', 105, footerY, { align: 'center' });
 
-        // PDF'i indir
         const fileName = `fitness-program-${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(fileName);
 
@@ -663,12 +1054,10 @@ function showToast(message, type = 'info') {
     toast.textContent = message;
     toast.className = `toast ${type}`;
 
-    // Göster
     setTimeout(() => {
         toast.classList.add('show');
     }, 100);
 
-    // Gizle
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
@@ -677,14 +1066,11 @@ function showToast(message, type = 'info') {
 // ==================== EVENT LISTENERS ====================
 
 function setupEventListeners() {
-    // Kullanıcı bilgileri kaydet
     document.getElementById('saveUserInfo').addEventListener('click', saveUserInfo);
 
-    // Filtreler
     document.getElementById('applyFilters').addEventListener('click', applyFilters);
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
 
-    // Program işlemleri
     document.getElementById('saveProgram').addEventListener('click', saveProgram);
     document.getElementById('downloadPDF').addEventListener('click', generatePDF);
     document.getElementById('clearProgram').addEventListener('click', clearProgram);
@@ -692,7 +1078,6 @@ function setupEventListeners() {
 
 // ==================== YARDIMCI FONKSİYONLAR ====================
 
-// LocalStorage desteğini kontrol et
 function checkLocalStorageSupport() {
     try {
         const test = '__localStorage_test__';
@@ -705,5 +1090,4 @@ function checkLocalStorageSupport() {
     }
 }
 
-// Sayfa yüklendiğinde localStorage desteğini kontrol et
 checkLocalStorageSupport();
