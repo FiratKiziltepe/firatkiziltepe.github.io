@@ -91,6 +91,8 @@ function switchTab(tabId) {
 
 // ==================== HAZIR PROGRAMLAR ====================
 
+let presetProgramsListenerAdded = false;
+
 function renderPresetPrograms() {
     const container = document.getElementById('presetProgramsGrid');
     if (!container) return;
@@ -101,6 +103,18 @@ function renderPresetPrograms() {
         const card = createPresetProgramCard(program);
         container.appendChild(card);
     });
+
+    // Event delegation - container'a sadece BİR KERE listener ekle
+    if (!presetProgramsListenerAdded) {
+        container.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-preset-select');
+            if (btn) {
+                const programId = btn.getAttribute('data-program-id');
+                loadPresetProgram(programId);
+            }
+        });
+        presetProgramsListenerAdded = true;
+    }
 }
 
 function createPresetProgramCard(program) {
@@ -117,7 +131,8 @@ function createPresetProgramCard(program) {
 
     card.style.background = gradient;
 
-    card.innerHTML = `
+    // HTML içeriğini oluştur
+    const cardContent = `
         <div class="preset-program-header">
             <h3 class="preset-program-name">${program.name}</h3>
             <div class="preset-program-badges">
@@ -151,17 +166,13 @@ function createPresetProgramCard(program) {
         </div>
     `;
 
-    // Düğmeye event listener ekle
-    const selectBtn = card.querySelector('.btn-preset-select');
-    selectBtn.addEventListener('click', () => {
-        window.loadPresetProgram(program.id);
-    });
+    card.innerHTML = cardContent;
 
     return card;
 }
 
-// Global fonksiyon
-window.loadPresetProgram = function(programId) {
+// loadPresetProgram artık global değil, normal fonksiyon
+function loadPresetProgram(programId) {
     const program = PRESET_PROGRAMS.find(p => p.id === programId);
     if (!program) {
         showToast('Program bulunamadı!', 'error');
