@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern, responsive todo app with advanced features">
+    <title>Advanced Todo App</title>
+    <link rel="stylesheet" href="todo-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <svg class="app-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                    </svg>
+                    Todo App
+                </h1>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Add Task Form -->
+            <section class="add-task-section">
+                <form id="taskForm" class="task-form">
+                    <div class="form-row">
+                        <input
+                            type="text"
+                            id="taskInput"
+                            class="task-input"
+                            placeholder="What needs to be done?"
+                            required
+                            aria-label="Task description"
+                        >
+                        <button type="submit" class="btn btn-primary add-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Add Task</span>
+                        </button>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="taskCategory">Category</label>
+                            <select id="taskCategory" class="form-select">
+                                <option value="personal">Personal</option>
+                                <option value="work">Work</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="health">Health</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskPriority">Priority</label>
+                            <select id="taskPriority" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskDueDate">Due Date</label>
+                            <input type="date" id="taskDueDate" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskDueTime">Time</label>
+                            <input type="time" id="taskDueTime" class="form-input">
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Filters and Search -->
+            <section class="filters-section">
+                <div class="search-wrapper">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="search-input"
+                        placeholder="Search tasks..."
+                        aria-label="Search tasks"
+                    >
+                </div>
+
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filterStatus">Status</label>
+                        <select id="filterStatus" class="form-select">
+                            <option value="all">All</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterCategory">Category</label>
+                        <select id="filterCategory" class="form-select">
+                            <option value="all">All</option>
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="health">Health</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterPriority">Priority</label>
+                        <select id="filterPriority" class="form-select">
+                            <option value="all">All</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
+                </div>
+            </section>
+
+            <!-- Stats -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeTasks">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </section>
+
+            <!-- Tasks List -->
+            <section class="tasks-section">
+                <div class="tasks-header">
+                    <h2>Tasks</h2>
+                    <div class="sort-controls">
+                        <label for="sortBy">Sort by:</label>
+                        <select id="sortBy" class="form-select">
+                            <option value="created">Created Date</option>
+                            <option value="dueDate">Due Date</option>
+                            <option value="priority">Priority</option>
+                            <option value="title">Title</option>
+                        </select>
+                    </div>
+                </div>
+                <ul id="taskList" class="task-list" role="list">
+                    <!-- Tasks will be dynamically added here -->
+                </ul>
+                <div id="emptyState" class="empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                    </svg>
+                    <p>No tasks yet. Add one to get started!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal" role="dialog" aria-labelledby="editModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="editModalTitle">Edit Task</h2>
+                <button class="modal-close" id="closeModal" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="editForm" class="edit-form">
+                <div class="form-group">
+                    <label for="editTaskInput">Task</label>
+                    <input type="text" id="editTaskInput" class="form-input" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editTaskCategory">Category</label>
+                        <select id="editTaskCategory" class="form-select">
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="health">Health</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTaskPriority">Priority</label>
+                        <select id="editTaskPriority" class="form-select">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTaskDueDate">Due Date</label>
+                        <input type="date" id="editTaskDueDate" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTaskDueTime">Time</label>
+                        <input type="time" id="editTaskDueTime" class="form-input">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEdit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="todo-app.js"></script>
+</body>
+</html>
