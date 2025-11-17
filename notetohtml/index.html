@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NotebookLM to HTML - Tek Dosya Dönüştürücü</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+
+        <header class="header">
+
+            <div class="header-content">
+
+                <h1>📚 NotebookLM to HTML</h1>
+
+                <p class="subtitle">Google NotebookLM HTML'ini tek dosyaya dönüştür</p>
+
+            </div>
+
+        </header>
+
+ 
+
+        <!-- Main Content -->
+
+        <main class="main">
+
+            <!-- Instructions -->
+
+            <div class="instructions">
+
+                <h2>🚀 Nasıl Kullanılır?</h2>
+
+                <ol>
+
+                    <li>Google NotebookLM'den sayfayı <strong>"HTML olarak kaydet"</strong></li>
+
+                    <li>İndirilen <strong>.html dosyasını</strong> ve <strong>_files klasörünü</strong> aşağıya yükleyin</li>
+
+                    <li><strong>"Dönüştür"</strong> butonuna tıklayın</li>
+
+                    <li>Tek HTML dosyasını indirin - internet olmadan çalışır! ✨</li>
+
+                </ol>
+
+            </div>
+
+ 
+
+            <!-- File Upload Section -->
+
+            <div class="upload-section">
+
+                <!-- HTML File Upload -->
+
+                <div class="upload-box" id="htmlDropZone">
+
+                    <div class="upload-icon">📄</div>
+
+                    <h3>HTML Dosyası</h3>
+
+                    <p class="upload-text">Sürükle-bırak veya tıklayarak seç</p>
+
+                    <input type="file" id="htmlFileInput" accept=".html" hidden>
+
+                    <button class="browse-btn" onclick="document.getElementById('htmlFileInput').click()">
+
+                        Dosya Seç
+
+                    </button>
+
+                    <div class="file-info" id="htmlFileInfo"></div>
+
+                </div>
+
+ 
+
+                <!-- Resources Folder Upload -->
+
+                <div class="upload-box" id="filesDropZone">
+
+                    <div class="upload-icon">📁</div>
+
+                    <h3>_files Klasörü</h3>
+
+                    <p class="upload-text">Klasörü sürükle-bırak veya seç</p>
+
+                    <input type="file" id="filesInput" webkitdirectory directory multiple hidden>
+
+                    <button class="browse-btn" onclick="document.getElementById('filesInput').click()">
+
+                        Klasör Seç
+
+                    </button>
+
+                    <div class="file-info" id="filesInfo"></div>
+
+                </div>
+
+            </div>
+
+ 
+
+            <!-- Progress Section -->
+
+            <div class="progress-section" id="progressSection" style="display: none;">
+
+                <div class="progress-bar">
+
+                    <div class="progress-fill" id="progressFill"></div>
+
+                </div>
+
+                <p class="progress-text" id="progressText">Hazırlanıyor...</p>
+
+            </div>
+
+ 
+
+            <!-- Log Section -->
+
+            <div class="log-section" id="logSection" style="display: none;">
+
+                <h3>📋 İşlem Günlüğü</h3>
+
+                <div class="log-content" id="logContent"></div>
+
+            </div>
+
+ 
+
+            <!-- Convert Button -->
+
+            <div class="action-section">
+
+                <button class="convert-btn" id="convertBtn" disabled>
+
+                    <span class="btn-icon">⚡</span>
+
+                    Dönüştür
+
+                </button>
+
+            </div>
+
+ 
+
+            <!-- Download Section -->
+
+            <div class="download-section" id="downloadSection" style="display: none;">
+
+                <div class="success-message">
+
+                    <div class="success-icon">✅</div>
+
+                    <h3>Dönüştürme Başarılı!</h3>
+
+                    <p>HTML dosyanız hazır. Artık internet olmadan kullanabilirsiniz.</p>
+
+                </div>
+
+                <button class="download-btn" id="downloadBtn">
+
+                    <span class="btn-icon">⬇️</span>
+
+                    HTML'i İndir
+
+                </button>
+
+            </div>
+
+        </main>
+
+ 
+
+        <!-- Footer -->
+
+        <footer class="footer">
+
+            <p>Made with ❤️ by Fırat Kızıltepe | <a href="https://github.com/FiratKiziltepe" target="_blank">GitHub</a></p>
+
+            <p class="version">Surgical Mode V10 - Açıkla butonu gizleme + Ekrana sığma garantili</p>
+
+        </footer>
+
+    </div>
+
+ 
+
+    <script src="converter.js"></script>
+
+</body>
+
+</html>
