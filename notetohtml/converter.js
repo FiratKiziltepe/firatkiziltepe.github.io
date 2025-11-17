@@ -1,1151 +1,382 @@
-// NotebookLM to HTML Converter - Surgical Mode V10
-
-// Web-based converter with base64 iframe injection
-
- 
-
 class NotebookLMConverter {
-
     constructor() {
-
         this.htmlFile = null;
-
         this.resourceFiles = [];
-
-        this.convertedHTML = null;
-
         this.init();
-
     }
-
- 
 
     init() {
-
         this.setupEventListeners();
-
         this.setupDragAndDrop();
-
     }
-
- 
 
     setupEventListeners() {
-
-        // HTML file input
-
         document.getElementById('htmlFileInput').addEventListener('change', (e) => {
-
             this.handleHTMLFile(e.target.files[0]);
-
         });
-
- 
-
-        // Resources folder input
 
         document.getElementById('filesInput').addEventListener('change', (e) => {
-
             this.handleResourceFiles(Array.from(e.target.files));
-
         });
-
- 
-
-        // Convert button
 
         document.getElementById('convertBtn').addEventListener('click', () => {
-
             this.convert();
-
         });
-
- 
-
-        // Download button
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
-
             this.download();
-
         });
-
     }
-
- 
 
     setupDragAndDrop() {
-
-        const htmlZone = document.getElementById('htmlDropZone');
-
-        const filesZone = document.getElementById('filesDropZone');
-
- 
-
-        // HTML drop zone
-
+        const dropZone = document.getElementById('dropZone');
+        
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-
-            htmlZone.addEventListener(eventName, (e) => {
-
-                e.preventDefault();
-
-                e.stopPropagation();
-
-            });
-
+            dropZone.addEventListener(eventName, preventDefaults, false);
         });
 
- 
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         ['dragenter', 'dragover'].forEach(eventName => {
-
-            htmlZone.addEventListener(eventName, () => {
-
-                htmlZone.classList.add('drag-over');
-
-            });
-
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-active'));
         });
-
- 
 
         ['dragleave', 'drop'].forEach(eventName => {
-
-            htmlZone.addEventListener(eventName, () => {
-
-                htmlZone.classList.remove('drag-over');
-
-            });
-
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-active'));
         });
 
- 
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = [...dt.files];
+            
+            const htmlFile = files.find(f => f.type === 'text/html' || f.name.endsWith('.html'));
+            const resources = files.filter(f => f !== htmlFile);
 
-        htmlZone.addEventListener('drop', (e) => {
-
-            const files = e.dataTransfer.files;
-
-            if (files.length > 0) {
-
-                this.handleHTMLFile(files[0]);
-
-            }
-
+            if (htmlFile) this.handleHTMLFile(htmlFile);
+            if (resources.length > 0) this.handleResourceFiles(resources);
         });
-
- 
-
-        // Resources drop zone
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-
-            filesZone.addEventListener(eventName, (e) => {
-
-                e.preventDefault();
-
-                e.stopPropagation();
-
-            });
-
-        });
-
- 
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-
-            filesZone.addEventListener(eventName, () => {
-
-                filesZone.classList.add('drag-over');
-
-            });
-
-        });
-
- 
-
-        ['dragleave', 'drop'].forEach(eventName => {
-
-            filesZone.addEventListener(eventName, () => {
-
-                filesZone.classList.remove('drag-over');
-
-            });
-
-        });
-
- 
-
-        filesZone.addEventListener('drop', (e) => {
-
-            const files = Array.from(e.dataTransfer.files);
-
-            this.handleResourceFiles(files);
-
-        });
-
     }
-
- 
 
     handleHTMLFile(file) {
-
-        if (!file || !file.name.endsWith('.html')) {
-
-            this.log('error', '❌ Lütfen geçerli bir HTML dosyası seçin');
-
-            return;
-
+        if (file) {
+            this.htmlFile = file;
+            this.updateFileList();
+            this.checkReady();
+            this.log('info', `HTML dosyası seçildi: ${file.name}`);
         }
-
- 
-
-        this.htmlFile = file;
-
-        const htmlZone = document.getElementById('htmlDropZone');
-
-        const htmlInfo = document.getElementById('htmlFileInfo');
-
- 
-
-        htmlZone.classList.add('has-file');
-
-        htmlInfo.textContent = `✓ ${file.name} (${this.formatBytes(file.size)})`;
-
- 
-
-        this.log('success', `✓ HTML dosyası yüklendi: ${file.name}`);
-
-        this.checkReady();
-
     }
-
- 
 
     handleResourceFiles(files) {
-
-        if (!files || files.length === 0) {
-
-            this.log('warning', '⚠️ Klasör boş veya dosya bulunamadı');
-
-            return;
-
+        if (files.length > 0) {
+            this.resourceFiles = [...this.resourceFiles, ...files];
+            this.updateFileList();
+            this.log('info', `${files.length} kaynak dosyası eklendi`);
         }
-
- 
-
-        this.resourceFiles = files;
-
-        const filesZone = document.getElementById('filesDropZone');
-
-        const filesInfo = document.getElementById('filesInfo');
-
- 
-
-        filesZone.classList.add('has-file');
-
-        filesInfo.textContent = `✓ ${files.length} dosya yüklendi`;
-
- 
-
-        this.log('success', `✓ ${files.length} kaynak dosya yüklendi`);
-
-        this.checkReady();
-
     }
 
- 
+    updateFileList() {
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        
+        if (this.htmlFile) {
+            list.innerHTML += `<div class="file-item html-file">📄 ${this.htmlFile.name}</div>`;
+        }
+        
+        if (this.resourceFiles.length > 0) {
+            list.innerHTML += `<div class="file-item resource-file">📦 ${this.resourceFiles.length} kaynak dosyası</div>`;
+        }
+    }
 
     checkReady() {
-
-        const convertBtn = document.getElementById('convertBtn');
-
-        if (this.htmlFile) {
-
-            convertBtn.disabled = false;
-
-        }
-
+        const btn = document.getElementById('convertBtn');
+        btn.disabled = !this.htmlFile;
     }
 
- 
+    // Türkçe Karakter Dostu Base64 Kodlama/Çözme Fonksiyonları
+    b64DecodeUnicode(str) {
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+
+    b64EncodeUnicode(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+            function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+        }));
+    }
 
     async convert() {
+        if (!this.htmlFile) return;
+
+        this.showProgress(true);
+        this.updateProgress(0, 'Dosya okunuyor...');
+        this.log('process', 'Dönüştürme başlatıldı...');
 
         try {
+            let content = await this.readFile(this.htmlFile);
+            
+            // 1. Kaynak Dosyaları Göm (Klasik İşlem)
+            this.updateProgress(20, 'Kaynak dosyalar gömülüyor...');
+            content = await this.embedResources(content);
 
-            this.log('info', '🚀 Dönüştürme başlatıldı...');
+            // 2. NOTEBOOKLM YAMASI (V10 Universal Constraint)
+            this.updateProgress(60, 'NotebookLM V10 Yaması Uygulanıyor...');
+            content = this.applyNotebookFixes(content);
 
-            this.showProgress(true);
-
-            this.updateProgress(10, 'HTML dosyası okunuyor...');
-
- 
-
-            // Read HTML file
-
-            const htmlContent = await this.readFileAsText(this.htmlFile);
-
-            this.updateProgress(20, 'HTML içeriği işleniyor...');
-
- 
-
-            let processedHTML = htmlContent;
-
- 
-
-            // Embed resources if available
-
-            if (this.resourceFiles.length > 0) {
-
-                this.updateProgress(30, 'Kaynak dosyalar gömülüyor...');
-
-                processedHTML = await this.embedResources(processedHTML);
-
-            } else {
-
-                this.log('warning', '⚠️ Kaynak klasörü yok, sadece HTML işleniyor');
-
-            }
-
- 
-
-            // Inject Surgical Mode V10
-
-            this.updateProgress(70, 'Surgical Mode V10 enjekte ediliyor...');
-
-            processedHTML = this.injectSurgicalMode(processedHTML);
-
- 
-
-            // Add clean CSS to main HTML
-
-            this.updateProgress(90, 'Temizlik CSS\'i ekleniyor...');
-
-            processedHTML = this.addCleanCSS(processedHTML);
-
- 
-
-            this.convertedHTML = processedHTML;
-
-            this.updateProgress(100, 'Tamamlandı! ✅');
-
- 
-
-            setTimeout(() => {
-
-                this.showProgress(false);
-
-                this.showDownload(true);
-
-                this.log('success', '✅ Dönüştürme başarıyla tamamlandı!');
-
-            }, 500);
-
- 
+            this.convertedHTML = content;
+            this.updateProgress(100, 'Tamamlandı!');
+            this.log('success', 'Dönüştürme ve yamalama başarıyla tamamlandı!');
+            this.showDownload(true);
 
         } catch (error) {
-
-            this.log('error', `❌ Hata: ${error.message}`);
-
-            this.showProgress(false);
-
+            console.error(error);
+            this.log('error', `Hata: ${error.message}`);
         }
-
     }
 
- 
-
-    async embedResources(htmlContent) {
-
-        const embedCount = { count: 0 };
-
-        this.log('info', `📦 ${this.resourceFiles.length} dosya işlenecek...`);
-
- 
-
-        for (const file of this.resourceFiles) {
-
-            try {
-
-                const fileName = file.name;
-
-                const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-
- 
-
-                // Check if file is used in HTML
-
-                if (!htmlContent.includes(fileName)) {
-
-                    continue;
-
-                }
-
- 
-
-                this.log('info', `  → ${fileName} gömülüyor...`);
-
- 
-
-                if (fileExt === '.css') {
-
-                    // Embed CSS inline
-
-                    const cssContent = await this.readFileAsText(file);
-
-                    const styleTag = `<style data-embedded-from="${fileName}">\n${cssContent}\n</style>`;
-
- 
-
-                    // Replace link tag with style tag
-
-                    const linkPattern = new RegExp(`<link[^>]*href=["'][^"']*${fileName}["'][^>]*>`, 'gi');
-
-                    htmlContent = htmlContent.replace(linkPattern, styleTag);
-
-                    embedCount.count++;
-
- 
-
-                } else if (fileExt === '.js') {
-
-                    // Embed JS inline
-
-                    const jsContent = await this.readFileAsText(file);
-
-                    const scriptTag = `<script data-embedded-from="${fileName}">\n${jsContent}\n</script>`;
-
- 
-
-                    // Replace script tag
-
-                    const scriptPattern = new RegExp(`<script[^>]*src=["'][^"']*${fileName}["'][^>]*></script>`, 'gi');
-
-                    htmlContent = htmlContent.replace(scriptPattern, scriptTag);
-
-                    embedCount.count++;
-
- 
-
-                } else {
-
-                    // Embed as base64 (images, fonts, etc.)
-
-                    const base64Data = await this.readFileAsBase64(file);
-
-                    const mimeType = this.getMimeType(fileExt);
-
-                    const dataUrl = `data:${mimeType};base64,${base64Data}`;
-
- 
-
-                    // Replace all occurrences of the file path
-
-                    const patterns = [
-
-                        new RegExp(`src=["'][^"']*${fileName}["']`, 'gi'),
-
-                        new RegExp(`href=["'][^"']*${fileName}["']`, 'gi')
-
-                    ];
-
- 
-
-                    patterns.forEach(pattern => {
-
-                        htmlContent = htmlContent.replace(pattern, (match) => {
-
-                            return match.replace(/["'][^"']*["']/, `"${dataUrl}"`);
-
-                        });
-
-                    });
-
-                    embedCount.count++;
-
-                }
-
- 
-
-            } catch (error) {
-
-                this.log('error', `  ✗ ${file.name}: ${error.message}`);
-
-            }
-
-        }
-
- 
-
-        this.log('success', `✓ ${embedCount.count} dosya başarıyla gömüldü`);
-
-        return htmlContent;
-
-    }
-
- 
-
-    injectSurgicalMode(htmlContent) {
-
-        this.log('info', '💉 Base64 iframe\'ler aranıyor...');
-
- 
-
+    // Python'daki V10 Logic'in JS Versiyonu
+    applyNotebookFixes(content) {
+        // Iframe Base64 pattern'i
         const pattern = /(src="data:text\/html;base64,)([^"]+)"/g;
+        let matchFound = false;
 
-        let injectionCount = 0;
+        // V10 Final Payload (JS + CSS)
+        const injectionScript = `
+        <script>
+        (function() {
+            console.log("🌍 V10: Universal Constraint (Web) Aktif");
 
- 
-
-        htmlContent = htmlContent.replace(pattern, (match, prefix, base64Data) => {
-
-            try {
-
-                // Decode base64
-
-                const decodedHTML = atob(base64Data);
-
- 
-
-                // Get Surgical Mode script
-
-                const surgicalScript = this.getSurgicalModeScript();
-
- 
-
-                // Inject after <html> tag or at the beginning
-
-                let newHTML;
-
-                if (decodedHTML.includes('<html')) {
-
-                    newHTML = decodedHTML.replace(/(<html[^>]*>)/i, `$1${surgicalScript}`);
-
-                } else {
-
-                    newHTML = surgicalScript + decodedHTML;
-
+            const styles = \`
+                /* HER ŞEYE UYGULANACAK KURAL */
+                * {
+                    max-width: 100vw !important;
+                    box-sizing: border-box !important;
                 }
 
- 
+                /* Scrollbar'ı çizimden kaldır */
+                ::-webkit-scrollbar {
+                    width: 0px !important;
+                    height: 0px !important;
+                    background: transparent !important;
+                    display: none !important;
+                }
+                
+                ::-webkit-scrollbar-track { background: transparent !important; }
+                ::-webkit-scrollbar-thumb { background: transparent !important; display: none !important; }
 
-                // Encode back to base64
+                /* Firefox vb. için */
+                html, body {
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                    overflow-x: hidden !important;
+                    width: 100% !important;
+                    position: relative !important;
+                }
 
-                const newBase64 = btoa(unescape(encodeURIComponent(newHTML)));
+                /* İçerik genişliği */
+                .main-content, main, mat-card {
+                    width: 100% !important;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                }
+                
+                /* BUTON GİZLEME (Cerrah Modu) */
+                button[aria-label*="Açıkla"], 
+                button[mattooltip*="Açıkla"],
+                button:has(span:contains("Açıkla")) {
+                    display: none !important;
+                }
+            \`;
 
-                injectionCount++;
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = styles;
+            document.head.appendChild(styleSheet);
 
- 
+            function constrainElements(root) {
+                const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+                while(walker.nextNode()) {
+                    const node = walker.currentNode;
+                    
+                    // Buton Gizleme
+                    if (node.tagName === 'BUTTON') {
+                        const txt = (node.textContent || "").toLowerCase();
+                        const aria = (node.getAttribute('aria-label') || "").toLowerCase();
+                        if ((txt.includes("açıkla") || aria.includes("açıkla")) && 
+                            !(txt.includes("önceki") || txt.includes("sonraki"))) {
+                            node.style.display = 'none';
+                        }
+                    }
 
-                return `${prefix}${newBase64}"`;
+                    // Taşma Kontrolü
+                    if (node.scrollWidth > window.innerWidth) {
+                        node.style.setProperty('max-width', '100%', 'important');
+                        node.style.setProperty('overflow-x', 'hidden', 'important');
+                    }
 
- 
-
-            } catch (error) {
-
-                this.log('error', `  ✗ Iframe enjeksiyon hatası: ${error.message}`);
-
-                return match;
-
+                    // Shadow DOM
+                    if (node.shadowRoot) {
+                        if (!node.shadowRoot.querySelector('style[data-v10]')) {
+                            const s = document.createElement('style');
+                            s.textContent = styles;
+                            s.setAttribute('data-v10', 'true');
+                            node.shadowRoot.appendChild(s);
+                        }
+                        constrainElements(node.shadowRoot);
+                    }
+                }
             }
 
+            const observer = new MutationObserver(() => constrainElements(document.body));
+            observer.observe(document.body, { childList: true, subtree: true });
+            
+            window.addEventListener('resize', () => constrainElements(document.body));
+            setTimeout(() => constrainElements(document.body), 500);
+        })();
+        <\/script>
+        `;
+
+        // Replace işlemi
+        const fixedContent = content.replace(pattern, (match, prefix, b64Data) => {
+            try {
+                matchFound = true;
+                // 1. Kod Çöz (UTF-8 destekli)
+                let decodedHtml = this.b64DecodeUnicode(b64Data);
+                
+                this.log('process', 'Base64 Iframe bulundu ve şifresi çözüldü.');
+
+                // 2. Enjekte Et
+                if (decodedHtml.includes('<html')) {
+                    decodedHtml = decodedHtml.replace(/(<html[^>]*>)/, '$1' + injectionScript);
+                } else {
+                    decodedHtml = injectionScript + decodedHtml;
+                }
+
+                // 3. Tekrar Şifrele (UTF-8 destekli)
+                const reEncoded = this.b64EncodeUnicode(decodedHtml);
+                
+                this.log('success', 'V10 yaması iframe içine başarıyla gömüldü.');
+                return `${prefix}${reEncoded}"`;
+
+            } catch (e) {
+                this.log('error', 'Base64 işleme hatası: ' + e.message);
+                return match; // Hata olursa orijinali döndür
+            }
         });
 
- 
-
-        if (injectionCount > 0) {
-
-            this.log('success', `✓ ${injectionCount} iframe'e Surgical Mode enjekte edildi`);
-
-        } else {
-
-            this.log('warning', '! Base64 iframe bulunamadı (normal HTML olabilir)');
-
+        if (!matchFound) {
+            this.log('warning', 'Uyarı: Base64 iframe yapısı bulunamadı. Dosya formatı farklı olabilir.');
         }
 
- 
-
-        return htmlContent;
-
+        return fixedContent;
     }
 
- 
-
-    getSurgicalModeScript() {
-
-        return `
-
-<script>
-
-(function() {
-
-    console.log("⚕️ SURGICAL MODE V10: Hassas Temizlik + Ekrana Sığma Aktif ⚕️");
-
- 
-
-    // 1. EVRENSEL CSS (Ekrana Sığma + Buton Gizleme)
-
-    const universalCSS = \`
-
-        /* HER ŞEYE UYGULANACAK KURAL - Ekrana Sığma */
-
-        * {
-
-            max-width: 100vw !important;
-
-            box-sizing: border-box !important;
-
-        }
-
- 
-
-        /* Scrollbar'ı tamamen gizle */
-
-        ::-webkit-scrollbar {
-
-            width: 0px !important;
-
-            height: 0px !important;
-
-            background: transparent !important;
-
-            display: none !important;
-
-        }
-
- 
-
-        ::-webkit-scrollbar-track {
-
-            background: transparent !important;
-
-        }
-
- 
-
-        ::-webkit-scrollbar-thumb {
-
-            background: transparent !important;
-
-            display: none !important;
-
-        }
-
- 
-
-        /* Firefox ve diğer tarayıcılar için */
-
-        html, body {
-
-            scrollbar-width: none !important;
-
-            -ms-overflow-style: none !important;
-
-            overflow-x: hidden !important;
-
-            width: 100% !important;
-
-            position: relative !important;
-
-        }
-
- 
-
-        /* İçerik tam genişlik */
-
-        .main-content, main, mat-card {
-
-            width: 100% !important;
-
-            margin-left: 0 !important;
-
-            margin-right: 0 !important;
-
-        }
-
- 
-
-        /* AÇIKLA BUTONUNU GİZLE */
-
-        button[aria-label*="Açıkla"],
-
-        button[mattooltip*="Açıkla"],
-
-        button[mattooltip*="açıkla"],
-
-        mat-icon[data-mat-icon-name="spark"],
-
-        mat-icon:contains("spark"),
-
-        mat-icon:contains("auto_awesome") {
-
-            display: none !important;
-
-            visibility: hidden !important;
-
-            opacity: 0 !important;
-
-            pointer-events: none !important;
-
-            position: absolute !important;
-
-        }
-
-    \`;
-
- 
-
-    const styleSheet = document.createElement('style');
-
-    styleSheet.textContent = universalCSS;
-
-    document.head.appendChild(styleSheet);
-
- 
-
-    // 2. HASSAS HEDEFLEME + EKRANA SIĞDIRMA FONKSİYONU
-
-    function constrainAndClean(node) {
-
-        if (node.nodeType !== 1) return;
-
- 
-
-        // A. AÇIKLA BUTONU GİZLEME
-
-        if (node.tagName === 'BUTTON') {
-
-            const text = (node.textContent || "").toLowerCase().trim();
-
-            const aria = (node.getAttribute('aria-label') || "").toLowerCase();
-
-            const tooltip = (node.getAttribute('mattooltip') || "").toLowerCase();
-
- 
-
-            const isTarget = text.includes("açıkla") || aria.includes("açıkla") || tooltip.includes("açıkla");
-
-            const isSafe = text.includes("önceki") || text.includes("sonraki") ||
-
-                           text.includes("previous") || text.includes("next") ||
-
-                           aria.includes("previous") || aria.includes("next");
-
- 
-
-            if (isTarget && !isSafe) {
-
-                node.style.display = 'none';
-
-                node.style.visibility = 'hidden';
-
-                node.setAttribute('hidden', 'true');
-
+    async embedResources(html) {
+        // Burası standart dosya gömme işlemleri (resim, css vs.)
+        // Sizin önceki kodunuzdaki logic benzeri çalışır ama basitleştirilmiş hali:
+        let processed = html;
+        
+        for (const file of this.resourceFiles) {
+            const fileName = file.name;
+            const dataUrl = await this.readFileAsDataURL(file);
+            
+            // Link/Script değişimleri
+            if (fileName.endsWith('.css')) {
+                processed = processed.replace(
+                    new RegExp(`<link[^>]*href=["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["'][^>]*>`, 'g'),
+                    `<style>/* Injected: ${fileName} */ @import url('${dataUrl}');</style>`
+                );
+            } else if (fileName.endsWith('.js')) {
+                processed = processed.replace(
+                    new RegExp(`<script[^>]*src=["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["'][^>]*>.*?<\/script>`, 'g'),
+                    `<script src="${dataUrl}"></script>`
+                );
+            } else {
+                // Resimler vb.
+                processed = processed.replace(
+                    new RegExp(`["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["']`, 'g'),
+                    `"${dataUrl}"`
+                );
             }
-
+            this.log('info', `Gömüldü: ${fileName}`);
         }
-
- 
-
-        // B. EKRANA SIĞDIRMA (Taşan elementleri daralt)
-
-        if (node.scrollWidth > window.innerWidth) {
-
-            node.style.setProperty('max-width', '100%', 'important');
-
-            node.style.setProperty('overflow-x', 'hidden', 'important');
-
-        }
-
+        return processed;
     }
 
- 
-
-    // 3. TARAMA DÖNGÜSÜ (Shadow DOM + CSS Enjeksiyonu)
-
-    function scan(root) {
-
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-
-        while(walker.nextNode()) {
-
-            const node = walker.currentNode;
-
-            constrainAndClean(node);
-
- 
-
-            // Shadow DOM içine CSS enjekte et
-
-            if (node.shadowRoot) {
-
-                if (!node.shadowRoot.querySelector('style[data-surgical-v10]')) {
-
-                    const s = document.createElement('style');
-
-                    s.textContent = universalCSS;
-
-                    s.setAttribute('data-surgical-v10', 'true');
-
-                    node.shadowRoot.appendChild(s);
-
-                }
-
-                scan(node.shadowRoot);
-
-            }
-
-        }
-
+    readFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsText(file);
+        });
     }
 
- 
-
-    // 4. TIKLAMA TAKİBİ
-
-    document.addEventListener('click', (e) => {
-
-        let count = 0;
-
-        const int = setInterval(() => {
-
-            scan(document.body);
-
-            count++;
-
-            if(count > 20) clearInterval(int);
-
-        }, 50);
-
-    }, true);
-
- 
-
-    // 5. SÜREKLİ GÖZLEM (MutationObserver)
-
-    const observer = new MutationObserver((mutations) => {
-
-        scan(document.body);
-
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
- 
-
-    // 6. PENCERE BOYUTU DEĞİŞİNCE TEKRAR KONTROL
-
-    window.addEventListener('resize', () => {
-
-        scan(document.body);
-
-    });
-
- 
-
-    // 7. BAŞLANGIÇ TARAMA
-
-    scan(document.body);
-
- 
-
-    // 8. SAYFA TAM YÜKLENDİKTEN SONRA SON VURUŞ
-
-    setTimeout(() => {
-
-        document.body.style.overflowX = 'hidden';
-
-        document.documentElement.style.overflowX = 'hidden';
-
-        scan(document.body);
-
-        console.log("✅ Surgical Mode V10 tamamlandı - Ekran sığma garantili");
-
-    }, 1000);
-
- 
-
-})();
-
-</script>
-
-`;
-
+    readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
     }
-
- 
-
-    addCleanCSS(htmlContent) {
-
-        // Add minimal clean CSS to main HTML
-
-        const cleanCSS = `
-
-<style id="main-clean-style">
-
-/* Scrollbar gizle */
-
-::-webkit-scrollbar {
-
-    display: none !important;
-
-}
-
- 
-
-* {
-
-    scrollbar-width: none !important;
-
-    -ms-overflow-style: none !important;
-
-}
-
-</style>`;
-
- 
-
-        // Inject before </head> or </body>
-
-        if (htmlContent.includes('</head>')) {
-
-            htmlContent = htmlContent.replace('</head>', cleanCSS + '\n</head>');
-
-        } else if (htmlContent.includes('</body>')) {
-
-            htmlContent = htmlContent.replace('</body>', cleanCSS + '\n</body>');
-
-        } else {
-
-            htmlContent += cleanCSS;
-
-        }
-
- 
-
-        return htmlContent;
-
-    }
-
- 
 
     download() {
-
-        if (!this.convertedHTML) {
-
-            this.log('error', '❌ Dönüştürülmüş HTML bulunamadı');
-
-            return;
-
-        }
-
- 
-
-        const originalName = this.htmlFile.name.replace('.html', '');
-
-        const newFileName = `${originalName}_Tek_Dosya.html`;
-
- 
-
-        const blob = new Blob([this.convertedHTML], { type: 'text/html;charset=utf-8' });
-
+        if (!this.convertedHTML) return;
+        
+        const blob = new Blob([this.convertedHTML], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement('a');
-
+        
+        const originalName = this.htmlFile.name.replace('.html', '');
         a.href = url;
-
-        a.download = newFileName;
-
+        a.download = `${originalName}_Tek_Dosya_V10.html`;
         document.body.appendChild(a);
-
         a.click();
-
         document.body.removeChild(a);
-
         URL.revokeObjectURL(url);
-
- 
-
-        this.log('success', `✅ Dosya indirildi: ${newFileName}`);
-
     }
-
- 
-
-    // Utility functions
-
-    async readFileAsText(file) {
-
-        return new Promise((resolve, reject) => {
-
-            const reader = new FileReader();
-
-            reader.onload = (e) => resolve(e.target.result);
-
-            reader.onerror = (e) => reject(new Error('Dosya okunamadı'));
-
-            reader.readAsText(file);
-
-        });
-
-    }
-
- 
-
-    async readFileAsBase64(file) {
-
-        return new Promise((resolve, reject) => {
-
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-
-                const base64 = e.target.result.split(',')[1];
-
-                resolve(base64);
-
-            };
-
-            reader.onerror = (e) => reject(new Error('Dosya okunamadı'));
-
-            reader.readAsDataURL(file);
-
-        });
-
-    }
-
- 
-
-    getMimeType(ext) {
-
-        const mimeTypes = {
-
-            '.svg': 'image/svg+xml',
-
-            '.jpg': 'image/jpeg',
-
-            '.jpeg': 'image/jpeg',
-
-            '.png': 'image/png',
-
-            '.gif': 'image/gif',
-
-            '.webp': 'image/webp',
-
-            '.woff': 'font/woff',
-
-            '.woff2': 'font/woff2',
-
-            '.ttf': 'font/ttf',
-
-            '.eot': 'application/vnd.ms-fontobject',
-
-            '.otf': 'font/otf',
-
-            '.mp4': 'video/mp4',
-
-            '.webm': 'video/webm',
-
-            '.mp3': 'audio/mpeg',
-
-            '.wav': 'audio/wav',
-
-            '.pdf': 'application/pdf',
-
-            '.json': 'application/json',
-
-            '.xml': 'application/xml'
-
-        };
-
-        return mimeTypes[ext] || 'application/octet-stream';
-
-    }
-
- 
-
-    formatBytes(bytes) {
-
-        if (bytes === 0) return '0 Bytes';
-
-        const k = 1024;
-
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-
-    }
-
- 
 
     showProgress(show) {
-
-        document.getElementById('progressSection').style.display = show ? 'block' : 'none';
-
-        document.getElementById('logSection').style.display = show ? 'block' : 'none';
-
+        const section = document.getElementById('progressSection');
+        if(section) section.style.display = show ? 'block' : 'none';
     }
-
- 
 
     updateProgress(percent, text) {
-
-        document.getElementById('progressFill').style.width = percent + '%';
-
-        document.getElementById('progressText').textContent = text;
-
+        const fill = document.getElementById('progressFill');
+        const txt = document.getElementById('progressText');
+        if(fill) fill.style.width = percent + '%';
+        if(txt) txt.textContent = text;
     }
-
- 
 
     showDownload(show) {
-
-        document.getElementById('downloadSection').style.display = show ? 'block' : 'none';
-
+        const section = document.getElementById('downloadSection');
+        if(section) section.style.display = show ? 'block' : 'none';
     }
-
- 
 
     log(type, message) {
-
-        const logSection = document.getElementById('logSection');
-
-        const logContent = document.getElementById('logContent');
-
- 
-
-        logSection.style.display = 'block';
-
- 
-
+        const content = document.getElementById('logContent');
+        if (!content) return;
+        
         const entry = document.createElement('div');
-
-        entry.className = `log-entry ${type}`;
-
-        entry.textContent = message;
-
-        logContent.appendChild(entry);
-
- 
-
-        // Auto scroll to bottom
-
-        logContent.scrollTop = logContent.scrollHeight;
-
+        entry.className = `log-entry log-${type}`;
+        
+        const time = new Date().toLocaleTimeString();
+        entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+        
+        content.appendChild(entry);
+        content.scrollTop = content.scrollHeight;
     }
 
+    escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
 }
 
- 
-
-// Initialize when DOM is ready
-
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-
     new NotebookLMConverter();
-
 });
