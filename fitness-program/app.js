@@ -91,8 +91,6 @@ function switchTab(tabId) {
 
 // ==================== HAZIR PROGRAMLAR ====================
 
-let presetProgramsListenerAdded = false;
-
 function renderPresetPrograms() {
     const container = document.getElementById('presetProgramsGrid');
     if (!container) {
@@ -108,22 +106,6 @@ function renderPresetPrograms() {
     });
 
     console.log('Preset programlar render edildi, toplam:', PRESET_PROGRAMS.length);
-
-    // Event delegation - container'a sadece BİR KERE listener ekle
-    if (!presetProgramsListenerAdded) {
-        container.addEventListener('click', function(e) {
-            console.log('Container tıklandı, hedef:', e.target);
-            const btn = e.target.closest('.btn-preset-select');
-            console.log('Buton bulundu:', btn);
-            if (btn) {
-                const programId = btn.getAttribute('data-program-id');
-                console.log('Program ID:', programId);
-                loadPresetProgram(programId);
-            }
-        });
-        presetProgramsListenerAdded = true;
-        console.log('Event listener eklendi');
-    }
 }
 
 function createPresetProgramCard(program) {
@@ -139,6 +121,10 @@ function createPresetProgramCard(program) {
     }
 
     card.style.background = gradient;
+
+    // Kartın tamamını tıklanabilir yap - onclick ile
+    card.setAttribute('onclick', `selectPresetProgram('${program.id}')`);
+    card.style.cursor = 'pointer';
 
     // HTML içeriğini oluştur
     const cardContent = `
@@ -169,7 +155,7 @@ function createPresetProgramCard(program) {
         </div>
 
         <div class="preset-program-action">
-            <button class="btn btn-preset-select" data-program-id="${program.id}">
+            <button class="btn btn-preset-select">
                 🚀 Bu Programı Seç
             </button>
         </div>
@@ -180,8 +166,8 @@ function createPresetProgramCard(program) {
     return card;
 }
 
-// loadPresetProgram artık global değil, normal fonksiyon
-function loadPresetProgram(programId) {
+// GLOBAL fonksiyon - HTML onclick'ten çağrılabilir
+window.selectPresetProgram = function(programId) {
     console.log('loadPresetProgram çağrıldı, programId:', programId);
 
     const program = PRESET_PROGRAMS.find(p => p.id === programId);
