@@ -309,6 +309,12 @@
           "baslik": "Yapılacaklar Listesi",
           "aciklama": "Gelişmiş özellikli responsive todo uygulaması",
           "ikon": "fas fa-tasks"
+        },
+        {
+          "url": "scorm-converter/index.html",
+          "baslik": "SCORM 1.2 Paket Dönüştürücü",
+          "aciklama": "HTML içeriklerini SCORM 1.2 paketine dönüştürme aracı",
+          "ikon": "fas fa-box"
         }
       ]
     },
