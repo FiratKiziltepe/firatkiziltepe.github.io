@@ -113,12 +113,26 @@ function renderPresetPrograms() {
     if (!presetProgramsListenerAdded) {
         container.addEventListener('click', function(e) {
             console.log('Container tıklandı, hedef:', e.target);
+
+            // Buton veya butona yakın bir element tıklandı mı?
             const btn = e.target.closest('.btn-preset-select');
-            console.log('Buton bulundu:', btn);
+
+            // Eğer buton yoksa, kart tıklandı mı kontrol et
+            const card = e.target.closest('.preset-program-card');
+
             if (btn) {
+                // Butona tıklandı
                 const programId = btn.getAttribute('data-program-id');
-                console.log('Program ID:', programId);
+                console.log('Buton tıklandı, Program ID:', programId);
                 loadPresetProgram(programId);
+            } else if (card) {
+                // Karta tıklandı, kartın içindeki butonu bul
+                const cardBtn = card.querySelector('.btn-preset-select');
+                if (cardBtn) {
+                    const programId = cardBtn.getAttribute('data-program-id');
+                    console.log('Kart tıklandı, Program ID:', programId);
+                    loadPresetProgram(programId);
+                }
             }
         });
         presetProgramsListenerAdded = true;
