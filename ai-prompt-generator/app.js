@@ -1075,37 +1075,41 @@ const Templates = {
 };
 
 // ==========================================
-// PROMPT GENERATORS (5E Model)
+// PROMPT GENERATORS
 // ==========================================
 
 const PromptGenerators = {
     image: function(formData) {
         let prompt = `# GÖRSEL OLUŞTURMA PROMPTU\n\n`;
-        prompt += `## 🎯 ENGAGE (Dikkat Çekme)\n`;
+
+        prompt += `## 🎯 Genel Tanım\n`;
         prompt += `Bir AI görsel oluşturma modeli kullanarak aşağıdaki detaylara sahip profesyonel bir görsel oluştur:\n\n`;
 
-        prompt += `## 🔍 EXPLORE (Keşfetme)\n`;
-        prompt += `### Ana Konu/Obje:\n${formData.subject || 'Belirtilmedi'}\n\n`;
-        prompt += `### Sanat Stili:\n${formData.style || 'Belirtilmedi'}\n\n`;
+        prompt += `## 🖼️ Ana Özellikler\n`;
+        prompt += `**Konu/Obje:** ${formData.subject || 'Belirtilmedi'}\n`;
+        prompt += `**Sanat Stili:** ${formData.style || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 📖 EXPLAIN (Açıklama)\n`;
-        if (formData.mood) prompt += `### Atmosfer/Ruh Hali:\n${formData.mood}\n\n`;
-        if (formData.colors) prompt += `### Renk Paleti:\n${formData.colors}\n\n`;
-        if (formData.lighting) prompt += `### Işıklandırma:\n${formData.lighting}\n\n`;
-        if (formData.perspective) prompt += `### Bakış Açısı:\n${formData.perspective}\n\n`;
+        if (formData.mood || formData.colors || formData.lighting || formData.perspective) {
+            prompt += `## 🎨 Görsel Detaylar\n`;
+            if (formData.mood) prompt += `**Atmosfer/Ruh Hali:** ${formData.mood}\n`;
+            if (formData.colors) prompt += `**Renk Paleti:** ${formData.colors}\n`;
+            if (formData.lighting) prompt += `**Işıklandırma:** ${formData.lighting}\n`;
+            if (formData.perspective) prompt += `**Bakış Açısı:** ${formData.perspective}\n`;
+            prompt += `\n`;
+        }
 
-        prompt += `## 🎨 ELABORATE (Derinleştirme)\n`;
-        if (formData.details) prompt += `### Ek Detaylar:\n${formData.details}\n\n`;
+        if (formData.details) {
+            prompt += `## ✨ Ek Detaylar\n${formData.details}\n\n`;
+        }
 
-        prompt += `## ✅ EVALUATE (Değerlendirme)\n`;
-        prompt += `### Kalite Kriterleri:\n`;
+        if (formData.exclude) {
+            prompt += `## ❌ İstenmeyen Öğeler\n${formData.exclude}\n\n`;
+        }
+
+        prompt += `## ✅ Kalite Standartları\n`;
         prompt += `- Yüksek çözünürlük ve detay seviyesi\n`;
         prompt += `- Belirtilen stil ve atmosfere sadakat\n`;
         prompt += `- Kompozisyon dengesi ve görsel çekicilik\n\n`;
-
-        if (formData.exclude) {
-            prompt += `### ❌ İstenmeyen Öğeler:\n${formData.exclude}\n\n`;
-        }
 
         prompt += `---\n### 💡 Not:\nBu prompt, profesyonel görsel oluşturma araçlarında (DALL-E, Midjourney, Stable Diffusion vb.) kullanılmak üzere optimize edilmiştir.`;
 
@@ -1115,20 +1119,13 @@ const PromptGenerators = {
     video: function(formData) {
         let prompt = `# JSON VİDEO PROMPT YAPISI\n\n`;
 
-        prompt += `## 🎯 ENGAGE (Dikkat Çekme)\n`;
-        prompt += `Video Başlığı: ${formData.title || 'Belirtilmedi'}\n`;
-        prompt += `Hedef Kitle: ${formData.target_audience || 'Belirtilmedi'}\n`;
-        prompt += `Video Amacı: ${formData.purpose || 'Belirtilmedi'}\n\n`;
+        prompt += `## 🎯 Video Bilgileri\n`;
+        prompt += `**Başlık:** ${formData.title || 'Belirtilmedi'}\n`;
+        prompt += `**Hedef Kitle:** ${formData.target_audience || 'Belirtilmedi'}\n`;
+        prompt += `**Amaç:** ${formData.purpose || 'Belirtilmedi'}\n`;
+        prompt += `**Süre:** ${formData.duration || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 🔍 EXPLORE (Video Yapısı)\n`;
-        prompt += `### Genel Özellikler:\n`;
-        prompt += `- Süre: ${formData.duration || 'Belirtilmedi'}\n`;
-        if (formData.music_style) prompt += `- Müzik Tarzı: ${formData.music_style}\n`;
-        if (formData.transitions) prompt += `- Geçiş Efektleri: ${formData.transitions}\n`;
-        prompt += `\n`;
-
-        prompt += `## 📖 EXPLAIN (Sahne Detayları)\n`;
-        prompt += `### Sahneler:\n`;
+        prompt += `## 🎬 Sahne Yapısı\n`;
         if (formData.scenes && formData.scenes.length > 0) {
             formData.scenes.forEach((scene, index) => {
                 prompt += `${index + 1}. ${scene}\n`;
@@ -1138,16 +1135,19 @@ const PromptGenerators = {
         }
         prompt += `\n`;
 
-        if (formData.voiceover) {
-            prompt += `## 🎙️ ELABORATE (Seslendirme)\n`;
-            prompt += `### Seslendirme Metni:\n${formData.voiceover}\n\n`;
+        if (formData.voiceover || formData.music_style || formData.transitions) {
+            prompt += `## 🎵 Ses ve Müzik\n`;
+            if (formData.voiceover) prompt += `**Seslendirme Metni:**\n${formData.voiceover}\n\n`;
+            if (formData.music_style) prompt += `**Müzik Tarzı:** ${formData.music_style}\n`;
+            if (formData.transitions) prompt += `**Geçiş Efektleri:** ${formData.transitions}\n`;
+            prompt += `\n`;
         }
 
         if (formData.branding) {
-            prompt += `### Marka Öğeleri:\n${formData.branding}\n\n`;
+            prompt += `## 🏷️ Marka Öğeleri\n${formData.branding}\n\n`;
         }
 
-        prompt += `## ✅ EVALUATE (Başarı Kriterleri)\n`;
+        prompt += `## ✅ Başarı Kriterleri\n`;
         prompt += `- Hedef kitleye uygunluk\n`;
         prompt += `- Mesajın net iletilmesi\n`;
         prompt += `- Görsel ve işitsel tutarlılık\n`;
@@ -1161,52 +1161,53 @@ const PromptGenerators = {
     summary: function(formData) {
         let prompt = `# AKADEMİK MAKALE ÖZETLEME PROMPTU\n\n`;
 
-        prompt += `## 🎯 ENGAGE (Giriş)\n`;
+        prompt += `## 📚 Makale Bilgileri\n`;
         prompt += `Aşağıdaki akademik makaleyi kapsamlı bir şekilde özetle:\n\n`;
         prompt += `**Makale Başlığı:** ${formData.article_title || 'Belirtilmedi'}\n`;
         prompt += `**Makale Türü:** ${formData.article_type || 'Belirtilmedi'}\n`;
         prompt += `**Araştırma Alanı:** ${formData.research_field || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 🔍 EXPLORE (Araştırma Sorusu ve Metodoloji)\n`;
-        prompt += `### Araştırma Sorusu/Hipotez:\n${formData.research_question || 'Belirtilmedi'}\n\n`;
+        prompt += `## 🎯 Araştırma Sorusu/Hipotez\n`;
+        prompt += `${formData.research_question || 'Belirtilmedi'}\n\n`;
 
-        prompt += `### Metodoloji:\n`;
+        prompt += `## 🔬 Metodoloji\n`;
         prompt += `${formData.methodology || 'Belirtilmedi'}\n\n`;
         if (formData.sample_size) prompt += `**Örneklem:** ${formData.sample_size}\n`;
         if (formData.statistical_tests) prompt += `**İstatistiksel Testler:** ${formData.statistical_tests}\n`;
-        prompt += `\n`;
+        if (formData.sample_size || formData.statistical_tests) prompt += `\n`;
 
-        prompt += `## 📖 EXPLAIN (Bulgular)\n`;
-        prompt += `### Ana Bulgular:\n${formData.key_findings || 'Belirtilmedi'}\n\n`;
+        prompt += `## 📊 Ana Bulgular\n`;
+        prompt += `${formData.key_findings || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 🎨 ELABORATE (Derinlemesine Analiz)\n`;
-        if (formData.limitations) {
-            prompt += `### Sınırlılıklar:\n${formData.limitations}\n\n`;
-        }
-
-        prompt += `### Literatürle İlişki:\n`;
+        prompt += `## 📖 Literatür Analizi\n`;
         prompt += `Bu makaleyi özetlerken:\n`;
         prompt += `- Bulguların mevcut literatürle örtüşen yönlerini belirt\n`;
         prompt += `- Literatürle çelişen veya yeni katkı sağlayan noktaları vurgula\n\n`;
 
-        if (formData.practical_implications) {
-            prompt += `### Pratik Uygulamalar:\n${formData.practical_implications}\n\n`;
+        if (formData.limitations) {
+            prompt += `## ⚠️ Sınırlılıklar\n`;
+            prompt += `${formData.limitations}\n\n`;
         }
 
-        prompt += `## ✅ EVALUATE (Değerlendirme ve Gelecek)\n`;
         if (formData.future_research) {
-            prompt += `### Gelecek Araştırma Önerileri:\n${formData.future_research}\n\n`;
+            prompt += `## 🔮 Gelecek Araştırma Önerileri\n`;
+            prompt += `${formData.future_research}\n\n`;
         }
 
-        prompt += `### Genel Değerlendirme:\n`;
-        prompt += `- Çalışmanın bilimsel katkısını değerlendir\n`;
-        prompt += `- Metodolojik güçlü ve zayıf yönlerini belirt\n`;
-        prompt += `- Bulguların güvenilirliğini yorumla\n\n`;
+        if (formData.practical_implications) {
+            prompt += `## 💡 Pratik Uygulamalar\n`;
+            prompt += `${formData.practical_implications}\n\n`;
+        }
 
-        prompt += `---\n### 📋 Özet Formatı:\n`;
-        prompt += `Lütfen özeti şu başlıklar altında yapılandır:\n`;
+        prompt += `## ✅ Değerlendirme Kriterleri\n`;
+        prompt += `Özette şunları değerlendir:\n`;
+        prompt += `- Çalışmanın bilimsel katkısı\n`;
+        prompt += `- Metodolojik güçlü ve zayıf yönleri\n`;
+        prompt += `- Bulguların güvenilirliği ve genellenebilirliği\n\n`;
+
+        prompt += `---\n### 📋 Beklenen Özet Yapısı:\n`;
         prompt += `1. Araştırma Sorusu/Hipotez\n`;
-        prompt += `2. Metodoloji (tasarım, örneklem, veri toplama, analiz teknikleri)\n`;
+        prompt += `2. Metodoloji (tasarım, örneklem, veri toplama, analiz teknikleri, istatistiksel testler)\n`;
         prompt += `3. Ana Bulgular\n`;
         prompt += `4. Literatürle Örtüşen ve Çelişen Noktalar\n`;
         prompt += `5. Sınırlılıklar\n`;
@@ -1219,7 +1220,7 @@ const PromptGenerators = {
     report: function(formData) {
         let prompt = `# RAPOR YAZMA PROMPTU\n\n`;
 
-        prompt += `## 🎯 ENGAGE (Giriş)\n`;
+        prompt += `## 📋 Rapor Bilgileri\n`;
         prompt += `Aşağıdaki bilgilere dayanarak profesyonel bir rapor hazırla:\n\n`;
         prompt += `**Rapor Başlığı:** ${formData.report_title || 'Belirtilmedi'}\n`;
         prompt += `**Rapor Türü:** ${formData.report_type || 'Belirtilmedi'}\n`;
@@ -1227,12 +1228,13 @@ const PromptGenerators = {
         if (formData.tone) prompt += `**Üslup:** ${formData.tone}\n`;
         prompt += `\n`;
 
-        prompt += `## 🔍 EXPLORE (Yönetici Özeti ve Bağlam)\n`;
-        prompt += `### Yönetici Özeti:\n${formData.executive_summary || 'Belirtilmedi'}\n\n`;
-        prompt += `### Arka Plan:\n${formData.background || 'Belirtilmedi'}\n\n`;
+        prompt += `## 📝 Yönetici Özeti\n`;
+        prompt += `${formData.executive_summary || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 📖 EXPLAIN (Amaç ve Metodoloji)\n`;
-        prompt += `### Amaç ve Hedefler:\n`;
+        prompt += `## 📖 Arka Plan/Bağlam\n`;
+        prompt += `${formData.background || 'Belirtilmedi'}\n\n`;
+
+        prompt += `## 🎯 Amaç ve Hedefler\n`;
         if (formData.objectives && formData.objectives.length > 0) {
             formData.objectives.forEach((obj, index) => {
                 prompt += `${index + 1}. ${obj}\n`;
@@ -1243,15 +1245,17 @@ const PromptGenerators = {
         prompt += `\n`;
 
         if (formData.methodology_report) {
-            prompt += `### Metodoloji/Yaklaşım:\n${formData.methodology_report}\n\n`;
+            prompt += `## 🔬 Metodoloji/Yaklaşım\n`;
+            prompt += `${formData.methodology_report}\n\n`;
         }
 
-        prompt += `## 🎨 ELABORATE (Bulgular ve Analiz)\n`;
-        prompt += `### Ana Veriler/Bulgular:\n${formData.key_data || 'Belirtilmedi'}\n\n`;
-        prompt += `### Analiz ve Yorumlama:\n${formData.analysis || 'Belirtilmedi'}\n\n`;
+        prompt += `## 📊 Ana Veriler ve Bulgular\n`;
+        prompt += `${formData.key_data || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## ✅ EVALUATE (Öneriler ve Sonuç)\n`;
-        prompt += `### Öneriler:\n`;
+        prompt += `## 🔍 Analiz ve Yorumlama\n`;
+        prompt += `${formData.analysis || 'Belirtilmedi'}\n\n`;
+
+        prompt += `## 💡 Öneriler\n`;
         if (formData.recommendations && formData.recommendations.length > 0) {
             formData.recommendations.forEach((rec, index) => {
                 prompt += `${index + 1}. ${rec}\n`;
@@ -1261,7 +1265,8 @@ const PromptGenerators = {
         }
         prompt += `\n`;
 
-        prompt += `### Sonuç:\n${formData.conclusion || 'Belirtilmedi'}\n\n`;
+        prompt += `## ✅ Sonuç\n`;
+        prompt += `${formData.conclusion || 'Belirtilmedi'}\n\n`;
 
         prompt += `---\n### 📋 Rapor Yapısı:\n`;
         prompt += `Lütfen raporu şu bölümlerle yapılandır:\n`;
@@ -1348,16 +1353,16 @@ const PromptGenerators = {
     html: function(formData) {
         let prompt = `# ETKİLEŞİMLİ HTML İÇERİK PROMPTU\n\n`;
 
-        prompt += `## 🎯 ENGAGE (Proje Tanımı)\n`;
+        prompt += `## 🎯 Proje Tanımı\n`;
         prompt += `Aşağıdaki özelliklere sahip etkileşimli bir HTML içeriği oluştur:\n\n`;
         prompt += `**Proje Başlığı:** ${formData.content_title || 'Belirtilmedi'}\n`;
         prompt += `**İçerik Türü:** ${formData.content_type || 'Belirtilmedi'}\n`;
         prompt += `**Hedef Platform:** ${formData.target_platform || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 🔍 EXPLORE (İçerik Açıklaması)\n`;
-        prompt += `### Detaylı Açıklama:\n${formData.content_description || 'Belirtilmedi'}\n\n`;
+        prompt += `## 📝 İçerik Açıklaması\n`;
+        prompt += `${formData.content_description || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 📖 EXPLAIN (Teknik Özellikler)\n`;
+        prompt += `## ⚙️ Teknik Özellikler\n`;
         prompt += `### İstenen Özellikler:\n`;
         if (formData.features && formData.features.length > 0) {
             formData.features.forEach((feature, index) => {
@@ -1379,20 +1384,21 @@ const PromptGenerators = {
         prompt += `\n`;
 
         if (formData.technologies) {
-            prompt += `### Tercih Edilen Teknolojiler:\n${formData.technologies}\n\n`;
+            prompt += `**Tercih Edilen Teknolojiler:** ${formData.technologies}\n\n`;
         }
 
-        prompt += `## 🎨 ELABORATE (Tasarım Detayları)\n`;
-        if (formData.design_style) prompt += `**Tasarım Stili:** ${formData.design_style}\n`;
-        if (formData.colors_html) prompt += `**Renk Şeması:** ${formData.colors_html}\n`;
-        prompt += `\n`;
+        if (formData.design_style || formData.colors_html) {
+            prompt += `## 🎨 Tasarım Detayları\n`;
+            if (formData.design_style) prompt += `**Tasarım Stili:** ${formData.design_style}\n`;
+            if (formData.colors_html) prompt += `**Renk Şeması:** ${formData.colors_html}\n`;
+            prompt += `\n`;
+        }
 
         if (formData.accessibility) {
-            prompt += `### Erişilebilirlik Gereksinimleri:\n${formData.accessibility}\n\n`;
+            prompt += `## ♿ Erişilebilirlik\n${formData.accessibility}\n\n`;
         }
 
-        prompt += `## ✅ EVALUATE (Başarı Kriterleri)\n`;
-        prompt += `### Kalite Standartları:\n`;
+        prompt += `## ✅ Kalite Standartları\n`;
         prompt += `- Responsive tasarım (tüm cihazlarda çalışmalı)\n`;
         prompt += `- Temiz ve okunabilir kod yapısı\n`;
         prompt += `- Kullanıcı dostu arayüz\n`;
@@ -1414,17 +1420,18 @@ const PromptGenerators = {
     other: function(formData) {
         let prompt = `# ${(formData.content_category || 'İÇERİK').toUpperCase()} OLUŞTURMA PROMPTU\n\n`;
 
-        prompt += `## 🎯 ENGAGE (Giriş)\n`;
+        prompt += `## 📋 İçerik Bilgileri\n`;
         prompt += `Aşağıdaki özelliklere sahip bir ${formData.content_category || 'içerik'} oluştur:\n\n`;
         prompt += `**Başlık/Konu:** ${formData.other_title || 'Belirtilmedi'}\n`;
         prompt += `**Hedef Kitle:** ${formData.target_audience_other || 'Belirtilmedi'}\n`;
-        prompt += `**Üslup/Ton:** ${formData.tone_other || 'Belirtilmedi'}\n\n`;
+        prompt += `**Üslup/Ton:** ${formData.tone_other || 'Belirtilmedi'}\n`;
+        if (formData.length_other) prompt += `**İçerik Uzunluğu:** ${formData.length_other}\n`;
+        prompt += `\n`;
 
-        prompt += `## 🔍 EXPLORE (Amaç ve Bağlam)\n`;
-        prompt += `### Amaç:\n${formData.purpose_other || 'Belirtilmedi'}\n\n`;
+        prompt += `## 🎯 Amaç\n`;
+        prompt += `${formData.purpose_other || 'Belirtilmedi'}\n\n`;
 
-        prompt += `## 📖 EXPLAIN (Ana Mesajlar)\n`;
-        prompt += `### İletilmesi Gereken Temel Mesajlar:\n`;
+        prompt += `## 💬 Ana Mesajlar\n`;
         if (formData.key_messages && formData.key_messages.length > 0) {
             formData.key_messages.forEach((message, index) => {
                 prompt += `${index + 1}. ${message}\n`;
@@ -1434,28 +1441,25 @@ const PromptGenerators = {
         }
         prompt += `\n`;
 
-        prompt += `## 🎨 ELABORATE (Detaylar ve Gereksinimler)\n`;
-        if (formData.length_other) {
-            prompt += `**İçerik Uzunluğu:** ${formData.length_other}\n\n`;
+        if (formData.special_requirements || formData.additional_context) {
+            prompt += `## 📝 Ek Detaylar\n`;
+            if (formData.special_requirements) {
+                prompt += `**Özel Gereksinimler:**\n${formData.special_requirements}\n\n`;
+            }
+            if (formData.additional_context) {
+                prompt += `**Ek Bağlam:**\n${formData.additional_context}\n\n`;
+            }
         }
 
-        if (formData.special_requirements) {
-            prompt += `### Özel Gereksinimler:\n${formData.special_requirements}\n\n`;
-        }
-
-        if (formData.additional_context) {
-            prompt += `### Ek Bağlam:\n${formData.additional_context}\n\n`;
-        }
-
-        prompt += `## ✅ EVALUATE (Sonuç ve CTA)\n`;
         if (formData.call_to_action) {
-            prompt += `**Harekete Geçirici Mesaj (CTA):** ${formData.call_to_action}\n\n`;
+            prompt += `## 📣 Harekete Geçirici Mesaj (CTA)\n`;
+            prompt += `${formData.call_to_action}\n\n`;
         }
 
-        prompt += `### Başarı Kriterleri:\n`;
+        prompt += `## ✅ Başarı Kriterleri\n`;
         prompt += `- Hedef kitleye uygun dil ve üslup\n`;
         prompt += `- Ana mesajların net iletilmesi\n`;
-        prompt += `- Belirtilen uzunluğa uygunluk\n`;
+        if (formData.length_other) prompt += `- Belirtilen uzunluğa uygunluk\n`;
         prompt += `- Özgün ve ilgi çekici içerik\n`;
         if (formData.call_to_action) prompt += `- Etkili CTA entegrasyonu\n`;
         prompt += `\n`;
