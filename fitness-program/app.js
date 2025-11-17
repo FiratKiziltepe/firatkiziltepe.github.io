@@ -892,6 +892,21 @@ function clearProgram() {
     }
 }
 
+// ==================== YAZDIRMA ====================
+
+function printProgram() {
+    const selectedExercises = Object.entries(appState.selectedExercises)
+        .filter(([id, data]) => data.selected);
+
+    if (selectedExercises.length === 0) {
+        showToast('Lütfen en az bir egzersiz seçin!', 'error');
+        return;
+    }
+
+    // Browser'ın yazdır penceresini aç
+    window.print();
+}
+
 // ==================== PDF OLUŞTURMA ====================
 
 function generatePDF() {
@@ -1279,12 +1294,12 @@ function setupEventListeners() {
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
 
     document.getElementById('saveProgram').addEventListener('click', saveProgram);
-    document.getElementById('downloadPDF').addEventListener('click', generatePDF);
+    document.getElementById('printProgram').addEventListener('click', printProgram);
     document.getElementById('clearProgram').addEventListener('click', clearProgram);
 
     // AI Asistan
     document.getElementById('saveApiSettings').addEventListener('click', saveApiSettings);
-    document.getElementById('generateAiProgram').addEventListener('click', generateAiProgram);
+    document.getElementById('startAiConversation').addEventListener('click', startAiConversation);
     document.getElementById('acceptAiProgram').addEventListener('click', acceptAiProgram);
 }
 
@@ -1307,6 +1322,9 @@ checkLocalStorageSupport();
 // ==================== AI ASISTAN ====================
 
 let aiSuggestedExerciseIds = [];
+let aiConversationHistory = [];
+let aiQuestionsAsked = 0;
+const MAX_AI_QUESTIONS = 3;
 
 // API ayarlarını kaydet
 function saveApiSettings() {
@@ -1335,10 +1353,9 @@ function loadApiSettings() {
     document.getElementById('geminiModel').value = model;
 }
 
-// AI program oluştur
-async function generateAiProgram() {
+// Sohbete başla
+async function startAiConversation() {
     const apiKey = localStorage.getItem('gemini_api_key');
-    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
     const userRequest = document.getElementById('aiUserRequest').value.trim();
 
     if (!apiKey) {
@@ -1351,12 +1368,176 @@ async function generateAiProgram() {
         return;
     }
 
-    // Loading göster
-    document.getElementById('aiLoadingIndicator').style.display = 'flex';
+    // Reset
+    aiConversationHistory = [];
+    aiQuestionsAsked = 0;
+    aiSuggestedExerciseIds = [];
+
+    // İlk mesajı ekle
+    aiConversationHistory.push({
+        role: 'user',
+        parts: [{ text: userRequest }]
+    });
+
+    // UI göster
+    document.getElementById('aiConversationSection').style.display = 'block';
     document.getElementById('aiResponseSection').style.display = 'none';
 
+    // Mesajı göster
+    addMessageToUI('user', userRequest);
+
+    // İlk soruyu sor
+    await askNextQuestion();
+}
+
+// Sonraki soruyu sor
+async function askNextQuestion() {
+    if (aiQuestionsAsked >= MAX_AI_QUESTIONS) {
+        // Yeterli bilgi toplandı, program oluştur
+        await generateFinalProgram();
+        return;
+    }
+
+    const apiKey = localStorage.getItem('gemini_api_key');
+    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+
+    document.getElementById('aiLoadingIndicator').style.display = 'flex';
+    document.getElementById('aiQuestionSection').style.display = 'none';
+
     try {
-        // Tüm egzersizlerin listesini hazırla
+        const prompt = `Sen bir fitness koçusun. Kullanıcıyla ${MAX_AI_QUESTIONS} soru-cevap yaparak detaylı bilgi toplayacaksın.
+
+Şu ana kadar toplanan bilgiler:
+${aiConversationHistory.map(msg => `${msg.role}: ${msg.parts[0].text}`).join('\n')}
+
+Soru ${aiQuestionsAsked + 1}/${MAX_AI_QUESTIONS}:
+
+Lütfen kullanıcıya detay öğrenmek için BİR soru sor ve 3 seçenek sun. Şu formatta yanıt ver:
+
+SORU: [Soru metni]
+A) [Seçenek 1]
+B) [Seçenek 2]
+C) [Seçenek 3]
+
+Sorular şunları kapsamalı:
+1. Fiziksel durum (yaş, kilo, boy, sağlık sorunları)
+2. Hedef ve motivasyon (kilo verme, kas yapma, dayanıklılık)
+3. Antrenman tercihleri (süre, zorluk seviyesi, odak bölgeler)
+
+Sadece yukarıdaki formatı kullan, başka açıklama yapma.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: aiConversationHistory.concat([{
+                    role: 'user',
+                    parts: [{ text: prompt }]
+                }])
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Hatası: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiResponse = data.candidates[0].content.parts[0].text;
+
+        // Soruyu parse et
+        const questionMatch = aiResponse.match(/SORU:\s*(.+)/);
+        const optionAMatch = aiResponse.match(/A\)\s*(.+)/);
+        const optionBMatch = aiResponse.match(/B\)\s*(.+)/);
+        const optionCMatch = aiResponse.match(/C\)\s*(.+)/);
+
+        if (questionMatch && optionAMatch && optionBMatch && optionCMatch) {
+            const question = questionMatch[1].trim();
+            const options = [
+                { key: 'A', text: optionAMatch[1].trim() },
+                { key: 'B', text: optionBMatch[1].trim() },
+                { key: 'C', text: optionCMatch[1].trim() }
+            ];
+
+            displayQuestion(question, options);
+        } else {
+            throw new Error('AI soruyu doğru formatta oluşturamadı');
+        }
+
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+
+    } catch (error) {
+        console.error('AI hatası:', error);
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+        showToast('Hata: ' + error.message, 'error');
+    }
+}
+
+// Soruyu UI'da göster
+function displayQuestion(question, options) {
+    addMessageToUI('assistant', question);
+
+    document.getElementById('aiCurrentQuestion').textContent = question;
+
+    const optionsContainer = document.getElementById('aiAnswerOptions');
+    optionsContainer.innerHTML = '';
+
+    options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'ai-answer-btn';
+        btn.textContent = `${option.key}) ${option.text}`;
+        btn.onclick = () => handleAnswer(option.key, option.text, question);
+        optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById('aiQuestionSection').style.display = 'block';
+}
+
+// Cevabı işle
+async function handleAnswer(key, answerText, question) {
+    const userAnswer = `${key}) ${answerText}`;
+
+    // Kullanıcı cevabını ekle
+    aiConversationHistory.push({
+        role: 'user',
+        parts: [{ text: userAnswer }]
+    });
+
+    addMessageToUI('user', userAnswer);
+
+    document.getElementById('aiQuestionSection').style.display = 'none';
+
+    aiQuestionsAsked++;
+
+    // Sonraki soruya geç
+    await askNextQuestion();
+}
+
+// Mesajı UI'a ekle
+function addMessageToUI(role, text) {
+    const historyContainer = document.getElementById('aiConversationHistory');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ai-message ${role}`;
+
+    messageDiv.innerHTML = `
+        <div class="ai-message-label">${role === 'user' ? 'Siz' : 'AI Koç'}</div>
+        <div class="ai-message-text">${text}</div>
+    `;
+
+    historyContainer.appendChild(messageDiv);
+    historyContainer.scrollTop = historyContainer.scrollHeight;
+}
+
+// Final programı oluştur
+async function generateFinalProgram() {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+
+    document.getElementById('aiLoadingIndicator').style.display = 'flex';
+
+    try {
         const exerciseList = EXERCISES_DATA.map(ex => ({
             id: ex.id,
             name: ex.name,
@@ -1365,35 +1546,33 @@ async function generateAiProgram() {
             type: ex.type === 'reps' ? 'tekrarlı' : 'zamanlı',
             sets: ex.defaultSets,
             reps: ex.defaultReps,
-            timeSec: ex.defaultTimeSec,
-            notes: ex.notes
+            timeSec: ex.defaultTimeSec
         }));
 
-        // Prompt oluştur
-        const prompt = `Sen bir fitness koçusun. Kullanıcının isteğine göre aşağıdaki egzersiz listesinden uygun egzersizleri seçerek bir program oluştur.
+        const conversationSummary = aiConversationHistory.map(msg =>
+            `${msg.role === 'user' ? 'Kullanıcı' : 'Koç'}: ${msg.parts[0].text}`
+        ).join('\n');
 
-KULLANICI TALEBİ:
-${userRequest}
+        const prompt = `Sohbet özeti:
+${conversationSummary}
 
-MEVCUT EGZERSİZLER:
+Mevcut egzersizler:
 ${JSON.stringify(exerciseList, null, 2)}
 
-Lütfen şu formatta yanıt ver:
+Şimdi kullanıcı için uygun egzersizleri seç ve şu formatta yanıt ver:
 
 AÇIKLAMA:
-[Kullanıcının durumuna göre kısa açıklama ve öneriler]
+[Kullanıcının durumuna göre kısa açıklama]
 
 SEÇİLEN_EGZERSİZ_IDS:
-[egzersiz_id_1, egzersiz_id_2, egzersiz_id_3, ...]
+[id1, id2, id3, ...]
 
 Önemli:
 - Sadece yukarıdaki egzersiz listesinden seçim yap
 - Kullanıcının şikayetlerini dikkate al
-- Seviye olarak uygun egzersizler seç
-- 8-15 egzersiz arasında öner
+- 8-15 egzersiz öner
 - SEÇİLEN_EGZERSİZ_IDS kısmında sadece ID'leri virgülle ayır`;
 
-        // Gemini API'ye istek at
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
@@ -1401,26 +1580,19 @@ SEÇİLEN_EGZERSİZ_IDS:
             },
             body: JSON.stringify({
                 contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
+                    parts: [{ text: prompt }]
                 }]
             })
         });
 
         if (!response.ok) {
-            throw new Error(`API Hatası: ${response.status} ${response.statusText}`);
+            throw new Error(`API Hatası: ${response.status}`);
         }
 
         const data = await response.json();
-
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error('API yanıtı beklenen formatta değil');
-        }
-
         const aiResponse = data.candidates[0].content.parts[0].text;
 
-        // Yanıtı parse et
+        // Parse et
         const descriptionMatch = aiResponse.match(/AÇIKLAMA:\s*([\s\S]*?)(?=SEÇİLEN_EGZERSİZ_IDS:|$)/);
         const idsMatch = aiResponse.match(/SEÇİLEN_EGZERSİZ_IDS:\s*\[(.*?)\]/);
 
@@ -1431,18 +1603,16 @@ SEÇİLEN_EGZERSİZ_IDS:
             const idsString = idsMatch[1];
             exerciseIds = idsString.split(',').map(id => id.trim().replace(/['"]/g, '')).filter(id => id);
         } else {
-            // Alternatif: Tüm yanıttan ID'leri bulmaya çalış
             const allIds = EXERCISES_DATA.map(ex => ex.id);
             exerciseIds = allIds.filter(id => aiResponse.includes(id));
         }
 
-        // Geçerli ID'leri filtrele
         aiSuggestedExerciseIds = exerciseIds.filter(id =>
             EXERCISES_DATA.some(ex => ex.id === id)
         );
 
         if (aiSuggestedExerciseIds.length === 0) {
-            throw new Error('AI uygun egzersiz öneremedi. Lütfen talebinizi daha açık yazın.');
+            throw new Error('AI uygun egzersiz öneremedi.');
         }
 
         // Sonuçları göster
@@ -1450,6 +1620,7 @@ SEÇİLEN_EGZERSİZ_IDS:
         renderAiSuggestedExercises();
 
         document.getElementById('aiLoadingIndicator').style.display = 'none';
+        document.getElementById('aiConversationSection').style.display = 'none';
         document.getElementById('aiResponseSection').style.display = 'block';
 
         showToast(`${aiSuggestedExerciseIds.length} egzersiz önerildi!`, 'success');
@@ -1475,6 +1646,7 @@ function renderAiSuggestedExercises() {
         card.dataset.exerciseId = exerciseId;
 
         card.innerHTML = `
+            ${createExerciseImageHTML(exercise)}
             <div class="ai-exercise-card-header">
                 <h4>${exercise.name}</h4>
                 <div class="ai-exercise-card-badges">

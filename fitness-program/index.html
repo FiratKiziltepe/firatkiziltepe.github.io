@@ -199,13 +199,24 @@
                             <!-- Talep Formu -->
                             <div class="ai-request-form">
                                 <h3>Talebinizi Yazın</h3>
-                                <textarea id="aiUserRequest" rows="6" placeholder="Örnek: 32 yaşındayım, 85 kg'um ve 10 kg vermek istiyorum. Diz ağrım var, yüksek yoğunluklu egzersizler yapamıyorum. Haftada 3 gün antrenman yapabilirim. Karın ve bacaklarıma odaklanmak istiyorum."></textarea>
-                                <button type="button" id="generateAiProgram" class="btn btn-primary">
-                                    ✨ Program Oluştur
+                                <textarea id="aiUserRequest" rows="4" placeholder="Örnek: 36 yaşındayım, kilo vermek istiyorum."></textarea>
+                                <button type="button" id="startAiConversation" class="btn btn-primary">
+                                    💬 Sohbete Başla
                                 </button>
+                            </div>
+
+                            <!-- Soru-Cevap Bölümü -->
+                            <div id="aiConversationSection" class="ai-conversation-section" style="display: none;">
+                                <div id="aiConversationHistory" class="ai-conversation-history"></div>
+
+                                <div id="aiQuestionSection" class="ai-question-section" style="display: none;">
+                                    <div id="aiCurrentQuestion" class="ai-current-question"></div>
+                                    <div id="aiAnswerOptions" class="ai-answer-options"></div>
+                                </div>
+
                                 <div id="aiLoadingIndicator" class="ai-loading" style="display: none;">
                                     <div class="spinner"></div>
-                                    <p>AI programınızı oluşturuyor...</p>
+                                    <p>AI yanıt oluşturuyor...</p>
                                 </div>
                             </div>
 
@@ -215,7 +226,7 @@
                                 <div id="aiResponseText" class="ai-response-text"></div>
 
                                 <h3>Önerilen Egzersizler</h3>
-                                <p class="ai-suggestion-note">İstemediğiniz egzersizleri kaldırabilirsiniz.</p>
+                                <p class="ai-suggestion-note">Görsele tıklayarak büyütebilir, istemediğiniz egzersizleri kaldırabilirsiniz.</p>
                                 <div id="aiSuggestedExercises" class="ai-suggested-exercises"></div>
 
                                 <button type="button" id="acceptAiProgram" class="btn btn-success">
@@ -249,8 +260,8 @@
                     <button type="button" id="saveProgram" class="btn btn-success">
                         💾 Kendi Programımı Oluştur (Kaydet)
                     </button>
-                    <button type="button" id="downloadPDF" class="btn btn-primary">
-                        📄 PDF İndir
+                    <button type="button" id="printProgram" class="btn btn-primary">
+                        🖨️ Yazdır
                     </button>
                     <button type="button" id="clearProgram" class="btn btn-danger">
                         🗑️ Programı Temizle

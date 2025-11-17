@@ -1422,3 +1422,88 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Soru-Cevap Bölümü */
+.ai-conversation-section {
+    background: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.ai-conversation-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.ai-message {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    max-width: 80%;
+}
+
+.ai-message.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.ai-message.assistant {
+    align-self: flex-start;
+    background: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+}
+
+.ai-message-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    opacity: 0.8;
+}
+
+.ai-message-text {
+    line-height: 1.6;
+}
+
+.ai-question-section {
+    margin-top: var(--spacing-xl);
+}
+
+.ai-current-question {
+    background: #e3f2fd;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #2196f3;
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.ai-answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.ai-answer-btn {
+    background: white;
+    border: 2px solid var(--border-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.ai-answer-btn:hover {
+    border-color: var(--primary-color);
+    background: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.ai-answer-btn:active {
+    transform: scale(0.98);
+}
