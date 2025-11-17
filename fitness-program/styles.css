@@ -671,3 +671,486 @@ body {
 .mt-2 { margin-top: var(--spacing-lg); }
 .mb-1 { margin-bottom: var(--spacing-md); }
 .mb-2 { margin-bottom: var(--spacing-lg); }
+
+/* ==================== TAB SİSTEMİ ==================== */
+
+.tabs-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.tabs-container {
+    padding: 0;
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 0;
+    background-color: var(--bg-color);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: var(--spacing-lg);
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    background-color: white;
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+    padding: var(--spacing-xl);
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== HAZIR PROGRAMLAR ==================== */
+
+.preset-programs-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.preset-intro {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.preset-intro h2 {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+    border: none;
+    padding: 0;
+}
+
+.preset-intro p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+}
+
+.preset-programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.preset-program-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.preset-program-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.preset-program-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.preset-program-card:hover::before {
+    opacity: 1;
+}
+
+.preset-program-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.preset-program-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.preset-program-badges {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.preset-badge {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.preset-program-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.95;
+}
+
+.preset-program-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.preset-detail {
+    text-align: center;
+}
+
+.preset-detail-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+}
+
+.preset-detail-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.preset-program-action {
+    margin-top: var(--spacing-lg);
+    text-align: center;
+}
+
+.preset-program-card .btn {
+    background-color: white;
+    color: var(--primary-color);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+}
+
+.preset-program-card .btn:hover {
+    background-color: #f8fafc;
+    transform: scale(1.05);
+}
+
+.preset-program-days {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.preset-day-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.875rem;
+}
+
+/* ==================== KENDİ PROGRAMIM ==================== */
+
+.my-program-container {
+    min-height: 400px;
+}
+
+.my-program-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.my-program-header h2 {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+    border: none;
+    padding: 0;
+}
+
+.my-program-header p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+}
+
+.my-program-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl) * 2;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.my-program-day-section {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.my-program-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.my-program-day-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.my-program-exercises-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+}
+
+/* ==================== EGZERSİZ RESİMLERİ VE LIGHTBOX ==================== */
+
+.exercise-image-container {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.exercise-image-container:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.exercise-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.exercise-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+}
+
+.exercise-image-placeholder-text {
+    font-size: 0.875rem;
+    margin-top: var(--spacing-sm);
+    opacity: 0.9;
+}
+
+.lightbox-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: fadeIn 0.3s ease;
+}
+
+.lightbox-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10000;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus {
+    color: #ccc;
+    text-decoration: none;
+}
+
+.lightbox-caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    font-size: 1.125rem;
+}
+
+/* ==================== YENİ RESPONSIVE DÜZENLEMELER ==================== */
+
+.exercises-section-inner {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-xl);
+    align-items: start;
+}
+
+.filters-container-sidebar {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: var(--spacing-lg);
+}
+
+.filters-container-sidebar h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: var(--spacing-sm);
+}
+
+.exercises-list-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* ==================== TAB VE RESPONSIVE DÜZENLEMELER ==================== */
+
+@media (max-width: 1200px) {
+    .exercises-section-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-container-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .tabs-header {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        border-bottom: 1px solid var(--border-color);
+        border-right: none;
+    }
+
+    .tab-btn.active {
+        border-left: 3px solid var(--primary-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .preset-programs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .my-program-exercises-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lightbox-close {
+        top: 10px;
+        right: 20px;
+        font-size: 30px;
+    }
+
+    .preset-program-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-content {
+        padding: var(--spacing-md);
+    }
+
+    .exercise-image-container {
+        height: 120px;
+    }
+}
