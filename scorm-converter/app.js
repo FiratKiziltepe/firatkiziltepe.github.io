@@ -27,7 +27,7 @@ function handleSingleFileUpload(e) {
     const file = e.target.files[0];
     if (file) {
         uploadedFiles = [file];
-        htmlFileName.textContent = file.name;
+        htmlFileName.textContent = `✓ ${file.name}`;
         folderName.textContent = '';
         folderInput.value = '';
         displayFileList();
@@ -35,6 +35,8 @@ function handleSingleFileUpload(e) {
         // Otomatik config oluştur
         generateAutoConfig(file.name, file.name);
         enableConvertButton();
+
+        showStatus('info', `${file.name} yüklendi. Dönüştürmek için butona tıklayın.`);
     }
 }
 
@@ -46,7 +48,7 @@ function handleFolderUpload(e) {
     if (files.length > 0) {
         uploadedFiles = files;
         const folderPath = files[0].webkitRelativePath.split('/')[0];
-        folderName.textContent = `${folderPath} (${files.length} dosya)`;
+        folderName.textContent = `✓ ${folderPath} (${files.length} dosya)`;
         htmlFileName.textContent = '';
         htmlFileInput.value = '';
         displayFileList();
@@ -65,6 +67,8 @@ function handleFolderUpload(e) {
         // Otomatik config oluştur
         generateAutoConfig(folderPath, launchFileName);
         enableConvertButton();
+
+        showStatus('info', `${folderPath} klasörü yüklendi (${files.length} dosya). Dönüştürmek için butona tıklayın.`);
     }
 }
 
@@ -90,7 +94,16 @@ function generateAutoConfig(baseName, launchFileName) {
  * Convert butonunu etkinleştir
  */
 function enableConvertButton() {
-    convertBtn.disabled = uploadedFiles.length === 0;
+    const shouldEnable = uploadedFiles.length > 0;
+    convertBtn.disabled = !shouldEnable;
+
+    if (shouldEnable) {
+        convertBtn.style.opacity = '1';
+        convertBtn.style.cursor = 'pointer';
+    } else {
+        convertBtn.style.opacity = '0.6';
+        convertBtn.style.cursor = 'not-allowed';
+    }
 }
 
 /**
@@ -362,7 +375,7 @@ function downloadPackage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showStatus('success', `Paket indirildi: ${fileName}`);
+    showStatus('success', `✓ ${fileName} indirildi! Yeni bir dosya dönüştürmek için tekrar yükleyin.`);
 }
 
 /**
@@ -373,10 +386,11 @@ function showStatus(type, message) {
     statusDiv.textContent = message;
     statusDiv.style.display = 'block';
 
-    // 5 saniye sonra gizle (error hariç)
+    // Otomatik gizleme (error hariç)
     if (type !== 'error') {
+        const timeout = type === 'info' ? 3000 : 5000;
         setTimeout(() => {
             statusDiv.style.display = 'none';
-        }, 5000);
+        }, timeout);
     }
 }
