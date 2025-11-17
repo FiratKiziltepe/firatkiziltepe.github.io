@@ -13,6 +13,7 @@ class TodoApp {
             priority: 'all'
         };
         this.sortBy = 'created';
+        this.counterIntervals = {}; // Track active counter animations
 
         this.init();
     }
@@ -480,7 +481,7 @@ class TodoApp {
                         <line x1="8" y1="2" x2="8" y2="6"></line>
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    ${this.formatDate(dueDateTime)}
+                    Due: ${this.formatDate(dueDateTime)}
                 `;
             }
 
@@ -527,15 +528,29 @@ class TodoApp {
     }
 
     formatDate(date) {
-        const options = { month: 'short', day: 'numeric' };
-        const formatted = date.toLocaleDateString('en-US', options);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-        if (date.getHours() !== 0 || date.getMinutes() !== 0) {
-            const timeOptions = { hour: 'numeric', minute: '2-digit' };
-            return `${formatted}, ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        const dueDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        let dateStr = '';
+        if (dueDay.getTime() === today.getTime()) {
+            dateStr = 'Today';
+        } else if (dueDay.getTime() === tomorrow.getTime()) {
+            dateStr = 'Tomorrow';
+        } else {
+            const options = { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined };
+            dateStr = date.toLocaleDateString('en-US', options);
         }
 
-        return formatted;
+        if (date.getHours() !== 0 || date.getMinutes() !== 0) {
+            const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+            return `${dateStr} at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        }
+
+        return dateStr;
     }
 
     // ==========================================
@@ -552,19 +567,33 @@ class TodoApp {
     }
 
     animateCounter(element, target) {
+        // Clear any existing animation for this element
+        const elementId = element.id;
+        if (this.counterIntervals[elementId]) {
+            clearInterval(this.counterIntervals[elementId]);
+            delete this.counterIntervals[elementId];
+        }
+
         const current = parseInt(element.textContent) || 0;
+
+        // If no change needed, just set the value
+        if (current === target) {
+            return;
+        }
+
         const increment = target > current ? 1 : -1;
         const duration = 300;
         const steps = Math.abs(target - current);
         const stepDuration = steps > 0 ? duration / steps : 0;
 
         let count = current;
-        const timer = setInterval(() => {
+        this.counterIntervals[elementId] = setInterval(() => {
             count += increment;
             element.textContent = count;
 
             if (count === target) {
-                clearInterval(timer);
+                clearInterval(this.counterIntervals[elementId]);
+                delete this.counterIntervals[elementId];
             }
         }, stepDuration);
     }
