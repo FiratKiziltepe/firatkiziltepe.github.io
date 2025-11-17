@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapsamlı Metin Analiz Aracı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .input-section {
+            grid-column: 1 / -1;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .readability-scores {
+            display: grid;
+            gap: 15px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .score-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .score-description {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .keyword-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .keyword-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .keyword-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .keyword-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .sentiment-display {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .sentiment-emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .sentiment-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .sentiment-score {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .emotion-bars {
+            margin-top: 20px;
+        }
+
+        .emotion-item {
+            margin-bottom: 15px;
+        }
+
+        .emotion-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .emotion-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .emotion-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .spelling-errors {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .error-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .error-word {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .suggestions {
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+
+        .suggestion-chip {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin-right: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .suggestion-chip:hover {
+            background: #764ba2;
+        }
+
+        .comparison-section {
+            margin-top: 20px;
+        }
+
+        .comparison-result {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .similarity-score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .language-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cleaning-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tool-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tool-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Kapsamlı Metin Analiz Aracı</h1>
+            <p>Metninizi analiz edin, okuyabilirlik skorlarını görün, duygu analizi yapın ve daha fazlası</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="card">
+                    <h2>📄 Metin Girişi</h2>
+                    <textarea id="textInput" placeholder="Metninizi buraya yazın veya dosya yükleyin..."></textarea>
+
+                    <div class="button-group">
+                        <div class="file-input-wrapper">
+                            <button>📁 Dosya Yükle</button>
+                            <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.csv,.xlsx">
+                        </div>
+                        <button onclick="analyzeText()">🔍 Analiz Et</button>
+                        <button onclick="clearText()">🗑️ Temizle</button>
+                        <button onclick="exportReport()">📥 Rapor İndir</button>
+                    </div>
+
+                    <div class="cleaning-tools">
+                        <button class="tool-btn" onclick="cleanText('removeExtraSpaces')">Fazla Boşlukları Kaldır</button>
+                        <button class="tool-btn" onclick="cleanText('toLowerCase')">Küçük Harfe Çevir</button>
+                        <button class="tool-btn" onclick="cleanText('toUpperCase')">Büyük Harfe Çevir</button>
+                        <button class="tool-btn" onclick="cleanText('removeNumbers')">Sayıları Kaldır</button>
+                        <button class="tool-btn" onclick="cleanText('removePunctuation')">Noktalamayı Kaldır</button>
+                        <button class="tool-btn" onclick="cleanText('removeLineBreaks')">Satır Sonlarını Kaldır</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Stats -->
+            <div class="card">
+                <h2>📊 Temel İstatistikler</h2>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="stat-number" id="wordCount">0</div>
+                        <div class="stat-label">Kelime</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="charCount">0</div>
+                        <div class="stat-label">Karakter</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="charCountNoSpace">0</div>
+                        <div class="stat-label">Boşluksuz Karakter</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="sentenceCount">0</div>
+                        <div class="stat-label">Cümle</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="paragraphCount">0</div>
+                        <div class="stat-label">Paragraf</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="readingTime">0</div>
+                        <div class="stat-label">Okuma Süresi (dk)</div>
+                    </div>
+                </div>
+                <div id="languageDetection" style="margin-top: 20px; text-align: center;">
+                    <span class="language-badge" id="detectedLanguage">Dil Algılanıyor...</span>
+                </div>
+            </div>
+
+            <!-- Readability Scores -->
+            <div class="card">
+                <h2>📖 Okunabilirlik Skorları</h2>
+                <div class="readability-scores">
+                    <div class="score-item">
+                        <div>
+                            <div class="score-label">Flesch Reading Ease</div>
+                            <div class="score-description" id="fleschDesc">-</div>
+                        </div>
+                        <div class="score-value" id="fleschScore">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div>
+                            <div class="score-label">Flesch-Kincaid Grade</div>
+                            <div class="score-description" id="fkDesc">-</div>
+                        </div>
+                        <div class="score-value" id="fkGrade">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div>
+                            <div class="score-label">SMOG Index</div>
+                            <div class="score-description" id="smogDesc">-</div>
+                        </div>
+                        <div class="score-value" id="smogScore">-</div>
+                    </div>
+                    <div class="score-item">
+                        <div>
+                            <div class="score-label">Coleman-Liau Index</div>
+                            <div class="score-description" id="colemanDesc">-</div>
+                        </div>
+                        <div class="score-value" id="colemanScore">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keyword Density -->
+            <div class="card">
+                <h2>🔑 Anahtar Kelime Yoğunluğu</h2>
+                <div class="keyword-list" id="keywordList">
+                    <div class="alert alert-info">Metni analiz etmek için yukarıdaki butona tıklayın</div>
+                </div>
+            </div>
+
+            <!-- Sentiment Analysis -->
+            <div class="card">
+                <h2>😊 Duygu Analizi</h2>
+                <div class="sentiment-display">
+                    <div class="sentiment-emoji" id="sentimentEmoji">😐</div>
+                    <div class="sentiment-label" id="sentimentLabel">Nötr</div>
+                    <div class="sentiment-score" id="sentimentScore">Skor: 0</div>
+                </div>
+                <div class="emotion-bars">
+                    <div class="emotion-item">
+                        <div class="emotion-label">
+                            <span>😊 Mutluluk</span>
+                            <span id="joyPercent">0%</span>
+                        </div>
+                        <div class="emotion-bar">
+                            <div class="emotion-fill" id="joyBar" style="background: #28a745; width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="emotion-item">
+                        <div class="emotion-label">
+                            <span>😢 Üzüntü</span>
+                            <span id="sadnessPercent">0%</span>
+                        </div>
+                        <div class="emotion-bar">
+                            <div class="emotion-fill" id="sadnessBar" style="background: #007bff; width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="emotion-item">
+                        <div class="emotion-label">
+                            <span>😠 Öfke</span>
+                            <span id="angerPercent">0%</span>
+                        </div>
+                        <div class="emotion-bar">
+                            <div class="emotion-fill" id="angerBar" style="background: #dc3545; width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="emotion-item">
+                        <div class="emotion-label">
+                            <span>😨 Korku</span>
+                            <span id="fearPercent">0%</span>
+                        </div>
+                        <div class="emotion-bar">
+                            <div class="emotion-fill" id="fearBar" style="background: #6c757d; width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spelling & Grammar -->
+            <div class="card">
+                <h2>✍️ Yazım ve Dilbilgisi</h2>
+                <div class="spelling-errors" id="spellingErrors">
+                    <div class="alert alert-info">Metni analiz etmek için yukarıdaki butona tıklayın</div>
+                </div>
+            </div>
+
+            <!-- Text Comparison -->
+            <div class="card">
+                <h2>🔄 Metin Karşılaştırma</h2>
+                <textarea id="compareText" placeholder="Karşılaştırmak için ikinci metni buraya yapıştırın..." style="min-height: 100px; margin-bottom: 15px;"></textarea>
+                <button onclick="compareTexts()">📊 Metinleri Karşılaştır</button>
+                <div class="comparison-result" id="comparisonResult" style="margin-top: 15px; display: none;">
+                    <div>Benzerlik Oranı</div>
+                    <div class="similarity-score" id="similarityScore">0%</div>
+                    <div style="margin-top: 10px; color: #666;" id="similarityDesc">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentText = '';
+        let analysisResults = {};
+
+        // File upload handler
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            let text = '';
+
+            try {
+                if (fileExtension === 'txt') {
+                    text = await file.text();
+                } else if (fileExtension === 'pdf') {
+                    text = await extractTextFromPDF(file);
+                } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+                    text = await extractTextFromWord(file);
+                } else if (fileExtension === 'csv') {
+                    text = await file.text();
+                } else if (fileExtension === 'xlsx') {
+                    text = await extractTextFromExcel(file);
+                }
+
+                document.getElementById('textInput').value = text;
+                currentText = text;
+                analyzeText();
+            } catch (error) {
+                alert('Dosya yüklenirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function extractTextFromPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let text = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const pageText = content.items.map(item => item.str).join(' ');
+                text += pageText + '\n';
+            }
+
+            return text;
+        }
+
+        async function extractTextFromWord(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            return result.value;
+        }
+
+        async function extractTextFromExcel(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            let text = '';
+
+            workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const sheetText = XLSX.utils.sheet_to_csv(sheet);
+                text += sheetText + '\n';
+            });
+
+            return text;
+        }
+
+        // Main analysis function
+        function analyzeText() {
+            const text = document.getElementById('textInput').value;
+            if (!text.trim()) {
+                alert('Lütfen analiz etmek için metin girin!');
+                return;
+            }
+
+            currentText = text;
+
+            // Calculate all metrics
+            calculateBasicStats(text);
+            calculateReadabilityScores(text);
+            analyzeKeywordDensity(text);
+            analyzeSentiment(text);
+            checkSpelling(text);
+            detectLanguage(text);
+
+            // Store results
+            analysisResults = {
+                text: text,
+                timestamp: new Date().toISOString(),
+                basicStats: getBasicStats(),
+                readability: getReadabilityScores(),
+                keywords: getKeywords(),
+                sentiment: getSentiment()
+            };
+        }
+
+        // Basic statistics
+        function calculateBasicStats(text) {
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
+            const chars = text.length;
+            const charsNoSpace = text.replace(/\s/g, '').length;
+            const readingTime = Math.ceil(words.length / 200); // Average reading speed: 200 words/minute
+
+            document.getElementById('wordCount').textContent = words.length;
+            document.getElementById('charCount').textContent = chars;
+            document.getElementById('charCountNoSpace').textContent = charsNoSpace;
+            document.getElementById('sentenceCount').textContent = sentences.length;
+            document.getElementById('paragraphCount').textContent = paragraphs.length;
+            document.getElementById('readingTime').textContent = readingTime;
+        }
+
+        // Readability scores
+        function calculateReadabilityScores(text) {
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const syllables = countSyllables(text);
+
+            if (words.length === 0 || sentences.length === 0) return;
+
+            // Flesch Reading Ease
+            const fleschScore = 206.835 - 1.015 * (words.length / sentences.length) - 84.6 * (syllables / words.length);
+            document.getElementById('fleschScore').textContent = Math.round(fleschScore);
+            document.getElementById('fleschDesc').textContent = getFleschDescription(fleschScore);
+
+            // Flesch-Kincaid Grade Level
+            const fkGrade = 0.39 * (words.length / sentences.length) + 11.8 * (syllables / words.length) - 15.59;
+            document.getElementById('fkGrade').textContent = Math.max(0, Math.round(fkGrade * 10) / 10);
+            document.getElementById('fkDesc').textContent = `${Math.round(fkGrade)}. sınıf seviyesi`;
+
+            // SMOG Index
+            const polysyllables = countPolysyllables(text);
+            const smogScore = 1.0430 * Math.sqrt(polysyllables * (30 / sentences.length)) + 3.1291;
+            document.getElementById('smogScore').textContent = Math.round(smogScore * 10) / 10;
+            document.getElementById('smogDesc').textContent = `${Math.round(smogScore)}. sınıf seviyesi`;
+
+            // Coleman-Liau Index
+            const L = (text.replace(/\s/g, '').length / words.length) * 100;
+            const S = (sentences.length / words.length) * 100;
+            const colemanScore = 0.0588 * L - 0.296 * S - 15.8;
+            document.getElementById('colemanScore').textContent = Math.round(colemanScore * 10) / 10;
+            document.getElementById('colemanDesc').textContent = `${Math.round(colemanScore)}. sınıf seviyesi`;
+        }
+
+        function countSyllables(text) {
+            const words = text.toLowerCase().match(/\b[a-zçğıöşü]+\b/gi) || [];
+            return words.reduce((count, word) => {
+                // Simple syllable counting (can be improved)
+                const vowels = word.match(/[aeıioöuü]/gi);
+                return count + (vowels ? vowels.length : 1);
+            }, 0);
+        }
+
+        function countPolysyllables(text) {
+            const words = text.toLowerCase().match(/\b[a-zçğıöşü]+\b/gi) || [];
+            return words.filter(word => {
+                const vowels = word.match(/[aeıioöuü]/gi);
+                return vowels && vowels.length >= 3;
+            }).length;
+        }
+
+        function getFleschDescription(score) {
+            if (score >= 90) return 'Çok Kolay';
+            if (score >= 80) return 'Kolay';
+            if (score >= 70) return 'Oldukça Kolay';
+            if (score >= 60) return 'Standart';
+            if (score >= 50) return 'Oldukça Zor';
+            if (score >= 30) return 'Zor';
+            return 'Çok Zor';
+        }
+
+        // Keyword density analysis
+        function analyzeKeywordDensity(text) {
+            const words = text.toLowerCase()
+                .replace(/[^\w\sçğıöşü]/gi, '')
+                .split(/\s+/)
+                .filter(w => w.length > 3); // Only words longer than 3 characters
+
+            // Count word frequencies
+            const wordFreq = {};
+            words.forEach(word => {
+                wordFreq[word] = (wordFreq[word] || 0) + 1;
+            });
+
+            // Sort by frequency
+            const sorted = Object.entries(wordFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const maxFreq = sorted[0]?.[1] || 1;
+            const keywordList = document.getElementById('keywordList');
+            keywordList.innerHTML = '';
+
+            sorted.forEach(([word, count]) => {
+                const percentage = ((count / words.length) * 100).toFixed(2);
+                const barWidth = (count / maxFreq) * 100;
+
+                const item = document.createElement('div');
+                item.className = 'keyword-item';
+                item.innerHTML = `
+                    <span style="font-weight: 600; min-width: 120px;">${word}</span>
+                    <div class="keyword-bar">
+                        <div class="keyword-fill" style="width: ${barWidth}%"></div>
+                    </div>
+                    <span style="min-width: 80px; text-align: right;">
+                        ${count} kez (${percentage}%)
+                    </span>
+                `;
+                keywordList.appendChild(item);
+            });
+        }
+
+        // Sentiment analysis
+        function analyzeSentiment(text) {
+            // Turkish positive and negative words (basic lexicon)
+            const positiveWords = [
+                'güzel', 'harika', 'mükemmel', 'muhteşem', 'iyi', 'sevgi', 'mutlu', 'başarılı',
+                'kaliteli', 'eğlenceli', 'heyecan', 'şahane', 'olağanüstü', 'parlak', 'hoş',
+                'keyifli', 'sevinç', 'umut', 'iyimser', 'pozitif', 'hayranlık', 'beğeni'
+            ];
+
+            const negativeWords = [
+                'kötü', 'berbat', 'korkunç', 'korkutucu', 'üzücü', 'acı', 'olumsuz', 'başarısız',
+                'kalitesiz', 'sıkıcı', 'kaygı', 'endişe', 'korku', 'nefret', 'öfke', 'kızgın',
+                'mutsuz', 'karanlık', 'umutsuz', 'kötümser', 'negatif', 'hayal kırıklığı'
+            ];
+
+            const words = text.toLowerCase().match(/\b[\wçğıöşü]+\b/gi) || [];
+
+            let positiveCount = 0;
+            let negativeCount = 0;
+            let joyCount = 0;
+            let sadnessCount = 0;
+            let angerCount = 0;
+            let fearCount = 0;
+
+            words.forEach(word => {
+                if (positiveWords.includes(word)) {
+                    positiveCount++;
+                    joyCount++;
+                }
+                if (negativeWords.includes(word)) {
+                    negativeCount++;
+                    // Distribute among negative emotions
+                    if (['üzücü', 'acı', 'mutsuz'].includes(word)) sadnessCount++;
+                    if (['öfke', 'kızgın', 'nefret'].includes(word)) angerCount++;
+                    if (['korku', 'korkutucu', 'endişe'].includes(word)) fearCount++;
+                }
+            });
+
+            const totalEmotional = positiveCount + negativeCount;
+            const score = totalEmotional > 0
+                ? ((positiveCount - negativeCount) / totalEmotional * 100).toFixed(1)
+                : 0;
+
+            // Update sentiment display
+            let emoji, label;
+            if (score > 30) {
+                emoji = '😊';
+                label = 'Pozitif';
+            } else if (score < -30) {
+                emoji = '😞';
+                label = 'Negatif';
+            } else {
+                emoji = '😐';
+                label = 'Nötr';
+            }
+
+            document.getElementById('sentimentEmoji').textContent = emoji;
+            document.getElementById('sentimentLabel').textContent = label;
+            document.getElementById('sentimentScore').textContent = `Skor: ${score}`;
+
+            // Update emotion bars
+            const total = joyCount + sadnessCount + angerCount + fearCount || 1;
+            updateEmotionBar('joy', joyCount, total);
+            updateEmotionBar('sadness', sadnessCount, total);
+            updateEmotionBar('anger', angerCount, total);
+            updateEmotionBar('fear', fearCount, total);
+        }
+
+        function updateEmotionBar(emotion, count, total) {
+            const percentage = ((count / total) * 100).toFixed(1);
+            document.getElementById(`${emotion}Percent`).textContent = `${percentage}%`;
+            document.getElementById(`${emotion}Bar`).style.width = `${percentage}%`;
+        }
+
+        // Spelling and grammar check
+        function checkSpelling(text) {
+            const words = text.match(/\b[\wçğıöşü]+\b/gi) || [];
+            const spellingErrors = document.getElementById('spellingErrors');
+
+            // Common Turkish misspellings and corrections (basic dictionary)
+            const commonErrors = {
+                'gercek': 'gerçek',
+                'daha': 'daha',
+                'cok': 'çok',
+                'bisey': 'birşey',
+                'birsey': 'birşey',
+                'neden': 'neden',
+                'niye': 'niye',
+                'nasil': 'nasıl',
+                'guzel': 'güzel',
+                'oyle': 'öyle',
+                'boyle': 'böyle',
+                'soyle': 'şöyle',
+                'bugun': 'bugün',
+                'dunya': 'dünya',
+                'turkiye': 'türkiye',
+                'acaba': 'acaba',
+                'lutfen': 'lütfen'
+            };
+
+            const errors = [];
+            const checkedWords = new Set();
+
+            words.forEach(word => {
+                const lower = word.toLowerCase();
+                if (!checkedWords.has(lower) && commonErrors[lower]) {
+                    errors.push({
+                        word: word,
+                        suggestions: [commonErrors[lower]]
+                    });
+                    checkedWords.add(lower);
+                }
+            });
+
+            if (errors.length === 0) {
+                spellingErrors.innerHTML = '<div class="alert alert-success">✓ Yaygın yazım hatası bulunamadı!</div>';
+            } else {
+                spellingErrors.innerHTML = errors.map(error => `
+                    <div class="error-item">
+                        <div>Hatalı: <span class="error-word">${error.word}</span></div>
+                        <div class="suggestions">
+                            Öneriler: ${error.suggestions.map(s =>
+                                `<span class="suggestion-chip">${s}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Language detection
+        function detectLanguage(text) {
+            const turkishChars = text.match(/[çğıöşü]/gi) || [];
+            const englishWords = text.toLowerCase().match(/\b(the|is|are|was|were|have|has|with|from|this|that)\b/gi) || [];
+            const turkishWords = text.toLowerCase().match(/\b(bir|ve|bu|şu|için|ile|olan|olarak|da|de)\b/gi) || [];
+
+            let language = 'Belirsiz';
+            let flag = '🌐';
+
+            if (turkishChars.length > 5 || turkishWords.length > englishWords.length) {
+                language = 'Türkçe';
+                flag = '🇹🇷';
+            } else if (englishWords.length > turkishWords.length) {
+                language = 'İngilizce';
+                flag = '🇬🇧';
+            }
+
+            document.getElementById('detectedLanguage').textContent = `${flag} ${language}`;
+        }
+
+        // Text comparison
+        function compareTexts() {
+            const text1 = document.getElementById('textInput').value;
+            const text2 = document.getElementById('compareText').value;
+
+            if (!text1.trim() || !text2.trim()) {
+                alert('Her iki metin alanını da doldurun!');
+                return;
+            }
+
+            const similarity = calculateSimilarity(text1, text2);
+            const resultDiv = document.getElementById('comparisonResult');
+
+            resultDiv.style.display = 'block';
+            document.getElementById('similarityScore').textContent = `${similarity}%`;
+
+            let description;
+            if (similarity > 80) description = 'Çok yüksek benzerlik';
+            else if (similarity > 60) description = 'Yüksek benzerlik';
+            else if (similarity > 40) description = 'Orta benzerlik';
+            else if (similarity > 20) description = 'Düşük benzerlik';
+            else description = 'Çok düşük benzerlik';
+
+            document.getElementById('similarityDesc').textContent = description;
+        }
+
+        function calculateSimilarity(text1, text2) {
+            // Jaccard similarity
+            const words1 = new Set(text1.toLowerCase().match(/\b[\wçğıöşü]+\b/gi) || []);
+            const words2 = new Set(text2.toLowerCase().match(/\b[\wçğıöşü]+\b/gi) || []);
+
+            const intersection = new Set([...words1].filter(x => words2.has(x)));
+            const union = new Set([...words1, ...words2]);
+
+            return union.size > 0 ? Math.round((intersection.size / union.size) * 100) : 0;
+        }
+
+        // Text cleaning tools
+        function cleanText(action) {
+            let text = document.getElementById('textInput').value;
+
+            switch(action) {
+                case 'removeExtraSpaces':
+                    text = text.replace(/\s+/g, ' ').trim();
+                    break;
+                case 'toLowerCase':
+                    text = text.toLowerCase();
+                    break;
+                case 'toUpperCase':
+                    text = text.toUpperCase();
+                    break;
+                case 'removeNumbers':
+                    text = text.replace(/\d+/g, '');
+                    break;
+                case 'removePunctuation':
+                    text = text.replace(/[^\w\sçğıöşü]/gi, '');
+                    break;
+                case 'removeLineBreaks':
+                    text = text.replace(/\n+/g, ' ').trim();
+                    break;
+            }
+
+            document.getElementById('textInput').value = text;
+        }
+
+        // Clear text
+        function clearText() {
+            if (confirm('Tüm metni temizlemek istediğinizden emin misiniz?')) {
+                document.getElementById('textInput').value = '';
+                document.getElementById('compareText').value = '';
+
+                // Reset all displays
+                document.getElementById('wordCount').textContent = '0';
+                document.getElementById('charCount').textContent = '0';
+                document.getElementById('charCountNoSpace').textContent = '0';
+                document.getElementById('sentenceCount').textContent = '0';
+                document.getElementById('paragraphCount').textContent = '0';
+                document.getElementById('readingTime').textContent = '0';
+
+                document.getElementById('keywordList').innerHTML = '<div class="alert alert-info">Metni analiz etmek için yukarıdaki butona tıklayın</div>';
+                document.getElementById('spellingErrors').innerHTML = '<div class="alert alert-info">Metni analiz etmek için yukarıdaki butona tıklayın</div>';
+
+                document.getElementById('comparisonResult').style.display = 'none';
+            }
+        }
+
+        // Export report
+        function exportReport() {
+            if (!currentText) {
+                alert('İhraç edilecek analiz yok. Önce bir metin analiz edin!');
+                return;
+            }
+
+            const report = generateReport();
+            const blob = new Blob([report], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `metin-analiz-raporu-${Date.now()}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function generateReport() {
+            const now = new Date().toLocaleString('tr-TR');
+
+            return `
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Metin Analiz Raporu</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 40px auto; padding: 20px; }
+        h1 { color: #667eea; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+        h2 { color: #764ba2; margin-top: 30px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .stat-box { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        .footer { margin-top: 40px; text-align: center; color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>📝 Metin Analiz Raporu</h1>
+    <p><strong>Oluşturulma Tarihi:</strong> ${now}</p>
+
+    <h2>📊 Temel İstatistikler</h2>
+    <div class="stat-grid">
+        <div class="stat-box">
+            <div class="stat-number">${document.getElementById('wordCount').textContent}</div>
+            <div class="stat-label">Kelime</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">${document.getElementById('charCount').textContent}</div>
+            <div class="stat-label">Karakter</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">${document.getElementById('readingTime').textContent}</div>
+            <div class="stat-label">Okuma Süresi (dk)</div>
+        </div>
+    </div>
+
+    <h2>📖 Okunabilirlik Skorları</h2>
+    <table>
+        <tr>
+            <th>Metrik</th>
+            <th>Skor</th>
+            <th>Açıklama</th>
+        </tr>
+        <tr>
+            <td>Flesch Reading Ease</td>
+            <td>${document.getElementById('fleschScore').textContent}</td>
+            <td>${document.getElementById('fleschDesc').textContent}</td>
+        </tr>
+        <tr>
+            <td>Flesch-Kincaid Grade</td>
+            <td>${document.getElementById('fkGrade').textContent}</td>
+            <td>${document.getElementById('fkDesc').textContent}</td>
+        </tr>
+        <tr>
+            <td>SMOG Index</td>
+            <td>${document.getElementById('smogScore').textContent}</td>
+            <td>${document.getElementById('smogDesc').textContent}</td>
+        </tr>
+        <tr>
+            <td>Coleman-Liau Index</td>
+            <td>${document.getElementById('colemanScore').textContent}</td>
+            <td>${document.getElementById('colemanDesc').textContent}</td>
+        </tr>
+    </table>
+
+    <h2>😊 Duygu Analizi</h2>
+    <p><strong>Genel Duygu:</strong> ${document.getElementById('sentimentLabel').textContent}</p>
+    <p><strong>Skor:</strong> ${document.getElementById('sentimentScore').textContent}</p>
+
+    <h2>📝 Analiz Edilen Metin</h2>
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; white-space: pre-wrap;">
+${currentText}
+    </div>
+
+    <div class="footer">
+        <p>Bu rapor Kapsamlı Metin Analiz Aracı tarafından otomatik olarak oluşturulmuştur.</p>
+    </div>
+</body>
+</html>
+            `.trim();
+        }
+
+        // Helper functions to get current data
+        function getBasicStats() {
+            return {
+                words: document.getElementById('wordCount').textContent,
+                characters: document.getElementById('charCount').textContent,
+                sentences: document.getElementById('sentenceCount').textContent,
+                paragraphs: document.getElementById('paragraphCount').textContent,
+                readingTime: document.getElementById('readingTime').textContent
+            };
+        }
+
+        function getReadabilityScores() {
+            return {
+                flesch: document.getElementById('fleschScore').textContent,
+                fleschKincaid: document.getElementById('fkGrade').textContent,
+                smog: document.getElementById('smogScore').textContent,
+                coleman: document.getElementById('colemanScore').textContent
+            };
+        }
+
+        function getKeywords() {
+            const items = document.querySelectorAll('.keyword-item');
+            return Array.from(items).map(item => {
+                const text = item.textContent.trim();
+                return text;
+            });
+        }
+
+        function getSentiment() {
+            return {
+                emoji: document.getElementById('sentimentEmoji').textContent,
+                label: document.getElementById('sentimentLabel').textContent,
+                score: document.getElementById('sentimentScore').textContent
+            };
+        }
+
+        // Real-time character count
+        document.getElementById('textInput').addEventListener('input', function() {
+            const text = this.value;
+            document.getElementById('charCount').textContent = text.length;
+            document.getElementById('charCountNoSpace').textContent = text.replace(/\s/g, '').length;
+
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            document.getElementById('wordCount').textContent = words.length;
+        });
+    </script>
+</body>
+</html>
