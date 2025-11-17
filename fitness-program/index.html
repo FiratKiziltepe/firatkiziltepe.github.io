@@ -60,6 +60,7 @@
                         <button class="tab-btn active" data-tab="preset">📦 Hazır Programlar</button>
                         <button class="tab-btn" data-tab="exercises">💪 Egzersiz Listesi</button>
                         <button class="tab-btn" data-tab="myprogram">⭐ Kendi Programım</button>
+                        <button class="tab-btn" data-tab="ai">🤖 AI Asistan</button>
                     </div>
 
                     <!-- Tab 1: Hazır Programlar -->
@@ -163,6 +164,63 @@
                                     <p>veya</p>
                                     <p>"Hazır Programlar" sekmesinden hazır bir program seçin.</p>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: AI Asistan -->
+                    <div class="tab-content" id="tab-ai">
+                        <div class="ai-assistant-container">
+                            <div class="ai-assistant-header">
+                                <h2>🤖 AI Program Asistanı</h2>
+                                <p>Yapay zeka ile size özel egzersiz programı oluşturun. Hedeflerinizi, kilo ve şikayetlerinizi yazın.</p>
+                            </div>
+
+                            <!-- API Ayarları (Gizli Alan) -->
+                            <details class="ai-settings">
+                                <summary>⚙️ API Ayarları</summary>
+                                <div class="ai-settings-content">
+                                    <div class="form-group">
+                                        <label for="geminiApiKey">Gemini API Key:</label>
+                                        <input type="password" id="geminiApiKey" placeholder="AIza...">
+                                        <small>API anahtarınızı <a href="https://aistudio.google.com/app/apikey" target="_blank">buradan</a> alabilirsiniz.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="geminiModel">Model:</label>
+                                        <select id="geminiModel">
+                                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Hızlı, 10 RPM)</option>
+                                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Gelişmiş, 2 RPM)</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="saveApiSettings" class="btn btn-secondary">Kaydet</button>
+                                </div>
+                            </details>
+
+                            <!-- Talep Formu -->
+                            <div class="ai-request-form">
+                                <h3>Talebinizi Yazın</h3>
+                                <textarea id="aiUserRequest" rows="6" placeholder="Örnek: 32 yaşındayım, 85 kg'um ve 10 kg vermek istiyorum. Diz ağrım var, yüksek yoğunluklu egzersizler yapamıyorum. Haftada 3 gün antrenman yapabilirim. Karın ve bacaklarıma odaklanmak istiyorum."></textarea>
+                                <button type="button" id="generateAiProgram" class="btn btn-primary">
+                                    ✨ Program Oluştur
+                                </button>
+                                <div id="aiLoadingIndicator" class="ai-loading" style="display: none;">
+                                    <div class="spinner"></div>
+                                    <p>AI programınızı oluşturuyor...</p>
+                                </div>
+                            </div>
+
+                            <!-- AI Yanıtı -->
+                            <div id="aiResponseSection" class="ai-response-section" style="display: none;">
+                                <h3>AI Önerisi</h3>
+                                <div id="aiResponseText" class="ai-response-text"></div>
+
+                                <h3>Önerilen Egzersizler</h3>
+                                <p class="ai-suggestion-note">İstemediğiniz egzersizleri kaldırabilirsiniz.</p>
+                                <div id="aiSuggestedExercises" class="ai-suggested-exercises"></div>
+
+                                <button type="button" id="acceptAiProgram" class="btn btn-success">
+                                    ✅ Bu Egzersizleri Kabul Et ve Kaydet
+                                </button>
                             </div>
                         </div>
                     </div>
