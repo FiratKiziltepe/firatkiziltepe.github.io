@@ -420,7 +420,17 @@ class TodoApp {
         // Checkbox
         const checkbox = document.createElement('div');
         checkbox.className = `task-checkbox${task.completed ? ' checked' : ''}`;
-        checkbox.addEventListener('click', () => this.toggleComplete(task.id));
+        checkbox.draggable = false;
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.toggleComplete(task.id);
+        });
+        checkbox.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
 
         // Task details
         const details = document.createElement('div');
@@ -494,9 +504,16 @@ class TodoApp {
         // Actions
         const actions = document.createElement('div');
         actions.className = 'task-actions';
+        actions.draggable = false;
+        actions.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
 
         const editBtn = document.createElement('button');
         editBtn.className = 'task-btn edit-btn';
+        editBtn.draggable = false;
         editBtn.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -504,10 +521,15 @@ class TodoApp {
             </svg>
         `;
         editBtn.setAttribute('aria-label', 'Edit task');
-        editBtn.addEventListener('click', () => this.openEditModal(task.id));
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.openEditModal(task.id);
+        });
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'task-btn delete-btn';
+        deleteBtn.draggable = false;
         deleteBtn.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -515,7 +537,11 @@ class TodoApp {
             </svg>
         `;
         deleteBtn.setAttribute('aria-label', 'Delete task');
-        deleteBtn.addEventListener('click', () => this.deleteTask(task.id));
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.deleteTask(task.id);
+        });
 
         actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);

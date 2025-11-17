@@ -523,6 +523,11 @@ body {
     transition: all var(--transition-fast);
     background-color: var(--bg-secondary);
     margin-top: 2px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .task-checkbox:hover {
@@ -617,6 +622,8 @@ body {
 .task-actions {
     display: flex;
     gap: var(--spacing-xs);
+    position: relative;
+    z-index: 10;
 }
 
 .task-btn {
