@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML to SCORM 1.2 Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 HTML to SCORM 1.2 Converter</h1>
+            <p>HTML içeriklerinizi SCORM 1.2 paketine dönüştürün</p>
+        </header>
+
+        <main>
+            <section class="upload-section">
+                <h2>1. İçerik Yükle</h2>
+                <div class="upload-options">
+                    <div class="upload-method">
+                        <h3>HTML Dosyası</h3>
+                        <input type="file" id="htmlFile" accept=".html,.htm" />
+                        <label for="htmlFile" class="file-label">Dosya Seç</label>
+                        <span id="htmlFileName" class="file-name"></span>
+                    </div>
+
+                    <div class="upload-divider">VEYA</div>
+
+                    <div class="upload-method">
+                        <h3>Klasör (HTML, CSS, JS, vb.)</h3>
+                        <input type="file" id="folderUpload" webkitdirectory directory multiple />
+                        <label for="folderUpload" class="file-label">Klasör Seç</label>
+                        <span id="folderName" class="file-name"></span>
+                    </div>
+                </div>
+
+                <div id="fileList" class="file-list"></div>
+            </section>
+
+            <section class="config-section">
+                <h2>2. SCORM Paket Bilgileri</h2>
+                <form id="scormConfig">
+                    <div class="form-group">
+                        <label for="courseTitle">Kurs Başlığı *</label>
+                        <input type="text" id="courseTitle" required placeholder="Örn: Web Geliştirme Kursu">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseId">Kurs ID *</label>
+                        <input type="text" id="courseId" required placeholder="Örn: COURSE_001">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scoTitle">SCO Başlığı *</label>
+                        <input type="text" id="scoTitle" required placeholder="Örn: Modül 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scoId">SCO ID *</label>
+                        <input type="text" id="scoId" required placeholder="Örn: SCO_001">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="launchFile">Başlangıç Dosyası *</label>
+                        <input type="text" id="launchFile" required placeholder="Örn: index.html" value="index.html">
+                        <small>Yüklenecek ana HTML dosyasının adı</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Açıklama</label>
+                        <textarea id="description" rows="3" placeholder="Kurs hakkında kısa açıklama"></textarea>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="includeApi" checked>
+                        <label for="includeApi">SCORM API Wrapper dahil et (önerilir)</label>
+                    </div>
+                </form>
+            </section>
+
+            <section class="action-section">
+                <h2>3. Dönüştür ve İndir</h2>
+                <button id="convertBtn" class="btn-primary" disabled>
+                    🔄 SCORM Paketi Oluştur
+                </button>
+
+                <div id="progressBar" class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                    <span class="progress-text">İşleniyor...</span>
+                </div>
+
+                <div id="status" class="status"></div>
+            </section>
+
+            <section class="preview-section" id="previewSection" style="display: none;">
+                <h2>Paket Önizleme</h2>
+                <div id="packageInfo" class="package-info"></div>
+                <button id="downloadBtn" class="btn-success">
+                    ⬇️ SCORM Paketini İndir (.zip)
+                </button>
+            </section>
+        </main>
+
+        <footer>
+            <details class="info-section">
+                <summary>SCORM 1.2 Hakkında Bilgi</summary>
+                <div class="info-content">
+                    <h3>SCORM 1.2 Nedir?</h3>
+                    <p>SCORM (Sharable Content Object Reference Model), e-öğrenme içeriklerinin farklı LMS (Öğrenme Yönetim Sistemleri) platformlarında çalışabilmesini sağlayan bir standarttır.</p>
+
+                    <h3>Paket İçeriği</h3>
+                    <ul>
+                        <li><strong>imsmanifest.xml:</strong> Paket yapısını ve metadata'yı tanımlar</li>
+                        <li><strong>İçerik dosyaları:</strong> HTML, CSS, JS ve diğer medya dosyaları</li>
+                        <li><strong>SCORM API:</strong> LMS ile iletişim için JavaScript kodu</li>
+                    </ul>
+
+                    <h3>Desteklenen LMS Platformları</h3>
+                    <p>Moodle, Canvas, Blackboard, TalentLMS ve diğer SCORM 1.2 uyumlu platformlar</p>
+                </div>
+            </details>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
