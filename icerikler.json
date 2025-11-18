@@ -189,13 +189,8 @@
           "baslik": "Dengeli Beslenme",
           "aciklama": "Dengeli beslenme rehberi ve araçları",
           "ikon": "fas fa-apple-alt"
-        },
-        {
-          "url": "ftr.html",
-          "baslik": "Fizyoterapi",
-          "aciklama": "Fizyoterapi bilgileri ve egzersizler",
-          "ikon": "fas fa-running"
         }
+        
       ]
     },
     {
