@@ -147,7 +147,6 @@
           "aciklama": "Ses kayıt ve işleme araçları",
           "ikon": "fas fa-microphone"
         },
-       
         {
           "url": "verigorsellestirme/index.html",
           "baslik": "Veri Görselleştirme",
@@ -229,7 +228,7 @@
           "aciklama": "Tarihsel gelişim süreci",
           "ikon": "fas fa-history"
         },
-         {
+        {
           "url": "tablo/index.html",
           "baslik": "E-içerik Tablosu",
           "aciklama": "E-içerik tablosu görüntüleyici",
