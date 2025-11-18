@@ -97,6 +97,12 @@
           "aciklama": "Kapsamlı yapay zeka prompt oluşturma platformu",
           "ikon": "fas fa-magic"
         }
+        {
+          "url": "yz/index.html",
+          "baslik": "YZ araçlar listesi",
+          "aciklama": "Çeşitli yz araçların listesi",
+          "ikon": "fas fa-search"
+        },
       ]
     },
     {
@@ -107,7 +113,7 @@
         {
           "url": "soruolustur/index.html",
           "baslik": "Soru Oluşturma",
-          "aciklama": "Otomatik soru oluşturma aracı",
+          "aciklama": "Belgeden otomatik soru oluşturma aracı",
           "ikon": "fas fa-question-circle"
         }
       ]
@@ -141,27 +147,22 @@
           "aciklama": "Ses kayıt ve işleme araçları",
           "ikon": "fas fa-microphone"
         },
+       
         {
-          "url": "tablo/index.html",
-          "baslik": "Tablo Oluşturma",
-          "aciklama": "Dinamik tablo oluşturma aracı",
-          "ikon": "fas fa-table"
-        },
-        {
-          "url": "video.html",
-          "baslik": "Video Araçları",
-          "aciklama": "Video işleme ve düzenleme",
+          "url": "verigorsellestirme/index.html",
+          "baslik": "Veri Görselleştirme",
+          "aciklama": "Excel dosyasını etkili görselleştirme aracı",
           "ikon": "fas fa-video"
         },
         {
-          "url": "text-analysis-tool.html",
+          "url": "metinanaliz/index.html",
           "baslik": "Metin Analiz Aracı",
           "aciklama": "Kapsamlı metin analizi, duygu analizi ve istatistik araçları",
           "ikon": "fas fa-analytics"
         },
         {
-          "url": "todo-app.html",
-          "baslik": "Yapılacaklar Listesi",
+          "url": "todo/index.html",
+          "baslik": "To Do List Uygulaması",
           "aciklama": "Gelişmiş özellikli responsive todo uygulaması",
           "ikon": "fas fa-tasks"
         },
@@ -178,6 +179,12 @@
       "baslik": "Sağlık ve Yaşam",
       "ikon": "fas fa-heartbeat",
       "icerikler": [
+        {
+          "url": "fitness/index.html",
+          "baslik": "Fitnes Programı",
+          "aciklama": "Kişiye özel fitnes programı",
+          "ikon": "fas fa-apple-alt"
+        },
         {
           "url": "dengelibeslen/index.html",
           "baslik": "Dengeli Beslenme",
@@ -222,6 +229,12 @@
           "aciklama": "Tarihsel gelişim süreci",
           "ikon": "fas fa-history"
         }
+         {
+          "url": "tablo/index.html",
+          "baslik": "E-içerik Tablosu",
+          "aciklama": "E-içerik tablosu görüntüleyici",
+          "ikon": "fas fa-table"
+        },
       ]
     }
   ]
