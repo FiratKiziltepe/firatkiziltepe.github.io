@@ -29,7 +29,6 @@
           "aciklama": "Tren sollama interaktif uygulaması",
           "ikon": "fas fa-train"
         }
-  
       ]
     },
     {
@@ -86,14 +85,12 @@
       "baslik": "Yapay Zeka Araçları",
       "ikon": "fas fa-brain",
       "icerikler": [
-        
         {
           "url": "gemini-literature-screening/index.html",
           "baslik": "Gemini Literatür Tarama",
           "aciklama": "Gemini AI ile literatür tarama aracı",
           "ikon": "fas fa-search"
         },
-     
         {
           "url": "ai-prompt-generator/index.html",
           "baslik": "AI Prompt Oluşturucu",
@@ -107,14 +104,12 @@
       "baslik": "Eğitim İçerikleri",
       "ikon": "fas fa-book-open",
       "icerikler": [
-  
         {
           "url": "soruolustur/index.html",
           "baslik": "Soru Oluşturma",
           "aciklama": "Otomatik soru oluşturma aracı",
           "ikon": "fas fa-question-circle"
-        },
-
+        }
       ]
     },
     {
@@ -122,7 +117,6 @@
       "baslik": "Dijital Araçlar",
       "ikon": "fas fa-toolbox",
       "icerikler": [
-  
         {
           "url": "ocr/index.html",
           "baslik": "OCR - Metin Tanıma",
@@ -153,14 +147,12 @@
           "aciklama": "Dinamik tablo oluşturma aracı",
           "ikon": "fas fa-table"
         },
-
         {
           "url": "video.html",
           "baslik": "Video Araçları",
           "aciklama": "Video işleme ve düzenleme",
           "ikon": "fas fa-video"
         },
-
         {
           "url": "text-analysis-tool.html",
           "baslik": "Metin Analiz Aracı",
@@ -200,7 +192,6 @@
         }
       ]
     },
-    
     {
       "id": "oyunlar",
       "baslik": "Oyunlar",
@@ -219,7 +210,6 @@
       "baslik": "Diğer İçerikler",
       "ikon": "fas fa-folder",
       "icerikler": [
-
         {
           "url": "ott/clarkkozma.html",
           "baslik": "Clark & Kozma",
