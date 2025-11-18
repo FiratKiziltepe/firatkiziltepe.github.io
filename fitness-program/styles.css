@@ -1073,6 +1073,192 @@ body {
     font-size: 1.125rem;
 }
 
+/* ==================== EGZERSIZ EKLEME MODALI ==================== */
+
+.add-exercise-modal {
+    display: none;
+    position: fixed;
+    z-index: 9998;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.3s ease;
+}
+
+.add-exercise-modal-content {
+    background-color: var(--card-bg);
+    margin: 2% auto;
+    padding: 0;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 1200px;
+    max-height: 85vh;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.add-exercise-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 2px solid var(--border-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    color: white;
+}
+
+.add-exercise-modal-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+}
+
+.add-exercise-modal-close {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+    padding: 0 10px;
+}
+
+.add-exercise-modal-close:hover,
+.add-exercise-modal-close:focus {
+    color: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.add-exercise-modal-body {
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+    max-height: calc(85vh - 100px);
+}
+
+.add-exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.exercise-card-mini {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.exercise-card-mini:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.exercise-card-mini.selected-already {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    opacity: 0.7;
+}
+
+.exercise-card-mini-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.exercise-card-mini-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.exercise-regions-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.region-tag-mini {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+}
+
+.exercise-details-mini {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.btn-add-exercise {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add-exercise:hover {
+    background: var(--success-hover);
+    transform: scale(1.02);
+}
+
+.already-selected-badge {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* ==================== KALDIRMA BUTONU ==================== */
+
+.remove-exercise-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+.remove-exercise-btn:hover {
+    background: var(--danger-hover);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
 /* ==================== YENİ RESPONSIVE DÜZENLEMELER ==================== */
 
 .exercises-section-inner {
@@ -1506,4 +1692,40 @@ body {
 
 .ai-answer-btn:active {
     transform: scale(0.98);
+}
+
+/* ==================== MODAL RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .add-exercise-modal-content {
+        width: 95%;
+        max-height: 90vh;
+        margin: 5% auto;
+    }
+
+    .add-exercise-modal-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .add-exercise-modal-close {
+        font-size: 28px;
+        right: 15px;
+    }
+
+    .add-exercise-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .add-exercise-modal-body {
+        padding: var(--spacing-md);
+    }
+
+    .remove-exercise-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        top: 8px;
+        right: 8px;
+    }
 }

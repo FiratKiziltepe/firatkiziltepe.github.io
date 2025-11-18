@@ -53,6 +53,9 @@ function initializeApp() {
     // Lightbox'ı başlat
     initializeLightbox();
 
+    // Egzersiz ekleme modalını başlat
+    initializeAddExerciseModal();
+
     showToast('Uygulama hazır! Hazır programları inceleyin veya kendi programınızı oluşturun.', 'success');
 }
 
@@ -230,6 +233,121 @@ window.selectPresetProgram = function(programId) {
     switchTab('myprogram');
 };
 
+// GLOBAL fonksiyon - Programdan egzersiz kaldır
+window.removeExerciseFromProgram = function(exerciseId) {
+    console.log('Egzersiz kaldırılıyor:', exerciseId);
+
+    // Egzersizi seçili listeden kaldır
+    if (appState.selectedExercises[exerciseId]) {
+        delete appState.selectedExercises[exerciseId];
+
+        // LocalStorage'a kaydet
+        saveToLocalStorage();
+
+        // UI'ı güncelle
+        updateProgramSummary();
+        updateDynamicWarmup();
+        updateMyProgramView();
+        renderExercises(); // Egzersiz listesindeki seçim durumunu güncelle
+
+        showToast('Egzersiz programdan kaldırıldı', 'success');
+    }
+};
+
+// GLOBAL fonksiyon - Yeni egzersiz ekleme modalını göster
+window.showAddExerciseModal = function() {
+    console.log('Egzersiz ekleme modalı açılıyor...');
+
+    const modal = document.getElementById('addExerciseModal');
+    if (!modal) {
+        console.error('addExerciseModal bulunamadı!');
+        return;
+    }
+
+    // Modal içeriğini oluştur - tüm egzersizleri listele
+    const modalBody = modal.querySelector('.add-exercise-modal-body');
+    if (!modalBody) {
+        console.error('Modal body bulunamadı!');
+        return;
+    }
+
+    // Egzersizleri filtrele - zaten seçili olanları işaretle
+    let html = '<div class="add-exercise-grid">';
+
+    EXERCISES_DATA.forEach(exercise => {
+        const isSelected = appState.selectedExercises[exercise.id]?.selected;
+        const cardClass = isSelected ? 'exercise-card-mini selected-already' : 'exercise-card-mini';
+
+        html += `
+            <div class="${cardClass}" data-exercise-id="${exercise.id}">
+                <div class="exercise-card-mini-header">
+                    <h4>${exercise.name}</h4>
+                    <span class="exercise-badge badge-level-${exercise.level}">${exercise.level}</span>
+                </div>
+                <div class="exercise-regions-mini">
+                    ${exercise.region.slice(0, 2).map(r => `<span class="region-tag-mini">${r}</span>`).join('')}
+                </div>
+                <div class="exercise-details-mini">
+                    <span>${exercise.defaultSets} set</span>
+                    ${exercise.type === 'reps' ? `<span>${exercise.defaultReps} tekrar</span>` : `<span>${exercise.defaultTimeSec}sn</span>`}
+                </div>
+                ${isSelected
+                    ? '<div class="already-selected-badge">✓ Seçili</div>'
+                    : `<button class="btn-add-exercise" onclick="addExerciseToProgram('${exercise.id}')">+ Ekle</button>`
+                }
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    modalBody.innerHTML = html;
+
+    // Modalı göster
+    modal.style.display = 'block';
+};
+
+// GLOBAL fonksiyon - Programa yeni egzersiz ekle
+window.addExerciseToProgram = function(exerciseId) {
+    console.log('Egzersiz programa ekleniyor:', exerciseId);
+
+    const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
+    if (!exercise) {
+        console.error('Egzersiz bulunamadı:', exerciseId);
+        return;
+    }
+
+    // Egzersizi seçili listeye ekle
+    appState.selectedExercises[exerciseId] = {
+        selected: true,
+        sets: exercise.defaultSets,
+        reps: exercise.defaultReps,
+        timeSec: exercise.defaultTimeSec,
+        weightKg: exercise.defaultWeightKg
+    };
+
+    // LocalStorage'a kaydet
+    saveToLocalStorage();
+
+    // UI'ı güncelle
+    updateProgramSummary();
+    updateDynamicWarmup();
+    updateMyProgramView();
+    renderExercises();
+
+    showToast(`"${exercise.name}" programa eklendi`, 'success');
+
+    // Modalı kapat
+    closeAddExerciseModal();
+};
+
+// GLOBAL fonksiyon - Egzersiz ekleme modalını kapat
+window.closeAddExerciseModal = function() {
+    const modal = document.getElementById('addExerciseModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
 // ==================== KENDİ PROGRAMIM GÖRÜNÜMÜ ====================
 
 function updateMyProgramView() {
@@ -278,9 +396,14 @@ function updateMyProgramView() {
 function renderPresetProgramView(container, program) {
     let html = `
         <div class="my-program-preset-info">
-            <h3 style="text-align:center; margin-bottom:2rem; color: var(--primary-color);">
+            <h3 style="text-align:center; margin-bottom:1rem; color: var(--primary-color);">
                 📦 ${program.name}
             </h3>
+            <div style="text-align:center; margin-bottom:2rem;">
+                <button class="btn btn-secondary" onclick="showAddExerciseModal()">
+                    ➕ Yeni Egzersiz Ekle
+                </button>
+            </div>
         </div>
     `;
 
@@ -300,7 +423,7 @@ function renderPresetProgramView(container, program) {
             const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
             if (exercise) {
                 const data = appState.selectedExercises[exerciseId] || {};
-                html += createMyProgramExerciseCard(exercise, data);
+                html += createMyProgramExerciseCard(exercise, data, true); // true = göster kaldır butonu
             }
         });
 
@@ -326,9 +449,14 @@ function renderCustomProgramView(container, exercises) {
 
     let html = `
         <div class="my-program-custom-info">
-            <h3 style="text-align:center; margin-bottom:2rem; color: var(--primary-color);">
+            <h3 style="text-align:center; margin-bottom:1rem; color: var(--primary-color);">
                 ⭐ Özel Programınız
             </h3>
+            <div style="text-align:center; margin-bottom:2rem;">
+                <button class="btn btn-secondary" onclick="showAddExerciseModal()">
+                    ➕ Yeni Egzersiz Ekle
+                </button>
+            </div>
         </div>
     `;
 
@@ -343,7 +471,7 @@ function renderCustomProgramView(container, exercises) {
         `;
 
         exList.forEach(exercise => {
-            html += createMyProgramExerciseCard(exercise, appState.selectedExercises[exercise.id]);
+            html += createMyProgramExerciseCard(exercise, appState.selectedExercises[exercise.id], true); // true = göster kaldır butonu
         });
 
         html += `
@@ -355,14 +483,19 @@ function renderCustomProgramView(container, exercises) {
     container.innerHTML = html;
 }
 
-function createMyProgramExerciseCard(exercise, data) {
+function createMyProgramExerciseCard(exercise, data, showRemoveButton = false) {
     const sets = data.sets || exercise.defaultSets;
     const reps = data.reps || exercise.defaultReps;
     const timeSec = data.timeSec || exercise.defaultTimeSec;
     const weightKg = data.weightKg !== undefined ? data.weightKg : exercise.defaultWeightKg;
 
     return `
-        <div class="exercise-card selected">
+        <div class="exercise-card selected" style="position: relative;">
+            ${showRemoveButton ? `
+                <button class="remove-exercise-btn" onclick="removeExerciseFromProgram('${exercise.id}')" title="Bu egzersizi kaldır">
+                    🗑️
+                </button>
+            ` : ''}
             ${createExerciseImageHTML(exercise)}
             <div class="exercise-card-title">
                 <h3>${exercise.name}</h3>
@@ -497,6 +630,21 @@ function closeLightbox() {
     if (modal) {
         modal.classList.remove('active');
     }
+}
+
+// ==================== EGZERSIZ EKLEME MODALI ====================
+
+function initializeAddExerciseModal() {
+    const modal = document.getElementById('addExerciseModal');
+
+    if (!modal) return;
+
+    // Modalın dışına tıklandığında kapat
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeAddExerciseModal();
+        }
+    });
 }
 
 // ==================== LOCALSTORAGE İŞLEMLERİ ====================
