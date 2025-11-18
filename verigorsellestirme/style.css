@@ -94,6 +94,30 @@ header p {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+.or-divider {
+    margin: 15px 0;
+    color: #999;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.example-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 5px;
+}
+
+.example-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
 .file-info {
     margin-top: 20px;
     padding: 15px;
@@ -182,6 +206,58 @@ header p {
     color: #333;
     margin-bottom: 25px;
     font-size: 1.8rem;
+}
+
+/* Grafik Önerileri */
+.chart-suggestions {
+    background: linear-gradient(135deg, #fff5f7 0%, #fff 100%);
+    border: 2px solid #f093fb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.chart-suggestions h3 {
+    color: #f5576c;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.suggestion-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.suggestion-badge {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.suggestion-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+}
+
+.suggestion-badge.recommended {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
 }
 
 .chart-types {

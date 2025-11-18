@@ -1,0 +1,21 @@
+ogrenci_id,ad,cinsiyet,yas,sinif,bolum,not_ortalamasi,devamsizlik_gun,ders_saati,kitap_sayisi,spor_aktivitesi,yurt_mu,burs_durumu,gunluk_calisma_saati,kardes_sayisi,gelir_durumu,internet_erisimi,online_ders_memnuniyet,proje_sayisi,sosyal_kulup
+1,Ahmet Yılmaz,Erkek,19,2,Bilgisayar Mühendisliği,3.45,5,25,12,Futbol,Evet,Tam Burs,4.5,2,Orta,Evet,8,3,Robotik Kulübü
+2,Ayşe Demir,Kadın,20,3,İşletme,3.78,2,22,8,Yok,Hayır,Kısmi Burs,6.0,1,Yüksek,Evet,9,5,Girişimcilik
+3,Mehmet Kaya,Erkek,18,1,Elektrik Mühendisliği,2.89,8,28,5,Basketbol,Evet,Yok,3.0,3,Düşük,Evet,6,1,Yok
+4,Zeynep Şahin,Kadın,21,4,Psikoloji,3.92,1,20,15,Voleybol,Hayır,Tam Burs,5.5,0,Orta,Evet,10,7,Sosyal Sorumluluk
+5,Can Öztürk,Erkek,19,2,Makine Mühendisliği,3.12,6,26,7,Yüzme,Evet,Kısmi Burs,3.5,2,Orta,Evet,7,2,Yok
+6,Elif Arslan,Kadın,20,3,Mimarlık,3.65,3,24,11,Yok,Hayır,Yok,7.0,1,Yüksek,Evet,8,6,Sanat Kulübü
+7,Burak Çelik,Erkek,22,4,Hukuk,3.54,4,18,9,Futbol,Hayır,Yok,4.0,2,Yüksek,Evet,7,4,Hukuk Kulübü
+8,Selin Yıldız,Kadın,18,1,Tıp,3.88,1,32,14,Tenis,Evet,Tam Burs,8.0,1,Orta,Evet,9,2,Bilim Kulübü
+9,Emre Aydın,Erkek,19,2,Endüstri Mühendisliği,2.95,7,25,6,Yok,Evet,Yok,2.5,4,Düşük,Hayır,5,1,Yok
+10,Deniz Koç,Kadın,21,3,İktisat,3.42,5,21,10,Pilates,Hayır,Kısmi Burs,5.0,2,Orta,Evet,8,3,Ekonomi Kulübü
+11,Ali Tekin,Erkek,20,3,Fizik,3.71,2,23,13,Yok,Evet,Tam Burs,6.5,1,Düşük,Evet,9,5,Bilim Kulübü
+12,Merve Bulut,Kadın,19,2,Uluslararası İlişkiler,3.58,3,20,9,Voleybol,Hayır,Yok,4.5,3,Yüksek,Evet,7,4,Model BM
+13,Oğuz Şen,Erkek,18,1,İnşaat Mühendisliği,2.67,10,27,4,Futbol,Evet,Yok,2.0,2,Orta,Evet,4,0,Yok
+14,Gizem Acar,Kadın,22,4,Kimya,3.85,2,22,16,Yok,Hayır,Tam Burs,7.0,0,Orta,Evet,10,8,Bilim Kulübü
+15,Cem Polat,Erkek,20,3,İletişim,3.22,6,19,7,Basketbol,Evet,Kısmi Burs,3.0,3,Düşük,Evet,6,2,Medya Kulübü
+16,Duygu Kılıç,Kadın,19,2,Matematik,3.94,1,26,18,Yok,Hayır,Tam Burs,8.5,1,Orta,Evet,10,6,Matematik Kulübü
+17,Kaan Özkan,Erkek,21,4,Ziraat Mühendisliği,3.15,5,21,8,Yok,Evet,Yok,3.5,4,Düşük,Hayır,5,2,Yok
+18,Tuğçe Erdoğan,Kadın,18,1,Biyoloji,3.76,2,28,12,Dans,Evet,Kısmi Burs,5.5,2,Orta,Evet,8,3,Bilim Kulübü
+19,Eda Yavuz,Kadın,20,3,Çevre Mühendisliği,3.29,4,24,9,Yok,Hayır,Kısmi Burs,4.0,2,Orta,Evet,7,3,Çevre Kulübü
+20,Barış Aksoy,Erkek,19,2,Enformatik,3.61,3,23,11,E-Spor,Evet,Tam Burs,5.0,1,Orta,Evet,8,4,Teknoloji Kulübü

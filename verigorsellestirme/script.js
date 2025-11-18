@@ -139,6 +139,134 @@ function displayData() {
     // Bölümleri göster
     document.getElementById('dataPreview').style.display = 'block';
     document.getElementById('chartSelection').style.display = 'block';
+
+    // Grafik önerilerini göster
+    showChartSuggestions();
+}
+
+// Örnek veri yükle
+function loadExampleData() {
+    fetch('ornek_veri.csv')
+        .then(response => response.text())
+        .then(csvData => {
+            uploadedData = parseCSV(csvData);
+            document.getElementById('fileName').textContent = 'Örnek Veri (20 Öğrenci)';
+            document.getElementById('fileInfo').style.display = 'block';
+            displayData();
+        })
+        .catch(error => {
+            console.error('Örnek veri yüklenirken hata:', error);
+            alert('Örnek veri yüklenirken bir hata oluştu!');
+        });
+}
+
+// Veriye göre grafik önerileri göster
+function showChartSuggestions() {
+    if (!uploadedData || uploadedData.length < 2) return;
+
+    const headers = uploadedData[0];
+    const suggestions = [];
+
+    // Veri analizleri
+    const numericColumns = [];
+    const categoricalColumns = [];
+    const dateColumns = [];
+
+    headers.forEach((header, index) => {
+        if (index === 0) return; // İlk sütunu (ID) atla
+
+        const sampleValues = uploadedData.slice(1, 6).map(row => row[index]);
+
+        // Sayısal mı kontrol et
+        const numericCount = sampleValues.filter(v => !isNaN(parseFloat(v))).length;
+        if (numericCount >= 3) {
+            numericColumns.push({ index, header });
+        } else {
+            categoricalColumns.push({ index, header });
+        }
+
+        // Tarih mi kontrol et
+        const dateCount = sampleValues.filter(v => !isNaN(Date.parse(v))).length;
+        if (dateCount >= 3) {
+            dateColumns.push({ index, header });
+        }
+    });
+
+    // Öneri algoritması
+    const uniqueCategories = new Set(uploadedData.slice(1).map(row => row[categoricalColumns[0]?.index])).size;
+
+    // 1. Kategorik + Sayısal varsa
+    if (categoricalColumns.length > 0 && numericColumns.length > 0) {
+        if (uniqueCategories <= 5) {
+            suggestions.push({ type: 'pie', name: 'Pasta Grafiği', reason: 'Kategorik dağılım görmek için', recommended: true });
+            suggestions.push({ type: 'doughnut', name: 'Halka Grafiği', reason: 'Oranları görmek için' });
+        }
+        suggestions.push({ type: 'bar', name: 'Sütun Grafiği', reason: 'Kategorileri karşılaştırmak için', recommended: !suggestions.length });
+
+        if (numericColumns.length >= 2) {
+            suggestions.push({ type: 'barGrouped', name: 'Gruplu Sütun', reason: 'Çoklu karşılaştırma için' });
+            suggestions.push({ type: 'barStacked', name: 'Yığılmış Sütun', reason: 'Alt kategorileri görmek için' });
+        }
+    }
+
+    // 2. Çok sayısal değişken varsa
+    if (numericColumns.length >= 2) {
+        suggestions.push({ type: 'scatter', name: 'Dağılım Grafiği', reason: 'Korelasyon analizi için', recommended: !suggestions.length });
+        suggestions.push({ type: 'line', name: 'Çizgi Grafiği', reason: 'Eğilimleri görmek için' });
+    }
+
+    // 3. Tek sayısal değişken varsa
+    if (numericColumns.length === 1) {
+        suggestions.push({ type: 'histogram', name: 'Histogram', reason: 'Dağılımı görmek için', recommended: true });
+    }
+
+    // 4. Kategorik değişken + sayısal varsa boxplot
+    if (categoricalColumns.length > 0 && numericColumns.length >= 1 && uniqueCategories <= 8) {
+        suggestions.push({ type: 'boxplot', name: 'Boxplot', reason: 'İstatistiksel analiz için' });
+    }
+
+    // 5. Çok boyutlu analiz
+    if (numericColumns.length >= 3) {
+        suggestions.push({ type: 'radar', name: 'Radar Grafiği', reason: 'Çok boyutlu karşılaştırma için' });
+    }
+
+    // 6. Tarih sütunları varsa
+    if (dateColumns.length >= 2) {
+        suggestions.push({ type: 'timeline', name: 'Zaman Çizelgesi', reason: 'Zaman aralıklarını görmek için' });
+    }
+
+    // Önerileri göster
+    if (suggestions.length > 0) {
+        const suggestionList = document.getElementById('suggestionList');
+        suggestionList.innerHTML = '';
+
+        suggestions.forEach(suggestion => {
+            const badge = document.createElement('div');
+            badge.className = 'suggestion-badge' + (suggestion.recommended ? ' recommended' : '');
+            badge.textContent = `${suggestion.name}${suggestion.recommended ? ' ⭐' : ''} - ${suggestion.reason}`;
+            badge.onclick = () => {
+                // Grafik tipini otomatik seç
+                document.querySelectorAll('.chart-type-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+
+                const cardToSelect = Array.from(document.querySelectorAll('.chart-type-card'))
+                    .find(card => card.getAttribute('onclick').includes(`'${suggestion.type}'`));
+
+                if (cardToSelect) {
+                    cardToSelect.classList.add('selected');
+                    selectedChartType = suggestion.type;
+                    showColumnSelection();
+
+                    // Grafik kartına kaydır
+                    cardToSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            };
+            suggestionList.appendChild(badge);
+        });
+
+        document.getElementById('chartSuggestions').style.display = 'block';
+    }
 }
 
 // Dosyayı kaldır
@@ -227,6 +355,8 @@ function generateChart() {
         config = generateStackedBarChart(labelColumnIndex, selectedValueIndices);
     } else if (selectedChartType === 'barGrouped') {
         config = generateGroupedBarChart(labelColumnIndex, selectedValueIndices);
+    } else if (selectedChartType === 'pie' || selectedChartType === 'doughnut' || selectedChartType === 'polarArea') {
+        config = generatePieChart(labelColumnIndex, selectedValueIndices[0]);
     } else {
         config = generateStandardChart(labelColumnIndex, selectedValueIndices);
     }
@@ -315,6 +445,67 @@ function generateStandardChart(labelColumnIndex, selectedValueIndices) {
                     }
                 }
             } : {}
+        }
+    };
+}
+
+// Pasta/Halka/Polar grafik oluştur
+function generatePieChart(labelColumnIndex, valueIndex) {
+    const categoryCount = {};
+
+    // Kategorilere göre değerleri topla
+    for (let i = 1; i < uploadedData.length; i++) {
+        const category = uploadedData[i][labelColumnIndex];
+        const value = parseFloat(uploadedData[i][valueIndex]) || 1;
+
+        if (categoryCount[category]) {
+            categoryCount[category] += value;
+        } else {
+            categoryCount[category] = value;
+        }
+    }
+
+    const labels = Object.keys(categoryCount);
+    const data = Object.values(categoryCount);
+
+    // Her kategori için farklı renk oluştur
+    const backgroundColors = labels.map((_, index) => generateColor(index));
+
+    return {
+        type: selectedChartType,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: uploadedData[0][valueIndex],
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: backgroundColors.map(c => c.replace('0.7', '1')),
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                },
+                title: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
         }
     };
 }
@@ -677,14 +868,26 @@ function generateTimelineChart(labelColumnIndex, selectedValueIndices) {
 // Renk oluştur
 function generateColor(index) {
     const colors = [
-        'rgba(102, 126, 234, 0.7)',
-        'rgba(237, 100, 166, 0.7)',
-        'rgba(255, 159, 64, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
-        'rgba(255, 99, 132, 0.7)',
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(255, 206, 86, 0.7)',
+        'rgba(102, 126, 234, 0.7)',  // Mor-mavi
+        'rgba(237, 100, 166, 0.7)',  // Pembe
+        'rgba(255, 159, 64, 0.7)',   // Turuncu
+        'rgba(75, 192, 192, 0.7)',   // Turkuaz
+        'rgba(153, 102, 255, 0.7)',  // Mor
+        'rgba(255, 99, 132, 0.7)',   // Kırmızı-pembe
+        'rgba(54, 162, 235, 0.7)',   // Mavi
+        'rgba(255, 206, 86, 0.7)',   // Sarı
+        'rgba(76, 175, 80, 0.7)',    // Yeşil
+        'rgba(121, 85, 72, 0.7)',    // Kahverengi
+        'rgba(156, 39, 176, 0.7)',   // Mor
+        'rgba(0, 150, 136, 0.7)',    // Teal
+        'rgba(233, 30, 99, 0.7)',    // Derin pembe
+        'rgba(63, 81, 181, 0.7)',    // İndigo
+        'rgba(255, 87, 34, 0.7)',    // Derin turuncu
+        'rgba(96, 125, 139, 0.7)',   // Gri-mavi
+        'rgba(205, 220, 57, 0.7)',   // Lime
+        'rgba(255, 152, 0, 0.7)',    // Turuncu
+        'rgba(103, 58, 183, 0.7)',   // Derin mor
+        'rgba(0, 188, 212, 0.7)',    // Cyan
     ];
     return colors[index % colors.length];
 }

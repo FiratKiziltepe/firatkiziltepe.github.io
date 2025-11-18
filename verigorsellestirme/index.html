@@ -30,6 +30,10 @@
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
                     Dosya Seç
                 </button>
+                <div class="or-divider">veya</div>
+                <button class="example-btn" onclick="loadExampleData()">
+                    📊 Örnek Veri ile Deneyin (20 Öğrenci Verisi)
+                </button>
             </div>
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="info-content">
@@ -50,6 +54,13 @@
         <!-- Grafik Seçimi -->
         <section class="chart-selection" id="chartSelection" style="display: none;">
             <h2>Grafik Türünü Seçin</h2>
+
+            <!-- Grafik Önerileri -->
+            <div class="chart-suggestions" id="chartSuggestions" style="display: none;">
+                <h3>💡 Verileriniz için Önerilen Grafikler</h3>
+                <div class="suggestion-list" id="suggestionList"></div>
+            </div>
+
             <div class="chart-types">
                 <div class="chart-type-card" onclick="selectChartType('bar')">
                     <div class="chart-icon">📊</div>
