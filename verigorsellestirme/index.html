@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veri Görselleştirme Platformu</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js için CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- SheetJS (xlsx) için CDN -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Veri Görselleştirme Platformu</h1>
+            <p>CSV veya Excel dosyanızı yükleyin ve profesyonel grafikler oluşturun</p>
+        </header>
+
+        <!-- Dosya Yükleme Bölümü -->
+        <section class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>Dosya Yükle</h3>
+                <p>CSV veya Excel (.xlsx, .xls) dosyanızı buraya sürükleyin veya tıklayın</p>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Dosya Seç
+                </button>
+            </div>
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <div class="info-content">
+                    <span id="fileName"></span>
+                    <button class="remove-btn" onclick="removeFile()">✕</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Veri Önizleme -->
+        <section class="data-preview" id="dataPreview" style="display: none;">
+            <h2>Veri Önizleme</h2>
+            <div class="table-container">
+                <table id="dataTable"></table>
+            </div>
+        </section>
+
+        <!-- Grafik Seçimi -->
+        <section class="chart-selection" id="chartSelection" style="display: none;">
+            <h2>Grafik Türünü Seçin</h2>
+            <div class="chart-types">
+                <div class="chart-type-card" onclick="selectChartType('bar')">
+                    <div class="chart-icon">📊</div>
+                    <h3>Sütun Grafiği</h3>
+                    <p>Kategorik verileri karşılaştırın</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('line')">
+                    <div class="chart-icon">📈</div>
+                    <h3>Çizgi Grafiği</h3>
+                    <p>Zamansal eğilimleri gösterin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('pie')">
+                    <div class="chart-icon">🥧</div>
+                    <h3>Pasta Grafiği</h3>
+                    <p>Oranları görselleştirin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('doughnut')">
+                    <div class="chart-icon">🍩</div>
+                    <h3>Halka Grafiği</h3>
+                    <p>Dağılımları gösterin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('radar')">
+                    <div class="chart-icon">🎯</div>
+                    <h3>Radar Grafiği</h3>
+                    <p>Çok boyutlu verileri analiz edin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('polarArea')">
+                    <div class="chart-icon">🌐</div>
+                    <h3>Polar Alan Grafiği</h3>
+                    <p>Döngüsel verileri gösterin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('scatter')">
+                    <div class="chart-icon">⚫</div>
+                    <h3>Dağılım Grafiği</h3>
+                    <p>Korelasyonları keşfedin</p>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('bubble')">
+                    <div class="chart-icon">🫧</div>
+                    <h3>Balon Grafiği</h3>
+                    <p>3 boyutlu ilişkileri gösterin</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sütun Seçimi -->
+        <section class="column-selection" id="columnSelection" style="display: none;">
+            <h2>Veri Sütunlarını Seçin</h2>
+            <div class="column-inputs">
+                <div class="input-group">
+                    <label for="labelColumn">Etiket Sütunu (X Ekseni):</label>
+                    <select id="labelColumn"></select>
+                </div>
+                <div class="input-group">
+                    <label for="valueColumns">Değer Sütunları (Y Ekseni):</label>
+                    <select id="valueColumns" multiple></select>
+                    <small>Birden fazla seçim için Ctrl/Cmd tuşuna basılı tutun</small>
+                </div>
+            </div>
+            <button class="generate-btn" onclick="generateChart()">Grafik Oluştur</button>
+        </section>
+
+        <!-- Grafik Görüntüleme -->
+        <section class="chart-display" id="chartDisplay" style="display: none;">
+            <div class="chart-header">
+                <h2>Grafiğiniz Hazır!</h2>
+                <div class="chart-controls">
+                    <button class="control-btn" onclick="toggleOptions()">⚙️ Ayarlar</button>
+                    <button class="control-btn" onclick="backToSelection()">🔄 Yeni Grafik</button>
+                </div>
+            </div>
+
+            <!-- Grafik Özelleştirme Paneli -->
+            <div class="options-panel" id="optionsPanel" style="display: none;">
+                <div class="option-group">
+                    <label for="chartTitle">Grafik Başlığı:</label>
+                    <input type="text" id="chartTitle" placeholder="Grafik başlığı...">
+                </div>
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="showLegend" checked>
+                        Açıklamayı Göster
+                    </label>
+                </div>
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="showGrid" checked>
+                        Izgara Çizgilerini Göster
+                    </label>
+                </div>
+                <button class="apply-btn" onclick="applyOptions()">Uygula</button>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="myChart"></canvas>
+            </div>
+
+            <!-- İndirme Seçenekleri -->
+            <div class="download-options">
+                <h3>Grafiği İndir</h3>
+                <div class="download-buttons">
+                    <button class="download-btn png" onclick="downloadChart('png')">
+                        🖼️ PNG İndir (Yüksek Çözünürlük)
+                    </button>
+                    <button class="download-btn svg" onclick="downloadChart('svg')">
+                        📊 SVG İndir (Vektörel)
+                    </button>
+                    <button class="download-btn jpg" onclick="downloadChart('jpg')">
+                        🎨 JPG İndir
+                    </button>
+                </div>
+                <div class="resolution-options">
+                    <label for="resolution">Çözünürlük:</label>
+                    <select id="resolution">
+                        <option value="1">Normal (1x)</option>
+                        <option value="2" selected>Yüksek (2x)</option>
+                        <option value="3">Çok Yüksek (3x)</option>
+                        <option value="4">Ultra (4x)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
