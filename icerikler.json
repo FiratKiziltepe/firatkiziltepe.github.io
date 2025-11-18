@@ -96,13 +96,13 @@
           "baslik": "AI Prompt Oluşturucu",
           "aciklama": "Kapsamlı yapay zeka prompt oluşturma platformu",
           "ikon": "fas fa-magic"
-        }
+        },
         {
           "url": "yz/index.html",
           "baslik": "YZ araçlar listesi",
           "aciklama": "Çeşitli yz araçların listesi",
           "ikon": "fas fa-search"
-        },
+        }
       ]
     },
     {
@@ -228,13 +228,13 @@
           "baslik": "Tarihsel Süreç",
           "aciklama": "Tarihsel gelişim süreci",
           "ikon": "fas fa-history"
-        }
+        },
          {
           "url": "tablo/index.html",
           "baslik": "E-içerik Tablosu",
           "aciklama": "E-içerik tablosu görüntüleyici",
           "ikon": "fas fa-table"
-        },
+        }
       ]
     }
   ]
