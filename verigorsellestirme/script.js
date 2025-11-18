@@ -215,7 +215,40 @@ function generateChart() {
         return;
     }
 
-    // Veriyi hazırla
+    // Grafik türüne göre özel işlemler
+    let config;
+    if (selectedChartType === 'boxplot') {
+        config = generateBoxplotChart(labelColumnIndex, selectedValueIndices);
+    } else if (selectedChartType === 'histogram') {
+        config = generateHistogramChart(selectedValueIndices[0]);
+    } else if (selectedChartType === 'timeline') {
+        config = generateTimelineChart(labelColumnIndex, selectedValueIndices);
+    } else if (selectedChartType === 'barStacked') {
+        config = generateStackedBarChart(labelColumnIndex, selectedValueIndices);
+    } else if (selectedChartType === 'barGrouped') {
+        config = generateGroupedBarChart(labelColumnIndex, selectedValueIndices);
+    } else {
+        config = generateStandardChart(labelColumnIndex, selectedValueIndices);
+    }
+
+    // Önceki grafiği yok et
+    if (currentChart) {
+        currentChart.destroy();
+    }
+
+    // Yeni grafik oluştur
+    const ctx = document.getElementById('myChart').getContext('2d');
+    currentChart = new Chart(ctx, config);
+
+    // Grafik görüntüleme bölümünü göster
+    document.getElementById('chartDisplay').style.display = 'block';
+
+    // Grafiğe kaydır
+    document.getElementById('chartDisplay').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Standart grafik oluştur (bar, line, pie, doughnut, radar, polarArea, scatter, bubble)
+function generateStandardChart(labelColumnIndex, selectedValueIndices) {
     const labels = [];
     const datasets = [];
 
@@ -224,9 +257,6 @@ function generateChart() {
         const dataPoints = [];
 
         for (let i = 1; i < uploadedData.length; i++) {
-            if (i === 1) {
-                // İlk satırda etiketleri topla
-            }
             const label = uploadedData[i][labelColumnIndex];
             const value = parseFloat(uploadedData[i][valueIndex]) || 0;
 
@@ -236,7 +266,6 @@ function generateChart() {
             dataPoints.push(value);
         }
 
-        // Renk oluştur
         const color = generateColor(selectedValueIndices.indexOf(valueIndex));
 
         datasets.push({
@@ -252,12 +281,10 @@ function generateChart() {
         });
     });
 
-    // Benzersiz etiketler
     const uniqueLabels = [...new Set(labels)];
 
-    // Grafik yapılandırması
-    const config = {
-        type: selectedChartType === 'scatter' || selectedChartType === 'bubble' ? selectedChartType : selectedChartType,
+    return {
+        type: selectedChartType,
         data: {
             labels: uniqueLabels,
             datasets: datasets
@@ -290,21 +317,361 @@ function generateChart() {
             } : {}
         }
     };
+}
 
-    // Önceki grafiği yok et
-    if (currentChart) {
-        currentChart.destroy();
+// Yığılmış sütun grafiği
+function generateStackedBarChart(labelColumnIndex, selectedValueIndices) {
+    const labels = [];
+    const datasets = [];
+
+    selectedValueIndices.forEach(valueIndex => {
+        const dataPoints = [];
+
+        for (let i = 1; i < uploadedData.length; i++) {
+            const label = uploadedData[i][labelColumnIndex];
+            const value = parseFloat(uploadedData[i][valueIndex]) || 0;
+
+            if (selectedValueIndices.indexOf(valueIndex) === 0) {
+                labels.push(label);
+            }
+            dataPoints.push(value);
+        }
+
+        const color = generateColor(selectedValueIndices.indexOf(valueIndex));
+
+        datasets.push({
+            label: uploadedData[0][valueIndex],
+            data: dataPoints,
+            backgroundColor: color,
+            borderColor: color.replace('0.7', '1'),
+            borderWidth: 1,
+        });
+    });
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: true
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: {
+                        display: true
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Gruplu sütun grafiği
+function generateGroupedBarChart(labelColumnIndex, selectedValueIndices) {
+    const labels = [];
+    const datasets = [];
+
+    selectedValueIndices.forEach(valueIndex => {
+        const dataPoints = [];
+
+        for (let i = 1; i < uploadedData.length; i++) {
+            const label = uploadedData[i][labelColumnIndex];
+            const value = parseFloat(uploadedData[i][valueIndex]) || 0;
+
+            if (selectedValueIndices.indexOf(valueIndex) === 0) {
+                labels.push(label);
+            }
+            dataPoints.push(value);
+        }
+
+        const color = generateColor(selectedValueIndices.indexOf(valueIndex));
+
+        datasets.push({
+            label: uploadedData[0][valueIndex],
+            data: dataPoints,
+            backgroundColor: color,
+            borderColor: color.replace('0.7', '1'),
+            borderWidth: 1,
+        });
+    });
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: true
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Boxplot grafiği
+function generateBoxplotChart(labelColumnIndex, selectedValueIndices) {
+    const labels = [];
+    const datasets = [];
+
+    // Kategorilere göre verileri grupla
+    const groupedData = {};
+
+    for (let i = 1; i < uploadedData.length; i++) {
+        const label = uploadedData[i][labelColumnIndex];
+        if (!groupedData[label]) {
+            groupedData[label] = [];
+        }
+
+        selectedValueIndices.forEach(valueIndex => {
+            const value = parseFloat(uploadedData[i][valueIndex]);
+            if (!isNaN(value)) {
+                groupedData[label].push(value);
+            }
+        });
     }
 
-    // Yeni grafik oluştur
-    const ctx = document.getElementById('myChart').getContext('2d');
-    currentChart = new Chart(ctx, config);
+    // Her kategori için boxplot verisi oluştur
+    const boxplotData = Object.keys(groupedData).map(label => {
+        const values = groupedData[label].sort((a, b) => a - b);
+        labels.push(label);
+        return values;
+    });
 
-    // Grafik görüntüleme bölümünü göster
-    document.getElementById('chartDisplay').style.display = 'block';
+    const color = generateColor(0);
 
-    // Grafiğe kaydır
-    document.getElementById('chartDisplay').scrollIntoView({ behavior: 'smooth' });
+    return {
+        type: 'boxplot',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Dağılım',
+                data: boxplotData,
+                backgroundColor: color,
+                borderColor: color.replace('0.7', '1'),
+                borderWidth: 1,
+                outlierBackgroundColor: 'rgba(255, 99, 132, 0.7)',
+                outlierBorderColor: 'rgba(255, 99, 132, 1)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            }
+        }
+    };
+}
+
+// Histogram grafiği
+function generateHistogramChart(valueIndex) {
+    const values = [];
+
+    for (let i = 1; i < uploadedData.length; i++) {
+        const value = parseFloat(uploadedData[i][valueIndex]);
+        if (!isNaN(value)) {
+            values.push(value);
+        }
+    }
+
+    // Histogram için sınıf aralıkları oluştur
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const binCount = Math.ceil(Math.sqrt(values.length)); // Sturges kuralı
+    const binWidth = (max - min) / binCount;
+
+    const bins = [];
+    const frequencies = [];
+
+    for (let i = 0; i < binCount; i++) {
+        const binStart = min + (i * binWidth);
+        const binEnd = binStart + binWidth;
+        const binLabel = `${binStart.toFixed(1)}-${binEnd.toFixed(1)}`;
+        bins.push(binLabel);
+
+        const count = values.filter(v => v >= binStart && v < binEnd).length;
+        frequencies.push(count);
+    }
+
+    const color = generateColor(0);
+
+    return {
+        type: 'bar',
+        data: {
+            labels: bins,
+            datasets: [{
+                label: uploadedData[0][valueIndex] + ' - Frekans',
+                data: frequencies,
+                backgroundColor: color,
+                borderColor: color.replace('0.7', '1'),
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Frekans'
+                    },
+                    grid: {
+                        display: true
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: uploadedData[0][valueIndex]
+                    },
+                    grid: {
+                        display: true
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Timeline (Gantt) grafiği
+function generateTimelineChart(labelColumnIndex, selectedValueIndices) {
+    const labels = [];
+    const datasets = [];
+
+    // Timeline için başlangıç ve bitiş tarihleri gerekli (2 sütun)
+    if (selectedValueIndices.length < 2) {
+        alert('Timeline grafiği için en az 2 sütun seçin (başlangıç ve bitiş tarihleri)');
+        return generateStandardChart(labelColumnIndex, selectedValueIndices);
+    }
+
+    const startIndex = selectedValueIndices[0];
+    const endIndex = selectedValueIndices[1];
+
+    const timelineData = [];
+
+    for (let i = 1; i < uploadedData.length; i++) {
+        const label = uploadedData[i][labelColumnIndex];
+        const startDate = new Date(uploadedData[i][startIndex]);
+        const endDate = new Date(uploadedData[i][endIndex]);
+
+        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            labels.push(label);
+            timelineData.push([startDate.getTime(), endDate.getTime()]);
+        }
+    }
+
+    const color = generateColor(0);
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Zaman Aralığı',
+                data: timelineData.map(t => t[1] - t[0]),
+                backgroundColor: color,
+                borderColor: color.replace('0.7', '1'),
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const days = Math.ceil(context.parsed.x / (1000 * 60 * 60 * 24));
+                            return `Süre: ${days} gün`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Süre (ms)'
+                    },
+                    grid: {
+                        display: true
+                    }
+                },
+                y: {
+                    grid: {
+                        display: true
+                    }
+                }
+            }
+        }
+    };
 }
 
 // Renk oluştur
