@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js için CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Boxplot Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.5"></script>
     <!-- SheetJS (xlsx) için CDN -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -52,41 +54,92 @@
                     <div class="chart-icon">📊</div>
                     <h3>Sütun Grafiği</h3>
                     <p>Kategorik verileri karşılaştırın</p>
+                    <div class="chart-example">Örn: Aylık satış miktarları</div>
+                    <div class="chart-variables">Kategorik - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('line')">
                     <div class="chart-icon">📈</div>
                     <h3>Çizgi Grafiği</h3>
                     <p>Zamansal eğilimleri gösterin</p>
+                    <div class="chart-example">Örn: Yıllık sıcaklık değişimi</div>
+                    <div class="chart-variables">Sürekli - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('pie')">
                     <div class="chart-icon">🥧</div>
                     <h3>Pasta Grafiği</h3>
                     <p>Oranları görselleştirin</p>
+                    <div class="chart-example">Örn: Pazar payı dağılımı</div>
+                    <div class="chart-variables">Kategorik - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('doughnut')">
                     <div class="chart-icon">🍩</div>
                     <h3>Halka Grafiği</h3>
                     <p>Dağılımları gösterin</p>
+                    <div class="chart-example">Örn: Bütçe kategorileri</div>
+                    <div class="chart-variables">Kategorik - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('radar')">
                     <div class="chart-icon">🎯</div>
                     <h3>Radar Grafiği</h3>
                     <p>Çok boyutlu verileri analiz edin</p>
+                    <div class="chart-example">Örn: Ürün özellikleri karşılaştırması</div>
+                    <div class="chart-variables">Kategorik - Sürekli (Çoklu)</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('polarArea')">
                     <div class="chart-icon">🌐</div>
                     <h3>Polar Alan Grafiği</h3>
                     <p>Döngüsel verileri gösterin</p>
+                    <div class="chart-example">Örn: Aylık rüzgar yönleri</div>
+                    <div class="chart-variables">Kategorik - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('scatter')">
                     <div class="chart-icon">⚫</div>
                     <h3>Dağılım Grafiği</h3>
                     <p>Korelasyonları keşfedin</p>
+                    <div class="chart-example">Örn: Sınav puanı - Kaygı ilişkisi</div>
+                    <div class="chart-variables">Sürekli - Sürekli</div>
                 </div>
                 <div class="chart-type-card" onclick="selectChartType('bubble')">
                     <div class="chart-icon">🫧</div>
                     <h3>Balon Grafiği</h3>
                     <p>3 boyutlu ilişkileri gösterin</p>
+                    <div class="chart-example">Örn: Gelir-Gider-Nüfus analizi</div>
+                    <div class="chart-variables">Sürekli - Sürekli - Sürekli</div>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('barStacked')">
+                    <div class="chart-icon">📊</div>
+                    <h3>Yığılmış Sütun</h3>
+                    <p>Alt kategori karşılaştırmaları</p>
+                    <div class="chart-example">Örn: Aylık satışlar (ürün gruplarına göre)</div>
+                    <div class="chart-variables">Kategorik - Sürekli (Gruplu)</div>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('barGrouped')">
+                    <div class="chart-icon">📊</div>
+                    <h3>Gruplu Sütun</h3>
+                    <p>Yan yana kategori karşılaştırması</p>
+                    <div class="chart-example">Örn: Şube satışları (ürün bazlı)</div>
+                    <div class="chart-variables">Kategorik - Sürekli (Gruplu)</div>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('boxplot')">
+                    <div class="chart-icon">📐</div>
+                    <h3>Kutu Grafiği (Boxplot)</h3>
+                    <p>İstatistiksel dağılım ve aykırı değerler</p>
+                    <div class="chart-example">Örn: Sınıflara göre sınav puanları</div>
+                    <div class="chart-variables">Kategorik - Sürekli</div>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('histogram')">
+                    <div class="chart-icon">📚</div>
+                    <h3>Histogram</h3>
+                    <p>Sayısal dağılımı aralıklara göre</p>
+                    <div class="chart-example">Örn: Yaş dağılımı frekansları</div>
+                    <div class="chart-variables">Sürekli - Frekans</div>
+                </div>
+                <div class="chart-type-card" onclick="selectChartType('timeline')">
+                    <div class="chart-icon">⏳</div>
+                    <h3>Zaman Çizelgesi</h3>
+                    <p>Proje yönetimi ve planlama</p>
+                    <div class="chart-example">Örn: Proje görev takvimi (Gantt)</div>
+                    <div class="chart-variables">Kategorik - Tarih (Başlangıç-Bitiş)</div>
                 </div>
             </div>
         </section>
