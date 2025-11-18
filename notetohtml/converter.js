@@ -2,6 +2,7 @@ class NotebookLMConverter {
     constructor() {
         this.htmlFile = null;
         this.resourceFiles = [];
+        this.convertedHTML = null;
         this.init();
     }
 
@@ -32,13 +33,11 @@ class NotebookLMConverter {
         const dropZone = document.getElementById('dropZone');
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
         });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-active'));
@@ -95,13 +94,7 @@ class NotebookLMConverter {
         btn.disabled = !this.htmlFile;
     }
 
-    // Türkçe Karakter Dostu Base64 Kodlama/Çözme Fonksiyonları
-    b64DecodeUnicode(str) {
-        return decodeURIComponent(atob(str).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-    }
-
+    // Türkçe Karakter Dostu Base64 İşlemleri
     b64EncodeUnicode(str) {
         return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
             function(match, p1) {
@@ -109,46 +102,18 @@ class NotebookLMConverter {
         }));
     }
 
-    async convert() {
-        if (!this.htmlFile) return;
-
-        this.showProgress(true);
-        this.updateProgress(0, 'Dosya okunuyor...');
-        this.log('process', 'Dönüştürme başlatıldı...');
-
-        try {
-            let content = await this.readFile(this.htmlFile);
-            
-            // 1. Kaynak Dosyaları Göm (Klasik İşlem)
-            this.updateProgress(20, 'Kaynak dosyalar gömülüyor...');
-            content = await this.embedResources(content);
-
-            // 2. NOTEBOOKLM YAMASI (V10 Universal Constraint)
-            this.updateProgress(60, 'NotebookLM V10 Yaması Uygulanıyor...');
-            content = this.applyNotebookFixes(content);
-
-            this.convertedHTML = content;
-            this.updateProgress(100, 'Tamamlandı!');
-            this.log('success', 'Dönüştürme ve yamalama başarıyla tamamlandı!');
-            this.showDownload(true);
-
-        } catch (error) {
-            console.error(error);
-            this.log('error', `Hata: ${error.message}`);
-        }
+    b64DecodeUnicode(str) {
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
     }
 
-    // Python'daki V10 Logic'in JS Versiyonu
-    applyNotebookFixes(content) {
-        // Iframe Base64 pattern'i
-        const pattern = /(src="data:text\/html;base64,)([^"]+)"/g;
-        let matchFound = false;
-
-        // V10 Final Payload (JS + CSS)
-        const injectionScript = `
+    // V10 Final Yaması (Script İçeriği)
+    getInjectionScript() {
+        return `
         <script>
         (function() {
-            console.log("🌍 V10: Universal Constraint (Web) Aktif");
+            console.log("🌍 V11: Universal Fix (Web-PreInject) Aktif");
 
             const styles = \`
                 /* HER ŞEYE UYGULANACAK KURAL */
@@ -156,19 +121,8 @@ class NotebookLMConverter {
                     max-width: 100vw !important;
                     box-sizing: border-box !important;
                 }
-
                 /* Scrollbar'ı çizimden kaldır */
-                ::-webkit-scrollbar {
-                    width: 0px !important;
-                    height: 0px !important;
-                    background: transparent !important;
-                    display: none !important;
-                }
-                
-                ::-webkit-scrollbar-track { background: transparent !important; }
-                ::-webkit-scrollbar-thumb { background: transparent !important; display: none !important; }
-
-                /* Firefox vb. için */
+                ::-webkit-scrollbar { width: 0px !important; height: 0px !important; display: none !important; }
                 html, body {
                     scrollbar-width: none !important;
                     -ms-overflow-style: none !important;
@@ -176,15 +130,13 @@ class NotebookLMConverter {
                     width: 100% !important;
                     position: relative !important;
                 }
-
                 /* İçerik genişliği */
-                .main-content, main, mat-card {
+                .main-content, main, mat-card, .notebook-content {
                     width: 100% !important;
                     margin-left: 0 !important;
                     margin-right: 0 !important;
                 }
-                
-                /* BUTON GİZLEME (Cerrah Modu) */
+                /* BUTON GİZLEME */
                 button[aria-label*="Açıkla"], 
                 button[mattooltip*="Açıkla"],
                 button:has(span:contains("Açıkla")) {
@@ -210,19 +162,12 @@ class NotebookLMConverter {
                             node.style.display = 'none';
                         }
                     }
-
-                    // Taşma Kontrolü
-                    if (node.scrollWidth > window.innerWidth) {
-                        node.style.setProperty('max-width', '100%', 'important');
-                        node.style.setProperty('overflow-x', 'hidden', 'important');
-                    }
-
-                    // Shadow DOM
+                    // Shadow DOM Aşılaması
                     if (node.shadowRoot) {
-                        if (!node.shadowRoot.querySelector('style[data-v10]')) {
+                        if (!node.shadowRoot.querySelector('style[data-v11]')) {
                             const s = document.createElement('style');
                             s.textContent = styles;
-                            s.setAttribute('data-v10', 'true');
+                            s.setAttribute('data-v11', 'true');
                             node.shadowRoot.appendChild(s);
                         }
                         constrainElements(node.shadowRoot);
@@ -238,72 +183,128 @@ class NotebookLMConverter {
         })();
         <\/script>
         `;
-
-        // Replace işlemi
-        const fixedContent = content.replace(pattern, (match, prefix, b64Data) => {
-            try {
-                matchFound = true;
-                // 1. Kod Çöz (UTF-8 destekli)
-                let decodedHtml = this.b64DecodeUnicode(b64Data);
-                
-                this.log('process', 'Base64 Iframe bulundu ve şifresi çözüldü.');
-
-                // 2. Enjekte Et
-                if (decodedHtml.includes('<html')) {
-                    decodedHtml = decodedHtml.replace(/(<html[^>]*>)/, '$1' + injectionScript);
-                } else {
-                    decodedHtml = injectionScript + decodedHtml;
-                }
-
-                // 3. Tekrar Şifrele (UTF-8 destekli)
-                const reEncoded = this.b64EncodeUnicode(decodedHtml);
-                
-                this.log('success', 'V10 yaması iframe içine başarıyla gömüldü.');
-                return `${prefix}${reEncoded}"`;
-
-            } catch (e) {
-                this.log('error', 'Base64 işleme hatası: ' + e.message);
-                return match; // Hata olursa orijinali döndür
-            }
-        });
-
-        if (!matchFound) {
-            this.log('warning', 'Uyarı: Base64 iframe yapısı bulunamadı. Dosya formatı farklı olabilir.');
-        }
-
-        return fixedContent;
     }
 
-    async embedResources(html) {
-        // Burası standart dosya gömme işlemleri (resim, css vs.)
-        // Sizin önceki kodunuzdaki logic benzeri çalışır ama basitleştirilmiş hali:
+    async convert() {
+        if (!this.htmlFile) return;
+
+        this.showProgress(true);
+        this.updateProgress(0, 'Dosya okunuyor...');
+        this.log('process', '🚀 İşlem başlatıldı...');
+
+        try {
+            let content = await this.readFile(this.htmlFile);
+            
+            // 1. Kaynak Dosyaları Göm + HTML Olanları Anında Yamala
+            this.updateProgress(30, 'Kaynak dosyalar işleniyor ve yamalanıyor...');
+            content = await this.embedAndPatchResources(content);
+
+            // 2. Halen Yamalanmamış Base64 Iframe Varsa (Yedek Plan)
+            this.updateProgress(70, 'Son kontroller yapılıyor...');
+            content = this.patchExistingIframes(content);
+
+            this.convertedHTML = content;
+            this.updateProgress(100, 'Tamamlandı!');
+            this.log('success', '✅ Dönüştürme başarıyla tamamlandı!');
+            this.showDownload(true);
+
+        } catch (error) {
+            console.error(error);
+            this.log('error', `❌ Hata: ${error.message}`);
+        }
+    }
+
+    async embedAndPatchResources(html) {
         let processed = html;
         
         for (const file of this.resourceFiles) {
             const fileName = file.name;
-            const dataUrl = await this.readFileAsDataURL(file);
+            let replacementData = "";
+
+            // HTML Dosyaları için ÖZEL MUAMELE (Ön-Enjeksiyon)
+            if (fileName.toLowerCase().endsWith('.html')) {
+                try {
+                    this.log('process', `🛠️ HTML Yamalanıyor: ${fileName}`);
+                    // 1. Metin olarak oku
+                    let textContent = await this.readFile(file);
+                    
+                    // 2. V10 Scriptini içine zerk et
+                    const script = this.getInjectionScript();
+                    if (textContent.includes('</body>')) {
+                        textContent = textContent.replace('</body>', script + '</body>');
+                    } else {
+                        textContent += script;
+                    }
+
+                    // 3. Elle Base64'e çevir (UTF-8 destekli)
+                    const b64 = this.b64EncodeUnicode(textContent);
+                    replacementData = `data:text/html;base64,${b64}`;
+                    
+                } catch (e) {
+                    this.log('error', `HTML işleme hatası (${fileName}): ${e.message}`);
+                    // Hata olursa normal oku
+                    replacementData = await this.readFileAsDataURL(file);
+                }
+            } else {
+                // Diğer dosyalar (Resim, CSS, JS)
+                replacementData = await this.readFileAsDataURL(file);
+            }
             
-            // Link/Script değişimleri
+            // Değiştirme işlemi
+            // Regex: Dosya ismini tırnaklar içinde veya yolun sonunda arar
+            const regex = new RegExp(`["'](?:[^"']*\\/)?${this.escapeRegExp(fileName)}["']`, 'g');
+            
+            // CSS/JS özel tag değişimi
             if (fileName.endsWith('.css')) {
                 processed = processed.replace(
-                    new RegExp(`<link[^>]*href=["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["'][^>]*>`, 'g'),
-                    `<style>/* Injected: ${fileName} */ @import url('${dataUrl}');</style>`
+                    new RegExp(`<link[^>]*href=["'](?:[^"']*\\/)?${this.escapeRegExp(fileName)}["'][^>]*>`, 'g'),
+                    `<style>/* ${fileName} */ @import url('${replacementData}');</style>`
                 );
             } else if (fileName.endsWith('.js')) {
                 processed = processed.replace(
-                    new RegExp(`<script[^>]*src=["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["'][^>]*>.*?<\/script>`, 'g'),
-                    `<script src="${dataUrl}"></script>`
+                    new RegExp(`<script[^>]*src=["'](?:[^"']*\\/)?${this.escapeRegExp(fileName)}["'][^>]*>.*?<\/script>`, 'g'),
+                    `<script src="${replacementData}"></script>`
                 );
             } else {
-                // Resimler vb.
-                processed = processed.replace(
-                    new RegExp(`["'](?:[^"']*\/)?${this.escapeRegExp(fileName)}["']`, 'g'),
-                    `"${dataUrl}"`
-                );
+                // HTML iframe src değişimi veya resim src değişimi
+                processed = processed.replace(regex, `"${replacementData}"`);
             }
-            this.log('info', `Gömüldü: ${fileName}`);
+            
+            this.log('info', `→ Gömüldü: ${fileName}`);
         }
         return processed;
+    }
+
+    // Bu fonksiyon sadece önceden gömülü iframe varsa çalışır (Fallback)
+    patchExistingIframes(content) {
+        // Regex'i gevşettik: data:text/html olmak zorunda değil, herhangi bir data:base64 olabilir.
+        const pattern = /(src="data:[^;]*;base64,)([^"]+)"/g;
+        let matchFound = false;
+        const script = this.getInjectionScript();
+
+        return content.replace(pattern, (match, prefix, b64Data) => {
+            try {
+                // Zaten yamalandıysa atla (Script kontrolü)
+                let decoded = this.b64DecodeUnicode(b64Data);
+                if (decoded.includes('V11: Universal Fix')) {
+                    return match; 
+                }
+
+                matchFound = true;
+                this.log('process', '⚠️ Önceden gömülü iframe bulundu, yamalanıyor...');
+                
+                if (decoded.includes('</body>')) {
+                    decoded = decoded.replace('</body>', script + '</body>');
+                } else {
+                    decoded += script;
+                }
+
+                const reEncoded = this.b64EncodeUnicode(decoded);
+                return `${prefix}${reEncoded}"`;
+            } catch (e) {
+                return match;
+            }
+        });
     }
 
     readFile(file) {
@@ -326,14 +327,12 @@ class NotebookLMConverter {
 
     download() {
         if (!this.convertedHTML) return;
-        
         const blob = new Blob([this.convertedHTML], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        
         const originalName = this.htmlFile.name.replace('.html', '');
         a.href = url;
-        a.download = `${originalName}_Tek_Dosya_V10.html`;
+        a.download = `${originalName}_Tek_Dosya_V11.html`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -341,8 +340,8 @@ class NotebookLMConverter {
     }
 
     showProgress(show) {
-        const section = document.getElementById('progressSection');
-        if(section) section.style.display = show ? 'block' : 'none';
+        const s = document.getElementById('progressSection');
+        if(s) s.style.display = show ? 'block' : 'none';
     }
 
     updateProgress(percent, text) {
@@ -353,20 +352,16 @@ class NotebookLMConverter {
     }
 
     showDownload(show) {
-        const section = document.getElementById('downloadSection');
-        if(section) section.style.display = show ? 'block' : 'none';
+        const s = document.getElementById('downloadSection');
+        if(s) s.style.display = show ? 'block' : 'none';
     }
 
     log(type, message) {
         const content = document.getElementById('logContent');
         if (!content) return;
-        
         const entry = document.createElement('div');
         entry.className = `log-entry log-${type}`;
-        
-        const time = new Date().toLocaleTimeString();
-        entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
-        
+        entry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${message}`;
         content.appendChild(entry);
         content.scrollTop = content.scrollHeight;
     }
@@ -376,7 +371,6 @@ class NotebookLMConverter {
     }
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     new NotebookLMConverter();
 });
