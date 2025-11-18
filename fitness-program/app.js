@@ -407,22 +407,44 @@ function renderPresetProgramView(container, program) {
         </div>
     `;
 
+    // Ekstra egzersizleri bul (programda olmayan ama seçilmiş olanlar)
+    const programExerciseIds = new Set();
+    Object.values(program.days).forEach(day => {
+        day.exercises.forEach(id => programExerciseIds.add(id));
+    });
+
+    const extraExercises = Object.entries(appState.selectedExercises)
+        .filter(([id, data]) => data.selected && !programExerciseIds.has(id))
+        .map(([id]) => {
+            const exercise = EXERCISES_DATA.find(ex => ex.id === id);
+            return { ...exercise, ...appState.selectedExercises[id] };
+        });
+
     // Her gün için
     [1, 2, 3].forEach(dayNum => {
         const day = program.days[dayNum];
+
+        // Bu günde gerçekten seçili olan egzersizleri filtrele
+        const daySelectedExercises = day.exercises.filter(exerciseId => {
+            const data = appState.selectedExercises[exerciseId];
+            return data && data.selected;
+        });
+
         html += `
             <div class="my-program-day-section">
                 <div class="my-program-day-header">
                     <h3 class="my-program-day-title">${day.name}</h3>
-                    <span style="color: var(--text-secondary);">${day.exercises.length} egzersiz</span>
+                    <span style="color: var(--text-secondary);">${daySelectedExercises.length} egzersiz</span>
                 </div>
                 <div class="my-program-exercises-grid">
         `;
 
         day.exercises.forEach(exerciseId => {
             const exercise = EXERCISES_DATA.find(ex => ex.id === exerciseId);
-            if (exercise) {
-                const data = appState.selectedExercises[exerciseId] || {};
+            const data = appState.selectedExercises[exerciseId];
+
+            // Sadece seçili olan egzersizleri göster
+            if (exercise && data && data.selected) {
                 html += createMyProgramExerciseCard(exercise, data, true); // true = göster kaldır butonu
             }
         });
@@ -432,6 +454,27 @@ function renderPresetProgramView(container, program) {
             </div>
         `;
     });
+
+    // Ekstra egzersizler varsa onları da göster
+    if (extraExercises.length > 0) {
+        html += `
+            <div class="my-program-day-section">
+                <div class="my-program-day-header">
+                    <h3 class="my-program-day-title">⭐ Ekstra Egzersizler</h3>
+                    <span style="color: var(--text-secondary);">${extraExercises.length} egzersiz</span>
+                </div>
+                <div class="my-program-exercises-grid">
+        `;
+
+        extraExercises.forEach(exercise => {
+            html += createMyProgramExerciseCard(exercise, appState.selectedExercises[exercise.id], true);
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+    }
 
     container.innerHTML = html;
 }
