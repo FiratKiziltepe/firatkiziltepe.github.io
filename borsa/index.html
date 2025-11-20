@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borsa Hisse Takip ve Öneri Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>Borsa Takip</h1>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-label">BIST 100</span>
+                    <span class="stat-value" id="bist100">-</span>
+                    <span class="stat-change" id="bist100-change">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Toplam Hacim</span>
+                    <span class="stat-value" id="total-volume">-</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="section-card">
+                    <h2><i class="fas fa-star"></i> ÖNERİLEN HİSSELER</h2>
+                    <div id="recommended-stocks" class="recommended-list">
+                        <div class="loading">Yükleniyor...</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h2><i class="fas fa-fire"></i> GÜNÜN YILDIZLARI</h2>
+                    <div id="top-gainers" class="stock-list">
+                        <div class="loading">Yükleniyor...</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h2><i class="fas fa-arrow-trend-down"></i> EN DÜŞENLER</h2>
+                    <div id="top-losers" class="stock-list">
+                        <div class="loading">Yükleniyor...</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Section -->
+            <main class="main-section">
+                <!-- Search Bar -->
+                <div class="search-section">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="stock-search" placeholder="Hisse ara (örn: THYAO, GARAN, AKBNK...)">
+                    </div>
+                    <button class="refresh-btn" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Yenile
+                    </button>
+                </div>
+
+                <!-- Selected Stock Details -->
+                <div class="stock-detail-card" id="stock-detail">
+                    <div class="stock-detail-header">
+                        <div class="stock-title">
+                            <h2 id="selected-stock-name">Hisse Seçiniz</h2>
+                            <span class="stock-code" id="selected-stock-code">-</span>
+                        </div>
+                        <div class="stock-price-info">
+                            <div class="current-price" id="current-price">-</div>
+                            <div class="price-change" id="price-change">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Açılış</span>
+                            <span class="metric-value" id="open-price">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">En Yüksek</span>
+                            <span class="metric-value" id="high-price">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">En Düşük</span>
+                            <span class="metric-value" id="low-price">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Hacim</span>
+                            <span class="metric-value" id="volume">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">RSI (14)</span>
+                            <span class="metric-value" id="rsi">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">MACD</span>
+                            <span class="metric-value" id="macd">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="chart-container">
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-period="1D">1G</button>
+                            <button class="chart-btn" data-period="1W">1H</button>
+                            <button class="chart-btn" data-period="1M">1A</button>
+                            <button class="chart-btn" data-period="3M">3A</button>
+                            <button class="chart-btn" data-period="1Y">1Y</button>
+                        </div>
+                        <canvas id="stock-chart"></canvas>
+                    </div>
+
+                    <!-- Analysis & Predictions -->
+                    <div class="analysis-section">
+                        <div class="analysis-card">
+                            <h3><i class="fas fa-brain"></i> Teknik Analiz</h3>
+                            <div id="technical-analysis" class="analysis-content">
+                                <div class="loading">Hisse seçiniz</div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h3><i class="fas fa-crystal-ball"></i> Tahminler</h3>
+                            <div id="predictions" class="prediction-content">
+                                <div class="loading">Hisse seçiniz</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Watchlist -->
+                <div class="watchlist-section">
+                    <h2><i class="fas fa-eye"></i> İzleme Listesi</h2>
+                    <div id="watchlist" class="watchlist-grid">
+                        <div class="empty-state">
+                            <i class="fas fa-list"></i>
+                            <p>İzleme listeniz boş. Hisse aramadan ekleyebilirsiniz.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
