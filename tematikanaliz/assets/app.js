@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const state = {
     apiKey: localStorage.getItem('gemini_api_key') || '',
     selectedModel: localStorage.getItem('gemini_model') || 'gemini-2.5-flash',
+    batchSize: parseInt(localStorage.getItem('batch_size')) || 10,
     rawData: [],
     enrichedData: [],
     analysisResults: [],
@@ -41,7 +42,6 @@ const AVAILABLE_MODELS = [
     }
 ];
 
-const BATCH_SIZE = 10;
 const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 
 // Schema for structured output
@@ -74,15 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeModelSelect();
         console.log('2. Model seçimi tamamlandı');
         
-        console.log('3. Event listener\'lar başlatılıyor...');
+        console.log('3. Batch size başlatılıyor...');
+        initializeBatchSize();
+        console.log('4. Batch size tamamlandı');
+        
+        console.log('5. Event listener\'lar başlatılıyor...');
         initializeEventListeners();
-        console.log('4. Event listener\'lar tamamlandı');
+        console.log('6. Event listener\'lar tamamlandı');
         
         if (state.apiKey) {
-            console.log('5. Kaydedilmiş API key bulundu, yükleniyor...');
+            console.log('7. Kaydedilmiş API key bulundu, yükleniyor...');
             document.getElementById('apiKeyInput').value = state.apiKey;
         } else {
-            console.log('5. Kaydedilmiş API key yok');
+            console.log('7. Kaydedilmiş API key yok');
         }
         
         console.log('=== SİSTEM BAŞARILI ŞEKİLDE BAŞLATILDI ===');
@@ -90,6 +94,29 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('=== SİSTEM BAŞLATMA HATASI ===', error);
     }
 });
+
+function initializeBatchSize() {
+    const batchSizeInput = document.getElementById('batchSizeInput');
+    
+    if (!batchSizeInput) {
+        console.error('batchSizeInput element not found!');
+        return;
+    }
+    
+    // Set initial value
+    batchSizeInput.value = state.batchSize;
+    
+    // Listen for changes
+    batchSizeInput.addEventListener('input', (e) => {
+        let value = parseInt(e.target.value);
+        if (value < 1) value = 1;
+        if (value > 50) value = 50;
+        e.target.value = value;
+        state.batchSize = value;
+        localStorage.setItem('batch_size', value.toString());
+        console.log(`Batch size değiştirildi: ${value}`);
+    });
+}
 
 function initializeModelSelect() {
     console.log('Initializing model select...');
@@ -301,11 +328,11 @@ async function startAnalysis() {
         const genAI = new GoogleGenerativeAI(state.apiKey);
         state.analysisResults = [];
 
-        const totalBatches = Math.ceil(state.rawData.length / BATCH_SIZE);
+        const totalBatches = Math.ceil(state.rawData.length / state.batchSize);
 
-        for (let i = 0; i < state.rawData.length; i += BATCH_SIZE) {
-            const batch = state.rawData.slice(i, i + BATCH_SIZE);
-            const currentBatch = Math.floor(i / BATCH_SIZE) + 1;
+        for (let i = 0; i < state.rawData.length; i += state.batchSize) {
+            const batch = state.rawData.slice(i, i + state.batchSize);
+            const currentBatch = Math.floor(i / state.batchSize) + 1;
 
             console.log(`Processing batch ${currentBatch}/${totalBatches}`);
             updateProgress(i + batch.length, state.rawData.length);
@@ -313,7 +340,7 @@ async function startAnalysis() {
             const batchResult = await analyzeBatch(genAI, batch);
             state.analysisResults.push(...batchResult.items);
 
-            if (i + BATCH_SIZE < state.rawData.length) {
+            if (i + state.batchSize < state.rawData.length) {
                 await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
             }
         }
@@ -566,7 +593,8 @@ function createCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     position: 'bottom'
@@ -592,7 +620,8 @@ function createCharts() {
         options: {
             indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     display: false
@@ -619,7 +648,8 @@ function createCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     position: 'bottom'
@@ -640,7 +670,8 @@ function createCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     position: 'bottom'
