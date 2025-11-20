@@ -67,20 +67,40 @@ const analysisSchema = {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    initializeModelSelect();
-    initializeEventListeners();
-    if (state.apiKey) {
-        document.getElementById('apiKeyInput').value = state.apiKey;
+    console.log('=== TEMATIK ANALIZ SISTEMI BAŞLATILIYOR ===');
+    
+    try {
+        console.log('1. Model seçimi başlatılıyor...');
+        initializeModelSelect();
+        console.log('2. Model seçimi tamamlandı');
+        
+        console.log('3. Event listener\'lar başlatılıyor...');
+        initializeEventListeners();
+        console.log('4. Event listener\'lar tamamlandı');
+        
+        if (state.apiKey) {
+            console.log('5. Kaydedilmiş API key bulundu, yükleniyor...');
+            document.getElementById('apiKeyInput').value = state.apiKey;
+        } else {
+            console.log('5. Kaydedilmiş API key yok');
+        }
+        
+        console.log('=== SİSTEM BAŞARILI ŞEKİLDE BAŞLATILDI ===');
+    } catch (error) {
+        console.error('=== SİSTEM BAŞLATMA HATASI ===', error);
     }
 });
 
 function initializeModelSelect() {
+    console.log('Initializing model select...');
     const modelSelect = document.getElementById('modelSelect');
     
     if (!modelSelect) {
         console.error('modelSelect element not found!');
         return;
     }
+
+    console.log('modelSelect found, populating options...');
 
     // Clear existing options first
     modelSelect.innerHTML = '';
@@ -91,25 +111,43 @@ function initializeModelSelect() {
         option.value = model.id;
         option.textContent = model.name;
         modelSelect.appendChild(option);
+        console.log(`Added model: ${model.name}`);
     });
 
     // Set initial value
-    modelSelect.value = state.selectedModel;
-    updateLimitInfo(state.selectedModel);
+    const selectedValue = state.selectedModel || AVAILABLE_MODELS[0].id;
+    modelSelect.value = selectedValue;
+    console.log(`Set selected model to: ${selectedValue}`);
+    
+    updateLimitInfo(selectedValue);
 
     // Listen for changes
     modelSelect.addEventListener('change', (e) => {
+        console.log(`Model changed to: ${e.target.value}`);
         state.selectedModel = e.target.value;
         localStorage.setItem('gemini_model', e.target.value);
         updateLimitInfo(e.target.value);
     });
+    
+    console.log('Model select initialization complete');
 }
 
 function updateLimitInfo(modelId) {
+    console.log(`Updating limit info for model: ${modelId}`);
     const model = AVAILABLE_MODELS.find(m => m.id === modelId);
     const limitInfoEl = document.getElementById('modelLimitInfo');
-    if (model && limitInfoEl) {
+    
+    if (!limitInfoEl) {
+        console.error('modelLimitInfo element not found!');
+        return;
+    }
+    
+    if (model) {
         limitInfoEl.textContent = `Limitler: ${model.limitInfo}`;
+        console.log(`Limit info updated: ${model.limitInfo}`);
+    } else {
+        console.error(`Model not found: ${modelId}`);
+        limitInfoEl.textContent = 'Model bilgisi bulunamadı';
     }
 }
 
