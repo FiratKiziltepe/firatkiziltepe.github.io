@@ -187,6 +187,7 @@ function initializeEventListeners() {
     const resetBtn = document.getElementById('resetBtn');
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     const exportBtn = document.getElementById('exportBtn');
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
     const themeFilter = document.getElementById('themeFilter');
@@ -212,6 +213,7 @@ function initializeEventListeners() {
     resetBtn.addEventListener('click', resetApp);
     newAnalysisBtn.addEventListener('click', resetApp);
     exportBtn.addEventListener('click', exportToExcel);
+    exportPdfBtn.addEventListener('click', exportToPDF);
 
     // Filters
     searchInput.addEventListener('input', () => {
@@ -379,28 +381,70 @@ async function analyzeBatch(genAI, rows) {
     }));
 
     const prompt = `
-Aşağıda öğretmenlerin eğitim materyalleri ve müfredat hakkındaki görüşleri bulunmaktadır.
-Bu görüşleri analiz et ve JSON formatında yapılandır.
-Eğer görüş boşsa veya anlamsızsa, kategori olarak "Diğer", sentiment olarak "Nötr" işaretle.
+Sen kıdemli bir eğitim politikası uzmanısın. ${rows.length} öğretmen görüşünü analiz edeceksin.
 
-Ana Kategoriler (sadece bunları kullan):
-- Ders Kitabı İçeriği
-- Müfredat
-- Ölçme Değerlendirme
-- Fiziki Koşullar
-- Öğretmen Kılavuzu
-- Öğrenci Seviyesi
-- Zaman Yönetimi
-- Diğer
+ÖNEMLİ: TÜM görüşler için TUTARLI kategorilendirme yap. Benzer görüşler AYNI kategoriye atılmalı.
 
-Veriler:
+ANA KATEGORİLER VE TANIMLARI (SADECE BUNLARI KULLAN):
+
+1. "Ders Kitabı İçeriği"
+   - Kitaptaki konu anlatımı, örnekler, görseller
+   - Etkinlik sayısı, zorluğu, çeşitliliği
+   - Kitap içeriğinin eksikliği veya fazlalığı
+   - "Etkinlik zor/kolay", "Örnekler yetersiz", "Konu anlatımı eksik"
+
+2. "Öğrenci Seviyesi"
+   - Öğrencilerin hazırbulunuşluğu
+   - Yaş grubuna uygunluk
+   - Öğrenci kapasitesi ve algı düzeyi
+   - "Seviyelerine uygun değil", "Çocuklar anlamıyor", "Ön öğrenme eksik"
+
+3. "Müfredat"
+   - Kazanımlar, öğrenme çıktıları
+   - Müfredat yoğunluğu, sıralaması
+   - "Kazanım çok", "Müfredat yoğun", "Sıralama hatalı"
+
+4. "Ölçme Değerlendirme"
+   - Sınav, quiz, ölçme araçları
+   - Değerlendirme kriterleri
+   - "Sınav soruları yetersiz", "Ölçme yapamıyorum"
+
+5. "Fiziki Koşullar"
+   - Sınıf, malzeme, teknolojik altyapı
+   - "Materyal yok", "Sınıf uygun değil", "İnternet yok"
+
+6. "Öğretmen Kılavuzu"
+   - Kılavuz kitap içeriği, yeterliliği
+   - "Kılavuz eksik", "Kılavuzda örnek yok"
+
+7. "Zaman Yönetimi"
+   - Ders saati yeterliliği
+   - "Süre yetersiz", "Zaman yetmiyor"
+
+8. "Diğer"
+   - Yukarıdaki kategorilere girmeyen veya boş görüşler
+
+KURALLAR:
+- Her görüş için EN UYGUN 1 kategori seç
+- "Etkinlik zor" → "Ders Kitabı İçeriği" (öğrenci seviyesi DEĞİL)
+- "Öğrenci seviyesine uygun değil" → "Öğrenci Seviyesi"
+- "Kazanım fazla" → "Müfredat"
+- Boş veya anlamsız görüş → "Diğer" + "Nötr" sentiment
+- Alt tema kısa ve öz olsun (max 5-6 kelime)
+
+SENTIMENT:
+- Pozitif: Övgü, memnuniyet
+- Negatif: Sorun, eksiklik, şikayet
+- Nötr: Tarafsız tespit veya boş
+
+Görüşler:
 ${JSON.stringify(promptData, null, 2)}
 `;
 
     const model = genAI.getGenerativeModel({
         model: state.selectedModel,
         generationConfig: {
-            temperature: 0.2,
+            temperature: 0.1,
             responseMimeType: 'application/json',
             responseSchema: analysisSchema,
         },
@@ -480,7 +524,7 @@ Türkçe ve resmi bir dil kullan. Markdown formatında yaz.
     const model = genAI.getGenerativeModel({
         model: state.selectedModel,
         generationConfig: {
-            temperature: 0.7,
+            temperature: 0.3,
         },
     });
 
@@ -804,6 +848,187 @@ function exportToExcel() {
     ];
 
     XLSX.writeFile(wb, 'analiz_sonuclari.xlsx');
+}
+
+async function exportToPDF() {
+    try {
+        // Show loading message
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const originalText = exportPdfBtn.innerHTML;
+        exportPdfBtn.innerHTML = '<span class="animate-pulse">PDF Oluşturuluyor...</span>';
+        exportPdfBtn.disabled = true;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        let yPosition = 20;
+
+        // Helper function to add new page if needed
+        const checkPageBreak = (neededSpace) => {
+            if (yPosition + neededSpace > pageHeight - 20) {
+                pdf.addPage();
+                yPosition = 20;
+                return true;
+            }
+            return false;
+        };
+
+        // Title
+        pdf.setFontSize(22);
+        pdf.setTextColor(31, 41, 55); // gray-800
+        pdf.text('Tematik Analiz Raporu', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(107, 114, 128); // gray-500
+        pdf.text('Gemini AI ile Güçlendirilmiş Öğretmen Görüş Analizi', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 5;
+        pdf.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+
+        // Stats Overview
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Genel İstatistikler', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(75, 85, 99);
+        const stats = [
+            `Toplam Görüş: ${state.stats.totalRows}`,
+            `Ana Kategori Sayısı: ${Object.keys(state.stats.categoryCounts).length}`,
+            `Alt Tema Sayısı: ${Object.keys(state.stats.themeCounts).length}`,
+            `Eyleme Dönüştürülebilir: ${Math.round((state.stats.actionableCount / state.stats.totalRows) * 100)}%`
+        ];
+
+        stats.forEach(stat => {
+            pdf.text(stat, 20, yPosition);
+            yPosition += 6;
+        });
+        yPosition += 10;
+
+        // Charts - Convert to images
+        checkPageBreak(80);
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Grafikler', 15, yPosition);
+        yPosition += 10;
+
+        // Category Chart
+        const categoryCanvas = document.getElementById('categoryChart');
+        if (categoryCanvas) {
+            const categoryImg = categoryCanvas.toDataURL('image/png');
+            pdf.addImage(categoryImg, 'PNG', 15, yPosition, 90, 60);
+        }
+
+        // Sentiment Chart
+        const sentimentCanvas = document.getElementById('sentimentChart');
+        if (sentimentCanvas) {
+            const sentimentImg = sentimentCanvas.toDataURL('image/png');
+            pdf.addImage(sentimentImg, 'PNG', 110, yPosition, 90, 60);
+        }
+        yPosition += 70;
+
+        checkPageBreak(80);
+        // Theme Chart
+        const themeCanvas = document.getElementById('themeChart');
+        if (themeCanvas) {
+            const themeImg = themeCanvas.toDataURL('image/png');
+            pdf.addImage(themeImg, 'PNG', 15, yPosition, 90, 60);
+        }
+
+        // Actionable Chart
+        const actionableCanvas = document.getElementById('actionableChart');
+        if (actionableCanvas) {
+            const actionableImg = actionableCanvas.toDataURL('image/png');
+            pdf.addImage(actionableImg, 'PNG', 110, yPosition, 90, 60);
+        }
+        yPosition += 70;
+
+        // Category Distribution
+        checkPageBreak(60);
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Kategori Dağılımı', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(9);
+        pdf.setTextColor(75, 85, 99);
+        const sortedCategories = Object.entries(state.stats.categoryCounts)
+            .sort((a, b) => b[1] - a[1]);
+
+        sortedCategories.forEach(([category, count]) => {
+            checkPageBreak(6);
+            const percentage = ((count / state.stats.totalRows) * 100).toFixed(1);
+            pdf.text(`${category}: ${count} (${percentage}%)`, 20, yPosition);
+            yPosition += 5;
+        });
+        yPosition += 10;
+
+        // Top 10 Themes
+        checkPageBreak(60);
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('En Sık Karşılaşılan 10 Alt Tema', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(9);
+        const topThemes = Object.entries(state.stats.themeCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        topThemes.forEach(([theme, count], index) => {
+            checkPageBreak(6);
+            const text = `${index + 1}. ${theme}: ${count}`;
+            // Wrap text if too long
+            const lines = pdf.splitTextToSize(text, pageWidth - 40);
+            lines.forEach(line => {
+                checkPageBreak(5);
+                pdf.text(line, 20, yPosition);
+                yPosition += 5;
+            });
+        });
+        yPosition += 10;
+
+        // Executive Summary
+        checkPageBreak(40);
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Yönetici Özeti', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(9);
+        pdf.setTextColor(75, 85, 99);
+        
+        // Convert markdown-like summary to plain text
+        const summaryText = state.executiveSummary
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/<[^>]*>/g, '');
+
+        const summaryLines = pdf.splitTextToSize(summaryText, pageWidth - 30);
+        summaryLines.forEach(line => {
+            checkPageBreak(5);
+            pdf.text(line, 15, yPosition);
+            yPosition += 5;
+        });
+
+        // Save PDF
+        pdf.save(`tematik_analiz_raporu_${new Date().getTime()}.pdf`);
+
+        // Reset button
+        exportPdfBtn.innerHTML = originalText;
+        exportPdfBtn.disabled = false;
+
+    } catch (error) {
+        console.error('PDF export error:', error);
+        alert('PDF oluşturulurken bir hata oluştu: ' + error.message);
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        exportPdfBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg><span>PDF Rapor İndir</span>';
+        exportPdfBtn.disabled = false;
+    }
 }
 
 function resetApp() {
