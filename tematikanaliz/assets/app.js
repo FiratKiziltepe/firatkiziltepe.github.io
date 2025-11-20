@@ -16,7 +16,7 @@ const state = {
     charts: {}
 };
 
-const MODEL_NAME = 'gemini-2.0-flash-exp';
+const MODEL_NAME = 'gemini-1.5-flash';
 const BATCH_SIZE = 50;
 
 // Schema for structured output
