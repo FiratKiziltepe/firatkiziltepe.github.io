@@ -1,14 +1,265 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Gemini AI ile güçlendirilmiş tematik analiz sistemi - Öğretmen görüşlerini analiz edin" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tematik Analiz Sistemi | Gemini AI</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <meta name="description" content="Gemini AI ile güçlendirilmiş tematik analiz sistemi - Öğretmen görüşlerini analiz edin">
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- XLSX Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Google Generative AI -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Tematik Analiz Sistemi</h1>
+            <p class="text-gray-600">Gemini AI ile Güçlendirilmiş Öğretmen Görüş Analizi</p>
+        </div>
+
+        <!-- API Key Section -->
+        <div id="apiKeySection" class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gemini API Anahtarı</label>
+                    <input type="password" id="apiKeyInput" placeholder="AIza... ile başlayan API anahtarınızı girin"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="mt-2 text-sm text-gray-500">
+                        API anahtarınız tarayıcınızda saklanır ve hiçbir sunucuya gönderilmez.
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
+                            class="text-blue-600 hover:text-blue-700 ml-1">Buradan bir anahtar alabilirsiniz →</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p id="errorMessage" class="text-sm text-red-700"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div id="uploadSection">
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer transition-all duration-200 bg-white hover:border-gray-400">
+                <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div class="text-lg font-medium text-gray-700 mt-4">
+                    <span id="fileNameDisplay">Excel dosyasını buraya sürükleyin veya <span class="text-blue-600 hover:text-blue-700">seçmek için tıklayın</span></span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">.xlsx veya .xls formatında, maksimum 10,000+ satır</p>
+            </div>
+        </div>
+
+        <!-- Analysis Controls -->
+        <div id="controlsSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Dosya Yüklendi: <span id="rowCount">0</span> satır</h3>
+                    <p class="text-sm text-gray-600 mt-1">Analize başlamak için butona tıklayın</p>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="resetBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">İptal</button>
+                    <button id="analyzeBtn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Analizi Başlat</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="progressSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Analiz Devam Ediyor...</h3>
+            <div class="space-y-4">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div id="progressBar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-center text-gray-600">0 / 0 satır işlendi (0%)</p>
+                <div class="flex items-center justify-center">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="hidden">
+            <!-- Action Buttons -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Analiz Tamamlandı!</h3>
+                        <p class="text-sm text-gray-600 mt-1"><span id="totalRowsDisplay">0</span> satır başarıyla analiz edildi</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="newAnalysisBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Yeni Analiz</button>
+                        <button id="exportBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Excel İndir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Toplam Görüş</div>
+                    <div id="statTotal" class="text-3xl font-bold text-blue-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Ana Kategori</div>
+                    <div id="statCategories" class="text-3xl font-bold text-indigo-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Alt Tema</div>
+                    <div id="statThemes" class="text-3xl font-bold text-purple-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Eyleme Dönüştürülebilir</div>
+                    <div id="statActionable" class="text-3xl font-bold text-green-600">0%</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Ana Kategori Dağılımı</h3>
+                    <canvas id="categoryChart" width="400" height="300"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">En Sık Karşılaşılan 10 Alt Tema</h3>
+                    <canvas id="themeChart" width="400" height="300"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Sentiment Dağılımı</h3>
+                    <canvas id="sentimentChart" width="400" height="300"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Eyleme Dönüştürülebilirlik</h3>
+                    <canvas id="actionableChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Yönetici Özeti</h2>
+                <div id="executiveSummary" class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Analiz Sonuçları</h2>
+
+                    <!-- Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <input type="text" id="searchInput" placeholder="Arama (Entry ID veya görüş metni)..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select id="categoryFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="all">Tüm Kategoriler</option>
+                        </select>
+                        <select id="sentimentFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="all">Tüm Sentimentler</option>
+                            <option value="Pozitif">Pozitif</option>
+                            <option value="Negatif">Negatif</option>
+                            <option value="Nötr">Nötr</option>
+                        </select>
+                    </div>
+
+                    <div id="filterInfo" class="text-sm text-gray-600">Gösterilen: 0-0 / Toplam: 0</div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entry ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ders / Sınıf</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görüş</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ana Kategori</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alt Tema</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sentiment</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eyleme Dönüştürülebilir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="paginationSection" class="mt-6 flex items-center justify-between">
+                    <button id="prevBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Önceki</button>
+                    <span id="pageInfo" class="text-sm text-gray-600">Sayfa 1 / 1</span>
+                    <button id="nextBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Sonraki</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Gemini 2.0 Flash ile güçlendirilmiştir • Tüm analiz tarayıcınızda gerçekleşir</p>
+        </div>
+    </div>
+
+    <script type="module" src="assets/app.js"></script>
+</body>
 </html>
