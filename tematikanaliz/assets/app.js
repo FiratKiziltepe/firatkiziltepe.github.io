@@ -719,25 +719,33 @@ function showResults() {
     // Show executive summary
     document.getElementById('executiveSummary').innerHTML = formatMarkdown(state.executiveSummary);
 
-    // Populate category filter
+    // Populate category filter - SADECE İÇERİK OLAN KATEGORİLER
     const categoryFilter = document.getElementById('categoryFilter');
     categoryFilter.innerHTML = '<option value="all">Tüm Kategoriler</option>';
-    Object.keys(state.stats.categoryCounts).forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        categoryFilter.appendChild(option);
-    });
+    
+    // Kategorileri sayılarıyla birlikte göster ve sırala
+    Object.entries(state.stats.categoryCounts)
+        .filter(([cat, count]) => count > 0 && cat !== 'İşlenmedi') // Boş ve işlenmemiş olanları filtrele
+        .sort((a, b) => b[1] - a[1]) // Sayıya göre sırala (çoktan aza)
+        .forEach(([cat, count]) => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = `${cat} (${count})`;
+            categoryFilter.appendChild(option);
+        });
 
-    // Populate theme filter
+    // Populate theme filter - SADECE İÇERİK OLAN TEMALAR
     const themeFilter = document.getElementById('themeFilter');
     themeFilter.innerHTML = '<option value="all">Tüm Alt Temalar</option>';
-    Object.keys(state.stats.themeCounts)
-        .sort()
-        .forEach(theme => {
+    
+    // Alt temaları sayılarıyla birlikte göster ve sırala
+    Object.entries(state.stats.themeCounts)
+        .filter(([theme, count]) => count > 0 && theme !== 'İşlenmedi') // Boş ve işlenmemiş olanları filtrele
+        .sort((a, b) => b[1] - a[1]) // Sayıya göre sırala (çoktan aza)
+        .forEach(([theme, count]) => {
             const option = document.createElement('option');
             option.value = theme;
-            option.textContent = theme;
+            option.textContent = `${theme} (${count})`;
             themeFilter.appendChild(option);
         });
 
