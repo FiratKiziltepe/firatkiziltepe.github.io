@@ -45,7 +45,7 @@ const AVAILABLE_MODELS = [
 
 const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 
-// Schema for structured output
+// Schema for structured output (HİBRİT MOD - ESNEKLİK İLE)
 const analysisSchema = {
     type: 'object',
     properties: {
@@ -55,12 +55,32 @@ const analysisSchema = {
                 type: 'object',
                 properties: {
                     entryId: { type: 'string', description: 'The Entry Id provided in the input' },
-                    mainCategory: { type: 'string', description: 'Ana kategori (Örn: Ders Kitabı İçeriği, Müfredat, Ölçme Değerlendirme, Fiziki Koşullar, Öğretmen Kılavuzu)' },
-                    subTheme: { type: 'string', description: 'Spesifik alt tema (Örn: Etkinlik zorluğu, Kaynak yetersizliği, Kazanım uyumsuzluğu)' },
-                    sentiment: { type: 'string', enum: ['Pozitif', 'Negatif', 'Nötr'], description: 'Görüşün duygu durumu' },
+                    topics: {
+                        type: 'array',
+                        description: 'Bir görüş birden fazla konuya değiniyorsa, bunları ayrı topic objeleri olarak böl',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                mainCategory: { 
+                                    type: 'string', 
+                                    description: 'Standart listeden seçilmesi önerilir. Ancak görüş listedeki hiçbir kategoriye uymuyorsa, konuyu en iyi anlatan YENİ bir Ana Kategori ismi yazılabilir.' 
+                                },
+                                subTheme: { 
+                                    type: 'string', 
+                                    description: 'Standart listeden veya duruma özel üretilmiş spesifik alt tema.' 
+                                },
+                                sentiment: { 
+                                    type: 'string', 
+                                    enum: ['Pozitif', 'Negatif', 'Nötr', 'Yapıcı Eleştiri'],
+                                    description: 'Görüşün duygu durumu' 
+                                }
+                            },
+                            required: ['mainCategory', 'subTheme', 'sentiment']
+                        }
+                    },
                     actionable: { type: 'boolean', description: 'Somut bir öneri veya aksiyon içeriyor mu?' }
                 },
-                required: ['entryId', 'mainCategory', 'subTheme', 'sentiment', 'actionable']
+                required: ['entryId', 'topics', 'actionable']
             }
         }
     }
@@ -380,64 +400,129 @@ async function analyzeBatch(genAI, rows) {
         context: `${r.DERS} - ${r.SINIF}`
     }));
 
+    const systemInstruction = `
+Sen Milli Eğitim Bakanlığı (MEB) ders materyallerini, müfredatını ve sahadaki uygulamaları analiz eden kıdemli bir eğitim veri bilimcisisin.
+Görevin, öğretmenlerden gelen serbest metinli görüşleri analiz ederek etiketlemektir.
+
+TEMEL KURALLAR:
+1. **ÖNCELİK STANDART LİSTE:** Analiz yaparken *öncelikle* aşağıda verilen standart "Ana Kategori" ve "Alt Tema" listesini kullanmaya çalış.
+2. **ESNEKLİK VE YENİ KATEGORİ:** Eğer görüş, standart listedeki **hiçbir kategoriye uymuyorsa** (gerçekten benzersiz veya öngörülmemiş bir durumsa), **YENİ BİR ANA KATEGORİ veya ALT TEMA İSMİ ÜRET.**
+3. **İSİMLENDİRME KURALI:** Yeni kategori üreteceksen, mevcutlar gibi kısa, öz ve kurumsal bir dil kullan (Örn: "Yapay Zeka Kullanımı", "Veli İletişimi" gibi). Asla cümle kurma.
+4. **BAĞLAM:** Ders ve sınıf bilgisini kullanarak yorumu doğru kategorize et.
+5. **AYRIŞTIRMA:** Bir yorum birden fazla konuya değiniyorsa, bunları ayrı "topic" objeleri olarak böl.
+
+---
+
+## 📌 STANDART REFERANS LİSTESİ (Öncelikli Kullanılacaklar)
+
+🟥 **1) İçerik ve Müfredat**
+   - Kazanım uyumsuzluğu / eksikliği / fazlalığı
+   - Seviyeye uygun olmaması (Ağır/Kolay)
+   - Soyut kavramların fazlalığı / Somutlaştırma eksik
+   - Konu sırasının yanlış olması / Bağlantı eksikliği
+   - Metinlerin çok uzun/kısa olması
+   - Metin seçiminde ideolojik/dil eleştirisi
+   - Hassas/yanlı içerik / Bilimsel hata
+   - Güncel değil / Hayatla ilişkilendirme zayıf
+
+🟦 **2) Etkinlikler ve Öğrenme Süreçleri**
+   - Etkinlik sayısının azlığı / çeşitliliği
+   - Yönerge karmaşası / Uygulaması zor
+   - Ölçme yerine yalnızca etkinlik
+   - İşbirlikli öğrenme / Deney eksikliği
+   - Üst düzey düşünme eksik
+   - Süre yetersizliği
+   - Öğrenci aktifliği düşük / Pasif öğrenme
+
+🟨 **3) Ölçme ve Değerlendirme**
+   - Soruların çok zor / kolay olması
+   - Soru yönergesi anlaşılmıyor / Yetersiz soru sayısı
+   - Üst düzey düşünme içermemesi
+   - Tablo/rubrik kullanımı anlaşılmaz
+   - Karekod sınav materyali çalışmıyor
+   - Sınav sonrası geri bildirim eksik
+   - Ölçme ile kazanım eşleşmiyor
+
+🟩 **4) Görsel Tasarım ve Sayfa Düzeni**
+   - Sayfa düzeni sıkışık / Renk uyumsuzluğu
+   - Görseller çok küçük / kalitesiz / pedagojik değil
+   - Yazı fontunun okunabilir olmaması
+   - Metin–görsel oranı dengesiz
+   - Sayfa numarası/dizin sorunları
+
+🟪 **5) Öğretmen ve Öğrenci İhtiyaçları**
+   - Öğretmen kılavuz kitabı eksik
+   - Öğretmene zaman tüketici yük
+   - Ek materyal ihtiyacı
+   - Öğrenci zorlanıyor / Veli açıklaması eksik
+   - Özel gereksinimli öğrenci uyarlaması yok
+
+🟫 **6) Fiziki ve Teknik Koşullar**
+   - Laboratuvar/malzeme eksikliği
+   - Dijital araç yok / QR sorunları
+   - Sınıf mevcudu fazla / Okul donanımı yetersiz
+   - EBA/uygulama teknik sorunları
+
+⚫ **7) Diğer (Referans)**
+   - Dil kullanımında ideolojik vurgu / Kültürel hassasiyet
+   - Telif sorunu / Gizlilik endişesi
+   - Teşekkür / Genel Memnuniyet
+`;
+
+    const fewShotExamples = `
+ÖRNEK ANALİZLER (REFERANS AL):
+
+GİRDİ: "Etkinliklerdeki yönergeler o kadar karışık ki çocuklar ne yapacağını anlamıyor."
+ÇIKTI:
+{
+  "items": [{
+    "entryId": "ex1",
+    "topics": [
+      { "mainCategory": "Etkinlikler ve Öğrenme Süreçleri", "subTheme": "Yönerge karmaşası", "sentiment": "Negatif" }
+    ],
+    "actionable": true
+  }]
+}
+
+GİRDİ: "Yapay zeka destekli uygulamalarla ilgili hiçbir içerik yok, dünya buraya gidiyor ama kitapta yz yok."
+ÇIKTI:
+{
+  "items": [{
+    "entryId": "ex2",
+    "topics": [
+      { "mainCategory": "Teknoloji ve Gelecek Vizyonu", "subTheme": "Yapay zeka içeriği eksikliği", "sentiment": "Yapıcı Eleştiri" }
+    ],
+    "actionable": true
+  }]
+}
+
+GİRDİ: "Veliler sürekli bu etkinliklerin evde yapılmasından şikayetçi, onlara yönelik bir açıklama sayfası konulmalı."
+ÇIKTI:
+{
+  "items": [{
+    "entryId": "ex3",
+    "topics": [
+      { "mainCategory": "Öğretmen ve Öğrenci İhtiyaçları", "subTheme": "Velilere yönelik açıklama eksik", "sentiment": "Negatif" }
+    ],
+    "actionable": true
+  }]
+}
+`;
+
     const prompt = `
-Sen kıdemli bir eğitim politikası uzmanısın. ${rows.length} öğretmen görüşünü analiz edeceksin.
+${systemInstruction}
 
-ÖNEMLİ: TÜM görüşler için TUTARLI kategorilendirme yap. Benzer görüşler AYNI kategoriye atılmalı.
+${fewShotExamples}
 
-ANA KATEGORİLER VE TANIMLARI (SADECE BUNLARI KULLAN):
+---
 
-1. "Ders Kitabı İçeriği"
-   - Kitaptaki konu anlatımı, örnekler, görseller
-   - Etkinlik sayısı, zorluğu, çeşitliliği
-   - Kitap içeriğinin eksikliği veya fazlalığı
-   - "Etkinlik zor/kolay", "Örnekler yetersiz", "Konu anlatımı eksik"
+GÖREV:
+Aşağıdaki ${rows.length} öğretmen görüşünü analiz et.
+Her bir görüş için STANDART LİSTEYE EN UYGUN kategoriyi seç.
+UYGUN YOKSA, MANTIKLI VE KISA YENİ BİR KATEGORİ OLUŞTUR.
+Bir görüş birden fazla konuya değiniyorsa, ayrı "topics" array elemanları olarak böl.
 
-2. "Öğrenci Seviyesi"
-   - Öğrencilerin hazırbulunuşluğu
-   - Yaş grubuna uygunluk
-   - Öğrenci kapasitesi ve algı düzeyi
-   - "Seviyelerine uygun değil", "Çocuklar anlamıyor", "Ön öğrenme eksik"
-
-3. "Müfredat"
-   - Kazanımlar, öğrenme çıktıları
-   - Müfredat yoğunluğu, sıralaması
-   - "Kazanım çok", "Müfredat yoğun", "Sıralama hatalı"
-
-4. "Ölçme Değerlendirme"
-   - Sınav, quiz, ölçme araçları
-   - Değerlendirme kriterleri
-   - "Sınav soruları yetersiz", "Ölçme yapamıyorum"
-
-5. "Fiziki Koşullar"
-   - Sınıf, malzeme, teknolojik altyapı
-   - "Materyal yok", "Sınıf uygun değil", "İnternet yok"
-
-6. "Öğretmen Kılavuzu"
-   - Kılavuz kitap içeriği, yeterliliği
-   - "Kılavuz eksik", "Kılavuzda örnek yok"
-
-7. "Zaman Yönetimi"
-   - Ders saati yeterliliği
-   - "Süre yetersiz", "Zaman yetmiyor"
-
-8. "Diğer"
-   - Yukarıdaki kategorilere girmeyen veya boş görüşler
-
-KURALLAR:
-- Her görüş için EN UYGUN 1 kategori seç
-- "Etkinlik zor" → "Ders Kitabı İçeriği" (öğrenci seviyesi DEĞİL)
-- "Öğrenci seviyesine uygun değil" → "Öğrenci Seviyesi"
-- "Kazanım fazla" → "Müfredat"
-- Boş veya anlamsız görüş → "Diğer" + "Nötr" sentiment
-- Alt tema kısa ve öz olsun (max 5-6 kelime)
-
-SENTIMENT:
-- Pozitif: Övgü, memnuniyet
-- Negatif: Sorun, eksiklik, şikayet
-- Nötr: Tarafsız tespit veya boş
-
-Görüşler:
+VERİLER:
 ${JSON.stringify(promptData, null, 2)}
 `;
 
@@ -481,42 +566,53 @@ ${JSON.stringify(promptData, null, 2)}
 }
 
 async function generateExecutiveSummary(genAI, analysisResults) {
-    const categoryCounts = analysisResults.reduce((acc, item) => {
-        acc[item.mainCategory] = (acc[item.mainCategory] || 0) + 1;
+    // Flatten all topics for counting
+    const allTopics = analysisResults.flatMap(item => item.topics || []);
+    
+    const categoryCounts = allTopics.reduce((acc, topic) => {
+        acc[topic.mainCategory] = (acc[topic.mainCategory] || 0) + 1;
         return acc;
     }, {});
 
-    const sentimentCounts = analysisResults.reduce((acc, item) => {
-        acc[item.sentiment] = (acc[item.sentiment] || 0) + 1;
+    const sentimentCounts = allTopics.reduce((acc, topic) => {
+        acc[topic.sentiment] = (acc[topic.sentiment] || 0) + 1;
         return acc;
     }, {});
 
     const actionableCount = analysisResults.filter(i => i.actionable).length;
-    const topThemes = analysisResults
-        .slice(0, 100)
-        .map(i => `${i.mainCategory}: ${i.subTheme}`)
+    
+    const subThemeCounts = {};
+    allTopics.forEach(topic => {
+        const key = `${topic.mainCategory}: ${topic.subTheme}`;
+        subThemeCounts[key] = (subThemeCounts[key] || 0) + 1;
+    });
+    
+    const topThemes = Object.entries(subThemeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 30)
+        .map(([theme, count]) => `${theme} (${count} adet)`)
         .join('; ');
 
     const prompt = `
-Sen kıdemli bir eğitim analistisin. Binlerce öğretmen görüşünün analiz sonuçlarını inceledin.
-Aşağıdaki özet verilere dayanarak, Milli Eğitim Bakanlığı yetkilileri için üst düzey bir yönetici özeti (Executive Summary) yaz.
+Sen kıdemli bir eğitim analistisin. ${analysisResults.length} adet öğretmen görüşünün analiz sonuçlarını inceledin.
 
-Toplam Görüş Sayısı: ${analysisResults.length}
+Aşağıdaki istatistiklere dayanarak, Milli Eğitim Bakanlığı yetkilileri için üst düzey bir yönetici özeti (Executive Summary) yaz.
+Not: Listede olmayan "Yeni Kategoriler" türetilmiş olabilir, bunları da analize dahil et.
 
-Kategori Dağılımı: ${JSON.stringify(categoryCounts, null, 2)}
+İstatistikler:
+- Toplam Görüş: ${analysisResults.length}
+- Kategori Dağılımı: ${JSON.stringify(categoryCounts, null, 2)}
+- Duygu Dağılımı: ${JSON.stringify(sentimentCounts, null, 2)}
+- Eyleme Dönüştürülebilir: ${actionableCount} (${((actionableCount / analysisResults.length) * 100).toFixed(1)}%)
 
-Sentiment Dağılımı: ${JSON.stringify(sentimentCounts, null, 2)}
+Öne Çıkan Konular (Top 30):
+${topThemes}
 
-Eyleme Dönüştürülebilir Görüş Sayısı: ${actionableCount} (${((actionableCount / analysisResults.length) * 100).toFixed(1)}%)
-
-Örnek Temalar (ilk 100): ${topThemes}
-
-Lütfen şu başlıkları kullan:
+Başlıklar:
 1. Genel Durum Değerlendirmesi
-2. Öne Çıkan Sorun Alanları
-3. En Sık Rastlanan Alt Temalar
-4. İyileştirme Önerileri
-5. Öncelikli Aksiyon Maddeleri
+2. Kritik Sorun Alanları ve Yeni Beliren Temalar
+3. İyileştirme Önerileri
+4. Öncelikli Aksiyon Maddeleri
 
 Türkçe ve resmi bir dil kullan. Markdown formatında yaz.
 `;
@@ -559,12 +655,16 @@ function enrichDataWithAnalysis(rawData, analysisResults) {
 
     return rawData.map(row => {
         const analysis = analysisMap.get(row['Entry Id']);
+        // topics array'den ilk topic'i al (birden fazla topic varsa ilkini kullan)
+        const firstTopic = analysis?.topics && analysis.topics.length > 0 ? analysis.topics[0] : null;
+        
         return {
             ...row,
-            mainCategory: analysis?.mainCategory || 'İşlenmedi',
-            subTheme: analysis?.subTheme || 'İşlenmedi',
-            sentiment: analysis?.sentiment || 'Nötr',
+            mainCategory: firstTopic?.mainCategory || 'İşlenmedi',
+            subTheme: firstTopic?.subTheme || 'İşlenmedi',
+            sentiment: firstTopic?.sentiment || 'Nötr',
             actionable: analysis?.actionable || false,
+            allTopics: analysis?.topics || [] // Tüm topics'leri de sakla
         };
     });
 }
@@ -576,9 +676,14 @@ function calculateStats(analysisResults) {
     let actionableCount = 0;
 
     analysisResults.forEach(result => {
-        categoryCounts[result.mainCategory] = (categoryCounts[result.mainCategory] || 0) + 1;
-        themeCounts[result.subTheme] = (themeCounts[result.subTheme] || 0) + 1;
-        sentimentCounts[result.sentiment] = (sentimentCounts[result.sentiment] || 0) + 1;
+        // Her result'ın topics array'ini işle
+        if (result.topics && Array.isArray(result.topics)) {
+            result.topics.forEach(topic => {
+                categoryCounts[topic.mainCategory] = (categoryCounts[topic.mainCategory] || 0) + 1;
+                themeCounts[topic.subTheme] = (themeCounts[topic.subTheme] || 0) + 1;
+                sentimentCounts[topic.sentiment] = (sentimentCounts[topic.sentiment] || 0) + 1;
+            });
+        }
         if (result.actionable) actionableCount++;
     });
 
