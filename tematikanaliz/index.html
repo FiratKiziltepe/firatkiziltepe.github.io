@@ -245,7 +245,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Analiz Sonuçları</h2>
 
                     <!-- Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                         <input type="text" id="searchInput" placeholder="Arama (Entry ID veya görüş metni)..."
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <select id="categoryFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -259,6 +259,11 @@
                             <option value="Pozitif">Pozitif</option>
                             <option value="Negatif">Negatif</option>
                             <option value="Nötr">Nötr</option>
+                        </select>
+                        <select id="actionableFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="all">Tüm Görüşler</option>
+                            <option value="true">Eyleme Dönüştürülebilir</option>
+                            <option value="false">Eyleme Dönüştürülemez</option>
                         </select>
                     </div>
 

@@ -16,6 +16,7 @@ const state = {
     categoryFilter: 'all',
     themeFilter: 'all',
     sentimentFilter: 'all',
+    actionableFilter: 'all',
     charts: {}
 };
 
@@ -212,6 +213,7 @@ function initializeEventListeners() {
     const categoryFilter = document.getElementById('categoryFilter');
     const themeFilter = document.getElementById('themeFilter');
     const sentimentFilter = document.getElementById('sentimentFilter');
+    const actionableFilter = document.getElementById('actionableFilter');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
 
@@ -253,6 +255,11 @@ function initializeEventListeners() {
     });
     sentimentFilter.addEventListener('change', () => {
         state.sentimentFilter = sentimentFilter.value;
+        state.currentPage = 1;
+        renderTable();
+    });
+    actionableFilter.addEventListener('change', () => {
+        state.actionableFilter = actionableFilter.value;
         state.currentPage = 1;
         renderTable();
     });
@@ -405,11 +412,32 @@ Sen Milli Eğitim Bakanlığı (MEB) ders materyallerini, müfredatını ve saha
 Görevin, öğretmenlerden gelen serbest metinli görüşleri analiz ederek etiketlemektir.
 
 TEMEL KURALLAR:
-1. **ÖNCELİK STANDART LİSTE:** Analiz yaparken *öncelikle* aşağıda verilen standart "Ana Kategori" ve "Alt Tema" listesini kullanmaya çalış.
-2. **ESNEKLİK VE YENİ KATEGORİ:** Eğer görüş, standart listedeki **hiçbir kategoriye uymuyorsa** (gerçekten benzersiz veya öngörülmemiş bir durumsa), **YENİ BİR ANA KATEGORİ veya ALT TEMA İSMİ ÜRET.**
-3. **İSİMLENDİRME KURALI:** Yeni kategori üreteceksen, mevcutlar gibi kısa, öz ve kurumsal bir dil kullan (Örn: "Yapay Zeka Kullanımı", "Veli İletişimi" gibi). Asla cümle kurma.
-4. **BAĞLAM:** Ders ve sınıf bilgisini kullanarak yorumu doğru kategorize et.
-5. **AYRIŞTIRMA:** Bir yorum birden fazla konuya değiniyorsa, bunları ayrı "topic" objeleri olarak böl.
+
+1. **ÇOKLU ETİKETLEME (1-3 TOPIC):**
+   - Her görüş için **EN AZ 1, EN FAZLA 3** topic objesi döndür
+   - Sadece görüş **açıkça farklı konulara değiniyorsa** birden fazla topic oluştur
+   - Aynı kategori-alt tema çiftini tekrar etme
+   - Kısa/tek konulu görüşler için 1 topic yeterli
+   - Uzun/çok yönlü görüşler için 2-3 topic kullan
+
+2. **ÖNCELİK STANDART LİSTE:** 
+   - Analiz yaparken *öncelikle* aşağıda verilen standart "Ana Kategori" ve "Alt Tema" listesini kullan
+
+3. **ESNEKLİK VE YENİ KATEGORİ:** 
+   - Eğer görüş, standart listedeki **hiçbir kategoriye uymuyorsa**, **YENİ BİR ANA KATEGORİ veya ALT TEMA İSMİ ÜRET**
+
+4. **İSİMLENDİRME KURALI:** 
+   - Yeni kategori üreteceksen, mevcutlar gibi kısa, öz ve kurumsal bir dil kullan (Örn: "Yapay Zeka Kullanımı", "Veli İletişimi")
+   - Asla cümle kurma
+
+5. **BAĞLAM:** 
+   - Ders ve sınıf bilgisini kullanarak yorumu doğru kategorize et
+
+6. **AYRIŞTIRMA ÖRNEKLERİ:**
+   - "Etkinlikler zor VE sınıf kalabalık" → 2 topic (Etkinlikler + Fiziki Koşullar)
+   - "Kitap güzel ama kılavuz eksik" → 2 topic (İçerik + Öğretmen Kılavuzu)
+   - "Etkinlikler zor" → 1 topic (sadece Etkinlikler)
+   - "Kazanımlar fazla, soyut ve sıralama yanlış" → 3 topic (3 farklı Müfredat sorunu)
 
 ---
 
@@ -472,6 +500,7 @@ TEMEL KURALLAR:
     const fewShotExamples = `
 ÖRNEK ANALİZLER (REFERANS AL):
 
+ÖRNEK 1 - TEK TOPIC (Kısa, tek konulu görüş):
 GİRDİ: "Etkinliklerdeki yönergeler o kadar karışık ki çocuklar ne yapacağını anlamıyor."
 ÇIKTI:
 {
@@ -484,25 +513,43 @@ GİRDİ: "Etkinliklerdeki yönergeler o kadar karışık ki çocuklar ne yapaca�
   }]
 }
 
-GİRDİ: "Yapay zeka destekli uygulamalarla ilgili hiçbir içerik yok, dünya buraya gidiyor ama kitapta yz yok."
+ÖRNEK 2 - İKİ TOPIC (İki farklı konu):
+GİRDİ: "Kitaptaki örnekler çok güzel ama sınıfta materyal yok, etkinlikleri uygulayamıyoruz."
 ÇIKTI:
 {
   "items": [{
     "entryId": "ex2",
     "topics": [
-      { "mainCategory": "Teknoloji ve Gelecek Vizyonu", "subTheme": "Yapay zeka içeriği eksikliği", "sentiment": "Yapıcı Eleştiri" }
+      { "mainCategory": "İçerik ve Müfredat", "subTheme": "Örnekler kaliteli", "sentiment": "Pozitif" },
+      { "mainCategory": "Fiziki ve Teknik Koşullar", "subTheme": "Materyal eksikliği", "sentiment": "Negatif" }
     ],
     "actionable": true
   }]
 }
 
-GİRDİ: "Veliler sürekli bu etkinliklerin evde yapılmasından şikayetçi, onlara yönelik bir açıklama sayfası konulmalı."
+ÖRNEK 3 - ÜÇ TOPIC (Üç farklı sorun):
+GİRDİ: "Kazanımlar çok fazla, konular soyut ve anlaşılmıyor, bir de sıralama yanlış yapılmış."
 ÇIKTI:
 {
   "items": [{
     "entryId": "ex3",
     "topics": [
-      { "mainCategory": "Öğretmen ve Öğrenci İhtiyaçları", "subTheme": "Velilere yönelik açıklama eksik", "sentiment": "Negatif" }
+      { "mainCategory": "İçerik ve Müfredat", "subTheme": "Kazanım fazlalığı", "sentiment": "Negatif" },
+      { "mainCategory": "İçerik ve Müfredat", "subTheme": "Soyut kavramların fazlalığı", "sentiment": "Negatif" },
+      { "mainCategory": "İçerik ve Müfredat", "subTheme": "Konu sırası yanlış", "sentiment": "Negatif" }
+    ],
+    "actionable": true
+  }]
+}
+
+ÖRNEK 4 - YENİ KATEGORİ (Standart listede yok):
+GİRDİ: "Yapay zeka ve kodlama ile ilgili hiçbir içerik yok, 21. yüzyıl becerileri eksik."
+ÇIKTI:
+{
+  "items": [{
+    "entryId": "ex4",
+    "topics": [
+      { "mainCategory": "Teknoloji ve Gelecek Becerileri", "subTheme": "Yapay zeka içeriği eksikliği", "sentiment": "Yapıcı Eleştiri" }
     ],
     "actionable": true
   }]
@@ -518,9 +565,20 @@ ${fewShotExamples}
 
 GÖREV:
 Aşağıdaki ${rows.length} öğretmen görüşünü analiz et.
-Her bir görüş için STANDART LİSTEYE EN UYGUN kategoriyi seç.
-UYGUN YOKSA, MANTIKLI VE KISA YENİ BİR KATEGORİ OLUŞTUR.
-Bir görüş birden fazla konuya değiniyorsa, ayrı "topics" array elemanları olarak böl.
+
+Her görüş için:
+1. Görüşte tartışılan **EN FAZLA 3 FARKLI YÖNÜ** belirle
+2. Her yön için:
+   - Standart listeden EN UYGUN **Ana Kategori** ve **Alt Tema** seç
+   - Uygun yoksa YENİ bir alt tema oluştur
+   - O yön için **Sentiment** belirle (Pozitif, Negatif, Nötr, Yapıcı Eleştiri)
+   - O yön **Aksiyon Gerektiriyor mu?** belirle
+
+ÖNEMLİ:
+- **EN AZ 1, EN FAZLA 3** topic döndür
+- Sadece görüş **açıkça farklı konulara** değiniyorsa birden fazla topic oluştur
+- Aynı kategori-alt tema çiftini TEKRAR ETME
+- Kısa görüşler için 1 topic yeterli
 
 VERİLER:
 ${JSON.stringify(promptData, null, 2)}
@@ -893,7 +951,10 @@ function getFilteredData() {
         const matchesCategory = state.categoryFilter === 'all' || row.mainCategory === state.categoryFilter;
         const matchesTheme = state.themeFilter === 'all' || row.subTheme === state.themeFilter;
         const matchesSentiment = state.sentimentFilter === 'all' || row.sentiment === state.sentimentFilter;
-        return matchesSearch && matchesCategory && matchesTheme && matchesSentiment;
+        const matchesActionable = state.actionableFilter === 'all' || 
+            (state.actionableFilter === 'true' && row.actionable === true) ||
+            (state.actionableFilter === 'false' && row.actionable === false);
+        return matchesSearch && matchesCategory && matchesTheme && matchesSentiment && matchesActionable;
     });
 }
 
@@ -1155,6 +1216,7 @@ function resetApp() {
     state.categoryFilter = 'all';
     state.themeFilter = 'all';
     state.sentimentFilter = 'all';
+    state.actionableFilter = 'all';
 
     // Destroy charts
     Object.values(state.charts).forEach(chart => chart?.destroy());
