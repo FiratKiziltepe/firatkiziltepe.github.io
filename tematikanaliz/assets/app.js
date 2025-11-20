@@ -67,8 +67,8 @@ const analysisSchema = {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    initializeEventListeners();
     initializeModelSelect();
+    initializeEventListeners();
     if (state.apiKey) {
         document.getElementById('apiKeyInput').value = state.apiKey;
     }
@@ -76,7 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeModelSelect() {
     const modelSelect = document.getElementById('modelSelect');
-    const modelLimitInfo = document.getElementById('modelLimitInfo');
+    
+    if (!modelSelect) {
+        console.error('modelSelect element not found!');
+        return;
+    }
+
+    // Clear existing options first
+    modelSelect.innerHTML = '';
 
     // Populate options
     AVAILABLE_MODELS.forEach(model => {
@@ -100,8 +107,9 @@ function initializeModelSelect() {
 
 function updateLimitInfo(modelId) {
     const model = AVAILABLE_MODELS.find(m => m.id === modelId);
-    if (model) {
-        document.getElementById('modelLimitInfo').textContent = `Limitler: ${model.limitInfo}`;
+    const limitInfoEl = document.getElementById('modelLimitInfo');
+    if (model && limitInfoEl) {
+        limitInfoEl.textContent = `Limitler: ${model.limitInfo}`;
     }
 }
 
