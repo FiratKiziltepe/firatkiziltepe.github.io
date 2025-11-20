@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Global state
 const state = {
     apiKey: localStorage.getItem('gemini_api_key') || '',
+    selectedModel: localStorage.getItem('gemini_model') || 'gemini-2.5-flash',
     rawData: [],
     enrichedData: [],
     analysisResults: [],
@@ -16,8 +17,32 @@ const state = {
     charts: {}
 };
 
-const MODEL_NAME = 'gemini-2.0-flash-exp';
-const BATCH_SIZE = 50;
+// Model Definitions
+const AVAILABLE_MODELS = [
+    {
+        id: 'gemini-2.5-pro',
+        name: 'Gemini 2.5 Pro',
+        limitInfo: 'BGBG: 2, TPM: 125.000, RPD: 50'
+    },
+    {
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
+    },
+    {
+        id: 'gemini-2.5-flash-preview',
+        name: 'Gemini 2.5 Flash Önizlemesi',
+        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
+    },
+    {
+        id: 'gemini-2.5-flash-lite',
+        name: 'Gemini 2.5 Flash-Lite',
+        limitInfo: 'BGBG: 15, TPM: 250.000, RPD: 1.000'
+    }
+];
+
+const BATCH_SIZE = 10;
+const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 
 // Schema for structured output
 const analysisSchema = {
@@ -43,10 +68,42 @@ const analysisSchema = {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
+    initializeModelSelect();
     if (state.apiKey) {
         document.getElementById('apiKeyInput').value = state.apiKey;
     }
 });
+
+function initializeModelSelect() {
+    const modelSelect = document.getElementById('modelSelect');
+    const modelLimitInfo = document.getElementById('modelLimitInfo');
+
+    // Populate options
+    AVAILABLE_MODELS.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = model.name;
+        modelSelect.appendChild(option);
+    });
+
+    // Set initial value
+    modelSelect.value = state.selectedModel;
+    updateLimitInfo(state.selectedModel);
+
+    // Listen for changes
+    modelSelect.addEventListener('change', (e) => {
+        state.selectedModel = e.target.value;
+        localStorage.setItem('gemini_model', e.target.value);
+        updateLimitInfo(e.target.value);
+    });
+}
+
+function updateLimitInfo(modelId) {
+    const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+    if (model) {
+        document.getElementById('modelLimitInfo').textContent = `Limitler: ${model.limitInfo}`;
+    }
+}
 
 function initializeEventListeners() {
     const dropZone = document.getElementById('dropZone');
@@ -211,7 +268,7 @@ async function startAnalysis() {
             state.analysisResults.push(...batchResult.items);
 
             if (i + BATCH_SIZE < state.rawData.length) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
             }
         }
 
@@ -260,26 +317,43 @@ Veriler:
 ${JSON.stringify(promptData, null, 2)}
 `;
 
-    try {
-        const model = genAI.getGenerativeModel({
-            model: MODEL_NAME,
-            generationConfig: {
-                temperature: 0.2,
-                responseMimeType: 'application/json',
-                responseSchema: analysisSchema,
-            },
-        });
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.2,
+            responseMimeType: 'application/json',
+            responseSchema: analysisSchema,
+        },
+    });
 
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
+    let retries = 5;
+    let retryDelay = 5000;
 
-        if (!text) throw new Error('Empty response from Gemini');
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
 
-        return JSON.parse(text);
-    } catch (error) {
-        console.error('Batch analysis error:', error);
-        return { items: [] };
+            if (!text) throw new Error('Empty response from Gemini');
+
+            return JSON.parse(text);
+        } catch (error) {
+            const isRateLimit = error.message.includes('429') || error.message.includes('Quota exceeded');
+            if (isRateLimit && retries > 1) {
+                console.warn(`Rate limit hit (Batch), retrying in ${retryDelay}ms...`, error);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 1.5;
+                retries--;
+                continue;
+            }
+            console.error('Batch analysis error:', error);
+            // Only return empty if it's a non-recoverable error or we ran out of retries
+            if (retries === 1) return { items: [] };
+            // If it's not a rate limit error, fail immediately
+            if (!isRateLimit) return { items: [] };
+        }
     }
+    return { items: [] };
 }
 
 async function generateExecutiveSummary(genAI, analysisResults) {
@@ -323,20 +397,34 @@ Lütfen şu başlıkları kullan:
 Türkçe ve resmi bir dil kullan. Markdown formatında yaz.
 `;
 
-    try {
-        const model = genAI.getGenerativeModel({
-            model: MODEL_NAME,
-            generationConfig: {
-                temperature: 0.7,
-            },
-        });
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.7,
+        },
+    });
 
-        const result = await model.generateContent(prompt);
-        return result.response.text() || 'Özet oluşturulamadı.';
-    } catch (e) {
-        console.error('Summary generation error:', e);
-        return 'Özet oluşturulurken bir hata oluştu.';
+    let retries = 5;
+    let retryDelay = 5000;
+
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            return result.response.text() || 'Özet oluşturulamadı.';
+        } catch (e) {
+            const isRateLimit = e.message.includes('429') || e.message.includes('Quota exceeded');
+            if (isRateLimit && retries > 1) {
+                console.warn(`Rate limit hit (Summary), retrying in ${retryDelay}ms...`, e);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 1.5;
+                retries--;
+                continue;
+            }
+            console.error('Summary generation error:', e);
+            if (retries === 1 || !isRateLimit) return 'Özet oluşturulurken bir hata oluştu.';
+        }
     }
+    return 'Özet oluşturulurken bir hata oluştu.';
 }
 
 function enrichDataWithAnalysis(rawData, analysisResults) {
