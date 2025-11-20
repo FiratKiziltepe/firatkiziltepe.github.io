@@ -14,6 +14,7 @@ const state = {
     itemsPerPage: 20,
     searchTerm: '',
     categoryFilter: 'all',
+    themeFilter: 'all',
     sentimentFilter: 'all',
     charts: {}
 };
@@ -188,6 +189,7 @@ function initializeEventListeners() {
     const exportBtn = document.getElementById('exportBtn');
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
+    const themeFilter = document.getElementById('themeFilter');
     const sentimentFilter = document.getElementById('sentimentFilter');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -219,6 +221,11 @@ function initializeEventListeners() {
     });
     categoryFilter.addEventListener('change', () => {
         state.categoryFilter = categoryFilter.value;
+        state.currentPage = 1;
+        renderTable();
+    });
+    themeFilter.addEventListener('change', () => {
+        state.themeFilter = themeFilter.value;
         state.currentPage = 1;
         renderTable();
     });
@@ -573,6 +580,18 @@ function showResults() {
         categoryFilter.appendChild(option);
     });
 
+    // Populate theme filter
+    const themeFilter = document.getElementById('themeFilter');
+    themeFilter.innerHTML = '<option value="all">Tüm Alt Temalar</option>';
+    Object.keys(state.stats.themeCounts)
+        .sort()
+        .forEach(theme => {
+            const option = document.createElement('option');
+            option.value = theme;
+            option.textContent = theme;
+            themeFilter.appendChild(option);
+        });
+
     // Render table
     renderTable();
 }
@@ -580,24 +599,32 @@ function showResults() {
 function createCharts() {
     const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16'];
 
-    // Category Chart
-    const categoryData = Object.entries(state.stats.categoryCounts);
+    // Category Chart (Horizontal Bar)
+    const categoryData = Object.entries(state.stats.categoryCounts)
+        .sort((a, b) => b[1] - a[1]);
     state.charts.category = new Chart(document.getElementById('categoryChart'), {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: categoryData.map(([name]) => name),
             datasets: [{
+                label: 'Görüş Sayısı',
                 data: categoryData.map(([, value]) => value),
                 backgroundColor: colors
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
             aspectRatio: 1.5,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
                 }
             }
         }
@@ -610,7 +637,7 @@ function createCharts() {
     state.charts.theme = new Chart(document.getElementById('themeChart'), {
         type: 'bar',
         data: {
-            labels: themeData.map(([name]) => name.length > 30 ? name.substring(0, 30) + '...' : name),
+            labels: themeData.map(([name]) => name),
             datasets: [{
                 label: 'Görüş Sayısı',
                 data: themeData.map(([, value]) => value),
@@ -621,10 +648,30 @@ function createCharts() {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 1.5,
+            aspectRatio: 1.2,
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.x + ' görüş';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false,
+                        font: {
+                            size: 11
+                        }
+                    }
                 }
             }
         }
@@ -687,8 +734,9 @@ function getFilteredData() {
             row['Entry Id']?.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
             row['Görüş, tespit veya önerilerinizi buraya yazabilirsiniz.']?.toLowerCase().includes(state.searchTerm.toLowerCase());
         const matchesCategory = state.categoryFilter === 'all' || row.mainCategory === state.categoryFilter;
+        const matchesTheme = state.themeFilter === 'all' || row.subTheme === state.themeFilter;
         const matchesSentiment = state.sentimentFilter === 'all' || row.sentiment === state.sentimentFilter;
-        return matchesSearch && matchesCategory && matchesSentiment;
+        return matchesSearch && matchesCategory && matchesTheme && matchesSentiment;
     });
 }
 
@@ -707,13 +755,13 @@ function renderTable() {
     const tbody = document.getElementById('resultsTableBody');
     tbody.innerHTML = currentData.map(row => `
         <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${escapeHtml(row['Entry Id'])}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${escapeHtml(row['DERS'])} / ${escapeHtml(row['SINIF'])}</td>
-            <td class="px-6 py-4 text-sm text-gray-600 max-w-md"><div class="line-clamp-3">${escapeHtml(row['Görüş, tespit veya önerilerinizi buraya yazabilirsiniz.'] || '-')}</div></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">${escapeHtml(row.mainCategory)}</span></td>
-            <td class="px-6 py-4 text-sm text-gray-600 max-w-xs"><div class="line-clamp-2">${escapeHtml(row.subTheme)}</div></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 py-1 rounded-full text-xs ${getSentimentColor(row.sentiment)}">${escapeHtml(row.sentiment)}</span></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">${row.actionable ? '<span class="text-green-600">✓</span>' : '<span class="text-gray-400">-</span>'}</td>
+            <td class="px-4 py-4 text-sm text-gray-900" style="width: 100px;">${escapeHtml(row['Entry Id'])}</td>
+            <td class="px-4 py-4 text-sm text-gray-600" style="width: 150px;">${escapeHtml(row['DERS'])} / ${escapeHtml(row['SINIF'])}</td>
+            <td class="px-4 py-4 text-sm text-gray-600" style="width: 400px; word-wrap: break-word; white-space: normal;">${escapeHtml(row['Görüş, tespit veya önerilerinizi buraya yazabilirsiniz.'] || '-')}</td>
+            <td class="px-4 py-4 text-sm" style="width: 150px;"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs inline-block">${escapeHtml(row.mainCategory)}</span></td>
+            <td class="px-4 py-4 text-sm text-gray-600" style="width: 200px; word-wrap: break-word; white-space: normal;">${escapeHtml(row.subTheme)}</td>
+            <td class="px-4 py-4 text-sm" style="width: 100px;"><span class="px-2 py-1 rounded-full text-xs inline-block ${getSentimentColor(row.sentiment)}">${escapeHtml(row.sentiment)}</span></td>
+            <td class="px-4 py-4 text-sm text-center" style="width: 80px;">${row.actionable ? '<span class="text-green-600 text-lg">✓</span>' : '<span class="text-gray-400">-</span>'}</td>
         </tr>
     `).join('');
 
@@ -767,6 +815,7 @@ function resetApp() {
     state.currentPage = 1;
     state.searchTerm = '';
     state.categoryFilter = 'all';
+    state.themeFilter = 'all';
     state.sentimentFilter = 'all';
 
     // Destroy charts
