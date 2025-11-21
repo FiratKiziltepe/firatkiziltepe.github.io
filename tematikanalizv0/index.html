@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tematik Analiz - Gemini AI</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📊 Tematik Analiz Sistemi</h1>
+            <p class="subtitle">Öğretmen görüşlerinizi Gemini AI ile analiz edin</p>
+        </header>
+
+        <!-- API Key Section -->
+        <section class="card" id="api-section">
+            <h2>🔑 API Anahtarı</h2>
+            <div class="form-group">
+                <label for="api-key">Gemini API Key:</label>
+                <div class="input-with-button">
+                    <input type="password" id="api-key" placeholder="AIza..." />
+                    <button id="toggle-key-btn" class="btn-icon" title="Göster/Gizle">👁️</button>
+                    <button id="save-key-btn" class="btn-secondary">Kaydet</button>
+                </div>
+                <small>API anahtarınız tarayıcınızda güvenli şekilde saklanır. <a href="https://aistudio.google.com/app/apikey" target="_blank">Buradan</a> ücretsiz API key alabilirsiniz.</small>
+            </div>
+        </section>
+
+        <!-- File Upload Section -->
+        <section class="card" id="upload-section">
+            <h2>📁 Excel Dosyası Yükleme</h2>
+            <div class="upload-area" id="upload-area">
+                <input type="file" id="file-input" accept=".xlsx,.xls" hidden />
+                <div class="upload-content">
+                    <span class="upload-icon">📤</span>
+                    <p>Excel dosyanızı buraya sürükleyin veya tıklayın</p>
+                    <button class="btn-primary" id="select-file-btn">Dosya Seç</button>
+                </div>
+            </div>
+            <div id="file-info" class="file-info hidden">
+                <p><strong>Seçilen Dosya:</strong> <span id="file-name"></span></p>
+                <p><strong>Toplam Satır:</strong> <span id="row-count"></span></p>
+            </div>
+        </section>
+
+        <!-- Column Selection Section -->
+        <section class="card hidden" id="column-section">
+            <h2>📋 Kolon Seçimi</h2>
+            <div class="column-grid">
+                <div class="form-group">
+                    <label for="col-entry-id">Entry ID Kolonu:</label>
+                    <select id="col-entry-id" class="form-select">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="col-opinion">Görüş/Öneri Kolonu:</label>
+                    <select id="col-opinion" class="form-select">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="col-branch">Branş Kolonu (Opsiyonel):</label>
+                    <select id="col-branch" class="form-select">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="col-course">Ders Kolonu (Opsiyonel):</label>
+                    <select id="col-course" class="form-select">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="col-grade">Sınıf Kolonu (Opsiyonel):</label>
+                    <select id="col-grade" class="form-select">
+                        <option value="">Seçiniz...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="batch-size-group">
+                <label for="batch-size">Batch Boyutu (satır/istek):</label>
+                <input type="number" id="batch-size" value="10" min="5" max="50" />
+                <small>Daha büyük batch'ler daha hızlı ama rate limit riski artar (Önerilen: 10-15)</small>
+            </div>
+            <button class="btn-success" id="start-analysis-btn">Analizi Başlat</button>
+        </section>
+
+        <!-- Progress Section -->
+        <section class="card hidden" id="progress-section">
+            <h2>⏳ Analiz İlerliyor...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="progress-text">
+                <span id="progress-current">0</span> / <span id="progress-total">0</span> satır işlendi
+                (<span id="progress-percent">0</span>%)
+            </p>
+            <p class="progress-status" id="progress-status">Hazırlanıyor...</p>
+        </section>
+
+        <!-- Results Section -->
+        <section class="card hidden" id="results-section">
+            <h2>✅ Analiz Sonuçları</h2>
+            
+            <!-- Statistics -->
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Toplam Analiz</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-positive">0</div>
+                    <div class="stat-label">Pozitif</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-negative">0</div>
+                    <div class="stat-label">Negatif</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-neutral">0</div>
+                    <div class="stat-label">Nötr</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-actionable">0</div>
+                    <div class="stat-label">Aksiyona Dönük</div>
+                </div>
+            </div>
+
+            <!-- Charts Row: Categories Bar Chart + Sentiment Pie Chart -->
+            <div class="charts-row-dual">
+                <!-- Category Distribution Bar Chart -->
+                <div class="chart-container">
+                    <h3>Ana Kategori Dağılımı</h3>
+                    <canvas id="category-bar-chart"></canvas>
+                </div>
+
+                <!-- Sentiment Pie Chart -->
+                <div class="chart-container pie-chart-container">
+                    <h3>Duygu Durumu Analizi</h3>
+                    <canvas id="sentiment-pie-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Prominent Sub-Themes -->
+            <div class="chart-container">
+                <h3>Öne Çıkan Alt Temalar</h3>
+                <div id="prominent-themes"></div>
+            </div>
+
+            <!-- Download Buttons -->
+            <div class="download-buttons">
+                <button class="btn-primary" id="download-excel-btn">📥 Excel İndir</button>
+                <button class="btn-secondary" id="download-json-btn">📥 JSON İndir</button>
+            </div>
+
+            <!-- Results Table -->
+            <div class="table-container">
+                <h3>Detaylı Sonuçlar</h3>
+                <div id="pagination-controls" class="pagination-controls"></div>
+                <div class="table-scroll">
+                    <table id="results-table">
+                        <thead>
+                            <tr>
+                                <th>Entry Id</th>
+                                <th>Orijinal Görüş</th>
+                                <th>Branş</th>
+                                <th>Sınıf</th>
+                                <th>Ders</th>
+                                <th>Ana Kategori</th>
+                                <th>Alt Tema</th>
+                                <th>Duygu Durumu</th>
+                                <th>Aksiyon Gerektirir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                            <!-- Results will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Executive Summary Section -->
+        <section class="card hidden" id="summary-section">
+            <h2>📝 Yönetici Özeti</h2>
+            <div class="summary-loading hidden" id="summary-loading">
+                <div class="spinner"></div>
+                <p>Yönetici özeti oluşturuluyor...</p>
+            </div>
+            <div class="summary-content" id="summary-content">
+                <!-- Summary will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Gemini AI ile güçlendirilmiştir | © 2024</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="js/excel-handler.js"></script>
+    <script src="js/gemini-api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
