@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinamik Tematik Analiz Sistemi | Gemini AI</title>
+    <meta name="description" content="Gemini AI ile güçlendirilmiş dinamik tematik analiz sistemi - Herhangi bir veri setini analiz edin">
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- XLSX Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF & html2canvas for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Google Generative AI -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .checkbox-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-label:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Dinamik Tematik Analiz Sistemi</h1>
+            <p class="text-gray-600">Gemini AI ile Güçlendirilmiş - Herhangi Bir Veri Setini Analiz Edin</p>
+        </div>
+
+        <!-- API Key Section -->
+        <div id="apiKeySection" class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gemini API Anahtarı</label>
+                    <input type="password" id="apiKeyInput" placeholder="AIza... ile başlayan API anahtarınızı girin"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">Model Seçimi</label>
+                            <select id="modelSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer">
+                                <option value="">Yükleniyor...</option>
+                            </select>
+                            <p id="modelLimitInfo" class="mt-1 text-xs text-gray-500">Limitler yükleniyor...</p>
+                        </div>
+                        <div>
+                            <label for="batchSizeInput" class="block text-sm font-medium text-gray-700 mb-2">Batch Boyutu</label>
+                            <input type="number" id="batchSizeInput" min="1" max="50" value="10" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin (1-50)</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-500">
+                        API anahtarınız tarayıcınızda saklanır ve hiçbir sunucuya gönderilmez.
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
+                            class="text-blue-600 hover:text-blue-700 ml-1">Buradan bir anahtar alabilirsiniz →</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p id="errorMessage" class="text-sm text-red-700"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div id="uploadSection">
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer transition-all duration-200 bg-white hover:border-gray-400">
+                <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div class="text-lg font-medium text-gray-700 mt-4">
+                    <span id="fileNameDisplay">Excel dosyasını buraya sürükleyin veya <span class="text-purple-600 hover:text-purple-700">seçmek için tıklayın</span></span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">.xlsx veya .xls formatında - Herhangi bir veri seti</p>
+            </div>
+        </div>
+
+        <!-- Column Selection -->
+        <div id="columnSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sütun Seçimi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- ID Column Selection -->
+                <div>
+                    <label for="idColumnSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                        ID Sütunu (Zorunlu)
+                    </label>
+                    <select id="idColumnSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                        <option value="">ID sütunu seçin...</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">Her satırı benzersiz tanımlayan sütun</p>
+                </div>
+
+                <!-- Row count display -->
+                <div>
+                    <div class="text-sm font-medium text-gray-700 mb-2">Veri İstatistikleri</div>
+                    <div class="text-2xl font-bold text-purple-600">
+                        <span id="rowCountDisplay">0</span> satır
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Excel dosyasında bulunan satır sayısı</p>
+                </div>
+            </div>
+
+            <!-- Analysis Columns Selection -->
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Analiz Edilecek Sütunlar (En az 1 seçin)
+                </label>
+                <div id="analysisColumnsContainer" class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+                    <!-- Checkboxes will be inserted here -->
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Her sütun bağımsız olarak analiz edilecek</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between mt-6">
+                <button id="cancelColumnBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    İptal
+                </button>
+                <button id="startAnalysisBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Analizi Başlat
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="progressSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Analiz Devam Ediyor...</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span id="currentColumnProgress">İşlenen Sütun: -</span>
+                        <span id="columnProgressCount">0 / 0 sütun</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div id="progressBar" class="bg-purple-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p id="progressText" class="text-center text-gray-600">İşlem başlatılıyor...</p>
+                <div class="flex items-center justify-center">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="hidden">
+            <!-- Action Buttons -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Analiz Tamamlandı!</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <span id="totalRowsDisplay">0</span> satır, 
+                            <span id="totalColumnsDisplay">0</span> sütun başarıyla analiz edildi
+                        </p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="newAnalysisBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            Yeni Analiz
+                        </button>
+                        <button id="exportPdfBtn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            <span>PDF Rapor İndir</span>
+                        </button>
+                        <button id="exportBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Excel İndir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Toplam Satır</div>
+                    <div id="statTotal" class="text-3xl font-bold text-purple-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Analiz Edilen Sütun</div>
+                    <div id="statColumns" class="text-3xl font-bold text-indigo-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Toplam Kategori</div>
+                    <div id="statCategories" class="text-3xl font-bold text-blue-600">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Toplam Tema</div>
+                    <div id="statThemes" class="text-3xl font-bold text-cyan-600">0</div>
+                </div>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Genel Yönetici Özeti</h2>
+                <div id="executiveSummary" class="prose max-w-none text-gray-700 leading-relaxed"></div>
+            </div>
+
+            <!-- Per-Column Charts -->
+            <div id="columnChartsContainer">
+                <!-- Charts will be inserted here dynamically -->
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Detaylı Analiz Sonuçları</h2>
+
+                    <!-- Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <input type="text" id="searchInput" placeholder="Arama (ID veya metin)..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <select id="columnFilterSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="all">Tüm Sütunlar</option>
+                        </select>
+                        <select id="sentimentFilterSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="all">Tüm Sentimentler</option>
+                            <option value="Pozitif">Pozitif</option>
+                            <option value="Negatif">Negatif</option>
+                            <option value="Nötr">Nötr</option>
+                            <option value="Yapıcı Eleştiri">Yapıcı Eleştiri</option>
+                        </select>
+                    </div>
+
+                    <div id="filterInfo" class="text-sm text-gray-600">Gösterilen: 0-0 / Toplam: 0</div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr id="tableHeader">
+                                <!-- Table headers will be inserted dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Table rows will be inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="paginationSection" class="mt-6 flex items-center justify-between">
+                    <button id="prevBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Önceki</button>
+                    <span id="pageInfo" class="text-sm text-gray-600">Sayfa 1 / 1</span>
+                    <button id="nextBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Sonraki</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Gemini 2.0 Flash ile güçlendirilmiştir • Tüm analiz tarayıcınızda gerçekleşir</p>
+        </div>
+    </div>
+
+    <script type="module" src="assets/app.js"></script>
+</body>
+</html>
+
