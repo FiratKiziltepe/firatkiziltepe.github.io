@@ -1,0 +1,48 @@
+# API Keys and sensitive data
+.env
+.env.local
+config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Personal notes
+notes.txt
+TODO.txt
+# PDF Dosyalarını dahil etme
+*.pdf
+
+# Excel Dosyalarını dahil etme
+*.xlsx
+*.xls
+
+# Ekran Görüntüleri
+*.png
+*.jpg
+*.jpeg
+
+# IDE klasörleri
+.vscode/
+.idea/
+
+# Log ve Temp
+*.log
+tmp/
