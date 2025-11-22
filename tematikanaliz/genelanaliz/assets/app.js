@@ -19,7 +19,9 @@ const state = {
     searchTerm: '',
     columnFilter: 'all',
     sentimentFilter: 'all',
-    charts: {}
+    charts: {},
+    currentAnalysisId: null, // For tracking current/loaded analysis
+    isHistoryMode: false // Whether viewing from history
 };
 
 // Model Definitions
@@ -175,6 +177,8 @@ function initializeEventListeners() {
     const sentimentFilterSelect = document.getElementById('sentimentFilterSelect');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const saveAnalysisBtn = document.getElementById('saveAnalysisBtn');
 
     // API Key
     apiKeyInput.addEventListener('input', (e) => {
@@ -197,6 +201,8 @@ function initializeEventListeners() {
     newAnalysisBtn.addEventListener('click', resetApp);
     exportBtn.addEventListener('click', exportToExcel);
     exportPdfBtn.addEventListener('click', exportToPDF);
+    historyBtn.addEventListener('click', showHistoryModal);
+    saveAnalysisBtn.addEventListener('click', saveCurrentAnalysis);
 
     // Filters
     searchInput.addEventListener('input', () => {
@@ -682,6 +688,9 @@ function showResults() {
     // Show executive summary
     document.getElementById('executiveSummary').innerHTML = formatMarkdown(state.executiveSummary);
 
+    // Create comparison mode
+    createComparisonMode();
+
     // Create charts for each column
     createColumnCharts();
 
@@ -698,6 +707,105 @@ function showResults() {
     // Render table
     renderTableHeader();
     renderTable();
+    
+    // Auto-save if not in history mode
+    if (!state.isHistoryMode && !state.currentAnalysisId) {
+        state.currentAnalysisId = 'analysis_' + Date.now();
+        autoSaveAnalysis();
+    }
+}
+
+function createComparisonMode() {
+    if (state.selectedAnalysisColumns.length < 2) return;
+    
+    const container = document.getElementById('comparisonContainer');
+    container.innerHTML = '';
+    
+    // Create comparison section
+    const section = document.createElement('div');
+    section.className = 'bg-white rounded-lg shadow-md p-6 mb-6';
+    section.innerHTML = `
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Sütunlar Arası Karşılaştırma</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+                <h4 class="text-sm font-semibold mb-3 text-gray-700">Kategori Örtüşme Matrisi</h4>
+                <canvas id="comparisonMatrix"></canvas>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold mb-3 text-gray-700">Sentiment Karşılaştırması</h4>
+                <canvas id="comparisonSentiment"></canvas>
+            </div>
+        </div>
+    `;
+    container.appendChild(section);
+    
+    setTimeout(() => {
+        createComparisonCharts();
+    }, 100);
+}
+
+function createComparisonCharts() {
+    // Category overlap matrix
+    const allCategories = new Set();
+    Object.values(state.stats).forEach(stat => {
+        Object.keys(stat.categoryCounts).forEach(cat => allCategories.add(cat));
+    });
+    
+    const categoryArray = Array.from(allCategories).slice(0, 10); // Top 10
+    const datasets = state.selectedAnalysisColumns.map((col, idx) => {
+        const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6'];
+        const stats = state.stats[col];
+        return {
+            label: col,
+            data: categoryArray.map(cat => stats.categoryCounts[cat] || 0),
+            backgroundColor: colors[idx % colors.length]
+        };
+    });
+    
+    if (document.getElementById('comparisonMatrix')) {
+        state.charts['comparison_matrix'] = new Chart(document.getElementById('comparisonMatrix'), {
+            type: 'bar',
+            data: {
+                labels: categoryArray,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } }
+                }
+            }
+        });
+    }
+    
+    // Sentiment comparison
+    const sentiments = ['Pozitif', 'Negatif', 'Nötr', 'Yapıcı Eleştiri'];
+    const sentimentDatasets = state.selectedAnalysisColumns.map((col, idx) => {
+        const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6'];
+        const stats = state.stats[col];
+        return {
+            label: col,
+            data: sentiments.map(sent => stats.sentimentCounts[sent] || 0),
+            backgroundColor: colors[idx % colors.length]
+        };
+    });
+    
+    if (document.getElementById('comparisonSentiment')) {
+        state.charts['comparison_sentiment'] = new Chart(document.getElementById('comparisonSentiment'), {
+            type: 'bar',
+            data: {
+                labels: sentiments,
+                datasets: sentimentDatasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
 }
 
 function createColumnCharts() {
@@ -898,23 +1006,42 @@ function renderTable() {
     document.getElementById('filterInfo').textContent =
         `Gösterilen: ${startIndex + 1}-${Math.min(endIndex, filteredData.length)} / Toplam: ${filteredData.length}`;
 
-    // Render table rows
+    // Render table rows with editable cells
     const tbody = document.getElementById('resultsTableBody');
-    tbody.innerHTML = currentData.map(row => {
+    tbody.innerHTML = currentData.map((row, rowIdx) => {
+        const actualRowIndex = startIndex + rowIdx;
         const idValue = escapeHtml(String(row[state.selectedIdColumn] || '-'));
         let rowHTML = `<td class="px-4 py-4 text-sm text-gray-900">${idValue}</td>`;
         
         state.selectedAnalysisColumns.forEach(col => {
             const text = escapeHtml(String(row[col] || '-'));
-            const category = escapeHtml(row[`${col}_category`] || 'İşlenmedi');
-            const theme = escapeHtml(row[`${col}_theme`] || 'İşlenmedi');
+            const category = row[`${col}_category`] || 'İşlenmedi';
+            const theme = row[`${col}_theme`] || 'İşlenmedi';
             const sentiment = row[`${col}_sentiment`] || 'Nötr';
             
             rowHTML += `
                 <td class="px-4 py-4 text-sm text-gray-600" style="max-width: 300px; word-wrap: break-word;">${text}</td>
-                <td class="px-4 py-4 text-sm"><span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">${category}</span></td>
-                <td class="px-4 py-4 text-sm text-gray-600">${theme}</td>
-                <td class="px-4 py-4 text-sm"><span class="px-2 py-1 rounded-full text-xs ${getSentimentColor(sentiment)}">${escapeHtml(sentiment)}</span></td>
+                <td class="px-4 py-4 text-sm">
+                    <span class="editable-cell px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs cursor-text" 
+                          contenteditable="true" 
+                          data-row="${actualRowIndex}" 
+                          data-field="${col}_category"
+                          onblur="handleCellEdit(this)">${escapeHtml(category)}</span>
+                </td>
+                <td class="px-4 py-4 text-sm">
+                    <span class="editable-cell text-gray-600 cursor-text" 
+                          contenteditable="true" 
+                          data-row="${actualRowIndex}" 
+                          data-field="${col}_theme"
+                          onblur="handleCellEdit(this)">${escapeHtml(theme)}</span>
+                </td>
+                <td class="px-4 py-4 text-sm">
+                    <span class="editable-cell px-2 py-1 rounded-full text-xs ${getSentimentColor(sentiment)} cursor-text" 
+                          contenteditable="true" 
+                          data-row="${actualRowIndex}" 
+                          data-field="${col}_sentiment"
+                          onblur="handleCellEdit(this)">${escapeHtml(sentiment)}</span>
+                </td>
             `;
         });
         
@@ -925,6 +1052,43 @@ function renderTable() {
     document.getElementById('pageInfo').textContent = `Sayfa ${state.currentPage} / ${totalPages || 1}`;
     document.getElementById('prevBtn').disabled = state.currentPage === 1;
     document.getElementById('nextBtn').disabled = state.currentPage >= totalPages;
+}
+
+// Global function for cell editing
+window.handleCellEdit = function(element) {
+    const rowIndex = parseInt(element.dataset.row);
+    const field = element.dataset.field;
+    const newValue = element.textContent.trim();
+    
+    // Get filtered data to find actual row
+    const filteredData = getFilteredData();
+    if (rowIndex < filteredData.length) {
+        filteredData[rowIndex][field] = newValue;
+        
+        // Update the original enrichedData
+        const idColumn = state.selectedIdColumn;
+        const rowId = filteredData[rowIndex][idColumn];
+        const originalRow = state.enrichedData.find(r => r[idColumn] === rowId);
+        if (originalRow) {
+            originalRow[field] = newValue;
+        }
+        
+        // Auto-save
+        autoSaveAnalysis();
+        
+        // Show save indicator
+        showSaveIndicator();
+    }
+}
+
+function showSaveIndicator() {
+    const indicator = document.getElementById('saveIndicator');
+    if (indicator) {
+        indicator.classList.remove('hidden');
+        setTimeout(() => {
+            indicator.classList.add('hidden');
+        }, 2000);
+    }
 }
 
 function getSentimentColor(sentiment) {
@@ -1080,6 +1244,144 @@ async function exportToPDF() {
     }
 }
 
+function autoSaveAnalysis() {
+    if (!state.currentAnalysisId) return;
+    
+    const analysis = {
+        id: state.currentAnalysisId,
+        timestamp: Date.now(),
+        rawData: state.rawData,
+        columns: state.columns,
+        selectedIdColumn: state.selectedIdColumn,
+        selectedAnalysisColumns: state.selectedAnalysisColumns,
+        analysisResults: state.analysisResults,
+        enrichedData: state.enrichedData,
+        stats: state.stats,
+        globalStats: state.globalStats,
+        executiveSummary: state.executiveSummary
+    };
+    
+    // Get existing analyses
+    let analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    
+    // Update or add current analysis
+    const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
+    if (existingIndex >= 0) {
+        analyses[existingIndex] = analysis;
+    } else {
+        analyses.unshift(analysis); // Add to beginning
+    }
+    
+    // Keep only last 10 analyses
+    analyses = analyses.slice(0, 10);
+    
+    localStorage.setItem('saved_analyses', JSON.stringify(analyses));
+}
+
+function saveCurrentAnalysis() {
+    if (!state.currentAnalysisId) {
+        state.currentAnalysisId = 'analysis_' + Date.now();
+    }
+    autoSaveAnalysis();
+    alert('Analiz başarıyla kaydedildi!');
+}
+
+function loadAnalysis(analysisId) {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const analysis = analyses.find(a => a.id === analysisId);
+    
+    if (!analysis) {
+        alert('Analiz bulunamadı!');
+        return;
+    }
+    
+    // Load into state
+    state.rawData = analysis.rawData;
+    state.columns = analysis.columns;
+    state.selectedIdColumn = analysis.selectedIdColumn;
+    state.selectedAnalysisColumns = analysis.selectedAnalysisColumns;
+    state.analysisResults = analysis.analysisResults;
+    state.enrichedData = analysis.enrichedData;
+    state.stats = analysis.stats;
+    state.globalStats = analysis.globalStats;
+    state.executiveSummary = analysis.executiveSummary;
+    state.currentAnalysisId = analysisId;
+    state.isHistoryMode = true;
+    
+    // Reset filters and pagination
+    state.currentPage = 1;
+    state.searchTerm = '';
+    state.columnFilter = 'all';
+    state.sentimentFilter = 'all';
+    
+    // Hide all sections except results
+    document.getElementById('uploadSection').classList.add('hidden');
+    document.getElementById('columnSection').classList.add('hidden');
+    document.getElementById('progressSection').classList.add('hidden');
+    
+    // Close history modal
+    document.getElementById('historyModal').classList.add('hidden');
+    
+    // Show results
+    showResults();
+}
+
+function deleteAnalysis(analysisId) {
+    if (!confirm('Bu analizi silmek istediğinizden emin misiniz?')) return;
+    
+    let analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    analyses = analyses.filter(a => a.id !== analysisId);
+    localStorage.setItem('saved_analyses', JSON.stringify(analyses));
+    
+    // Refresh history modal
+    renderHistoryModal();
+}
+
+function showHistoryModal() {
+    document.getElementById('historyModal').classList.remove('hidden');
+    renderHistoryModal();
+}
+
+function renderHistoryModal() {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const container = document.getElementById('historyList');
+    
+    if (analyses.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz kaydedilmiş analiz yok.</p>';
+        return;
+    }
+    
+    container.innerHTML = analyses.map(analysis => {
+        const date = new Date(analysis.timestamp).toLocaleString('tr-TR');
+        const columns = analysis.selectedAnalysisColumns.join(', ');
+        return `
+            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${date}</h4>
+                        <p class="text-sm text-gray-600 mt-1">Sütunlar: ${columns}</p>
+                        <p class="text-sm text-gray-600">Satırlar: ${analysis.rawData.length}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="loadAnalysis('${analysis.id}')" 
+                                class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                            Yükle
+                        </button>
+                        <button onclick="deleteAnalysis('${analysis.id}')" 
+                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                            Sil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Make functions global for onclick handlers
+window.loadAnalysis = loadAnalysis;
+window.deleteAnalysis = deleteAnalysis;
+
 function resetApp() {
     state.rawData = [];
     state.columns = [];
@@ -1094,6 +1396,8 @@ function resetApp() {
     state.searchTerm = '';
     state.columnFilter = 'all';
     state.sentimentFilter = 'all';
+    state.currentAnalysisId = null;
+    state.isHistoryMode = false;
 
     // Destroy charts
     Object.values(state.charts).forEach(chart => chart?.destroy());

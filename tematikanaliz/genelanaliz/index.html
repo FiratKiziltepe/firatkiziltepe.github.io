@@ -203,28 +203,43 @@
             <!-- Action Buttons -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-center justify-between">
-                    <div>
+                    <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-800">Analiz Tamamlandı!</h3>
                         <p class="text-sm text-gray-600 mt-1">
                             <span id="totalRowsDisplay">0</span> satır, 
                             <span id="totalColumnsDisplay">0</span> sütun başarıyla analiz edildi
                         </p>
+                        <p id="saveIndicator" class="text-sm text-green-600 mt-1 hidden">
+                            ✓ Değişiklikler kaydedildi
+                        </p>
                     </div>
-                    <div class="flex space-x-4">
-                        <button id="newAnalysisBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    <div class="flex space-x-3">
+                        <button id="historyBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Geçmiş</span>
+                        </button>
+                        <button id="saveAnalysisBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                            </svg>
+                            <span>Kaydet</span>
+                        </button>
+                        <button id="newAnalysisBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                             Yeni Analiz
                         </button>
-                        <button id="exportPdfBtn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
+                        <button id="exportPdfBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
-                            <span>PDF Rapor İndir</span>
+                            <span>PDF</span>
                         </button>
-                        <button id="exportBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                        <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            <span>Excel İndir</span>
+                            <span>Excel</span>
                         </button>
                     </div>
                 </div>
@@ -256,6 +271,11 @@
                 <div id="executiveSummary" class="prose max-w-none text-gray-700 leading-relaxed"></div>
             </div>
 
+            <!-- Comparison Mode -->
+            <div id="comparisonContainer">
+                <!-- Comparison charts will be inserted here dynamically -->
+            </div>
+
             <!-- Per-Column Charts -->
             <div id="columnChartsContainer">
                 <!-- Charts will be inserted here dynamically -->
@@ -282,7 +302,12 @@
                         </select>
                     </div>
 
-                    <div id="filterInfo" class="text-sm text-gray-600">Gösterilen: 0-0 / Toplam: 0</div>
+                    <div class="flex justify-between items-center">
+                        <div id="filterInfo" class="text-sm text-gray-600">Gösterilen: 0-0 / Toplam: 0</div>
+                        <div class="text-sm text-blue-600">
+                            💡 Kategori, Tema ve Sentiment hücrelerine tıklayarak düzenleyebilirsiniz
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Table -->
@@ -311,6 +336,24 @@
         <!-- Footer -->
         <div class="text-center mt-8 text-gray-500 text-sm">
             <p>Gemini 2.0 Flash ile güçlendirilmiştir • Tüm analiz tarayıcınızda gerçekleşir</p>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Geçmiş Analizler</h2>
+                <button onclick="document.getElementById('historyModal').classList.add('hidden')" 
+                        class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="historyList" class="p-6 overflow-y-auto max-h-[60vh] space-y-4">
+                <!-- History items will be inserted here -->
+            </div>
         </div>
     </div>
 
