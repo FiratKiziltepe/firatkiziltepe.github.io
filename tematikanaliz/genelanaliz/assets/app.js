@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('apiKeyInput').value = state.apiKey;
         }
         
+        // Check for saved analyses and update history button
+        updateHistoryButtonState();
+        
         console.log('=== SİSTEM BAŞARILI ŞEKİLDE BAŞLATILDI ===');
     } catch (error) {
         console.error('=== SİSTEM BAŞLATMA HATASI ===', error);
@@ -178,6 +181,7 @@ function initializeEventListeners() {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const historyBtn = document.getElementById('historyBtn');
+    const historyBtnTop = document.getElementById('historyBtnTop');
     const saveAnalysisBtn = document.getElementById('saveAnalysisBtn');
 
     // API Key
@@ -202,6 +206,7 @@ function initializeEventListeners() {
     exportBtn.addEventListener('click', exportToExcel);
     exportPdfBtn.addEventListener('click', exportToPDF);
     historyBtn.addEventListener('click', showHistoryModal);
+    historyBtnTop.addEventListener('click', showHistoryModal);
     saveAnalysisBtn.addEventListener('click', saveCurrentAnalysis);
 
     // Filters
@@ -1276,6 +1281,21 @@ function autoSaveAnalysis() {
     analyses = analyses.slice(0, 10);
     
     localStorage.setItem('saved_analyses', JSON.stringify(analyses));
+    
+    // Update history button state
+    updateHistoryButtonState();
+}
+
+function updateHistoryButtonState() {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const historyCount = document.getElementById('historyCount');
+    
+    if (analyses.length > 0) {
+        historyCount.textContent = analyses.length;
+        historyCount.classList.remove('hidden');
+    } else {
+        historyCount.classList.add('hidden');
+    }
 }
 
 function saveCurrentAnalysis() {
@@ -1333,6 +1353,9 @@ function deleteAnalysis(analysisId) {
     analyses = analyses.filter(a => a.id !== analysisId);
     localStorage.setItem('saved_analyses', JSON.stringify(analyses));
     
+    // Update history button state
+    updateHistoryButtonState();
+    
     // Refresh history modal
     renderHistoryModal();
 }
@@ -1347,29 +1370,48 @@ function renderHistoryModal() {
     const container = document.getElementById('historyList');
     
     if (analyses.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz kaydedilmiş analiz yok.</p>';
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-500 mt-4">Henüz kaydedilmiş analiz yok.</p>
+                <p class="text-gray-400 text-sm mt-2">Bir analiz tamamladığınızda otomatik olarak buraya kaydedilecek.</p>
+            </div>
+        `;
         return;
     }
     
-    container.innerHTML = analyses.map(analysis => {
+    container.innerHTML = analyses.map((analysis, index) => {
         const date = new Date(analysis.timestamp).toLocaleString('tr-TR');
         const columns = analysis.selectedAnalysisColumns.join(', ');
+        const isLatest = index === 0;
         return `
-            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 ${isLatest ? 'border-purple-300 bg-purple-50' : ''}">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
-                        <h4 class="font-semibold text-gray-800">${date}</h4>
-                        <p class="text-sm text-gray-600 mt-1">Sütunlar: ${columns}</p>
-                        <p class="text-sm text-gray-600">Satırlar: ${analysis.rawData.length}</p>
+                        <div class="flex items-center space-x-2">
+                            <h4 class="font-semibold text-gray-800">${date}</h4>
+                            ${isLatest ? '<span class="px-2 py-0.5 bg-purple-600 text-white text-xs rounded">En Son</span>' : ''}
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">📊 Sütunlar: ${columns}</p>
+                        <p class="text-sm text-gray-600">📝 Satırlar: ${analysis.rawData.length}</p>
+                        <p class="text-sm text-gray-600">🏷️ Kategoriler: ${analysis.globalStats.totalCategories} • Temalar: ${analysis.globalStats.totalThemes}</p>
                     </div>
                     <div class="flex space-x-2">
                         <button onclick="loadAnalysis('${analysis.id}')" 
-                                class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
-                            Yükle
+                                class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center space-x-1">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <span>Görüntüle</span>
                         </button>
                         <button onclick="deleteAnalysis('${analysis.id}')" 
                                 class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                            Sil
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
