@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar -->
@@ -21,7 +23,7 @@
                 <i class="fas fa-layer-group"></i>
                 <span>ProCompare</span>
             </div>
-            
+
             <nav class="nav-menu">
                 <button class="nav-item active" id="navCompare">
                     <i class="fas fa-exchange-alt"></i> Karşılaştır
@@ -75,7 +77,8 @@
                             </div>
                             <h3>Orijinal Dosya</h3>
                             <p>Dosyayı buraya sürükleyin veya</p>
-                            <button class="btn-upload" onclick="document.getElementById('fileInput1').click()">Dosya Seç</button>
+                            <button class="btn-upload" onclick="document.getElementById('fileInput1').click()">Dosya
+                                Seç</button>
                             <input type="file" id="fileInput1" hidden>
                             <div class="file-info" id="fileInfo1" style="display: none;">
                                 <i class="fas fa-file-alt"></i>
@@ -83,7 +86,8 @@
                                 <button class="btn-remove" onclick="removeFile(1)"><i class="fas fa-times"></i></button>
                             </div>
                         </div>
-                        <textarea class="text-input" id="textInput1" placeholder="Veya metni buraya yapıştırın..."></textarea>
+                        <textarea class="text-input" id="textInput1"
+                            placeholder="Veya metni buraya yapıştırın..."></textarea>
                     </div>
 
                     <!-- Divider -->
@@ -99,7 +103,8 @@
                             </div>
                             <h3>Yeni Dosya</h3>
                             <p>Dosyayı buraya sürükleyin veya</p>
-                            <button class="btn-upload" onclick="document.getElementById('fileInput2').click()">Dosya Seç</button>
+                            <button class="btn-upload" onclick="document.getElementById('fileInput2').click()">Dosya
+                                Seç</button>
                             <input type="file" id="fileInput2" hidden>
                             <div class="file-info" id="fileInfo2" style="display: none;">
                                 <i class="fas fa-file-alt"></i>
@@ -107,42 +112,119 @@
                                 <button class="btn-remove" onclick="removeFile(2)"><i class="fas fa-times"></i></button>
                             </div>
                         </div>
-                        <textarea class="text-input" id="textInput2" placeholder="Veya metni buraya yapıştırın..."></textarea>
+                        <textarea class="text-input" id="textInput2"
+                            placeholder="Veya metni buraya yapıştırın..."></textarea>
                     </div>
                 </div>
             </div>
 
             <!-- Results Area (Hidden by default) -->
             <div class="results-section" id="resultsSection" style="display: none;">
-                <div class="results-toolbar">
-                    <div class="view-toggles">
-                        <button class="view-btn active" data-view="unified">
-                            <i class="fas fa-stream"></i> Birleşik Görünüm
-                        </button>
-                        <button class="view-btn" data-view="split">
-                            <i class="fas fa-columns"></i> Yan Yana
-                        </button>
-                    </div>
-                    <div class="stats-summary">
-                        <span class="stat added"><i class="fas fa-plus-circle"></i> <span id="statAdded">0</span> Ekleme</span>
-                        <span class="stat deleted"><i class="fas fa-minus-circle"></i> <span id="statDeleted">0</span> Silme</span>
-                    </div>
-                    <button class="btn-export" id="exportHtmlBtn">
-                        <i class="fas fa-download"></i> Rapor İndir
-                    </button>
-                </div>
+                <div class="results-content-wrapper">
+                    <div class="results-main">
+                        <div class="results-toolbar">
+                            <div class="view-toggles">
+                                <button class="view-btn active" data-view="unified">
+                                    <i class="fas fa-stream"></i> Birleşik Görünüm
+                                </button>
+                                <button class="view-btn" data-view="split">
+                                    <i class="fas fa-columns"></i> Yan Yana
+                                </button>
+                            </div>
+                            <div class="toolbar-actions">
+                                <button class="btn-icon" id="toggleSidebarBtn" title="Değişiklikleri Göster">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button class="btn-export" id="exportHtmlBtn">
+                                    <i class="fas fa-download"></i> Rapor İndir
+                                </button>
+                            </div>
+                        </div>
 
-                <div class="comparison-container">
-                    <div class="comparison-view unified-view" id="unifiedView">
-                        <!-- Diff content will be injected here -->
+                        <div class="comparison-container">
+                            <div class="comparison-view unified-view" id="unifiedView">
+                                <!-- Diff content will be injected here -->
+                            </div>
+                            <div class="comparison-view split-view" id="splitView" style="display: none;">
+                                <div class="split-pane original" id="splitOriginal"></div>
+                                <div class="split-pane modified" id="splitModified"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="comparison-view split-view" id="splitView" style="display: none;">
-                        <div class="split-pane original" id="splitOriginal"></div>
-                        <div class="split-pane modified" id="splitModified"></div>
-                    </div>
+
+                    <!-- Right Sidebar -->
+                    <aside class="changes-sidebar" id="changesSidebar">
+                        <div class="sidebar-header">
+                            <h3>Değişiklikler</h3>
+                            <button class="btn-close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+                        </div>
+
+                        <div class="filter-section">
+                            <input type="text" class="search-input" id="changeSearch" placeholder="Ara...">
+                            <div class="filter-chips">
+                                <button class="filter-chip active" data-filter="all">Tümü</button>
+                                <button class="filter-chip added" data-filter="added">Eklenen</button>
+                                <button class="filter-chip deleted" data-filter="deleted">Silinen</button>
+                                <button class="filter-chip moved" data-filter="moved">Taşınan</button>
+                            </div>
+                        </div>
+
+                        <div class="changes-list" id="changesList">
+                            <!-- Change items will be populated here -->
+                        </div>
+                    </aside>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ayarlar</h2>
+                <button class="btn-close-modal" onclick="toggleModal('settingsModal', false)"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="settingIgnoreCase">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Büyük/Küçük harf yoksay</span>
+                </div>
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="settingIgnoreWhitespace" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Boşlukları yoksay</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="saveSettings()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay" id="historyModal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Geçmiş Analizler</h2>
+                <button class="btn-close-modal" onclick="toggleModal('historyModal', false)"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="historyList">
+                    <!-- History items -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="clearHistory()">Geçmişi Temizle</button>
+            </div>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
@@ -153,4 +235,5 @@
 
     <script src="pdfcompare-pro.js"></script>
 </body>
+
 </html>

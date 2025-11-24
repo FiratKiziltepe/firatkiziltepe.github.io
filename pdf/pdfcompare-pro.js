@@ -7,7 +7,12 @@
 const state = {
     file1: { text: null, name: null },
     file2: { text: null, name: null },
-    diffs: []
+    diffs: [],
+    changes: [], // Processed changes for sidebar
+    settings: {
+        ignoreCase: false,
+        ignoreWhitespace: true
+    }
 };
 
 // ==================== DOM Elements ====================
@@ -28,17 +33,27 @@ const el = {
     splitOriginal: document.getElementById('splitOriginal'),
     splitModified: document.getElementById('splitModified'),
     loadingOverlay: document.getElementById('loadingOverlay'),
-    statAdded: document.getElementById('statAdded'),
-    statDeleted: document.getElementById('statDeleted'),
     themeSwitch: document.getElementById('themeSwitch'),
-    exportHtmlBtn: document.getElementById('exportHtmlBtn')
+    exportHtmlBtn: document.getElementById('exportHtmlBtn'),
+
+    // New Elements
+    navHistory: document.getElementById('navHistory'),
+    navSettings: document.getElementById('navSettings'),
+    changesList: document.getElementById('changesList'),
+    changeSearch: document.getElementById('changeSearch'),
+    filterChips: document.querySelectorAll('.filter-chip'),
+    toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
+    closeSidebarBtn: document.getElementById('closeSidebarBtn'),
+    changesSidebar: document.getElementById('changesSidebar'),
+    historyList: document.getElementById('historyList')
 };
 
 // ==================== Initialization ====================
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupTheme();
-    
+    loadSettings();
+
     // PDF.js Worker Setup
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 });
@@ -68,6 +83,22 @@ function setupEventListeners() {
     el.themeSwitch.addEventListener('change', toggleTheme);
     el.exportHtmlBtn.addEventListener('click', exportHtmlReport);
 
+    // Navigation
+    el.navHistory.addEventListener('click', showHistory);
+    el.navSettings.addEventListener('click', showSettings);
+
+    // Sidebar & Filters
+    el.toggleSidebarBtn.addEventListener('click', () => el.changesSidebar.classList.toggle('closed'));
+    el.closeSidebarBtn.addEventListener('click', () => el.changesSidebar.classList.add('closed'));
+    el.changeSearch.addEventListener('input', filterChanges);
+    el.filterChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            el.filterChips.forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            filterChanges();
+        });
+    });
+
     // View Toggles
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -75,6 +106,32 @@ function setupEventListeners() {
             e.currentTarget.classList.add('active');
             switchView(e.currentTarget.dataset.view);
         });
+    });
+
+    // Scroll Sync
+    setupScrollSync();
+}
+
+function setupScrollSync() {
+    let isSyncingLeft = false;
+    let isSyncingRight = false;
+
+    el.splitOriginal.addEventListener('scroll', function () {
+        if (!isSyncingLeft) {
+            isSyncingRight = true;
+            el.splitModified.scrollTop = this.scrollTop;
+            el.splitModified.scrollLeft = this.scrollLeft;
+        }
+        isSyncingLeft = false;
+    });
+
+    el.splitModified.addEventListener('scroll', function () {
+        if (!isSyncingRight) {
+            isSyncingLeft = true;
+            el.splitOriginal.scrollTop = this.scrollTop;
+            el.splitOriginal.scrollLeft = this.scrollLeft;
+        }
+        isSyncingRight = false;
     });
 }
 
@@ -104,19 +161,19 @@ async function handleFileSelect(file, fileNum) {
     showLoading(true);
     try {
         const text = await extractText(file);
-        
+
         if (fileNum === 1) {
             state.file1.text = text;
             state.file1.name = file.name;
             updateFileInfo(1, file.name);
-            el.textInput1.value = text; // Show extracted text
+            el.textInput1.value = text;
         } else {
             state.file2.text = text;
             state.file2.name = file.name;
             updateFileInfo(2, file.name);
             el.textInput2.value = text;
         }
-        
+
         checkReady();
     } catch (error) {
         console.error('Extraction error:', error);
@@ -169,7 +226,7 @@ async function extractExcelText(file) {
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer);
     let fullText = '';
-    
+
     workbook.SheetNames.forEach(sheetName => {
         const sheet = workbook.Sheets[sheetName];
         fullText += XLSX.utils.sheet_to_csv(sheet) + '\n\n';
@@ -185,10 +242,10 @@ async function extractPlainText(file) {
 function updateFileInfo(num, name) {
     const info = num === 1 ? el.fileInfo1 : el.fileInfo2;
     const input = num === 1 ? el.textInput1 : el.textInput2;
-    
+
     info.style.display = 'flex';
     info.querySelector('.filename').textContent = name;
-    input.style.display = 'none'; // Hide text area when file is loaded
+    input.style.display = 'none';
 }
 
 function removeFile(num) {
@@ -209,7 +266,6 @@ function removeFile(num) {
 }
 
 function checkReady() {
-    // Enable compare button if both sides have text
     const hasText1 = state.file1.text && state.file1.text.trim().length > 0;
     const hasText2 = state.file2.text && state.file2.text.trim().length > 0;
     el.compareBtn.disabled = !(hasText1 && hasText2);
@@ -230,20 +286,33 @@ function clearAll() {
 // ==================== Comparison Logic ====================
 function startComparison() {
     showLoading(true);
-    
-    // Small timeout to allow UI to update
+
     setTimeout(() => {
         try {
             const dmp = new diff_match_patch();
-            const text1 = state.file1.text || '';
-            const text2 = state.file2.text || '';
+            let text1 = state.file1.text || '';
+            let text2 = state.file2.text || '';
+
+            // Apply Settings
+            if (state.settings.ignoreCase) {
+                text1 = text1.toLowerCase();
+                text2 = text2.toLowerCase();
+            }
+            if (state.settings.ignoreWhitespace) {
+                text1 = text1.replace(/\s+/g, ' ').trim();
+                text2 = text2.replace(/\s+/g, ' ').trim();
+            }
 
             const diffs = dmp.diff_main(text1, text2);
             dmp.diff_cleanupSemantic(diffs);
-            state.diffs = diffs;
 
-            renderResults(diffs);
-            
+            // Detect Moves
+            const processedDiffs = detectMoves(diffs);
+            state.diffs = processedDiffs;
+
+            renderResults(processedDiffs);
+            saveToHistory(state.file1.name || 'Metin 1', state.file2.name || 'Metin 2');
+
             el.uploadSection.style.display = 'none';
             el.resultsSection.style.display = 'flex';
         } catch (error) {
@@ -255,25 +324,64 @@ function startComparison() {
     }, 100);
 }
 
+// Moved Text Detection Logic
+function detectMoves(diffs) {
+    const deletedChunks = [];
+    const addedChunks = [];
+
+    // 1. Collect all significant deletions and additions
+    diffs.forEach((diff, index) => {
+        const [op, text] = diff;
+        if (text.length < 10) return; // Ignore small changes
+
+        if (op === -1) deletedChunks.push({ index, text });
+        if (op === 1) addedChunks.push({ index, text });
+    });
+
+    // 2. Match deleted chunks with added chunks
+    deletedChunks.forEach(del => {
+        const match = addedChunks.find(add => add.text === del.text && !add.matched);
+        if (match) {
+            // Mark as moved
+            diffs[del.index][0] = -2; // Custom op for MOVED_FROM
+            diffs[match.index][0] = 2; // Custom op for MOVED_TO
+
+            // Link them
+            diffs[del.index][2] = match.index;
+            diffs[match.index][2] = del.index;
+
+            match.matched = true;
+        }
+    });
+
+    return diffs;
+}
+
 function renderResults(diffs) {
     let htmlUnified = '';
     let htmlOriginal = '';
     let htmlModified = '';
-    
-    let addedCount = 0;
-    let deletedCount = 0;
 
-    diffs.forEach(([op, text]) => {
+    state.changes = [];
+
+    diffs.forEach(([op, text], index) => {
         const escapedText = escapeHtml(text);
-        
+
         if (op === 1) { // Insert
             htmlUnified += `<ins>${escapedText}</ins>`;
             htmlModified += `<ins>${escapedText}</ins>`;
-            addedCount++;
+            state.changes.push({ type: 'added', text: text });
         } else if (op === -1) { // Delete
             htmlUnified += `<del>${escapedText}</del>`;
             htmlOriginal += `<del>${escapedText}</del>`;
-            deletedCount++;
+            state.changes.push({ type: 'deleted', text: text });
+        } else if (op === 2) { // Moved To (New Location)
+            htmlUnified += `<span class="moved-text" title="Taşınan Metin">${escapedText}</span>`;
+            htmlModified += `<span class="moved-text">${escapedText}</span>`;
+            state.changes.push({ type: 'moved', text: text });
+        } else if (op === -2) { // Moved From (Old Location)
+            htmlUnified += `<span class="moved-text" style="text-decoration: line-through; opacity: 0.5;">${escapedText}</span>`;
+            htmlOriginal += `<span class="moved-text">${escapedText}</span>`;
         } else { // Equal
             htmlUnified += escapedText;
             htmlOriginal += escapedText;
@@ -285,10 +393,105 @@ function renderResults(diffs) {
     el.splitOriginal.innerHTML = htmlOriginal;
     el.splitModified.innerHTML = htmlModified;
 
-    el.statAdded.textContent = addedCount;
-    el.statDeleted.textContent = deletedCount;
+    populateSidebar();
 }
 
+function populateSidebar() {
+    el.changesList.innerHTML = '';
+    state.changes.forEach(change => {
+        const div = document.createElement('div');
+        div.className = `change-card ${change.type}`;
+        div.innerHTML = `
+            <div class="change-header">
+                <span>${getChangeLabel(change.type)}</span>
+            </div>
+            <div class="change-preview">${escapeHtml(change.text)}</div>
+        `;
+        div.addEventListener('click', () => {
+            // Scroll to text (Implementation would require mapping spans to changes)
+        });
+        el.changesList.appendChild(div);
+    });
+}
+
+function getChangeLabel(type) {
+    if (type === 'added') return 'Eklendi';
+    if (type === 'deleted') return 'Silindi';
+    if (type === 'moved') return 'Taşındı';
+    return '';
+}
+
+function filterChanges() {
+    const query = el.changeSearch.value.toLowerCase();
+    const activeFilter = document.querySelector('.filter-chip.active').dataset.filter;
+
+    const cards = el.changesList.querySelectorAll('.change-card');
+    cards.forEach(card => {
+        const type = card.classList.contains('added') ? 'added' :
+            card.classList.contains('deleted') ? 'deleted' : 'moved';
+        const text = card.querySelector('.change-preview').textContent.toLowerCase();
+
+        const matchesType = activeFilter === 'all' || activeFilter === type;
+        const matchesQuery = text.includes(query);
+
+        card.style.display = matchesType && matchesQuery ? 'block' : 'none';
+    });
+}
+
+// ==================== History & Settings ====================
+function saveToHistory(name1, name2) {
+    const history = JSON.parse(localStorage.getItem('compareHistory') || '[]');
+    history.unshift({
+        date: new Date().toLocaleString(),
+        file1: name1,
+        file2: name2
+    });
+    if (history.length > 10) history.pop();
+    localStorage.setItem('compareHistory', JSON.stringify(history));
+}
+
+function showHistory() {
+    const history = JSON.parse(localStorage.getItem('compareHistory') || '[]');
+    el.historyList.innerHTML = history.map(item => `
+        <div class="history-item">
+            <div class="history-info">
+                <h4>${item.file1} vs ${item.file2}</h4>
+                <span class="history-date">${item.date}</span>
+            </div>
+        </div>
+    `).join('') || '<p style="text-align:center; color:#666;">Geçmiş bulunamadı.</p>';
+
+    toggleModal('historyModal', true);
+}
+
+function clearHistory() {
+    localStorage.removeItem('compareHistory');
+    showHistory();
+}
+
+function showSettings() {
+    document.getElementById('settingIgnoreCase').checked = state.settings.ignoreCase;
+    document.getElementById('settingIgnoreWhitespace').checked = state.settings.ignoreWhitespace;
+    toggleModal('settingsModal', true);
+}
+
+function saveSettings() {
+    state.settings.ignoreCase = document.getElementById('settingIgnoreCase').checked;
+    state.settings.ignoreWhitespace = document.getElementById('settingIgnoreWhitespace').checked;
+    localStorage.setItem('compareSettings', JSON.stringify(state.settings));
+    toggleModal('settingsModal', false);
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('compareSettings');
+    if (saved) state.settings = JSON.parse(saved);
+}
+
+function toggleModal(id, show) {
+    document.getElementById(id).style.display = show ? 'flex' : 'none';
+}
+
+// ==================== Utilities ====================
 function switchView(view) {
     if (view === 'unified') {
         el.unifiedView.style.display = 'block';
@@ -299,7 +502,6 @@ function switchView(view) {
     }
 }
 
-// ==================== Utilities ====================
 function escapeHtml(text) {
     return text
         .replace(/&/g, "&amp;")
@@ -319,7 +521,6 @@ function toggleTheme() {
 }
 
 function setupTheme() {
-    // Check system preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         el.themeSwitch.checked = true;
         document.body.setAttribute('data-theme', 'dark');
@@ -337,6 +538,7 @@ function exportHtmlReport() {
             body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
             ins { background: #dcfce7; color: #166534; text-decoration: none; border-bottom: 2px solid #10b981; }
             del { background: #fee2e2; color: #991b1b; text-decoration: line-through; }
+            .moved-text { background-color: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 2px; }
             .header { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
         </style>
     </head>
