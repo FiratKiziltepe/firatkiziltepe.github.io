@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Literatür Tarama Aracı</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- SheetJS for Excel support -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Gemini Literatür Tarama Aracı</h1>
+            <p>Sistematik literatür taraması için yapay zeka destekli otomatik tarama sistemi</p>
+        </header>
+
+        <div class="config-section">
+            <div class="card">
+                <h2>⚙️ Ayarlar</h2>
+
+                <div class="form-group">
+                    <label for="apiKey">Gemini API Key:</label>
+                    <input type="password" id="apiKey" placeholder="API anahtarınızı buraya girin">
+                    <small>API anahtarınız tarayıcıda saklanır ve hiçbir yere gönderilmez.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchSize">Batch Size (Parti Boyutu):</label>
+                    <input type="number" id="batchSize" value="5" min="1" max="20">
+                    <small>Her seferde işlenecek makale sayısı (Rate limit için)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="delayBetweenRequests">Makale Arası Bekleme (saniye):</label>
+                    <input type="number" id="delayBetweenRequests" value="3" min="1" max="30" step="0.5">
+                    <small>Her makale arasında beklenecek süre (Rate limit için ÖNEMLİ)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="delayBetweenBatches">Batch'ler Arası Bekleme (saniye):</label>
+                    <input type="number" id="delayBetweenBatches" value="5" min="0" max="60">
+                    <small>Her batch arasında beklenecek süre</small>
+                </div>
+
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+
+                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 15px;">⚡ Gemini 2.5 Flash-Lite (Free)</h3>
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                    <div style="font-size: 0.85rem; color: #666;">
+                        <strong>API Limitleri:</strong> RPM: 15 | TPM: 250K | RPD: 1,000
+                    </div>
+                </div>
+
+                <div class="rate-stats">
+                    <div class="rate-stat-item">
+                        <span class="rate-label">Dakikada Makale:</span>
+                        <span class="rate-value" id="articlesPerMinute">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">API İsteği:</span>
+                        <span class="rate-value" id="requestsPerMinute">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">Durum:</span>
+                        <span class="rate-value" id="rateLimitStatus">-</span>
+                    </div>
+                    <div class="rate-stat-item">
+                        <span class="rate-label">100 Makale:</span>
+                        <span class="rate-value" id="estimatedTime">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📝 Tarama Talimatı</h2>
+
+                <div class="form-group">
+                    <label>Sistem Promptu (Sabit):</label>
+                    <textarea id="systemPrompt" rows="12" readonly style="background-color: #f5f5f5; cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**.
+
+Kullanıcı sana her çalışma için şu bilgileri verecek:
+* **Başlık**
+* **Yıl** (varsa - dahil etme/hariç tutma kriterlerinde yıl şartı varsa kullan)
+* **Özet**
+
+Senin görevin bu çalışmaları önceden belirlenmiş **dahil etme** ve **hariç tutma** ölçütlerine göre incelemek ve sonucu **JSON formatında** sunmaktır.
+
+Her çalışma için şu bilgileri dönmelisin:
+1. **title**: Başlık
+2. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
+3. **decision**: "Include", "Exclude" veya "Maybe"
+4. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.</textarea>
+                    <small>Bu bölüm sabittir ve değiştirilemez.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="inclusionCriteria">✅ Dahil Etme Ölçütleri:</label>
+                    <textarea id="inclusionCriteria" rows="5" placeholder="Dahil etme kriterlerinizi buraya girin...">* Odak: Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) **öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine** odaklanan çalışmalar.
+* Araştırma deseni: **Ampirik çalışmalar**.</textarea>
+                    <small>Dahil etme kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="exclusionCriteria">❌ Hariç Tutma Ölçütleri:</label>
+                    <textarea id="exclusionCriteria" rows="5" placeholder="Hariç tutma kriterlerinizi buraya girin...">* Kişiselleştirilmiş önerilere odaklanmayan (ör. yalnızca öngörü analitiği yapan, genel öneri sistemlerini inceleyen veya e-öğrenmenin başka yönlerine odaklanan) çalışmalar.
+* Yayın türü: **Konferans bildirileri, sunumlar, raporlar, kitaplar, tezler**.
+* Araştırma deseni: **Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları**.</textarea>
+                    <small>Hariç tutma kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section card">
+            <h2>📤 Dosya Yükle</h2>
+            <div class="form-group">
+                <label for="csvFile">CSV veya Excel Dosyası Seç:</label>
+                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
+                <small>Dosya en az Title ve Abstract sütunlarını içermelidir. ID, Authors, Year sütunları opsiyoneldir. (CSV veya Excel formatı desteklenir)</small>
+            </div>
+            <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
+        </div>
+
+        <div id="progressSection" class="progress-section" style="display: none;">
+            <h2>⏳ İlerleme</h2>
+            <div class="progress-bar">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <p id="progressText">Hazırlanıyor...</p>
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h2>📊 Sonuçlar</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="downloadCsvBtn" class="btn-secondary">💾 CSV İndir</button>
+                    <button id="downloadExcelBtn" class="btn-secondary">📊 Excel İndir</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Yazar(lar)</th>
+                            <th>Başlık</th>
+                            <th>Yıl</th>
+                            <th>Abstract (Orijinal)</th>
+                            <th>Kısa Özet (TR)</th>
+                            <th>Karar</th>
+                            <th>Gerekçe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="stats">
+                <div class="stat-card include">
+                    <h3>✅ Include</h3>
+                    <p id="includeCount">0</p>
+                </div>
+                <div class="stat-card exclude">
+                    <h3>❌ Exclude</h3>
+                    <p id="excludeCount">0</p>
+                </div>
+                <div class="stat-card maybe">
+                    <h3>❓ Maybe</h3>
+                    <p id="maybeCount">0</p>
+                </div>
+                <div class="stat-card total">
+                    <h3>📚 Toplam</h3>
+                    <p id="totalCount">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=6"></script>
+</body>
+</html>
