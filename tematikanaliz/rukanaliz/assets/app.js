@@ -141,6 +141,159 @@ const AVAILABLE_MODELS = [
 
 const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 const DELAY_BETWEEN_COLUMNS = 3000; // 3 seconds between columns
+const AVG_API_RESPONSE_TIME = 3000; // Average API response time in ms
+
+// Progress tracking
+let analysisStartTime = null;
+let processedRowsCount = 0;
+let totalRowsToProcess = 0;
+
+// Calculate estimated time
+function calculateEstimatedTime(rowCount, columnCount, batchSize) {
+    if (!rowCount || !columnCount || !batchSize) return null;
+    
+    const batchesPerColumn = Math.ceil(rowCount / batchSize);
+    const totalBatches = batchesPerColumn * columnCount;
+    
+    // Time per batch = API response time + delay
+    const timePerBatch = AVG_API_RESPONSE_TIME + DELAY_BETWEEN_BATCHES;
+    const columnDelayTime = (columnCount - 1) * DELAY_BETWEEN_COLUMNS;
+    
+    const totalTimeMs = (totalBatches * timePerBatch) + columnDelayTime;
+    
+    return {
+        totalMs: totalTimeMs,
+        formatted: formatDuration(totalTimeMs),
+        batches: totalBatches,
+        batchesPerColumn
+    };
+}
+
+// Format duration to human readable
+function formatDuration(ms) {
+    if (!ms || ms < 0) return '--:--';
+    
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+        return `${hours}s ${minutes % 60}dk`;
+    } else if (minutes > 0) {
+        return `${minutes}dk ${seconds % 60}sn`;
+    } else {
+        return `${seconds}sn`;
+    }
+}
+
+// Update estimated time display
+function updateEstimatedTimeDisplay() {
+    const rowCount = state.rawData.length;
+    const columnCheckboxes = document.querySelectorAll('#analysisColumnsContainer input[type="checkbox"]:checked');
+    const columnCount = columnCheckboxes.length || 1;
+    const batchSize = state.batchSize;
+    
+    const estimate = calculateEstimatedTime(rowCount, columnCount, batchSize);
+    
+    const displayEl = document.getElementById('estimatedTimeDisplay');
+    const detailsEl = document.getElementById('estimatedTimeDetails');
+    
+    if (displayEl) {
+        if (estimate) {
+            displayEl.textContent = estimate.formatted;
+        } else {
+            displayEl.textContent = '-';
+        }
+    }
+    
+    if (detailsEl && estimate) {
+        detailsEl.textContent = `${estimate.batches} batch × ${columnCount} sütun`;
+    }
+}
+
+// Start progress tracking
+function startProgressTracking() {
+    analysisStartTime = Date.now();
+    processedRowsCount = 0;
+    
+    // Start elapsed time updater
+    updateElapsedTime();
+}
+
+// Update elapsed time display
+function updateElapsedTime() {
+    if (!analysisStartTime) return;
+    
+    const elapsed = Date.now() - analysisStartTime;
+    const elapsedEl = document.getElementById('elapsedTimeDisplay');
+    if (elapsedEl) {
+        elapsedEl.textContent = formatDuration(elapsed);
+    }
+    
+    // Update remaining time estimate
+    if (processedRowsCount > 0 && totalRowsToProcess > 0) {
+        const avgTimePerRow = elapsed / processedRowsCount;
+        const remainingRows = totalRowsToProcess - processedRowsCount;
+        const remainingTime = remainingRows * avgTimePerRow;
+        
+        const remainingEl = document.getElementById('remainingTimeDisplay');
+        if (remainingEl) {
+            remainingEl.textContent = formatDuration(remainingTime);
+        }
+    }
+    
+    // Continue updating if analysis is running
+    if (document.getElementById('progressSection') && !document.getElementById('progressSection').classList.contains('hidden')) {
+        setTimeout(updateElapsedTime, 1000);
+    }
+}
+
+// Update processed rows count
+function updateProcessedRows(count) {
+    processedRowsCount = count;
+    const displayEl = document.getElementById('processedRowsDisplay');
+    if (displayEl) {
+        displayEl.textContent = `${count} / ${totalRowsToProcess}`;
+    }
+}
+
+// Update active API key display
+function updateActiveApiKeyDisplay() {
+    const displayEl = document.getElementById('activeApiKeyDisplay');
+    if (displayEl) {
+        displayEl.textContent = `${state.currentApiKeyIndex + 1} / ${state.apiKeys.filter(k => k).length}`;
+    }
+}
+
+// Show API status (rate limit, waiting, etc.)
+function showApiStatus(message, type = 'info') {
+    const section = document.getElementById('apiStatusSection');
+    const text = document.getElementById('apiStatusText');
+    
+    if (!section || !text) return;
+    
+    section.classList.remove('hidden', 'bg-yellow-100', 'bg-red-100', 'bg-blue-100');
+    
+    if (type === 'warning') {
+        section.classList.add('bg-yellow-100');
+        text.className = 'text-sm text-center text-yellow-800';
+    } else if (type === 'error') {
+        section.classList.add('bg-red-100');
+        text.className = 'text-sm text-center text-red-800';
+    } else {
+        section.classList.add('bg-blue-100');
+        text.className = 'text-sm text-center text-blue-800';
+    }
+    
+    text.textContent = message;
+}
+
+function hideApiStatus() {
+    const section = document.getElementById('apiStatusSection');
+    if (section) {
+        section.classList.add('hidden');
+    }
+}
 
 // Dynamic schema for analysis (no predefined categories)
 const analysisSchema = {
@@ -378,6 +531,9 @@ function initializeBatchSize() {
         e.target.value = value;
         state.batchSize = value;
         localStorage.setItem('batch_size_dynamic', value.toString());
+        
+        // Update estimated time when batch size changes
+        updateEstimatedTimeDisplay();
     });
 }
 
@@ -639,6 +795,9 @@ function populateColumnSelections(columns) {
         checkbox.value = col;
         checkbox.className = 'h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded';
         
+        // Add change listener for estimated time update
+        checkbox.addEventListener('change', updateEstimatedTimeDisplay);
+        
         const label = document.createElement('label');
         label.htmlFor = `col_${col}`;
         label.textContent = col;
@@ -648,6 +807,9 @@ function populateColumnSelections(columns) {
         div.appendChild(label);
         container.appendChild(div);
     });
+    
+    // Initial estimated time calculation
+    updateEstimatedTimeDisplay();
 }
 
 async function startAnalysis() {
@@ -685,6 +847,12 @@ async function startAnalysis() {
 
         // Reset failed rows tracking
         state.failedRows = [];
+        
+        // Initialize progress tracking
+        totalRowsToProcess = state.rawData.length * state.selectedAnalysisColumns.length;
+        startProgressTracking();
+        updateActiveApiKeyDisplay();
+        updateProcessedRows(0);
         
         const genAI = new GoogleGenerativeAI(state.apiKey);
         state.analysisResults = {};
@@ -731,6 +899,7 @@ async function analyzeColumn(genAI, columnName) {
     state.currentBatchSize = calculateAdaptiveBatchSize(state.rawData, columnName, state.batchSize);
     const totalBatches = Math.ceil(state.rawData.length / state.currentBatchSize);
     
+    const columnIndex = state.selectedAnalysisColumns.indexOf(columnName);
     let i = 0;
     let batchNum = 0;
     
@@ -738,16 +907,24 @@ async function analyzeColumn(genAI, columnName) {
         const batch = state.rawData.slice(i, i + state.currentBatchSize);
         batchNum++;
 
-        const totalProgress = ((state.selectedAnalysisColumns.indexOf(columnName) * state.rawData.length) + i + batch.length) / 
+        const totalProgress = ((columnIndex * state.rawData.length) + i + batch.length) / 
                               (state.selectedAnalysisColumns.length * state.rawData.length);
         
         updateProgress(totalProgress * 100, `${columnName}: Batch ${batchNum}/${totalBatches} (${batch.length} satır)`);
+        
+        // Update processed rows count
+        const currentProcessed = (columnIndex * state.rawData.length) + i + batch.length;
+        updateProcessedRows(currentProcessed);
+        
+        // Update active API key display
+        updateActiveApiKeyDisplay();
 
         try {
             const batchResult = await analyzeBatch(genAI, batch, columnName);
             if (batchResult && batchResult.items) {
                 results.push(...batchResult.items);
             }
+            hideApiStatus();
         } catch (error) {
             console.error(`Batch ${batchNum} failed for column ${columnName}:`, error);
             // Continue with next batch even if this one fails
@@ -892,7 +1069,8 @@ ${JSON.stringify(promptData, null, 2)}
                 // Try rotating to next API key
                 if (apiKeysTriedCount < maxApiKeyRotations && rotateApiKey()) {
                     console.log('Rate limit hit, rotated to next API key');
-                    updateProgress(null, `Rate limit - API anahtarı değiştirildi (${state.currentApiKeyIndex + 1}/${state.apiKeys.length})`);
+                    showApiStatus(`Rate limit - API anahtarı değiştirildi (${state.currentApiKeyIndex + 1}/${state.apiKeys.length})`, 'warning');
+                    updateActiveApiKeyDisplay();
                     // Get new model with new API key
                     const newGenAI = new GoogleGenerativeAI(state.apiKey);
                     return analyzeBatch(newGenAI, rows, columnName, retryWithSmallerBatch);
@@ -1170,6 +1348,9 @@ function showResults() {
     // Show executive summary
     document.getElementById('executiveSummary').innerHTML = formatMarkdown(state.executiveSummary);
 
+    // Show failed rows report if any
+    renderFailedRowsReport();
+
     // Populate filter dropdowns
     populateFilterDropdowns();
 
@@ -1181,6 +1362,45 @@ function showResults() {
         state.currentAnalysisId = 'analysis_' + Date.now();
         autoSaveAnalysis();
     }
+}
+
+// Render failed rows report
+function renderFailedRowsReport() {
+    const section = document.getElementById('failedRowsSection');
+    const countEl = document.getElementById('failedRowsCount');
+    const listEl = document.getElementById('failedRowsList');
+    
+    if (!section || !countEl || !listEl) return;
+    
+    if (state.failedRows.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+    
+    section.classList.remove('hidden');
+    countEl.textContent = state.failedRows.length;
+    
+    // Group failed rows by error
+    const groupedByError = {};
+    state.failedRows.forEach(row => {
+        const errorKey = row.error || 'Bilinmeyen hata';
+        if (!groupedByError[errorKey]) {
+            groupedByError[errorKey] = [];
+        }
+        groupedByError[errorKey].push(row);
+    });
+    
+    listEl.innerHTML = Object.entries(groupedByError).map(([error, rows]) => `
+        <div class="bg-white rounded p-3 border border-red-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-red-700 uppercase">${escapeHtml(error.substring(0, 100))}${error.length > 100 ? '...' : ''}</span>
+                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">${rows.length} satır</span>
+            </div>
+            <div class="text-xs text-gray-600">
+                ID'ler: ${rows.slice(0, 10).map(r => r.id).join(', ')}${rows.length > 10 ? ` ve ${rows.length - 10} daha...` : ''}
+            </div>
+        </div>
+    `).join('');
 }
 
 function populateFilterDropdowns() {
