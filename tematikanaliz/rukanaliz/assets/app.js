@@ -98,7 +98,16 @@ const state = {
     currentAnalysisId: null, // For tracking current/loaded analysis
     isHistoryMode: false, // Whether viewing from history
     failedRows: [], // Track failed rows for retry
-    currentBatchSize: 10 // Adaptive batch size
+    currentBatchSize: 10, // Adaptive batch size
+    // Analysis control
+    isAnalyzing: false,
+    isPaused: false,
+    shouldStop: false,
+    // Parallel processing
+    parallelProcessing: localStorage.getItem('parallel_processing') === 'true',
+    // Partial save tracking
+    completedColumns: [], // Track which columns are completed
+    partialAnalysisId: null // ID for partial saves
 };
 
 // Backward compatibility getter
@@ -159,13 +168,21 @@ function calculateEstimatedTime(rowCount, columnCount, batchSize) {
     const timePerBatch = AVG_API_RESPONSE_TIME + DELAY_BETWEEN_BATCHES;
     const columnDelayTime = (columnCount - 1) * DELAY_BETWEEN_COLUMNS;
     
-    const totalTimeMs = (totalBatches * timePerBatch) + columnDelayTime;
+    let totalTimeMs = (totalBatches * timePerBatch) + columnDelayTime;
+    
+    // If parallel processing is enabled, divide by number of API keys
+    const validApiKeys = state.apiKeys.filter(k => k && k.trim().length > 0);
+    if (state.parallelProcessing && validApiKeys.length > 1) {
+        const parallelFactor = Math.min(validApiKeys.length, columnCount);
+        totalTimeMs = totalTimeMs / parallelFactor;
+    }
     
     return {
         totalMs: totalTimeMs,
         formatted: formatDuration(totalTimeMs),
         batches: totalBatches,
-        batchesPerColumn
+        batchesPerColumn,
+        isParallel: state.parallelProcessing && validApiKeys.length > 1
     };
 }
 
@@ -207,7 +224,12 @@ function updateEstimatedTimeDisplay() {
     }
     
     if (detailsEl && estimate) {
-        detailsEl.textContent = `${estimate.batches} batch × ${columnCount} sütun`;
+        let details = `${estimate.batches} batch × ${columnCount} sütun`;
+        if (estimate.isParallel) {
+            const validApiKeys = state.apiKeys.filter(k => k && k.trim().length > 0);
+            details += ` (${validApiKeys.length}x paralel)`;
+        }
+        detailsEl.textContent = details;
     }
 }
 
@@ -295,6 +317,111 @@ function hideApiStatus() {
     }
 }
 
+// Pause/Resume Analysis
+function togglePauseResume() {
+    state.isPaused = !state.isPaused;
+    
+    const pauseIcon = document.getElementById('pauseIcon');
+    const playIcon = document.getElementById('playIcon');
+    const pauseResumeText = document.getElementById('pauseResumeText');
+    const pausedIndicator = document.getElementById('pausedIndicator');
+    const spinner = document.getElementById('spinnerContainer');
+    
+    if (state.isPaused) {
+        // Show paused state
+        pauseIcon?.classList.add('hidden');
+        playIcon?.classList.remove('hidden');
+        pauseResumeText.textContent = 'Devam Et';
+        pausedIndicator?.classList.remove('hidden');
+        spinner?.classList.add('hidden');
+    } else {
+        // Show running state
+        pauseIcon?.classList.remove('hidden');
+        playIcon?.classList.add('hidden');
+        pauseResumeText.textContent = 'Duraklat';
+        pausedIndicator?.classList.add('hidden');
+        spinner?.classList.remove('hidden');
+    }
+}
+
+function stopAnalysis() {
+    if (confirm('Analizi durdurmak istediğinizden emin misiniz? Tamamlanan sütunların sonuçları kaydedilecek.')) {
+        state.shouldStop = true;
+        state.isPaused = false;
+        showApiStatus('Analiz durduruluyor...', 'warning');
+    }
+}
+
+// Wait while paused
+async function waitWhilePaused() {
+    while (state.isPaused && !state.shouldStop) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+}
+
+// Partial save after column completion
+function partialSaveAfterColumn(columnName) {
+    if (!state.partialAnalysisId) {
+        state.partialAnalysisId = 'partial_' + Date.now();
+    }
+    
+    state.completedColumns.push(columnName);
+    
+    const partialData = {
+        id: state.partialAnalysisId,
+        timestamp: Date.now(),
+        rawData: state.rawData,
+        columns: state.columns,
+        selectedIdColumn: state.selectedIdColumn,
+        selectedAnalysisColumns: state.selectedAnalysisColumns,
+        completedColumns: state.completedColumns,
+        analysisResults: state.analysisResults,
+        isPartial: true
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('partial_analysis', JSON.stringify(partialData));
+    
+    console.log(`Partial save completed for column: ${columnName}`);
+    showApiStatus(`"${columnName}" sütunu kaydedildi`, 'info');
+    setTimeout(hideApiStatus, 2000);
+}
+
+// Check for partial analysis to resume
+function checkForPartialAnalysis() {
+    const partial = localStorage.getItem('partial_analysis');
+    if (partial) {
+        try {
+            return JSON.parse(partial);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+// Clear partial analysis
+function clearPartialAnalysis() {
+    localStorage.removeItem('partial_analysis');
+    state.partialAnalysisId = null;
+    state.completedColumns = [];
+}
+
+// Initialize parallel processing checkbox
+function initializeParallelProcessing() {
+    const checkbox = document.getElementById('parallelProcessingCheckbox');
+    if (checkbox) {
+        checkbox.checked = state.parallelProcessing;
+        checkbox.addEventListener('change', (e) => {
+            state.parallelProcessing = e.target.checked;
+            localStorage.setItem('parallel_processing', e.target.checked.toString());
+            
+            // Update estimated time
+            updateEstimatedTimeDisplay();
+        });
+    }
+}
+
 // Dynamic schema for analysis (no predefined categories)
 const analysisSchema = {
     type: 'object',
@@ -366,10 +493,17 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeBatchSize();
         initializeApiKeys();
         initializePromptCustomization();
+        initializeParallelProcessing();
         initializeEventListeners();
         
         // Check for saved analyses and update history button
         updateHistoryButtonState();
+        
+        // Check for partial analysis
+        const partialAnalysis = checkForPartialAnalysis();
+        if (partialAnalysis) {
+            showPartialAnalysisPrompt(partialAnalysis);
+        }
         
         console.log('=== SİSTEM BAŞARILI ŞEKİLDE BAŞLATILDI ===');
     } catch (error) {
@@ -683,6 +817,64 @@ function initializeEventListeners() {
             renderTable();
         }
     });
+    
+    // Pause/Resume and Stop buttons
+    const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+    const stopAnalysisBtn = document.getElementById('stopAnalysisBtn');
+    
+    if (pauseResumeBtn) {
+        pauseResumeBtn.addEventListener('click', togglePauseResume);
+    }
+    
+    if (stopAnalysisBtn) {
+        stopAnalysisBtn.addEventListener('click', stopAnalysis);
+    }
+}
+
+// Show prompt for partial analysis recovery
+function showPartialAnalysisPrompt(partialData) {
+    const completedCount = partialData.completedColumns?.length || 0;
+    const totalCount = partialData.selectedAnalysisColumns?.length || 0;
+    const date = new Date(partialData.timestamp).toLocaleString('tr-TR');
+    
+    if (completedCount > 0 && completedCount < totalCount) {
+        const resumeConfirm = confirm(
+            `Yarım kalmış bir analiz bulundu!\n\n` +
+            `Tarih: ${date}\n` +
+            `Tamamlanan: ${completedCount}/${totalCount} sütun\n` +
+            `Satır sayısı: ${partialData.rawData?.length || 0}\n\n` +
+            `Devam etmek ister misiniz?`
+        );
+        
+        if (resumeConfirm) {
+            resumePartialAnalysis(partialData);
+        } else {
+            clearPartialAnalysis();
+        }
+    } else {
+        // Partial data is complete or empty, clear it
+        clearPartialAnalysis();
+    }
+}
+
+// Resume partial analysis
+async function resumePartialAnalysis(partialData) {
+    // Load partial state
+    state.rawData = partialData.rawData;
+    state.columns = partialData.columns;
+    state.selectedIdColumn = partialData.selectedIdColumn;
+    state.selectedAnalysisColumns = partialData.selectedAnalysisColumns;
+    state.completedColumns = partialData.completedColumns || [];
+    state.analysisResults = partialData.analysisResults || {};
+    state.partialAnalysisId = partialData.id;
+    
+    // Show progress section
+    document.getElementById('uploadSection').classList.add('hidden');
+    document.getElementById('columnSection').classList.add('hidden');
+    document.getElementById('progressSection').classList.remove('hidden');
+    
+    // Continue analysis from where it left off
+    await continueAnalysis();
 }
 
 function resetFilters() {
@@ -845,8 +1037,12 @@ async function startAnalysis() {
         document.getElementById('columnSection').classList.add('hidden');
         document.getElementById('progressSection').classList.remove('hidden');
 
-        // Reset failed rows tracking
+        // Reset control flags
+        state.isAnalyzing = true;
+        state.isPaused = false;
+        state.shouldStop = false;
         state.failedRows = [];
+        state.completedColumns = [];
         
         // Initialize progress tracking
         totalRowsToProcess = state.rawData.length * state.selectedAnalysisColumns.length;
@@ -854,23 +1050,27 @@ async function startAnalysis() {
         updateActiveApiKeyDisplay();
         updateProcessedRows(0);
         
-        const genAI = new GoogleGenerativeAI(state.apiKey);
+        // Clear any previous partial analysis
+        clearPartialAnalysis();
+        
         state.analysisResults = {};
 
-        // Analyze each column independently
-        for (let colIndex = 0; colIndex < state.selectedAnalysisColumns.length; colIndex++) {
-            const columnName = state.selectedAnalysisColumns[colIndex];
-            
-            document.getElementById('currentColumnProgress').textContent = `İşlenen Sütun: ${columnName}`;
-            document.getElementById('columnProgressCount').textContent = `${colIndex + 1} / ${state.selectedAnalysisColumns.length} sütun`;
-            
-            const columnResults = await analyzeColumn(genAI, columnName);
-            state.analysisResults[columnName] = columnResults;
-
-            // Delay between columns
-            if (colIndex < state.selectedAnalysisColumns.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_COLUMNS));
-            }
+        // Check if parallel processing is enabled and we have multiple API keys
+        if (state.parallelProcessing && validApiKeys.length > 1) {
+            await runParallelAnalysis(validApiKeys);
+        } else {
+            await runSequentialAnalysis();
+        }
+        
+        // Check if analysis was stopped
+        if (state.shouldStop && state.completedColumns.length === 0) {
+            // No columns completed, just reset
+            state.isAnalyzing = false;
+            document.getElementById('progressSection').classList.add('hidden');
+            document.getElementById('columnSection').classList.remove('hidden');
+            showError('Analiz durduruldu. Hiçbir sütun tamamlanmadı.');
+            clearPartialAnalysis();
+            return;
         }
 
         // Calculate statistics
@@ -879,17 +1079,177 @@ async function startAnalysis() {
         // Enrich data
         enrichData();
 
-        // Generate executive summary
-        state.executiveSummary = await generateExecutiveSummary(genAI);
+        // Generate executive summary (only if we have results)
+        if (Object.keys(state.analysisResults).length > 0) {
+            const genAI = new GoogleGenerativeAI(state.apiKey);
+            state.executiveSummary = await generateExecutiveSummary(genAI);
+        } else {
+            state.executiveSummary = 'Analiz sonuçları yetersiz, özet oluşturulamadı.';
+        }
+        
+        // Clear partial analysis on successful completion
+        clearPartialAnalysis();
 
         // Show results
+        state.isAnalyzing = false;
         document.getElementById('progressSection').classList.add('hidden');
         showResults();
+        
+        if (state.shouldStop) {
+            showApiStatus(`Analiz durduruldu. ${state.completedColumns.length} sütun tamamlandı.`, 'warning');
+        }
     } catch (error) {
+        state.isAnalyzing = false;
         showError('Analiz sırasında bir hata oluştu: ' + error.message);
         document.getElementById('progressSection').classList.add('hidden');
         document.getElementById('columnSection').classList.remove('hidden');
     }
+}
+
+// Sequential analysis (default)
+async function runSequentialAnalysis() {
+    const genAI = new GoogleGenerativeAI(state.apiKey);
+    
+    for (let colIndex = 0; colIndex < state.selectedAnalysisColumns.length; colIndex++) {
+        // Check for stop signal
+        if (state.shouldStop) {
+            console.log('Sequential analysis stopped');
+            break;
+        }
+        
+        const columnName = state.selectedAnalysisColumns[colIndex];
+        
+        document.getElementById('currentColumnProgress').textContent = `İşlenen Sütun: ${columnName}`;
+        document.getElementById('columnProgressCount').textContent = `${colIndex + 1} / ${state.selectedAnalysisColumns.length} sütun`;
+        
+        const columnResults = await analyzeColumn(genAI, columnName);
+        state.analysisResults[columnName] = columnResults;
+        
+        // Partial save after column completion
+        partialSaveAfterColumn(columnName);
+
+        // Delay between columns
+        if (colIndex < state.selectedAnalysisColumns.length - 1 && !state.shouldStop) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_COLUMNS));
+        }
+    }
+}
+
+// Parallel analysis using multiple API keys
+async function runParallelAnalysis(validApiKeys) {
+    const columns = [...state.selectedAnalysisColumns];
+    const concurrency = Math.min(validApiKeys.length, columns.length);
+    
+    showApiStatus(`Paralel işleme: ${concurrency} API anahtarı ile çalışılıyor`, 'info');
+    
+    let completedCount = 0;
+    const totalColumns = columns.length;
+    
+    // Create a queue of columns to process
+    const columnQueue = [...columns];
+    const activePromises = [];
+    
+    // Worker function for each API key
+    async function processWithApiKey(apiKeyIndex) {
+        const apiKey = validApiKeys[apiKeyIndex];
+        const genAI = new GoogleGenerativeAI(apiKey);
+        
+        while (columnQueue.length > 0 && !state.shouldStop) {
+            const columnName = columnQueue.shift();
+            if (!columnName) break;
+            
+            try {
+                console.log(`API ${apiKeyIndex + 1} processing column: ${columnName}`);
+                
+                document.getElementById('currentColumnProgress').textContent = 
+                    `İşlenen: ${columnName} (API ${apiKeyIndex + 1})`;
+                
+                const columnResults = await analyzeColumn(genAI, columnName);
+                state.analysisResults[columnName] = columnResults;
+                
+                completedCount++;
+                document.getElementById('columnProgressCount').textContent = 
+                    `${completedCount} / ${totalColumns} sütun`;
+                
+                // Partial save
+                partialSaveAfterColumn(columnName);
+                
+            } catch (error) {
+                console.error(`API ${apiKeyIndex + 1} error on column ${columnName}:`, error);
+                // Put column back in queue for another API to try
+                columnQueue.push(columnName);
+            }
+        }
+    }
+    
+    // Start workers for each API key
+    for (let i = 0; i < concurrency; i++) {
+        activePromises.push(processWithApiKey(i));
+    }
+    
+    // Wait for all workers to complete
+    await Promise.all(activePromises);
+    
+    hideApiStatus();
+}
+
+// Continue analysis from partial state
+async function continueAnalysis() {
+    state.isAnalyzing = true;
+    state.isPaused = false;
+    state.shouldStop = false;
+    state.failedRows = [];
+    
+    // Calculate remaining columns
+    const remainingColumns = state.selectedAnalysisColumns.filter(
+        col => !state.completedColumns.includes(col)
+    );
+    
+    if (remainingColumns.length === 0) {
+        // All columns already completed
+        calculateAllStats();
+        enrichData();
+        const genAI = new GoogleGenerativeAI(state.apiKey);
+        state.executiveSummary = await generateExecutiveSummary(genAI);
+        clearPartialAnalysis();
+        state.isAnalyzing = false;
+        document.getElementById('progressSection').classList.add('hidden');
+        showResults();
+        return;
+    }
+    
+    // Initialize progress tracking
+    totalRowsToProcess = state.rawData.length * remainingColumns.length;
+    startProgressTracking();
+    updateActiveApiKeyDisplay();
+    
+    const genAI = new GoogleGenerativeAI(state.apiKey);
+    
+    for (const columnName of remainingColumns) {
+        if (state.shouldStop) break;
+        
+        document.getElementById('currentColumnProgress').textContent = `İşlenen Sütun: ${columnName}`;
+        document.getElementById('columnProgressCount').textContent = 
+            `${state.completedColumns.length + 1} / ${state.selectedAnalysisColumns.length} sütun`;
+        
+        const columnResults = await analyzeColumn(genAI, columnName);
+        state.analysisResults[columnName] = columnResults;
+        
+        partialSaveAfterColumn(columnName);
+        
+        if (!state.shouldStop) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_COLUMNS));
+        }
+    }
+    
+    // Finalize
+    calculateAllStats();
+    enrichData();
+    state.executiveSummary = await generateExecutiveSummary(genAI);
+    clearPartialAnalysis();
+    state.isAnalyzing = false;
+    document.getElementById('progressSection').classList.add('hidden');
+    showResults();
 }
 
 async function analyzeColumn(genAI, columnName) {
@@ -904,6 +1264,20 @@ async function analyzeColumn(genAI, columnName) {
     let batchNum = 0;
     
     while (i < state.rawData.length) {
+        // Check for stop signal
+        if (state.shouldStop) {
+            console.log(`Analysis stopped at column ${columnName}, batch ${batchNum}`);
+            break;
+        }
+        
+        // Wait while paused
+        await waitWhilePaused();
+        
+        // Check again after pause (might have been stopped while paused)
+        if (state.shouldStop) {
+            break;
+        }
+        
         const batch = state.rawData.slice(i, i + state.currentBatchSize);
         batchNum++;
 
@@ -932,7 +1306,7 @@ async function analyzeColumn(genAI, columnName) {
 
         i += state.currentBatchSize;
         
-        if (i < state.rawData.length) {
+        if (i < state.rawData.length && !state.shouldStop) {
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
         }
     }
@@ -2232,6 +2606,12 @@ function resetApp() {
     state.failedRows = [];
     state.currentBatchSize = state.batchSize;
     state.currentApiKeyIndex = 0;
+    // Reset analysis control
+    state.isAnalyzing = false;
+    state.isPaused = false;
+    state.shouldStop = false;
+    state.completedColumns = [];
+    state.partialAnalysisId = null;
 
     // Destroy charts
     Object.values(state.charts).forEach(chart => chart?.destroy());
@@ -2246,6 +2626,17 @@ function resetApp() {
     document.getElementById('progressSection').classList.add('hidden');
     document.getElementById('resultsSection').classList.add('hidden');
     hideError();
+    
+    // Reset pause button state
+    const pauseIcon = document.getElementById('pauseIcon');
+    const playIcon = document.getElementById('playIcon');
+    const pauseResumeText = document.getElementById('pauseResumeText');
+    const pausedIndicator = document.getElementById('pausedIndicator');
+    
+    if (pauseIcon) pauseIcon.classList.remove('hidden');
+    if (playIcon) playIcon.classList.add('hidden');
+    if (pauseResumeText) pauseResumeText.textContent = 'Duraklat';
+    if (pausedIndicator) pausedIndicator.classList.add('hidden');
     
     // Re-render API keys to reset active indicator
     renderApiKeysList();

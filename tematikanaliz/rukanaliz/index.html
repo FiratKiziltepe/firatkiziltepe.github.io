@@ -164,7 +164,7 @@
                         Rate limit'e takılınca sistem otomatik olarak sonraki anahtara geçer.
                     </p>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">Model Seçimi</label>
                             <select id="modelSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer">
@@ -176,7 +176,15 @@
                             <label for="batchSizeInput" class="block text-sm font-medium text-gray-700 mb-2">Batch Boyutu</label>
                             <input type="number" id="batchSizeInput" min="1" max="50" value="10" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin (otomatik ayarlanır)</p>
+                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Paralel İşleme</label>
+                            <label class="flex items-center space-x-3 p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" id="parallelProcessingCheckbox" class="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                                <span class="text-sm text-gray-700">Aktif</span>
+                            </label>
+                            <p class="mt-1 text-xs text-gray-500">Birden fazla API ile eşzamanlı çalış</p>
                         </div>
                     </div>
 
@@ -316,8 +324,33 @@
                     <p id="apiStatusText" class="text-sm text-center"></p>
                 </div>
                 
-                <div class="flex items-center justify-center">
-                    <div class="spinner"></div>
+                <!-- Control Buttons -->
+                <div class="flex items-center justify-center space-x-4">
+                    <div id="spinnerContainer" class="spinner"></div>
+                    <button id="pauseResumeBtn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2">
+                        <svg id="pauseIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <svg id="playIcon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span id="pauseResumeText">Duraklat</span>
+                    </button>
+                    <button id="stopAnalysisBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                        </svg>
+                        <span>Durdur</span>
+                    </button>
+                </div>
+                
+                <!-- Paused Indicator -->
+                <div id="pausedIndicator" class="hidden text-center mt-2">
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium animate-pulse">
+                        ⏸️ Duraklatıldı - Devam etmek için "Devam Et" butonuna tıklayın
+                    </span>
                 </div>
             </div>
         </div>
