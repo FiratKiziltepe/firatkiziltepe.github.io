@@ -137,19 +137,34 @@
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="block text-sm font-medium text-gray-700">Gemini API Anahtarı</label>
-                        <button id="historyBtnTop" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 text-sm">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>Geçmiş Analizler</span>
-                            <span id="historyCount" class="hidden bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs font-bold"></span>
-                        </button>
+                        <label class="block text-sm font-medium text-gray-700">Gemini API Anahtarları</label>
+                        <div class="flex items-center space-x-2">
+                            <button id="customPromptBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2 text-sm">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                <span>Prompt Özelleştir</span>
+                            </button>
+                            <button id="historyBtnTop" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 text-sm">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Geçmiş Analizler</span>
+                                <span id="historyCount" class="hidden bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs font-bold"></span>
+                            </button>
+                        </div>
                     </div>
-                    <input type="password" id="apiKeyInput" placeholder="AIza... ile başlayan API anahtarınızı girin"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Multiple API Keys Container -->
+                    <div id="apiKeysContainer" class="mb-4">
+                        <!-- API keys will be rendered here by JS -->
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">
+                        <span class="text-green-600 font-medium">💡 Birden fazla API anahtarı ekleyebilirsiniz.</span> 
+                        Rate limit'e takılınca sistem otomatik olarak sonraki anahtara geçer.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">Model Seçimi</label>
                             <select id="modelSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer">
@@ -161,7 +176,7 @@
                             <label for="batchSizeInput" class="block text-sm font-medium text-gray-700 mb-2">Batch Boyutu</label>
                             <input type="number" id="batchSizeInput" min="1" max="50" value="10" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin (1-50)</p>
+                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin (otomatik ayarlanır)</p>
                         </div>
                     </div>
 
@@ -488,6 +503,68 @@
             </div>
             <div id="historyList" class="p-6 overflow-y-auto max-h-[60vh] space-y-4">
                 <!-- History items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Customization Modal -->
+    <div id="promptModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Prompt Özelleştirme</h2>
+                    <p class="text-sm text-gray-500 mt-1">Analiz prompt'unu ihtiyacınıza göre düzenleyin</p>
+                </div>
+                <button onclick="document.getElementById('promptModal').classList.add('hidden')" 
+                        class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[65vh]">
+                <!-- Warning -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-yellow-600 mt-0.5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div class="text-sm">
+                            <p class="font-medium text-yellow-800">Zorunlu Anahtar Kelimeler</p>
+                            <p class="text-yellow-700 mt-1">Aşağıdaki kelimeler analiz sonuçları için gereklidir ve prompt'tan kaldırılamaz:</p>
+                            <code class="mt-2 block bg-yellow-100 px-2 py-1 rounded text-xs">mainCategory, subTheme, sentiment, direction, entryId, topics, actionable</code>
+                            <p class="text-yellow-700 mt-2"><code>{{COLUMN_NAME}}</code> placeholder'ı analiz edilen sütun adıyla değiştirilir.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Prompt Textarea -->
+                <div>
+                    <label for="customPromptTextarea" class="block text-sm font-medium text-gray-700 mb-2">Sistem Prompt'u</label>
+                    <textarea id="customPromptTextarea" 
+                        class="w-full h-96 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                        placeholder="Prompt'unuzu buraya yazın..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-between items-center bg-gray-50">
+                <button id="resetPromptBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center space-x-2">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Varsayılana Sıfırla</span>
+                </button>
+                <div class="flex space-x-3">
+                    <button onclick="document.getElementById('promptModal').classList.add('hidden')" 
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        İptal
+                    </button>
+                    <button id="savePromptBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>Kaydet</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -1,10 +1,82 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Protected keywords that cannot be removed from prompt
+const PROTECTED_KEYWORDS = ['mainCategory', 'subTheme', 'sentiment', 'direction', 'entryId', 'topics', 'actionable'];
+
+// Default system prompt template
+const DEFAULT_SYSTEM_PROMPT = `Sen bir tematik analiz uzmanısın. Verilen serbest metin cevaplarını analiz et ve kategorize et.
+
+SORU/BAĞLAM: "{{COLUMN_NAME}}"
+
+GÖREV:
+Her cevap için:
+1. 1-3 ana tema/konu belirle (cevap birden fazla konuya değiniyorsa ayır)
+2. Her tema için:
+   - mainCategory: Temayı en iyi tanımlayan kategori adı (kısa, öz, Türkçe)
+   - subTheme: Daha spesifik alt tema (kısa, öz, Türkçe)
+   - sentiment: Pozitif/Negatif/Nötr/Yapıcı Eleştiri
+   - direction: İfadenin yönelimi (Talep/İstek, Şikayet/Sorun, Memnuniyet, Tespit)
+3. actionable: Somut aksiyon gerektiriyor mu?
+
+YÖNELİM (direction) AÇIKLAMALARI:
+- Talep/İstek: Bir şey isteniyor, öneri sunuluyor, değişiklik talep ediliyor
+- Şikayet/Sorun: Bir problemden, eksiklikten bahsediliyor, memnuniyetsizlik bildiriliyor
+- Memnuniyet: Olumlu görüş, memnuniyet, beğeni ifade ediliyor
+- Tespit: Sadece bir durum tespiti yapılıyor, nötr bir gözlem
+
+KURALLAR:
+- Kategorileri verilerden organik olarak çıkar
+- Benzer konuları aynı kategori altında topla
+- Kısa, kurumsal, Türkçe isimler kullan
+- Aynı kişinin farklı konulara değiniyorsa ayır (max 3 topic)
+- Boş/anlamsız cevaplar için tek bir "Yanıt Yok" kategorisi kullan
+
+ÖRNEKLER:
+
+Cevap: "Etkinlikler çocukların düzeyine uygun fakat çeşitlendirilmeli, okuma metinleri arttırılmalı."
+→ 3 topic:
+  1. mainCategory: "İçerik Kalitesi", subTheme: "Etkinlikler düzeye uygun", sentiment: "Pozitif", direction: "Memnuniyet"
+  2. mainCategory: "İçerik Zenginleştirme", subTheme: "Etkinlik çeşitliliği talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
+  3. mainCategory: "İçerik Zenginleştirme", subTheme: "Okuma metni artış talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
+
+Cevap: "Görseller konuyu anlatmada yetersiz kalıyor ancak renkler canlı seçilmiş."
+→ 2 topic:
+  1. mainCategory: "Görsel Tasarım", subTheme: "Görsellerin öğreticiliği yetersiz", sentiment: "Negatif", direction: "Şikayet/Sorun"
+  2. mainCategory: "Görsel Tasarım", subTheme: "Renk seçimi başarılı", sentiment: "Pozitif", direction: "Memnuniyet"
+
+Cevap: "Sorun yok"
+→ 1 topic:
+  mainCategory: "Genel Değerlendirme", subTheme: "Memnuniyet", sentiment: "Pozitif", direction: "Memnuniyet"
+
+Cevap: ""
+→ 1 topic:
+  mainCategory: "Yanıt Yok", subTheme: "Cevap verilmedi", sentiment: "Nötr", direction: "Tespit"`;
+
+// Load saved API keys from localStorage
+function loadApiKeys() {
+    const saved = localStorage.getItem('gemini_api_keys');
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            return [];
+        }
+    }
+    // Migrate from old single key
+    const oldKey = localStorage.getItem('gemini_api_key_dynamic');
+    if (oldKey) {
+        return [oldKey];
+    }
+    return [];
+}
+
 // Global state
 const state = {
-    apiKey: localStorage.getItem('gemini_api_key_dynamic') || '',
+    apiKeys: loadApiKeys(),
+    currentApiKeyIndex: 0,
     selectedModel: localStorage.getItem('gemini_model_dynamic') || 'gemini-2.5-flash',
     batchSize: parseInt(localStorage.getItem('batch_size_dynamic')) || 10,
+    customPrompt: localStorage.getItem('custom_prompt') || DEFAULT_SYSTEM_PROMPT,
     rawData: [],
     columns: [],
     selectedIdColumn: null,
@@ -24,8 +96,24 @@ const state = {
     directionFilter: 'all',
     charts: {},
     currentAnalysisId: null, // For tracking current/loaded analysis
-    isHistoryMode: false // Whether viewing from history
+    isHistoryMode: false, // Whether viewing from history
+    failedRows: [], // Track failed rows for retry
+    currentBatchSize: 10 // Adaptive batch size
 };
+
+// Backward compatibility getter
+Object.defineProperty(state, 'apiKey', {
+    get: function() {
+        return this.apiKeys[this.currentApiKeyIndex] || '';
+    },
+    set: function(value) {
+        if (this.apiKeys.length === 0) {
+            this.apiKeys.push(value);
+        } else {
+            this.apiKeys[this.currentApiKeyIndex] = value;
+        }
+    }
+});
 
 // Model Definitions
 const AVAILABLE_MODELS = [
@@ -123,11 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         initializeModelSelect();
         initializeBatchSize();
+        initializeApiKeys();
+        initializePromptCustomization();
         initializeEventListeners();
-        
-        if (state.apiKey) {
-            document.getElementById('apiKeyInput').value = state.apiKey;
-        }
         
         // Check for saved analyses and update history button
         updateHistoryButtonState();
@@ -137,6 +223,147 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('=== SİSTEM BAŞLATMA HATASI ===', error);
     }
 });
+
+// Initialize API Keys UI
+function initializeApiKeys() {
+    renderApiKeysList();
+}
+
+function renderApiKeysList() {
+    const container = document.getElementById('apiKeysContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    state.apiKeys.forEach((key, index) => {
+        const keyDiv = document.createElement('div');
+        keyDiv.className = 'flex items-center space-x-2 mb-2';
+        keyDiv.innerHTML = `
+            <div class="flex-1 relative">
+                <input type="password" value="${key}" 
+                    class="api-key-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                    placeholder="AIza... ile başlayan API anahtarı"
+                    data-index="${index}">
+                ${index === state.currentApiKeyIndex ? '<span class="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-green-500 rounded-full" title="Aktif"></span>' : ''}
+            </div>
+            <button type="button" class="delete-api-key px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" data-index="${index}" ${state.apiKeys.length === 1 ? 'disabled' : ''}>
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        `;
+        container.appendChild(keyDiv);
+    });
+    
+    // Add "Add new key" button
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.id = 'addApiKeyBtn';
+    addBtn.className = 'w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center space-x-2';
+    addBtn.innerHTML = `
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Yeni API Anahtarı Ekle</span>
+    `;
+    container.appendChild(addBtn);
+    
+    // Event listeners
+    container.querySelectorAll('.api-key-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            state.apiKeys[index] = e.target.value;
+            saveApiKeys();
+        });
+    });
+    
+    container.querySelectorAll('.delete-api-key').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.dataset.index);
+            if (state.apiKeys.length > 1) {
+                state.apiKeys.splice(index, 1);
+                if (state.currentApiKeyIndex >= state.apiKeys.length) {
+                    state.currentApiKeyIndex = state.apiKeys.length - 1;
+                }
+                saveApiKeys();
+                renderApiKeysList();
+            }
+        });
+    });
+    
+    addBtn.addEventListener('click', () => {
+        state.apiKeys.push('');
+        saveApiKeys();
+        renderApiKeysList();
+        // Focus on the new input
+        const inputs = container.querySelectorAll('.api-key-input');
+        inputs[inputs.length - 1]?.focus();
+    });
+}
+
+function saveApiKeys() {
+    localStorage.setItem('gemini_api_keys', JSON.stringify(state.apiKeys));
+}
+
+function rotateApiKey() {
+    if (state.apiKeys.length <= 1) return false;
+    
+    state.currentApiKeyIndex = (state.currentApiKeyIndex + 1) % state.apiKeys.length;
+    console.log(`API key rotated to index ${state.currentApiKeyIndex}`);
+    renderApiKeysList();
+    return true;
+}
+
+// Initialize Prompt Customization
+function initializePromptCustomization() {
+    const promptTextarea = document.getElementById('customPromptTextarea');
+    if (promptTextarea) {
+        promptTextarea.value = state.customPrompt;
+    }
+}
+
+function validatePrompt(prompt) {
+    const missingKeywords = PROTECTED_KEYWORDS.filter(kw => !prompt.includes(kw));
+    return {
+        valid: missingKeywords.length === 0,
+        missingKeywords
+    };
+}
+
+function saveCustomPrompt() {
+    const promptTextarea = document.getElementById('customPromptTextarea');
+    if (!promptTextarea) return;
+    
+    const newPrompt = promptTextarea.value;
+    const validation = validatePrompt(newPrompt);
+    
+    if (!validation.valid) {
+        alert(`Prompt'ta şu zorunlu anahtar kelimeler eksik: ${validation.missingKeywords.join(', ')}\n\nBu kelimeler analiz sonuçları için gereklidir ve kaldırılamaz.`);
+        return false;
+    }
+    
+    state.customPrompt = newPrompt;
+    localStorage.setItem('custom_prompt', newPrompt);
+    
+    // Close modal
+    document.getElementById('promptModal').classList.add('hidden');
+    
+    // Show success message
+    showSaveIndicator();
+    return true;
+}
+
+function resetPromptToDefault() {
+    if (confirm('Prompt varsayılan haline döndürülecek. Emin misiniz?')) {
+        state.customPrompt = DEFAULT_SYSTEM_PROMPT;
+        localStorage.setItem('custom_prompt', DEFAULT_SYSTEM_PROMPT);
+        
+        const promptTextarea = document.getElementById('customPromptTextarea');
+        if (promptTextarea) {
+            promptTextarea.value = DEFAULT_SYSTEM_PROMPT;
+        }
+    }
+}
 
 function initializeBatchSize() {
     const batchSizeInput = document.getElementById('batchSizeInput');
@@ -193,7 +420,6 @@ function updateLimitInfo(modelId) {
 function initializeEventListeners() {
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const apiKeyInput = document.getElementById('apiKeyInput');
     const cancelColumnBtn = document.getElementById('cancelColumnBtn');
     const startAnalysisBtn = document.getElementById('startAnalysisBtn');
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
@@ -210,12 +436,28 @@ function initializeEventListeners() {
     const historyBtn = document.getElementById('historyBtn');
     const historyBtnTop = document.getElementById('historyBtnTop');
     const saveAnalysisBtn = document.getElementById('saveAnalysisBtn');
+    const customPromptBtn = document.getElementById('customPromptBtn');
+    const savePromptBtn = document.getElementById('savePromptBtn');
+    const resetPromptBtn = document.getElementById('resetPromptBtn');
 
-    // API Key
-    apiKeyInput.addEventListener('input', (e) => {
-        state.apiKey = e.target.value;
-        localStorage.setItem('gemini_api_key_dynamic', e.target.value);
-    });
+    // Prompt Customization
+    if (customPromptBtn) {
+        customPromptBtn.addEventListener('click', () => {
+            const promptTextarea = document.getElementById('customPromptTextarea');
+            if (promptTextarea) {
+                promptTextarea.value = state.customPrompt;
+            }
+            document.getElementById('promptModal').classList.remove('hidden');
+        });
+    }
+    
+    if (savePromptBtn) {
+        savePromptBtn.addEventListener('click', saveCustomPrompt);
+    }
+    
+    if (resetPromptBtn) {
+        resetPromptBtn.addEventListener('click', resetPromptToDefault);
+    }
 
     // File upload
     dropZone.addEventListener('click', () => fileInput.click());
@@ -409,10 +651,15 @@ function populateColumnSelections(columns) {
 }
 
 async function startAnalysis() {
-    if (!state.apiKey) {
-        showError('Lütfen Gemini API anahtarınızı girin.');
+    // Check if at least one API key is provided
+    const validApiKeys = state.apiKeys.filter(k => k && k.trim().length > 0);
+    if (validApiKeys.length === 0) {
+        showError('Lütfen en az bir Gemini API anahtarı girin.');
         return;
     }
+    
+    // Use first valid key
+    state.currentApiKeyIndex = state.apiKeys.findIndex(k => k && k.trim().length > 0);
 
     // Get selected columns
     const idColumnSelect = document.getElementById('idColumnSelect');
@@ -436,6 +683,9 @@ async function startAnalysis() {
         document.getElementById('columnSection').classList.add('hidden');
         document.getElementById('progressSection').classList.remove('hidden');
 
+        // Reset failed rows tracking
+        state.failedRows = [];
+        
         const genAI = new GoogleGenerativeAI(state.apiKey);
         state.analysisResults = {};
 
@@ -476,83 +726,105 @@ async function startAnalysis() {
 
 async function analyzeColumn(genAI, columnName) {
     const results = [];
-    const totalBatches = Math.ceil(state.rawData.length / state.batchSize);
-
-    for (let i = 0; i < state.rawData.length; i += state.batchSize) {
-        const batch = state.rawData.slice(i, i + state.batchSize);
-        const currentBatch = Math.floor(i / state.batchSize) + 1;
+    
+    // Calculate adaptive batch size based on content
+    state.currentBatchSize = calculateAdaptiveBatchSize(state.rawData, columnName, state.batchSize);
+    const totalBatches = Math.ceil(state.rawData.length / state.currentBatchSize);
+    
+    let i = 0;
+    let batchNum = 0;
+    
+    while (i < state.rawData.length) {
+        const batch = state.rawData.slice(i, i + state.currentBatchSize);
+        batchNum++;
 
         const totalProgress = ((state.selectedAnalysisColumns.indexOf(columnName) * state.rawData.length) + i + batch.length) / 
                               (state.selectedAnalysisColumns.length * state.rawData.length);
         
-        updateProgress(totalProgress * 100, `${columnName}: Batch ${currentBatch}/${totalBatches}`);
+        updateProgress(totalProgress * 100, `${columnName}: Batch ${batchNum}/${totalBatches} (${batch.length} satır)`);
 
-        const batchResult = await analyzeBatch(genAI, batch, columnName);
-        results.push(...batchResult.items);
+        try {
+            const batchResult = await analyzeBatch(genAI, batch, columnName);
+            if (batchResult && batchResult.items) {
+                results.push(...batchResult.items);
+            }
+        } catch (error) {
+            console.error(`Batch ${batchNum} failed for column ${columnName}:`, error);
+            // Continue with next batch even if this one fails
+        }
 
-        if (i + state.batchSize < state.rawData.length) {
+        i += state.currentBatchSize;
+        
+        if (i < state.rawData.length) {
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
         }
+    }
+
+    // Log summary of failed rows if any
+    const columnFailedRows = state.failedRows.filter(r => r.column === columnName);
+    if (columnFailedRows.length > 0) {
+        console.warn(`Column "${columnName}": ${columnFailedRows.length} rows failed to process`);
     }
 
     return results;
 }
 
-async function analyzeBatch(genAI, rows, columnName) {
+// Constants for error handling
+const MAX_TEXT_LENGTH = 2000; // Max characters per text entry
+const MAX_TOKENS_PER_REQUEST = 30000; // Approximate token limit
+const CHARS_PER_TOKEN = 4; // Rough estimate
+
+// Estimate token count for a string
+function estimateTokens(text) {
+    return Math.ceil((text || '').length / CHARS_PER_TOKEN);
+}
+
+// Truncate text if too long
+function truncateText(text, maxLength = MAX_TEXT_LENGTH) {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '... [metin kısaltıldı]';
+}
+
+// Calculate adaptive batch size based on content
+function calculateAdaptiveBatchSize(rows, columnName, baseBatchSize) {
+    if (rows.length === 0) return baseBatchSize;
+    
+    // Sample first few rows to estimate average text length
+    const sampleSize = Math.min(10, rows.length);
+    let totalChars = 0;
+    
+    for (let i = 0; i < sampleSize; i++) {
+        const text = String(rows[i][columnName] || '');
+        totalChars += Math.min(text.length, MAX_TEXT_LENGTH);
+    }
+    
+    const avgChars = totalChars / sampleSize;
+    const avgTokensPerRow = estimateTokens(avgChars.toString()) + 100; // +100 for JSON overhead
+    
+    // Calculate how many rows we can fit in token limit
+    const promptOverhead = estimateTokens(state.customPrompt) + 500;
+    const availableTokens = MAX_TOKENS_PER_REQUEST - promptOverhead;
+    const maxRowsForTokens = Math.floor(availableTokens / avgTokensPerRow);
+    
+    // Use the smaller of base batch size and calculated max
+    const adaptiveBatch = Math.max(1, Math.min(baseBatchSize, maxRowsForTokens));
+    
+    if (adaptiveBatch < baseBatchSize) {
+        console.log(`Adaptive batch size: ${adaptiveBatch} (reduced from ${baseBatchSize} due to content length)`);
+    }
+    
+    return adaptiveBatch;
+}
+
+async function analyzeBatch(genAI, rows, columnName, retryWithSmallerBatch = true) {
+    // Truncate long texts and prepare data
     const promptData = rows.map(r => ({
         id: String(r[state.selectedIdColumn]),
-        text: String(r[columnName] || '')
+        text: truncateText(String(r[columnName] || ''))
     }));
 
-    const systemInstruction = `
-Sen bir tematik analiz uzmanısın. Verilen serbest metin cevaplarını analiz et ve kategorize et.
-
-SORU/BAĞLAM: "${columnName}"
-
-GÖREV:
-Her cevap için:
-1. 1-3 ana tema/konu belirle (cevap birden fazla konuya değiniyorsa ayır)
-2. Her tema için:
-   - mainCategory: Temayı en iyi tanımlayan kategori adı (kısa, öz, Türkçe)
-   - subTheme: Daha spesifik alt tema (kısa, öz, Türkçe)
-   - sentiment: Pozitif/Negatif/Nötr/Yapıcı Eleştiri
-   - direction: İfadenin yönelimi (Talep/İstek, Şikayet/Sorun, Memnuniyet, Tespit)
-3. actionable: Somut aksiyon gerektiriyor mu?
-
-YÖNELİM (direction) AÇIKLAMALARI:
-- Talep/İstek: Bir şey isteniyor, öneri sunuluyor, değişiklik talep ediliyor
-- Şikayet/Sorun: Bir problemden, eksiklikten bahsediliyor, memnuniyetsizlik bildiriliyor
-- Memnuniyet: Olumlu görüş, memnuniyet, beğeni ifade ediliyor
-- Tespit: Sadece bir durum tespiti yapılıyor, nötr bir gözlem
-
-KURALLAR:
-- Kategorileri verilerden organik olarak çıkar
-- Benzer konuları aynı kategori altında topla
-- Kısa, kurumsal, Türkçe isimler kullan
-- Aynı kişinin farklı konulara değiniyorsa ayır (max 3 topic)
-- Boş/anlamsız cevaplar için tek bir "Yanıt Yok" kategorisi kullan
-
-ÖRNEKLER:
-
-Cevap: "Etkinlikler çocukların düzeyine uygun fakat çeşitlendirilmeli, okuma metinleri arttırılmalı."
-→ 3 topic:
-  1. mainCategory: "İçerik Kalitesi", subTheme: "Etkinlikler düzeye uygun", sentiment: "Pozitif", direction: "Memnuniyet"
-  2. mainCategory: "İçerik Zenginleştirme", subTheme: "Etkinlik çeşitliliği talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
-  3. mainCategory: "İçerik Zenginleştirme", subTheme: "Okuma metni artış talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
-
-Cevap: "Görseller konuyu anlatmada yetersiz kalıyor ancak renkler canlı seçilmiş."
-→ 2 topic:
-  1. mainCategory: "Görsel Tasarım", subTheme: "Görsellerin öğreticiliği yetersiz", sentiment: "Negatif", direction: "Şikayet/Sorun"
-  2. mainCategory: "Görsel Tasarım", subTheme: "Renk seçimi başarılı", sentiment: "Pozitif", direction: "Memnuniyet"
-
-Cevap: "Sorun yok"
-→ 1 topic:
-  mainCategory: "Genel Değerlendirme", subTheme: "Memnuniyet", sentiment: "Pozitif", direction: "Memnuniyet"
-
-Cevap: ""
-→ 1 topic:
-  mainCategory: "Yanıt Yok", subTheme: "Cevap verilmedi", sentiment: "Nötr", direction: "Tespit"
-`;
+    // Use custom prompt with column name placeholder
+    const systemInstruction = state.customPrompt.replace(/\{\{COLUMN_NAME\}\}/g, columnName);
 
     const prompt = `
 ${systemInstruction}
@@ -560,6 +832,17 @@ ${systemInstruction}
 ANALİZ EDİLECEK VERİLER (${rows.length} adet):
 ${JSON.stringify(promptData, null, 2)}
 `;
+
+    // Check estimated tokens
+    const estimatedTokens = estimateTokens(prompt);
+    if (estimatedTokens > MAX_TOKENS_PER_REQUEST && rows.length > 1 && retryWithSmallerBatch) {
+        console.warn(`Estimated tokens (${estimatedTokens}) exceeds limit. Splitting batch...`);
+        // Split batch in half and process separately
+        const mid = Math.ceil(rows.length / 2);
+        const firstHalf = await analyzeBatch(genAI, rows.slice(0, mid), columnName, true);
+        const secondHalf = await analyzeBatch(genAI, rows.slice(mid), columnName, true);
+        return { items: [...(firstHalf.items || []), ...(secondHalf.items || [])] };
+    }
 
     const model = genAI.getGenerativeModel({
         model: state.selectedModel,
@@ -572,6 +855,8 @@ ${JSON.stringify(promptData, null, 2)}
 
     let retries = 5;
     let retryDelay = 5000;
+    let apiKeysTriedCount = 0;
+    const maxApiKeyRotations = state.apiKeys.length;
 
     while (retries > 0) {
         try {
@@ -580,21 +865,85 @@ ${JSON.stringify(promptData, null, 2)}
 
             if (!text) throw new Error('Empty response from Gemini');
 
-            return JSON.parse(text);
+            const parsed = JSON.parse(text);
+            return parsed;
         } catch (error) {
-            const isRateLimit = error.message.includes('429') || error.message.includes('Quota exceeded');
-            if (isRateLimit && retries > 1) {
-                console.warn(`Rate limit hit, retrying in ${retryDelay}ms...`, error);
+            const errorMsg = error.message || '';
+            const isRateLimit = errorMsg.includes('429') || errorMsg.includes('Quota exceeded') || errorMsg.includes('RESOURCE_EXHAUSTED');
+            const isTokenLimit = errorMsg.includes('token') || errorMsg.includes('too long') || errorMsg.includes('context length');
+            const isNetworkError = errorMsg.includes('network') || errorMsg.includes('fetch') || errorMsg.includes('ENOTFOUND');
+            
+            console.warn(`Batch error (retries: ${retries}):`, errorMsg);
+            
+            // Token limit exceeded - try smaller batch
+            if (isTokenLimit && rows.length > 1 && retryWithSmallerBatch) {
+                console.warn('Token limit hit, splitting batch...');
+                updateProgress(null, `Token limiti aşıldı, batch küçültülüyor...`);
+                const mid = Math.ceil(rows.length / 2);
+                const firstHalf = await analyzeBatch(genAI, rows.slice(0, mid), columnName, true);
+                const secondHalf = await analyzeBatch(genAI, rows.slice(mid), columnName, true);
+                return { items: [...(firstHalf.items || []), ...(secondHalf.items || [])] };
+            }
+            
+            // Rate limit - try rotating API key first
+            if (isRateLimit) {
+                apiKeysTriedCount++;
+                
+                // Try rotating to next API key
+                if (apiKeysTriedCount < maxApiKeyRotations && rotateApiKey()) {
+                    console.log('Rate limit hit, rotated to next API key');
+                    updateProgress(null, `Rate limit - API anahtarı değiştirildi (${state.currentApiKeyIndex + 1}/${state.apiKeys.length})`);
+                    // Get new model with new API key
+                    const newGenAI = new GoogleGenerativeAI(state.apiKey);
+                    return analyzeBatch(newGenAI, rows, columnName, retryWithSmallerBatch);
+                }
+                
+                // All keys exhausted or only one key - wait and retry
+                if (retries > 1) {
+                    console.warn(`Rate limit hit, waiting ${retryDelay}ms before retry...`);
+                    updateProgress(null, `Rate limit - ${Math.round(retryDelay/1000)}s bekleniyor...`);
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    retryDelay = Math.min(retryDelay * 1.5, 60000); // Max 60s
+                    retries--;
+                    apiKeysTriedCount = 0; // Reset for next retry round
+                    continue;
+                }
+            }
+            
+            // Network error - simple retry
+            if (isNetworkError && retries > 1) {
+                console.warn(`Network error, retrying in ${retryDelay}ms...`);
+                updateProgress(null, `Ağ hatası - yeniden deneniyor...`);
                 await new Promise(resolve => setTimeout(resolve, retryDelay));
-                retryDelay *= 1.5;
                 retries--;
                 continue;
             }
-            console.error('Batch analysis error:', error);
-            if (retries === 1) return { items: [] };
-            if (!isRateLimit) return { items: [] };
+            
+            // Other errors or final retry - log failed rows and return empty
+            console.error('Batch analysis failed:', error);
+            rows.forEach(r => {
+                state.failedRows.push({
+                    id: r[state.selectedIdColumn],
+                    column: columnName,
+                    error: errorMsg
+                });
+            });
+            
+            // Return empty result for this batch, analysis continues
+            return { items: rows.map(r => ({
+                entryId: String(r[state.selectedIdColumn]),
+                topics: [{
+                    mainCategory: 'Analiz Hatası',
+                    subTheme: 'İşlenemedi',
+                    sentiment: 'Nötr',
+                    direction: 'Tespit'
+                }],
+                actionable: false
+            })) };
         }
+        retries--;
     }
+    
     return { items: [] };
 }
 
@@ -799,8 +1148,12 @@ Türkçe, resmi ve öz bir dil kullan. Markdown formatında yaz.
 }
 
 function updateProgress(percentage, text) {
-    document.getElementById('progressBar').style.width = percentage + '%';
-    document.getElementById('progressText').textContent = text;
+    if (percentage !== null && percentage !== undefined) {
+        document.getElementById('progressBar').style.width = percentage + '%';
+    }
+    if (text) {
+        document.getElementById('progressText').textContent = text;
+    }
 }
 
 function showResults() {
@@ -1656,6 +2009,9 @@ function resetApp() {
     state.directionFilter = 'all';
     state.currentAnalysisId = null;
     state.isHistoryMode = false;
+    state.failedRows = [];
+    state.currentBatchSize = state.batchSize;
+    state.currentApiKeyIndex = 0;
 
     // Destroy charts
     Object.values(state.charts).forEach(chart => chart?.destroy());
@@ -1670,6 +2026,9 @@ function resetApp() {
     document.getElementById('progressSection').classList.add('hidden');
     document.getElementById('resultsSection').classList.add('hidden');
     hideError();
+    
+    // Re-render API keys to reset active indicator
+    renderApiKeysList();
 }
 
 function showError(message) {
