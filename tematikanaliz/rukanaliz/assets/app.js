@@ -1,0 +1,1701 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// Global state
+const state = {
+    apiKey: localStorage.getItem('gemini_api_key_dynamic') || '',
+    selectedModel: localStorage.getItem('gemini_model_dynamic') || 'gemini-2.5-flash',
+    batchSize: parseInt(localStorage.getItem('batch_size_dynamic')) || 10,
+    rawData: [],
+    columns: [],
+    selectedIdColumn: null,
+    selectedAnalysisColumns: [],
+    analysisResults: {}, // { columnName: [results] }
+    enrichedData: [],
+    stats: {}, // { columnName: stats }
+    globalStats: null,
+    executiveSummary: '',
+    currentPage: 1,
+    itemsPerPage: 20,
+    searchTerm: '',
+    columnFilter: 'all',
+    sentimentFilter: 'all',
+    categoryFilter: 'all',
+    themeFilter: 'all',
+    directionFilter: 'all',
+    charts: {},
+    currentAnalysisId: null, // For tracking current/loaded analysis
+    isHistoryMode: false // Whether viewing from history
+};
+
+// Model Definitions
+const AVAILABLE_MODELS = [
+    {
+        id: 'gemini-2.5-pro',
+        name: 'Gemini 2.5 Pro',
+        limitInfo: 'BGBG: 2, TPM: 125.000, RPD: 50'
+    },
+    {
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
+    },
+    {
+        id: 'gemini-2.5-flash-preview',
+        name: 'Gemini 2.5 Flash Önizlemesi',
+        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
+    },
+    {
+        id: 'gemini-2.5-flash-lite',
+        name: 'Gemini 2.5 Flash-Lite',
+        limitInfo: 'BGBG: 15, TPM: 250.000, RPD: 1.000'
+    }
+];
+
+const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
+const DELAY_BETWEEN_COLUMNS = 3000; // 3 seconds between columns
+
+// Dynamic schema for analysis (no predefined categories)
+const analysisSchema = {
+    type: 'object',
+    properties: {
+        items: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    entryId: { type: 'string', description: 'The Entry Id provided in the input' },
+                    topics: {
+                        type: 'array',
+                        description: 'Bir cevap birden fazla konuya değiniyorsa, bunları ayrı topic objeleri olarak böl',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                mainCategory: { 
+                                    type: 'string', 
+                                    description: 'Verilerden organik olarak çıkarılan ana kategori. Benzer konuları aynı kategori altında topla. Kısa, öz, Türkçe.' 
+                                },
+                                subTheme: { 
+                                    type: 'string', 
+                                    description: 'Daha spesifik alt tema. Kısa, öz, Türkçe.' 
+                                },
+                                sentiment: { 
+                                    type: 'string', 
+                                    enum: ['Pozitif', 'Negatif', 'Nötr', 'Yapıcı Eleştiri'],
+                                    description: 'Duygu durumu' 
+                                },
+                                direction: {
+                                    type: 'string',
+                                    enum: ['Talep/İstek', 'Şikayet/Sorun', 'Memnuniyet', 'Tespit'],
+                                    description: 'İfadenin yönelimi: bir şey isteniyor mu, şikayet mi ediliyor, memnuniyet mi bildiriliyor, yoksa sadece tespit mi'
+                                }
+                            },
+                            required: ['mainCategory', 'subTheme', 'sentiment', 'direction']
+                        }
+                    },
+                    actionable: { type: 'boolean', description: 'Somut bir öneri veya aksiyon içeriyor mu?' }
+                },
+                required: ['entryId', 'topics', 'actionable']
+            }
+        }
+    }
+};
+
+// Calculate overall sentiment based on directions (ornek.html logic)
+function calculateOverallSentiment(topics) {
+    if (!topics || topics.length === 0) return 'Nötr';
+    
+    const directions = topics.map(t => t.direction);
+    const hasComplaint = directions.includes('Şikayet/Sorun');
+    const hasRequest = directions.includes('Talep/İstek');
+    const hasSatisfaction = directions.includes('Memnuniyet');
+    
+    if (hasRequest) return 'Yapıcı Eleştiri';
+    if (hasComplaint && hasSatisfaction) return 'Yapıcı Eleştiri';
+    if (hasComplaint) return 'Olumsuz';
+    if (hasSatisfaction) return 'Olumlu';
+    return 'Nötr';
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('=== DİNAMİK TEMATİK ANALİZ SİSTEMİ BAŞLATILIYOR ===');
+    
+    try {
+        initializeModelSelect();
+        initializeBatchSize();
+        initializeEventListeners();
+        
+        if (state.apiKey) {
+            document.getElementById('apiKeyInput').value = state.apiKey;
+        }
+        
+        // Check for saved analyses and update history button
+        updateHistoryButtonState();
+        
+        console.log('=== SİSTEM BAŞARILI ŞEKİLDE BAŞLATILDI ===');
+    } catch (error) {
+        console.error('=== SİSTEM BAŞLATMA HATASI ===', error);
+    }
+});
+
+function initializeBatchSize() {
+    const batchSizeInput = document.getElementById('batchSizeInput');
+    if (!batchSizeInput) return;
+    
+    batchSizeInput.value = state.batchSize;
+    
+    batchSizeInput.addEventListener('input', (e) => {
+        let value = parseInt(e.target.value);
+        if (value < 1) value = 1;
+        if (value > 50) value = 50;
+        e.target.value = value;
+        state.batchSize = value;
+        localStorage.setItem('batch_size_dynamic', value.toString());
+    });
+}
+
+function initializeModelSelect() {
+    const modelSelect = document.getElementById('modelSelect');
+    if (!modelSelect) return;
+
+    modelSelect.innerHTML = '';
+
+    AVAILABLE_MODELS.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = model.name;
+        modelSelect.appendChild(option);
+    });
+
+    modelSelect.value = state.selectedModel || AVAILABLE_MODELS[0].id;
+    updateLimitInfo(modelSelect.value);
+
+    modelSelect.addEventListener('change', (e) => {
+        state.selectedModel = e.target.value;
+        localStorage.setItem('gemini_model_dynamic', e.target.value);
+        updateLimitInfo(e.target.value);
+    });
+}
+
+function updateLimitInfo(modelId) {
+    const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+    const limitInfoEl = document.getElementById('modelLimitInfo');
+    
+    if (!limitInfoEl) return;
+    
+    if (model) {
+        limitInfoEl.textContent = `Limitler: ${model.limitInfo}`;
+    } else {
+        limitInfoEl.textContent = 'Model bilgisi bulunamadı';
+    }
+}
+
+function initializeEventListeners() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const cancelColumnBtn = document.getElementById('cancelColumnBtn');
+    const startAnalysisBtn = document.getElementById('startAnalysisBtn');
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    const searchInput = document.getElementById('searchInput');
+    const sentimentFilterSelect = document.getElementById('sentimentFilterSelect');
+    const categoryFilterSelect = document.getElementById('categoryFilterSelect');
+    const themeFilterSelect = document.getElementById('themeFilterSelect');
+    const directionFilterSelect = document.getElementById('directionFilterSelect');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const historyBtnTop = document.getElementById('historyBtnTop');
+    const saveAnalysisBtn = document.getElementById('saveAnalysisBtn');
+
+    // API Key
+    apiKeyInput.addEventListener('input', (e) => {
+        state.apiKey = e.target.value;
+        localStorage.setItem('gemini_api_key_dynamic', e.target.value);
+    });
+
+    // File upload
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+    dropZone.addEventListener('drop', handleDrop);
+    fileInput.addEventListener('change', handleFileSelect);
+
+    // Column selection
+    cancelColumnBtn.addEventListener('click', resetApp);
+    startAnalysisBtn.addEventListener('click', startAnalysis);
+
+    // Results
+    newAnalysisBtn.addEventListener('click', resetApp);
+    exportBtn.addEventListener('click', exportToExcel);
+    exportPdfBtn.addEventListener('click', exportToPDF);
+    historyBtn.addEventListener('click', showHistoryModal);
+    historyBtnTop.addEventListener('click', showHistoryModal);
+    saveAnalysisBtn.addEventListener('click', saveCurrentAnalysis);
+
+    // Filters - all update dashboard
+    searchInput.addEventListener('input', () => {
+        state.searchTerm = searchInput.value;
+        state.currentPage = 1;
+        updateDashboard();
+    });
+    
+    sentimentFilterSelect.addEventListener('change', () => {
+        state.sentimentFilter = sentimentFilterSelect.value;
+        state.currentPage = 1;
+        updateDashboard();
+    });
+    
+    categoryFilterSelect.addEventListener('change', () => {
+        state.categoryFilter = categoryFilterSelect.value;
+        state.currentPage = 1;
+        updateDashboard();
+    });
+    
+    themeFilterSelect.addEventListener('change', () => {
+        state.themeFilter = themeFilterSelect.value;
+        state.currentPage = 1;
+        updateDashboard();
+    });
+    
+    directionFilterSelect.addEventListener('change', () => {
+        state.directionFilter = directionFilterSelect.value;
+        state.currentPage = 1;
+        updateDashboard();
+    });
+    
+    // Reset filters
+    resetFiltersBtn.addEventListener('click', resetFilters);
+
+    // Pagination
+    prevBtn.addEventListener('click', () => {
+        if (state.currentPage > 1) {
+            state.currentPage--;
+            renderTable();
+        }
+    });
+    nextBtn.addEventListener('click', () => {
+        const filteredData = getFilteredData();
+        const totalPages = Math.ceil(filteredData.length / state.itemsPerPage);
+        if (state.currentPage < totalPages) {
+            state.currentPage++;
+            renderTable();
+        }
+    });
+}
+
+function resetFilters() {
+    state.sentimentFilter = 'all';
+    state.categoryFilter = 'all';
+    state.themeFilter = 'all';
+    state.directionFilter = 'all';
+    state.searchTerm = '';
+    state.currentPage = 1;
+    
+    // Reset UI elements
+    document.getElementById('sentimentFilterSelect').value = 'all';
+    document.getElementById('categoryFilterSelect').value = 'all';
+    document.getElementById('themeFilterSelect').value = 'all';
+    document.getElementById('directionFilterSelect').value = 'all';
+    document.getElementById('searchInput').value = '';
+    
+    updateDashboard();
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('border-purple-500', 'bg-purple-50');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-purple-500', 'bg-purple-50');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-purple-500', 'bg-purple-50');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFile(files[0]);
+    }
+}
+
+function handleFileSelect(e) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+        handleFile(files[0]);
+    }
+}
+
+function handleFile(file) {
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        showError('Lütfen geçerli bir Excel dosyası (.xlsx veya .xls) seçin.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+                showError('Excel dosyası boş veya geçersiz.');
+                return;
+            }
+
+            // Get all column names
+            const columns = Object.keys(jsonData[0]);
+            
+            state.rawData = jsonData;
+            state.columns = columns;
+            
+            document.getElementById('fileNameDisplay').innerHTML = `<span class="text-green-600">Seçilen dosya: ${file.name}</span>`;
+            document.getElementById('rowCountDisplay').textContent = jsonData.length;
+            
+            // Populate column selections
+            populateColumnSelections(columns);
+            
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('columnSection').classList.remove('hidden');
+            hideError();
+        } catch (error) {
+            showError('Dosya okuma hatası: ' + error.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function populateColumnSelections(columns) {
+    // Populate ID column dropdown
+    const idColumnSelect = document.getElementById('idColumnSelect');
+    idColumnSelect.innerHTML = '<option value="">ID sütunu seçin...</option>';
+    columns.forEach(col => {
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        idColumnSelect.appendChild(option);
+    });
+
+    // Populate analysis columns checkboxes
+    const container = document.getElementById('analysisColumnsContainer');
+    container.innerHTML = '';
+    columns.forEach(col => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center space-x-2 p-2 rounded checkbox-label';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `col_${col}`;
+        checkbox.value = col;
+        checkbox.className = 'h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded';
+        
+        const label = document.createElement('label');
+        label.htmlFor = `col_${col}`;
+        label.textContent = col;
+        label.className = 'text-sm text-gray-700 cursor-pointer flex-1';
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+    });
+}
+
+async function startAnalysis() {
+    if (!state.apiKey) {
+        showError('Lütfen Gemini API anahtarınızı girin.');
+        return;
+    }
+
+    // Get selected columns
+    const idColumnSelect = document.getElementById('idColumnSelect');
+    state.selectedIdColumn = idColumnSelect.value;
+    
+    if (!state.selectedIdColumn) {
+        showError('Lütfen bir ID sütunu seçin.');
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('#analysisColumnsContainer input[type="checkbox"]:checked');
+    state.selectedAnalysisColumns = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (state.selectedAnalysisColumns.length === 0) {
+        showError('Lütfen en az bir analiz sütunu seçin.');
+        return;
+    }
+
+    try {
+        hideError();
+        document.getElementById('columnSection').classList.add('hidden');
+        document.getElementById('progressSection').classList.remove('hidden');
+
+        const genAI = new GoogleGenerativeAI(state.apiKey);
+        state.analysisResults = {};
+
+        // Analyze each column independently
+        for (let colIndex = 0; colIndex < state.selectedAnalysisColumns.length; colIndex++) {
+            const columnName = state.selectedAnalysisColumns[colIndex];
+            
+            document.getElementById('currentColumnProgress').textContent = `İşlenen Sütun: ${columnName}`;
+            document.getElementById('columnProgressCount').textContent = `${colIndex + 1} / ${state.selectedAnalysisColumns.length} sütun`;
+            
+            const columnResults = await analyzeColumn(genAI, columnName);
+            state.analysisResults[columnName] = columnResults;
+
+            // Delay between columns
+            if (colIndex < state.selectedAnalysisColumns.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_COLUMNS));
+            }
+        }
+
+        // Calculate statistics
+        calculateAllStats();
+
+        // Enrich data
+        enrichData();
+
+        // Generate executive summary
+        state.executiveSummary = await generateExecutiveSummary(genAI);
+
+        // Show results
+        document.getElementById('progressSection').classList.add('hidden');
+        showResults();
+    } catch (error) {
+        showError('Analiz sırasında bir hata oluştu: ' + error.message);
+        document.getElementById('progressSection').classList.add('hidden');
+        document.getElementById('columnSection').classList.remove('hidden');
+    }
+}
+
+async function analyzeColumn(genAI, columnName) {
+    const results = [];
+    const totalBatches = Math.ceil(state.rawData.length / state.batchSize);
+
+    for (let i = 0; i < state.rawData.length; i += state.batchSize) {
+        const batch = state.rawData.slice(i, i + state.batchSize);
+        const currentBatch = Math.floor(i / state.batchSize) + 1;
+
+        const totalProgress = ((state.selectedAnalysisColumns.indexOf(columnName) * state.rawData.length) + i + batch.length) / 
+                              (state.selectedAnalysisColumns.length * state.rawData.length);
+        
+        updateProgress(totalProgress * 100, `${columnName}: Batch ${currentBatch}/${totalBatches}`);
+
+        const batchResult = await analyzeBatch(genAI, batch, columnName);
+        results.push(...batchResult.items);
+
+        if (i + state.batchSize < state.rawData.length) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        }
+    }
+
+    return results;
+}
+
+async function analyzeBatch(genAI, rows, columnName) {
+    const promptData = rows.map(r => ({
+        id: String(r[state.selectedIdColumn]),
+        text: String(r[columnName] || '')
+    }));
+
+    const systemInstruction = `
+Sen bir tematik analiz uzmanısın. Verilen serbest metin cevaplarını analiz et ve kategorize et.
+
+SORU/BAĞLAM: "${columnName}"
+
+GÖREV:
+Her cevap için:
+1. 1-3 ana tema/konu belirle (cevap birden fazla konuya değiniyorsa ayır)
+2. Her tema için:
+   - mainCategory: Temayı en iyi tanımlayan kategori adı (kısa, öz, Türkçe)
+   - subTheme: Daha spesifik alt tema (kısa, öz, Türkçe)
+   - sentiment: Pozitif/Negatif/Nötr/Yapıcı Eleştiri
+   - direction: İfadenin yönelimi (Talep/İstek, Şikayet/Sorun, Memnuniyet, Tespit)
+3. actionable: Somut aksiyon gerektiriyor mu?
+
+YÖNELİM (direction) AÇIKLAMALARI:
+- Talep/İstek: Bir şey isteniyor, öneri sunuluyor, değişiklik talep ediliyor
+- Şikayet/Sorun: Bir problemden, eksiklikten bahsediliyor, memnuniyetsizlik bildiriliyor
+- Memnuniyet: Olumlu görüş, memnuniyet, beğeni ifade ediliyor
+- Tespit: Sadece bir durum tespiti yapılıyor, nötr bir gözlem
+
+KURALLAR:
+- Kategorileri verilerden organik olarak çıkar
+- Benzer konuları aynı kategori altında topla
+- Kısa, kurumsal, Türkçe isimler kullan
+- Aynı kişinin farklı konulara değiniyorsa ayır (max 3 topic)
+- Boş/anlamsız cevaplar için tek bir "Yanıt Yok" kategorisi kullan
+
+ÖRNEKLER:
+
+Cevap: "Etkinlikler çocukların düzeyine uygun fakat çeşitlendirilmeli, okuma metinleri arttırılmalı."
+→ 3 topic:
+  1. mainCategory: "İçerik Kalitesi", subTheme: "Etkinlikler düzeye uygun", sentiment: "Pozitif", direction: "Memnuniyet"
+  2. mainCategory: "İçerik Zenginleştirme", subTheme: "Etkinlik çeşitliliği talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
+  3. mainCategory: "İçerik Zenginleştirme", subTheme: "Okuma metni artış talebi", sentiment: "Yapıcı Eleştiri", direction: "Talep/İstek"
+
+Cevap: "Görseller konuyu anlatmada yetersiz kalıyor ancak renkler canlı seçilmiş."
+→ 2 topic:
+  1. mainCategory: "Görsel Tasarım", subTheme: "Görsellerin öğreticiliği yetersiz", sentiment: "Negatif", direction: "Şikayet/Sorun"
+  2. mainCategory: "Görsel Tasarım", subTheme: "Renk seçimi başarılı", sentiment: "Pozitif", direction: "Memnuniyet"
+
+Cevap: "Sorun yok"
+→ 1 topic:
+  mainCategory: "Genel Değerlendirme", subTheme: "Memnuniyet", sentiment: "Pozitif", direction: "Memnuniyet"
+
+Cevap: ""
+→ 1 topic:
+  mainCategory: "Yanıt Yok", subTheme: "Cevap verilmedi", sentiment: "Nötr", direction: "Tespit"
+`;
+
+    const prompt = `
+${systemInstruction}
+
+ANALİZ EDİLECEK VERİLER (${rows.length} adet):
+${JSON.stringify(promptData, null, 2)}
+`;
+
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.1,
+            responseMimeType: 'application/json',
+            responseSchema: analysisSchema,
+        },
+    });
+
+    let retries = 5;
+    let retryDelay = 5000;
+
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+
+            if (!text) throw new Error('Empty response from Gemini');
+
+            return JSON.parse(text);
+        } catch (error) {
+            const isRateLimit = error.message.includes('429') || error.message.includes('Quota exceeded');
+            if (isRateLimit && retries > 1) {
+                console.warn(`Rate limit hit, retrying in ${retryDelay}ms...`, error);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 1.5;
+                retries--;
+                continue;
+            }
+            console.error('Batch analysis error:', error);
+            if (retries === 1) return { items: [] };
+            if (!isRateLimit) return { items: [] };
+        }
+    }
+    return { items: [] };
+}
+
+function calculateAllStats() {
+    state.stats = {};
+    
+    let allCategories = new Set();
+    let allThemes = new Set();
+    let allDirections = new Set();
+    
+    // Global aggregated stats
+    let globalCategoryCounts = {};
+    let globalThemeCounts = {};
+    let globalDirectionCounts = {};
+    
+    for (const columnName in state.analysisResults) {
+        const results = state.analysisResults[columnName];
+        const categoryCounts = {};
+        const themeCounts = {};
+        const sentimentCounts = {};
+        const directionCounts = {};
+        // For stacked bar chart: category -> direction -> count
+        const categoryDirectionMatrix = {};
+        let actionableCount = 0;
+
+        results.forEach(result => {
+            if (result.topics && Array.isArray(result.topics)) {
+                result.topics.forEach(topic => {
+                    const category = topic.mainCategory;
+                    const theme = topic.subTheme;
+                    const direction = topic.direction || 'Tespit';
+                    
+                    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+                    themeCounts[theme] = (themeCounts[theme] || 0) + 1;
+                    sentimentCounts[topic.sentiment] = (sentimentCounts[topic.sentiment] || 0) + 1;
+                    directionCounts[direction] = (directionCounts[direction] || 0) + 1;
+                    
+                    // Matrix for stacked chart
+                    if (!categoryDirectionMatrix[category]) {
+                        categoryDirectionMatrix[category] = { 'Talep/İstek': 0, 'Şikayet/Sorun': 0, 'Memnuniyet': 0, 'Tespit': 0 };
+                    }
+                    if (categoryDirectionMatrix[category][direction] !== undefined) {
+                        categoryDirectionMatrix[category][direction]++;
+                    } else {
+                        categoryDirectionMatrix[category]['Tespit']++;
+                    }
+                    
+                    allCategories.add(category);
+                    allThemes.add(theme);
+                    allDirections.add(direction);
+                    
+                    // Global aggregates
+                    globalCategoryCounts[category] = (globalCategoryCounts[category] || 0) + 1;
+                    globalThemeCounts[theme] = { 
+                        count: (globalThemeCounts[theme]?.count || 0) + 1,
+                        direction: direction
+                    };
+                    globalDirectionCounts[direction] = (globalDirectionCounts[direction] || 0) + 1;
+                });
+            }
+            if (result.actionable) actionableCount++;
+        });
+
+        state.stats[columnName] = {
+            totalRows: results.length,
+            categoryCounts,
+            themeCounts,
+            sentimentCounts,
+            directionCounts,
+            categoryDirectionMatrix,
+            actionableCount,
+            nonActionableCount: results.length - actionableCount
+        };
+    }
+    
+    // Calculate global stats
+    state.globalStats = {
+        totalRows: state.rawData.length,
+        totalColumns: state.selectedAnalysisColumns.length,
+        totalCategories: allCategories.size,
+        totalThemes: allThemes.size,
+        allCategories: Array.from(allCategories).sort(),
+        allThemes: Array.from(allThemes).sort(),
+        allDirections: Array.from(allDirections),
+        globalCategoryCounts,
+        globalThemeCounts,
+        globalDirectionCounts
+    };
+}
+
+function enrichData() {
+    state.enrichedData = state.rawData.map(row => {
+        const enrichedRow = { ...row };
+        let allTopicsForRow = [];
+        
+        // Add analysis for each column
+        state.selectedAnalysisColumns.forEach(columnName => {
+            const results = state.analysisResults[columnName];
+            const rowId = String(row[state.selectedIdColumn]);
+            const analysis = results.find(r => r.entryId === rowId);
+            
+            if (analysis && analysis.topics && analysis.topics.length > 0) {
+                const firstTopic = analysis.topics[0];
+                enrichedRow[`${columnName}_category`] = firstTopic.mainCategory;
+                enrichedRow[`${columnName}_theme`] = firstTopic.subTheme;
+                enrichedRow[`${columnName}_sentiment`] = firstTopic.sentiment;
+                enrichedRow[`${columnName}_direction`] = firstTopic.direction || 'Tespit';
+                enrichedRow[`${columnName}_actionable`] = analysis.actionable;
+                enrichedRow[`${columnName}_allTopics`] = analysis.topics;
+                allTopicsForRow = allTopicsForRow.concat(analysis.topics);
+            } else {
+                enrichedRow[`${columnName}_category`] = 'İşlenmedi';
+                enrichedRow[`${columnName}_theme`] = 'İşlenmedi';
+                enrichedRow[`${columnName}_sentiment`] = 'Nötr';
+                enrichedRow[`${columnName}_direction`] = 'Tespit';
+                enrichedRow[`${columnName}_actionable`] = false;
+                enrichedRow[`${columnName}_allTopics`] = [];
+            }
+        });
+        
+        // Calculate overall sentiment for the row based on all topics
+        enrichedRow._allTopics = allTopicsForRow;
+        enrichedRow._overallSentiment = calculateOverallSentiment(allTopicsForRow);
+        
+        return enrichedRow;
+    });
+}
+
+async function generateExecutiveSummary(genAI) {
+    let summaryContext = `
+Toplam ${state.globalStats.totalRows} satır veri, ${state.globalStats.totalColumns} farklı sütun analiz edildi.
+Toplam ${state.globalStats.totalCategories} benzersiz kategori ve ${state.globalStats.totalThemes} benzersiz tema bulundu.
+
+SÜTUN BAZLI İSTATİSTİKLER:
+`;
+
+    for (const columnName in state.stats) {
+        const stats = state.stats[columnName];
+        const topCategories = Object.entries(stats.categoryCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([cat, count]) => `${cat} (${count})`)
+            .join(', ');
+        
+        const topThemes = Object.entries(stats.themeCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([theme, count]) => `${theme} (${count})`)
+            .join(', ');
+        
+        summaryContext += `
+"${columnName}":
+- Top Kategoriler: ${topCategories}
+- Top Temalar: ${topThemes}
+- Duygu Dağılımı: ${JSON.stringify(stats.sentimentCounts)}
+- Eyleme Dönüştürülebilir: ${stats.actionableCount} (${((stats.actionableCount / stats.totalRows) * 100).toFixed(1)}%)
+`;
+    }
+
+    const prompt = `
+Sen kıdemli bir veri analistisin. Aşağıdaki çoklu-sütun tematik analiz sonuçlarını incele ve üst düzey bir yönetici özeti yaz.
+
+${summaryContext}
+
+Başlıklar:
+1. Genel Durum Değerlendirmesi
+2. Sütunlar Arası Karşılaştırma ve İlişkiler
+3. Kritik Bulgular
+4. Öncelikli Aksiyon Önerileri
+
+Türkçe, resmi ve öz bir dil kullan. Markdown formatında yaz.
+`;
+
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.3,
+        },
+    });
+
+    let retries = 5;
+    let retryDelay = 5000;
+
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            return result.response.text() || 'Özet oluşturulamadı.';
+        } catch (e) {
+            const isRateLimit = e.message.includes('429') || e.message.includes('Quota exceeded');
+            if (isRateLimit && retries > 1) {
+                console.warn(`Rate limit hit (Summary), retrying in ${retryDelay}ms...`, e);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 1.5;
+                retries--;
+                continue;
+            }
+            console.error('Summary generation error:', e);
+            if (retries === 1 || !isRateLimit) return 'Özet oluşturulurken bir hata oluştu.';
+        }
+    }
+    return 'Özet oluşturulurken bir hata oluştu.';
+}
+
+function updateProgress(percentage, text) {
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = text;
+}
+
+function showResults() {
+    document.getElementById('resultsSection').classList.remove('hidden');
+
+    // Update global stats
+    document.getElementById('totalRowsDisplay').textContent = state.globalStats.totalRows;
+    document.getElementById('totalColumnsDisplay').textContent = state.globalStats.totalColumns;
+    document.getElementById('statTotal').textContent = state.globalStats.totalRows;
+    document.getElementById('statColumns').textContent = state.globalStats.totalColumns;
+    document.getElementById('statCategories').textContent = state.globalStats.totalCategories;
+    document.getElementById('statThemes').textContent = state.globalStats.totalThemes;
+
+    // Show executive summary
+    document.getElementById('executiveSummary').innerHTML = formatMarkdown(state.executiveSummary);
+
+    // Populate filter dropdowns
+    populateFilterDropdowns();
+
+    // Initial dashboard update (charts + table + stats)
+    updateDashboard();
+    
+    // Auto-save if not in history mode
+    if (!state.isHistoryMode && !state.currentAnalysisId) {
+        state.currentAnalysisId = 'analysis_' + Date.now();
+        autoSaveAnalysis();
+    }
+}
+
+function populateFilterDropdowns() {
+    // Category filter
+    const categorySelect = document.getElementById('categoryFilterSelect');
+    categorySelect.innerHTML = '<option value="all">Tüm Temalar</option>';
+    state.globalStats.allCategories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+    });
+
+    // Theme filter
+    const themeSelect = document.getElementById('themeFilterSelect');
+    themeSelect.innerHTML = '<option value="all">Tüm Alt Kategoriler</option>';
+    state.globalStats.allThemes.forEach(theme => {
+        const option = document.createElement('option');
+        option.value = theme;
+        option.textContent = theme;
+        themeSelect.appendChild(option);
+    });
+}
+
+function updateDashboard() {
+    const filteredData = getFilteredData();
+    
+    // Calculate sentiment stats from filtered data
+    let stats = { 'Olumlu': 0, 'Olumsuz': 0, 'Yapıcı Eleştiri': 0, 'Nötr': 0 };
+    filteredData.forEach(row => {
+        const sentiment = row._overallSentiment || 'Nötr';
+        if (stats[sentiment] !== undefined) {
+            stats[sentiment]++;
+        }
+    });
+    
+    // Update stats cards
+    document.getElementById('totalRowsHeader').textContent = filteredData.length;
+    document.getElementById('statPositive').textContent = stats['Olumlu'];
+    document.getElementById('statNegative').textContent = stats['Olumsuz'];
+    document.getElementById('statConstructive').textContent = stats['Yapıcı Eleştiri'];
+    document.getElementById('statNeutral').textContent = stats['Nötr'];
+
+    // Update charts
+    updateCharts(filteredData);
+    
+    // Update table
+    renderTable();
+}
+
+// Register ChartDataLabels plugin
+if (typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+}
+
+function updateCharts(filteredData) {
+    // Calculate stats from filtered data
+    let categoryStats = {};
+    let themeCounts = {};
+    let sentimentCounts = { 'Olumlu': 0, 'Olumsuz': 0, 'Yapıcı Eleştiri': 0, 'Nötr': 0 };
+    
+    const catFilter = state.categoryFilter;
+    const themeFilter = state.themeFilter;
+    const dirFilter = state.directionFilter;
+    
+    let totalTopicsFiltered = 0;
+
+    filteredData.forEach(row => {
+        // Count overall sentiment
+        const overallSent = row._overallSentiment || 'Nötr';
+        if (sentimentCounts[overallSent] !== undefined) {
+            sentimentCounts[overallSent]++;
+        }
+
+        // Process all topics
+        const allTopics = row._allTopics || [];
+        allTopics.forEach(t => {
+            const category = t.mainCategory;
+            const theme = t.subTheme;
+            const direction = t.direction || 'Tespit';
+            
+            const isRelevant = (catFilter === 'all' || category === catFilter) && 
+                               (themeFilter === 'all' || theme === themeFilter) &&
+                               (dirFilter === 'all' || direction === dirFilter);
+            
+            if (isRelevant) {
+                totalTopicsFiltered++;
+                
+                // Category Stats with direction breakdown
+                if (!categoryStats[category]) {
+                    categoryStats[category] = { 'Talep/İstek': 0, 'Şikayet/Sorun': 0, 'Memnuniyet': 0, 'Tespit': 0 };
+                }
+                if (categoryStats[category][direction] !== undefined) {
+                    categoryStats[category][direction]++;
+                } else {
+                    categoryStats[category]['Tespit']++;
+                }
+                
+                // Theme Stats
+                if (!themeCounts[theme]) themeCounts[theme] = { count: 0, direction: direction };
+                themeCounts[theme].count++;
+            }
+        });
+    });
+
+    // Destroy existing charts
+    if (state.charts.categoryChart) state.charts.categoryChart.destroy();
+    if (state.charts.themeChart) state.charts.themeChart.destroy();
+    if (state.charts.sentimentChart) state.charts.sentimentChart.destroy();
+
+    // 1. ANA TEMALAR (Horizontal Stacked Bar)
+    const categories = Object.keys(categoryStats).sort((a, b) => {
+        const sumA = Object.values(categoryStats[a]).reduce((acc, v) => acc + v, 0);
+        const sumB = Object.values(categoryStats[b]).reduce((acc, v) => acc + v, 0);
+        return sumB - sumA;
+    }).slice(0, 10);
+    
+    const dsRequest = categories.map(c => categoryStats[c]['Talep/İstek']);
+    const dsComplaint = categories.map(c => categoryStats[c]['Şikayet/Sorun']);
+    const dsSatisfaction = categories.map(c => categoryStats[c]['Memnuniyet']);
+    const dsDetection = categories.map(c => categoryStats[c]['Tespit']);
+
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        state.charts.categoryChart = new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [
+                    { label: 'Talep/İstek', data: dsRequest, backgroundColor: '#3B82F6', stack: 'Stack 0' },
+                    { label: 'Şikayet/Sorun', data: dsComplaint, backgroundColor: '#EF4444', stack: 'Stack 0' },
+                    { label: 'Memnuniyet', data: dsSatisfaction, backgroundColor: '#10B981', stack: 'Stack 0' },
+                    { label: 'Tespit', data: dsDetection, backgroundColor: '#9CA3AF', stack: 'Stack 0' }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    x: { stacked: true, beginAtZero: true, grace: '10%' }, 
+                    y: { stacked: true } 
+                },
+                plugins: { 
+                    legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } },
+                    datalabels: {
+                        color: 'white', 
+                        font: { size: 10, weight: 'bold' },
+                        formatter: (value, ctx) => {
+                            if (value === 0) return '';
+                            let idx = ctx.dataIndex;
+                            let sum = 0;
+                            ctx.chart.data.datasets.forEach(ds => { sum += ds.data[idx]; });
+                            let percentage = (value * 100 / sum).toFixed(0) + "%";
+                            return `${percentage} (${value})`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. ALT KATEGORİ DAĞILIMI (Horizontal Bar)
+    const sortedThemes = Object.entries(themeCounts).sort((a, b) => b[1].count - a[1].count).slice(0, 10);
+    const getDirectionColor = (dir) => {
+        if (dir === 'Şikayet/Sorun') return '#EF4444';
+        if (dir === 'Talep/İstek') return '#3B82F6';
+        if (dir === 'Memnuniyet') return '#10B981';
+        return '#9CA3AF';
+    };
+
+    const themeCtx = document.getElementById('themeChart');
+    if (themeCtx) {
+        state.charts.themeChart = new Chart(themeCtx, {
+            type: 'bar',
+            data: {
+                labels: sortedThemes.map(t => t[0]),
+                datasets: [{
+                    label: 'Frekans',
+                    data: sortedThemes.map(t => t[1].count),
+                    backgroundColor: sortedThemes.map(t => getDirectionColor(t[1].direction)),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { right: 40 } },
+                scales: { x: { beginAtZero: true, grace: '10%' } },
+                plugins: { 
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: '#4B5563',
+                        font: { size: 10, weight: 'bold' },
+                        formatter: (value) => {
+                            const percentage = totalTopicsFiltered > 0 
+                                ? (value * 100 / totalTopicsFiltered).toFixed(0) + "%"
+                                : "0%";
+                            return `${percentage} (${value})`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. SENTIMENT (Pie)
+    const sentimentLabels = Object.keys(sentimentCounts);
+    const sentimentValues = Object.values(sentimentCounts);
+    const colorMap = {
+        'Olumlu': '#10B981',
+        'Olumsuz': '#EF4444',
+        'Yapıcı Eleştiri': '#F59E0B',
+        'Nötr': '#9CA3AF'
+    };
+    const bgColors = sentimentLabels.map(l => colorMap[l]);
+
+    const sentimentCtx = document.getElementById('sentimentChart');
+    if (sentimentCtx) {
+        state.charts.sentimentChart = new Chart(sentimentCtx, {
+            type: 'pie',
+            data: {
+                labels: sentimentLabels,
+                datasets: [{
+                    data: sentimentValues,
+                    backgroundColor: bgColors,
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10 } },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value, ctx) => {
+                            if (value === 0) return '';
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.forEach(data => { sum += data; });
+                            let percentage = (value * 100 / sum).toFixed(1) + "%";
+                            return percentage;
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Legacy functions for backward compatibility
+function createComparisonMode() {
+    // Now handled by updateCharts
+}
+
+function createComparisonCharts() {
+    // Now handled by updateCharts
+}
+
+function createColumnCharts() {
+    // Now handled by updateCharts
+}
+
+function renderTableHeader() {
+    // Table header is now static in HTML - no dynamic headers needed
+    // The new design uses: ID, Orijinal Görüş, Duygu, Analiz Detayı
+}
+
+function getFilteredData() {
+    return state.enrichedData.filter(row => {
+        const idValue = String(row[state.selectedIdColumn] || '');
+        
+        // 1. Search filter
+        let matchesSearch = !state.searchTerm;
+        if (state.searchTerm) {
+            const searchLower = state.searchTerm.toLowerCase();
+            matchesSearch = idValue.toLowerCase().includes(searchLower);
+            if (!matchesSearch) {
+                // Search in any selected column
+                for (const col of state.selectedAnalysisColumns) {
+                    const colValue = String(row[col] || '');
+                    if (colValue.toLowerCase().includes(searchLower)) {
+                        matchesSearch = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // 2. Sentiment filter (overall sentiment)
+        let matchesSentiment = state.sentimentFilter === 'all';
+        if (!matchesSentiment) {
+            const overallSent = row._overallSentiment || 'Nötr';
+            matchesSentiment = overallSent === state.sentimentFilter;
+        }
+        
+        // 3. Topic-level filters (category, theme, direction)
+        const allTopics = row._allTopics || [];
+        
+        // If no topic filters are set, pass through
+        if (state.categoryFilter === 'all' && state.themeFilter === 'all' && state.directionFilter === 'all') {
+            return matchesSearch && matchesSentiment;
+        }
+        
+        // Check if any topic matches the filters
+        const matchingTopics = allTopics.filter(t => {
+            const catMatch = (state.categoryFilter === 'all' || t.mainCategory === state.categoryFilter);
+            const themeMatch = (state.themeFilter === 'all' || t.subTheme === state.themeFilter);
+            const dirMatch = (state.directionFilter === 'all' || (t.direction || 'Tespit') === state.directionFilter);
+            return catMatch && themeMatch && dirMatch;
+        });
+        
+        const matchesTopicFilters = matchingTopics.length > 0;
+        
+        return matchesSearch && matchesSentiment && matchesTopicFilters;
+    });
+}
+
+function renderTable() {
+    const filteredData = getFilteredData();
+    const totalPages = Math.ceil(filteredData.length / state.itemsPerPage);
+    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    const currentData = filteredData.slice(startIndex, endIndex);
+
+    // Update filter info
+    document.getElementById('filterInfo').textContent =
+        `Gösterilen: ${startIndex + 1}-${Math.min(endIndex, filteredData.length)} / Toplam: ${filteredData.length}`;
+
+    const tbody = document.getElementById('resultsTableBody');
+    const noDataMsg = document.getElementById('noDataMessage');
+    
+    if (filteredData.length === 0) {
+        tbody.innerHTML = '';
+        noDataMsg.classList.remove('hidden');
+        return;
+    } else {
+        noDataMsg.classList.add('hidden');
+    }
+
+    // Get filter values for relevance checking
+    const catFilter = state.categoryFilter;
+    const themeFilter = state.themeFilter;
+    const dirFilter = state.directionFilter;
+
+    // Render table rows with assertion tags
+    tbody.innerHTML = currentData.map((row) => {
+        const idValue = escapeHtml(String(row[state.selectedIdColumn] || '-'));
+        const overallSentiment = row._overallSentiment || 'Nötr';
+        
+        // Get all topics and original text
+        const allTopics = row._allTopics || [];
+        
+        // Combine text from all analysis columns
+        let combinedText = state.selectedAnalysisColumns
+            .map(col => row[col])
+            .filter(t => t && String(t).trim())
+            .join(' | ');
+        
+        if (!combinedText) combinedText = '-';
+        
+        // Build assertion tags HTML
+        let topicsHtml = '<div class="flex flex-col gap-1">';
+        allTopics.forEach(t => {
+            const category = t.mainCategory;
+            const theme = t.subTheme;
+            const direction = t.direction || 'Tespit';
+            
+            // Check relevance for opacity
+            const isRelevant = (catFilter === 'all' || category === catFilter) && 
+                               (themeFilter === 'all' || theme === themeFilter) &&
+                               (dirFilter === 'all' || direction === dirFilter);
+            
+            const isAnyFilterActive = (catFilter !== 'all' || themeFilter !== 'all' || dirFilter !== 'all');
+            const opacityClass = !isAnyFilterActive ? '' : (isRelevant ? '' : 'opacity-25 grayscale');
+            
+            // Direction dot class
+            let dotClass = 'dot-detection';
+            if (direction === 'Şikayet/Sorun') dotClass = 'dot-complaint';
+            else if (direction === 'Talep/İstek') dotClass = 'dot-request';
+            else if (direction === 'Memnuniyet') dotClass = 'dot-satisfaction';
+            
+            topicsHtml += `
+                <span class="assertion-tag ${opacityClass}">
+                    <div class="flex items-center">
+                        <span class="dot ${dotClass}"></span>
+                        <span class="font-semibold text-gray-700 mr-1 text-[10px]">${escapeHtml(direction)}:</span> 
+                        <span class="truncate max-w-[200px]" title="${escapeHtml(theme)}">${escapeHtml(theme)}</span>
+                    </div>
+                    <span class="cat-label">${escapeHtml(category)}</span>
+                </span>`;
+        });
+        topicsHtml += '</div>';
+
+        return `
+            <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-mono text-xs text-gray-400 align-top">${idValue}</td>
+                <td class="px-6 py-4 text-gray-800 align-top leading-relaxed text-xs">${escapeHtml(combinedText)}</td>
+                <td class="px-6 py-4 text-center align-top">
+                    <span class="sentiment-badge ${getOverallSentimentClass(overallSentiment)}">
+                        ${escapeHtml(overallSentiment)}
+                    </span>
+                </td>
+                <td class="px-6 py-4 align-top">
+                    ${topicsHtml}
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update pagination
+    document.getElementById('pageInfo').textContent = `Sayfa ${state.currentPage} / ${totalPages || 1}`;
+    document.getElementById('prevBtn').disabled = state.currentPage === 1;
+    document.getElementById('nextBtn').disabled = state.currentPage >= totalPages;
+}
+
+function getOverallSentimentClass(sentiment) {
+    switch(sentiment) {
+        case 'Olumlu': return 'sent-positive';
+        case 'Olumsuz': return 'sent-negative';
+        case 'Yapıcı Eleştiri': return 'sent-constructive';
+        default: return 'sent-neutral';
+    }
+}
+
+// Global function for cell editing
+window.handleCellEdit = function(element) {
+    const rowIndex = parseInt(element.dataset.row);
+    const field = element.dataset.field;
+    const newValue = element.textContent.trim();
+    
+    // Get filtered data to find actual row
+    const filteredData = getFilteredData();
+    if (rowIndex < filteredData.length) {
+        filteredData[rowIndex][field] = newValue;
+        
+        // Update the original enrichedData
+        const idColumn = state.selectedIdColumn;
+        const rowId = filteredData[rowIndex][idColumn];
+        const originalRow = state.enrichedData.find(r => r[idColumn] === rowId);
+        if (originalRow) {
+            originalRow[field] = newValue;
+        }
+        
+        // Auto-save
+        autoSaveAnalysis();
+        
+        // Show save indicator
+        showSaveIndicator();
+    }
+}
+
+function showSaveIndicator() {
+    const indicator = document.getElementById('saveIndicator');
+    if (indicator) {
+        indicator.classList.remove('hidden');
+        setTimeout(() => {
+            indicator.classList.add('hidden');
+        }, 2000);
+    }
+}
+
+function getSentimentColor(sentiment) {
+    switch (sentiment) {
+        case 'Pozitif': return 'bg-green-100 text-green-800';
+        case 'Negatif': return 'bg-red-100 text-red-800';
+        case 'Nötr': return 'bg-gray-100 text-gray-800';
+        case 'Yapıcı Eleştiri': return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-blue-100 text-blue-800';
+    }
+}
+
+function exportToExcel() {
+    const exportData = state.enrichedData.map(row => {
+        const exportRow = {
+            'ID': row[state.selectedIdColumn],
+            'Genel Duygu': row._overallSentiment || 'Nötr'
+        };
+        
+        state.selectedAnalysisColumns.forEach(col => {
+            exportRow[`${col} - Metin`] = row[col];
+            exportRow[`${col} - Kategori`] = row[`${col}_category`];
+            exportRow[`${col} - Tema`] = row[`${col}_theme`];
+            exportRow[`${col} - Sentiment`] = row[`${col}_sentiment`];
+            exportRow[`${col} - Yönelim`] = row[`${col}_direction`] || 'Tespit';
+            exportRow[`${col} - Eyleme Dönüştürülebilir`] = row[`${col}_actionable`] ? 'Evet' : 'Hayır';
+        });
+        
+        // Add all topics as JSON for detailed analysis
+        const allTopics = row._allTopics || [];
+        exportRow['Tüm Konular (JSON)'] = JSON.stringify(allTopics);
+        
+        return exportRow;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Analiz Sonuçları');
+
+    XLSX.writeFile(wb, `dinamik_analiz_sonuclari_${new Date().getTime()}.xlsx`);
+}
+
+async function exportToPDF() {
+    try {
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const originalText = exportPdfBtn.innerHTML;
+        exportPdfBtn.innerHTML = '<span class="animate-pulse">PDF Oluşturuluyor...</span>';
+        exportPdfBtn.disabled = true;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        let yPosition = 20;
+
+        const checkPageBreak = (neededSpace) => {
+            if (yPosition + neededSpace > pageHeight - 20) {
+                pdf.addPage();
+                yPosition = 20;
+                return true;
+            }
+            return false;
+        };
+
+        // Title
+        pdf.setFontSize(22);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Dinamik Tematik Analiz Raporu', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(107, 114, 128);
+        pdf.text('Gemini AI ile Guclendirilmis Coklu-Sutun Analizi', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 5;
+        pdf.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+
+        // Global Stats
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Genel Istatistikler', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(75, 85, 99);
+        const stats = [
+            `Toplam Satir: ${state.globalStats.totalRows}`,
+            `Analiz Edilen Sutun: ${state.globalStats.totalColumns}`,
+            `Toplam Kategori: ${state.globalStats.totalCategories}`,
+            `Toplam Tema: ${state.globalStats.totalThemes}`
+        ];
+
+        stats.forEach(stat => {
+            pdf.text(stat, 20, yPosition);
+            yPosition += 6;
+        });
+        yPosition += 10;
+
+        // Executive Summary
+        checkPageBreak(40);
+        pdf.setFontSize(16);
+        pdf.setTextColor(31, 41, 55);
+        pdf.text('Yonetici Ozeti', 15, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(9);
+        pdf.setTextColor(75, 85, 99);
+        
+        const summaryText = state.executiveSummary
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/<[^>]*>/g, '');
+
+        const summaryLines = pdf.splitTextToSize(summaryText, pageWidth - 30);
+        summaryLines.forEach(line => {
+            checkPageBreak(5);
+            pdf.text(line, 15, yPosition);
+            yPosition += 5;
+        });
+
+        // Per-column stats
+        for (const columnName in state.stats) {
+            checkPageBreak(60);
+            pdf.addPage();
+            yPosition = 20;
+            
+            pdf.setFontSize(14);
+            pdf.setTextColor(31, 41, 55);
+            pdf.text(`Sutun: ${columnName}`, 15, yPosition);
+            yPosition += 10;
+
+            const columnStats = state.stats[columnName];
+            const topCategories = Object.entries(columnStats.categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            pdf.setFontSize(9);
+            pdf.text('En Sik Kategoriler:', 15, yPosition);
+            yPosition += 5;
+            
+            topCategories.forEach(([cat, count]) => {
+                pdf.text(`  - ${cat}: ${count}`, 20, yPosition);
+                yPosition += 4;
+            });
+        }
+
+        pdf.save(`dinamik_tematik_analiz_${new Date().getTime()}.pdf`);
+
+        exportPdfBtn.innerHTML = originalText;
+        exportPdfBtn.disabled = false;
+
+    } catch (error) {
+        console.error('PDF export error:', error);
+        alert('PDF oluşturulurken bir hata oluştu: ' + error.message);
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        exportPdfBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg><span>PDF Rapor Indir</span>';
+        exportPdfBtn.disabled = false;
+    }
+}
+
+function autoSaveAnalysis() {
+    if (!state.currentAnalysisId) return;
+    
+    const analysis = {
+        id: state.currentAnalysisId,
+        timestamp: Date.now(),
+        rawData: state.rawData,
+        columns: state.columns,
+        selectedIdColumn: state.selectedIdColumn,
+        selectedAnalysisColumns: state.selectedAnalysisColumns,
+        analysisResults: state.analysisResults,
+        enrichedData: state.enrichedData,
+        stats: state.stats,
+        globalStats: state.globalStats,
+        executiveSummary: state.executiveSummary
+    };
+    
+    // Get existing analyses
+    let analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    
+    // Update or add current analysis
+    const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
+    if (existingIndex >= 0) {
+        analyses[existingIndex] = analysis;
+    } else {
+        analyses.unshift(analysis); // Add to beginning
+    }
+    
+    // Keep only last 10 analyses
+    analyses = analyses.slice(0, 10);
+    
+    localStorage.setItem('saved_analyses', JSON.stringify(analyses));
+    
+    // Update history button state
+    updateHistoryButtonState();
+}
+
+function updateHistoryButtonState() {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const historyCount = document.getElementById('historyCount');
+    
+    if (analyses.length > 0) {
+        historyCount.textContent = analyses.length;
+        historyCount.classList.remove('hidden');
+    } else {
+        historyCount.classList.add('hidden');
+    }
+}
+
+function saveCurrentAnalysis() {
+    if (!state.currentAnalysisId) {
+        state.currentAnalysisId = 'analysis_' + Date.now();
+    }
+    autoSaveAnalysis();
+    alert('Analiz başarıyla kaydedildi!');
+}
+
+function loadAnalysis(analysisId) {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const analysis = analyses.find(a => a.id === analysisId);
+    
+    if (!analysis) {
+        alert('Analiz bulunamadı!');
+        return;
+    }
+    
+    // Destroy existing charts
+    Object.values(state.charts).forEach(chart => chart?.destroy());
+    state.charts = {};
+    
+    // Load into state
+    state.rawData = analysis.rawData;
+    state.columns = analysis.columns;
+    state.selectedIdColumn = analysis.selectedIdColumn;
+    state.selectedAnalysisColumns = analysis.selectedAnalysisColumns;
+    state.analysisResults = analysis.analysisResults;
+    state.enrichedData = analysis.enrichedData;
+    state.stats = analysis.stats;
+    state.globalStats = analysis.globalStats;
+    state.executiveSummary = analysis.executiveSummary;
+    state.currentAnalysisId = analysisId;
+    state.isHistoryMode = true;
+    
+    // Reset filters and pagination
+    state.currentPage = 1;
+    state.searchTerm = '';
+    state.columnFilter = 'all';
+    state.sentimentFilter = 'all';
+    state.categoryFilter = 'all';
+    state.themeFilter = 'all';
+    state.directionFilter = 'all';
+    
+    // Hide all sections except results
+    document.getElementById('uploadSection').classList.add('hidden');
+    document.getElementById('columnSection').classList.add('hidden');
+    document.getElementById('progressSection').classList.add('hidden');
+    
+    // Close history modal
+    document.getElementById('historyModal').classList.add('hidden');
+    
+    // Show results
+    showResults();
+}
+
+function deleteAnalysis(analysisId) {
+    if (!confirm('Bu analizi silmek istediğinizden emin misiniz?')) return;
+    
+    let analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    analyses = analyses.filter(a => a.id !== analysisId);
+    localStorage.setItem('saved_analyses', JSON.stringify(analyses));
+    
+    // Update history button state
+    updateHistoryButtonState();
+    
+    // Refresh history modal
+    renderHistoryModal();
+}
+
+function showHistoryModal() {
+    document.getElementById('historyModal').classList.remove('hidden');
+    renderHistoryModal();
+}
+
+function renderHistoryModal() {
+    const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+    const container = document.getElementById('historyList');
+    
+    if (analyses.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-500 mt-4">Henüz kaydedilmiş analiz yok.</p>
+                <p class="text-gray-400 text-sm mt-2">Bir analiz tamamladığınızda otomatik olarak buraya kaydedilecek.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = analyses.map((analysis, index) => {
+        const date = new Date(analysis.timestamp).toLocaleString('tr-TR');
+        const columns = analysis.selectedAnalysisColumns.join(', ');
+        const isLatest = index === 0;
+        return `
+            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 ${isLatest ? 'border-purple-300 bg-purple-50' : ''}">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <h4 class="font-semibold text-gray-800">${date}</h4>
+                            ${isLatest ? '<span class="px-2 py-0.5 bg-purple-600 text-white text-xs rounded">En Son</span>' : ''}
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">📊 Sütunlar: ${columns}</p>
+                        <p class="text-sm text-gray-600">📝 Satırlar: ${analysis.rawData.length}</p>
+                        <p class="text-sm text-gray-600">🏷️ Kategoriler: ${analysis.globalStats.totalCategories} • Temalar: ${analysis.globalStats.totalThemes}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="loadAnalysis('${analysis.id}')" 
+                                class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center space-x-1">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <span>Görüntüle</span>
+                        </button>
+                        <button onclick="deleteAnalysis('${analysis.id}')" 
+                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Make functions global for onclick handlers
+window.loadAnalysis = loadAnalysis;
+window.deleteAnalysis = deleteAnalysis;
+
+function resetApp() {
+    state.rawData = [];
+    state.columns = [];
+    state.selectedIdColumn = null;
+    state.selectedAnalysisColumns = [];
+    state.analysisResults = {};
+    state.enrichedData = [];
+    state.stats = {};
+    state.globalStats = null;
+    state.executiveSummary = '';
+    state.currentPage = 1;
+    state.searchTerm = '';
+    state.columnFilter = 'all';
+    state.sentimentFilter = 'all';
+    state.categoryFilter = 'all';
+    state.themeFilter = 'all';
+    state.directionFilter = 'all';
+    state.currentAnalysisId = null;
+    state.isHistoryMode = false;
+
+    // Destroy charts
+    Object.values(state.charts).forEach(chart => chart?.destroy());
+    state.charts = {};
+
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileNameDisplay').innerHTML = 'Excel dosyasını buraya sürükleyin veya <span class="text-purple-600 hover:text-purple-700">seçmek için tıklayın</span>';
+    document.getElementById('searchInput').value = '';
+
+    document.getElementById('uploadSection').classList.remove('hidden');
+    document.getElementById('columnSection').classList.add('hidden');
+    document.getElementById('progressSection').classList.add('hidden');
+    document.getElementById('resultsSection').classList.add('hidden');
+    hideError();
+}
+
+function showError(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorSection').classList.remove('hidden');
+}
+
+function hideError() {
+    document.getElementById('errorSection').classList.add('hidden');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatMarkdown(text) {
+    return text
+        .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-6 mb-3 text-gray-800">$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800">$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-10 mb-5 text-gray-900">$1</h1>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+        .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
+        .replace(/^\d+\. (.*$)/gim, '<li class="ml-4">$1</li>')
+        .replace(/\n\n/g, '<br><br>');
+}
+

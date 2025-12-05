@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinamik Tematik Analiz Sistemi | Gemini AI</title>
+    <meta name="description" content="Gemini AI ile güçlendirilmiş dinamik tematik analiz sistemi - Herhangi bir veri setini analiz edin">
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- XLSX Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <!-- jsPDF & html2canvas for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Google Generative AI -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .checkbox-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-label:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Assertion Tags - ornek.html styles */
+        .assertion-tag { 
+            font-size: 0.70rem; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px; 
+            width: 100%;
+            background-color: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            color: #4B5563;
+        }
+        
+        .dot { height: 8px; width: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+        .dot-complaint { background-color: #EF4444; box-shadow: 0 0 0 2px #FEE2E2; }
+        .dot-request { background-color: #3B82F6; box-shadow: 0 0 0 2px #DBEAFE; }
+        .dot-satisfaction { background-color: #10B981; box-shadow: 0 0 0 2px #D1FAE5; }
+        .dot-detection { background-color: #9CA3AF; box-shadow: 0 0 0 2px #F3F4F6; }
+
+        .cat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6B7280;
+            background: #E5E7EB;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .sentiment-badge {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .sent-positive { background-color: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+        .sent-negative { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+        .sent-neutral { background-color: #F3F4F6; color: #374151; border: 1px solid #E5E7EB; }
+        .sent-constructive { background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+
+        .filter-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100" style="font-family: 'Inter', sans-serif;">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Dinamik Tematik Analiz Sistemi</h1>
+            <p class="text-gray-600">Gemini AI ile Güçlendirilmiş - Herhangi Bir Veri Setini Analiz Edin</p>
+        </div>
+
+        <!-- API Key Section -->
+        <div id="apiKeySection" class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Gemini API Anahtarı</label>
+                        <button id="historyBtnTop" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 text-sm">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Geçmiş Analizler</span>
+                            <span id="historyCount" class="hidden bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs font-bold"></span>
+                        </button>
+                    </div>
+                    <input type="password" id="apiKeyInput" placeholder="AIza... ile başlayan API anahtarınızı girin"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">Model Seçimi</label>
+                            <select id="modelSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer">
+                                <option value="">Yükleniyor...</option>
+                            </select>
+                            <p id="modelLimitInfo" class="mt-1 text-xs text-gray-500">Limitler yükleniyor...</p>
+                        </div>
+                        <div>
+                            <label for="batchSizeInput" class="block text-sm font-medium text-gray-700 mb-2">Batch Boyutu</label>
+                            <input type="number" id="batchSizeInput" min="1" max="50" value="10" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="mt-1 text-xs text-gray-500">Her seferde kaç satır işlensin (1-50)</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-500">
+                        API anahtarınız tarayıcınızda saklanır ve hiçbir sunucuya gönderilmez.
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
+                            class="text-blue-600 hover:text-blue-700 ml-1">Buradan bir anahtar alabilirsiniz →</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p id="errorMessage" class="text-sm text-red-700"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div id="uploadSection">
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer transition-all duration-200 bg-white hover:border-gray-400">
+                <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div class="text-lg font-medium text-gray-700 mt-4">
+                    <span id="fileNameDisplay">Excel dosyasını buraya sürükleyin veya <span class="text-purple-600 hover:text-purple-700">seçmek için tıklayın</span></span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">.xlsx veya .xls formatında - Herhangi bir veri seti</p>
+            </div>
+        </div>
+
+        <!-- Column Selection -->
+        <div id="columnSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sütun Seçimi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- ID Column Selection -->
+                <div>
+                    <label for="idColumnSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                        ID Sütunu (Zorunlu)
+                    </label>
+                    <select id="idColumnSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                        <option value="">ID sütunu seçin...</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">Her satırı benzersiz tanımlayan sütun</p>
+                </div>
+
+                <!-- Row count display -->
+                <div>
+                    <div class="text-sm font-medium text-gray-700 mb-2">Veri İstatistikleri</div>
+                    <div class="text-2xl font-bold text-purple-600">
+                        <span id="rowCountDisplay">0</span> satır
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Excel dosyasında bulunan satır sayısı</p>
+                </div>
+            </div>
+
+            <!-- Analysis Columns Selection -->
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Analiz Edilecek Sütunlar (En az 1 seçin)
+                </label>
+                <div id="analysisColumnsContainer" class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+                    <!-- Checkboxes will be inserted here -->
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Her sütun bağımsız olarak analiz edilecek</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between mt-6">
+                <button id="cancelColumnBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    İptal
+                </button>
+                <button id="startAnalysisBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Analizi Başlat
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="progressSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Analiz Devam Ediyor...</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span id="currentColumnProgress">İşlenen Sütun: -</span>
+                        <span id="columnProgressCount">0 / 0 sütun</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div id="progressBar" class="bg-purple-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p id="progressText" class="text-center text-gray-600">İşlem başlatılıyor...</p>
+                <div class="flex items-center justify-center">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="hidden">
+            <!-- Header with Actions -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-l-4 border-indigo-600 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Tematik Analiz Paneli</h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <span id="totalRowsDisplay">0</span> satır, 
+                        <span id="totalColumnsDisplay">0</span> sütun analiz edildi
+                    </p>
+                    <p id="saveIndicator" class="text-sm text-green-600 mt-1 hidden">
+                        ✓ Değişiklikler kaydedildi
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right mr-4">
+                        <div class="text-3xl font-bold text-indigo-600" id="totalRowsHeader">0</div>
+                        <div class="text-xs text-gray-500 uppercase font-semibold">Görüntülenen Görüş</div>
+                    </div>
+                    <button id="historyBtn" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-1 text-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Geçmiş</span>
+                    </button>
+                    <button id="saveAnalysisBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1 text-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        <span>Kaydet</span>
+                    </button>
+                    <button id="newAnalysisBtn" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">
+                        Yeni Analiz
+                    </button>
+                    <button id="exportPdfBtn" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-1 text-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        <span>PDF</span>
+                    </button>
+                    <button id="exportBtn" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1 text-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- FILTERS - Sticky -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 sticky top-2 z-10">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Sentiment Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Genel Duygu</label>
+                        <select id="sentimentFilterSelect" class="filter-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option value="all">Tüm Duygular</option>
+                            <option value="Olumlu">Olumlu</option>
+                            <option value="Olumsuz">Olumsuz</option>
+                            <option value="Yapıcı Eleştiri">Yapıcı Eleştiri</option>
+                            <option value="Nötr">Nötr</option>
+                        </select>
+                    </div>
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Ana Temalar</label>
+                        <select id="categoryFilterSelect" class="filter-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option value="all">Tüm Temalar</option>
+                        </select>
+                    </div>
+                    <!-- Theme Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Alt Kategoriler</label>
+                        <select id="themeFilterSelect" class="filter-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option value="all">Tüm Alt Kategoriler</option>
+                        </select>
+                    </div>
+                    <!-- Direction Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Yönelim</label>
+                        <select id="directionFilterSelect" class="filter-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option value="all">Tümü</option>
+                            <option value="Talep/İstek">Talep/İstek</option>
+                            <option value="Şikayet/Sorun">Şikayet/Sorun</option>
+                            <option value="Memnuniyet">Memnuniyet</option>
+                            <option value="Tespit">Tespit</option>
+                        </select>
+                    </div>
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Arama</label>
+                        <input type="text" id="searchInput" placeholder="Ara..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-green-500">
+                    <div class="text-gray-500 text-[10px] font-bold uppercase">Olumlu</div>
+                    <div class="text-2xl font-bold text-gray-800" id="statPositive">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-red-500">
+                    <div class="text-gray-500 text-[10px] font-bold uppercase">Olumsuz</div>
+                    <div class="text-2xl font-bold text-gray-800" id="statNegative">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-yellow-500">
+                    <div class="text-gray-500 text-[10px] font-bold uppercase">Yapıcı Eleştiri</div>
+                    <div class="text-2xl font-bold text-gray-800" id="statConstructive">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-gray-400">
+                    <div class="text-gray-500 text-[10px] font-bold uppercase">Nötr</div>
+                    <div class="text-2xl font-bold text-gray-800" id="statNeutral">0</div>
+                </div>
+            </div>
+
+            <!-- CHARTS GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Chart 1: ANA TEMALAR (Horizontal Stacked) -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">ANA TEMALAR</h3>
+                    <div class="h-80">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                <!-- Chart 2: ALT KATEGORİ DAĞILIMI (Horizontal) -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">ALT KATEGORİ DAĞILIMI</h3>
+                    <div class="h-80">
+                        <canvas id="themeChart"></canvas>
+                    </div>
+                </div>
+                <!-- Chart 3: Sentiment Distribution (Pie) -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">Filtrelenmiş Veri Duygu Dağılımı</h3>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded">Dinamik</span>
+                    </div>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wide">Genel Yönetici Özeti</h2>
+                <div id="executiveSummary" class="prose max-w-none text-gray-700 leading-relaxed text-sm"></div>
+            </div>
+
+            <!-- Hidden containers for legacy compatibility -->
+            <div id="comparisonContainer" class="hidden"></div>
+            <div id="columnChartsContainer" class="hidden"></div>
+            <div id="columnFilterSelect" class="hidden"></div>
+
+            <!-- TABLE -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h3 class="text-base font-bold text-gray-800">Filtrelenmiş Sonuçlar</h3>
+                    <button id="resetFiltersBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">Filtreleri Temizle</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b">
+                            <tr id="tableHeader">
+                                <th scope="col" class="px-6 py-3 w-16">ID</th>
+                                <th scope="col" class="px-6 py-3 w-1/3">Orijinal Görüş</th>
+                                <th scope="col" class="px-6 py-3 text-center w-24">Duygu</th>
+                                <th scope="col" class="px-6 py-3">Analiz Detayı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                    <div id="noDataMessage" class="hidden text-center py-8 text-gray-500 italic">
+                        Bu kriterlere uygun kayıt bulunamadı.
+                    </div>
+                </div>
+                <!-- Pagination -->
+                <div id="paginationSection" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                    <button id="prevBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Önceki</button>
+                    <div>
+                        <span id="filterInfo" class="text-sm text-gray-600 mr-4">Gösterilen: 0-0 / Toplam: 0</span>
+                        <span id="pageInfo" class="text-sm text-gray-600">Sayfa 1 / 1</span>
+                    </div>
+                    <button id="nextBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Sonraki</button>
+                </div>
+            </div>
+
+            <!-- Hidden stats for legacy compatibility -->
+            <div class="hidden">
+                <span id="statTotal">0</span>
+                <span id="statColumns">0</span>
+                <span id="statCategories">0</span>
+                <span id="statThemes">0</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Gemini 2.0 Flash ile güçlendirilmiştir • Tüm analiz tarayıcınızda gerçekleşir</p>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Geçmiş Analizler</h2>
+                <button onclick="document.getElementById('historyModal').classList.add('hidden')" 
+                        class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="historyList" class="p-6 overflow-y-auto max-h-[60vh] space-y-4">
+                <!-- History items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="assets/app.js"></script>
+</body>
+</html>
+
