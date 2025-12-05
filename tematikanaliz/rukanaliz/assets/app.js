@@ -283,7 +283,14 @@ function updateProcessedRows(count) {
 function updateActiveApiKeyDisplay() {
     const displayEl = document.getElementById('activeApiKeyDisplay');
     if (displayEl) {
-        displayEl.textContent = `${state.currentApiKeyIndex + 1} / ${state.apiKeys.filter(k => k).length}`;
+        const validKeys = state.apiKeys.filter(k => k && k.trim().length > 0);
+        
+        // If parallel processing is active, show parallel count
+        if (state.parallelProcessing && validKeys.length > 1) {
+            displayEl.textContent = `${validKeys.length}x paralel`;
+        } else {
+            displayEl.textContent = `${state.currentApiKeyIndex + 1} / ${validKeys.length}`;
+        }
     }
 }
 
@@ -348,7 +355,27 @@ function stopAnalysis() {
     if (confirm('Analizi durdurmak istediğinizden emin misiniz? Tamamlanan sütunların sonuçları kaydedilecek.')) {
         state.shouldStop = true;
         state.isPaused = false;
-        showApiStatus('Analiz durduruluyor...', 'warning');
+        
+        // Disable stop button and show stopping state
+        const stopBtn = document.getElementById('stopAnalysisBtn');
+        const pauseBtn = document.getElementById('pauseResumeBtn');
+        if (stopBtn) {
+            stopBtn.disabled = true;
+            stopBtn.innerHTML = `
+                <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Durduruluyor...</span>
+            `;
+            stopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            stopBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+        }
+        if (pauseBtn) {
+            pauseBtn.disabled = true;
+            pauseBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        
+        showApiStatus('Analiz durduruluyor, lütfen bekleyin...', 'warning');
     }
 }
 
@@ -1135,62 +1162,182 @@ async function runSequentialAnalysis() {
     }
 }
 
-// Parallel analysis using multiple API keys
+// Parallel analysis using multiple API keys - processes batches in parallel
 async function runParallelAnalysis(validApiKeys) {
-    const columns = [...state.selectedAnalysisColumns];
-    const concurrency = Math.min(validApiKeys.length, columns.length);
+    const concurrency = validApiKeys.length;
     
     showApiStatus(`Paralel işleme: ${concurrency} API anahtarı ile çalışılıyor`, 'info');
     
-    let completedCount = 0;
-    const totalColumns = columns.length;
+    // Create GenAI instances for each API key
+    const genAIInstances = validApiKeys.map(key => new GoogleGenerativeAI(key));
     
-    // Create a queue of columns to process
-    const columnQueue = [...columns];
-    const activePromises = [];
-    
-    // Worker function for each API key
-    async function processWithApiKey(apiKeyIndex) {
-        const apiKey = validApiKeys[apiKeyIndex];
-        const genAI = new GoogleGenerativeAI(apiKey);
+    for (let colIndex = 0; colIndex < state.selectedAnalysisColumns.length; colIndex++) {
+        if (state.shouldStop) break;
         
-        while (columnQueue.length > 0 && !state.shouldStop) {
-            const columnName = columnQueue.shift();
-            if (!columnName) break;
-            
-            try {
-                console.log(`API ${apiKeyIndex + 1} processing column: ${columnName}`);
-                
-                document.getElementById('currentColumnProgress').textContent = 
-                    `İşlenen: ${columnName} (API ${apiKeyIndex + 1})`;
-                
-                const columnResults = await analyzeColumn(genAI, columnName);
-                state.analysisResults[columnName] = columnResults;
-                
-                completedCount++;
-                document.getElementById('columnProgressCount').textContent = 
-                    `${completedCount} / ${totalColumns} sütun`;
-                
-                // Partial save
-                partialSaveAfterColumn(columnName);
-                
-            } catch (error) {
-                console.error(`API ${apiKeyIndex + 1} error on column ${columnName}:`, error);
-                // Put column back in queue for another API to try
-                columnQueue.push(columnName);
-            }
+        const columnName = state.selectedAnalysisColumns[colIndex];
+        
+        document.getElementById('currentColumnProgress').textContent = `İşlenen Sütun: ${columnName}`;
+        document.getElementById('columnProgressCount').textContent = `${colIndex + 1} / ${state.selectedAnalysisColumns.length} sütun`;
+        
+        // Process this column with parallel batches
+        const columnResults = await analyzeColumnParallel(genAIInstances, columnName, colIndex);
+        state.analysisResults[columnName] = columnResults;
+        
+        // Partial save after column completion
+        partialSaveAfterColumn(columnName);
+        
+        // Delay between columns
+        if (colIndex < state.selectedAnalysisColumns.length - 1 && !state.shouldStop) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_COLUMNS));
         }
     }
     
-    // Start workers for each API key
+    hideApiStatus();
+}
+
+// Analyze a single column using multiple API keys in parallel
+async function analyzeColumnParallel(genAIInstances, columnName, columnIndex) {
+    const results = [];
+    const concurrency = genAIInstances.length;
+    
+    // Calculate adaptive batch size
+    state.currentBatchSize = calculateAdaptiveBatchSize(state.rawData, columnName, state.batchSize);
+    const totalBatches = Math.ceil(state.rawData.length / state.currentBatchSize);
+    
+    // Create batch queue
+    const batchQueue = [];
+    for (let i = 0; i < state.rawData.length; i += state.currentBatchSize) {
+        batchQueue.push({
+            startIndex: i,
+            data: state.rawData.slice(i, i + state.currentBatchSize),
+            batchNum: Math.floor(i / state.currentBatchSize) + 1
+        });
+    }
+    
+    // Results array with slots for each batch (to maintain order)
+    const batchResults = new Array(batchQueue.length).fill(null);
+    let completedBatches = 0;
+    let currentBatchIndex = 0;
+    
+    // Worker function for each API key
+    async function worker(apiIndex) {
+        const genAI = genAIInstances[apiIndex];
+        
+        while (currentBatchIndex < batchQueue.length && !state.shouldStop) {
+            // Get next batch atomically
+            const batchIdx = currentBatchIndex++;
+            if (batchIdx >= batchQueue.length) break;
+            
+            const batch = batchQueue[batchIdx];
+            
+            // Wait while paused
+            await waitWhilePaused();
+            if (state.shouldStop) break;
+            
+            // Update UI
+            const totalProgress = ((columnIndex * state.rawData.length) + batch.startIndex + batch.data.length) / 
+                                  (state.selectedAnalysisColumns.length * state.rawData.length);
+            updateProgress(totalProgress * 100, `${columnName}: Batch ${batch.batchNum}/${totalBatches} (API ${apiIndex + 1})`);
+            
+            // Update active API display to show all active
+            document.getElementById('activeApiKeyDisplay').textContent = `${concurrency}x paralel`;
+            
+            // Update processed rows
+            const currentProcessed = (columnIndex * state.rawData.length) + batch.startIndex + batch.data.length;
+            updateProcessedRows(currentProcessed);
+            
+            try {
+                const batchResult = await analyzeBatchWithSpecificApi(genAI, batch.data, columnName);
+                if (batchResult && batchResult.items) {
+                    batchResults[batchIdx] = batchResult.items;
+                }
+                completedBatches++;
+            } catch (error) {
+                console.error(`API ${apiIndex + 1} error on batch ${batch.batchNum}:`, error);
+                batchResults[batchIdx] = batch.data.map(r => ({
+                    entryId: String(r[state.selectedIdColumn]),
+                    topics: [{
+                        mainCategory: 'Analiz Hatası',
+                        subTheme: 'İşlenemedi',
+                        sentiment: 'Nötr',
+                        direction: 'Tespit'
+                    }],
+                    actionable: false
+                }));
+            }
+            
+            // Small delay to prevent hitting rate limits
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+    }
+    
+    // Start all workers in parallel
+    const workers = [];
     for (let i = 0; i < concurrency; i++) {
-        activePromises.push(processWithApiKey(i));
+        workers.push(worker(i));
     }
     
     // Wait for all workers to complete
-    await Promise.all(activePromises);
+    await Promise.all(workers);
     
-    hideApiStatus();
+    // Flatten results in order
+    for (const batchResult of batchResults) {
+        if (batchResult) {
+            results.push(...batchResult);
+        }
+    }
+    
+    return results;
+}
+
+// Analyze batch with a specific API instance (for parallel processing)
+async function analyzeBatchWithSpecificApi(genAI, rows, columnName) {
+    const promptData = rows.map(r => ({
+        id: String(r[state.selectedIdColumn]),
+        text: truncateText(String(r[columnName] || ''))
+    }));
+
+    const systemInstruction = state.customPrompt.replace(/\{\{COLUMN_NAME\}\}/g, columnName);
+
+    const prompt = `
+${systemInstruction}
+
+ANALİZ EDİLECEK VERİLER (${rows.length} adet):
+${JSON.stringify(promptData, null, 2)}
+`;
+
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.1,
+            responseMimeType: 'application/json',
+            responseSchema: analysisSchema,
+        },
+    });
+
+    let retries = 3;
+    let retryDelay = 3000;
+
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+            if (!text) throw new Error('Empty response');
+            return JSON.parse(text);
+        } catch (error) {
+            const errorMsg = error.message || '';
+            const isRateLimit = errorMsg.includes('429') || errorMsg.includes('Quota');
+            
+            if (isRateLimit && retries > 1) {
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 2;
+                retries--;
+                continue;
+            }
+            throw error;
+        }
+    }
+    throw new Error('Max retries exceeded');
 }
 
 // Continue analysis from partial state
