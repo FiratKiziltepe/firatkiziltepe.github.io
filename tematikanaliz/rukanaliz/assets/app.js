@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Protected keywords that cannot be removed from prompt
-const PROTECTED_KEYWORDS = ['mainCategory', 'subTheme', 'sentiment', 'direction', 'entryId', 'topics', 'actionable'];
+// Only keywords that actually appear in the prompt examples
+const PROTECTED_KEYWORDS = ['mainCategory', 'subTheme', 'sentiment', 'direction'];
 
 // Default system prompt template
 const DEFAULT_SYSTEM_PROMPT = `Sen bir tematik analiz uzmanısın. Verilen serbest metin cevaplarını analiz et ve kategorize et.
