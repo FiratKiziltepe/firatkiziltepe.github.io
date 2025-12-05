@@ -389,30 +389,47 @@ async function waitWhilePaused() {
 
 // Partial save after column completion
 function partialSaveAfterColumn(columnName) {
-    if (!state.partialAnalysisId) {
-        state.partialAnalysisId = 'partial_' + Date.now();
+    try {
+        if (!state.partialAnalysisId) {
+            state.partialAnalysisId = 'partial_' + Date.now();
+        }
+        
+        if (!state.completedColumns.includes(columnName)) {
+            state.completedColumns.push(columnName);
+        }
+        
+        // Save minimal data for partial recovery
+        const partialData = {
+            id: state.partialAnalysisId,
+            timestamp: Date.now(),
+            // Don't save rawData - it's too large
+            // Save only IDs for reference
+            rowIds: state.rawData.map(r => r[state.selectedIdColumn]),
+            columns: state.columns,
+            selectedIdColumn: state.selectedIdColumn,
+            selectedAnalysisColumns: state.selectedAnalysisColumns,
+            completedColumns: state.completedColumns,
+            // Only save completed column results
+            analysisResults: Object.fromEntries(
+                Object.entries(state.analysisResults).filter(([col]) => 
+                    state.completedColumns.includes(col)
+                )
+            ),
+            isPartial: true
+        };
+        
+        // Try to save
+        if (!safeLocalStorageSave('partial_analysis', partialData)) {
+            // If can't save, just log it
+            console.warn('Could not save partial analysis - storage full');
+        } else {
+            console.log(`Partial save completed for column: ${columnName}`);
+        }
+        
+    } catch (error) {
+        console.warn('Partial save error:', error);
+        // Don't interrupt the analysis for save errors
     }
-    
-    state.completedColumns.push(columnName);
-    
-    const partialData = {
-        id: state.partialAnalysisId,
-        timestamp: Date.now(),
-        rawData: state.rawData,
-        columns: state.columns,
-        selectedIdColumn: state.selectedIdColumn,
-        selectedAnalysisColumns: state.selectedAnalysisColumns,
-        completedColumns: state.completedColumns,
-        analysisResults: state.analysisResults,
-        isPartial: true
-    };
-    
-    // Save to localStorage
-    localStorage.setItem('partial_analysis', JSON.stringify(partialData));
-    
-    console.log(`Partial save completed for column: ${columnName}`);
-    showApiStatus(`"${columnName}" sütunu kaydedildi`, 'info');
-    setTimeout(hideApiStatus, 2000);
 }
 
 // Check for partial analysis to resume
@@ -2550,41 +2567,136 @@ async function exportToPDF() {
     }
 }
 
+// Calculate approximate size of data in bytes
+function getDataSize(data) {
+    try {
+        return new Blob([JSON.stringify(data)]).size;
+    } catch (e) {
+        return JSON.stringify(data).length * 2; // Rough estimate
+    }
+}
+
+// Compress analysis data for storage
+function compressAnalysisForStorage(fullAnalysis) {
+    // Create a lighter version without raw data (can be large)
+    const compressed = {
+        id: fullAnalysis.id,
+        timestamp: fullAnalysis.timestamp,
+        columns: fullAnalysis.columns,
+        selectedIdColumn: fullAnalysis.selectedIdColumn,
+        selectedAnalysisColumns: fullAnalysis.selectedAnalysisColumns,
+        // Keep only essential analysis results
+        analysisResults: fullAnalysis.analysisResults,
+        // Keep enriched data but limit to essential fields
+        enrichedData: (fullAnalysis.enrichedData || []).map(row => ({
+            id: row.id,
+            column: row.column,
+            topics: row.topics,
+            actionable: row.actionable
+        })),
+        stats: fullAnalysis.stats,
+        globalStats: fullAnalysis.globalStats,
+        executiveSummary: fullAnalysis.executiveSummary,
+        // Store row count instead of full raw data
+        rowCount: fullAnalysis.rawData?.length || 0,
+        // Don't store rawData - it's too large
+    };
+    
+    return compressed;
+}
+
+// Try to save with quota management
+function safeLocalStorageSave(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.message.includes('quota')) {
+            return false;
+        }
+        console.warn('Storage error:', e);
+        return false;
+    }
+}
+
 function autoSaveAnalysis() {
     if (!state.currentAnalysisId) return;
     
-    const analysis = {
-        id: state.currentAnalysisId,
-        timestamp: Date.now(),
-        rawData: state.rawData,
-        columns: state.columns,
-        selectedIdColumn: state.selectedIdColumn,
-        selectedAnalysisColumns: state.selectedAnalysisColumns,
-        analysisResults: state.analysisResults,
-        enrichedData: state.enrichedData,
-        stats: state.stats,
-        globalStats: state.globalStats,
-        executiveSummary: state.executiveSummary
-    };
-    
-    // Get existing analyses
-    let analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
-    
-    // Update or add current analysis
-    const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
-    if (existingIndex >= 0) {
-        analyses[existingIndex] = analysis;
-    } else {
-        analyses.unshift(analysis); // Add to beginning
+    try {
+        const analysis = {
+            id: state.currentAnalysisId,
+            timestamp: Date.now(),
+            rawData: state.rawData,
+            columns: state.columns,
+            selectedIdColumn: state.selectedIdColumn,
+            selectedAnalysisColumns: state.selectedAnalysisColumns,
+            analysisResults: state.analysisResults,
+            enrichedData: state.enrichedData,
+            stats: state.stats,
+            globalStats: state.globalStats,
+            executiveSummary: state.executiveSummary
+        };
+        
+        // Compress data for storage
+        const compressedAnalysis = compressAnalysisForStorage(analysis);
+        
+        // Get existing analyses
+        let analyses = [];
+        try {
+            analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+        } catch (e) {
+            analyses = [];
+        }
+        
+        // Update or add current analysis
+        const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
+        if (existingIndex >= 0) {
+            analyses[existingIndex] = compressedAnalysis;
+        } else {
+            analyses.unshift(compressedAnalysis);
+        }
+        
+        // Keep only last 5 analyses (reduced from 10)
+        analyses = analyses.slice(0, 5);
+        
+        // Try to save
+        if (!safeLocalStorageSave('saved_analyses', analyses)) {
+            // Quota exceeded - try removing old analyses one by one
+            console.warn('Storage quota exceeded, removing old analyses...');
+            
+            while (analyses.length > 1) {
+                analyses.pop(); // Remove oldest
+                if (safeLocalStorageSave('saved_analyses', analyses)) {
+                    console.log(`Saved after removing old analyses. ${analyses.length} remaining.`);
+                    break;
+                }
+            }
+            
+            // If still can't save, clear all and save only current
+            if (analyses.length === 1 && !safeLocalStorageSave('saved_analyses', analyses)) {
+                // Try saving without enrichedData
+                const minimalAnalysis = {
+                    ...compressedAnalysis,
+                    enrichedData: [],
+                    analysisResults: {}
+                };
+                analyses = [minimalAnalysis];
+                
+                if (!safeLocalStorageSave('saved_analyses', analyses)) {
+                    console.error('Cannot save even minimal analysis. Clearing storage.');
+                    localStorage.removeItem('saved_analyses');
+                    showApiStatus('Depolama alanı dolu. Sonuçları Excel olarak indirin.', 'warning');
+                }
+            }
+        }
+        
+        // Update history button state
+        updateHistoryButtonState();
+        
+    } catch (error) {
+        console.error('Auto-save error:', error);
+        // Don't show error to user for auto-save failures
     }
-    
-    // Keep only last 10 analyses
-    analyses = analyses.slice(0, 10);
-    
-    localStorage.setItem('saved_analyses', JSON.stringify(analyses));
-    
-    // Update history button state
-    updateHistoryButtonState();
 }
 
 function updateHistoryButtonState() {
@@ -2603,8 +2715,25 @@ function saveCurrentAnalysis() {
     if (!state.currentAnalysisId) {
         state.currentAnalysisId = 'analysis_' + Date.now();
     }
-    autoSaveAnalysis();
-    alert('Analiz başarıyla kaydedildi!');
+    
+    try {
+        autoSaveAnalysis();
+        
+        // Check if save was successful
+        const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
+        const saved = analyses.find(a => a.id === state.currentAnalysisId);
+        
+        if (saved) {
+            showApiStatus('Analiz başarıyla kaydedildi!', 'info');
+            setTimeout(() => hideApiStatus(), 3000);
+        } else {
+            // Save failed due to quota
+            showApiStatus('Depolama alanı yetersiz. Sonuçları Excel olarak indirin.', 'warning');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showApiStatus('Kaydetme hatası. Sonuçları Excel olarak indirin.', 'warning');
+    }
 }
 
 function loadAnalysis(analysisId) {
