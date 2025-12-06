@@ -145,14 +145,14 @@
                                 </svg>
                                 <span>Prompt Özelleştir</span>
                             </button>
-                            <button id="historyBtnTop" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 text-sm">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span>Geçmiş Analizler</span>
-                                <span id="historyCount" class="hidden bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs font-bold"></span>
-                            </button>
-                        </div>
+                        <button id="historyBtnTop" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 text-sm">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Geçmiş Analizler</span>
+                            <span id="historyCount" class="hidden bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs font-bold"></span>
+                        </button>
+                    </div>
                     </div>
                     
                     <!-- Multiple API Keys Container -->
@@ -362,13 +362,13 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Tematik Analiz Paneli</h1>
                     <p class="text-sm text-gray-500 mt-1">
-                        <span id="totalRowsDisplay">0</span> satır, 
+                            <span id="totalRowsDisplay">0</span> satır, 
                         <span id="totalColumnsDisplay">0</span> sütun analiz edildi
-                    </p>
-                    <p id="saveIndicator" class="text-sm text-green-600 mt-1 hidden">
-                        ✓ Değişiklikler kaydedildi
-                    </p>
-                </div>
+                        </p>
+                        <p id="saveIndicator" class="text-sm text-green-600 mt-1 hidden">
+                            ✓ Değişiklikler kaydedildi
+                        </p>
+                    </div>
                 <div class="flex items-center space-x-3">
                     <div class="text-right mr-4">
                         <div class="text-3xl font-bold text-indigo-600" id="totalRowsHeader">0</div>
@@ -376,31 +376,31 @@
                     </div>
                     <button id="historyBtn" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-1 text-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Geçmiş</span>
-                    </button>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Geçmiş</span>
+                        </button>
                     <button id="saveAnalysisBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1 text-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                        </svg>
-                        <span>Kaydet</span>
-                    </button>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                            </svg>
+                            <span>Kaydet</span>
+                        </button>
                     <button id="newAnalysisBtn" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">
-                        Yeni Analiz
-                    </button>
+                            Yeni Analiz
+                        </button>
                     <button id="exportPdfBtn" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-1 text-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                        </svg>
-                        <span>PDF</span>
-                    </button>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            <span>PDF</span>
+                        </button>
                     <button id="exportBtn" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1 text-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span>Excel</span>
-                    </button>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Excel</span>
+                        </button>
                 </div>
             </div>
 
@@ -501,7 +501,15 @@
 
             <!-- Executive Summary -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wide">Genel Yönetici Özeti</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 uppercase tracking-wide">Genel Yönetici Özeti</h2>
+                    <button id="generateDetailedReportBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2 text-sm font-medium shadow-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>Detaylı Analiz Raporu Oluştur</span>
+                    </button>
+                </div>
                 <div id="executiveSummary" class="prose max-w-none text-gray-700 leading-relaxed text-sm"></div>
             </div>
 
@@ -519,7 +527,7 @@
                 <p class="text-sm text-red-700 mb-4">Aşağıdaki satırlar API hatası nedeniyle işlenemedi. Bu satırlar "Analiz Hatası" olarak işaretlendi.</p>
                 <div id="failedRowsList" class="max-h-48 overflow-y-auto space-y-2">
                     <!-- Failed rows will be listed here -->
-                </div>
+            </div>
             </div>
 
             <!-- Hidden containers for legacy compatibility -->
@@ -556,7 +564,7 @@
                     <button id="prevBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Önceki</button>
                     <div>
                         <span id="filterInfo" class="text-sm text-gray-600 mr-4">Gösterilen: 0-0 / Toplam: 0</span>
-                        <span id="pageInfo" class="text-sm text-gray-600">Sayfa 1 / 1</span>
+                    <span id="pageInfo" class="text-sm text-gray-600">Sayfa 1 / 1</span>
                     </div>
                     <button id="nextBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Sonraki</button>
                 </div>
@@ -591,6 +599,66 @@
             </div>
             <div id="historyList" class="p-6 overflow-y-auto max-h-[60vh] space-y-4">
                 <!-- History items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Report Modal -->
+    <div id="detailedReportModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-purple-600 to-indigo-600">
+                <div class="flex items-center space-x-3">
+                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Detaylı Nitel Analiz Raporu</h2>
+                        <p class="text-purple-200 text-sm">Tematik bulgular ve alıntılarla desteklenmiş kapsamlı rapor</p>
+                    </div>
+                </div>
+                <button id="closeReportModalBtn" class="text-white hover:text-purple-200 transition-colors">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="reportLoadingState" class="flex-1 flex flex-col items-center justify-center p-10">
+                <div class="relative">
+                    <div class="w-16 h-16 border-4 border-purple-200 rounded-full animate-spin border-t-purple-600"></div>
+                </div>
+                <p class="mt-6 text-lg font-medium text-gray-700">Detaylı rapor oluşturuluyor...</p>
+                <p id="reportProgressText" class="mt-2 text-sm text-gray-500">Temalar ve alıntılar analiz ediliyor</p>
+                <div class="mt-4 w-64 bg-gray-200 rounded-full h-2">
+                    <div id="reportProgressBar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Report Content (hidden initially) -->
+            <div id="reportContentWrapper" class="hidden flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div id="detailedReportContent" class="prose prose-sm max-w-none bg-white rounded-lg shadow-sm p-8 border border-gray-200">
+                    <!-- Report will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div id="reportFooter" class="hidden p-4 border-t border-gray-200 flex justify-between items-center bg-white">
+                <p class="text-xs text-gray-500">
+                    <span id="reportGeneratedTime"></span>
+                </p>
+                <div class="flex space-x-3">
+                    <button id="closeReportBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                        Kapat
+                    </button>
+                    <button id="downloadReportPdfBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2 font-medium shadow-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>PDF Olarak İndir</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

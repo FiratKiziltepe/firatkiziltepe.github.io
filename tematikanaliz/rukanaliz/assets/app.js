@@ -108,7 +108,9 @@ const state = {
     parallelProcessing: localStorage.getItem('parallel_processing') === 'true',
     // Partial save tracking
     completedColumns: [], // Track which columns are completed
-    partialAnalysisId: null // ID for partial saves
+    partialAnalysisId: null, // ID for partial saves
+    // Detailed report
+    detailedReport: null // Store generated detailed report for PDF export
 };
 
 // Backward compatibility getter
@@ -874,6 +876,32 @@ function initializeEventListeners() {
     if (stopAnalysisBtn) {
         stopAnalysisBtn.addEventListener('click', stopAnalysis);
     }
+
+    // Detailed Report buttons
+    const generateDetailedReportBtn = document.getElementById('generateDetailedReportBtn');
+    const closeReportModalBtn = document.getElementById('closeReportModalBtn');
+    const closeReportBtn = document.getElementById('closeReportBtn');
+    const downloadReportPdfBtn = document.getElementById('downloadReportPdfBtn');
+
+    if (generateDetailedReportBtn) {
+        generateDetailedReportBtn.addEventListener('click', generateDetailedReport);
+    }
+
+    if (closeReportModalBtn) {
+        closeReportModalBtn.addEventListener('click', () => {
+            document.getElementById('detailedReportModal').classList.add('hidden');
+        });
+    }
+
+    if (closeReportBtn) {
+        closeReportBtn.addEventListener('click', () => {
+            document.getElementById('detailedReportModal').classList.add('hidden');
+        });
+    }
+
+    if (downloadReportPdfBtn) {
+        downloadReportPdfBtn.addEventListener('click', exportDetailedReportToPDF);
+    }
 }
 
 // Show prompt for partial analysis recovery
@@ -1127,7 +1155,7 @@ async function startAnalysis() {
         // Generate executive summary (only if we have results)
         if (Object.keys(state.analysisResults).length > 0) {
             const genAI = new GoogleGenerativeAI(state.apiKey);
-            state.executiveSummary = await generateExecutiveSummary(genAI);
+        state.executiveSummary = await generateExecutiveSummary(genAI);
         } else {
             state.executiveSummary = 'Analiz sonuçları yetersiz, özet oluşturulamadı.';
         }
@@ -1459,9 +1487,9 @@ async function analyzeColumn(genAI, columnName) {
         updateActiveApiKeyDisplay();
 
         try {
-            const batchResult = await analyzeBatch(genAI, batch, columnName);
+        const batchResult = await analyzeBatch(genAI, batch, columnName);
             if (batchResult && batchResult.items) {
-                results.push(...batchResult.items);
+        results.push(...batchResult.items);
             }
             hideApiStatus();
         } catch (error) {
@@ -1619,12 +1647,12 @@ ${JSON.stringify(promptData, null, 2)}
                 if (retries > 1) {
                     console.warn(`Rate limit hit, waiting ${retryDelay}ms before retry...`);
                     updateProgress(null, `Rate limit - ${Math.round(retryDelay/1000)}s bekleniyor...`);
-                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
                     retryDelay = Math.min(retryDelay * 1.5, 60000); // Max 60s
-                    retries--;
+                retries--;
                     apiKeysTriedCount = 0; // Reset for next retry round
-                    continue;
-                }
+                continue;
+            }
             }
             
             // Network error - simple retry
@@ -1864,12 +1892,427 @@ Türkçe, resmi ve öz bir dil kullan. Markdown formatında yaz.
     return 'Özet oluşturulurken bir hata oluştu.';
 }
 
+// ==================== DETAILED REPORT FUNCTIONS ====================
+
+// Prepare context with quotes for detailed report
+function prepareReportContext() {
+    const context = {
+        overview: {
+            totalRows: state.globalStats?.totalRows || 0,
+            totalColumns: state.globalStats?.totalColumns || 0,
+            totalCategories: state.globalStats?.totalCategories || 0,
+            totalThemes: state.globalStats?.totalThemes || 0
+        },
+        columns: {},
+        themeQuotes: {} // theme -> [quotes]
+    };
+
+    // Process each analyzed column
+    for (const columnName of state.selectedAnalysisColumns) {
+        const stats = state.stats[columnName];
+        if (!stats) continue;
+
+        // Get top categories and themes
+        const topCategories = Object.entries(stats.categoryCounts || {})
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        const topThemes = Object.entries(stats.themeCounts || {})
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15);
+
+        context.columns[columnName] = {
+            topCategories,
+            topThemes,
+            sentimentCounts: stats.sentimentCounts || {},
+            directionCounts: stats.directionCounts || {},
+            totalRows: stats.totalRows || 0,
+            actionableCount: stats.actionableCount || 0
+        };
+
+        // Collect quotes for each theme
+        const columnResults = state.analysisResults[columnName] || [];
+        
+        for (const result of columnResults) {
+            if (!result.topics) continue;
+            
+            for (const topic of result.topics) {
+                const theme = topic.subTheme || topic.mainCategory;
+                if (!theme) continue;
+
+                if (!context.themeQuotes[theme]) {
+                    context.themeQuotes[theme] = [];
+                }
+
+                // Find original text from rawData
+                const originalRow = state.rawData.find(r => 
+                    String(r[state.selectedIdColumn]) === String(result.entryId)
+                );
+                
+                if (originalRow && originalRow[columnName]) {
+                    const text = String(originalRow[columnName]).trim();
+                    // Only add non-empty texts, limit length
+                    if (text.length > 10 && text.length < 500) {
+                        context.themeQuotes[theme].push({
+                            text: text.length > 250 ? text.substring(0, 250) + '...' : text,
+                            sentiment: topic.sentiment,
+                            direction: topic.direction,
+                            column: columnName
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // Limit quotes per theme to 5 most representative
+    for (const theme in context.themeQuotes) {
+        const quotes = context.themeQuotes[theme];
+        // Prioritize diverse sentiments
+        const grouped = { positive: [], negative: [], neutral: [] };
+        for (const q of quotes) {
+            const s = (q.sentiment || 'neutral').toLowerCase();
+            if (s.includes('pozitif') || s.includes('positive')) grouped.positive.push(q);
+            else if (s.includes('negatif') || s.includes('negative')) grouped.negative.push(q);
+            else grouped.neutral.push(q);
+        }
+        
+        // Select max 5 with diversity
+        const selected = [];
+        const pools = [grouped.negative, grouped.positive, grouped.neutral];
+        let poolIndex = 0;
+        
+        while (selected.length < 5) {
+            let found = false;
+            for (let i = 0; i < 3; i++) {
+                const pool = pools[(poolIndex + i) % 3];
+                if (pool.length > 0) {
+                    selected.push(pool.shift());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) break;
+            poolIndex++;
+        }
+        
+        context.themeQuotes[theme] = selected;
+    }
+
+    return context;
+}
+
+// Generate detailed report with AI
+async function generateDetailedReportWithAI(context) {
+    if (!state.apiKey) {
+        throw new Error('API anahtarı bulunamadı');
+    }
+
+    const genAI = new GoogleGenerativeAI(state.apiKey);
+
+    // Calculate content size for dynamic report length
+    const totalQuotes = Object.values(context.themeQuotes).flat().length;
+    const themeCount = Object.keys(context.themeQuotes).length;
+    
+    let reportLength = 'orta uzunlukta (2000-3000 kelime)';
+    if (themeCount > 15 || totalQuotes > 50) {
+        reportLength = 'kapsamlı (3500-5000 kelime)';
+    } else if (themeCount < 5) {
+        reportLength = 'özet (1000-1500 kelime)';
+    }
+
+    // Build context string
+    let contextStr = `
+## ARAŞTIRMA KAPSAMI
+- Toplam Katılımcı/Satır: ${context.overview.totalRows}
+- Analiz Edilen Soru Sayısı: ${context.overview.totalColumns}
+- Tespit Edilen Kategori Sayısı: ${context.overview.totalCategories}
+- Tespit Edilen Tema Sayısı: ${context.overview.totalThemes}
+
+## SÜTUN BAZLI BULGULAR
+`;
+
+    for (const [colName, colData] of Object.entries(context.columns)) {
+        contextStr += `
+### "${colName}"
+- Yanıt Sayısı: ${colData.totalRows}
+- Duygu Dağılımı: ${JSON.stringify(colData.sentimentCounts)}
+- Yön Dağılımı: ${JSON.stringify(colData.directionCounts)}
+- En Sık Temalar: ${colData.topThemes.slice(0, 5).map(([t, c]) => `${t} (${c})`).join(', ')}
+- Eyleme Dönüştürülebilir: ${colData.actionableCount} (${((colData.actionableCount / colData.totalRows) * 100).toFixed(1)}%)
+`;
+    }
+
+    contextStr += `
+## TEMA BAZLI ALINTILAR (Katılımcı İfadeleri)
+`;
+
+    // Add quotes for top themes
+    const sortedThemes = Object.entries(context.themeQuotes)
+        .sort((a, b) => b[1].length - a[1].length)
+        .slice(0, 20); // Top 20 themes with quotes
+
+    for (const [theme, quotes] of sortedThemes) {
+        if (quotes.length === 0) continue;
+        
+        contextStr += `
+### Tema: "${theme}"
+`;
+        for (const q of quotes) {
+            const sentimentLabel = q.sentiment || 'nötr';
+            contextStr += `- "${q.text}" [${sentimentLabel}]\n`;
+        }
+    }
+
+    const prompt = `Sen deneyimli bir nitel araştırma uzmanısın. Aşağıdaki tematik analiz verilerini kullanarak ${reportLength} bir nitel analiz raporu yaz.
+
+${contextStr}
+
+RAPOR YAPISI (Bu başlıkları kullan):
+
+# Detaylı Nitel Analiz Raporu
+
+## 1. Giriş ve Araştırma Kapsamı
+- Araştırmanın amacı ve kapsamını açıkla
+- Metodoloji hakkında kısa bilgi ver
+
+## 2. Tema Bazlı Detaylı Bulgular
+Her ana tema için:
+- Temanın tanımı ve önemi
+- İlgili alt temalar
+- Katılımcı alıntıları ile destekle (tırnak içinde italik olarak)
+- Sayısal verileri entegre et
+
+## 3. Duygu ve Yön Analizi
+- Genel duygu dağılımını yorumla
+- Pozitif ve negatif eğilimlerin nedenlerini analiz et
+- Eleştiri-Öneri dengesini değerlendir
+
+## 4. Temalar Arası İlişkiler
+- Birbiriyle bağlantılı temaları belirle
+- Örüntüleri ve örüntü dışı durumları açıkla
+
+## 5. Kritik İçgörüler
+- En önemli bulgular
+- Dikkat çeken örüntüler
+- Beklenmedik sonuçlar
+
+## 6. Öneriler
+- Kısa vadeli eylem önerileri
+- Uzun vadeli stratejik öneriler
+
+## 7. Sonuç
+- Temel bulguların özeti
+- Genel değerlendirme
+
+YAZIM KURALLARI:
+- Türkçe, akademik ve profesyonel bir dil kullan
+- Katılımcı alıntılarını "*italik*" ve tırnak içinde yaz
+- Sayısal verileri parantez içinde belirt
+- Her temayı en az 2-3 alıntı ile destekle
+- Markdown formatında yaz (başlıklar için #, ## kullan)
+- Akıcı ve tutarlı bir anlatım kullan
+`;
+
+    const model = genAI.getGenerativeModel({
+        model: state.selectedModel,
+        generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 8192,
+        },
+    });
+
+    let retries = 5;
+    let retryDelay = 5000;
+
+    while (retries > 0) {
+        try {
+            const result = await model.generateContent(prompt);
+            return result.response.text() || 'Rapor oluşturulamadı.';
+        } catch (e) {
+            const isRateLimit = e.message.includes('429') || e.message.includes('Quota exceeded');
+            if (isRateLimit && retries > 1) {
+                console.warn(`Rate limit hit (Report), retrying in ${retryDelay}ms...`, e);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                retryDelay *= 1.5;
+                retries--;
+                continue;
+            }
+            console.error('Report generation error:', e);
+            throw e;
+        }
+    }
+    throw new Error('Rapor oluşturulamadı - maksimum deneme sayısına ulaşıldı.');
+}
+
+// Main function to generate detailed report
+async function generateDetailedReport() {
+    const modal = document.getElementById('detailedReportModal');
+    const loadingState = document.getElementById('reportLoadingState');
+    const contentWrapper = document.getElementById('reportContentWrapper');
+    const reportContent = document.getElementById('detailedReportContent');
+    const footer = document.getElementById('reportFooter');
+    const progressBar = document.getElementById('reportProgressBar');
+    const progressText = document.getElementById('reportProgressText');
+
+    // Show modal with loading
+    modal.classList.remove('hidden');
+    loadingState.classList.remove('hidden');
+    contentWrapper.classList.add('hidden');
+    footer.classList.add('hidden');
+    progressBar.style.width = '0%';
+
+    try {
+        // Step 1: Prepare context
+        progressText.textContent = 'Temalar ve alıntılar hazırlanıyor...';
+        progressBar.style.width = '20%';
+        await new Promise(r => setTimeout(r, 300));
+
+        const context = prepareReportContext();
+        
+        progressText.textContent = 'AI ile detaylı rapor oluşturuluyor...';
+        progressBar.style.width = '40%';
+        await new Promise(r => setTimeout(r, 300));
+
+        // Step 2: Generate report with AI
+        const report = await generateDetailedReportWithAI(context);
+        
+        progressBar.style.width = '90%';
+        progressText.textContent = 'Rapor formatlanıyor...';
+        await new Promise(r => setTimeout(r, 300));
+
+        // Step 3: Display report
+        reportContent.innerHTML = formatMarkdown(report);
+        
+        // Store report for PDF export
+        state.detailedReport = report;
+        
+        // Update timestamp
+        const now = new Date();
+        document.getElementById('reportGeneratedTime').textContent = 
+            `Oluşturulma: ${now.toLocaleDateString('tr-TR')} ${now.toLocaleTimeString('tr-TR')}`;
+
+        progressBar.style.width = '100%';
+        await new Promise(r => setTimeout(r, 200));
+
+        // Show content
+        loadingState.classList.add('hidden');
+        contentWrapper.classList.remove('hidden');
+        footer.classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Detailed report error:', error);
+        loadingState.classList.add('hidden');
+        contentWrapper.classList.remove('hidden');
+        footer.classList.remove('hidden');
+        reportContent.innerHTML = `
+            <div class="text-center py-10">
+                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Rapor Oluşturulamadı</h3>
+                <p class="mt-2 text-sm text-gray-500">${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Export detailed report to PDF
+async function exportDetailedReportToPDF() {
+    if (!state.detailedReport) {
+        alert('Önce rapor oluşturulmalıdır.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15;
+    let yPosition = 20;
+
+    // Helper function for page breaks
+    const checkPageBreak = (neededSpace) => {
+        if (yPosition + neededSpace > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 20;
+        }
+    };
+
+    // Title
+    pdf.setFontSize(18);
+    pdf.setTextColor(88, 28, 135); // Purple
+    pdf.text('Detaylı Nitel Analiz Raporu', margin, yPosition);
+    yPosition += 10;
+
+    // Date
+    pdf.setFontSize(9);
+    pdf.setTextColor(107, 114, 128);
+    const now = new Date();
+    pdf.text(`Oluşturulma: ${now.toLocaleDateString('tr-TR')} ${now.toLocaleTimeString('tr-TR')}`, margin, yPosition);
+    yPosition += 15;
+
+    // Clean markdown and format for PDF
+    const cleanText = state.detailedReport
+        .replace(/#{1,6}\s/g, '') // Remove markdown headers
+        .replace(/\*\*/g, '')     // Remove bold
+        .replace(/\*/g, '')       // Remove italic
+        .replace(/<[^>]*>/g, '')  // Remove HTML tags
+        .replace(/\n{3,}/g, '\n\n'); // Reduce multiple newlines
+
+    // Split into paragraphs
+    const paragraphs = cleanText.split('\n\n');
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(55, 65, 81);
+
+    for (const para of paragraphs) {
+        if (!para.trim()) continue;
+
+        // Check if it's a section header (all caps or starts with number)
+        const isHeader = /^[0-9]+\./.test(para.trim()) || para.trim().length < 50;
+        
+        if (isHeader && para.trim().length < 80) {
+            checkPageBreak(12);
+            pdf.setFontSize(12);
+            pdf.setTextColor(31, 41, 55);
+            pdf.text(para.trim(), margin, yPosition);
+            yPosition += 8;
+            pdf.setFontSize(10);
+            pdf.setTextColor(55, 65, 81);
+        } else {
+            const lines = pdf.splitTextToSize(para.trim(), pageWidth - (margin * 2));
+            
+            for (const line of lines) {
+                checkPageBreak(6);
+                pdf.text(line, margin, yPosition);
+                yPosition += 5;
+            }
+            yPosition += 3;
+        }
+    }
+
+    // Footer on each page
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(156, 163, 175);
+        pdf.text(`Sayfa ${i} / ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    }
+
+    // Download
+    const fileName = `detayli_analiz_raporu_${now.toISOString().split('T')[0]}.pdf`;
+    pdf.save(fileName);
+}
+
 function updateProgress(percentage, text) {
     if (percentage !== null && percentage !== undefined) {
-        document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressBar').style.width = percentage + '%';
     }
     if (text) {
-        document.getElementById('progressText').textContent = text;
+    document.getElementById('progressText').textContent = text;
     }
 }
 
@@ -2065,8 +2508,8 @@ function updateCharts(filteredData) {
     const categoryCtx = document.getElementById('categoryChart');
     if (categoryCtx) {
         state.charts.categoryChart = new Chart(categoryCtx, {
-            type: 'bar',
-            data: {
+                type: 'bar',
+                data: {
                 labels: categories,
                 datasets: [
                     { label: 'Talep/İstek', data: dsRequest, backgroundColor: '#3B82F6', stack: 'Stack 0' },
@@ -2074,10 +2517,10 @@ function updateCharts(filteredData) {
                     { label: 'Memnuniyet', data: dsSatisfaction, backgroundColor: '#10B981', stack: 'Stack 0' },
                     { label: 'Tespit', data: dsDetection, backgroundColor: '#9CA3AF', stack: 'Stack 0' }
                 ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
                 maintainAspectRatio: false,
                 scales: { 
                     x: { stacked: true, beginAtZero: true, grace: '10%' }, 
@@ -2114,19 +2557,19 @@ function updateCharts(filteredData) {
     const themeCtx = document.getElementById('themeChart');
     if (themeCtx) {
         state.charts.themeChart = new Chart(themeCtx, {
-            type: 'bar',
-            data: {
+                type: 'bar',
+                data: {
                 labels: sortedThemes.map(t => t[0]),
-                datasets: [{
+                    datasets: [{
                     label: 'Frekans',
                     data: sortedThemes.map(t => t[1].count),
                     backgroundColor: sortedThemes.map(t => getDirectionColor(t[1].direction)),
                     borderRadius: 4
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
                 maintainAspectRatio: false,
                 layout: { padding: { right: 40 } },
                 scales: { x: { beginAtZero: true, grace: '10%' } },
@@ -2163,18 +2606,18 @@ function updateCharts(filteredData) {
     const sentimentCtx = document.getElementById('sentimentChart');
     if (sentimentCtx) {
         state.charts.sentimentChart = new Chart(sentimentCtx, {
-            type: 'pie',
-            data: {
+                type: 'pie',
+                data: {
                 labels: sentimentLabels,
-                datasets: [{
+                    datasets: [{
                     data: sentimentValues,
                     backgroundColor: bgColors,
                     borderWidth: 1,
                     borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10 } },
@@ -2623,36 +3066,36 @@ function autoSaveAnalysis() {
     if (!state.currentAnalysisId) return;
     
     try {
-        const analysis = {
-            id: state.currentAnalysisId,
-            timestamp: Date.now(),
-            rawData: state.rawData,
-            columns: state.columns,
-            selectedIdColumn: state.selectedIdColumn,
-            selectedAnalysisColumns: state.selectedAnalysisColumns,
-            analysisResults: state.analysisResults,
-            enrichedData: state.enrichedData,
-            stats: state.stats,
-            globalStats: state.globalStats,
-            executiveSummary: state.executiveSummary
-        };
+    const analysis = {
+        id: state.currentAnalysisId,
+        timestamp: Date.now(),
+        rawData: state.rawData,
+        columns: state.columns,
+        selectedIdColumn: state.selectedIdColumn,
+        selectedAnalysisColumns: state.selectedAnalysisColumns,
+        analysisResults: state.analysisResults,
+        enrichedData: state.enrichedData,
+        stats: state.stats,
+        globalStats: state.globalStats,
+        executiveSummary: state.executiveSummary
+    };
         
         // Compress data for storage
         const compressedAnalysis = compressAnalysisForStorage(analysis);
-        
-        // Get existing analyses
+    
+    // Get existing analyses
         let analyses = [];
         try {
             analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
         } catch (e) {
             analyses = [];
         }
-        
-        // Update or add current analysis
-        const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
-        if (existingIndex >= 0) {
+    
+    // Update or add current analysis
+    const existingIndex = analyses.findIndex(a => a.id === state.currentAnalysisId);
+    if (existingIndex >= 0) {
             analyses[existingIndex] = compressedAnalysis;
-        } else {
+    } else {
             analyses.unshift(compressedAnalysis);
         }
         
@@ -2689,9 +3132,9 @@ function autoSaveAnalysis() {
                 }
             }
         }
-        
-        // Update history button state
-        updateHistoryButtonState();
+    
+    // Update history button state
+    updateHistoryButtonState();
         
     } catch (error) {
         console.error('Auto-save error:', error);
@@ -2717,7 +3160,7 @@ function saveCurrentAnalysis() {
     }
     
     try {
-        autoSaveAnalysis();
+    autoSaveAnalysis();
         
         // Check if save was successful
         const analyses = JSON.parse(localStorage.getItem('saved_analyses') || '[]');
