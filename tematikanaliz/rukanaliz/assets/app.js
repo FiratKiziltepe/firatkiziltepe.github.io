@@ -902,6 +902,12 @@ function initializeEventListeners() {
     if (downloadReportPdfBtn) {
         downloadReportPdfBtn.addEventListener('click', exportDetailedReportToPDF);
     }
+
+    // Copy report button
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    if (copyReportBtn) {
+        copyReportBtn.addEventListener('click', copyReportToClipboard);
+    }
 }
 
 // Show prompt for partial analysis recovery
@@ -2118,7 +2124,7 @@ YAZIM KURALLARI:
         model: state.selectedModel,
         generationConfig: {
             temperature: 0.4,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 32768, // Increased for longer reports
         },
     });
 
@@ -2214,6 +2220,39 @@ async function generateDetailedReport() {
                 <p class="mt-2 text-sm text-gray-500">${error.message}</p>
             </div>
         `;
+    }
+}
+
+// Copy report to clipboard
+async function copyReportToClipboard() {
+    if (!state.detailedReport) {
+        alert('Önce rapor oluşturulmalıdır.');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(state.detailedReport);
+        
+        // Visual feedback
+        const copyBtn = document.getElementById('copyReportBtn');
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = `
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Kopyalandı!</span>
+        `;
+        copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+        copyBtn.classList.add('bg-green-500');
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+            copyBtn.classList.remove('bg-green-500');
+            copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        }, 2000);
+    } catch (err) {
+        console.error('Copy failed:', err);
+        alert('Kopyalama başarısız oldu. Lütfen metni manuel olarak seçip kopyalayın.');
     }
 }
 
