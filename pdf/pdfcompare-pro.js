@@ -1,851 +1,581 @@
 /*
- * DRAFTABLE-STYLE PDF COMPARISON
- * Simple, Clean Implementation
- * Using: PDF.js + diff_match_patch
+ * ProCompare - Logic Script
+ * Handles file parsing (PDF, DOCX, XLSX) and comparison
  */
-
-// ==================== PDF.js Setup ====================
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 // ==================== Global State ====================
 const state = {
-    pdf1: {
-        file: null,
-        document: null,
-        currentPage: 1,
-        totalPages: 0,
-        text: [] // Array of {pageNum, text}
-    },
-    pdf2: {
-        file: null,
-        document: null,
-        currentPage: 1,
-        totalPages: 0,
-        text: []
-    },
-    comparison: {
-        diffs: [], // diff_match_patch results
-        changes: [], // Processed changes with page info
-        highlights: { pdf1: {}, pdf2: {} } // Page-wise highlights
-    },
+    file1: { text: null, name: null },
+    file2: { text: null, name: null },
+    diffs: [],
+    changes: [], // Processed changes for sidebar
     settings: {
-        zoomLevel: 1.0,
-        syncScroll: true,
-        showHighlights: true
-    },
-    ui: {
-        currentPage: 1,
-        isComparing: false
+        ignoreCase: false,
+        ignoreWhitespace: true
     }
 };
 
 // ==================== DOM Elements ====================
 const el = {
-    // Upload
-    uploadBtn1: document.getElementById('uploadBtn1'),
-    uploadBtn2: document.getElementById('uploadBtn2'),
+    dropZone1: document.getElementById('dropZone1'),
+    dropZone2: document.getElementById('dropZone2'),
     fileInput1: document.getElementById('fileInput1'),
     fileInput2: document.getElementById('fileInput2'),
-    fileName1: document.getElementById('fileName1'),
-    fileName2: document.getElementById('fileName2'),
-
-    // Canvas
-    canvas1: document.getElementById('canvas1'),
-    canvas2: document.getElementById('canvas2'),
-    leftCanvasContainer: document.getElementById('leftCanvasContainer'),
-    rightCanvasContainer: document.getElementById('rightCanvasContainer'),
-    textLayer1: document.getElementById('textLayer1'),
-    textLayer2: document.getElementById('textLayer2'),
-    highlightOverlay1: document.getElementById('highlightOverlay1'),
-    highlightOverlay2: document.getElementById('highlightOverlay2'),
-
-    // Controls
+    textInput1: document.getElementById('textInput1'),
+    textInput2: document.getElementById('textInput2'),
+    fileInfo1: document.getElementById('fileInfo1'),
+    fileInfo2: document.getElementById('fileInfo2'),
     compareBtn: document.getElementById('compareBtn'),
-    zoomIn: document.getElementById('zoomIn'),
-    zoomOut: document.getElementById('zoomOut'),
-    zoomSelect: document.getElementById('zoomSelect'),
-    prevPage: document.getElementById('prevPage'),
-    nextPage: document.getElementById('nextPage'),
-    pageInfo: document.getElementById('pageInfo'),
-    syncScrollBtn: document.getElementById('syncScrollBtn'),
-    toggleHighlights: document.getElementById('toggleHighlights'),
-    prevChange: document.getElementById('prevChange'),
-    nextChange: document.getElementById('nextChange'),
-
-    // Sidebar
-    changesSidebar: document.getElementById('changesSidebar'),
-    changesList: document.getElementById('changesList'),
-    addedCount: document.getElementById('addedCount'),
-    deletedCount: document.getElementById('deletedCount'),
-    modifiedCount: document.getElementById('modifiedCount'),
-    movedCount: document.getElementById('movedCount'),
-    totalAdded: document.getElementById('totalAdded'),
-    totalDeleted: document.getElementById('totalDeleted'),
-    totalModified: document.getElementById('totalModified'),
-    totalMoved: document.getElementById('totalMoved'),
-    totalAddedWords: document.getElementById('totalAddedWords'),
-    totalDeletedWords: document.getElementById('totalDeletedWords'),
-    exportBtn: document.getElementById('exportBtn'),
-
-    // Content panels
-    leftContent: document.getElementById('leftContent'),
-    rightContent: document.getElementById('rightContent'),
-
-    // Loading
+    clearBtn: document.getElementById('clearBtn'),
+    resultsSection: document.getElementById('resultsSection'),
+    uploadSection: document.getElementById('uploadSection'),
+    unifiedView: document.getElementById('unifiedView'),
+    splitOriginal: document.getElementById('splitOriginal'),
+    splitModified: document.getElementById('splitModified'),
     loadingOverlay: document.getElementById('loadingOverlay'),
-    loadingText: document.getElementById('loadingText'),
-    progressFill: document.getElementById('progressFill')
+    themeSwitch: document.getElementById('themeSwitch'),
+    exportHtmlBtn: document.getElementById('exportHtmlBtn'),
+
+    // New Elements
+    navHistory: document.getElementById('navHistory'),
+    navSettings: document.getElementById('navSettings'),
+    changesList: document.getElementById('changesList'),
+    changeSearch: document.getElementById('changeSearch'),
+    filterChips: document.querySelectorAll('.filter-chip'),
+    toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
+    closeSidebarBtn: document.getElementById('closeSidebarBtn'),
+    changesSidebar: document.getElementById('changesSidebar'),
+    historyList: document.getElementById('historyList')
 };
 
 // ==================== Initialization ====================
-function init() {
+document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
-}
+    setupTheme();
+    loadSettings();
+
+    // PDF.js Worker Setup
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+});
 
 function setupEventListeners() {
-    // File upload
-    el.uploadBtn1.addEventListener('click', () => el.fileInput1.click());
-    el.uploadBtn2.addEventListener('click', () => el.fileInput2.click());
-    el.fileInput1.addEventListener('change', (e) => handleFileSelect(e, 1));
-    el.fileInput2.addEventListener('change', (e) => handleFileSelect(e, 2));
+    // File Inputs
+    el.fileInput1.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 1));
+    el.fileInput2.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 2));
 
-    // Compare button
+    // Drag & Drop
+    setupDragDrop(el.dropZone1, 1);
+    setupDragDrop(el.dropZone2, 2);
+
+    // Text Inputs
+    el.textInput1.addEventListener('input', (e) => {
+        state.file1.text = e.target.value;
+        checkReady();
+    });
+    el.textInput2.addEventListener('input', (e) => {
+        state.file2.text = e.target.value;
+        checkReady();
+    });
+
+    // Actions
     el.compareBtn.addEventListener('click', startComparison);
+    el.clearBtn.addEventListener('click', clearAll);
+    el.themeSwitch.addEventListener('change', toggleTheme);
+    el.exportHtmlBtn.addEventListener('click', exportHtmlReport);
 
-    // Zoom controls
-    el.zoomIn.addEventListener('click', () => changeZoom(0.25));
-    el.zoomOut.addEventListener('click', () => changeZoom(-0.25));
-    el.zoomSelect.addEventListener('change', (e) => {
-        state.settings.zoomLevel = parseFloat(e.target.value);
-        renderCurrentPage();
-    });
+    // Navigation
+    if (el.navHistory) el.navHistory.addEventListener('click', showHistory);
+    if (el.navSettings) el.navSettings.addEventListener('click', showSettings);
 
-    // Page navigation
-    el.prevPage.addEventListener('click', () => navigatePage(-1));
-    el.nextPage.addEventListener('click', () => navigatePage(1));
+    // Sidebar & Filters
+    if (el.toggleSidebarBtn) el.toggleSidebarBtn.addEventListener('click', () => el.changesSidebar.classList.toggle('closed'));
+    if (el.closeSidebarBtn) el.closeSidebarBtn.addEventListener('click', () => el.changesSidebar.classList.add('closed'));
+    if (el.changeSearch) el.changeSearch.addEventListener('input', filterChanges);
 
-    // Sync scroll toggle
-    el.syncScrollBtn.addEventListener('click', toggleSyncScroll);
-
-    // Highlights toggle
-    el.toggleHighlights.addEventListener('click', toggleHighlights);
-
-    // Change navigation
-    el.prevChange.addEventListener('click', () => navigateChange(-1));
-    el.nextChange.addEventListener('click', () => navigateChange(1));
-
-    // Export
-    el.exportBtn.addEventListener('click', exportReport);
-
-    // Synchronized scrolling
-    el.leftContent.addEventListener('scroll', () => {
-        if (state.settings.syncScroll) {
-            el.rightContent.scrollTop = el.leftContent.scrollTop;
-            el.rightContent.scrollLeft = el.leftContent.scrollLeft;
-        }
-    });
-
-    el.rightContent.addEventListener('scroll', () => {
-        if (state.settings.syncScroll) {
-            el.leftContent.scrollTop = el.rightContent.scrollTop;
-            el.leftContent.scrollLeft = el.rightContent.scrollLeft;
-        }
-    });
-}
-
-// ==================== File Upload ====================
-async function handleFileSelect(event, pdfNum) {
-    const file = event.target.files[0];
-    if (!file || file.type !== 'application/pdf') {
-        alert('Lütfen geçerli bir PDF dosyası seçin!');
-        return;
-    }
-
-    showLoading(true, `PDF ${pdfNum} yükleniyor...`);
-
-    try {
-        const pdf = pdfNum === 1 ? state.pdf1 : state.pdf2;
-        pdf.file = file;
-
-        const arrayBuffer = await file.arrayBuffer();
-        pdf.document = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        pdf.totalPages = pdf.document.numPages;
-        pdf.currentPage = 1;
-
-        // Update UI
-        const fileName = pdfNum === 1 ? el.fileName1 : el.fileName2;
-        fileName.textContent = `${file.name} (${pdf.totalPages} sayfa)`;
-
-        // Hide welcome, show canvas
-        const container = pdfNum === 1 ? el.leftCanvasContainer : el.rightCanvasContainer;
-        container.style.display = 'block';
-        container.previousElementSibling.style.display = 'none'; // Hide welcome message
-
-        // Render first page
-        await renderPage(pdfNum, 1);
-
-        // Show compare button if both PDFs loaded
-        if (state.pdf1.document && state.pdf2.document) {
-            el.compareBtn.style.display = 'flex';
-        }
-
-    } catch (error) {
-        console.error(`PDF ${pdfNum} yükleme hatası:`, error);
-        alert(`PDF ${pdfNum} yüklenirken bir hata oluştu: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ==================== PDF Rendering ====================
-async function renderPage(pdfNum, pageNum) {
-    const pdf = pdfNum === 1 ? state.pdf1 : state.pdf2;
-    const canvas = pdfNum === 1 ? el.canvas1 : el.canvas2;
-
-    if (!pdf.document || pageNum < 1 || pageNum > pdf.totalPages) return;
-
-    try {
-        const page = await pdf.document.getPage(pageNum);
-        const viewport = page.getViewport({ scale: state.settings.zoomLevel });
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        const renderContext = {
-            canvasContext: canvas.getContext('2d'),
-            viewport: viewport
-        };
-
-        await page.render(renderContext).promise;
-
-        pdf.currentPage = pageNum;
-
-        // Render text layer for selection
-        await renderTextLayer(pdfNum, page, viewport);
-
-        // Render highlights if comparison done
-        if (state.comparison.changes.length > 0) {
-            renderHighlights(pdfNum, pageNum);
-        }
-
-        updatePageInfo();
-
-    } catch (error) {
-        console.error(`Sayfa ${pageNum} render hatası:`, error);
-    }
-}
-
-async function renderTextLayer(pdfNum, page, viewport) {
-    const textLayer = pdfNum === 1 ? el.textLayer1 : el.textLayer2;
-
-    // Clear existing
-    textLayer.innerHTML = '';
-    textLayer.style.width = viewport.width + 'px';
-    textLayer.style.height = viewport.height + 'px';
-
-    try {
-        const textContent = await page.getTextContent();
-
-        textContent.items.forEach(item => {
-            if (!item.str || item.str.trim() === '') return;
-
-            const tx = item.transform;
-            const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
-
-            const span = document.createElement('span');
-            span.textContent = item.str;
-            span.style.left = tx[4] + 'px';
-            span.style.top = (tx[5] - fontHeight) + 'px';
-            span.style.fontSize = fontHeight + 'px';
-            span.style.fontFamily = item.fontName;
-
-            // Store text for matching
-            span.dataset.text = item.str;
-            span.dataset.x = tx[4];
-            span.dataset.y = tx[5];
-
-            textLayer.appendChild(span);
-        });
-
-    } catch (error) {
-        console.error('Text layer error:', error);
-    }
-}
-
-async function renderCurrentPage() {
-    const pageNum = state.ui.currentPage;
-
-    if (pageNum <= state.pdf1.totalPages) {
-        await renderPage(1, pageNum);
-    }
-    if (pageNum <= state.pdf2.totalPages) {
-        await renderPage(2, pageNum);
-    }
-}
-
-// ==================== Text Extraction ====================
-async function extractAllText(pdf) {
-    const allText = [];
-
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-
-        let pageText = '';
-        textContent.items.forEach(item => {
-            if (item.str) {
-                pageText += item.str + ' ';
-            }
-        });
-
-        allText.push({
-            pageNum: pageNum,
-            text: pageText.trim()
+    if (el.filterChips) {
+        el.filterChips.forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                el.filterChips.forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                filterChanges();
+            });
         });
     }
 
-    return allText;
+    // View Toggles
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            switchView(e.currentTarget.dataset.view);
+        });
+    });
+
+    // Scroll Sync
+    setupScrollSync();
 }
 
-// ==================== Comparison (diff_match_patch) ====================
-async function startComparison() {
-    if (!state.pdf1.document || !state.pdf2.document) {
-        alert('Lütfen iki PDF dosyası yükleyin!');
-        return;
-    }
+function setupScrollSync() {
+    let isSyncingLeft = false;
+    let isSyncingRight = false;
 
-    showLoading(true, 'PDF\'ler karşılaştırılıyor...');
-    state.ui.isComparing = true;
+    const leftPane = document.getElementById('splitOriginal');
+    const rightPane = document.getElementById('splitModified');
 
+    if (!leftPane || !rightPane) return;
+
+    leftPane.addEventListener('scroll', function () {
+        if (!isSyncingLeft) {
+            isSyncingRight = true;
+            rightPane.scrollTop = this.scrollTop;
+            rightPane.scrollLeft = this.scrollLeft;
+        }
+        isSyncingLeft = false;
+    });
+
+    rightPane.addEventListener('scroll', function () {
+        if (!isSyncingRight) {
+            isSyncingLeft = true;
+            leftPane.scrollTop = this.scrollTop;
+            leftPane.scrollLeft = this.scrollLeft;
+        }
+        isSyncingRight = false;
+    });
+}
+
+function setupDragDrop(zone, fileNum) {
+    if (!zone) return;
+
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+    });
+
+    zone.addEventListener('dragleave', () => {
+        zone.classList.remove('dragover');
+    });
+
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleFileSelect(e.dataTransfer.files[0], fileNum);
+        }
+    });
+}
+
+// ==================== File Handling ====================
+async function handleFileSelect(file, fileNum) {
+    if (!file) return;
+
+    showLoading(true);
     try {
-        // Extract text from both PDFs
-        updateProgress(20);
-        el.loadingText.textContent = 'Metinler çıkarılıyor...';
-        state.pdf1.text = await extractAllText(state.pdf1.document);
+        const text = await extractText(file);
 
-        updateProgress(40);
-        state.pdf2.text = await extractAllText(state.pdf2.document);
-
-        // Perform comparison
-        updateProgress(60);
-        el.loadingText.textContent = 'Karşılaştırma yapılıyor...';
-        performComparison();
-
-        // Extract text positions for highlighting
-        updateProgress(80);
-        el.loadingText.textContent = 'Vurgulama hazırlanıyor...';
-        await prepareHighlights();
-
-        // Update UI
-        updateProgress(100);
-        updateChangesPanel();
-        renderCurrentPage();
-
-        // Show changes sidebar
-        el.changesSidebar.style.display = 'flex';
-
-    } catch (error) {
-        console.error('Karşılaştırma hatası:', error);
-        alert('Karşılaştırma sırasında hata oluştu: ' + error.message);
-    } finally {
-        showLoading(false);
-        state.ui.isComparing = false;
-    }
-}
-
-function performComparison() {
-    const dmp = new diff_match_patch();
-    state.comparison.changes = [];
-
-    const maxPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-
-    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-        const page1 = state.pdf1.text.find(p => p.pageNum === pageNum);
-        const page2 = state.pdf2.text.find(p => p.pageNum === pageNum);
-
-        if (!page1 && page2) {
-            // Page added
-            state.comparison.changes.push({
-                pageNum: pageNum,
-                type: 'added',
-                addedText: page2.text,
-                deletedText: '',
-                wordCount: page2.text.split(/\s+/).length
-            });
-        } else if (page1 && !page2) {
-            // Page deleted
-            state.comparison.changes.push({
-                pageNum: pageNum,
-                type: 'deleted',
-                addedText: '',
-                deletedText: page1.text,
-                wordCount: page1.text.split(/\s+/).length
-            });
-        } else if (page1 && page2) {
-            // Compare page text
-            if (page1.text !== page2.text) {
-                // Run diff
-                const diffs = dmp.diff_main(page1.text, page2.text);
-                dmp.diff_cleanupSemantic(diffs); // Cleanup for better readability
-
-                // Count changes
-                let addedWords = 0;
-                let deletedWords = 0;
-                let addedChars = 0;
-                let deletedChars = 0;
-
-                diffs.forEach(([operation, text]) => {
-                    const words = text.split(/\s+/).filter(w => w.length > 0).length;
-                    if (operation === 1) { // DIFF_INSERT
-                        addedWords += words;
-                        addedChars += text.length;
-                    } else if (operation === -1) { // DIFF_DELETE
-                        deletedWords += words;
-                        deletedChars += text.length;
-                    }
-                });
-
-                if (addedWords > 0 || deletedWords > 0) {
-                    state.comparison.changes.push({
-                        pageNum: pageNum,
-                        type: 'modified',
-                        diffs: diffs,
-                        addedWords: addedWords,
-                        deletedWords: deletedWords,
-                        addedChars: addedChars,
-                        deletedChars: deletedChars
-                    });
-                }
-            }
-        }
-    }
-
-    console.log('Comparison complete:', state.comparison.changes);
-}
-
-// ==================== Highlight Preparation ====================
-async function prepareHighlights() {
-    state.comparison.highlights = { pdf1: {}, pdf2: {} };
-
-    for (const change of state.comparison.changes) {
-        const pageNum = change.pageNum;
-
-        if (change.type === 'added') {
-            // Highlight entire page 2
-            state.comparison.highlights.pdf2[pageNum] = [{
-                type: 'added',
-                text: change.addedText,
-                fullPage: true
-            }];
-        } else if (change.type === 'deleted') {
-            // Highlight entire page 1
-            state.comparison.highlights.pdf1[pageNum] = [{
-                type: 'deleted',
-                text: change.deletedText,
-                fullPage: true
-            }];
-        } else if (change.type === 'modified') {
-            // Process diffs to find specific text locations
-            await processModifiedPage(pageNum, change.diffs);
-        }
-    }
-}
-
-async function processModifiedPage(pageNum, diffs) {
-    if (!state.comparison.highlights.pdf1[pageNum]) {
-        state.comparison.highlights.pdf1[pageNum] = [];
-    }
-    if (!state.comparison.highlights.pdf2[pageNum]) {
-        state.comparison.highlights.pdf2[pageNum] = [];
-    }
-
-    // Extract deleted and added texts
-    diffs.forEach(([operation, text]) => {
-        if (operation === -1) { // DIFF_DELETE
-            state.comparison.highlights.pdf1[pageNum].push({
-                type: 'deleted',
-                text: text.trim()
-            });
-        } else if (operation === 1) { // DIFF_INSERT
-            state.comparison.highlights.pdf2[pageNum].push({
-                type: 'added',
-                text: text.trim()
-            });
-        }
-    });
-}
-
-// ==================== Highlight Rendering ====================
-function renderHighlights(pdfNum, pageNum) {
-    if (!state.settings.showHighlights) return;
-
-    const highlights = state.comparison.highlights[`pdf${pdfNum}`][pageNum];
-    if (!highlights || highlights.length === 0) return;
-
-    const textLayer = pdfNum === 1 ? el.textLayer1 : el.textLayer2;
-    const overlay = pdfNum === 1 ? el.highlightOverlay1 : el.highlightOverlay2;
-
-    // Clear existing highlights
-    textLayer.querySelectorAll('span').forEach(span => {
-        span.classList.remove('highlight-added', 'highlight-deleted', 'highlight-modified');
-    });
-    overlay.innerHTML = '';
-
-    // Set overlay size to match canvas
-    const canvas = pdfNum === 1 ? el.canvas1 : el.canvas2;
-    overlay.setAttribute('width', canvas.width);
-    overlay.setAttribute('height', canvas.height);
-    overlay.style.width = canvas.width + 'px';
-    overlay.style.height = canvas.height + 'px';
-
-    // Apply highlights
-    highlights.forEach(highlight => {
-        if (highlight.fullPage) {
-            // Highlight entire page
-            highlightEntirePage(overlay, highlight.type);
+        if (fileNum === 1) {
+            state.file1.text = text;
+            state.file1.name = file.name;
+            updateFileInfo(1, file.name);
+            el.textInput1.value = text;
         } else {
-            // Highlight specific text
-            highlightText(textLayer, highlight.text, highlight.type);
+            state.file2.text = text;
+            state.file2.name = file.name;
+            updateFileInfo(2, file.name);
+            el.textInput2.value = text;
+        }
+
+        checkReady();
+    } catch (error) {
+        console.error('Extraction error:', error);
+        alert(`Dosya okuma hatası: ${error.message}`);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function extractText(file) {
+    const type = file.type;
+    const name = file.name.toLowerCase();
+
+    if (type === 'application/pdf' || name.endsWith('.pdf')) {
+        return await extractPdfText(file);
+    } else if (type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || name.endsWith('.docx')) {
+        return await extractDocxText(file);
+    } else if (type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || name.endsWith('.xlsx')) {
+        return await extractExcelText(file);
+    } else if (type === 'text/plain' || name.endsWith('.txt')) {
+        return await extractPlainText(file);
+    } else {
+        throw new Error('Desteklenmeyen dosya formatı. Lütfen PDF, DOCX, XLSX veya TXT kullanın.');
+    }
+}
+
+// --- Extractors ---
+
+async function extractPdfText(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n\n';
+    }
+    return fullText.trim();
+}
+
+async function extractDocxText(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    return result.value.trim();
+}
+
+async function extractExcelText(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer);
+    let fullText = '';
+
+    workbook.SheetNames.forEach(sheetName => {
+        const sheet = workbook.Sheets[sheetName];
+        fullText += XLSX.utils.sheet_to_csv(sheet) + '\n\n';
+    });
+    return fullText.trim();
+}
+
+async function extractPlainText(file) {
+    return await file.text();
+}
+
+// ==================== UI Updates ====================
+function updateFileInfo(num, name) {
+    const info = num === 1 ? el.fileInfo1 : el.fileInfo2;
+    const input = num === 1 ? el.textInput1 : el.textInput2;
+
+    info.style.display = 'flex';
+    info.querySelector('.filename').textContent = name;
+    input.style.display = 'none';
+}
+
+function removeFile(num) {
+    if (num === 1) {
+        state.file1 = { text: null, name: null };
+        el.fileInfo1.style.display = 'none';
+        el.textInput1.style.display = 'block';
+        el.textInput1.value = '';
+        el.fileInput1.value = '';
+    } else {
+        state.file2 = { text: null, name: null };
+        el.fileInfo2.style.display = 'none';
+        el.textInput2.style.display = 'block';
+        el.textInput2.value = '';
+        el.fileInput2.value = '';
+    }
+    checkReady();
+}
+
+function checkReady() {
+    const hasText1 = state.file1.text && state.file1.text.trim().length > 0;
+    const hasText2 = state.file2.text && state.file2.text.trim().length > 0;
+    el.compareBtn.disabled = !(hasText1 && hasText2);
+}
+
+function showLoading(show) {
+    if (show) el.loadingOverlay.classList.add('active');
+    else el.loadingOverlay.classList.remove('active');
+}
+
+function clearAll() {
+    removeFile(1);
+    removeFile(2);
+    el.resultsSection.style.display = 'none';
+    el.uploadSection.style.display = 'flex';
+}
+
+// ==================== Comparison Logic ====================
+function startComparison() {
+    showLoading(true);
+
+    setTimeout(() => {
+        try {
+            const dmp = new diff_match_patch();
+            let text1 = state.file1.text || '';
+            let text2 = state.file2.text || '';
+
+            // Apply Settings
+            if (state.settings.ignoreCase) {
+                text1 = text1.toLowerCase();
+                text2 = text2.toLowerCase();
+            }
+            if (state.settings.ignoreWhitespace) {
+                text1 = text1.replace(/\s+/g, ' ').trim();
+                text2 = text2.replace(/\s+/g, ' ').trim();
+            }
+
+            const diffs = dmp.diff_main(text1, text2);
+            dmp.diff_cleanupSemantic(diffs);
+
+            // Detect Moves
+            const processedDiffs = detectMoves(diffs);
+            state.diffs = processedDiffs;
+
+            renderResults(processedDiffs);
+            saveToHistory(state.file1.name || 'Metin 1', state.file2.name || 'Metin 2');
+
+            el.uploadSection.style.display = 'none';
+            el.resultsSection.style.display = 'flex';
+
+            setupScrollSync();
+
+        } catch (error) {
+            console.error(error);
+            alert('Karşılaştırma sırasında bir hata oluştu.');
+        } finally {
+            showLoading(false);
+        }
+    }, 100);
+}
+
+// Moved Text Detection Logic
+function detectMoves(diffs) {
+    const deletedChunks = [];
+    const addedChunks = [];
+
+    // 1. Collect all significant deletions and additions
+    diffs.forEach((diff, index) => {
+        const [op, text] = diff;
+        if (text.length < 15) return; // Ignore very small changes
+
+        if (op === -1) deletedChunks.push({ index, text });
+        if (op === 1) addedChunks.push({ index, text });
+    });
+
+    // 2. Match deleted chunks with added chunks
+    deletedChunks.forEach(del => {
+        const match = addedChunks.find(add => !add.matched && add.text === del.text);
+        if (match) {
+            // Mark as moved
+            diffs[del.index][0] = -2; // Custom op for MOVED_FROM
+            diffs[match.index][0] = 2; // Custom op for MOVED_TO
+
+            // Link them
+            diffs[del.index][2] = match.index;
+            diffs[match.index][2] = del.index;
+
+            match.matched = true;
         }
     });
+
+    return diffs;
 }
 
-function highlightEntirePage(overlay, type) {
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('x', 0);
-    rect.setAttribute('y', 0);
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', '100%');
-    rect.setAttribute('class', `highlight-rect-${type}`);
-    overlay.appendChild(rect);
-}
+function renderResults(diffs) {
+    let htmlUnified = '';
+    let htmlOriginal = '';
+    let htmlModified = '';
 
-function highlightText(textLayer, searchText, type) {
-    // Ignore very short texts to prevent false positives
-    if (!searchText || searchText.length < 10) return;
+    state.changes = [];
 
-    const spans = Array.from(textLayer.querySelectorAll('span'));
-    const fullText = spans.map(s => s.textContent).join(' ');
-    const normalizedSearch = normalizeText(searchText);
-    const normalizedFull = normalizeText(fullText);
+    diffs.forEach(([op, text], index) => {
+        const escapedText = escapeHtml(text);
 
-    // Strategy 1: Try exact match first (PREFERRED)
-    const index = normalizedFull.indexOf(normalizedSearch);
-    if (index !== -1) {
-        // Calculate which spans contain this text
-        let currentPos = 0;
-        const matchStart = index;
-        const matchEnd = index + normalizedSearch.length;
-
-        spans.forEach(span => {
-            const spanText = normalizeText(span.textContent);
-            const spanStart = currentPos;
-            const spanEnd = currentPos + spanText.length;
-
-            // Check if span overlaps with match
-            if (spanStart < matchEnd && spanEnd > matchStart) {
-                span.classList.add(`highlight-${type}`);
-            }
-
-            currentPos = spanEnd + 1; // +1 for space
-        });
-        return;
-    }
-
-    // Strategy 2: Word-by-word matching (STRICT RULES to avoid false positives)
-    // Split into significant words (8+ chars, avoid common words)
-    const words = normalizedSearch.split(/\s+/).filter(w => w.length >= 8);
-
-    // Need at least 2 significant words to attempt word matching
-    if (words.length < 2) return;
-
-    // Track which words were found to ensure minimum match
-    let foundWords = 0;
-    const matchedSpans = new Set();
-
-    words.forEach(word => {
-        // Find FIRST occurrence only
-        let found = false;
-        spans.forEach(span => {
-            if (found) return; // Only match first occurrence
-
-            const spanText = normalizeText(span.textContent);
-
-            // STRICT: Must be exact word match (not just contains)
-            const spanWords = spanText.split(/\s+/);
-            if (spanWords.includes(word)) {
-                matchedSpans.add(span);
-                found = true;
-                foundWords++;
-            }
-        });
-    });
-
-    // Only apply highlights if we found at least half of the significant words
-    if (foundWords >= Math.ceil(words.length / 2)) {
-        matchedSpans.forEach(span => {
-            span.classList.add(`highlight-${type}`);
-        });
-    }
-}
-
-function normalizeText(text) {
-    return text.toLowerCase().replace(/\s+/g, ' ').trim();
-}
-
-// ==================== Changes Panel ====================
-function updateChangesPanel() {
-    let totalAdded = 0;
-    let totalDeleted = 0;
-    let totalModified = 0;
-    let totalMoved = 0;
-    let totalAddedWords = 0;
-    let totalDeletedWords = 0;
-
-    let changesHTML = '';
-
-    state.comparison.changes.forEach(change => {
-        const { pageNum, type } = change;
-
-        if (type === 'added') {
-            totalAdded++;
-            totalAddedWords += change.wordCount || 0;
-            changesHTML += `
-                <div class="change-item" onclick="navigateToPage(${pageNum})">
-                    <div class="change-item-header">
-                        <span class="change-item-page">Sayfa ${pageNum}</span>
-                        <span class="change-badge added">Eklenen</span>
-                    </div>
-                    <div class="change-item-preview">Sayfa eklendi</div>
-                    <div class="change-item-stats">+${change.wordCount || 0} kelime</div>
-                </div>
-            `;
-        } else if (type === 'deleted') {
-            totalDeleted++;
-            totalDeletedWords += change.wordCount || 0;
-            changesHTML += `
-                <div class="change-item" onclick="navigateToPage(${pageNum})">
-                    <div class="change-item-header">
-                        <span class="change-item-page">Sayfa ${pageNum}</span>
-                        <span class="change-badge deleted">Silinen</span>
-                    </div>
-                    <div class="change-item-preview">Sayfa silindi</div>
-                    <div class="change-item-stats">-${change.wordCount || 0} kelime</div>
-                </div>
-            `;
-        } else if (type === 'modified') {
-            totalModified++;
-            totalAddedWords += change.addedWords || 0;
-            totalDeletedWords += change.deletedWords || 0;
-            changesHTML += `
-                <div class="change-item" onclick="navigateToPage(${pageNum})">
-                    <div class="change-item-header">
-                        <span class="change-item-page">Sayfa ${pageNum}</span>
-                        <span class="change-badge modified">Değişen</span>
-                    </div>
-                    <div class="change-item-stats">
-                        +${change.addedWords || 0} kelime eklendi, -${change.deletedWords || 0} kelime silindi
-                    </div>
-                </div>
-            `;
+        if (op === 1) { // Insert
+            htmlUnified += `<ins>${escapedText}</ins>`;
+            htmlModified += `<ins>${escapedText}</ins>`;
+            state.changes.push({ type: 'added', text: text });
+        } else if (op === -1) { // Delete
+            htmlUnified += `<del>${escapedText}</del>`;
+            htmlOriginal += `<del>${escapedText}</del>`;
+            state.changes.push({ type: 'deleted', text: text });
+        } else if (op === 2) { // Moved To (New Location)
+            htmlUnified += `<span class="moved-text" title="Taşınan Metin">${escapedText}</span>`;
+            htmlModified += `<span class="moved-text">${escapedText}</span>`;
+            state.changes.push({ type: 'moved', text: text });
+        } else if (op === -2) { // Moved From (Old Location)
+            htmlUnified += `<span class="moved-text" style="text-decoration: line-through; opacity: 0.5;">${escapedText}</span>`;
+            htmlOriginal += `<span class="moved-text">${escapedText}</span>`;
+        } else { // Equal
+            htmlUnified += escapedText;
+            htmlOriginal += escapedText;
+            htmlModified += escapedText;
         }
     });
 
-    // Update counts
-    el.addedCount.textContent = totalAdded;
-    el.deletedCount.textContent = totalDeleted;
-    el.modifiedCount.textContent = totalModified;
-    el.movedCount.textContent = totalMoved;
+    el.unifiedView.innerHTML = htmlUnified;
+    el.splitOriginal.innerHTML = htmlOriginal;
+    el.splitModified.innerHTML = htmlModified;
 
-    el.totalAdded.textContent = totalAdded + totalModified;
-    el.totalDeleted.textContent = totalDeleted + totalModified;
-    el.totalModified.textContent = totalModified;
-    el.totalMoved.textContent = totalMoved;
-    el.totalAddedWords.textContent = totalAddedWords;
-    el.totalDeletedWords.textContent = totalDeletedWords;
-
-    // Update list
-    if (changesHTML === '') {
-        changesHTML = '<div style="padding: 40px; text-align: center; color: #999;">Hiç fark bulunamadı! PDF\'ler aynı.</div>';
-    }
-    el.changesList.innerHTML = changesHTML;
+    populateSidebar();
 }
 
-// ==================== Navigation ====================
-function navigatePage(delta) {
-    const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-    const newPage = Math.max(1, Math.min(totalPages, state.ui.currentPage + delta));
-    navigateToPage(newPage);
-}
-
-function navigateToPage(pageNum) {
-    const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-    if (pageNum < 1 || pageNum > totalPages) return;
-
-    state.ui.currentPage = pageNum;
-    renderCurrentPage();
-}
-
-function navigateChange(delta) {
-    const currentPage = state.ui.currentPage;
-    const changes = state.comparison.changes;
-
-    if (changes.length === 0) return;
-
-    // Find current change index
-    let currentIndex = changes.findIndex(c => c.pageNum >= currentPage);
-    if (currentIndex === -1) currentIndex = 0;
-
-    // Navigate
-    const newIndex = currentIndex + delta;
-    if (newIndex >= 0 && newIndex < changes.length) {
-        navigateToPage(changes[newIndex].pageNum);
-    }
-}
-
-function updatePageInfo() {
-    const totalPages = Math.max(state.pdf1.totalPages, state.pdf2.totalPages);
-    el.pageInfo.textContent = `Sayfa ${state.ui.currentPage} / ${totalPages}`;
-
-    el.prevPage.disabled = state.ui.currentPage <= 1;
-    el.nextPage.disabled = state.ui.currentPage >= totalPages;
-}
-
-// ==================== Controls ====================
-function changeZoom(delta) {
-    state.settings.zoomLevel = Math.max(0.5, Math.min(2, state.settings.zoomLevel + delta));
-    el.zoomSelect.value = state.settings.zoomLevel;
-    renderCurrentPage();
-}
-
-function toggleSyncScroll() {
-    state.settings.syncScroll = !state.settings.syncScroll;
-    el.syncScrollBtn.setAttribute('data-active', state.settings.syncScroll);
-    el.syncScrollBtn.title = state.settings.syncScroll ? 'Scroll Kilidi ON' : 'Scroll Kilidi OFF';
-}
-
-function toggleHighlights() {
-    state.settings.showHighlights = !state.settings.showHighlights;
-    el.toggleHighlights.setAttribute('data-active', state.settings.showHighlights);
-    renderCurrentPage();
-}
-
-// ==================== Export ====================
-function exportReport() {
-    let report = '='.repeat(80) + '\n';
-    report += 'PDF KARŞILAŞTIRMA RAPORU (PROFESYONEL)\n';
-    report += '='.repeat(80) + '\n\n';
-
-    report += 'DOSYA BİLGİLERİ:\n';
-    report += '-'.repeat(80) + '\n';
-    report += `PDF 1: ${state.pdf1.file ? state.pdf1.file.name : 'N/A'} (${state.pdf1.totalPages} sayfa)\n`;
-    report += `PDF 2: ${state.pdf2.file ? state.pdf2.file.name : 'N/A'} (${state.pdf2.totalPages} sayfa)\n\n`;
-
-    report += 'DEĞİŞİKLİK ÖZETİ:\n';
-    report += '-'.repeat(80) + '\n';
-    const stats = calculateStats();
-    report += `Eklenen Sayfalar: ${stats.addedPages}\n`;
-    report += `Silinen Sayfalar: ${stats.deletedPages}\n`;
-    report += `Değiştirilen Sayfalar: ${stats.modifiedPages}\n\n`;
-
-    report += 'DETAYLI DEĞİŞİKLİKLER:\n';
-    report += '-'.repeat(80) + '\n';
-
-    // Added pages
-    const addedPages = state.comparison.changes.filter(c => c.type === 'added');
-    if (addedPages.length > 0) {
-        report += '\n[EKLENMİŞ SAYFALAR]\n\n';
-        addedPages.forEach(change => {
-            report += `Sayfa ${change.pageNum}:\n`;
-            report += `${change.addedText.substring(0, 500)}${change.addedText.length > 500 ? '...' : ''}\n\n`;
+function populateSidebar() {
+    el.changesList.innerHTML = '';
+    state.changes.forEach(change => {
+        const div = document.createElement('div');
+        div.className = `change-card ${change.type}`;
+        div.innerHTML = `
+            <div class="change-header">
+                <span>${getChangeLabel(change.type)}</span>
+            </div>
+            <div class="change-preview">${escapeHtml(change.text)}</div>
+        `;
+        div.addEventListener('click', () => {
+            // Scroll to text (Implementation would require mapping spans to changes)
         });
+        el.changesList.appendChild(div);
+    });
+}
+
+function getChangeLabel(type) {
+    if (type === 'added') return 'Eklendi';
+    if (type === 'deleted') return 'Silindi';
+    if (type === 'moved') return 'Taşındı';
+    return '';
+}
+
+function filterChanges() {
+    const query = el.changeSearch.value.toLowerCase();
+    const activeFilter = document.querySelector('.filter-chip.active').dataset.filter;
+
+    const cards = el.changesList.querySelectorAll('.change-card');
+    cards.forEach(card => {
+        const type = card.classList.contains('added') ? 'added' :
+            card.classList.contains('deleted') ? 'deleted' : 'moved';
+        const text = card.querySelector('.change-preview').textContent.toLowerCase();
+
+        const matchesType = activeFilter === 'all' || activeFilter === type;
+        const matchesQuery = text.includes(query);
+
+        card.style.display = matchesType && matchesQuery ? 'block' : 'none';
+    });
+}
+
+// ==================== History & Settings ====================
+function saveToHistory(name1, name2) {
+    const history = JSON.parse(localStorage.getItem('compareHistory') || '[]');
+    history.unshift({
+        date: new Date().toLocaleString(),
+        file1: name1,
+        file2: name2
+    });
+    if (history.length > 10) history.pop();
+    localStorage.setItem('compareHistory', JSON.stringify(history));
+}
+
+function showHistory() {
+    const history = JSON.parse(localStorage.getItem('compareHistory') || '[]');
+    el.historyList.innerHTML = history.map(item => `
+        <div class="history-item">
+            <div class="history-info">
+                <h4>${item.file1} vs ${item.file2}</h4>
+                <span class="history-date">${item.date}</span>
+            </div>
+        </div>
+    `).join('') || '<p style="text-align:center; color:#666;">Geçmiş bulunamadı.</p>';
+
+    toggleModal('historyModal', true);
+}
+
+function clearHistory() {
+    localStorage.removeItem('compareHistory');
+    showHistory();
+}
+
+function showSettings() {
+    document.getElementById('settingIgnoreCase').checked = state.settings.ignoreCase;
+    document.getElementById('settingIgnoreWhitespace').checked = state.settings.ignoreWhitespace;
+    toggleModal('settingsModal', true);
+}
+
+function saveSettings() {
+    state.settings.ignoreCase = document.getElementById('settingIgnoreCase').checked;
+    state.settings.ignoreWhitespace = document.getElementById('settingIgnoreWhitespace').checked;
+    localStorage.setItem('compareSettings', JSON.stringify(state.settings));
+    toggleModal('settingsModal', false);
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('compareSettings');
+    if (saved) state.settings = JSON.parse(saved);
+}
+
+function toggleModal(id, show) {
+    document.getElementById(id).style.display = show ? 'flex' : 'none';
+}
+
+// ==================== Utilities ====================
+function switchView(view) {
+    if (view === 'unified') {
+        el.unifiedView.style.display = 'block';
+        document.getElementById('splitView').style.display = 'none';
+    } else {
+        el.unifiedView.style.display = 'none';
+        document.getElementById('splitView').style.display = 'flex';
     }
+}
 
-    // Deleted pages
-    const deletedPages = state.comparison.changes.filter(c => c.type === 'deleted');
-    if (deletedPages.length > 0) {
-        report += '\n[SİLİNMİŞ SAYFALAR]\n\n';
-        deletedPages.forEach(change => {
-            report += `Sayfa ${change.pageNum}:\n`;
-            report += `${change.deletedText.substring(0, 500)}${change.deletedText.length > 500 ? '...' : ''}\n\n`;
-        });
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\n/g, "<br>");
+}
+
+function toggleTheme() {
+    if (el.themeSwitch.checked) {
+        document.body.setAttribute('data-theme', 'dark');
+    } else {
+        document.body.removeAttribute('data-theme');
     }
+}
 
-    // Modified pages
-    const modifiedPages = state.comparison.changes.filter(c => c.type === 'modified');
-    if (modifiedPages.length > 0) {
-        report += '\n[DEĞİŞTİRİLMİŞ SAYFALAR]\n\n';
-        modifiedPages.forEach(change => {
-            report += `Sayfa ${change.pageNum}:\n`;
-
-            // Process diffs to show actual changes
-            if (change.diffs && change.diffs.length > 0) {
-                change.diffs.forEach(([operation, text]) => {
-                    const trimmedText = text.trim();
-                    if (trimmedText.length === 0) return;
-
-                    if (operation === -1) { // DIFF_DELETE
-                        report += `- ${trimmedText}\n`;
-                    } else if (operation === 1) { // DIFF_INSERT
-                        report += `+ ${trimmedText}\n`;
-                    }
-                });
-            }
-            report += '\n';
-        });
+function setupTheme() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        el.themeSwitch.checked = true;
+        document.body.setAttribute('data-theme', 'dark');
     }
+}
 
-    report += '='.repeat(80) + '\n';
-    report += `Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}\n`;
+function exportHtmlReport() {
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Karşılaştırma Raporu</title>
+        <style>
+            body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+            ins { background: #dcfce7; color: #166534; text-decoration: none; border-bottom: 2px solid #10b981; }
+            del { background: #fee2e2; color: #991b1b; text-decoration: line-through; }
+            .moved-text { background-color: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 2px; }
+            .header { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Karşılaştırma Raporu</h1>
+            <p>Tarih: ${new Date().toLocaleString()}</p>
+        </div>
+        <div class="content">
+            ${el.unifiedView.innerHTML}
+        </div>
+    </body>
+    </html>
+    `;
 
-    // Download
-    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pdf_karsilastirma_${Date.now()}.txt`;
+    a.download = 'karsilastirma-raporu.html';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
-
-function calculateStats() {
-    let addedPages = 0;
-    let deletedPages = 0;
-    let modifiedPages = 0;
-    let totalAddedWords = 0;
-    let totalDeletedWords = 0;
-
-    state.comparison.changes.forEach(change => {
-        if (change.type === 'added') {
-            addedPages++;
-            totalAddedWords += change.wordCount || 0;
-        } else if (change.type === 'deleted') {
-            deletedPages++;
-            totalDeletedWords += change.wordCount || 0;
-        } else if (change.type === 'modified') {
-            modifiedPages++;
-            totalAddedWords += change.addedWords || 0;
-            totalDeletedWords += change.deletedWords || 0;
-        }
-    });
-
-    return { addedPages, deletedPages, modifiedPages, totalAddedWords, totalDeletedWords };
-}
-
-// ==================== UI Helpers ====================
-function showLoading(show, text = 'Yükleniyor...') {
-    el.loadingOverlay.style.display = show ? 'flex' : 'none';
-    if (show) {
-        el.loadingText.textContent = text;
-        updateProgress(0);
-    }
-}
-
-function updateProgress(percent) {
-    el.progressFill.style.width = `${percent}%`;
-}
-
-// ==================== Start ====================
-document.addEventListener('DOMContentLoaded', init);

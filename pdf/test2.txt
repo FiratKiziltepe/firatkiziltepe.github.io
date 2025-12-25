@@ -1,0 +1,4 @@
+Bu bir test dosyasıdır.
+Bu satır değişmeyecek.
+Bu satır eklendi.
+Bu satır değişecek (yeni).

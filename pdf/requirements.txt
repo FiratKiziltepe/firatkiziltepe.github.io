@@ -1,0 +1,6 @@
+pdfplumber
+python-docx
+pandas
+openpyxl
+diff-match-patch
+beautifulsoup4
