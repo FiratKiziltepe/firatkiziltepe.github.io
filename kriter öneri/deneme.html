@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEB Kriter Asistanı (AI Destekli)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --success: #10b981;
+            --accent: #7c3aed;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .brand h1 { margin: 0; font-size: 1.5rem; color: var(--text); }
+        .brand p { margin: 0.5rem 0 0; color: var(--secondary); font-size: 0.9rem; }
+
+        /* API Settings */
+        .api-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            transition: all 0.2s;
+        }
+        .api-toggle-btn:hover { background: #f1f5f9; color: var(--text); }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+        }
+        .status-dot.active { background: var(--success); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+
+        .api-panel {
+            display: none;
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            animation: slideDown 0.3s ease;
+        }
+        .api-panel.show { display: block; }
+        .api-input-group { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .api-input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        
+        /* Search Area */
+        .search-wrapper {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            transition: box-shadow 0.3s;
+        }
+        .search-wrapper:focus-within { box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1); border-color: var(--primary); }
+
+        textarea {
+            width: 100%;
+            border: none;
+            resize: none;
+            font-size: 1.1rem;
+            font-family: inherit;
+            outline: none;
+            min-height: 80px;
+            color: var(--text);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .live-indicator {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .live-indicator.visible { opacity: 1; }
+
+        .btn-ai {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .btn-ai:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+        .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
+        
+        .btn-save { background: var(--primary); color: white; border: none; padding: 0 1.5rem; border-radius: 6px; cursor: pointer; }
+
+        /* Results */
+        .results-container { margin-top: 2rem; }
+        
+        .result-badge {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .badge-pill { background: #e0e7ff; color: var(--accent); padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; }
+        .badge-pill.local { background: #f1f5f9; color: var(--secondary); }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: transform 0.2s;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .card:hover { border-color: var(--primary); }
+
+        .card-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        
+        .code-display {
+            background: #eff6ff;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+            min-width: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .code-display:hover { background: #dbeafe; }
+
+        .card-content h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text); }
+        .section-tag { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--secondary); margin-bottom: 0.25rem; display: block; }
+
+        .ai-reason {
+            background: #fdf4ff;
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+            color: #581c87;
+        }
+
+        .details-list {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        .details-title { font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem; }
+        .details-list ul { margin: 0; padding-left: 1.2rem; color: #475569; font-size: 0.95rem; }
+        .details-list li { margin-bottom: 0.5rem; }
+
+        /* Utility */
+        .spinner { width: 20px; height: 20px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        .empty-state { text-align: center; padding: 3rem; color: var(--secondary); }
+        .empty-icon { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.5; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .card-header { flex-direction: column; }
+            .code-display { width: 100%; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <h1>Kriter Asistanı</h1>
+            <p>Hızlı Tespit & Akıllı Öneri Sistemi</p>
+        </div>
+        <button id="apiToggle" class="api-toggle-btn">
+            <span id="apiStatusDot" class="status-dot"></span>
+            <span id="apiStatusText">API Ayarı</span>
+        </button>
+    </header>
+
+    <div id="apiPanel" class="api-panel">
+        <h3>Google Gemini API Ayarları</h3>
+        <p style="font-size: 0.9rem; color: var(--secondary);">AI önerilerini kullanmak için bir Gemini API anahtarı giriniz. Anahtar sadece tarayıcınızda saklanır.</p>
+        <div class="api-input-group">
+            <input type="password" id="apiKeyInput" placeholder="API Anahtarınızı buraya yapıştırın (AI Studio'dan alınmış)">
+            <button id="saveApiKey" class="btn-save">Kaydet</button>
+        </div>
+    </div>
+
+    <main>
+        <div class="search-wrapper">
+            <textarea id="searchInput" placeholder="Hatayı buraya yazın... (Örn: Cevap anahtarı yanlış, görsel alt yazısı eksik, e-içerik açılmıyor)"></textarea>
+            <div class="action-bar">
+                <div id="liveIndicator" class="live-indicator">
+                    <span>🔍</span> Kelime bazlı aranıyor...
+                </div>
+                <button id="aiSearchBtn" class="btn-ai" disabled>
+                    <span>✨ YZ ile Öneri Getir</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="resultsArea" class="results-container">
+            <div class="empty-state">
+                <span class="empty-icon">📝</span>
+                <p>Bir inceleme tespiti yazmaya başlayın.<br>Hızlı sonuçlar anında listelenir, detaylı analiz için YZ butonunu kullanın.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    /**
+     * VERİ HAVUZU (criteria.json içeriği buraya gömüldü)
+     * Uygulamanın tek dosya olarak çalışması için veriyi buraya ekliyoruz.
+     */
+    const CRITERIA_DATA = [
+      {
+        "main_code": "1",
+        "main_title": "ANAYASA VE DİĞER MEVZUATA UYGUNLUĞU",
+        "code": "1.1.1",
+        "section": "1.1 Genel",
+        "title": "İçerikte Anayasa, taraf olduğumuz milletlerarası anlaşmalar, kanunlar ve diğer mevzuata aykırı bir husus bulunmamalıdır.",
+        "details": [
+          "İçerik, Anayasa’da ve Millî Eğitim Temel Kanunu’nda açıkça hükme bağlanmış eşitlik ilkesi gözetilerek temel insan hak ve özgürlük lerini destekleyen ve her türlü ayrımcılığı reddeden bir yaklaşımla hazırlanmalıdır.",
+          "İçerik; demokratik, laik ve sosyal bir hukuk devleti olan Türkiye Cumhuriyeti’ne karşı görev ve sorumluluklarını bilen ve bunları dav ranış hâline getirmiş vatandaşlar yetiştirme amacına uygun hazırlanmalıdır.",
+          "İçerik; 1739 sayılı Millî Eğitim Temel Kanunu’nun 2’nci maddesinde ifade edilen Türk Milletinin millî, ahlaki, insani, manevi ve kültürel değerlerini benimseyen, koruyan ve geliştiren bir vatandaş yetiştirme anlayışıyla tasarlanmalıdır.",
+          "İçerikte yer alan Türk bayrağı görseli; Türk Bayrağı Kanunu’na uygun olarak herhangi bir tartışmaya, değersizleştirmeye neden ol mayacak şekilde, sayfa düzenine ve görsel tasarıma uygun olarak çizilmeli ve konumlandırılmalıdır."
+        ]
+      },
+      {
+        "main_code": "1",
+        "main_title": "ANAYASA VE DİĞER MEVZUATA UYGUNLUĞU",
+        "code": "1.1.2",
+        "section": "1.1 Genel",
+        "title": "Ders kitabı ve eğitim aracında Atatürk Portresi, İstiklâl Marşı, Gençliğe Hitabe, Öğrenci Andı... Yönetmelik’te belirtilen şekilde kullanılmalıdır.",
+        "details": [
+          "İlkokul 1, 2 ve 3. sınıflarına ait ders kitapları ve eğitim araçlarında ikinci yaprak ve devamında... İstiklâl Marşı, Öğrenci Andı, Atatürk resmi...",
+          "İlkokul 4. sınıf, ortaokul, ortaöğretim... Türk bayrağı ile İstiklâl Marşı; Atatürk’ün Gençliğe Hitabesi; Atatürk resmi..."
+        ]
+      },
+      {
+        "main_code": "1",
+        "main_title": "ANAYASA VE DİĞER MEVZUATA UYGUNLUĞU",
+        "code": "1.2.1",
+        "section": "1.2 Millî Güvenlik",
+        "title": "İçerikte terör örgütleri ile irtibatlı veya iltisaklı herhangi bir görsel veya yazılı öge, ifade yahut ima bulunmamalıdır.",
+        "details": []
+      },
+      {
+        "main_code": "1",
+        "main_title": "ANAYASA VE DİĞER MEVZUATA UYGUNLUĞU",
+        "code": "1.3.1",
+        "section": "1.3 Eşitlik ve Kapsayıcılık",
+        "title": "Ders kitabı ve eğitim aracı eşitlikçi ve kapsayıcı şekilde tasarlanmalı, bireylerin hak ve özgürlüklerini ihlal edebilecek herhangi bir unsur bulundurmamalıdır.",
+        "details": [
+          "İçerikte çoğulculuk ilkesi gözetilmelidir.",
+          "İçerikte ırk, renk, dil, din, siyasi tercih, etnik köken ayrımı gözetilmeksizin evrensel insan hakları esas alınmalıdır.",
+          "Toplumsal eşitlik ilkesi gözetilmelidir."
+        ]
+      },
+      {
+        "main_code": "2",
+        "main_title": "BİLİMSEL YETERLİLİĞİ",
+        "code": "2.1.2",
+        "section": "2.1 Bilimsellik",
+        "title": "İçerikte bilgi hatası bulunmamalıdır.",
+        "details": [
+          "Konu anlatımı, tanım, açıklama, örnek, gösterim, etkinlik, deney, şema, grafik, tablo, terim, sembol, kısaltma vb. içerikler hata içermemelidir."
+        ]
+      },
+      {
+        "main_code": "2",
+        "main_title": "BİLİMSEL YETERLİLİĞİ",
+        "code": "2.2.1",
+        "section": "2.2 Metin ve Görsel Uyumu",
+        "title": "Metin ile görsel uyumlu olmalıdır.",
+        "details": [
+          "Metin içeren görsellerdeki bilgiler metin ile çelişmemelidir.",
+          "Metinde atıf yapılan görsellere eksiksiz bir biçimde yer verilmelidir."
+        ]
+      },
+      {
+        "main_code": "2",
+        "main_title": "BİLİMSEL YETERLİLİĞİ",
+        "code": "2.2.2",
+        "section": "2.2 Metin ve Görsel Uyumu",
+        "title": "Açıklama gerektiren görsele ait alt yazıda hata ve eksiklik bulunmamalıdır.",
+        "details": [
+          "Görselin açıklama gerektirip gerektirmediği göz önünde bulundurulmalıdır.",
+          "Açıklama gerektiren görsele ait alt yazı; görselde anlatılmak istenen olay, duygu, durum vb. hususları yansıtıcı nitelikte olmalıdır.",
+          "Görsele eklenen alt yazı ile görsel uyumlu olmalıdır."
+        ]
+      },
+      {
+        "main_code": "2",
+        "main_title": "BİLİMSEL YETERLİLİĞİ",
+        "code": "2.6.1",
+        "section": "2.6 Standart Bölümler",
+        "title": "Ders kitabı ve eğitim aracında tüm sayfalar... standart bölümler (cevap anahtarı, görsel ve genel ağ kaynakçası vb.) eksiksiz ve sıralı bir biçimde yer almalıdır.",
+        "details": [
+            "Cevap Anahtarı, Görsel Kaynakça ve Genel Ağ Kaynakçası bölümleri elektronik ortamda verilmelidir.",
+            "İlkokul birinci sınıfta cevap anahtarı olmayabilir."
+        ]
+      },
+      {
+        "main_code": "5",
+        "main_title": "ÖLÇME VE DEĞERLENDİRME SÜRECİNİN UYGUNLUĞU",
+        "code": "5.1.3",
+        "section": "5.1 Temel İlkeler",
+        "title": "Cevap anahtarı eksik veya hatalı olmamalıdır.",
+        "details": [
+          "Ünite/tema/öğrenme alanı ve konu sonlarında kullanılan ölçme ve değerlendirme etkinliklerindeki açık uçlu sorular hariç tüm soruların cevapları hatasız olarak cevap anahtarında yer almalıdır."
+        ]
+      },
+      {
+        "main_code": "6",
+        "main_title": "DİL VE ANLATIM YÖNÜNDEN YETERLİLİĞİ",
+        "code": "6.2.1",
+        "section": "6.2 Yazı Dili Standartları",
+        "title": "İçerikte yazım yanlışı bulunmamalıdır.",
+        "details": [
+          "Alana özgü olmayan ifadelerin yazımında Türk Dil Kurumu Yazım Kılavuzu esas alınmalıdır."
+        ]
+      },
+      {
+        "main_code": "6",
+        "main_title": "DİL VE ANLATIM YÖNÜNDEN YETERLİLİĞİ",
+        "code": "6.2.2",
+        "section": "6.2 Yazı Dili Standartları",
+        "title": "İçerikte noktalama eksikliği, yanlışlığı olmamalı; gereksiz noktalama işareti kullanılmamalıdır.",
+        "details": []
+      },
+      {
+        "main_code": "8",
+        "main_title": "ELEKTRONİK İÇERİKLERİN KAPSAM VE TASARIMININ UYGUNLUĞU",
+        "code": "8.5.1",
+        "section": "8.5 Ses ve Görüntü Kalitesi",
+        "title": "Ses ile içerik uyumlu olmalıdır.",
+        "details": [
+          "Ses ve görüntü birbirine eş zamanlı (senkronize) olmalıdır.",
+          "Ses rengi ve sesler, içeriğin yazılı ve görsel ögeleriyle uyumlu olmalıdır."
+        ]
+      },
+      {
+        "main_code": "8",
+        "main_title": "ELEKTRONİK İÇERİKLERİN KAPSAM VE TASARIMININ UYGUNLUĞU",
+        "code": "8.5.2",
+        "section": "8.5 Ses ve Görüntü Kalitesi",
+        "title": "Sesler net ve anlaşılır olmalıdır.",
+        "details": [
+          "Sesler profesyonel kalitede olmalıdır.",
+          "Dikkat dağıtıcı arka plan sesleri olmamalıdır."
+        ]
+      }
+      // Not: Dosya boyutu şişmemesi için örnek kriterlerin bir kısmını ekledim.
+      // Gerçek kullanımda tüm kriter listesi burada olmalıdır.
+      // Üstteki JSON bloğunu tüm verilerinizle değiştirebilirsiniz.
+    ];
+
+    // --- YAPILANDIRMA VE SABİTLER ---
+    const STOP_WORDS = new Set(['ve', 'veya', 'ile', 'bir', 'bu', 'şu', 'o', 'için', 'de', 'da', 'den', 'dan', 'ya', 'ki', 'ne', 'mi', 'mu', 'mü', 'mı', 'gibi', 'kadar', 'önce', 'sonra', 'daha', 'en', 'çok', 'az', 'her', 'tüm', 'bütün', 'bazı', 'hiç', 'yok', 'var']);
+    
+    const SYNONYMS = {
+        'hata': ['yanlış', 'yanlışlık', 'eksik', 'kusur', 'problem'],
+        'yanlış': ['hata', 'hatalı', 'eksik', 'doğru değil'],
+        'görsel': ['resim', 'fotoğraf', 'şekil', 'figür', 'çizim', 'grafik', 'tablo'],
+        'alt yazı': ['altyazı', 'açıklama', 'resim altı', 'karekod'],
+        'metin': ['yazı', 'içerik', 'paragraf', 'text', 'cümle'],
+        'cevap': ['yanıt', 'çözüm', 'anahtar', 'sonuç'],
+        'ses': ['seslendirme', 'audio', 'işitsel', 'kayıt', 'konuşma'],
+        'video': ['film', 'animasyon', 'görüntü', 'izleti'],
+        'e-içerik': ['dijital', 'elektronik', 'etkileşimli', 'karekod', 'uygulama']
+    };
+
+    // --- DOM ELEMENTLERİ ---
+    const els = {
+        apiToggle: document.getElementById('apiToggle'),
+        apiPanel: document.getElementById('apiPanel'),
+        apiStatusDot: document.getElementById('apiStatusDot'),
+        apiStatusText: document.getElementById('apiStatusText'),
+        apiKeyInput: document.getElementById('apiKeyInput'),
+        saveApiKeyBtn: document.getElementById('saveApiKey'),
+        searchInput: document.getElementById('searchInput'),
+        aiSearchBtn: document.getElementById('aiSearchBtn'),
+        resultsArea: document.getElementById('resultsArea'),
+        liveIndicator: document.getElementById('liveIndicator')
+    };
+
+    let debounceTimer;
+
+    // --- YARDIMCI FONKSİYONLAR ---
+
+    // Türkçe karakter normalizasyonu ve temizlik
+    function normalizeText(text) {
+        if (!text) return "";
+        return text.toLocaleLowerCase('tr-TR')
+                   .replace(/[\.,;:!?'"()\[\]{}<>\/\\@#$%^&*+=~`|_-]/g, ' ')
+                   .replace(/\s+/g, ' ')
+                   .trim();
+    }
+
+    // Kelime köklerini ve stop wordleri işleme
+    function tokenize(text) {
+        const rawWords = normalizeText(text).split(' ');
+        return rawWords.filter(w => w.length > 2 && !STOP_WORDS.has(w));
+    }
+
+    // Kelime eşleşme kontrolü (Eş anlamlılar dahil)
+    function isWordMatch(word1, word2) {
+        if (word1.includes(word2) || word2.includes(word1)) return true;
+        
+        // Eş anlamlı kontrolü
+        for (const [key, values] of Object.entries(SYNONYMS)) {
+            // Eğer word1 anahtarsa ve word2 değerlerindeyse
+            if (key === word1 && values.some(v => v.includes(word2))) return true;
+            if (key === word2 && values.some(v => v.includes(word1))) return true;
+            // Eğer ikisi de değerler listesindeyse
+            if (values.includes(word1) && values.includes(word2)) return true;
+        }
+        return false;
+    }
+
+    // API Key Yönetimi
+    function getApiKey() { return localStorage.getItem('gemini_api_key'); }
+    
+    function updateApiUI() {
+        const hasKey = !!getApiKey();
+        els.apiStatusDot.classList.toggle('active', hasKey);
+        els.apiStatusText.textContent = hasKey ? "API Aktif" : "API Ayarla";
+        if (hasKey) els.apiKeyInput.value = getApiKey();
+        els.aiSearchBtn.disabled = !hasKey || els.searchInput.value.length < 5;
+        
+        // Buton metnini güncelle
+        const btnContent = els.aiSearchBtn.querySelector('span');
+        if (!hasKey) {
+            btnContent.textContent = "YZ için Anahtar Girin";
+            els.aiSearchBtn.title = "Ayarlardan API anahtarını giriniz";
+        } else {
+            btnContent.textContent = "✨ YZ ile Öneri Getir";
+            els.aiSearchBtn.title = "Gemini AI ile analiz et";
+        }
+    }
+
+    // --- LOKAL ARAMA MOTORU ---
+    function performLocalSearch(query) {
+        const userTokens = tokenize(query);
+        if (userTokens.length === 0) return [];
+
+        const results = CRITERIA_DATA.map(item => {
+            const titleTokens = tokenize(item.title);
+            const detailsText = item.details ? item.details.join(' ') : '';
+            const detailsTokens = tokenize(detailsText);
+            
+            let score = 0;
+            let matches = 0;
+
+            // Başlıkta ara (Ağırlığı yüksek)
+            userTokens.forEach(uToken => {
+                if (titleTokens.some(tToken => isWordMatch(uToken, tToken))) {
+                    score += 10;
+                    matches++;
+                }
+            });
+
+            // Detaylarda ara
+            userTokens.forEach(uToken => {
+                if (detailsTokens.some(dToken => isWordMatch(uToken, dToken))) {
+                    score += 5;
+                    matches++;
+                }
+            });
+
+            return { item, score, matches };
+        });
+
+        // Skor 0'dan büyük olanları al, sırala
+        return results
+            .filter(r => r.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5) // En iyi 5 sonuç
+            .map(r => r.item);
+    }
+
+    // --- AI ARAMA MOTORU (GEMINI) ---
+    async function performAiSearch(query) {
+        const apiKey = getApiKey();
+        if (!apiKey) return;
+
+        // Context Hazırlığı (JSON boyutunu küçültüyoruz)
+        const contextData = CRITERIA_DATA.map(c => 
+            `ID:${c.code} | T:${c.title} | D:${(c.details||[]).join(' ')}`
+        ).join('\n');
+
+        const prompt = `
+        Sen bir MEB ders kitabı inceleme asistanısın. Aşağıdaki HATA TANIMINA en uygun kriter kodlarını bulman gerekiyor.
+        
+        HATA TANIMI: "${query}"
+        
+        GÖREV:
+        1. Listeyi analiz et. Hem başlıklara (T) hem detaylara (D) bak.
+        2. Hata ile en alakalı 2 veya 3 kriteri seç.
+        3. Neden seçtiğini kısaca açıkla.
+        
+        KRİTER LİSTESİ:
+        ${contextData}
+        
+        ÇIKTI FORMATI (Sadece geçerli JSON):
+        { "recommendations": [ { "code": "1.1.1", "reason": "Buraya neden yazdın" } ] }
+        `;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
+
+            if (!response.ok) throw new Error("API Hatası");
+
+            const data = await response.json();
+            const textResponse = data.candidates[0].content.parts[0].text;
+            const parsed = JSON.parse(textResponse);
+            
+            return parsed.recommendations;
+
+        } catch (error) {
+            console.error("AI Hatası:", error);
+            throw error;
+        }
+    }
+
+    // --- ARAYÜZ OLUŞTURMA ---
+    function renderResults(results, type = 'local', aiReasons = []) {
+        els.resultsArea.innerHTML = '';
+
+        if (results.length === 0) {
+            els.resultsArea.innerHTML = `
+                <div class="empty-state">
+                    <span class="empty-icon">😕</span>
+                    <p>Eşleşen kriter bulunamadı. Lütfen açıklamayı zenginleştirin veya farklı kelimeler deneyin.</p>
+                </div>`;
+            return;
+        }
+
+        // Badge
+        const badgeDiv = document.createElement('div');
+        badgeDiv.className = 'result-badge';
+        badgeDiv.innerHTML = type === 'ai' 
+            ? `<span class="badge-pill">✨ Yapay Zeka Önerileri</span>` 
+            : `<span class="badge-pill local">⚡ Hızlı Kelime Eşleşmeleri</span>`;
+        els.resultsArea.appendChild(badgeDiv);
+
+        results.forEach(item => {
+            const aiInfo = aiReasons.find(r => r.code === item.code);
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            let detailsHtml = '';
+            if (item.details && item.details.length > 0) {
+                detailsHtml = `
+                    <div class="details-list">
+                        <div class="details-title">DETAYLAR</div>
+                        <ul>${item.details.map(d => `<li>${d}</li>`).join('')}</ul>
+                    </div>`;
+            }
+
+            let aiReasonHtml = '';
+            if (aiInfo) {
+                aiReasonHtml = `<div class="ai-reason">💡 <strong>AI Analizi:</strong> ${aiInfo.reason}</div>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="code-display" title="Kodu Kopyala" onclick="copyCode('${item.code}')">${item.code}</div>
+                    <div class="card-content">
+                        <span class="section-tag">${item.main_title} > ${item.section}</span>
+                        <h3>${item.title}</h3>
+                    </div>
+                </div>
+                ${aiReasonHtml}
+                ${detailsHtml}
+            `;
+            els.resultsArea.appendChild(card);
+        });
+    }
+
+    // --- EVENT LISTENERS ---
+
+    // 1. API Ayarları Aç/Kapa
+    els.apiToggle.addEventListener('click', () => {
+        els.apiPanel.classList.toggle('show');
+    });
+
+    // 2. API Key Kaydet
+    els.saveApiKeyBtn.addEventListener('click', () => {
+        const key = els.apiKeyInput.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            updateApiUI();
+            els.apiPanel.classList.remove('show');
+        }
+    });
+
+    // 3. Input Değişikliği (Lokal Arama)
+    els.searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        // AI butonu durumu
+        els.aiSearchBtn.disabled = !getApiKey() || query.length < 5;
+
+        // Yazıyor indikatörü
+        if (query.length > 2) els.liveIndicator.classList.add('visible');
+        else els.liveIndicator.classList.remove('visible');
+
+        // Debounce ile lokal arama
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (query.length >= 3) {
+                const results = performLocalSearch(query);
+                renderResults(results, 'local');
+            } else if (query.length === 0) {
+                 els.resultsArea.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        <p>Bir inceleme tespiti yazmaya başlayın.</p>
+                    </div>`;
+            }
+            els.liveIndicator.classList.remove('visible');
+        }, 300);
+    });
+
+    // 4. AI Butonu Tıklama
+    els.aiSearchBtn.addEventListener('click', async () => {
+        const query = els.searchInput.value.trim();
+        if (!query) return;
+
+        // Loading state
+        const btnContent = els.aiSearchBtn.querySelector('span');
+        const originalText = btnContent.textContent;
+        els.aiSearchBtn.disabled = true;
+        btnContent.innerHTML = `<div class="spinner"></div> Analiz Ediliyor...`;
+
+        try {
+            const recommendations = await performAiSearch(query);
+            
+            // Kodları bul ve eşleşen full kriter objelerini al
+            const matchedCriteria = recommendations.map(rec => {
+                return CRITERIA_DATA.find(c => c.code === rec.code);
+            }).filter(Boolean);
+
+            renderResults(matchedCriteria, 'ai', recommendations);
+            
+        } catch (error) {
+            alert("AI servisine ulaşılamadı. Lütfen API anahtarınızı kontrol edin veya bağlantınızı deneyin.");
+        } finally {
+            els.aiSearchBtn.disabled = false;
+            btnContent.textContent = originalText;
+        }
+    });
+
+    // Kopyalama Fonksiyonu
+    window.copyCode = function(code) {
+        navigator.clipboard.writeText(code);
+        // Basit bir görsel geri bildirim eklenebilir
+    };
+
+    // Başlangıç
+    document.addEventListener('DOMContentLoaded', updateApiUI);
+
+</script>
+</body>
+</html>
