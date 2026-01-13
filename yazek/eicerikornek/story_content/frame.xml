@@ -1,0 +1,2043 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bwFrame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" default_layout="npnxnanbnsnfns11111100111" textdirection="ltr" textengine="DirectWrite" device="false" fontscale="100" captionFontScale="100" kbshortcuts="false" skip_nav_enabled="true" chromeless="false" outputtype="undefined" theme="unified" themeAccentColor="0x0085B8">
+  <layouts>
+    <layout name="npnxnanbsnfns11111100111" font="Roboto" controllayout="npnxnanbsnfns11111100111" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+    <layout name="pxabnsnfns11111100111" font="Roboto" controllayout="pxabnsnfns11111100111" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+    <layout name="npxnabnsnfns11111100111" font="Roboto" controllayout="npxnabnsnfns11111100111" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+    <layout name="npnxnanbnsnfns11111100111" font="Roboto" controllayout="npnxnanbnsnfns11111100111" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+    <layout name="pxabnsnfns11111100110" font="Roboto" controllayout="pxabnsnfns11111100110" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+    <layout name="pnxanbnsnfns11111100111" font="Roboto" controllayout="pnxanbnsnfns11111100111" colorscheme="npnxnanbnsnfns11111100111" string_table="npnxnanbnsnfns11111100111" />
+  </layouts>
+  <control_options>
+    <optiongroups>
+      <optiongroup name="sidebaroptions">
+        <options>
+          <option name="title_enabled" value="true">
+            <options>
+              <option name="title_text" value="E-i&amp;#231;erik İnceleme ve Değerlendirme Eğitimi-free" />
+            </options>
+          </option>
+          <option name="logo_enabled" value="true">
+            <options>
+              <option name="logo_url" />
+              <option name="html5_logo_url" value="mobile/5mu5apwJzZ3.png" />
+            </options>
+          </option>
+          <option name="sidebar_enabled" value="true">
+            <options>
+              <option name="sidebarpos" value="left" />
+              <option name="closed" value="false" />
+            </options>
+          </option>
+          <optionlist name="tabs">
+            <listitems>
+              <listitem name="resources" value="true" group="linkright" />
+              <listitem name="customlink" value="true" group="linkright">
+                <properties>
+                  <property name="title" value="SSS" />
+                  <property name="data" value="5WbfuHAwy1u" />
+                  <property name="ignoreSlideLock" value="true" />
+                </properties>
+              </listitem>
+              <listitem name="outline" value="true" group="sidebar" />
+              <listitem name="glossary" value="false" group="sidebar" />
+              <listitem name="transcript" value="false" group="sidebar" />
+            </listitems>
+          </optionlist>
+          <option name="time_enabled" value="false">
+            <options>
+              <option name="time_format" value="none" />
+            </options>
+          </option>
+          <option name="video_enabled" value="false">
+            <options>
+              <option name="height" value="135" />
+            </options>
+          </option>
+          <option name="logoAltText" />
+        </options>
+      </optiongroup>
+      <optiongroup name="menuoptions">
+        <options>
+          <option name="flow" value="free" />
+          <option name="wraplistitems" value="false" />
+          <option name="tooltips" value="true" />
+          <option name="autocollapse" value="false" />
+          <option name="autonumber" value="true" />
+          <option name="enableresultsicons" value="true" />
+        </options>
+      </optiongroup>
+      <optiongroup name="controls">
+        <options>
+          <option name="volume" value="true" />
+          <option name="seekbar" value="true">
+            <options>
+              <option name="readonly" value="false" />
+              <option name="readonlyOnce" value="false" />
+            </options>
+          </option>
+          <option name="pauseplay" value="true" />
+          <option name="replay" value="true" />
+          <option name="search" value="true" />
+          <option name="closed_captions" value="false">
+            <options>
+              <option name="font" value="Roboto" />
+            </options>
+          </option>
+          <option name="settings" value="false" />
+          <option name="fullScreenToggle" value="true" />
+          <option name="playbackSpeedControl" value="false" />
+        </options>
+      </optiongroup>
+      <optiongroup name="bottombaroptions">
+        <options>
+          <option name="bottombar_enabled" value="true" />
+        </options>
+      </optiongroup>
+      <optiongroup name="buttonoptions">
+        <options>
+          <option name="next" value="icontext" />
+          <option name="previous" value="icontext" />
+          <option name="submit" value="icontext" />
+        </options>
+      </optiongroup>
+      <optiongroup name="courseOptions">
+        <options>
+          <option name="thumbnailEnabled" value="false" />
+          <option name="thumbnailFillFrame" value="false" />
+          <option name="thumbnailDisplayName" value="Slide: Giriş" />
+          <option name="thumbnailUrl" value="story_content/6f7e6nasz9O.png" />
+        </options>
+      </optiongroup>
+    </optiongroups>
+  </control_options>
+  <control_layouts>
+    <control_layout name="npnxnanbsnfns11111100111">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="false" />
+      <control name="next" enabled="false" />
+      <control name="swipeleft" enabled="false" />
+      <control name="swiperight" enabled="false" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="true" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="true" />
+    </control_layout>
+    <control_layout name="pxabnsnfns11111100111">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="true" />
+      <control name="next" enabled="true" />
+      <control name="swipeleft" enabled="true" />
+      <control name="swiperight" enabled="true" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="false" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="true" />
+    </control_layout>
+    <control_layout name="npxnabnsnfns11111100111">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="false" />
+      <control name="next" enabled="true" />
+      <control name="swipeleft" enabled="false" />
+      <control name="swiperight" enabled="true" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="false" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="true" />
+    </control_layout>
+    <control_layout name="npnxnanbnsnfns11111100111">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="false" />
+      <control name="next" enabled="false" />
+      <control name="swipeleft" enabled="false" />
+      <control name="swiperight" enabled="false" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="false" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="true" />
+    </control_layout>
+    <control_layout name="pxabnsnfns11111100110">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="true" />
+      <control name="next" enabled="true" />
+      <control name="swipeleft" enabled="true" />
+      <control name="swiperight" enabled="true" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="false" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="false" />
+    </control_layout>
+    <control_layout name="pnxanbnsnfns11111100111">
+      <control name="volume" enabled="true" />
+      <control name="seekbar" enabled="true" />
+      <control name="replay" enabled="true" />
+      <control name="pauseplay" enabled="true" />
+      <control name="logo" enabled="true" />
+      <control name="previous" enabled="true" />
+      <control name="next" enabled="false" />
+      <control name="swipeleft" enabled="true" />
+      <control name="swiperight" enabled="false" />
+      <control name="fullScreenToggle" enabled="true" />
+      <control name="playbackSpeedControl" enabled="false" />
+      <control name="submit" enabled="false" />
+      <control name="finish" enabled="false" />
+      <control name="submitall" enabled="false" />
+      <control name="resources" enabled="true" />
+      <control name="glossary" enabled="false" />
+      <control name="transcript" enabled="false" />
+      <control name="outline" enabled="true">
+        <controls>
+          <control name="search" enabled="true" />
+        </controls>
+      </control>
+      <control name="close_btn" enabled="true" />
+    </control_layout>
+  </control_layouts>
+  <colorschemes>
+    <colorscheme name="npnxnanbnsnfns11111100111">
+      <color_group name="accessibility">
+        <group_colors>
+          <color name="focus_rect">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x0085B8" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="focus_rect_secondary">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x002060" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="HTML">
+        <group_colors>
+          <color name="htmlpage_bg_color">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="preloader">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8C8C8C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="infopanel">
+        <group_colors>
+          <color name="link_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="link_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="name_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x444444" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="title_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x999999" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="infopanelpopup">
+        <group_colors>
+          <color name="link_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFF0000" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="link_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="name_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bio_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="timer">
+        <group_colors>
+          <color name="duration">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xDCDCDC" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="elapsed">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFEE347" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="stroke">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xC7C7C7" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="inner">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="window">
+        <group_colors>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="inner">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x316300" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="diva">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divb">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="20" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="separator">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="editor">
+        <group_colors>
+          <color name="slide_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="html_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_text_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x214400" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x428E00" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_down">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2E5D00" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x3C7C00" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="listitem">
+        <group_colors>
+          <color name="scene_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2C2F30" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected_text">
+            <fill type="linear" rotation="90" />
+          </color>
+          <color name="shadow">
+            <fill type="linear" rotation="90" />
+          </color>
+          <color name="selected">
+            <fill type="linear" rotation="90" />
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="viewed">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="5" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="lines">
+            <fill type="linear" rotation="90" />
+          </color>
+          <color name="selected_hover_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="glossary">
+        <group_colors>
+          <color name="selected_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="heading_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2C2F30" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="diva">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divb">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divc">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="notes">
+        <group_colors>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="resource">
+        <group_colors>
+          <color name="separator">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="5" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="outline">
+        <group_colors>
+          <color name="search_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="search_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2D2D2D" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divc">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divb">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="diva">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="transcript">
+        <group_colors>
+          <color name="heading_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="div">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="tabs">
+        <group_colors>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x272B2C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x272B2C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="panel_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bottom_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="seekcontrol">
+        <group_colors>
+          <color name="btn_icon_color">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8C8C8C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="seek_position">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="60" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="seek_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="seek_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_icon_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_icon_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="searchinput">
+        <group_colors>
+          <color name="text_active">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2C2F30" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg_active">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x292929" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="search_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="hover_glow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x457E13" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="button_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x3F8500" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="icon">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="outer_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="5" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg_in_tab">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xEAEAEA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="scrollarea">
+        <group_colors>
+          <color name="detailb">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x6AA242" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="detaila">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2A5400" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x275000" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="icons">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="button_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2A5500" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="button_inner">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x4B8A16" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="button_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="80" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="button_bg_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="80" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x479901" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="0">
+              <colors>
+                <color rgb="0x366F00" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="menu">
+        <group_colors>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="generic_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x373737" alpha="77" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="right_shadow">
+            <fill type="linear" rotation="0">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+                <color rgb="0x000000" alpha="1" stop="89" />
+                <color rgb="0x000000" alpha="6" stop="255" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="logo">
+        <group_colors>
+          <color name="shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x254B00" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="checkbox">
+        <group_colors>
+          <color name="hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xAFDD82" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="check">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2BC400" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2A5300" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="button">
+        <group_colors>
+          <color name="btn_icon_color">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_text_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x272B2C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_down">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_glow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_on_dark_background">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xBABBBA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="btn_on_dark_background_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xF8F8F8" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="base">
+        <group_colors>
+          <color name="brandhighlight">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x0085B8" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="brandhighlight_secondary">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x0085B8" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text_hover">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x272B2C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="text_selected">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x272B2C" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="diva">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="divb">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="menu_shade">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="0" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="slide_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="overlay_message">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="85" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="5" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="selected_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="separator">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="control_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="settings">
+        <group_colors>
+          <color name="panel_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="panel_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="35" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="toggle_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x919191" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="toggle_thumb_off">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x585858" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="toggle_track_on">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x0085B8" alpha="30" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="toggle_track_off">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xE9E9E9" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="toggle_label">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x464646" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="settings_border_color">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+      <color_group name="volume">
+        <group_colors>
+          <color name="panel_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="thumb_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2B5500" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="thumb_inner">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x2B5500" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="thumb_bg">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFFFFFF" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="slider_border">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x428C01" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="slider_bg">
+            <fill type="linear" rotation="0">
+              <colors>
+                <color rgb="0x8E8F8E" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="slider_shadow">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0x000000" alpha="20" stop="0" />
+              </colors>
+            </fill>
+          </color>
+          <color name="volume_border_color">
+            <fill type="linear" rotation="90">
+              <colors>
+                <color rgb="0xFAFAFA" alpha="100" stop="0" />
+              </colors>
+            </fill>
+          </color>
+        </group_colors>
+      </color_group>
+    </colorscheme>
+  </colorschemes>
+  <string_tables>
+    <string_table name="npnxnanbnsnfns11111100111">
+      <string id="three_image_progress_audio">ilerle</string>
+      <string id="three_image_audio">ses</string>
+      <string id="three_image_camera_down">kamera aşağı hareket etti</string>
+      <string id="three_image_camera_left">kamera sola hareket etti</string>
+      <string id="three_image_camera_right">kamera sağa hareket etti</string>
+      <string id="three_image_camera_up">kamera yukarı hareket etti</string>
+      <string id="three_image_interaction_free">serbest keşif modu</string>
+      <string id="three_image_interaction_guided">rehberli tur modu</string>
+      <string id="three_image_hotspot">etkin nokta</string>
+      <string id="three_image_instructions">360 derecelik görüntüde gezinmek için w, a, s ve d tuşlarını kullanın. Etkileşimli işaretçilere ve etkin noktalara gitmek için Sekme tuşuna basın.</string>
+      <string id="three_image_interaction">360 derece görüntü etkileşimi</string>
+      <string id="three_image_label">etiket</string>
+      <string id="three_image_marker">işaretçi</string>
+      <string id="three_image_items">öğeler</string>
+      <string id="three_image_interaction_next">sonraki</string>
+      <string id="three_image_pause_audio">sesi duraklat</string>
+      <string id="three_image_pause_video">videoyu duraklat</string>
+      <string id="three_image_play_audio">sesi oynat</string>
+      <string id="three_image_play_video">videoyu oynat</string>
+      <string id="three_image_interaction_prev">önceki</string>
+      <string id="three_image_visited">ziyaret edilen</string>
+      <string id="three_image_of">/</string>
+      <string id="three_image_count_of_total">%count% / %total%</string>
+      <string id="acc_three_image_step_count_of_total">adım %count% / %total%</string>
+      <string id="three_image_item">öğe</string>
+      <string id="three_image_interaction_step">adım</string>
+      <string id="three_image_tooltip">araç ipucu</string>
+      <string id="three_image_total_items">%total% içerik</string>
+      <string id="three_image_total_item">%total% içerik</string>
+      <string id="three_image_progress_video">ilerle</string>
+      <string id="three_image_video">video</string>
+      <string id="three_image_video_volume">video sesi</string>
+      <string id="acc_three_image_count_of_total_items_visited">%count% / %total% ziyaret edilen içerik</string>
+      <string id="acc_three_image_count_of_total_item_visited">%count% / %total% ziyaret edilen içerik</string>
+      <string id="three_image_count_of_total_visited">%count% / %total% ziyaret edilen</string>
+      <string id="accessible_text">Erişilebilir metin</string>
+      <string id="background_audio">Arka plan sesi</string>
+      <string id="acc_enter_fullscreen">Tam ekran moduna geç</string>
+      <string id="acc_exit_fullscreen">Tam ekran modundan çık</string>
+      <string id="keyboardshortcuts_lower">Klavye Kısayolları</string>
+      <string id="zoom_to_fit">Sığacak şekilde yakınlaştır</string>
+      <string id="modern_video_settings_close">video ayarlarını kapat</string>
+      <string id="acc_modern_video_fullscreen">tam ekran </string>
+      <string id="modern_video_playback_settings">Video Geri Oynatım Ayarları</string>
+      <string id="modern_video_captions_off">Kapalı</string>
+      <string id="modern_video_captions_on">Açık </string>
+      <string id="modern_video_captions_label">Altyazılar</string>
+      <string id="acc_modern_video_settings">video ayarları </string>
+      <string id="acc_modern_video_mute">videoyu sessize al</string>
+      <string id="modern_video_normal_speed">Normal</string>
+      <string id="acc_modern_video_pause">videoyu duraklat</string>
+      <string id="acc_modern_video_pip">resim içinde resim</string>
+      <string id="acc_modern_video_play">videoyu oynat</string>
+      <string id="modern_video_playback_speed_title">Geri oynatım Hızı</string>
+      <string id="acc_modern_video_captions">video altyazıları</string>
+      <string id="acc_modern_video_playback_speed">geri oynatım hızı</string>
+      <string id="acc_modern_video_volume">video sesi</string>
+      <string id="acc_active">aktif</string>
+      <string id="alt_key">Alt</string>
+      <string id="check_include">Eklemek için işaretle</string>
+      <string id="clear">Temizle ve Menüye dön</string>
+      <string id="close">Kapat</string>
+      <string id="acc_closed_captions">Altyazılar. Altyazıları açmak ve kapatmak için boşluk tuşuna basın.</string>
+      <string id="closed_captions_tip">Başlıkları değiştir</string>
+      <string id="continue">Devam Et</string>
+      <string id="continueresponsive">Devam Et</string>
+      <string id="playback_speed_title">Geri oynatım Hızı</string>
+      <string id="playback_speed_normal">Normal</string>
+      <string id="acc_playback_speed">geri oynatım hızı</string>
+      <string id="ctrl_key">Ctrl</string>
+      <string id="enable_keyboardshortcuts">Klavye kısayollarını etkinleştir</string>
+      <string id="enter_key">Tamam</string>
+      <string id="exit">Çıkış</string>
+      <string id="filter">Filtre</string>
+      <string id="finish">SON</string>
+      <string id="acc_finish">sonlandırır</string>
+      <string id="definition">Tanım</string>
+      <string id="acc_definition">tanım</string>
+      <string id="glossary">Sözlük</string>
+      <string id="terms">Terimler</string>
+      <string id="progress_hour">saat</string>
+      <string id="progress_hours">saat</string>
+      <string id="action">Eylem</string>
+      <string id="keyboardshortcuts">Klavye Kısayolları</string>
+      <string id="shortcuthelp">Klavye kısayollarını listele</string>
+      <string id="mute_shortcut">Sesi kapat / sesi aç</string>
+      <string id="next_shortcut">Sonraki slayt</string>
+      <string id="playpause_shortcut">Oynat / durdur</string>
+      <string id="previous_shortcut">Önceki slayt</string>
+      <string id="replay_shortcut">Slaytı tekrar oynat</string>
+      <string id="shortcut">Kısayol</string>
+      <string id="submit_shortcut">Slaytı gönder</string>
+      <string id="acctext_shortcut">Erişilebilir metni aç / kapat</string>
+      <string id="background_audio_shortcut">Arka plan sesini aç/kapat</string>
+      <string id="closedcaptions_shortcut">Altyazıları aç / kapat</string>
+      <string id="fullscreen_shortcut">Tam ekran modunu değiştir</string>
+      <string id="togglezoom">Sığacak şekilde yakınlaştırmayı aç / kapat</string>
+      <string id="outline">MENÜ</string>
+      <string id="disabled_orientation">Lütfen cihazınızı döndürün</string>
+      <string id="progress_minute">dakika</string>
+      <string id="progress_minutes">dakika</string>
+      <string id="mute_tip">Sesi kapat</string>
+      <string id="next">İLERİ</string>
+      <string id="acc_next">ileri</string>
+      <string id="next_slide_tip">Sonraki slayt</string>
+      <string id="transcript_chk">Notlar</string>
+      <string id="transcript">Notlar</string>
+      <string id="bio">Kişisel Bilgiler</string>
+      <string id="more_info">Ek bilgi</string>
+      <string id="closed_captions">Altyazılar</string>
+      <string id="acc_pause">duraklat</string>
+      <string id="pause_tip">Duraklat</string>
+      <string id="acc_play">yürüt</string>
+      <string id="play_tip">Oynat</string>
+      <string id="send_an_email">E-posta gönder</string>
+      <string id="prev">GERİ</string>
+      <string id="acc_previous">geri</string>
+      <string id="previous_slide_tip">Önceki slayt</string>
+      <string id="question_list">Soru Listesi</string>
+      <string id="replay_tip">Tekrar oynat</string>
+      <string id="acc_replay">yeniden yürüt</string>
+      <string id="resources">Kaynaklar</string>
+      <string id="acc_resources">kaynaklar</string>
+      <string id="restart">Yeniden Başlat</string>
+      <string id="resume">Devam</string>
+      <string id="acc_locked">kilitli</string>
+      <string id="acc_search_input">ara</string>
+      <string id="search_toggle">Ara</string>
+      <string id="sidebar_toggle">Yan Çubuğu Aç/Kapat</string>
+      <string id="acc_slide_progress">slayt ilerlemesi</string>
+      <string id="desktop_start">Kursu Başlat</string>
+      <string id="mobile_start">Kursu Başlat</string>
+      <string id="acc_visited">ziyaret edilen</string>
+      <string id="search">Ara…</string>
+      <string id="search_in">Arama alanı:</string>
+      <string id="search_results">Arama Sonuçları</string>
+      <string id="progress_second">saniye</string>
+      <string id="progress_seconds">saniye</string>
+      <string id="settings_tip">Ayarlar</string>
+      <string id="shift_key">Shift</string>
+      <string id="acc_skipnavigation">En yukarıya dön</string>
+      <string id="slide_text_chk">Slayt Metni</string>
+      <string id="spacebar_key">Boşluk</string>
+      <string id="streaming_video_local_playback_learn_more">Daha fazla bilgi edinin</string>
+      <string id="streaming_video_local_playback_republish">Bu videoyu izlemek için Storyline 360'taki önizleme özelliğini kullanın, yayımlanan çıktınızı bir sunucuya yükleyin, Review 360'ta yayımlayın veya statik video kalitesine geçiş yapın.</string>
+      <string id="streaming_video_local_playback_title">Akıştaki video, yerel oynatma için kullanılamıyor.</string>
+      <string id="submitall">TÜMÜNÜ GÖNDER</string>
+      <string id="acc_submitall">tümünü gönderir</string>
+      <string id="submit">GÖNDER</string>
+      <string id="acc_submit">gönder</string>
+      <string id="submit_tip">Gönder</string>
+      <string id="unmute_tip">Sesi Aç</string>
+      <string id="transcript_auto_scroll">Otomatik kaydır</string>
+      <string id="acc_window_close">Kapat</string>
+      <string id="acc_video_transcript_list">Yazı</string>
+      <string id="acc_window_move">Pencereyi taşı</string>
+      <string id="acc_modern_video_transcript">Aç</string>
+      <string id="acc_window_resize">Pencereyi yeniden boyutlandır</string>
+      <string id="video_transcript_resume_autoscroll">Otomatik kaydırmayı sürdür</string>
+      <string id="video_transcript_select_track">Parça seç</string>
+      <string id="transcript_show_timestamp">Zaman damgalarını göster</string>
+      <string id="video_transcript_title">Yazılar</string>
+      <string id="acc_window_options">Seçenekler</string>
+      <string id="acc_volume">ses</string>
+    </string_table>
+  </string_tables>
+  <fonts>
+    <font name="Roboto">
+      <files>
+        <file bold="true" italic="false" />
+        <file bold="false" italic="false" />
+      </files>
+    </font>
+    <font name="Arial">
+      <files>
+        <file bold="false" italic="false" />
+      </files>
+    </font>
+    <font name="Roboto Light">
+      <files>
+        <file bold="false" italic="false" />
+      </files>
+    </font>
+  </fonts>
+  <sounds enabled="true" />
+  <nav_data>
+    <outline>
+      <links>
+        <slidelink slideid="_player.6Ufpby5ssqT" displaytext="E-içerikler" expand="true" type="slide">
+          <links>
+            <slidelink slideid="_player.6Ufpby5ssqT.6llaAAZ48Fk" displaytext="Giriş" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.6kGPdsfpwB1" displaytext="E-içerik Nedir?" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.6RtRJXOWbTW" displaytext="E-içeriklerin Önemi" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5oX9EYNY27y" displaytext="E-içerik Türleri" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5ngff0YCMKU" displaytext="Ses İçerikleri" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5j1vRZcruHo" displaytext="Hareketli Görüntü İçeren İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.660SzMJOjRs" displaytext="Metin Tabanlı İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5b8xWyr9kBR" displaytext="Görsel İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.66FnHzvjq2Q" displaytext="Etkileşimli İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5Y8A7hoAR4q" displaytext="Etkileşimli İçerik Türleri" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.6kstanibD2m" displaytext="Bilgi Ölçmeye Yönelik Etkileşimli İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.6O5vY8UzrT6" displaytext="Bilgi Aktarımına Yönelik Etkileşimli İçerikler" expand="false" type="slide" />
+            <slidelink slideid="_player.6Ufpby5ssqT.5maa8WxUeNv" displaytext="Diğer Etkileşimli İçerikler" expand="false" type="slide" />
+          </links>
+        </slidelink>
+        <slidelink slideid="_player.6LCdji0RbWw" displaytext="Ders Kitaplarında E-içerik Kullanımı" expand="true" type="slide">
+          <links>
+            <slidelink slideid="_player.6LCdji0RbWw.5bZTSNnJzSU" displaytext="Ders Kitaplarında E-içerik Kullanımı" expand="false" type="slide" />
+            <slidelink slideid="_player.6LCdji0RbWw.5zAr5H6UhcP" displaytext="Ders Kitapları Elektronik Eğitim İçerikleri Tablosunda Belirtilen E-içerikler" expand="false" type="slide" />
+          </links>
+        </slidelink>
+        <slidelink slideid="_player.6HuaVagWNDB" displaytext="E-içerik İnceleme İşlemleri" expand="true" type="slide">
+          <links>
+            <slidelink slideid="_player.6HuaVagWNDB.62gZR0iHN2Y" displaytext="E-içerik İnceleme ve Değerlendirme Kriterleri" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.6iruEdoB0HW" displaytext="Genel Tasarım İlkeleri" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.6FWGudMr3rV" displaytext="Tematik Bütünlük" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.618bWTnTvKI" displaytext="Zararlı Yazılım" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.64tPn0kqQ3c" displaytext="Geri Bildirim" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.6gB6lGlzkRG" displaytext="Video Kalitesi" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.5hBlDqAbjNk" displaytext="Canlandırma 3 Boyut Detay" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.5ceL8VyoYZH" displaytext="Türkçe Karakter Sorunu" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.5y36g2YsYsU" displaytext="Güncellik Sorunu" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.6Q9R1nnr8My" displaytext="Duyarlı Tasarım" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.62Tk8j4oJjU" displaytext="Senkronizasyon Sorunu" expand="false" type="slide" />
+            <slidelink slideid="_player.6HuaVagWNDB.6EpLOiqBeIX" displaytext="Yönerge" expand="false" type="slide" />
+          </links>
+        </slidelink>
+        <slidelink slideid="_player.6lDkKX9U9sX" displaytext="Sonuç" expand="true" type="slide">
+          <links>
+            <slidelink slideid="_player.6lDkKX9U9sX.6779qALrvJy" displaytext="Tamamlama Ekranı" expand="false" type="slide" />
+          </links>
+        </slidelink>
+      </links>
+    </outline>
+    <search>
+      <slidetext slideid="6Ufpby5ssqT.6llaAAZ48Fk" slidebank="false" type="slide">                millî eğitim bakanlığı talim ve terbiye kurulu başkanlığı elektronik eğitim İçerikleri İnceleme ve değerlendirme eğitimi       başlat </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.6kGPdsfpwB1" slidebank="false" type="slide">e-içerik nedir? eğitim öğretim sürecini desteklemek ve zenginleştirmek için öğrenme ortamlarında elektronik araçlar ile kullanılmak üzere tasarlanmış, zamandan ve mekândan bağımsız, tekrar kullanılabilen eğitsel içeriklerdir. </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.6RtRJXOWbTW" slidebank="false" type="slide">  akademik başarı ve kalıcı öğrenme esneklik İlgi çekici ve motive edici bireyselleştirilmiş öğrenme ortamı e-içeriklerin önemi       e-içerik          İş birlikli öğrenme   öğrenmeyi kolaylaştırma kalıcı öğrenme esnek öğrenme erişilebilirlik                         </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5oX9EYNY27y" slidebank="false" type="slide">e-içerik türleri ses İçerikleri hareketli görüntü İçeren İçerikler metin tabanlı İçerikler görsel İçerikler etkileşimli İçerikler</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5ngff0YCMKU" slidebank="false" type="slide">    e-içerik türleri ses İçerikleri sesli kitaplar bir kitabın tamamının seslendirilmiş versiyonu. dinleme metinleri kitaptaki diyaloglar,  metinler veya konuların sesli anlatımı. sesli hikâyeler hikâyelerin sesli anlatım türü. podcastler İnsanların ilgi alanına göre ses kayıtları veya röportajlar.                                </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5j1vRZcruHo" slidebank="false" type="slide">hareketli görüntü İçeren İçerikler e-içerik türleri görsel ve ses gibi çoklu ortam ögeleri kullanarak veya kayıt yoluyla oluşturulan içerik.   video karikatür tarzında animasyonlu eğitim materyalleri.  animasyon           kısa hareketli görüntüler.  gif    </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.660SzMJOjRs" slidebank="false" type="slide">e-içerik türleri metin tabanlı İçerikler metin tabanlı içerikler, eğitim öğretim süreci için hazırlanmış yazılı formatta bilgi sunan içeriklerdir.  yazılı metinler ve sunular metin tabanlı içeriklere örnek olarak verilebilir.</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5b8xWyr9kBR" slidebank="false" type="slide"> kapat kapat kapat akiş şemasi akış şeması, süreçleri, kararları ve veri akışını grafiksel olarak temsil etmek için kullanılan bir görsel organizasyon aracıdır.  şekiller, oklar ve semboller kullanılarak süreçlerin, kararların ve veri transferinin mantıklı bir sırayla nasıl gerçekleştiğini açıklar.    kapat kapat kapat bİlgİ kartlari belirli bir konuda kısa bilgileri içeren dijital kart desteleridir. öğrenilen konuları kolayca özetler ve öğrencilerin bilgiyi daha derinlemesine anlamalarına yardımcı olur. etkileşimli olarak tasarlanabilmeleri ve mobil uyumlu yapıları sayesinde öğrencilere hızlı, görsel ve etkileşimli bir öğrenme deneyimi sunar.   kapat kapat kapat afİş/poster/büroşür afiş, poster ve büroşürler  görsel çekiciliği ve özgün tasarımıyla mesajları etkili bir şekilde ileten grafik materyallerdir. bu materyaller olayları, ürünleri veya fikirleri tanıtmak için kullanılır, izleyicilerin dikkatini çeker ve bilgileri hızlıca ileterek etkili iletişim sağlar.      kapat kapat kapat kavram/zİhİn harİtalari kavram haritaları öğrencilere karmaşık konuları görsel olarak düzenleme, anlama ve ilişkilendirme yeteneği kazandırarak öğrenmeyi derinleştirmelerine yardımcı olur. zihin haritaları ise konular arasındaki ilişkileri göstererek problem çözme, planlama ve öğrenme süreçlerini kolaylaştırır, böylece bireyler bilgiyi daha bütünlüklü bir şekilde kavrar.  kapat kapat kapat harİtalar haritalar, coğrafi alanları görsel olarak temsil ederek yerler arasındaki ilişkileri anlamamıza yardımcı olur.  öğrenme süreçlerinde haritalar, konumsal farkındalık geliştirmek, mekansal ilişkileri anlamak ve coğrafi verileri analiz etmek için kullanılır. haritalarda sınırların doğru gösterilmesi oldukça önemlidir.  kapat kapat kapat İnfografİkler infografikler, karmaşık verileri basitleştirmek ve görsel olarak etkili bir şekilde sunmak için kullanılır. İnfografikler, istatistikler, trendler, grafikler ve haritalar gibi görsel unsurları kullanarak, karmaşık verileri göz alıcı ve anlaşılır bir formatta sunar.  İnfografikler bir hikaye anlatma aracı olarak da kullanılabilir. verilerin doğru bir şekilde yerleştirilmesiyle, izleyicilere belirli bir konu veya olay hakkında derinlemesine anlayış kazandırabilirler. e-içerik türleri görsel İçerikler akış şeması akış şeması akış şeması akış şeması İnfografik İnfografik İnfografik İnfografik harita harita harita harita kavram/zihin haritası kavram/zihin haritası kavram/zihin haritası kavram/zihin haritası afiş (poster, broşür) afiş (poster, broşür) afiş (poster, broşür) afiş (poster, broşür) bilgi kartları bilgi kartları bilgi kartları bilgi kartları görsel içerik detayları için kutucuklara tıklayınız.</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.66FnHzvjq2Q" slidebank="false" type="slide">e-içerik türleri etkileşimli İçerikler etkileşimli içerikler, kullanıcılarla aktif bir şekilde etkileşime girebilen ve kullanıcının içeriği pasif bir şekilde tüketmek yerine katılımcı bir rol oynamasına olanak tanıyan içerik türüdür. bu tür içerik, kullanıcıların seçimler yapmalarına, tepkiler vermesine olanak sağlar.</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5Y8A7hoAR4q" slidebank="false" type="slide">   boşluk doldurma etkinlikleri açık uçlu sorular kısa cevaplı sorular çoktan seçmeli sorular doğru/yanlış etkinlikleri çoklu seçim etkinlikleri eşleştirme etkinlikleri bulmaca etkinlikleri sıralama etkinlikleri etkileşimli harita etkileşimli zaman çizelgesi etkileşimli video etkileşimli İnfografik görsel etiketleme etkinlikleri    simülasyon (benzetim) sanal gerçeklik uygulamaları artırılmış gerçeklik uygulamaları sanal gezi uygulamaları etkileşimli oyun  e-içerik türleri bilgi ölçmeye yönelik etkileşimli İçerikler bilgi aktarımına yönelik etkileşimli İçerikler diğer etkileşimli İçerikler              etkileşimli İçerik türleri</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.6kstanibD2m" slidebank="false" type="slide">çoklu seçim etkinlikleri sorulan bir sorunun birden fazla cevabının bulunduğu ve öğrencilerin doğru cevapları seçtiği etkinlik türüdür.      doğru/yanlış etkinlikleri bir kısmı doğru bir kısmıysa yanlış ifadelerden oluşur. bu tip sorularda öğrencilerden verilen ifade, kavram ya da tanımların doğru ya da yanlış olup olmadığı konusundaki yargısı istenir.       çoktan seçmeli soru etkinlikleri bu tür sorularda tek bir cevabın doğru diğer seçeneklerin ise çeldirici işlevinde olması gerekmektedir.      kısa cevaplı soru etkinlikleri bu tip soruların cevaplarının tek bir kelime, cümle ya da sayı olarak verilmesini gerektiren nitelikte olup olmadığına dikkat edilmelidir.       açık uçlu soru etkinlikleri bu tip sorularda öğrencilerden soru hakkındaki cevaplarını serbest bir şekilde yazmalarını isteyen ifadenin yer almasına dikkat edilmelidir.       eşleştirme etkinlikleri çeşitli kategorilere veya konseptlere ait öğelerin doğru bir şekilde eşleştirilmesi istenen içerik türüdür. kelime eşleştirme resim-kelime  tanım-kelime soru-cevap eşleştirme gibi yöntemler kullanılabilir.      boşluk doldurma etkinlikleri tanımı verilerek cevap olarak yazılması istenen kelime, kavram ya da sembolün yeri açık bırakılarak oluşturulan soru etkinlikleridir. bu tip sorularda verilen soru kökünde istenilen cevabın yerleştirileceği yerin boş bırakılmasına dikkat edilmelidir.        boşluk doldurma etkinlikleri boşluk doldurma etkinlikleri boşluk doldurma etkinlikleri boşluk doldurma etkinlikleri eşleştirme etkinlikleri eşleştirme etkinlikleri eşleştirme etkinlikleri eşleştirme etkinlikleri açık uçlu sorular açık uçlu sorular açık uçlu sorular açık uçlu sorular çoktan seçmeli sorular çoktan seçmeli sorular çoktan seçmeli sorular çoktan seçmeli sorular doğru/yanlış etkinlikleri doğru/yanlış etkinlikleri doğru/yanlış etkinlikleri doğru/yanlış etkinlikleri çoklu seçim etkinlikleri çoklu seçim etkinlikleri çoklu seçim etkinlikleri çoklu seçim etkinlikleri kısa cevaplı sorular kısa cevaplı sorular kısa cevaplı sorular kısa cevaplı sorular bilgi ölçmeye yönelik etkileşimler bilgi ölçmeye yönelik etkileşimler e-içerik türleri etkileşimli İçerik türleri</slidetext>
+      <slidetext slideid="6Ufpby5ssqT.6O5vY8UzrT6" slidebank="false" type="slide">İlerleyebilmeniz için ekrandaki içerik türlerinin tamamını görüntülemeniz gerekmektedir. görüntülenen içeriklerin buton renkleri gri olacaktır.    kapat kapat kapat  görsel etiketleme görseller üzerinde belirli noktaları vurgulamak veya açıklamalar eklemek için kullanılan etkileşim türüdür. kullanıcılara resimdeki belirli bölgelere tıkladıklarında metin, ses, video veya bağlantı gibi içeriklerle etkileşimde bulunma imkanı tanır.  kapat kapat kapat    etkileşimli İnfografik grafikler, metinler ve görsellerle zenginleştirilmiş interaktif içeriklerdir. kullanıcılara verileri keşfetme, etkileşime geçme, grafikleri anlama ve içerikte derinlemesine gezinme imkanı sunar. kapat kapat kapat                                    etkileşimli video İzleyicilerle doğrudan etkileşime geçen dinamik video içeriklerdir. kullanıcıların videoyu durdurma, seçenekler arasında geçiş yapma, videoda sorulan bir souya yanıt verme gibi etkileşimli özellikleriyle içeriği kontrol etmelerine olanak tanır, öğrenme deneyimini zenginleştirir ve kullanıcıları daha etkin bir şekilde içeriğe dahil eder. kapat kapat kapat    etkileşimli zaman çizelgesi belirli bir süreç, olay veya tarih aralığını interaktif grafikler, metinler ve görsellerle gösteren dinamik zaman çizelgeleridir. kullanıcılara içeriği keşfetme, detayları inceleme, zaman aralıkları arasında geçiş yapma ve görsel öğelerle etkileşime geçme imkanı tanıyarak karmaşık olayları anlamayı kolaylaştırır ve katılımcıları içeriğe daha fazla bağlar. kapat kapat kapat    etkileşimli harita etkileşimli haritalar öğrencilerin haritalar üzerinde tıklama işlemi yoluyla detaylar öğrenmesini sağlar. etkileşimli haritalarda haritaların gerçekçi olması, etkileşimin amacına uygun tasarlanması oldukça önemlidir. kapat kapat kapat               e-içerik türleri etkileşimli harita etkileşimli zaman çizelgesi etkileşimli video etkileşimli İnfografik görsel etiketleme etkinlikleri etkileşimli İçerik türleri bilgi aktarımına yönelik etkileşimli İçerikler öğrencilerin bilgileri özümsemesini ve öğrenme deneyimini artırmayı hedefleyen etkileşimli öğrenme içerikleridir. bu sayede öğrenciler daha etkili bir şekilde bilgi edinir ve öğrenilen konuları derinlemesine anlama fırsatı bulurlar.                                                            </slidetext>
+      <slidetext slideid="6Ufpby5ssqT.5maa8WxUeNv" slidebank="false" type="slide">İlerleyebilmeniz için ekrandaki içerik türlerinin tamamını görüntülemeniz gerekmektedir. görüntülenen içeriklerin buton renkleri gri olacaktır.    kapat kapat kapat  eğitsel e-oyunlar eğitsel e-oyunlar, öğrenmeyi eğlenceli ve etkileşimli bir deneyim haline getiren, öğrencilerin problem çözme, strateji geliştirme ve işbirliği gibi becerileri geliştirmelerini sağlayan uygulamalardır. eğitsel e-oyunlar, öğrenmeyi desteklerken öğrencilerin motivasyonunu artırır ve ders içeriğini oyunlaştırarak daha etkili bir şekilde öğrenmelerini sağlar. kapat kapat kapat    sanal gezi uygulamaları sanal gezi veya tur uygulamaları, kullanıcıları gerçek mekanlarda dolaşıyormuş gibi hissettiren, 360 derece görüntüler, ses efektleri ve interaktif özelliklerle zenginleştirilmiş sanal ortamlardır.  bu uygulamalar, kullanıcıları farklı coğrafi mekanları keşfetmeye teşvik eder, kültürel deneyimleri artırır ve seyahat etme imkanı sunar. kapat kapat kapat    artırılmış gerçeklik uygulamaları artırılmış gerçeklik, fiziksel dünyayı bilgisayar tabanlı görüntüler, sesler veya diğer duyusal girdilerle zenginleştiren interaktif bir teknolojidir.  bu yöntem, gerçek dünya ile sanal dünya arasında köprü kurarak kullanıcıların daha zengin ve etkileşimli deneyimler yaşamasını sağlar. sağdaki örnekte küp telefon uygulaması kullanılarak artırılmış gerçeklik olarak görüntülenmektedir. kapat kapat kapat    sanal gerçeklik uygulamaları sanal gerçeklik, çeşitli teknolojiler kullanılarak oluşturulan üç boyutlu ve etkileşimli bir simülasyon ortamında gerçek dünya hissiyatını yaratan bir deneyimdir. kullanıcılar, sanal gerçeklik gözlükleri veya başlıkları aracılığıyla 360 derece video, 3d modeller ve ses efektleri ile zenginleştirilmiş ortamlarda etkileşimde bulunabilir, böylece gerçek dünya durumlarını sanal bir şekilde deneyimleyebilirler. sanal gerçeklikte kullanıcı dış dünyadan tamamen farklı bir ortamdadır. kapat kapat kapat  simülasyon (benzetim) eğitimde simülasyon, öğrencilere teorik bilgileri pratiğe dökme ve gerçek dünya durumlarını deneyimleme fırsatı sunar.  bu yöntem, öğrencilerin aktif bir şekilde öğrenmelerini sağlar, gerçek hayatta karşılaşabilecekleri durumları sanal bir ortamda deneyimleme imkanı tanır. örneğin; gerçek hayatta uygulanması zor ve tehlikeli olan kimyasal deneyler benzetimler yoluyla etkili bir biçimde öğrenilebilir. kapat kapat kapat   simülasyon (benzetim)       sanal gerçeklik uygulamaları artırılmış gerçeklik uygulamaları sanal gezi uygulamaları eğitsel e-oyunlar e-içerik türleri etkileşimli İçerik türleri diğer etkileşimli İçerikler öğrenenlere bilgi aktarımı, ölçme ve değerlendirme gibi çeşitli amaçlarla kullanılabilecek içeriklere ek olarak öğrenene gerçek öğrenme deneyimi sunan, öğrenmeyi etkili, kalıcı ve keyifli hale getiren çok sayıda etkileşimli içerik türü bulunmaktadır.                                         </slidetext>
+      <slidetext slideid="6LCdji0RbWw.5bZTSNnJzSU" slidebank="false" type="slide">ders kitaplarında e-içerik kullanımı özet elektronik  İçerikler   ek etkinlik veya  sorular  elektronik eğitim İçerikleri tablosu diğer  elektronik İçerikler       ünite/tema özetleyici e-içerikler taslak ders kitabının tüm ünite kapaklarında yer verilmek üzere sınıf seviyesi ve alan türleri dikkate alınarak bilgi, beceri, değer ve tutumları öğrencilere kazandırmada kullanılabilecek ve dersin özelliğine göre  üniteyi veya temayı destekleyen özet elektronik içerikleri ifade eder.             ek etkinlik veya soru İçeren e-içerikler taslak ders kitabında yer alan ölçme ve değerlendirme etkinlikleri dışında ünite/tema sonu ölçme ve değerlendirme bölümlerinde yer verilmek üzere hazırlanan öğrenilenleri pekiştirici etkinlikler veya farklı soru türlerini ifade eder.  elektronik eğitim İçerikleri tablosu konu ve kazanım düzeyinde hazırlanması gereken e-içeriklerin listelendiği tabloyu ifade eder.  diğer e-İçerikler burada belirtilenlerin dışında başvuru sahiplerince öğrenmeyi destekleyici olacak şekilde hazırlanan diğer e-içerikleri ifade eder. </slidetext>
+      <slidetext slideid="6LCdji0RbWw.5zAr5H6UhcP" slidebank="false" type="slide">ders kitapları elektronik eğitim İçerikleri tablosunda belirtilen e-içerikler sıra ders adi ünİte konu kazanim e-İçerİk türü 1 fizik 11 1. ünİte   kuvvet ve hareket enerji ve hareket 11.1.6.1. yapılan iş ile enerji arasındaki ilişkiyi analiz eder. video/animasyon/etkileşimli İçerik 2 fizik 11 1. ünİte   kuvvet ve hareket İtme ve çizgisel momentum 11.1.7.1. İtme ve çizgisel momentum kavramlarını açıklar. video/animasyon 3 fizik 11 2. ünİte   elektrİk ve manyetİzma elektriksel kuvvet ve elektrik alan 11.2.1.1. yüklü cisimler arasındaki elektriksel kuvveti etkileyen değişkenleri belirler. 11.2.1.2. noktasal yük için elektrik alanı açıklar. etkileşimli İçerik  birden fazla içerik türü varsa bunlardan en az birinin hazırlanması gerekir. örneğin; bu satır için video, animasyon veya etkileşimli içerik hazırlanması beklenmektedir. bu satırda belirtilen türlerin dışında başka bir e-içerik türü yüklenmesi durumunda hata girişi yapılmalıdır.  satırda tek bir e-içerik türü verilmişse o türde eiçerik hazırlanması gerekir. örneğin; burada satırdaki kazanımlara yönelik etkileşimli içerik hazırlanması beklenmektedir. bu satırda belirtilen türün (etkileşimli içerik) dışında başka bir e-içerik türü yüklenmesi durumunda hata girişi yapılmalıdır.  tablo satırında birden fazla kazanım varsa hazırlanacak e-içerik bu kazanımlardan en az biri ile ilgili olmalıdır. kazanımları gerçekleştirme yeterliliği ders kitapları elektronik eğitim İçerikleri tablosu’nda yer alan öğrenmeyi destekleyecek elektronik içeriğe uygun hazırlanmamıştır. e-içerik tablosu 1 numaralı satırda istenen içerik hazırlanmamıştır.  e-içerik tablosu 1 numaralı satırda istenen içerik tablodaki e-içerik türüne uygun hazırlanmamıştır.  e-içerik tablosu 1 numaralı satır ,11.1.6.1 numaralı kazanım</slidetext>
+      <slidetext slideid="6HuaVagWNDB.62gZR0iHN2Y" slidebank="false" type="slide"> kapat kapat kapat sanal gerçeklik ve artırılmış gerçeklik cihazlarının web tarayıcısı desteği olmalıdır. artırılmış gerçeklik cihazlarının kumanda kontrolü ve ses kesme özelliği olan kablosuz mikrofon desteği bulunmalıdır.  kriter açıklamaları kriter: sanal gerçeklik, artırılmış gerçeklik gibi etkileşimli içeriklerin çevre birimleri standartlara uygun olarak tasarlanmalıdır.  bu durum için örnek uygulama bulunmamaktadır.  sonraki bölüme geçebilirsiniz.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat  elektronik içeriklerde kullanılan üç boyutlu modellerde (canlandırma, çizim vb.) karakterler, dokular vb. çeşitli yapılar detaylı bir şekilde verilmelidir.  kriter açıklamaları kriter: etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat video kalitesi, akış boyutu, bit oranı, bit yoğunluğu ve kare hız modu gibi özellikler hata içermemelidir. video ve fotoğraf çekimlerinin ışık, çerçeveleme, çekim ölçekleri, açıları ve kompozisyon ögeleri bakımından görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır kriter açıklamaları kriter: video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat sesler bozulma olmayacak şekilde en yüksek ses hacmi ve kalitesinde olmalıdır. seçilen işitsel efektler içeriğe uygun ve dikkat dağıtmayacak bir ses hacmi ile verilmelidir. ses net, dip gürültüsüz, akıcı (kesintiye uğramadan) ve uygun ses hacminde olmalıdır. kullanılan ögeler yüksek çözünürlük ve kalitede olmalıdır. çoklu ortamlarda (ses, video vb.) ses ve görüntü birbirine eş zamanlı (senkronize) olarak akmalıdır. ses kalitesi sorunsuz olmalı; ses rengi, tonlaması ile oluşturduğu algı içerikle uyumlu olmalıdır. görüntüler net olmalı, kesintiye uğramamalıdır. dikkat dağıtıcı arka plan sesleri, görüntü vb. unsurlar bulunmamalıdır. kriter açıklamaları kriter: ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat • öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) yönergeler, uygulama basamakları vb. ögeler görsel açıdan anlaşılır, sistematik ve tutarlı bir tasarımla verilmelidir. kriter açıklamaları kriter: öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat  elektronik içerikler bilişim teknolojisi cihazlarının farklı ekran  boyutları, çözünürlükleri ve özelliklerine uygun, bunlarla uyumlu ve kullanışlı şekilde hazırlanmalıdır. kriter açıklamaları kriter: sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır.  kapat kapat kapat kriter:  elektronik içerikler çevrimiçi ve ihtiyaç duyulması hâlinde çevrimdışı çalışabilecek nitelikte tasarlanmalıdır. bu durum için örnek uygulama bulunmamaktadır.  sonraki kritere geçebilirsiniz.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat İçerikler güvenlik açıkları ve sınırlamalarla karşılaşılmaması için güncel çoklu platformlarda, işletim sistemleri/cihazlarda çalışabilecek yapıda ve güncel geliştirme ortamları, araç ve kütüphaneleri ile hazırlanmalıdır. kriter açıklamaları kriter: elektronik içeriklerde ve bunların geliştirme ortamları ile yazarlık araçlarında güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat türkçe karakterlerin kodlanmasında windows 1254, utf 8 ve iso 8859-9 karakter kümeleri kullanılmalıdır. yabancı diller, yaşayan diller ve lehçeler için hazırlanan ders kitaplarında o dile uygun karakter seti kullanılmalıdır. kriter açıklamaları kriter: türkçe karakter setleri kullanılmalıdır.   örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat e-içeriklerin herhangi bir bölümünde zararlı unsur bulunmamalıdır. kriter açıklamaları kriter: zararlı yazılımlar içermemelidir.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat elektronik içerikler yön, boşluk, denge, orantı, hiyerarşi, vurgulama, devamlılık, bütünlük vb. tasarım ilkelerine uygun olarak hazırlanmalıdır. ekranlar ve geçişler arasında tematik bir bütünlük olmalıdır. kriter açıklamaları kriter: genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır.  örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. örnek uygulama İçin tıklayınız. kapat kapat kapat elektronik içeriklerde kullanılan simge ve logoların açıklandığı, sınıf seviyesine uygun organizasyon şeması yer almalıdır. elektronik içeriklerde iletişim ve etkileşim köprüsü görevi gören kullanıcı arayüzleri basit, anlaşılır, yol gösterici adımlara uygun olarak hazırlanmalıdır. elektronik içerikler eğitim imkânlarını geliştirmek için özel gereksinimli öğrencilere yönelik sınıf içi uygulamaları desteklemelidir. kriter açıklamaları kriter: genel tasarım ilkelerine uygun olarak oluşturulmalıdır. e-içerik İnceleme ve değerlendirme kriterleri genel tasarım ilkelerine uygun olarak oluşturulmalıdır.  genel tasarım ilkelerine uygun olarak oluşturulmalıdır. genel tasarım ilkelerine uygun olarak oluşturulmalıdır.   genel tasarım ilkelerine uygun olarak oluşturulmalıdır. genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır.  genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır. genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır.   genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır. zararlı yazılımlar içermemelidir.  zararlı yazılımlar içermemelidir. zararlı yazılımlar içermemelidir.   zararlı yazılımlar içermemelidir. sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır.  sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır. sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır.   sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır. türkçe karakter setleri kullanılmalıdır.   türkçe karakter setleri kullanılmalıdır.  türkçe karakter setleri kullanılmalıdır.    türkçe karakter setleri kullanılmalıdır.  video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır.  video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır. video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır.   video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır. güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır.  güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır. güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır.   güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır.    öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir.     öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir.    öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir.      öğrencinin aktif katılacağı içeriklerde (deney, etkinlik, alıştırma, oyun vb.) anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir. etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir.  etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir. etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir.   etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir. çevrim içi ve ihtiyaç duyulması hâlinde çevrim dışı çalışabilecek nitelikte tasarlanmalıdır.   çevrim içi ve ihtiyaç duyulması hâlinde çevrim dışı çalışabilecek nitelikte tasarlanmalıdır.  çevrim içi ve ihtiyaç duyulması hâlinde çevrim dışı çalışabilecek nitelikte tasarlanmalıdır.    çevrim içi ve ihtiyaç duyulması hâlinde çevrim dışı çalışabilecek nitelikte tasarlanmalıdır.  ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır. ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır.   ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır.  ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır. sanal gerçeklik, artırılmış gerçeklik gibi etkileşimli içeriklerin çevre birimleri standartlara uygun olarak tasarlanmalıdır.   sanal gerçeklik, artırılmış gerçeklik gibi etkileşimli içeriklerin çevre birimleri standartlara uygun olarak tasarlanmalıdır.  sanal gerçeklik, artırılmış gerçeklik gibi etkileşimli içeriklerin çevre birimleri standartlara uygun olarak tasarlanmalıdır.    sanal gerçeklik, artırılmış gerçeklik gibi etkileşimli içeriklerin çevre birimleri standartlara uygun olarak tasarlanmalıdır.                          %kriter2_tamamlama% %kriter3_tamamlama% %kriter4_tamamlama% %kriter5_tamamlama% %kriter6_tamamlama% %kriter7_tamamlama% %kriter8_tamamlama% %kriter9_tamamlama% %kriter10_tamamlama% %kriter11_tamamlama% %kriter12_tamamlama% %kriter1_tamamlama% devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.6iruEdoB0HW" slidebank="false" type="slide">  elektronik İçerik tasarımının uygunluğu İçerikte yol gösterici adımlar (buton, köprü vb.) çalışmamaktadır. gemi butonuna tıklandığında ekranda bir değişim olmamaktadır. 1. ünite ulaşım araçlarını tanıyalım genel tasarım ilkelerine uygun olarak oluşturulmalıdır. devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.6FWGudMr3rV" slidebank="false" type="slide">  elektronik İçerik tasarımının uygunluğu ekranlar ve geçişler arasında tematik bir bütünlük sağlanmamıştır. meyvelerin anlatıldığı etkileşimli uygulamada diğer meyvelerin açıklaması yeşil arka plan ile gösterilirken elma gri arka planda gösterilmektedir. ayrıca elmanın arka planında kalan beyaz renk tasarım açısından diğer meyvelerle örtüşmemektedir. bu durum bütünlüğü bozmaktadır. 2. ünite meyveler genel yapısı ve tasarımı kendi içinde bir bütünlük oluşturmalıdır. devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.618bWTnTvKI" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu diğer tespitler başlat düğmesine tıklandığında virüslü içeriklere yönlendirmektedir. 4. ünite zararlı yazılımlar zararlı yazılımlar içermemelidir.   devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.64tPn0kqQ3c" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu etkileşimli canlandırmada etkinliğin özelliğine uygun sürede geri bildirim verilmemiştir. verilen örnekte kelime hecelerinden uzun olanın seçilmesi istenmektedir. ancak hece seçiminden sonra herhangi bir dönüt verilmemektedir. yalnızca doğru seçenek işaretlendiğinde teebrikler dönütü verilmektedir. 11. ünite etkili ve zamanında dönüt verme etkileşimli canlandırmalarda uygun sürede geri bildirim verilmelidir.   sonraki örnek sonraki örnek sonraki örnek sonraki örnek sonraki örnek sonraki örnek</slidetext>
+      <slidetext slideid="6HuaVagWNDB.6gB6lGlzkRG" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu görüntüler net değildir veya video akışı kesintiye uğramaktadır. videonun sonunda takılma meydana gelmektedir. ayrıca çözünürlük düşüktür. 10. ünite bozuk videolar   video ve fotoğrafların görsel etkinliği ve bütünlüğü olmalı, görüntü estetiği sağlanmalıdır. devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.5hBlDqAbjNk" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu üç boyutlu modellerde karakterler, dokular vb. çeşitli yapılar detaylı bir şekilde verilmemiştir. ekranda spor yapan karakterlerin kolları gerçeğe uygun şekilde verilmemiştir. 11. ünite gerçeğe yakın çizimler  üç boyutlu modellerde karakterler, dokular vb. çeşitli yapılar detaylı bir şekilde verilmelidir.  devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.5ceL8VyoYZH" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu İçerikte türkçe karakter seti kullanılmamıştır. İçerikte türkçe karakter seti kullanılmadığından ekrandaki karakterlerde bozulmalar meydana gelmiştir. 1. ünite ulaşım araçları türkçe karakter setleri kullanılmalıdır.  devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.5y36g2YsYsU" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu diğer tespitler hazırlanan etkileşimli oyun uygulamasının oynanabilmesi için güncel olmayan flash player eklentisinin yüklenmesi gerektiğinden hatalıdır. 5. ünite güncel yazılımlar güncel olmayan, geliştirilmeyen yazılım kütüphaneleri, uygulamaları kullanılmamalıdır. oyunu başlat oyunu başlat oyunu başlat oyunu başlat oyunu başlat oyunu başlat devam et devam et devam et devam et devam et devam et oyunu oynayabilmek için flash player yüklemeniz gerekmektedir.</slidetext>
+      <slidetext slideid="6HuaVagWNDB.6Q9R1nnr8My" slidebank="false" type="slide">sunulduğu ortama ve duyarlı tasarım ilkelerine uygun şekilde hazırlanmalıdır. elektronik İçerik tasarımının uygunluğu İçeriğin sunulduğu ortam, duyarlı tasarım ilkelerine uygun şekilde hazırlanmamıştır. hazırlanan içerik farklı cihazlardan açıldığında ekrana sığmamaktadır. 7. ünite duyarlı tasarım     devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.62Tk8j4oJjU" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu çoklu ortamlarda (ses, video vb.) ses ve görüntü birbiriyle eş zamanlı (senkronize) değildir. verilen animasyonda araba hareketini tamamladıktan sonra motor sesi gelmektedir. bu durum senkronizasyon problemi oluşturmaktadır. 9. ünite seslerin senkronizasyonu ses ve görüntü net, anlaşılır, akıcı ve eş zamanlı olmalıdır.  devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6HuaVagWNDB.6EpLOiqBeIX" slidebank="false" type="slide">elektronik İçerik tasarımının uygunluğu İçerikte anlaşılır, sistematik ve tutarlı yönergelere yer verilmemiştir. verilen etkileşimli deney uygulamasında öğrencinin ne yapması gerektiğine dair açık ve anlaşılır bir yönergeye yer verilmemiştir. 5. ünite sıvıların kaldırma kuvveti öğrencinin aktif katılacağı içeriklerde anlaşılır, sistematik ve tutarlı yönergelere yer verilmelidir. devam et devam et devam et devam et devam et devam et</slidetext>
+      <slidetext slideid="6lDkKX9U9sX.6779qALrvJy" slidebank="false" type="slide">tebrikler.  eğitimi başarıyla tamamladınız..   </slidetext>
+    </search>
+  </nav_data>
+  <resource_data description="&lt;p align='left'&gt;&lt;font face='Roboto' style='font-size: 11px;' size='11' color='#464646'&gt;Here are some useful links and documents:&lt;/font&gt;&lt;/p&gt;">
+    <resources>
+      <resource url="story_content/external_files/Taslak ders kitabı inceleme ve değerlendirme kriterleri.pdf" image="story_content/6P0C8KZLGzz.png" title="İnceleme ve Değerlendirme Kriterleri" />
+    </resources>
+  </resource_data>
+  <transcript_data>
+    <slidetranscripts>
+      <slidetranscript slideid="6Ufpby5ssqT.6llaAAZ48Fk" slidebank="false" type="slide" noteswf="" notespng="" pathlib="Lib" pathindex="0">&lt;Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Content&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="16" SpacingAfter="8" /&gt;
+      &lt;Span Text="Elektronik Eğitim İçerikleri İnceleme ve Değerlendirme Eğitimine hoş geldiniz.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="dk1,00" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" LinkColor="dk1,00" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="16" SpacingAfter="8" /&gt;
+      &lt;Span Text="Bu eğitimde e-içeriğin ne olduğunu, e-içerik türlerini, e-içeriklerin eğitimdeki yeri ve önemini, ders kitaplarındaki e-içeriklerin mevcut durumunu ve bu e-içeriklerin incelenme ve değerlendirme sürecinde nelere dikkat etmeniz gerektiğini öğreneceksiniz.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="dk1,00" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" LinkColor="dk1,00" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="16" SpacingAfter="8" /&gt;
+      &lt;Span Text="Başlamak için tıklayınız.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="dk1,00" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" LinkColor="dk1,00" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="16" SpacingAfter="8" /&gt;
+      &lt;Span Text=""&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="dk1,00" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" LinkColor="dk1,00" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+  &lt;/Content&gt;
+&lt;/Document&gt;</slidetranscript>
+      <slidetranscript slideid="6Ufpby5ssqT.6kGPdsfpwB1" slidebank="false" type="slide" noteswf="" notespng="" pathlib="Lib" pathindex="1">&lt;Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Content&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text="E-içerikler “e"&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" /&gt;
+      &lt;/Span&gt;
+      &lt;Span Text="ğitim öğretim sürecini desteklemek ve zenginleştirmek için öğrenme ortamlarında elektronik araçlar ile kullanılmak üzere tasarlanmış, zamandan ve mekândan bağımsız, tekrar kullanılabilen eğitsel içerikler” olarak tanımlanmaktadır."&gt;
+        &lt;Style FontFamily="Roboto" FontSize="12" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+  &lt;/Content&gt;
+&lt;/Document&gt;</slidetranscript>
+      <slidetranscript slideid="6Ufpby5ssqT.6RtRJXOWbTW" slidebank="false" type="slide" noteswf="" notespng="" pathlib="Lib" pathindex="2">&lt;Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Content&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text="E-içerikler sundukları etkileşim sayesinde öğrenciler arasında işbirlikli öğrenmeyi teşvik eder, öğrenmeyi kolaylaştırır ve sunmuş olduğu çeşitlilik sayesinde kalıcı öğrenmenin gerçekleşmesine katkı sağlar.&amp;#xA;"&gt;
+        &lt;Style FontSize="12" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text="Ayrıca sahip olduğu erişilebilirlik özellikleri sayesinde farklı gereksinimleri olan öğrenciler için içeriklerin özelleştirilmesini sağlar.&amp;#xA;"&gt;
+        &lt;Style FontSize="12" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text="Bunun yanında her öğrencinin istediği zamanda ve isteği yerden öğrenmesine fırsat sunduğundan esnek öğrenmeyi destekler.&amp;#xA;"&gt;
+        &lt;Style FontSize="12" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontSize="12" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style /&gt;
+      &lt;Span Text=""&gt;
+        &lt;Style FontSize="12" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+  &lt;/Content&gt;
+&lt;/Document&gt;</slidetranscript>
+      <slidetranscript slideid="6Ufpby5ssqT.6kstanibD2m" slidebank="false" type="slide" noteswf="" notespng="" pathlib="Lib" pathindex="3">&lt;Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Content&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="8" SpacingAfter="4" /&gt;
+      &lt;Span Text="Bilgi Ölçmeye Yönelik Etkileşimli İçerikler&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto" FontIsBold="True" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="dk1,00" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" LinkColor="hlink,00" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Boşluk Doldurma Etkinlikleri&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Açık Uçlu Sorular&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Kısa Cevaplı Sorular&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Çoktan Seçmeli Sorular&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Doğru/Yanlış Etkinlikleri&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="24" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="Bullet" BulletChar="•" BulletFont="Arial"&gt;
+          &lt;BulletPicture Size="0x0" /&gt;
+        &lt;/ListStyle&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Eşleştirme Etkinlikleri"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+  &lt;/Content&gt;
+&lt;/Document&gt;</slidetranscript>
+      <slidetranscript slideid="6LCdji0RbWw.5bZTSNnJzSU" slidebank="false" type="slide" noteswf="" notespng="" pathlib="Lib" pathindex="4">&lt;Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Content&gt;
+    &lt;Block&gt;
+      &lt;Style LeadingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Multiple" LineSpacing="20" SpacingBefore="0" SpacingAfter="0" /&gt;
+      &lt;Span Text="Ders kitapları ile eğitim araçları elektronik eğitim içeriklerini kapsayacak şekilde yeniden tanımlanmıştır.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Ders kitaplarında elektronik eğitim içeriklerine yer verilmesi için, ders kitaplarında kare kod uygulamasına geçilmiştir.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Özet elektronik içerikler&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Taslak ders kitabının tüm ünite kapaklarında yer verilmek üzere sınıf seviyesi ve alan türleri dikkate alınarak bilgi, beceri, değer ve tutumları öğrencilere kazandırmada kullanılabilecek ve dersin özelliğine göre  üniteyi veya temayı destekleyen özet elektronik içerikleri ifade eder.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="ek elektronik içerikler&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Taslak ders kitabında yer alan ölçme ve değerlendirme etkinlikleri dışında ünite/tema sonu ölçme ve değerlendirme bölümlerinde yer verilmek üzere hazırlanan öğrenilenleri pekiştirici etkinlikler veya farklı soru türlerini ifade eder.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="E-içerik tablosu&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Dersler bazında ünite, konu ve kazanımlara yönelik hazırlanması gereken e-içerik türlerinin yayımlandığı tabloyu ifade eder.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Diğer e-içerikler&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+      &lt;Span Text="Başvuru sahiplerince öğrenmeyi destekleyici olacak şekilde hazırlanan diğer e-içerikleri ifade eder.&amp;#xA;"&gt;
+        &lt;Style FontFamily="Roboto Light" FontSize="10" FontIsBold="False" FontIsItalic="False" FontIsUnderline="False" FontIsStrikeout="False" ForegroundColor="#2B2B2B" BackgroundColor="#000000,00" Elevation="Normal" Spacing="0" DisplayCase="AsIs" /&gt;
+      &lt;/Span&gt;
+    &lt;/Block&gt;
+    &lt;Block&gt;
+      &lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" ListLevel="0" LineSpacingRule="Single" LineSpacing="20" SpacingBefore="0" SpacingAfter="0"&gt;
+        &lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#0E2C4B" BulletFont="Arial" /&gt;
+      &lt;/Style&gt;
+    &lt;/Block&gt;
+  &lt;/Content&gt;
+&lt;/Document&gt;</slidetranscript>
+    </slidetranscripts>
+  </transcript_data>
+  <glossary_data />
+</bwFrame>
