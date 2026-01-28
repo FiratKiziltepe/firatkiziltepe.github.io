@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.5.5 Türkçe Karakter Setleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Türkçe Karakter Setleri</h1>
+                    <p class="scorm-subtitle">Kriter 8.5.5</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.5.5</span>
+            <span class="criterion-title">E-içeriklerde Türkçe karakter setleri kullanılmalıdır.</span>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <main class="flex-1 content-area">
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Yanlış karakter kodlaması kullanılıyor</li>
+                        <li>Türkçe karakterler bozuk görünüyor (ş, ğ, ü, ö, ç, ı, İ)</li>
+                        <li>Metin okunamaz hale geliyor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Fotosentez - Karakter Sorunu</h2>
+                </div>
+                <div class="simulation-body">
+                    <div class="bg-red-50 border-2 border-red-300 rounded-xl p-6 mb-4">
+                        <h3 class="font-bold text-red-800 mb-3">Bozuk Karakter Örneği (ASCII/Latin-1):</h3>
+                        <div class="bg-white p-4 rounded-lg border border-red-200 font-mono">
+                            <p class="text-gray-800 mb-2">
+                                Fotosentez, bitkilerin g�ne? ?????? kullanarak besin �retti?i bir s�re�tir.
+                            </p>
+                            <p class="text-gray-800 mb-2">
+                                Yapraklarda bulunan klorofil, ???k? so?urur ve kimyasal enerjiye d�n??t�r�r.
+                            </p>
+                            <p class="text-gray-800">
+                                Bu s�re�te su (H₂O) ve karbondioksit (CO₂) kullan?larak glikoz ve oksijen �retilir.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4">
+                        <h3 class="font-bold text-orange-800 mb-3">HTML Kodu (Yanlış):</h3>
+                        <div class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                            <p><span class="text-red-400">&lt;!-- Karakter seti belirtilmemiş veya yanlış --&gt;</span></p>
+                            <p>&lt;html&gt;</p>
+                            <p>&lt;head&gt;</p>
+                            <p>  <span class="text-red-400">&lt;!-- meta charset yok! --&gt;</span></p>
+                            <p>&lt;/head&gt;</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-4">
+                            <h4 class="font-bold text-red-800 mb-2">Bozulan Karakterler</h4>
+                            <table class="w-full text-sm">
+                                <tr class="border-b"><td class="py-1">ş → ?</td><td>ğ → ?</td></tr>
+                                <tr class="border-b"><td class="py-1">ü → �</td><td>ö → �</td></tr>
+                                <tr class="border-b"><td class="py-1">ç → �</td><td>ı → ?</td></tr>
+                                <tr><td class="py-1">İ → ?</td><td>Ş → ?</td></tr>
+                            </table>
+                        </div>
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-4">
+                            <h4 class="font-bold text-red-800 mb-2">Sorunun Nedeni</h4>
+                            <ul class="text-sm text-red-700 space-y-1">
+                                <li>• UTF-8 yerine ASCII kullanımı</li>
+                                <li>• meta charset eksik</li>
+                                <li>• Sunucu-istemci uyumsuzluğu</li>
+                                <li>• Veritabanı kodlama hatası</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>UTF-8 karakter kodlaması doğru şekilde kullanılıyor</li>
+                        <li>Tüm Türkçe karakterler düzgün görünüyor</li>
+                        <li>meta charset="UTF-8" tanımı mevcut</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-red-500 to-rose-500 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez - Doğru Karakter Kodlaması</h2>
+                    <p class="text-red-100 text-sm">UTF-8 ile Türkçe karakter desteği</p>
+                </div>
+                <div class="simulation-body">
+                    <div class="bg-green-50 border-2 border-green-300 rounded-xl p-6 mb-4">
+                        <h3 class="font-bold text-green-800 mb-3">Doğru Türkçe Metin (UTF-8):</h3>
+                        <div class="bg-white p-4 rounded-lg border border-green-200">
+                            <p class="text-gray-800 mb-2 text-lg">
+                                <strong>Fotosentez</strong>, bitkilerin <span class="text-green-600 font-medium">güneş ışığını</span> kullanarak besin ürettiği bir süreçtir.
+                            </p>
+                            <p class="text-gray-800 mb-2 text-lg">
+                                Yapraklarda bulunan <span class="text-green-600 font-medium">klorofil</span>, ışığı soğurur ve kimyasal enerjiye dönüştürür.
+                            </p>
+                            <p class="text-gray-800 text-lg">
+                                Bu süreçte su (H₂O) ve karbondioksit (CO₂) kullanılarak <span class="text-green-600 font-medium">glikoz</span> ve <span class="text-green-600 font-medium">oksijen</span> üretilir.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                        <h3 class="font-bold text-blue-800 mb-3">HTML Kodu (Doğru):</h3>
+                        <div class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                            <p>&lt;!DOCTYPE html&gt;</p>
+                            <p>&lt;html lang="<span class="text-green-400">tr</span>"&gt;</p>
+                            <p>&lt;head&gt;</p>
+                            <p>  <span class="text-green-400">&lt;meta charset="UTF-8"&gt;</span></p>
+                            <p>  &lt;title&gt;Fotosentez&lt;/title&gt;</p>
+                            <p>&lt;/head&gt;</p>
+                        </div>
+                    </div>
+
+                    <!-- Türkçe karakterler tablosu -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+                        <h3 class="font-bold text-gray-800 mb-3">Türkçe Özel Karakterler</h3>
+                        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center">
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">Ç</span>
+                                <p class="text-xs text-gray-600">ç</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">Ğ</span>
+                                <p class="text-xs text-gray-600">ğ</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">İ</span>
+                                <p class="text-xs text-gray-600">i</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">I</span>
+                                <p class="text-xs text-gray-600">ı</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">Ö</span>
+                                <p class="text-xs text-gray-600">ö</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">Ş</span>
+                                <p class="text-xs text-gray-600">ş</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">Ü</span>
+                                <p class="text-xs text-gray-600">ü</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-lg">
+                                <span class="text-2xl font-bold">₂</span>
+                                <p class="text-xs text-gray-600">subscript</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desteklenen karakter setleri -->
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h3 class="font-bold text-gray-800 mb-3">Türkçe İçin Uygun Karakter Setleri</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded-lg border-2 border-green-500">
+                                <h4 class="font-bold text-green-700 mb-2">UTF-8 ✓</h4>
+                                <p class="text-sm text-gray-600">Evrensel standart, önerilen</p>
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded mt-2 block">charset="UTF-8"</code>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-gray-700 mb-2">ISO 8859-9</h4>
+                                <p class="text-sm text-gray-600">Latin-5, Türkçe</p>
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded mt-2 block">charset="ISO-8859-9"</code>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-gray-700 mb-2">Windows-1254</h4>
+                                <p class="text-sm text-gray-600">Windows Türkçe</p>
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded mt-2 block">charset="windows-1254"</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.5.5</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('tab-bad').classList.toggle('active', tab === 'bad');
+            document.getElementById('tab-good').classList.toggle('active', tab === 'good');
+            document.getElementById('content-bad').classList.toggle('hidden', tab !== 'bad');
+            document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
+        }
+    </script>
+</body>
+</html>

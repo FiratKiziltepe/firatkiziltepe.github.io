@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.2.1 Arayüz Tasarımı - Kaldırma Kuvveti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Arayüz Tasarımı ve Kullanılabilirlik</h1>
+                    <p class="scorm-subtitle">Kriter 8.2.1</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.2.1</span>
+            <span class="criterion-title">Arayüz basit, anlaşılır ve kullanımı kolay olmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Menüler ve düğmeler işlevini yansıtmıyor</li>
+                        <li>Anlaşılması zor simgeler ve etiketler</li>
+                        <li>Karmaşık ve dağınık arayüz</li>
+                        <li>Eksik denetim ögeleri</li>
+                        <li>Kullanıcı dostu olmayan tasarım</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header" style="background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb); padding: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <button style="background: #333; color: #0f0; padding: 2px 8px; font-size: 10px; border: none; font-family: monospace;">SYS_INIT</button>
+                        <button style="background: purple; color: yellow; padding: 2px 8px; font-size: 10px; border: none; transform: rotate(-5deg);">???</button>
+                        <button style="background: red; color: white; padding: 2px 8px; font-size: 10px; border: none;">X</button>
+                        <button style="background: lime; color: black; padding: 2px 8px; font-size: 10px; border: none;">▶</button>
+                        <span style="font-size: 10px; color: white; text-shadow: 1px 1px black;">v0.0.1-alpha-test</span>
+                    </div>
+                </div>
+                <div class="simulation-body" style="background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px);">
+                    <h2 style="font-size: 14px; color: #666; margin-bottom: 10px; font-style: italic;">sıvı_kaldırma_kuvveti_sim_v2_final_son_GERCEK</h2>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <!-- Sol Panel - Kafa karıştırıcı -->
+                        <div style="flex: 1; min-width: 150px; background: #ddd; padding: 10px; border: 3px dashed orange;">
+                            <p style="font-size: 10px; color: red; margin-bottom: 5px;">* OPT_PANEL *</p>
+                            <div style="margin-bottom: 8px;">
+                                <label style="font-size: 9px; color: gray;">ρ (kg/m³):</label>
+                                <input type="text" value="1000" style="width: 50px; font-size: 10px; background: black; color: lime; border: none;">
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="font-size: 9px; color: gray;">Vol:</label>
+                                <input type="text" value="0.001" style="width: 50px; font-size: 10px; background: black; color: lime; border: none;">
+                            </div>
+                            <button style="background: gray; color: white; border: 2px outset gray; font-size: 9px; padding: 2px 5px; width: 100%;">EXEC</button>
+                            <button style="background: gray; color: white; border: 2px outset gray; font-size: 9px; padding: 2px 5px; width: 100%; margin-top: 3px;">RST</button>
+                        </div>
+
+                        <!-- Simülasyon Alanı -->
+                        <div style="flex: 2; min-width: 200px;">
+                            <canvas id="bad-canvas" width="300" height="250" style="border: 5px ridge brown; background: linear-gradient(#87CEEB, #4169E1);"></canvas>
+                            <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                                <button onclick="badSimStart()" style="background: #008000; color: white; font-size: 10px; padding: 3px 8px; border: 2px outset green;">GO</button>
+                                <button onclick="badSimStop()" style="background: #800000; color: white; font-size: 10px; padding: 3px 8px; border: 2px outset red;">HALT</button>
+                                <button style="background: #000080; color: yellow; font-size: 10px; padding: 3px 8px; border: 2px outset blue;">??</button>
+                                <button style="background: #808080; color: black; font-size: 10px; padding: 3px 8px; border: 2px outset gray;">cfg</button>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Panel -->
+                        <div style="flex: 1; min-width: 100px; background: #333; color: #0f0; padding: 5px; font-family: monospace; font-size: 9px;">
+                            <div>OUT:</div>
+                            <div>F_b=???</div>
+                            <div>W=???</div>
+                            <div>stat: IDLE</div>
+                            <div style="margin-top: 10px; color: red;">ERR: null</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Basit, anlaşılır ve sezgisel arayüz</li>
+                        <li>İşlevini yansıtan açık etiketli düğmeler</li>
+                        <li>Kolay hatırlanabilir simgeler</li>
+                        <li>Tüm denetim ögeleri eksiksiz</li>
+                        <li>Kullanıcı dostu ve modern tasarım</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-blue-600 to-cyan-500 text-white">
+                    <h2 class="text-lg font-bold">Sıvıların Kaldırma Kuvveti Simülasyonu</h2>
+                    <p class="text-blue-100 text-sm">Archimedes Prensibi - Etkileşimli Deney</p>
+                </div>
+                <div class="simulation-body">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <!-- Kontrol Paneli -->
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                            <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                </svg>
+                                Kontroller
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Sıvı Yoğunluğu</label>
+                                    <select id="good-liquid" class="w-full p-2 border border-gray-300 rounded-lg text-sm" onchange="updateGoodSim()">
+                                        <option value="1000">Su (1000 kg/m³)</option>
+                                        <option value="1025">Tuzlu Su (1025 kg/m³)</option>
+                                        <option value="13600">Cıva (13600 kg/m³)</option>
+                                        <option value="800">Yağ (800 kg/m³)</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cisim Türü</label>
+                                    <select id="good-object" class="w-full p-2 border border-gray-300 rounded-lg text-sm" onchange="updateGoodSim()">
+                                        <option value="wood">Tahta (600 kg/m³)</option>
+                                        <option value="plastic">Plastik (900 kg/m³)</option>
+                                        <option value="iron">Demir (7800 kg/m³)</option>
+                                        <option value="cork">Mantar (200 kg/m³)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cisim Boyutu</label>
+                                    <input type="range" id="good-size" min="20" max="60" value="40" class="w-full" onchange="updateGoodSim()">
+                                    <div class="flex justify-between text-xs text-gray-500">
+                                        <span>Küçük</span>
+                                        <span>Büyük</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="startGoodSim()" class="flex-1 btn btn-success">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                    Başlat
+                                </button>
+                                <button onclick="resetGoodSim()" class="flex-1 btn btn-secondary">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Sıfırla
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Simülasyon Görünümü -->
+                        <div class="md:col-span-2">
+                            <div class="canvas-container" style="min-height: 300px;">
+                                <canvas id="good-canvas" width="500" height="300"></canvas>
+                            </div>
+                            
+                            <!-- Sonuç Paneli -->
+                            <div class="grid grid-cols-3 gap-3 mt-4">
+                                <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+                                    <p class="text-xs text-blue-600 font-medium">Kaldırma Kuvveti</p>
+                                    <p class="text-xl font-bold text-blue-800" id="good-buoyancy">0 N</p>
+                                </div>
+                                <div class="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">
+                                    <p class="text-xs text-orange-600 font-medium">Ağırlık</p>
+                                    <p class="text-xl font-bold text-orange-800" id="good-weight">0 N</p>
+                                </div>
+                                <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                                    <p class="text-xs text-green-600 font-medium">Durum</p>
+                                    <p class="text-lg font-bold text-green-800" id="good-status">Hazır</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İpucu -->
+                    <div class="hint-box mt-4">
+                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <span><strong>İpucu:</strong> Farklı sıvı ve cisim kombinasyonlarını deneyin. Cismin yoğunluğu sıvıdan düşükse yüzer, yüksekse batar!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.2.1</p>
+    </footer>
+
+    <script>
+        // Tab değiştirme
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initGoodCanvas();
+            }
+        }
+
+        // Kötü simülasyon
+        let badAnimId = null;
+        const badCanvas = document.getElementById('bad-canvas');
+        const badCtx = badCanvas.getContext('2d');
+
+        function drawBadSim() {
+            badCtx.fillStyle = '#87CEEB';
+            badCtx.fillRect(0, 0, 300, 100);
+            badCtx.fillStyle = '#4169E1';
+            badCtx.fillRect(0, 100, 300, 150);
+            
+            // Basit kare cisim
+            badCtx.fillStyle = '#8B4513';
+            badCtx.fillRect(130, 80, 40, 40);
+            
+            badCtx.fillStyle = 'white';
+            badCtx.font = '10px monospace';
+            badCtx.fillText('OBJ_01', 135, 105);
+        }
+
+        function badSimStart() {
+            drawBadSim();
+        }
+
+        function badSimStop() {
+            // Hiçbir şey yapmaz
+        }
+
+        drawBadSim();
+
+        // İyi simülasyon
+        const goodCanvas = document.getElementById('good-canvas');
+        const goodCtx = goodCanvas.getContext('2d');
+        let goodAnimId = null;
+        let objectY = 50;
+        let objectVelocity = 0;
+        let isRunning = false;
+
+        const objects = {
+            wood: { density: 600, color: '#8B4513', name: 'Tahta' },
+            plastic: { density: 900, color: '#FF6B6B', name: 'Plastik' },
+            iron: { density: 7800, color: '#4A5568', name: 'Demir' },
+            cork: { density: 200, color: '#D4A574', name: 'Mantar' }
+        };
+
+        function initGoodCanvas() {
+            goodCanvas.width = goodCanvas.parentElement.offsetWidth;
+            goodCanvas.height = 300;
+            drawGoodSim();
+        }
+
+        function drawGoodSim() {
+            const width = goodCanvas.width;
+            const height = goodCanvas.height;
+            const waterLevel = height * 0.3;
+            
+            // Arka plan
+            goodCtx.fillStyle = '#E0F7FA';
+            goodCtx.fillRect(0, 0, width, waterLevel);
+            
+            // Su
+            const liquidSelect = document.getElementById('good-liquid');
+            const liquidDensity = parseInt(liquidSelect.value);
+            let waterColor = '#2196F3';
+            if (liquidDensity === 13600) waterColor = '#9E9E9E';
+            else if (liquidDensity === 800) waterColor = '#FFC107';
+            else if (liquidDensity === 1025) waterColor = '#0097A7';
+            
+            goodCtx.fillStyle = waterColor + '90';
+            goodCtx.fillRect(0, waterLevel, width, height - waterLevel);
+            
+            // Su yüzeyi çizgisi
+            goodCtx.strokeStyle = waterColor;
+            goodCtx.lineWidth = 3;
+            goodCtx.beginPath();
+            goodCtx.moveTo(0, waterLevel);
+            goodCtx.lineTo(width, waterLevel);
+            goodCtx.stroke();
+            
+            // Kap kenarları
+            goodCtx.strokeStyle = '#546E7A';
+            goodCtx.lineWidth = 4;
+            goodCtx.beginPath();
+            goodCtx.moveTo(20, waterLevel - 20);
+            goodCtx.lineTo(20, height - 10);
+            goodCtx.lineTo(width - 20, height - 10);
+            goodCtx.lineTo(width - 20, waterLevel - 20);
+            goodCtx.stroke();
+            
+            // Cisim
+            const objectSelect = document.getElementById('good-object');
+            const objectType = objectSelect.value;
+            const obj = objects[objectType];
+            const size = parseInt(document.getElementById('good-size').value);
+            
+            const objX = width / 2 - size / 2;
+            
+            // Gölge
+            goodCtx.fillStyle = 'rgba(0,0,0,0.1)';
+            goodCtx.beginPath();
+            goodCtx.ellipse(width / 2, height - 20, size / 2, 8, 0, 0, Math.PI * 2);
+            goodCtx.fill();
+            
+            // Cisim
+            goodCtx.fillStyle = obj.color;
+            goodCtx.beginPath();
+            goodCtx.roundRect(objX, objectY, size, size, 8);
+            goodCtx.fill();
+            
+            // Cisim etiketi
+            goodCtx.fillStyle = 'white';
+            goodCtx.font = 'bold 12px Nunito';
+            goodCtx.textAlign = 'center';
+            goodCtx.fillText(obj.name, width / 2, objectY + size / 2 + 4);
+            
+            // Oklar (kuvvetler)
+            if (objectY > waterLevel - size) {
+                // Kaldırma kuvveti oku (yukarı)
+                drawArrow(goodCtx, width / 2 + size / 2 + 20, objectY + size, width / 2 + size / 2 + 20, objectY - 20, '#2196F3', 'Fb');
+            }
+            
+            // Ağırlık oku (aşağı)
+            drawArrow(goodCtx, width / 2 - size / 2 - 20, objectY, width / 2 - size / 2 - 20, objectY + size + 30, '#FF5722', 'W');
+        }
+
+        function drawArrow(ctx, fromX, fromY, toX, toY, color, label) {
+            const headLen = 10;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLen * Math.cos(angle - Math.PI / 6), toY - headLen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headLen * Math.cos(angle + Math.PI / 6), toY - headLen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.font = 'bold 14px Nunito';
+            ctx.fillText(label, fromX + (toX - fromX) / 2 + 15, fromY + (toY - fromY) / 2);
+        }
+
+        function updateGoodSim() {
+            drawGoodSim();
+            calculateForces();
+        }
+
+        function calculateForces() {
+            const liquidDensity = parseInt(document.getElementById('good-liquid').value);
+            const objectType = document.getElementById('good-object').value;
+            const size = parseInt(document.getElementById('good-size').value);
+            const obj = objects[objectType];
+            
+            const volume = Math.pow(size / 100, 3); // m³
+            const weight = obj.density * volume * 9.8;
+            const waterLevel = goodCanvas.height * 0.3;
+            
+            let submergedVolume = 0;
+            if (objectY + size > waterLevel) {
+                const submergedHeight = Math.min(size, objectY + size - waterLevel);
+                submergedVolume = (submergedHeight / size) * volume;
+            }
+            
+            const buoyancy = liquidDensity * submergedVolume * 9.8;
+            
+            document.getElementById('good-buoyancy').textContent = buoyancy.toFixed(2) + ' N';
+            document.getElementById('good-weight').textContent = weight.toFixed(2) + ' N';
+            
+            if (buoyancy > weight) {
+                document.getElementById('good-status').textContent = 'Yüzüyor';
+                document.getElementById('good-status').className = 'text-lg font-bold text-green-800';
+            } else if (buoyancy < weight) {
+                document.getElementById('good-status').textContent = 'Batıyor';
+                document.getElementById('good-status').className = 'text-lg font-bold text-red-800';
+            } else {
+                document.getElementById('good-status').textContent = 'Dengede';
+                document.getElementById('good-status').className = 'text-lg font-bold text-blue-800';
+            }
+        }
+
+        function startGoodSim() {
+            if (isRunning) return;
+            isRunning = true;
+            objectY = 20;
+            animateGood();
+        }
+
+        function animateGood() {
+            const liquidDensity = parseInt(document.getElementById('good-liquid').value);
+            const objectType = document.getElementById('good-object').value;
+            const size = parseInt(document.getElementById('good-size').value);
+            const obj = objects[objectType];
+            const waterLevel = goodCanvas.height * 0.3;
+            
+            const volume = Math.pow(size / 100, 3);
+            const mass = obj.density * volume;
+            const weight = mass * 9.8;
+            
+            let submergedVolume = 0;
+            if (objectY + size > waterLevel) {
+                const submergedHeight = Math.min(size, objectY + size - waterLevel);
+                submergedVolume = (submergedHeight / size) * volume;
+            }
+            
+            const buoyancy = liquidDensity * submergedVolume * 9.8;
+            const netForce = weight - buoyancy;
+            const acceleration = netForce / mass;
+            
+            objectVelocity += acceleration * 0.016;
+            objectVelocity *= 0.98; // Sönümleme
+            objectY += objectVelocity;
+            
+            // Sınırlar
+            const maxY = goodCanvas.height - size - 15;
+            if (objectY > maxY) {
+                objectY = maxY;
+                objectVelocity = 0;
+            }
+            if (objectY < 10) {
+                objectY = 10;
+                objectVelocity = 0;
+            }
+            
+            drawGoodSim();
+            calculateForces();
+            
+            if (Math.abs(objectVelocity) > 0.01 || Math.abs(netForce) > 0.001) {
+                goodAnimId = requestAnimationFrame(animateGood);
+            } else {
+                isRunning = false;
+            }
+        }
+
+        function resetGoodSim() {
+            if (goodAnimId) cancelAnimationFrame(goodAnimId);
+            isRunning = false;
+            objectY = 50;
+            objectVelocity = 0;
+            drawGoodSim();
+            document.getElementById('good-buoyancy').textContent = '0 N';
+            document.getElementById('good-weight').textContent = '0 N';
+            document.getElementById('good-status').textContent = 'Hazır';
+            document.getElementById('good-status').className = 'text-lg font-bold text-green-800';
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', () => {
+            initGoodCanvas();
+        });
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) {
+                initGoodCanvas();
+            }
+        });
+    </script>
+</body>
+</html>

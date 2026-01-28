@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3.1 Erişilebilirlik - Işık Kırılması</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+    <style>
+        /* Uygun olmayan örnek - düşük kontrast */
+        .bad-low-contrast {
+            color: #999;
+            background: #aaa;
+        }
+        .bad-btn {
+            background: #f0f0f0;
+            color: #e0e0e0;
+            border: none;
+            padding: 5px 10px;
+        }
+        /* Focus göstergesi yok */
+        .bad-no-focus:focus {
+            outline: none;
+        }
+        
+        /* Uygun örnek - WCAG uyumlu */
+        .good-high-contrast {
+            color: #1f2937;
+            background: #ffffff;
+        }
+        .focus-visible-ring:focus-visible {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Skip Link - Erişilebilirlik için -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">
+        İçeriğe Atla
+    </a>
+
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Erişilebilirlik</h1>
+                    <p class="scorm-subtitle">Kriter 8.3.1</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home" aria-label="Ana sayfaya dön">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.3.1</span>
+            <span class="criterion-title">E-içerikler evrensel tasarım ve erişilebilirlik ilkelerine uygun hazırlanmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container" role="tablist" aria-label="Örnek seçimi">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')" 
+            role="tab" aria-selected="true" aria-controls="content-bad">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')"
+            role="tab" aria-selected="false" aria-controls="content-good">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main id="main-content" class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in" role="tabpanel" aria-labelledby="tab-bad">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl" aria-hidden="true">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Düşük kontrast - WCAG standartlarına uymuyor</li>
+                        <li>Bilgi sadece renkle ayırt ediliyor</li>
+                        <li>Renk körlüğüne uygun olmayan renkler (kırmızı-yeşil)</li>
+                        <li>Alternatif metin yok veya yetersiz</li>
+                        <li>Klavye ile erişim sorunlu</li>
+                        <li>Tab sırası mantıklı değil</li>
+                        <li>Ekran okuyucu etiketleri eksik</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header" style="background: #ccc; color: #999;">
+                    <h2 style="color: #aaa;">Işığın Kırılması</h2>
+                </div>
+                <div class="simulation-body" style="background: #e8e8e8;">
+                    <!-- Düşük kontrastlı içerik -->
+                    <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 15px;">
+                        Aşağıdaki simülasyonda ışık kırılmasını inceleyin.
+                    </p>
+
+                    <!-- Renk körlüğüne uygun olmayan gösterim -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <div style="background: #ff0000; width: 40px; height: 40px; border-radius: 50%;" title="Kırmızı"></div>
+                        <div style="background: #00ff00; width: 40px; height: 40px; border-radius: 50%;" title="Yeşil"></div>
+                        <div style="background: #ffff00; width: 40px; height: 40px; border-radius: 50%;" title="Sarı"></div>
+                        <span style="color: #b0b0b0; font-size: 12px; align-self: center;">(Renklere göre seçin)</span>
+                    </div>
+
+                    <!-- Eksik alt metin -->
+                    <div style="margin-bottom: 15px;">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100' fill='%23ddd'%3E%3Crect width='200' height='100'/%3E%3Ctext x='50%25' y='50%25' fill='%23999' text-anchor='middle' dy='.3em'%3EPrizma%3C/text%3E%3C/svg%3E" alt="image001.png">
+                    </div>
+
+                    <!-- Focus göstergesi olmayan butonlar -->
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <button class="bad-no-focus" style="background: #d0d0d0; color: #b0b0b0; border: none; padding: 8px 15px; cursor: pointer;" tabindex="5">
+                            tıklayınız
+                        </button>
+                        <button class="bad-no-focus" style="background: #e0e0e0; color: #c0c0c0; border: none; padding: 8px 15px; cursor: pointer;" tabindex="1">
+                            Gönder
+                        </button>
+                        <button class="bad-no-focus" style="background: #d5d5d5; color: #b5b5b5; border: none; padding: 8px 15px; cursor: pointer;" tabindex="3">
+                            >>>
+                        </button>
+                    </div>
+
+                    <!-- Erişilebilir olmayan form -->
+                    <div style="margin-top: 20px;">
+                        <input type="text" placeholder="" style="border: 1px solid #ddd; padding: 5px; color: #ccc; background: #f5f5f5;">
+                        <span style="color: #c0c0c0; font-size: 11px;"> (zorunlu alan)</span>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700 text-sm">
+                            <strong>Erişilebilirlik Sorunları:</strong><br>
+                            • Kontrast oranı yetersiz (4.5:1 altında)<br>
+                            • Renk körlerinin ayırt edemeyeceği renkler<br>
+                            • Alt metin dosya adı içeriyor (image001.png)<br>
+                            • Tab sırası karışık (5, 1, 3)<br>
+                            • Focus göstergesi yok<br>
+                            • "tıklayınız" belirsiz bağlantı metni<br>
+                            • Form alanı etiketsiz
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in" role="tabpanel" aria-labelledby="tab-good">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl" aria-hidden="true">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>WCAG 2.1 AA standartlarına uygun kontrast (min 4.5:1)</li>
+                        <li>Bilgi sadece renk ile değil, sembol ve metin ile de verilmiş</li>
+                        <li>Renk körlüğüne uygun renk paleti</li>
+                        <li>Tüm görsellerde anlamlı alternatif metin</li>
+                        <li>Tam klavye erişimi ve mantıklı tab sırası</li>
+                        <li>Görünür focus göstergesi</li>
+                        <li>Ekran okuyucu uyumlu etiketler</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-indigo-700 to-purple-700 text-white">
+                    <h2 class="text-lg font-bold">Işığın Kırılması Simülasyonu</h2>
+                    <p class="text-indigo-100 text-sm">Prizmada beyaz ışığın renklere ayrılması</p>
+                </div>
+                <div class="simulation-body">
+                    <!-- Anlaşılır yönerge -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" role="region" aria-label="Kullanım yönergesi">
+                        <h3 class="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            Nasıl Kullanılır?
+                        </h3>
+                        <ol class="text-blue-800 text-sm space-y-1 list-decimal list-inside">
+                            <li>Işık kaynağı türünü seçin</li>
+                            <li>Kırılma açısını ayarlamak için kaydırıcıyı kullanın</li>
+                            <li>"Simülasyonu Başlat" butonuna tıklayın veya Enter tuşuna basın</li>
+                        </ol>
+                    </div>
+
+                    <!-- Renk körlüğüne uygun gösterim - sembol + metin ile -->
+                    <fieldset class="mb-6">
+                        <legend class="font-bold text-gray-800 mb-3">Işık Türünü Seçin:</legend>
+                        <div class="flex flex-wrap gap-4" role="radiogroup">
+                            <label class="flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400">
+                                <input type="radio" name="light-type" value="white" checked class="w-5 h-5 text-blue-600 focus-visible-ring">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 border-2 border-gray-300" aria-hidden="true"></span>
+                                    <span class="w-4 h-4 flex items-center justify-center text-xs" aria-hidden="true">◯</span>
+                                    <span class="font-medium">Beyaz Işık</span>
+                                </span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400">
+                                <input type="radio" name="light-type" value="red" class="w-5 h-5 text-blue-600 focus-visible-ring">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-red-500 border-2 border-gray-300" aria-hidden="true"></span>
+                                    <span class="w-4 h-4 flex items-center justify-center text-xs" aria-hidden="true">■</span>
+                                    <span class="font-medium">Kırmızı Işık</span>
+                                </span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400">
+                                <input type="radio" name="light-type" value="blue" class="w-5 h-5 text-blue-600 focus-visible-ring">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-blue-500 border-2 border-gray-300" aria-hidden="true"></span>
+                                    <span class="w-4 h-4 flex items-center justify-center text-xs" aria-hidden="true">▲</span>
+                                    <span class="font-medium">Mavi Işık</span>
+                                </span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <!-- Erişilebilir simülasyon alanı -->
+                    <div class="mb-6">
+                        <figure>
+                            <div class="canvas-container rounded-xl overflow-hidden" role="img" aria-label="Işık kırılması simülasyonu: Beyaz ışık prizmaya girerek kırmızı, turuncu, sarı, yeşil, mavi, çivit ve mor renklere ayrılıyor">
+                                <canvas id="accessible-canvas" width="600" height="300" aria-hidden="true"></canvas>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 mt-2 text-center">
+                                Şekil 1: Prizmada beyaz ışığın görünür ışık spektrumuna ayrılması
+                            </figcaption>
+                        </figure>
+                    </div>
+
+                    <!-- Erişilebilir kontroller -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="mb-4">
+                            <label for="angle-slider" class="block font-medium text-gray-800 mb-2">
+                                Kırılma Açısı: <span id="angle-value" class="text-blue-600">45°</span>
+                            </label>
+                            <input type="range" id="angle-slider" min="0" max="90" value="45" 
+                                class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer focus-visible-ring"
+                                aria-valuemin="0" aria-valuemax="90" aria-valuenow="45" aria-valuetext="45 derece"
+                                onchange="updateAngle(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0°</span>
+                                <span>45°</span>
+                                <span>90°</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="startSimulation()" class="btn btn-primary focus-visible-ring">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                Simülasyonu Başlat
+                            </button>
+                            <button onclick="resetSimulation()" class="btn btn-secondary focus-visible-ring">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Sıfırla
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Erişilebilir form örneği -->
+                    <form class="bg-white border border-gray-200 rounded-xl p-4" onsubmit="event.preventDefault(); submitAnswer();">
+                        <h3 class="font-bold text-gray-800 mb-4">Bilgini Test Et</h3>
+                        
+                        <div class="mb-4">
+                            <label for="answer-input" class="block font-medium text-gray-700 mb-2">
+                                Beyaz ışık prizmada kaç renge ayrılır?
+                                <span class="text-red-500" aria-label="zorunlu alan">*</span>
+                            </label>
+                            <input type="text" id="answer-input" required
+                                class="w-full md:w-48 px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus-visible-ring"
+                                aria-describedby="answer-hint"
+                                placeholder="Cevabınızı yazın">
+                            <p id="answer-hint" class="text-sm text-gray-500 mt-1">
+                                İpucu: Gökkuşağındaki renk sayısını düşünün
+                            </p>
+                        </div>
+
+                        <button type="submit" class="btn btn-success focus-visible-ring">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Cevabı Kontrol Et
+                        </button>
+
+                        <div id="answer-result" class="mt-4 hidden" role="alert" aria-live="polite"></div>
+                    </form>
+
+                    <!-- Erişilebilirlik notu -->
+                    <div class="mt-6 p-4 bg-indigo-50 border border-indigo-200 rounded-xl" role="complementary">
+                        <h3 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Erişilebilirlik Özellikleri
+                        </h3>
+                        <ul class="text-indigo-800 text-sm space-y-1">
+                            <li>✓ WCAG 2.1 AA uyumlu kontrast oranları</li>
+                            <li>✓ Klavye ile tam erişim (Tab, Enter, Space)</li>
+                            <li>✓ Ekran okuyucu uyumlu etiketler</li>
+                            <li>✓ Renk + sembol + metin ile bilgi aktarımı</li>
+                            <li>✓ Anlamlı alternatif metinler</li>
+                            <li>✓ Mantıklı başlık hiyerarşisi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer" role="contentinfo">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.3.1</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabBad.setAttribute('aria-selected', 'true');
+                tabGood.classList.remove('active');
+                tabGood.setAttribute('aria-selected', 'false');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+            } else {
+                tabGood.classList.add('active');
+                tabGood.setAttribute('aria-selected', 'true');
+                tabBad.classList.remove('active');
+                tabBad.setAttribute('aria-selected', 'false');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initCanvas();
+            }
+        }
+
+        // Klavye navigasyonu için
+        document.querySelectorAll('[role="tab"]').forEach(tab => {
+            tab.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+                    const currentIndex = tabs.indexOf(e.target);
+                    const nextIndex = e.key === 'ArrowRight' 
+                        ? (currentIndex + 1) % tabs.length 
+                        : (currentIndex - 1 + tabs.length) % tabs.length;
+                    tabs[nextIndex].focus();
+                    tabs[nextIndex].click();
+                }
+            });
+        });
+
+        const canvas = document.getElementById('accessible-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function initCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            drawSimulation();
+        }
+
+        function drawSimulation() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const angle = parseInt(document.getElementById('angle-slider').value);
+
+            // Arka plan
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, width, height);
+
+            // Işık kaynağı
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(50, height/2, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Işık ışını
+            const lightType = document.querySelector('input[name="light-type"]:checked').value;
+            ctx.strokeStyle = lightType === 'red' ? '#ef4444' : lightType === 'blue' ? '#3b82f6' : '#fff';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(70, height/2);
+            ctx.lineTo(width * 0.35, height/2);
+            ctx.stroke();
+
+            // Prizma
+            const prismX = width * 0.4;
+            const prismY = height / 2;
+            const prismSize = 100;
+
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(prismX, prismY - prismSize/2);
+            ctx.lineTo(prismX - prismSize/2, prismY + prismSize/2);
+            ctx.lineTo(prismX + prismSize/2, prismY + prismSize/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#60a5fa';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Kırılan ışınlar
+            if (lightType === 'white') {
+                const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7'];
+                colors.forEach((color, i) => {
+                    const angleOffset = (i - 3) * (angle / 15);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(prismX + 30, prismY + 10);
+                    const endX = width - 30;
+                    const endY = prismY + 10 + Math.tan(angleOffset * Math.PI / 180) * (endX - prismX - 30);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+                });
+            } else {
+                ctx.strokeStyle = lightType === 'red' ? '#ef4444' : '#3b82f6';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(prismX + 30, prismY + 10);
+                ctx.lineTo(width - 30, prismY + 10 + Math.tan(angle * 0.3 * Math.PI / 180) * (width - prismX - 60));
+                ctx.stroke();
+            }
+
+            // Etiketler
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Nunito';
+            ctx.textAlign = 'center';
+            ctx.fillText('Işık Kaynağı', 50, height/2 + 45);
+            ctx.fillText('Prizma', prismX, prismY + prismSize/2 + 25);
+            if (lightType === 'white') {
+                ctx.fillText('Spektrum', width - 60, height/2 + 60);
+            }
+        }
+
+        function updateAngle(value) {
+            document.getElementById('angle-value').textContent = value + '°';
+            document.getElementById('angle-slider').setAttribute('aria-valuenow', value);
+            document.getElementById('angle-slider').setAttribute('aria-valuetext', value + ' derece');
+            drawSimulation();
+        }
+
+        function startSimulation() {
+            drawSimulation();
+            // Ekran okuyucu için duyuru
+            announceToScreenReader('Simülasyon başlatıldı');
+        }
+
+        function resetSimulation() {
+            document.getElementById('angle-slider').value = 45;
+            updateAngle(45);
+            document.querySelector('input[value="white"]').checked = true;
+            drawSimulation();
+            announceToScreenReader('Simülasyon sıfırlandı');
+        }
+
+        function submitAnswer() {
+            const answer = document.getElementById('answer-input').value.trim();
+            const resultDiv = document.getElementById('answer-result');
+            resultDiv.classList.remove('hidden');
+
+            if (answer === '7' || answer.toLowerCase() === 'yedi') {
+                resultDiv.innerHTML = `
+                    <div class="success-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                        Doğru! Beyaz ışık prizmada 7 renge (kırmızı, turuncu, sarı, yeşil, mavi, çivit, mor) ayrılır.
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        Yanlış. Tekrar deneyin. İpucu: Gökkuşağındaki renkleri sayın.
+                    </div>
+                `;
+            }
+        }
+
+        function announceToScreenReader(message) {
+            const announcement = document.createElement('div');
+            announcement.setAttribute('role', 'status');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.className = 'sr-only';
+            announcement.textContent = message;
+            document.body.appendChild(announcement);
+            setTimeout(() => announcement.remove(), 1000);
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', initCanvas);
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) {
+                initCanvas();
+            }
+        });
+
+        // Işık türü değiştiğinde simülasyonu güncelle
+        document.querySelectorAll('input[name="light-type"]').forEach(radio => {
+            radio.addEventListener('change', drawSimulation);
+        });
+    </script>
+</body>
+</html>

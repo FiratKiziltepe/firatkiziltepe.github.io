@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-İçerik İnceleme Kriterleri - Eğitim Platformu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .criterion-card {
+            transition: all 0.3s ease;
+        }
+        .criterion-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        .scorm-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- SCORM Üst Bar -->
+    <header class="scorm-header text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">E-İçerik İnceleme Kriterleri</h1>
+                        <p class="text-blue-200 text-sm">Eğitim Platformu - Fen Bilimleri Örnekleri</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm text-blue-200">Toplam Kriter</p>
+                        <p class="text-2xl font-bold">16</p>
+                    </div>
+                    <div class="w-16 h-16 relative">
+                        <svg class="w-16 h-16 progress-ring">
+                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.2)" stroke-width="4" fill="none"/>
+                            <circle cx="32" cy="32" r="28" stroke="#4ade80" stroke-width="4" fill="none" 
+                                stroke-dasharray="176" stroke-dashoffset="0" stroke-linecap="round"/>
+                        </svg>
+                        <span class="absolute inset-0 flex items-center justify-center text-sm font-bold">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alt Başlık -->
+    <div class="bg-white border-b shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <p class="text-gray-600 text-sm">
+                <strong>Amaç:</strong> Her kriter için uygun ve uygun olmayan e-içerik örneklerini inceleyerek değerlendirme becerilerinizi geliştirin.
+            </p>
+        </div>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 8.1 Bilişsel Yük -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-purple-500 text-white rounded-lg flex items-center justify-center font-bold">8.1</span>
+                <h2 class="text-xl font-bold text-gray-800">Etkili Bilişsel Yük Dengesi</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="bilisselyuk.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-purple-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">8.1.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Bilişsel Yük Dengesi</h3>
+                            <p class="text-gray-600 text-sm mt-1">Dikkat dağıtıcı unsurlar, adım adım talimatlar, ipucu desteği</p>
+                        </div>
+                        <span class="text-purple-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Fotosentez</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Bilgi Sunumu</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 8.2 Arayüz Tasarımı -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">8.2</span>
+                <h2 class="text-xl font-bold text-gray-800">Arayüz Tasarımı ve Kullanılabilirlik</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="8-2-1-arayuz.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">8.2.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Arayüz Tasarımı</h3>
+                            <p class="text-gray-600 text-sm mt-1">Basit, anlaşılır ve sezgisel arayüz</p>
+                        </div>
+                        <span class="text-blue-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Kaldırma Kuvveti</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Simülasyon</span>
+                    </div>
+                </a>
+
+                <a href="8-2-2-oynatici.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">8.2.2</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Oynatıcı Yapılandırması</h3>
+                            <p class="text-gray-600 text-sm mt-1">Video kontrolleri, ilerleme durumu, navigasyon</p>
+                        </div>
+                        <span class="text-blue-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Işık Kırılması</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Animasyon</span>
+                    </div>
+                </a>
+
+                <a href="8-2-3-calisma.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">8.2.3</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Sorunsuz Çalışma</h3>
+                            <p class="text-gray-600 text-sm mt-1">Etkileşimlerin doğru çalışması, hatasız işlevler</p>
+                        </div>
+                        <span class="text-blue-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Fotosentez</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Sürükle-Bırak</span>
+                    </div>
+                </a>
+
+                <a href="8-2-4-etkilesim.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">8.2.4</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Etkileşim Alanları</h3>
+                            <p class="text-gray-600 text-sm mt-1">Dokunmatik uyumluluk, yazma alanları, eşleştirme</p>
+                        </div>
+                        <span class="text-blue-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Kaldırma Kuvveti</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Eşleştirme</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 8.3 Erişilebilirlik -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-teal-500 text-white rounded-lg flex items-center justify-center font-bold">8.3</span>
+                <h2 class="text-xl font-bold text-gray-800">Erişilebilirlik</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="8-3-1-erisilebilirlik.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-teal-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-teal-600 bg-teal-100 px-2 py-1 rounded">8.3.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Evrensel Tasarım</h3>
+                            <p class="text-gray-600 text-sm mt-1">WCAG uyumu, kontrast, klavye erişimi, ekran okuyucu</p>
+                        </div>
+                        <span class="text-teal-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Işık Kırılması</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Etkileşimli</span>
+                    </div>
+                </a>
+
+                <a href="8-3-2-alternatif.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-teal-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-teal-600 bg-teal-100 px-2 py-1 rounded">8.3.2</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Alternatif Yöntemler</h3>
+                            <p class="text-gray-600 text-sm mt-1">Geçiş düğmeleri, erişilebilir alternatifler</p>
+                        </div>
+                        <span class="text-teal-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Kaldırma Kuvveti</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Geçiş Düğmesi</span>
+                    </div>
+                </a>
+
+                <a href="8-3-3-altyazi.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-teal-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-teal-600 bg-teal-100 px-2 py-1 rounded">8.3.3</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Alt Yazı</h3>
+                            <p class="text-gray-600 text-sm mt-1">Senkronize alt yazı, gizlenebilirlik, ses efektleri</p>
+                        </div>
+                        <span class="text-teal-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Fotosentez</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Video</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 8.4 Ses ve Görüntü Kalitesi -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold">8.4</span>
+                <h2 class="text-xl font-bold text-gray-800">Ses ve Görüntü Kalitesi</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="8-4-1-ses-uyum.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-orange-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">8.4.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Ses-İçerik Uyumu</h3>
+                            <p class="text-gray-600 text-sm mt-1">Senkronizasyon, tonlama, ses rengi uyumu</p>
+                        </div>
+                        <span class="text-orange-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Işık Kırılması</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Sesli Anlatım</span>
+                    </div>
+                </a>
+
+                <a href="8-4-2-ses-netlik.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-orange-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">8.4.2</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Ses Netliği</h3>
+                            <p class="text-gray-600 text-sm mt-1">Profesyonel kalite, gürültüsüz, akıcı ses</p>
+                        </div>
+                        <span class="text-orange-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Fotosentez</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Ses Kalitesi</span>
+                    </div>
+                </a>
+
+                <a href="8-4-3-video-kalite.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-orange-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">8.4.3</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Video Kalitesi</h3>
+                            <p class="text-gray-600 text-sm mt-1">Çözünürlük, ışıklandırma, çerçeveleme, estetik</p>
+                        </div>
+                        <span class="text-orange-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Kaldırma Kuvveti</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Video</span>
+                    </div>
+                </a>
+
+                <a href="8-4-4-video-akis.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-orange-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded">8.4.4</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Video Akışı</h3>
+                            <p class="text-gray-600 text-sm mt-1">Geçiş efektleri, kesintisiz akış, kare hızı</p>
+                        </div>
+                        <span class="text-orange-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Işık Kırılması</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Animasyon</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 8.5 Güvenlik, Güncellik ve Uyumluluk -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold">8.5</span>
+                <h2 class="text-xl font-bold text-gray-800">Güvenlik, Güncellik ve Uyumluluk</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="8-5-1-guvenlik.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-red-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded">8.5.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Güvenlik Uyarıları</h3>
+                            <p class="text-gray-600 text-sm mt-1">Deney güvenliği, uyarı zamanlaması, semboller</p>
+                        </div>
+                        <span class="text-red-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Kaldırma Kuvveti</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Deney</span>
+                    </div>
+                </a>
+
+                <a href="8-5-3-duyarli.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-red-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded">8.5.3</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Duyarlı Tasarım</h3>
+                            <p class="text-gray-600 text-sm mt-1">Mobil uyumluluk, farklı ekran boyutları</p>
+                        </div>
+                        <span class="text-red-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Fotosentez</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Responsive</span>
+                    </div>
+                </a>
+
+                <a href="8-5-5-karakter.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-red-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded">8.5.5</span>
+                            <h3 class="font-bold text-gray-800 mt-2">Türkçe Karakter</h3>
+                            <p class="text-gray-600 text-sm mt-1">UTF-8, Windows-1254, ISO 8859-9 kodlama</p>
+                        </div>
+                        <span class="text-red-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Tüm Konular</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Kodlama</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 8.6 VR/AR -->
+        <section class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-10 h-10 bg-indigo-500 text-white rounded-lg flex items-center justify-center font-bold">8.6</span>
+                <h2 class="text-xl font-bold text-gray-800">Sanal Gerçeklik ve Artırılmış Gerçeklik</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="8-6-1-vr-ar.html" class="criterion-card bg-white rounded-xl p-5 shadow-md border-l-4 border-indigo-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">8.6.1</span>
+                            <h3 class="font-bold text-gray-800 mt-2">VR/AR Standartları</h3>
+                            <p class="text-gray-600 text-sm mt-1">3D etkileşim, derinlik hissi, gerçekçilik</p>
+                        </div>
+                        <span class="text-indigo-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Işık Kırılması</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Three.js 3D</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Alt Bilgi -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm">E-İçerik İnceleme Kriterleri Eğitim Platformu</p>
+            <p class="text-gray-500 text-xs mt-1">Ortaokul Fen Bilimleri Dersi Örnekleri</p>
+        </div>
+    </footer>
+</body>
+</html>

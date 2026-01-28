@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.2.2 Oynatıcı Yapılandırması - Işık Kırılması</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Oynatıcı Yapılandırması</h1>
+                    <p class="scorm-subtitle">Kriter 8.2.2</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.2.2</span>
+            <span class="criterion-title">Oynatıcı, içeriğin amacına uygun bir şekilde yapılandırılmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Durdurma, geri/ileri sarma seçenekleri yok</li>
+                        <li>Oynatma kontrolleri gizli veya erişilmez konumda</li>
+                        <li>İlerleme durumu gösterilmiyor</li>
+                        <li>Tam ekran düğmesi yok</li>
+                        <li>Oynatma hızı ayarı bulunmuyor</li>
+                        <li>Ses kontrolü eksik</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Işığın Kırılması - Animasyon</h2>
+                    <p class="text-gray-500 text-sm">Eksik oynatıcı kontrolleri örneği</p>
+                </div>
+                <div class="simulation-body">
+                    <!-- Kötü Oynatıcı -->
+                    <div style="position: relative; background: #1a1a2e;">
+                        <canvas id="bad-player-canvas" width="600" height="350" style="width: 100%; display: block;"></canvas>
+                        
+                        <!-- Minimal/Gizli Kontroller -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.3); padding: 5px; display: flex; justify-content: center;">
+                            <button onclick="toggleBadPlay()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; opacity: 0.5;">▶</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700 text-sm">
+                            <strong>Sorunlar:</strong> İlerleme çubuğu yok, geri/ileri sarma yok, ses kontrolü yok, 
+                            tam ekran yok, hız ayarı yok, hangi adımda olduğunuz belli değil.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Durdur, geri/ileri sarma seçenekleri mevcut</li>
+                        <li>Oynatma kontrolleri kolay erişilebilir konumda</li>
+                        <li>İlerleme çubuğu ve adım göstergesi var</li>
+                        <li>Tam ekran düğmesi bulunuyor</li>
+                        <li>Oynatma hızı ayarlanabiliyor</li>
+                        <li>Ses açma/kapama ve seviye kontrolü var</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                    <h2 class="text-lg font-bold">Işığın Kırılması - Etkileşimli Animasyon</h2>
+                    <p class="text-indigo-100 text-sm">Prizmada ışık kırılması ve renklere ayrılması</p>
+                </div>
+                <div class="simulation-body p-0">
+                    <!-- İyi Oynatıcı -->
+                    <div id="good-player-wrapper" style="position: relative; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                        <canvas id="good-player-canvas" width="800" height="400" style="width: 100%; display: block;"></canvas>
+                        
+                        <!-- Adım Göstergesi -->
+                        <div style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 8px; color: white;">
+                            <span class="text-xs opacity-70">Adım</span>
+                            <span id="step-indicator" class="font-bold ml-1">1/5</span>
+                        </div>
+
+                        <!-- Tam Ekran Butonu -->
+                        <button onclick="toggleFullscreen()" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                            <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                            </svg>
+                        </button>
+
+                        <!-- Alt Kontrol Paneli -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 15px;">
+                            <!-- İlerleme Çubuğu -->
+                            <div style="margin-bottom: 12px;">
+                                <input type="range" id="progress-bar" min="0" max="100" value="0" 
+                                    style="width: 100%; height: 6px; cursor: pointer;"
+                                    oninput="seekAnimation(this.value)">
+                            </div>
+                            
+                            <!-- Kontrol Butonları -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <!-- Geri -->
+                                    <button onclick="skipBackward()" class="player-btn" title="10 saniye geri">
+                                        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                            <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Oynat/Durdur -->
+                                    <button onclick="toggleGoodPlay()" id="play-pause-btn" class="player-btn-primary" title="Oynat/Durdur">
+                                        <svg id="play-icon" width="28" height="28" fill="white" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                        <svg id="pause-icon" width="28" height="28" fill="white" viewBox="0 0 24 24" style="display: none;">
+                                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- İleri -->
+                                    <button onclick="skipForward()" class="player-btn" title="10 saniye ileri">
+                                        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                            <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Tekrar -->
+                                    <button onclick="restartAnimation()" class="player-btn" title="Baştan başla">
+                                        <svg width="22" height="22" fill="white" viewBox="0 0 24 24">
+                                            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Zaman Göstergesi -->
+                                <div style="color: white; font-size: 14px; font-family: monospace;">
+                                    <span id="current-time">0:00</span> / <span id="total-time">0:25</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <!-- Hız Kontrolü -->
+                                    <select id="speed-control" onchange="changeSpeed(this.value)" 
+                                        style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                                        border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                                        <option value="0.5">0.5x</option>
+                                        <option value="1" selected>1x</option>
+                                        <option value="1.5">1.5x</option>
+                                        <option value="2">2x</option>
+                                    </select>
+                                    
+                                    <!-- Ses Kontrolü -->
+                                    <button onclick="toggleMute()" class="player-btn" title="Ses aç/kapat">
+                                        <svg id="volume-icon" width="22" height="22" fill="white" viewBox="0 0 24 24">
+                                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                        </svg>
+                                        <svg id="mute-icon" width="22" height="22" fill="white" viewBox="0 0 24 24" style="display: none;">
+                                            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                                        </svg>
+                                    </button>
+                                    <input type="range" id="volume-slider" min="0" max="100" value="80" 
+                                        style="width: 80px; cursor: pointer;" oninput="changeVolume(this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Adım Navigasyonu -->
+                    <div class="p-4 bg-gray-50 border-t">
+                        <p class="text-sm text-gray-600 mb-3 font-medium">Animasyon Adımları:</p>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="goToStep(1)" class="step-btn active" data-step="1">1. Işık Kaynağı</button>
+                            <button onclick="goToStep(2)" class="step-btn" data-step="2">2. Prizmaya Giriş</button>
+                            <button onclick="goToStep(3)" class="step-btn" data-step="3">3. Kırılma</button>
+                            <button onclick="goToStep(4)" class="step-btn" data-step="4">4. Renklere Ayrılma</button>
+                            <button onclick="goToStep(5)" class="step-btn" data-step="5">5. Spektrum</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İpucu -->
+            <div class="hint-box mt-4">
+                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span><strong>İpucu:</strong> Adım butonlarına tıklayarak istediğiniz bölüme atlayabilir, hız ayarını değiştirerek animasyonu yavaşlatıp detayları inceleyebilirsiniz.</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.2.2</p>
+    </footer>
+
+    <style>
+        .player-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+        .player-btn-primary {
+            background: #6366f1;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-btn-primary:hover {
+            background: #4f46e5;
+            transform: scale(1.1);
+        }
+        .step-btn {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .step-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        .step-btn.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        .step-btn.completed {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+    </style>
+
+    <script>
+        // Tab değiştirme
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+                initBadCanvas();
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initGoodCanvas();
+            }
+        }
+
+        // Kötü oynatıcı
+        const badCanvas = document.getElementById('bad-player-canvas');
+        const badCtx = badCanvas.getContext('2d');
+        let badPlaying = false;
+        let badFrame = 0;
+
+        function initBadCanvas() {
+            drawBadFrame();
+        }
+
+        function drawBadFrame() {
+            badCtx.fillStyle = '#1a1a2e';
+            badCtx.fillRect(0, 0, badCanvas.width, badCanvas.height);
+            
+            // Basit ışık çizimi
+            const progress = (badFrame % 100) / 100;
+            
+            // Işık kaynağı
+            badCtx.fillStyle = '#fff';
+            badCtx.beginPath();
+            badCtx.arc(50, 175, 15, 0, Math.PI * 2);
+            badCtx.fill();
+            
+            // Işık ışını
+            badCtx.strokeStyle = '#fff';
+            badCtx.lineWidth = 3;
+            badCtx.beginPath();
+            badCtx.moveTo(65, 175);
+            badCtx.lineTo(200 + progress * 100, 175);
+            badCtx.stroke();
+            
+            // Prizma
+            badCtx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+            badCtx.beginPath();
+            badCtx.moveTo(300, 100);
+            badCtx.lineTo(250, 250);
+            badCtx.lineTo(350, 250);
+            badCtx.closePath();
+            badCtx.fill();
+            badCtx.strokeStyle = '#4fc3f7';
+            badCtx.stroke();
+            
+            if (badPlaying) {
+                badFrame++;
+                requestAnimationFrame(drawBadFrame);
+            }
+        }
+
+        function toggleBadPlay() {
+            badPlaying = !badPlaying;
+            if (badPlaying) drawBadFrame();
+        }
+
+        // İyi oynatıcı
+        const goodCanvas = document.getElementById('good-player-canvas');
+        const goodCtx = goodCanvas.getContext('2d');
+        let goodPlaying = false;
+        let currentStep = 1;
+        let animationProgress = 0;
+        let animationSpeed = 1;
+        let totalDuration = 25; // saniye
+        let lastTime = 0;
+
+        function initGoodCanvas() {
+            goodCanvas.width = goodCanvas.parentElement.offsetWidth;
+            goodCanvas.height = 400;
+            drawGoodFrame(0);
+        }
+
+        function drawGoodFrame(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (goodPlaying) {
+                animationProgress += deltaTime * animationSpeed;
+                if (animationProgress >= totalDuration) {
+                    animationProgress = totalDuration;
+                    goodPlaying = false;
+                    updatePlayPauseIcon();
+                }
+                updateProgressBar();
+                updateTimeDisplay();
+                updateCurrentStep();
+            }
+
+            const width = goodCanvas.width;
+            const height = goodCanvas.height;
+
+            // Arka plan
+            const gradient = goodCtx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#0f0c29');
+            gradient.addColorStop(0.5, '#302b63');
+            gradient.addColorStop(1, '#24243e');
+            goodCtx.fillStyle = gradient;
+            goodCtx.fillRect(0, 0, width, height);
+
+            // Yıldızlar
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 37) % width;
+                const y = (i * 23) % height;
+                const size = (i % 3) + 1;
+                goodCtx.fillStyle = `rgba(255,255,255,${0.3 + Math.sin(animationProgress + i) * 0.2})`;
+                goodCtx.beginPath();
+                goodCtx.arc(x, y, size, 0, Math.PI * 2);
+                goodCtx.fill();
+            }
+
+            const progress = Math.min(animationProgress / totalDuration, 1);
+            const centerX = width * 0.45;
+            const centerY = height / 2;
+
+            // Adım 1: Işık kaynağı
+            if (progress >= 0) {
+                const step1Progress = Math.min(progress / 0.2, 1);
+                
+                // Işık kaynağı glow
+                const glowGradient = goodCtx.createRadialGradient(80, centerY, 0, 80, centerY, 60);
+                glowGradient.addColorStop(0, 'rgba(255,255,200,0.8)');
+                glowGradient.addColorStop(0.5, 'rgba(255,255,100,0.3)');
+                glowGradient.addColorStop(1, 'rgba(255,255,0,0)');
+                goodCtx.fillStyle = glowGradient;
+                goodCtx.beginPath();
+                goodCtx.arc(80, centerY, 60 * step1Progress, 0, Math.PI * 2);
+                goodCtx.fill();
+
+                // Işık kaynağı
+                goodCtx.fillStyle = '#fff';
+                goodCtx.beginPath();
+                goodCtx.arc(80, centerY, 20 * step1Progress, 0, Math.PI * 2);
+                goodCtx.fill();
+
+                // Etiket
+                if (step1Progress === 1) {
+                    goodCtx.fillStyle = 'rgba(255,255,255,0.8)';
+                    goodCtx.font = '14px Nunito';
+                    goodCtx.textAlign = 'center';
+                    goodCtx.fillText('Işık Kaynağı', 80, centerY + 50);
+                }
+            }
+
+            // Adım 2: Işık ışını prizmaya doğru
+            if (progress >= 0.2) {
+                const step2Progress = Math.min((progress - 0.2) / 0.2, 1);
+                const beamEndX = 100 + (centerX - 50 - 100) * step2Progress;
+
+                goodCtx.strokeStyle = '#fff';
+                goodCtx.lineWidth = 4;
+                goodCtx.shadowColor = '#fff';
+                goodCtx.shadowBlur = 10;
+                goodCtx.beginPath();
+                goodCtx.moveTo(100, centerY);
+                goodCtx.lineTo(beamEndX, centerY);
+                goodCtx.stroke();
+                goodCtx.shadowBlur = 0;
+            }
+
+            // Prizma
+            const prismSize = 120;
+            goodCtx.save();
+            goodCtx.translate(centerX, centerY);
+            
+            // Prizma gölge
+            goodCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            goodCtx.beginPath();
+            goodCtx.moveTo(5, -prismSize/2 + 5);
+            goodCtx.lineTo(-prismSize/2 + 5, prismSize/2 + 5);
+            goodCtx.lineTo(prismSize/2 + 5, prismSize/2 + 5);
+            goodCtx.closePath();
+            goodCtx.fill();
+
+            // Prizma
+            const prismGradient = goodCtx.createLinearGradient(-prismSize/2, 0, prismSize/2, 0);
+            prismGradient.addColorStop(0, 'rgba(150,220,255,0.4)');
+            prismGradient.addColorStop(0.5, 'rgba(200,240,255,0.5)');
+            prismGradient.addColorStop(1, 'rgba(150,220,255,0.4)');
+            goodCtx.fillStyle = prismGradient;
+            goodCtx.beginPath();
+            goodCtx.moveTo(0, -prismSize/2);
+            goodCtx.lineTo(-prismSize/2, prismSize/2);
+            goodCtx.lineTo(prismSize/2, prismSize/2);
+            goodCtx.closePath();
+            goodCtx.fill();
+            goodCtx.strokeStyle = '#4fc3f7';
+            goodCtx.lineWidth = 2;
+            goodCtx.stroke();
+            
+            goodCtx.fillStyle = 'rgba(255,255,255,0.8)';
+            goodCtx.font = '12px Nunito';
+            goodCtx.textAlign = 'center';
+            goodCtx.fillText('Prizma', 0, prismSize/2 + 25);
+            goodCtx.restore();
+
+            // Adım 3-4: Kırılma ve renklere ayrılma
+            if (progress >= 0.4) {
+                const step3Progress = Math.min((progress - 0.4) / 0.3, 1);
+                const colors = [
+                    { color: '#ff0000', angle: -25 },
+                    { color: '#ff7f00', angle: -15 },
+                    { color: '#ffff00', angle: -5 },
+                    { color: '#00ff00', angle: 5 },
+                    { color: '#0000ff', angle: 15 },
+                    { color: '#4b0082', angle: 22 },
+                    { color: '#9400d3', angle: 28 }
+                ];
+
+                colors.forEach((c, i) => {
+                    const delay = i * 0.05;
+                    const rayProgress = Math.max(0, Math.min((step3Progress - delay) / 0.7, 1));
+                    if (rayProgress > 0) {
+                        const startX = centerX + 30;
+                        const startY = centerY + 10;
+                        const endX = startX + 250 * rayProgress;
+                        const endY = startY + Math.tan(c.angle * Math.PI / 180) * 250 * rayProgress;
+
+                        goodCtx.strokeStyle = c.color;
+                        goodCtx.lineWidth = 3;
+                        goodCtx.shadowColor = c.color;
+                        goodCtx.shadowBlur = 8;
+                        goodCtx.beginPath();
+                        goodCtx.moveTo(startX, startY);
+                        goodCtx.lineTo(endX, endY);
+                        goodCtx.stroke();
+                        goodCtx.shadowBlur = 0;
+                    }
+                });
+            }
+
+            // Adım 5: Spektrum etiketi
+            if (progress >= 0.8) {
+                const step5Progress = Math.min((progress - 0.8) / 0.2, 1);
+                goodCtx.fillStyle = `rgba(255,255,255,${step5Progress * 0.9})`;
+                goodCtx.font = 'bold 16px Nunito';
+                goodCtx.textAlign = 'center';
+                goodCtx.fillText('Görünür Işık Spektrumu', width - 150, centerY + 80);
+                
+                // Renk isimleri
+                const colorNames = ['Kırmızı', 'Turuncu', 'Sarı', 'Yeşil', 'Mavi', 'Çivit', 'Mor'];
+                goodCtx.font = '11px Nunito';
+                colorNames.forEach((name, i) => {
+                    const y = centerY - 60 + i * 20;
+                    goodCtx.fillStyle = `rgba(255,255,255,${step5Progress * 0.7})`;
+                    goodCtx.fillText(name, width - 50, y);
+                });
+            }
+
+            if (goodPlaying) {
+                requestAnimationFrame(drawGoodFrame);
+            }
+        }
+
+        function toggleGoodPlay() {
+            goodPlaying = !goodPlaying;
+            updatePlayPauseIcon();
+            if (goodPlaying) {
+                lastTime = 0;
+                requestAnimationFrame(drawGoodFrame);
+            }
+        }
+
+        function updatePlayPauseIcon() {
+            document.getElementById('play-icon').style.display = goodPlaying ? 'none' : 'block';
+            document.getElementById('pause-icon').style.display = goodPlaying ? 'block' : 'none';
+        }
+
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.value = (animationProgress / totalDuration) * 100;
+        }
+
+        function updateTimeDisplay() {
+            const currentMins = Math.floor(animationProgress / 60);
+            const currentSecs = Math.floor(animationProgress % 60);
+            document.getElementById('current-time').textContent = 
+                `${currentMins}:${currentSecs.toString().padStart(2, '0')}`;
+        }
+
+        function updateCurrentStep() {
+            const progress = animationProgress / totalDuration;
+            let step = 1;
+            if (progress >= 0.8) step = 5;
+            else if (progress >= 0.55) step = 4;
+            else if (progress >= 0.4) step = 3;
+            else if (progress >= 0.2) step = 2;
+
+            if (step !== currentStep) {
+                currentStep = step;
+                document.getElementById('step-indicator').textContent = `${step}/5`;
+                
+                document.querySelectorAll('.step-btn').forEach(btn => {
+                    const btnStep = parseInt(btn.dataset.step);
+                    btn.classList.remove('active', 'completed');
+                    if (btnStep === step) btn.classList.add('active');
+                    else if (btnStep < step) btn.classList.add('completed');
+                });
+            }
+        }
+
+        function seekAnimation(value) {
+            animationProgress = (value / 100) * totalDuration;
+            updateTimeDisplay();
+            updateCurrentStep();
+            if (!goodPlaying) {
+                lastTime = 0;
+                drawGoodFrame(0);
+            }
+        }
+
+        function skipBackward() {
+            animationProgress = Math.max(0, animationProgress - 5);
+            seekAnimation((animationProgress / totalDuration) * 100);
+        }
+
+        function skipForward() {
+            animationProgress = Math.min(totalDuration, animationProgress + 5);
+            seekAnimation((animationProgress / totalDuration) * 100);
+        }
+
+        function restartAnimation() {
+            animationProgress = 0;
+            goodPlaying = false;
+            updatePlayPauseIcon();
+            seekAnimation(0);
+        }
+
+        function changeSpeed(speed) {
+            animationSpeed = parseFloat(speed);
+        }
+
+        function goToStep(step) {
+            const stepTimes = { 1: 0, 2: 5, 3: 10, 4: 14, 5: 20 };
+            animationProgress = stepTimes[step];
+            seekAnimation((animationProgress / totalDuration) * 100);
+        }
+
+        function toggleMute() {
+            const volumeIcon = document.getElementById('volume-icon');
+            const muteIcon = document.getElementById('mute-icon');
+            const slider = document.getElementById('volume-slider');
+            
+            if (volumeIcon.style.display !== 'none') {
+                volumeIcon.style.display = 'none';
+                muteIcon.style.display = 'block';
+                slider.value = 0;
+            } else {
+                volumeIcon.style.display = 'block';
+                muteIcon.style.display = 'none';
+                slider.value = 80;
+            }
+        }
+
+        function changeVolume(value) {
+            const volumeIcon = document.getElementById('volume-icon');
+            const muteIcon = document.getElementById('mute-icon');
+            if (value == 0) {
+                volumeIcon.style.display = 'none';
+                muteIcon.style.display = 'block';
+            } else {
+                volumeIcon.style.display = 'block';
+                muteIcon.style.display = 'none';
+            }
+        }
+
+        function toggleFullscreen() {
+            const wrapper = document.getElementById('good-player-wrapper');
+            if (!document.fullscreenElement) {
+                wrapper.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // İlk yükleme
+        window.addEventListener('load', () => {
+            initBadCanvas();
+        });
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) {
+                initGoodCanvas();
+            }
+        });
+    </script>
+</body>
+</html>

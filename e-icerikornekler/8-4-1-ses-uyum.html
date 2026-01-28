@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.4.1 Ses-İçerik Uyumu - Işık Kırılması</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Ses-İçerik Uyumu</h1>
+                    <p class="scorm-subtitle">Kriter 8.4.1</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.4.1</span>
+            <span class="criterion-title">Ses ile içerik uyumlu olmalıdır.</span>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <main class="flex-1 content-area">
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Ses ve görüntü senkronize değil</li>
+                        <li>Tonlama içerikle uyumsuz (ciddi konuda neşeli ses)</li>
+                        <li>Ses rengi görsel ögelerle uyuşmuyor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Işığın Kırılması - Sesli Anlatım</h2>
+                </div>
+                <div class="simulation-body">
+                    <div class="bg-gray-100 rounded-xl p-6 mb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800">Senkronizasyon Sorunu</p>
+                                    <p class="text-sm text-gray-500">Ses 2 saniye geç geliyor</p>
+                                </div>
+                            </div>
+                            <button onclick="playBadExample()" class="btn btn-danger">
+                                Örneği Dinle (Simülasyon)
+                            </button>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-lg border-2 border-red-200">
+                                <p class="text-xs text-red-600 mb-2">GÖRÜNTÜ (0:03)</p>
+                                <p class="text-gray-700">"Prizma gösteriliyor"</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border-2 border-red-200">
+                                <p class="text-xs text-red-600 mb-2">SES (0:03)</p>
+                                <p class="text-gray-700">"...ışık kaynağından çıkan ışın..."</p>
+                                <p class="text-xs text-red-500 mt-1">⚠️ Ses görüntüyle eşleşmiyor!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-100 rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                                <span class="text-2xl">🎭</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">Tonlama Uyumsuzluğu</p>
+                                <p class="text-sm text-gray-500">Bilimsel içerikte eğlence tonu</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 italic">"Heyyyy! Işık kırılması çok eğlenceli! Prizmaya bak bak baaak! 🎉"</p>
+                        <p class="text-red-600 text-sm mt-2">⚠️ Bilimsel içerik için uygunsuz tonlama</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Ses ve görüntü mükemmel senkronize</li>
+                        <li>Tonlama içerikle uyumlu (bilimsel, sakin, öğretici)</li>
+                        <li>Ses rengi görsel atmosferle uyuşuyor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+                    <h2 class="text-lg font-bold">Işığın Kırılması - Sesli Anlatım</h2>
+                    <p class="text-orange-100 text-sm">Senkronize ses ve görüntü</p>
+                </div>
+                <div class="simulation-body">
+                    <div class="canvas-container rounded-xl overflow-hidden mb-4">
+                        <canvas id="sync-canvas" width="600" height="250"></canvas>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                        <h3 class="font-bold text-green-800 mb-3">Senkronizasyon Gösterimi</h3>
+                        <div id="sync-display" class="space-y-2">
+                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg">
+                                <span class="text-xs font-mono bg-green-100 px-2 py-1 rounded">0:00</span>
+                                <div class="flex-1">
+                                    <p class="text-sm"><strong>Görüntü:</strong> Işık kaynağı aktif</p>
+                                    <p class="text-sm text-gray-600"><strong>Ses:</strong> "Işık kaynağından çıkan beyaz ışık..."</p>
+                                </div>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button onclick="playSyncDemo()" class="btn btn-success">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            Senkronize Örneği Başlat
+                        </button>
+                        <button onclick="resetSyncDemo()" class="btn btn-secondary">Sıfırla</button>
+                    </div>
+
+                    <div class="mt-6 grid md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-xl border text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <p class="font-bold text-gray-800">Senkronize</p>
+                            <p class="text-sm text-gray-500">Ses-görüntü uyumu</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                </svg>
+                            </div>
+                            <p class="font-bold text-gray-800">Uygun Tonlama</p>
+                            <p class="text-sm text-gray-500">Öğretici ve sakin</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
+                                </svg>
+                            </div>
+                            <p class="font-bold text-gray-800">Uyumlu Atmosfer</p>
+                            <p class="text-sm text-gray-500">Görsel-işitsel bütünlük</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.4.1</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('tab-bad').classList.toggle('active', tab === 'bad');
+            document.getElementById('tab-good').classList.toggle('active', tab === 'good');
+            document.getElementById('content-bad').classList.toggle('hidden', tab !== 'bad');
+            document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
+            if (tab === 'good') initCanvas();
+        }
+
+        function playBadExample() {
+            alert('Bu örnek ses-görüntü uyumsuzluğunu göstermektedir:\n\n• Ses 2 saniye gecikmeli\n• Tonlama bilimsel içeriğe uygun değil\n• Görsel ile ses eşleşmiyor');
+        }
+
+        const canvas = document.getElementById('sync-canvas');
+        let ctx;
+        let animTime = 0;
+        let isAnimating = false;
+
+        function initCanvas() {
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            drawFrame();
+        }
+
+        function drawFrame() {
+            const w = canvas.width, h = canvas.height;
+            
+            // Arka plan
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, w, h);
+
+            // Işık kaynağı
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(50, h/2, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Işık ışını
+            if (animTime > 0) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(65, h/2);
+                ctx.lineTo(Math.min(65 + animTime * 50, w * 0.35), h/2);
+                ctx.stroke();
+            }
+
+            // Prizma
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(w * 0.4, h * 0.2);
+            ctx.lineTo(w * 0.3, h * 0.8);
+            ctx.lineTo(w * 0.5, h * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#60a5fa';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Kırılan ışınlar
+            if (animTime > 3) {
+                const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7'];
+                colors.forEach((color, i) => {
+                    const progress = Math.min((animTime - 3) / 3, 1);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(w * 0.45, h/2);
+                    const endX = w * 0.45 + progress * (w * 0.5);
+                    const endY = h/2 + (i - 3) * 20 * progress;
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+                });
+            }
+        }
+
+        function playSyncDemo() {
+            isAnimating = true;
+            animTime = 0;
+            animate();
+        }
+
+        function animate() {
+            if (!isAnimating) return;
+            animTime += 0.05;
+            drawFrame();
+            
+            // Sync display güncelle
+            updateSyncDisplay();
+            
+            if (animTime < 8) {
+                requestAnimationFrame(animate);
+            } else {
+                isAnimating = false;
+            }
+        }
+
+        function updateSyncDisplay() {
+            const display = document.getElementById('sync-display');
+            const steps = [
+                { time: 0, visual: 'Işık kaynağı aktif', audio: 'Işık kaynağından çıkan beyaz ışık...' },
+                { time: 2, visual: 'Işık prizmaya ulaşıyor', audio: '...prizmaya doğru ilerler.' },
+                { time: 4, visual: 'Işık kırılıyor', audio: 'Prizma içinde farklı dalga boyları...' },
+                { time: 6, visual: 'Renklere ayrılıyor', audio: '...farklı açılarda kırılarak renklere ayrılır.' }
+            ];
+
+            const currentStep = steps.filter(s => s.time <= animTime).pop();
+            if (currentStep) {
+                display.innerHTML = `
+                    <div class="flex items-center gap-3 p-2 bg-white rounded-lg border-2 border-green-300">
+                        <span class="text-xs font-mono bg-green-500 text-white px-2 py-1 rounded">${currentStep.time}:00</span>
+                        <div class="flex-1">
+                            <p class="text-sm"><strong>Görüntü:</strong> ${currentStep.visual}</p>
+                            <p class="text-sm text-gray-600"><strong>Ses:</strong> "${currentStep.audio}"</p>
+                        </div>
+                        <span class="text-green-500 text-xl">✓</span>
+                    </div>
+                `;
+            }
+        }
+
+        function resetSyncDemo() {
+            isAnimating = false;
+            animTime = 0;
+            drawFrame();
+            document.getElementById('sync-display').innerHTML = `
+                <div class="flex items-center gap-3 p-2 bg-white rounded-lg">
+                    <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded">--:--</span>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400">Başlatmak için butona tıklayın</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.addEventListener('load', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) initCanvas();
+        });
+    </script>
+</body>
+</html>

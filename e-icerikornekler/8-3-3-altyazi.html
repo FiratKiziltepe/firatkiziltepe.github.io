@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3.3 Alt Yazı - Fotosentez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+    <style>
+        .subtitle-container {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: 80%;
+            text-align: center;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .subtitle-bad {
+            font-size: 10px;
+            background: rgba(0,0,0,0.3);
+            color: #999;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10 0h2v2h-2v-2zm-6-4h8v2h-8v-2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Alt Yazı</h1>
+                    <p class="scorm-subtitle">Kriter 8.3.3</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.3.3</span>
+            <span class="criterion-title">Sesli anlatım bulunan video içerikler için alt yazı hazırlanmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Alt yazı sesli içerikle örtüşmüyor</li>
+                        <li>Ses ile alt yazı senkronize değil</li>
+                        <li>Alt yazı gizlenemiyor</li>
+                        <li>Ses efektleri alt yazıda belirtilmemiş</li>
+                        <li>Alt yazılar 3+ satır halinde gösteriliyor</li>
+                        <li>Düşük kontrast ve küçük font</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Fotosentez Süreci - Video</h2>
+                    <p class="text-gray-500 text-sm">Yetersiz alt yazı örneği</p>
+                </div>
+                <div class="simulation-body p-0">
+                    <div class="relative bg-black" style="aspect-ratio: 16/9;">
+                        <canvas id="bad-video-canvas" class="w-full h-full"></canvas>
+                        
+                        <!-- Kötü alt yazı - senkronize değil, gizlenemiyor -->
+                        <div class="subtitle-bad absolute bottom-8 left-4 right-4 text-center" style="font-size: 11px; line-height: 1.2;">
+                            Fotosentez bitkilerin güneş ışığını kullanarak su ve karbondioksiti glikoz ve oksijene dönüştürdüğü bir süreçtir bu süreç klorofil pigmenti sayesinde gerçekleşir ve bitkiler için yaşamsal öneme sahiptir günümüzde...
+                        </div>
+                        
+                        <!-- Basit kontroller -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/50 p-2 flex justify-center">
+                            <button onclick="playBadVideo()" class="text-white text-sm px-3 py-1">▶ Oynat</button>
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-red-700 text-sm">
+                                <strong>Alt Yazı Sorunları:</strong><br>
+                                • Tüm metin tek seferde gösteriliyor (senkronizasyon yok)<br>
+                                • Alt yazı çok uzun, 3+ satır<br>
+                                • Gizleme seçeneği yok<br>
+                                • Font çok küçük ve düşük kontrast<br>
+                                • Ses efektleri belirtilmemiş
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Alt yazılar sesli içerikle bire bir örtüşüyor</li>
+                        <li>Ses ile alt yazı eş zamanlı (senkronize)</li>
+                        <li>Alt yazılar gizlenebilir</li>
+                        <li>Anlamlı ses efektleri alt yazıda belirtilmiş</li>
+                        <li>Alt yazılar 1-2 satır halinde gösteriliyor</li>
+                        <li>Yüksek kontrast ve okunaklı font</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez Süreci - Sesli Anlatım</h2>
+                    <p class="text-green-100 text-sm">Senkronize alt yazılı video</p>
+                </div>
+                <div class="simulation-body p-0">
+                    <!-- Video Alanı -->
+                    <div id="video-container" class="relative bg-gradient-to-b from-sky-400 to-sky-600" style="aspect-ratio: 16/9;">
+                        <canvas id="good-video-canvas" class="w-full h-full"></canvas>
+                        
+                        <!-- Senkronize Alt Yazı -->
+                        <div id="subtitle-display" class="subtitle-container"></div>
+                        
+                        <!-- Video Kontrolleri -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <!-- İlerleme Çubuğu -->
+                            <div class="mb-3">
+                                <input type="range" id="video-progress" min="0" max="100" value="0" 
+                                    class="w-full h-2 cursor-pointer" oninput="seekVideo(this.value)">
+                            </div>
+                            
+                            <!-- Kontrol Butonları -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <button onclick="togglePlay()" id="play-btn" class="text-white hover:text-green-400 transition">
+                                        <svg id="play-icon" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                        <svg id="pause-icon" class="w-8 h-8 hidden" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <button onclick="restartVideo()" class="text-white hover:text-green-400 transition" title="Başa sar">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <span id="time-display" class="text-white text-sm font-mono">0:00 / 0:30</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <!-- Ses Kontrolü -->
+                                    <button onclick="toggleMute()" class="text-white hover:text-green-400 transition" title="Ses aç/kapat">
+                                        <svg id="volume-on" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                        </svg>
+                                        <svg id="volume-off" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Alt Yazı Aç/Kapat -->
+                                    <button onclick="toggleSubtitles()" id="cc-btn" class="px-2 py-1 text-white border-2 border-white rounded text-xs font-bold hover:bg-white hover:text-black transition" title="Alt yazı aç/kapat">
+                                        CC
+                                    </button>
+                                    
+                                    <!-- Tam Ekran -->
+                                    <button onclick="toggleFullscreen()" class="text-white hover:text-green-400 transition" title="Tam ekran">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alt Yazı Bilgisi -->
+                    <div class="p-4 bg-gray-50 border-t">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-gray-800">Alt Yazı Özellikleri</h3>
+                            <span id="subtitle-status" class="text-sm text-green-600 font-medium">Alt yazı: Açık</span>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-3 text-sm">
+                            <div class="bg-white p-3 rounded-lg border">
+                                <p class="text-gray-500 text-xs mb-1">Format</p>
+                                <p class="font-medium">WebVTT (Senkronize)</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border">
+                                <p class="text-gray-500 text-xs mb-1">Satır Sayısı</p>
+                                <p class="font-medium">Maksimum 2 satır</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border">
+                                <p class="text-gray-500 text-xs mb-1">Ses Efektleri</p>
+                                <p class="font-medium">[Müzik], [Kuş sesi] vb.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İpucu -->
+            <div class="hint-box mt-4">
+                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span><strong>Not:</strong> "CC" butonuna tıklayarak alt yazıları açıp kapatabilirsiniz. Alt yazılar sesle senkronize olarak görüntülenir.</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.3.3</p>
+    </footer>
+
+    <script>
+        // Alt yazı verileri (WebVTT benzeri)
+        const subtitles = [
+            { start: 0, end: 3, text: "[Doğa sesleri ve kuş cıvıltısı]" },
+            { start: 3, end: 6, text: "Fotosentez, bitkilerin yaşamı için\ntemel bir süreçtir." },
+            { start: 6, end: 10, text: "Bu süreçte bitkiler güneş ışığını\nkullanarak besin üretir." },
+            { start: 10, end: 14, text: "Yapraklardaki klorofil pigmenti\nışığı soğurur." },
+            { start: 14, end: 18, text: "Su ve karbondioksit,\nbu enerjiyle birleşir." },
+            { start: 18, end: 22, text: "Sonuçta glikoz (şeker) ve\noksijen üretilir." },
+            { start: 22, end: 26, text: "Oksijen atmosfere salınır\nve canlılar için yaşamsal önem taşır." },
+            { start: 26, end: 30, text: "[Müzik yavaşça azalır]\nFotosentez, yaşamın temelidir." }
+        ];
+
+        let isPlaying = false;
+        let currentTime = 0;
+        let totalDuration = 30;
+        let subtitlesEnabled = true;
+        let animationId = null;
+        let lastTimestamp = 0;
+
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+                initBadCanvas();
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initGoodCanvas();
+            }
+        }
+
+        // Kötü örnek canvas
+        function initBadCanvas() {
+            const canvas = document.getElementById('bad-video-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+            
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#444';
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Video Oynatıcı', canvas.width / 2, canvas.height / 2);
+        }
+
+        // İyi örnek canvas
+        const goodCanvas = document.getElementById('good-video-canvas');
+        let goodCtx;
+
+        function initGoodCanvas() {
+            goodCtx = goodCanvas.getContext('2d');
+            goodCanvas.width = goodCanvas.parentElement.offsetWidth;
+            goodCanvas.height = goodCanvas.parentElement.offsetHeight;
+            drawScene();
+        }
+
+        function drawScene() {
+            const width = goodCanvas.width;
+            const height = goodCanvas.height;
+            const progress = currentTime / totalDuration;
+
+            // Gökyüzü
+            const skyGradient = goodCtx.createLinearGradient(0, 0, 0, height * 0.6);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#E0F4FF');
+            goodCtx.fillStyle = skyGradient;
+            goodCtx.fillRect(0, 0, width, height * 0.6);
+
+            // Güneş
+            const sunY = height * 0.15 + Math.sin(currentTime * 0.5) * 10;
+            const sunGlow = goodCtx.createRadialGradient(width * 0.8, sunY, 0, width * 0.8, sunY, 80);
+            sunGlow.addColorStop(0, 'rgba(255, 255, 200, 1)');
+            sunGlow.addColorStop(0.5, 'rgba(255, 200, 50, 0.5)');
+            sunGlow.addColorStop(1, 'rgba(255, 150, 0, 0)');
+            goodCtx.fillStyle = sunGlow;
+            goodCtx.beginPath();
+            goodCtx.arc(width * 0.8, sunY, 80, 0, Math.PI * 2);
+            goodCtx.fill();
+
+            goodCtx.fillStyle = '#FFD700';
+            goodCtx.beginPath();
+            goodCtx.arc(width * 0.8, sunY, 40, 0, Math.PI * 2);
+            goodCtx.fill();
+
+            // Işık ışınları (animasyonlu)
+            if (currentTime > 5) {
+                const rayOpacity = Math.min((currentTime - 5) / 5, 0.4);
+                goodCtx.strokeStyle = `rgba(255, 255, 0, ${rayOpacity})`;
+                goodCtx.lineWidth = 3;
+                for (let i = 0; i < 5; i++) {
+                    const angle = -Math.PI / 4 + (i * 0.15) + Math.sin(currentTime + i) * 0.05;
+                    goodCtx.beginPath();
+                    goodCtx.moveTo(width * 0.8 - 40, sunY + 20);
+                    goodCtx.lineTo(width * 0.3 + i * 30, height * 0.5);
+                    goodCtx.stroke();
+                }
+            }
+
+            // Zemin
+            goodCtx.fillStyle = '#8B4513';
+            goodCtx.fillRect(0, height * 0.85, width, height * 0.15);
+
+            // Çimen
+            goodCtx.fillStyle = '#228B22';
+            goodCtx.fillRect(0, height * 0.6, width, height * 0.25);
+
+            // Bitki (animasyonlu büyüme)
+            const plantHeight = Math.min(progress * 2, 1) * 150;
+            const plantX = width * 0.3;
+            const plantBaseY = height * 0.85;
+
+            // Gövde
+            goodCtx.strokeStyle = '#2d5016';
+            goodCtx.lineWidth = 8;
+            goodCtx.beginPath();
+            goodCtx.moveTo(plantX, plantBaseY);
+            goodCtx.lineTo(plantX, plantBaseY - plantHeight);
+            goodCtx.stroke();
+
+            // Yapraklar
+            if (plantHeight > 50) {
+                drawLeaf(goodCtx, plantX, plantBaseY - plantHeight * 0.7, -30, currentTime);
+                drawLeaf(goodCtx, plantX, plantBaseY - plantHeight * 0.5, 30, currentTime);
+                drawLeaf(goodCtx, plantX, plantBaseY - plantHeight * 0.3, -25, currentTime);
+            }
+
+            // CO2 ve H2O ok işaretleri
+            if (currentTime > 10) {
+                goodCtx.fillStyle = '#666';
+                goodCtx.font = 'bold 14px Nunito';
+                goodCtx.fillText('CO₂ →', plantX - 80, plantBaseY - plantHeight * 0.5);
+                goodCtx.fillStyle = '#0066cc';
+                goodCtx.fillText('H₂O ↑', plantX - 10, plantBaseY + 20);
+            }
+
+            // O2 çıkışı
+            if (currentTime > 18) {
+                for (let i = 0; i < 3; i++) {
+                    const bubbleY = plantBaseY - plantHeight - 20 - (currentTime * 5 + i * 30) % 100;
+                    goodCtx.fillStyle = `rgba(100, 200, 255, ${0.7 - (i * 0.2)})`;
+                    goodCtx.beginPath();
+                    goodCtx.arc(plantX + 30 + i * 15, bubbleY, 8, 0, Math.PI * 2);
+                    goodCtx.fill();
+                }
+                goodCtx.fillStyle = '#009900';
+                goodCtx.font = 'bold 14px Nunito';
+                goodCtx.fillText('O₂ ↑', plantX + 50, plantBaseY - plantHeight - 30);
+            }
+
+            // Alt yazı güncelle
+            updateSubtitle();
+        }
+
+        function drawLeaf(ctx, x, y, angle, time) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angle + Math.sin(time * 2) * 3) * Math.PI / 180);
+            
+            ctx.fillStyle = '#32CD32';
+            ctx.beginPath();
+            ctx.ellipse(30, 0, 40, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Yaprak damarı
+            ctx.strokeStyle = '#228B22';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(60, 0);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        function updateSubtitle() {
+            const subtitleDisplay = document.getElementById('subtitle-display');
+            
+            if (!subtitlesEnabled) {
+                subtitleDisplay.style.display = 'none';
+                return;
+            }
+
+            const currentSubtitle = subtitles.find(s => currentTime >= s.start && currentTime < s.end);
+            
+            if (currentSubtitle) {
+                subtitleDisplay.style.display = 'block';
+                subtitleDisplay.innerHTML = currentSubtitle.text.replace('\n', '<br>');
+            } else {
+                subtitleDisplay.style.display = 'none';
+            }
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            document.getElementById('play-icon').classList.toggle('hidden', isPlaying);
+            document.getElementById('pause-icon').classList.toggle('hidden', !isPlaying);
+            
+            if (isPlaying) {
+                lastTimestamp = performance.now();
+                animate();
+            }
+        }
+
+        function animate(timestamp) {
+            if (!isPlaying) return;
+
+            const delta = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+            
+            currentTime += delta;
+            
+            if (currentTime >= totalDuration) {
+                currentTime = totalDuration;
+                isPlaying = false;
+                document.getElementById('play-icon').classList.remove('hidden');
+                document.getElementById('pause-icon').classList.add('hidden');
+            }
+
+            updateProgress();
+            drawScene();
+
+            if (isPlaying) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('video-progress');
+            progressBar.value = (currentTime / totalDuration) * 100;
+            
+            const mins = Math.floor(currentTime / 60);
+            const secs = Math.floor(currentTime % 60);
+            const totalMins = Math.floor(totalDuration / 60);
+            const totalSecs = Math.floor(totalDuration % 60);
+            document.getElementById('time-display').textContent = 
+                `${mins}:${secs.toString().padStart(2, '0')} / ${totalMins}:${totalSecs.toString().padStart(2, '0')}`;
+        }
+
+        function seekVideo(value) {
+            currentTime = (value / 100) * totalDuration;
+            updateProgress();
+            if (!isPlaying) {
+                drawScene();
+            }
+        }
+
+        function restartVideo() {
+            currentTime = 0;
+            updateProgress();
+            if (!isPlaying) {
+                drawScene();
+            }
+        }
+
+        function toggleSubtitles() {
+            subtitlesEnabled = !subtitlesEnabled;
+            const ccBtn = document.getElementById('cc-btn');
+            const statusText = document.getElementById('subtitle-status');
+            
+            if (subtitlesEnabled) {
+                ccBtn.classList.add('bg-white', 'text-black');
+                ccBtn.classList.remove('border-white', 'text-white');
+                statusText.textContent = 'Alt yazı: Açık';
+                statusText.className = 'text-sm text-green-600 font-medium';
+            } else {
+                ccBtn.classList.remove('bg-white', 'text-black');
+                ccBtn.classList.add('border-white', 'text-white');
+                statusText.textContent = 'Alt yazı: Kapalı';
+                statusText.className = 'text-sm text-gray-500 font-medium';
+            }
+            
+            updateSubtitle();
+        }
+
+        function toggleMute() {
+            document.getElementById('volume-on').classList.toggle('hidden');
+            document.getElementById('volume-off').classList.toggle('hidden');
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function playBadVideo() {
+            alert('Bu örnek sadece alt yazı sorunlarını göstermek için hazırlanmıştır.');
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', () => {
+            initBadCanvas();
+        });
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) {
+                initGoodCanvas();
+            } else {
+                initBadCanvas();
+            }
+        });
+    </script>
+</body>
+</html>

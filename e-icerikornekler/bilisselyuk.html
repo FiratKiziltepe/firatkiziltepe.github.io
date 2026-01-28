@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilişsel Yük Karşılaştırması</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    /* Uygun olmayan örnek için dikkat dağıtıcı animasyonlar */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+    
+    @keyframes pulse-bg {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    
+    @keyframes bounce-text {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    @keyframes rainbow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    
+    .floating { animation: float 2s ease-in-out infinite; }
+    .floating-delay { animation: float 2.5s ease-in-out infinite 0.5s; }
+    .sparkle { animation: sparkle 1.5s ease-in-out infinite; }
+    .bounce-text { animation: bounce-text 0.8s ease-in-out infinite; }
+    .rainbow-bg {
+      background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+      background-size: 300% 300%;
+      animation: pulse-bg 3s ease infinite;
+    }
+    .rainbow-filter { animation: rainbow 3s linear infinite; }
+    
+    /* Parıltı efekti */
+    .sparkle-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    
+    .sparkle-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: gold;
+      border-radius: 50%;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-slate-100 font-['Nunito']">
+  <div id="app" class="h-full w-full overflow-auto"><!-- Ana Başlık -->
+   <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-6 px-4 shadow-lg">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+     <div class="text-center flex-1">
+      <h1 id="main-title" class="text-2xl md:text-3xl font-extrabold mb-2">Bilişsel Yük Dengesi Karşılaştırması</h1>
+      <p class="text-indigo-100 text-sm md:text-base">Kriter 8.1.1 - Aynı konunun iki farklı sunumu</p>
+     </div>
+     <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition text-sm font-semibold">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      Ana Sayfa
+     </a>
+    </div>
+   </header><!-- Tab Navigasyonu -->
+   <div class="flex justify-center gap-2 py-4 bg-white shadow-sm sticky top-0 z-10"><button id="tab-bad" class="px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-red-500 text-white shadow-md"> ❌ Uygun Olmayan </button> <button id="tab-good" class="px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-slate-200 text-slate-600 hover:bg-slate-300"> ✅ Uygun Örnek </button>
+   </div><!-- İçerik Alanı -->
+   <main class="max-w-4xl mx-auto p-4 pb-8"><!-- UYGUN OLMAYAN ÖRNEK -->
+    <div id="content-bad" class="space-y-4"><!-- Açıklama Kartı -->
+     <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
+      <div class="flex items-start gap-3"><span class="text-2xl">⚠️</span>
+       <div>
+        <h3 class="font-bold text-red-700 mb-1">Bu Örnek Neden Uygun Değil?</h3>
+        <ul class="text-red-600 text-sm space-y-1">
+         <li>• Sürekli hareket eden dikkat dağıtıcı animasyonlar</li>
+         <li>• Konuyla ilgisiz dekoratif öğeler (parıltılar, emojiler)</li>
+         <li>• Renk geçişli, göz yoran arka planlar</li>
+         <li>• Aşırı görsel karmaşıklık</li>
+         <li>• Öğrenme amacıyla ilgisiz süslemeler</li>
+        </ul>
+       </div>
+      </div>
+     </div><!-- Uygun Olmayan İçerik -->
+     <div class="rainbow-bg rounded-2xl p-6 relative overflow-hidden shadow-xl"><!-- Parıltı efektleri -->
+      <div class="sparkle-container">
+       <div class="sparkle-dot" style="top: 10%; left: 15%;"></div>
+       <div class="sparkle-dot" style="top: 20%; left: 80%; animation-delay: 0.3s;"></div>
+       <div class="sparkle-dot" style="top: 60%; left: 10%; animation-delay: 0.6s;"></div>
+       <div class="sparkle-dot" style="top: 70%; left: 90%; animation-delay: 0.9s;"></div>
+       <div class="sparkle-dot" style="top: 40%; left: 50%; animation-delay: 1.2s;"></div>
+       <div class="sparkle-dot" style="top: 85%; left: 30%; animation-delay: 0.4s;"></div>
+       <div class="sparkle-dot" style="top: 15%; left: 60%; animation-delay: 0.7s;"></div>
+      </div><!-- Başlık -->
+      <div class="text-center mb-6 relative"><span class="floating inline-block text-4xl mb-2">🌟</span> <span class="floating-delay inline-block text-4xl mb-2">✨</span> <span class="floating inline-block text-4xl mb-2">🎉</span>
+       <h2 id="bad-topic-title" class="text-2xl font-extrabold text-white drop-shadow-lg bounce-text">🔬 Fotosentez Nedir? 🌿</h2><span class="floating-delay inline-block text-3xl">🌈</span> <span class="floating inline-block text-3xl">⭐</span>
+      </div><!-- İçerik Kutusu -->
+      <div class="bg-white/80 backdrop-blur rounded-xl p-5 relative"><!-- Dikkat dağıtıcı köşe süslemeleri -->
+       <div class="absolute -top-3 -left-3 text-3xl floating rainbow-filter">
+        🦋
+       </div>
+       <div class="absolute -top-3 -right-3 text-3xl floating-delay rainbow-filter">
+        🌺
+       </div>
+       <div class="absolute -bottom-3 -left-3 text-3xl floating rainbow-filter">
+        🐝
+       </div>
+       <div class="absolute -bottom-3 -right-3 text-3xl floating-delay rainbow-filter">
+        🌻
+       </div><!-- Tanım -->
+       <div class="mb-4 p-4 bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 rounded-lg border-4 border-dashed border-purple-400">
+        <p class="text-lg"><span class="text-2xl floating inline-block">🌱</span> <strong class="text-purple-700 bounce-text inline-block">Fotosentez</strong>, <span class="text-2xl floating-delay inline-block">☀️</span> bitkilerin güneş ışığını kullanarak <span class="text-2xl floating inline-block">💧</span> su ve karbondioksiti besin ve oksijene dönüştürme sürecidir! <span class="text-2xl floating-delay inline-block">🎈</span></p>
+       </div><!-- Denklem -->
+       <div class="bg-gradient-to-r from-yellow-300 via-green-300 to-cyan-300 p-4 rounded-xl mb-4 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-white/30"></div>
+        <p class="font-bold text-xl relative z-10"><span class="bounce-text inline-block">💨 CO₂</span> <span class="text-2xl mx-2">➕</span> <span class="bounce-text inline-block" style="animation-delay: 0.2s;">💧 H₂O</span> <span class="text-2xl mx-2">➕</span> <span class="bounce-text inline-block" style="animation-delay: 0.4s;">☀️ Işık</span></p>
+        <p class="text-3xl my-2 rainbow-filter">⬇️⬇️⬇️</p>
+        <p class="font-bold text-xl relative z-10"><span class="bounce-text inline-block">🍬 C₆H₁₂O₆</span> <span class="text-2xl mx-2">➕</span> <span class="bounce-text inline-block" style="animation-delay: 0.3s;">💨 O₂</span> <span class="text-3xl ml-2 floating">🎊</span></p>
+       </div><!-- Bilgi Kutuları -->
+       <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gradient-to-br from-green-400 to-emerald-500 p-3 rounded-xl text-white text-center relative overflow-hidden"><span class="text-4xl floating">🌿</span> <span class="absolute top-1 right-1 text-xl sparkle">✨</span>
+         <p class="font-bold mt-1 text-sm bounce-text">Kloroplast</p>
+         <p class="text-xs">Fotosentez burada gerçekleşir!</p><span class="absolute bottom-1 left-1 text-xl sparkle" style="animation-delay: 0.5s;">⭐</span>
+        </div>
+        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-3 rounded-xl text-white text-center relative overflow-hidden"><span class="text-4xl floating-delay">☀️</span> <span class="absolute top-1 left-1 text-xl sparkle" style="animation-delay: 0.3s;">💫</span>
+         <p class="font-bold mt-1 text-sm bounce-text">Güneş Işığı</p>
+         <p class="text-xs">Enerji kaynağımız!</p><span class="absolute bottom-1 right-1 text-xl sparkle" style="animation-delay: 0.8s;">🌟</span>
+        </div>
+       </div><!-- Alt süsleme -->
+       <div class="text-center mt-4"><span class="text-2xl floating inline-block mx-1">🎀</span> <span class="text-2xl floating-delay inline-block mx-1">🎁</span> <span class="text-2xl floating inline-block mx-1">🎪</span> <span class="text-2xl floating-delay inline-block mx-1">🎠</span> <span class="text-2xl floating inline-block mx-1">🎡</span>
+       </div>
+      </div>
+     </div>
+    </div><!-- UYGUN ÖRNEK -->
+    <div id="content-good" class="space-y-4 hidden"><!-- Açıklama Kartı -->
+     <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 mb-6">
+      <div class="flex items-start gap-3"><span class="text-2xl">✅</span>
+       <div>
+        <h3 class="font-bold text-emerald-700 mb-1">Bu Örnek Neden Uygun?</h3>
+        <ul class="text-emerald-600 text-sm space-y-1">
+         <li>• Temiz ve sade tasarım</li>
+         <li>• Dikkat dağıtıcı animasyonlar yok</li>
+         <li>• İçerikle doğrudan ilgili görseller</li>
+         <li>• Net ve okunaklı tipografi</li>
+         <li>• Bilişsel yükü azaltan düzen</li>
+        </ul>
+       </div>
+      </div>
+     </div><!-- Uygun İçerik -->
+     <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200"><!-- Başlık -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white">
+       <h2 id="good-topic-title" class="text-xl font-bold">Fotosentez Nedir?</h2>
+       <p class="text-emerald-100 text-sm mt-1">Bitkilerin enerji üretim süreci</p>
+      </div>
+      <div class="p-6 space-y-6"><!-- Tanım -->
+       <div class="flex gap-4 items-start">
+        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+         <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+         </svg>
+        </div>
+        <div>
+         <h3 class="font-bold text-slate-800 mb-1">Tanım</h3>
+         <p class="text-slate-600 leading-relaxed"><strong>Fotosentez</strong>, bitkilerin güneş ışığı enerjisini kullanarak su ve karbondioksiti glikoz (besin) ve oksijene dönüştürdüğü kimyasal süreçtir.</p>
+        </div>
+       </div><!-- Denklem -->
+       <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h3 class="font-bold text-slate-800 mb-3 text-center">Kimyasal Denklem</h3>
+        <div class="flex flex-wrap items-center justify-center gap-2 text-center">
+         <div class="bg-blue-100 px-3 py-2 rounded-lg">
+          <p class="text-xs text-blue-600 mb-1">Karbondioksit</p>
+          <p class="font-bold text-blue-800">6CO₂</p>
+         </div><span class="text-slate-400 font-bold">+</span>
+         <div class="bg-cyan-100 px-3 py-2 rounded-lg">
+          <p class="text-xs text-cyan-600 mb-1">Su</p>
+          <p class="font-bold text-cyan-800">6H₂O</p>
+         </div><span class="text-slate-400 font-bold">+</span>
+         <div class="bg-amber-100 px-3 py-2 rounded-lg">
+          <p class="text-xs text-amber-600 mb-1">Işık</p>
+          <p class="font-bold text-amber-700">☀️</p>
+         </div><span class="text-emerald-500 font-bold text-xl">→</span>
+         <div class="bg-emerald-100 px-3 py-2 rounded-lg">
+          <p class="text-xs text-emerald-600 mb-1">Glikoz</p>
+          <p class="font-bold text-emerald-800">C₆H₁₂O₆</p>
+         </div><span class="text-slate-400 font-bold">+</span>
+         <div class="bg-teal-100 px-3 py-2 rounded-lg">
+          <p class="text-xs text-teal-600 mb-1">Oksijen</p>
+          <p class="font-bold text-teal-800">6O₂</p>
+         </div>
+        </div>
+       </div><!-- Temel Kavramlar -->
+       <div>
+        <h3 class="font-bold text-slate-800 mb-3">Temel Kavramlar</h3>
+        <div class="grid md:grid-cols-2 gap-3">
+         <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+          <div class="flex items-center gap-3 mb-2">
+           <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd" />
+            </svg>
+           </div>
+           <h4 class="font-semibold text-emerald-800">Kloroplast</h4>
+          </div>
+          <p class="text-emerald-700 text-sm">Fotosentezin gerçekleştiği hücre organeli. Klorofil pigmentini içerir.</p>
+         </div>
+         <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+          <div class="flex items-center gap-3 mb-2">
+           <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+            </svg>
+           </div>
+           <h4 class="font-semibold text-amber-800">Işık Enerjisi</h4>
+          </div>
+          <p class="text-amber-700 text-sm">Güneşten gelen enerji, kimyasal enerjiye dönüştürülür.</p>
+         </div>
+        </div>
+       </div><!-- Özet Kutusu -->
+       <div class="bg-gradient-to-r from-slate-800 to-slate-700 text-white p-4 rounded-xl">
+        <div class="flex items-center gap-2 mb-2">
+         <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+         </svg>
+         <h4 class="font-semibold">Özet</h4>
+        </div>
+        <p class="text-slate-200 text-sm leading-relaxed">Fotosentez, bitkilerin yaşamı ve Dünya'daki oksijen döngüsü için temel süreçtir. Bu süreç sayesinde bitkiler kendi besinlerini üretir ve atmosfere oksijen salar.</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </main><!-- Alt Bilgi -->
+   <footer class="bg-slate-800 text-white py-4 px-4 text-center">
+    <p class="text-slate-300 text-sm">Eğitsel İçerik Tasarım Örneği • Bilişsel Yük Dengesi Karşılaştırması</p>
+   </footer>
+  </div>
+  <script>
+    // Varsayılan yapılandırma
+    const defaultConfig = {
+      main_title: 'Bilişsel Yük Dengesi Karşılaştırması',
+      topic_title: 'Fotosentez Nedir?'
+    };
+
+    let config = { ...defaultConfig };
+    let activeTab = 'bad';
+
+    // Tab değiştirme
+    function switchTab(tab) {
+      activeTab = tab;
+      
+      const tabBad = document.getElementById('tab-bad');
+      const tabGood = document.getElementById('tab-good');
+      const contentBad = document.getElementById('content-bad');
+      const contentGood = document.getElementById('content-good');
+
+      if (tab === 'bad') {
+        tabBad.className = 'px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-red-500 text-white shadow-md';
+        tabGood.className = 'px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-slate-200 text-slate-600 hover:bg-slate-300';
+        contentBad.classList.remove('hidden');
+        contentGood.classList.add('hidden');
+      } else {
+        tabGood.className = 'px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-emerald-500 text-white shadow-md';
+        tabBad.className = 'px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 bg-slate-200 text-slate-600 hover:bg-slate-300';
+        contentGood.classList.remove('hidden');
+        contentBad.classList.add('hidden');
+      }
+    }
+
+    // Event listeners
+    document.getElementById('tab-bad').addEventListener('click', () => switchTab('bad'));
+    document.getElementById('tab-good').addEventListener('click', () => switchTab('good'));
+
+    // UI güncelleme fonksiyonu
+    function updateUI() {
+      document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
+      
+      const topicTitle = config.topic_title || defaultConfig.topic_title;
+      document.getElementById('bad-topic-title').innerHTML = '🔬 ' + topicTitle + ' 🌿';
+      document.getElementById('good-topic-title').textContent = topicTitle;
+    }
+
+    // Element SDK entegrasyonu
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = { ...defaultConfig, ...newConfig };
+          updateUI();
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['main_title', config.main_title || defaultConfig.main_title],
+          ['topic_title', config.topic_title || defaultConfig.topic_title]
+        ])
+      });
+    }
+
+    // İlk yükleme
+    updateUI();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c526b8db74a141b',t:'MTc2OTYyMzU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

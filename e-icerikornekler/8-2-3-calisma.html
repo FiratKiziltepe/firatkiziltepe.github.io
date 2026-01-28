@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.2.3 Sorunsuz Çalışma - Fotosentez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+    <style>
+        .draggable {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable:active {
+            cursor: grabbing;
+        }
+        .draggable.dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+        }
+        .drop-zone {
+            transition: all 0.2s;
+        }
+        .drop-zone.drag-over {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            transform: scale(1.02);
+        }
+        .drop-zone.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+        .drop-zone.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .bad-draggable {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Sorunsuz Çalışma</h1>
+                    <p class="scorm-subtitle">Kriter 8.2.3</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.2.3</span>
+            <span class="criterion-title">E-içerikler sorunsuz bir şekilde çalışmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Sürükle-bırak çalışmıyor veya takılıyor</li>
+                        <li>Ögeler kolayca seçilip taşınamıyor</li>
+                        <li>Hedef alanlara yerleştirme sorunlu</li>
+                        <li>Düğmeler tıklandığında beklenen işlevi yapmıyor</li>
+                        <li>Etkinlik her açılışta baştan başlamıyor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Fotosentez Bileşenlerini Eşleştir</h2>
+                    <p class="text-gray-500 text-sm">Hatalı sürükle-bırak örneği</p>
+                </div>
+                <div class="simulation-body">
+                    <p class="text-sm text-gray-600 mb-4">Aşağıdaki bileşenleri doğru kutulara sürükleyip bırakın:</p>
+                    
+                    <!-- Hatalı Sürüklenebilir Öğeler -->
+                    <div class="flex flex-wrap gap-2 mb-6 p-3 bg-gray-100 rounded-lg">
+                        <div class="bad-draggable bg-yellow-200 px-3 py-2 rounded text-sm" 
+                            onclick="alert('HATA: Bu öğe sürüklenemiyor!')">
+                            ☀️ Güneş Işığı
+                        </div>
+                        <div class="bad-draggable bg-blue-200 px-3 py-2 rounded text-sm opacity-50">
+                            💧 Su (H₂O)
+                        </div>
+                        <div class="bad-draggable bg-gray-300 px-3 py-2 rounded text-sm" 
+                            style="pointer-events: none;">
+                            💨 CO₂
+                        </div>
+                        <div class="bad-draggable bg-green-200 px-3 py-2 rounded text-sm"
+                            draggable="true" ondragstart="event.preventDefault()">
+                            🌿 Klorofil
+                        </div>
+                    </div>
+
+                    <!-- Hatalı Hedef Alanlar -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[80px] bg-gray-50">
+                            <p class="text-xs text-gray-400 mb-2">Girdi Maddeleri</p>
+                            <p class="text-gray-400 text-sm">Bırakma alanı çalışmıyor</p>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[80px] bg-gray-50">
+                            <p class="text-xs text-gray-400 mb-2">Çıktı Maddeleri</p>
+                            <p class="text-gray-400 text-sm">Bırakma alanı çalışmıyor</p>
+                        </div>
+                    </div>
+
+                    <!-- Hatalı Butonlar -->
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn btn-primary opacity-50" disabled>Kontrol Et</button>
+                        <button class="btn btn-secondary" onclick="location.reload()">Yeniden Başla (Sayfa yenilenir)</button>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700 text-sm">
+                            <strong>Sorunlar:</strong> Öğeler sürüklenemiyor, bazıları pasif, bırakma alanları çalışmıyor,
+                            kontrol butonu devre dışı, yeniden başlatma sayfayı yeniliyor.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Sürükle-bırak sorunsuz çalışıyor</li>
+                        <li>Ögeler kolayca seçilip taşınabiliyor</li>
+                        <li>Hedef alanlara doğru yerleştirilebiliyor</li>
+                        <li>Tüm düğmeler beklenen işlevi yapıyor</li>
+                        <li>Etkinlik her açılışta baştan başlıyor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-green-600 to-emerald-500 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez Bileşenlerini Eşleştir</h2>
+                    <p class="text-green-100 text-sm">Sürükle-bırak etkinliği</p>
+                </div>
+                <div class="simulation-body">
+                    <!-- Yönerge -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p class="text-blue-800 text-sm flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            <strong>Yönerge:</strong> Aşağıdaki bileşenleri doğru kategorilere sürükleyip bırakın.
+                        </p>
+                    </div>
+
+                    <!-- İlerleme -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm text-gray-600">İlerleme:</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="progress-bar-good" class="h-full bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="progress-text" class="text-sm font-medium text-gray-700">0/6</span>
+                        </div>
+                    </div>
+
+                    <!-- Sürüklenebilir Öğeler -->
+                    <div id="items-container" class="flex flex-wrap gap-3 mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+                        <div class="draggable bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="light" data-category="input">
+                            <span class="text-lg">☀️</span> Güneş Işığı
+                        </div>
+                        <div class="draggable bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="water" data-category="input">
+                            <span class="text-lg">💧</span> Su (H₂O)
+                        </div>
+                        <div class="draggable bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="co2" data-category="input">
+                            <span class="text-lg">💨</span> Karbondioksit (CO₂)
+                        </div>
+                        <div class="draggable bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="glucose" data-category="output">
+                            <span class="text-lg">🍬</span> Glikoz (C₆H₁₂O₆)
+                        </div>
+                        <div class="draggable bg-gradient-to-r from-teal-400 to-cyan-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="oxygen" data-category="output">
+                            <span class="text-lg">💨</span> Oksijen (O₂)
+                        </div>
+                        <div class="draggable bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2"
+                            draggable="true" data-item="chlorophyll" data-category="catalyst">
+                            <span class="text-lg">🌿</span> Klorofil
+                        </div>
+                    </div>
+
+                    <!-- Hedef Alanlar -->
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div class="drop-zone border-2 border-dashed border-blue-300 rounded-xl p-4 min-h-[120px] bg-blue-50"
+                            data-category="input">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14"/>
+                                    </svg>
+                                </div>
+                                <span class="font-bold text-blue-800">Girdi Maddeleri</span>
+                            </div>
+                            <div class="dropped-items flex flex-wrap gap-2"></div>
+                            <p class="text-blue-400 text-xs mt-2 empty-text">Buraya bırakın</p>
+                        </div>
+
+                        <div class="drop-zone border-2 border-dashed border-green-300 rounded-xl p-4 min-h-[120px] bg-green-50"
+                            data-category="catalyst">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <span class="font-bold text-green-800">Katalizör</span>
+                            </div>
+                            <div class="dropped-items flex flex-wrap gap-2"></div>
+                            <p class="text-green-400 text-xs mt-2 empty-text">Buraya bırakın</p>
+                        </div>
+
+                        <div class="drop-zone border-2 border-dashed border-orange-300 rounded-xl p-4 min-h-[120px] bg-orange-50"
+                            data-category="output">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                    </svg>
+                                </div>
+                                <span class="font-bold text-orange-800">Çıktı Maddeleri</span>
+                            </div>
+                            <div class="dropped-items flex flex-wrap gap-2"></div>
+                            <p class="text-orange-400 text-xs mt-2 empty-text">Buraya bırakın</p>
+                        </div>
+                    </div>
+
+                    <!-- Kontrol ve Sıfırlama -->
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button onclick="checkAnswers()" class="btn btn-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Kontrol Et
+                        </button>
+                        <button onclick="resetActivity()" class="btn btn-secondary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Yeniden Başla
+                        </button>
+                        <button onclick="showHint()" class="btn btn-secondary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            İpucu
+                        </button>
+                    </div>
+
+                    <!-- Sonuç Alanı -->
+                    <div id="result-area" class="hidden mt-4"></div>
+                </div>
+            </div>
+
+            <!-- İpucu -->
+            <div class="hint-box mt-4">
+                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span><strong>İpucu:</strong> Fotosentez sırasında bitkiler güneş ışığı, su ve karbondioksit kullanarak glikoz ve oksijen üretir. Klorofil bu süreçte katalizör görevi görür.</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.2.3</p>
+    </footer>
+
+    <script>
+        let placedItems = 0;
+        const totalItems = 6;
+
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initDragDrop();
+            }
+        }
+
+        function initDragDrop() {
+            const draggables = document.querySelectorAll('.draggable');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', handleDragStart);
+                draggable.addEventListener('dragend', handleDragEnd);
+                
+                // Touch events
+                draggable.addEventListener('touchstart', handleTouchStart, { passive: false });
+                draggable.addEventListener('touchmove', handleTouchMove, { passive: false });
+                draggable.addEventListener('touchend', handleTouchEnd);
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+
+            // İlk konteynere de drop event ekle (geri bırakma için)
+            const itemsContainer = document.getElementById('items-container');
+            itemsContainer.addEventListener('dragover', handleDragOver);
+            itemsContainer.addEventListener('drop', handleDropBack);
+        }
+
+        let draggedElement = null;
+        let touchOffsetX = 0;
+        let touchOffsetY = 0;
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedElement) {
+                const dropZone = e.currentTarget;
+                const droppedItems = dropZone.querySelector('.dropped-items');
+                const emptyText = dropZone.querySelector('.empty-text');
+                
+                // Eğer başka bir drop zone'dan geliyorsa, eski konumdan sil
+                const oldContainer = draggedElement.parentElement;
+                if (oldContainer.classList.contains('dropped-items')) {
+                    const oldEmptyText = oldContainer.parentElement.querySelector('.empty-text');
+                    if (oldContainer.children.length === 1) {
+                        oldEmptyText.style.display = 'block';
+                    }
+                }
+                
+                droppedItems.appendChild(draggedElement);
+                emptyText.style.display = 'none';
+                
+                updateProgress();
+            }
+        }
+
+        function handleDropBack(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedElement) {
+                const oldContainer = draggedElement.parentElement;
+                if (oldContainer.classList.contains('dropped-items')) {
+                    const oldEmptyText = oldContainer.parentElement.querySelector('.empty-text');
+                    if (oldContainer.children.length === 1) {
+                        oldEmptyText.style.display = 'block';
+                    }
+                }
+                
+                e.currentTarget.appendChild(draggedElement);
+                updateProgress();
+            }
+        }
+
+        // Touch support
+        function handleTouchStart(e) {
+            e.preventDefault();
+            draggedElement = e.target.closest('.draggable');
+            if (draggedElement) {
+                const touch = e.touches[0];
+                const rect = draggedElement.getBoundingClientRect();
+                touchOffsetX = touch.clientX - rect.left;
+                touchOffsetY = touch.clientY - rect.top;
+                draggedElement.classList.add('dragging');
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (draggedElement) {
+                const touch = e.touches[0];
+                draggedElement.style.position = 'fixed';
+                draggedElement.style.left = (touch.clientX - touchOffsetX) + 'px';
+                draggedElement.style.top = (touch.clientY - touchOffsetY) + 'px';
+                draggedElement.style.zIndex = '1000';
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (draggedElement) {
+                draggedElement.style.position = '';
+                draggedElement.style.left = '';
+                draggedElement.style.top = '';
+                draggedElement.style.zIndex = '';
+                draggedElement.classList.remove('dragging');
+
+                const touch = e.changedTouches[0];
+                const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                if (dropZone) {
+                    const zone = dropZone.closest('.drop-zone');
+                    if (zone) {
+                        const droppedItems = zone.querySelector('.dropped-items');
+                        const emptyText = zone.querySelector('.empty-text');
+                        
+                        const oldContainer = draggedElement.parentElement;
+                        if (oldContainer.classList.contains('dropped-items')) {
+                            const oldEmptyText = oldContainer.parentElement.querySelector('.empty-text');
+                            if (oldContainer.children.length === 1) {
+                                oldEmptyText.style.display = 'block';
+                            }
+                        }
+                        
+                        droppedItems.appendChild(draggedElement);
+                        emptyText.style.display = 'none';
+                        updateProgress();
+                    }
+                }
+                
+                draggedElement = null;
+            }
+        }
+
+        function updateProgress() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let count = 0;
+            dropZones.forEach(zone => {
+                count += zone.querySelector('.dropped-items').children.length;
+            });
+            placedItems = count;
+            
+            const percentage = (count / totalItems) * 100;
+            document.getElementById('progress-bar-good').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = count + '/' + totalItems;
+        }
+
+        function checkAnswers() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let correct = 0;
+            let total = 0;
+
+            dropZones.forEach(zone => {
+                const category = zone.dataset.category;
+                const items = zone.querySelectorAll('.draggable');
+                
+                items.forEach(item => {
+                    total++;
+                    if (item.dataset.category === category) {
+                        correct++;
+                        item.classList.add('ring-2', 'ring-green-500');
+                    } else {
+                        item.classList.add('ring-2', 'ring-red-500');
+                    }
+                });
+            });
+
+            const resultArea = document.getElementById('result-area');
+            resultArea.classList.remove('hidden');
+
+            if (total === 0) {
+                resultArea.innerHTML = `
+                    <div class="error-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        Lütfen önce bileşenleri kategorilere yerleştirin!
+                    </div>
+                `;
+            } else if (correct === total && total === totalItems) {
+                resultArea.innerHTML = `
+                    <div class="success-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                        Tebrikler! Tüm bileşenleri doğru yerleştirdiniz! 🎉
+                    </div>
+                `;
+            } else {
+                resultArea.innerHTML = `
+                    <div class="error-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        ${correct}/${total} doğru. Kırmızı çerçeveli öğeleri kontrol edin.
+                    </div>
+                `;
+            }
+        }
+
+        function resetActivity() {
+            const container = document.getElementById('items-container');
+            const draggables = document.querySelectorAll('.draggable');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(item => {
+                item.classList.remove('ring-2', 'ring-green-500', 'ring-red-500');
+                container.appendChild(item);
+            });
+
+            dropZones.forEach(zone => {
+                const emptyText = zone.querySelector('.empty-text');
+                emptyText.style.display = 'block';
+            });
+
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('result-area').innerHTML = '';
+            
+            placedItems = 0;
+            updateProgress();
+        }
+
+        function showHint() {
+            alert('İpucu:\n\n📥 Girdi: Güneş Işığı, Su, CO₂\n⚡ Katalizör: Klorofil\n📤 Çıktı: Glikoz, Oksijen');
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', initDragDrop);
+    </script>
+</body>
+</html>

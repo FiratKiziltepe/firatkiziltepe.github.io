@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.5.3 Duyarlı Tasarım - Fotosentez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Duyarlı Tasarım</h1>
+                    <p class="scorm-subtitle">Kriter 8.5.3</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.5.3</span>
+            <span class="criterion-title">E-içerikler duyarlı tasarım ilkelerine uygun hazırlanmalıdır.</span>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <main class="flex-1 content-area">
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Sabit piksel genişliği (1200px) - mobilde taşıyor</li>
+                        <li>Küçük ekranlarda içerik kesilir veya yatay kaydırma gerekir</li>
+                        <li>Dokunmatik alanlar mobil için çok küçük</li>
+                        <li>Font boyutları küçük ekranlarda okunamaz</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Fotosentez - Sabit Genişlik</h2>
+                </div>
+                <div class="simulation-body overflow-x-auto">
+                    <!-- Sabit genişlikli içerik simülasyonu -->
+                    <div class="border-2 border-red-300 rounded-lg p-4 bg-red-50">
+                        <p class="text-red-600 text-sm mb-3">⚠️ Aşağıdaki içerik 1200px sabit genişlikte tasarlanmış:</p>
+                        
+                        <div style="width: 1200px; background: white; border: 1px solid #ddd; padding: 20px; font-size: 12px;">
+                            <div style="display: flex; gap: 20px;">
+                                <div style="width: 300px; flex-shrink: 0;">
+                                    <h3 style="font-size: 14px; margin-bottom: 10px;">Kontrol Paneli</h3>
+                                    <button style="padding: 5px 10px; font-size: 10px; margin: 2px;">Küçük Buton</button>
+                                    <button style="padding: 5px 10px; font-size: 10px; margin: 2px;">Küçük Buton</button>
+                                    <input type="text" style="width: 100%; padding: 3px; font-size: 10px; margin-top: 5px;" placeholder="Küçük input">
+                                </div>
+                                <div style="flex: 1; background: #f0f0f0; padding: 10px;">
+                                    <p style="font-size: 10px;">Simülasyon alanı - 900px genişlik</p>
+                                    <div style="width: 100%; height: 200px; background: linear-gradient(#87ceeb, #228b22); display: flex; align-items: center; justify-content: center;">
+                                        <span style="background: white; padding: 10px; font-size: 11px;">Fotosentez Animasyonu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cihaz simülasyonu -->
+                    <div class="mt-6">
+                        <h3 class="font-bold text-gray-800 mb-4">Farklı Cihazlarda Görünüm</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
+                                    <div class="bg-white rounded" style="width: 120px; height: 200px; overflow: hidden;">
+                                        <div style="width: 1200px; transform: scale(0.1); transform-origin: top left;">
+                                            <div style="background: #f0f0f0; padding: 20px;">
+                                                <p>İçerik çok küçük</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-red-600 mt-2">📱 Mobil - Okunamaz</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
+                                    <div class="bg-white rounded" style="width: 180px; height: 120px; overflow: hidden;">
+                                        <div style="width: 1200px; transform: scale(0.15); transform-origin: top left;">
+                                            <div style="background: #f0f0f0; padding: 20px;">
+                                                <p>İçerik kesildi</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-red-600 mt-2">📱 Tablet - Kesiliyor</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
+                                    <div class="bg-white rounded" style="width: 200px; height: 120px; overflow: auto;">
+                                        <div style="width: 1200px; background: #f0f0f0; padding: 10px;">
+                                            <p style="font-size: 8px;">Yatay kaydırma gerekli</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-orange-600 mt-2">💻 Laptop - Scroll gerekli</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Yüzde bazlı ve esnek genişlikler kullanılıyor</li>
+                        <li>Tüm ekran boyutlarına uyum sağlıyor</li>
+                        <li>Dokunmatik alanlar yeterli büyüklükte (min 44px)</li>
+                        <li>Font boyutları okunabilir (min 16px mobilde)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-red-500 to-pink-500 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez - Duyarlı Tasarım</h2>
+                    <p class="text-red-100 text-sm">Tüm cihazlara uyumlu</p>
+                </div>
+                <div class="simulation-body">
+                    <!-- Ekran boyutu simülatörü -->
+                    <div class="mb-6">
+                        <label class="block font-medium text-gray-800 mb-2">Ekran Boyutunu Simüle Et:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="setViewport('mobile')" class="btn btn-secondary" id="btn-mobile">
+                                📱 Mobil (375px)
+                            </button>
+                            <button onclick="setViewport('tablet')" class="btn btn-secondary" id="btn-tablet">
+                                📱 Tablet (768px)
+                            </button>
+                            <button onclick="setViewport('desktop')" class="btn btn-secondary" id="btn-desktop">
+                                💻 Masaüstü (1024px)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Responsive içerik önizleme -->
+                    <div class="bg-gray-100 rounded-xl p-4 flex justify-center">
+                        <div id="preview-container" class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300" style="width: 100%; max-width: 800px;">
+                            <div class="bg-gradient-to-r from-green-600 to-emerald-500 text-white p-4">
+                                <h3 class="font-bold" id="preview-title">Fotosentez Süreci</h3>
+                            </div>
+                            <div class="p-4" id="preview-content">
+                                <div id="layout-grid" class="grid gap-4">
+                                    <!-- Sol Panel -->
+                                    <div id="control-panel" class="bg-gray-50 rounded-lg p-4">
+                                        <h4 class="font-bold text-gray-800 mb-3">Kontroller</h4>
+                                        <div class="space-y-3">
+                                            <select class="w-full p-3 border rounded-lg text-base">
+                                                <option>Işık Yoğunluğu</option>
+                                            </select>
+                                            <input type="range" class="w-full h-3">
+                                            <div class="flex gap-2">
+                                                <button class="flex-1 bg-green-500 text-white p-3 rounded-lg font-medium">Başlat</button>
+                                                <button class="flex-1 bg-gray-300 p-3 rounded-lg font-medium">Sıfırla</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Simülasyon Alanı -->
+                                    <div id="sim-panel" class="bg-gradient-to-b from-sky-200 to-green-300 rounded-lg p-4 min-h-[200px] flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-4xl mb-2">🌿☀️💧</div>
+                                            <p class="font-medium">Fotosentez Simülasyonu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Responsive özellikleri -->
+                    <div class="mt-6 grid md:grid-cols-3 gap-4">
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                            <div class="text-3xl mb-2">📱</div>
+                            <h4 class="font-bold text-green-800">Mobil Uyumlu</h4>
+                            <p class="text-green-700 text-sm">Tek sütun düzen, büyük butonlar</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                            <div class="text-3xl mb-2">📱</div>
+                            <h4 class="font-bold text-green-800">Tablet Uyumlu</h4>
+                            <p class="text-green-700 text-sm">Esnek iki sütun düzen</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                            <div class="text-3xl mb-2">💻</div>
+                            <h4 class="font-bold text-green-800">Masaüstü Uyumlu</h4>
+                            <p class="text-green-700 text-sm">Geniş ekran optimizasyonu</p>
+                        </div>
+                    </div>
+
+                    <!-- CSS Breakpoint bilgisi -->
+                    <div class="mt-6 bg-gray-800 text-gray-100 rounded-xl p-4 font-mono text-sm">
+                        <p class="text-green-400">/* Duyarlı Tasarım CSS */</p>
+                        <p><span class="text-purple-400">@media</span> (max-width: <span class="text-yellow-400">640px</span>) { <span class="text-gray-400">/* Mobil */</span> }</p>
+                        <p><span class="text-purple-400">@media</span> (min-width: <span class="text-yellow-400">641px</span>) and (max-width: <span class="text-yellow-400">1024px</span>) { <span class="text-gray-400">/* Tablet */</span> }</p>
+                        <p><span class="text-purple-400">@media</span> (min-width: <span class="text-yellow-400">1025px</span>) { <span class="text-gray-400">/* Masaüstü */</span> }</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.5.3</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('tab-bad').classList.toggle('active', tab === 'bad');
+            document.getElementById('tab-good').classList.toggle('active', tab === 'good');
+            document.getElementById('content-bad').classList.toggle('hidden', tab !== 'bad');
+            document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
+        }
+
+        function setViewport(size) {
+            const container = document.getElementById('preview-container');
+            const grid = document.getElementById('layout-grid');
+            
+            // Buton stillerini güncelle
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            document.getElementById('btn-' + size).classList.remove('bg-gray-200');
+            document.getElementById('btn-' + size).classList.add('bg-blue-500', 'text-white');
+
+            switch(size) {
+                case 'mobile':
+                    container.style.maxWidth = '375px';
+                    grid.classList.remove('md:grid-cols-2');
+                    grid.classList.add('grid-cols-1');
+                    break;
+                case 'tablet':
+                    container.style.maxWidth = '768px';
+                    grid.classList.remove('grid-cols-1');
+                    grid.classList.add('md:grid-cols-2');
+                    break;
+                case 'desktop':
+                    container.style.maxWidth = '1024px';
+                    grid.classList.remove('grid-cols-1');
+                    grid.classList.add('md:grid-cols-2');
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>

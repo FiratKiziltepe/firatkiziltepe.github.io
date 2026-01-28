@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3.2 Alternatif Yöntemler - Kaldırma Kuvveti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Alternatif Yöntemler</h1>
+                    <p class="scorm-subtitle">Kriter 8.3.2</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.3.2</span>
+            <span class="criterion-title">Erişilebilir olarak hazırlanamayan içerikler için alternatif yöntemler kullanılmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Erişilebilir olmayan içerik için geçiş düğmesi yok</li>
+                        <li>Ekran okuyucu kullanıcıları etkinliği atlayamıyor</li>
+                        <li>Alternatif erişilebilir içerik sunulmamış</li>
+                        <li>Sayfa numarası ve başlık ekran okuyucu için kapatılmamış</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Kaldırma Kuvveti Deneyi - Sayfa 3</h2>
+                    <p class="text-gray-500 text-sm">Sürükle-bırak etkinliği (Erişilebilir değil)</p>
+                </div>
+                <div class="simulation-body">
+                    <p class="text-gray-600 mb-4">Cisimleri sıvıya sürükleyerek kaldırma kuvvetini gözlemleyin:</p>
+                    
+                    <!-- Erişilebilir olmayan sürükle-bırak -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 min-h-[200px]">
+                        <p class="text-center text-gray-400">
+                            [Sürükle-bırak simülasyon alanı]<br>
+                            <span class="text-xs">(Ekran okuyucu ile erişilemiyor)</span>
+                        </p>
+                        <div class="flex justify-center gap-4 mt-4">
+                            <div class="w-12 h-12 bg-yellow-500 rounded cursor-move" draggable="true"></div>
+                            <div class="w-12 h-12 bg-gray-600 rounded cursor-move" draggable="true"></div>
+                            <div class="w-12 h-12 bg-amber-700 rounded cursor-move" draggable="true"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700 text-sm">
+                            <strong>Sorunlar:</strong><br>
+                            • Sürükle-bırak ekran okuyucu ile kullanılamıyor<br>
+                            • Geçiş düğmesi yok - kullanıcı sıkışıp kalıyor<br>
+                            • Alternatif erişilebilir içerik sunulmamış<br>
+                            • Öğrenme çıktılarına ulaşılamıyor
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Erişilebilir olmayan içerik için uygun etiketli geçiş düğmesi var</li>
+                        <li>Geçiş düğmesi sadece ekran okuyucu tarafından algılanıyor</li>
+                        <li>Alternatif erişilebilir içerik sunuluyor</li>
+                        <li>Öğrenme çıktılarını karşılayan en az bir etkileşimli bölüm var</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-cyan-600 to-blue-600 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold">Kaldırma Kuvveti Deneyi</h2>
+                            <p class="text-cyan-100 text-sm">Sürükle-bırak etkinliği</p>
+                        </div>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Sayfa 3/5</span>
+                    </div>
+                </div>
+                <div class="simulation-body">
+                    <!-- Geçiş Düğmesi - Sadece ekran okuyucu için -->
+                    <a href="#accessible-section" 
+                       class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50"
+                       aria-label="Sürükle-bırak etkinliği erişilebilir değildir. Alternatif erişilebilir içeriğe atlamak için tıklayın veya Enter tuşuna basın.">
+                        Erişilebilir İçeriğe Atla
+                    </a>
+
+                    <!-- Erişilebilir olmayan bölüm -->
+                    <section aria-hidden="true" class="mb-8">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                            <p class="text-blue-800 text-sm">
+                                <strong>Yönerge:</strong> Aşağıdaki cisimleri sıvıya sürükleyerek kaldırma kuvvetini gözlemleyin.
+                            </p>
+                        </div>
+
+                        <div class="canvas-container rounded-xl overflow-hidden mb-4">
+                            <canvas id="sim-canvas" width="600" height="300"></canvas>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 justify-center">
+                            <button onclick="dropObject('wood')" class="btn btn-primary">
+                                <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                                Tahta Bırak
+                            </button>
+                            <button onclick="dropObject('iron')" class="btn btn-secondary">
+                                <span class="w-4 h-4 bg-gray-600 rounded mr-2"></span>
+                                Demir Bırak
+                            </button>
+                            <button onclick="dropObject('cork')" class="btn btn-secondary">
+                                <span class="w-4 h-4 bg-amber-600 rounded mr-2"></span>
+                                Mantar Bırak
+                            </button>
+                            <button onclick="resetSim()" class="btn btn-secondary">Sıfırla</button>
+                        </div>
+                    </section>
+
+                    <!-- Görsel ayırıcı -->
+                    <div class="relative my-8">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white text-gray-500">Alternatif Erişilebilir İçerik</span>
+                        </div>
+                    </div>
+
+                    <!-- Erişilebilir Alternatif Bölüm -->
+                    <section id="accessible-section" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-green-900">Erişilebilir Alternatif: Etkileşimli Quiz</h3>
+                                <p class="text-green-700 text-sm">Aynı öğrenme çıktılarını karşılayan erişilebilir içerik</p>
+                            </div>
+                        </div>
+
+                        <form id="quiz-form" class="space-y-6" onsubmit="event.preventDefault(); checkQuiz();">
+                            <!-- Soru 1 -->
+                            <fieldset class="bg-white rounded-lg p-4 border border-green-200">
+                                <legend class="font-bold text-gray-800 px-2">
+                                    1. Tahta (yoğunluk: 600 kg/m³) suya (yoğunluk: 1000 kg/m³) bırakıldığında ne olur?
+                                </legend>
+                                <div class="space-y-2 mt-3">
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q1" value="sink" class="w-5 h-5">
+                                        <span>Batar</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q1" value="float" class="w-5 h-5">
+                                        <span>Yüzer</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q1" value="neutral" class="w-5 h-5">
+                                        <span>Askıda kalır</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <!-- Soru 2 -->
+                            <fieldset class="bg-white rounded-lg p-4 border border-green-200">
+                                <legend class="font-bold text-gray-800 px-2">
+                                    2. Demir (yoğunluk: 7800 kg/m³) suya bırakıldığında ne olur?
+                                </legend>
+                                <div class="space-y-2 mt-3">
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q2" value="sink" class="w-5 h-5">
+                                        <span>Batar</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q2" value="float" class="w-5 h-5">
+                                        <span>Yüzer</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q2" value="neutral" class="w-5 h-5">
+                                        <span>Askıda kalır</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <!-- Soru 3 -->
+                            <fieldset class="bg-white rounded-lg p-4 border border-green-200">
+                                <legend class="font-bold text-gray-800 px-2">
+                                    3. Kaldırma kuvveti neye bağlıdır?
+                                </legend>
+                                <div class="space-y-2 mt-3">
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q3" value="wrong1" class="w-5 h-5">
+                                        <span>Sadece cismin ağırlığına</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q3" value="correct" class="w-5 h-5">
+                                        <span>Sıvının yoğunluğuna ve batan hacme</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-2 rounded hover:bg-green-50 cursor-pointer">
+                                        <input type="radio" name="q3" value="wrong2" class="w-5 h-5">
+                                        <span>Sadece cismin şekline</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <div class="flex gap-3">
+                                <button type="submit" class="btn btn-success">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Cevapları Kontrol Et
+                                </button>
+                                <button type="button" onclick="resetQuiz()" class="btn btn-secondary">
+                                    Sıfırla
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="quiz-result" class="mt-4 hidden" role="alert" aria-live="polite"></div>
+                    </section>
+
+                    <!-- Navigasyon -->
+                    <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                        <button class="btn btn-secondary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            Önceki Sayfa
+                        </button>
+                        <span class="text-gray-500 text-sm">3 / 5</span>
+                        <button class="btn btn-primary">
+                            Sonraki Sayfa
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bilgi Kutusu -->
+            <div class="info-box mt-4">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span><strong>Not:</strong> "Erişilebilir İçeriğe Atla" düğmesi sadece ekran okuyucu kullanıcıları tarafından algılanır. Tab tuşu ile gezinirken görünür hale gelir.</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.3.2</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+                initCanvas();
+            }
+        }
+
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+        let objects = [];
+
+        function initCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            drawScene();
+        }
+
+        function drawScene() {
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Arka plan
+            ctx.fillStyle = '#e0f2fe';
+            ctx.fillRect(0, 0, width, height * 0.4);
+
+            // Su
+            ctx.fillStyle = '#3b82f6';
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(0, height * 0.4, width, height * 0.6);
+            ctx.globalAlpha = 1;
+
+            // Su yüzeyi
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, height * 0.4);
+            ctx.lineTo(width, height * 0.4);
+            ctx.stroke();
+
+            // Kap
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(20, height * 0.3);
+            ctx.lineTo(20, height - 10);
+            ctx.lineTo(width - 20, height - 10);
+            ctx.lineTo(width - 20, height * 0.3);
+            ctx.stroke();
+
+            // Nesneleri çiz
+            objects.forEach(obj => {
+                ctx.fillStyle = obj.color;
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function dropObject(type) {
+            const configs = {
+                wood: { color: '#eab308', density: 600, name: 'Tahta' },
+                iron: { color: '#4b5563', density: 7800, name: 'Demir' },
+                cork: { color: '#d97706', density: 200, name: 'Mantar' }
+            };
+            
+            const config = configs[type];
+            const waterDensity = 1000;
+            const waterLevel = canvas.height * 0.4;
+            
+            const obj = {
+                x: 100 + objects.length * 80,
+                y: 50,
+                color: config.color,
+                density: config.density,
+                targetY: config.density < waterDensity ? waterLevel : canvas.height - 40
+            };
+            
+            objects.push(obj);
+            animateObject(obj);
+        }
+
+        function animateObject(obj) {
+            const animate = () => {
+                if (Math.abs(obj.y - obj.targetY) > 1) {
+                    obj.y += (obj.targetY - obj.y) * 0.05;
+                    drawScene();
+                    requestAnimationFrame(animate);
+                } else {
+                    obj.y = obj.targetY;
+                    drawScene();
+                }
+            };
+            animate();
+        }
+
+        function resetSim() {
+            objects = [];
+            drawScene();
+        }
+
+        function checkQuiz() {
+            const answers = {
+                q1: 'float',
+                q2: 'sink',
+                q3: 'correct'
+            };
+
+            let correct = 0;
+            for (const [q, answer] of Object.entries(answers)) {
+                const selected = document.querySelector(`input[name="${q}"]:checked`);
+                if (selected && selected.value === answer) {
+                    correct++;
+                }
+            }
+
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.classList.remove('hidden');
+
+            if (correct === 3) {
+                resultDiv.innerHTML = `
+                    <div class="success-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                        Tebrikler! Tüm soruları doğru cevapladınız! Kaldırma kuvveti konusunu iyi anladınız. 🎉
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        ${correct}/3 doğru. Hatırlatma: Cismin yoğunluğu sıvıdan küçükse yüzer, büyükse batar.
+                    </div>
+                `;
+            }
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-result').classList.add('hidden');
+        }
+
+        window.addEventListener('load', () => {
+            if (!document.getElementById('content-good').classList.contains('hidden')) {
+                initCanvas();
+            }
+        });
+        window.addEventListener('resize', initCanvas);
+    </script>
+</body>
+</html>

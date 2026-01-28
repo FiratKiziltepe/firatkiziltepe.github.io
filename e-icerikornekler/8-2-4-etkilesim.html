@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.2.4 Etkileşim Alanları - Kaldırma Kuvveti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+    <style>
+        .match-line {
+            stroke-width: 3;
+            fill: none;
+        }
+        .match-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .match-item:hover {
+            transform: scale(1.02);
+        }
+        .match-item.selected {
+            box-shadow: 0 0 0 3px #3b82f6;
+        }
+        .match-item.correct {
+            box-shadow: 0 0 0 3px #22c55e;
+            background: #f0fdf4;
+        }
+        .match-item.incorrect {
+            box-shadow: 0 0 0 3px #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Etkileşim Alanları Tasarımı</h1>
+                    <p class="scorm-subtitle">Kriter 8.2.4</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.2.4</span>
+            <span class="criterion-title">Etkileşimli içeriklerde alanlar etkileşime uygun tasarlanmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Etkileşim alanları çok küçük, dokunmatik ekranlarda zor kullanılır</li>
+                        <li>Eşleşen ögeler arasında görsel bağlantı yok</li>
+                        <li>Yazma alanları yetersiz büyüklükte</li>
+                        <li>Yazı tipi ve boyutu okunaklı değil</li>
+                        <li>Boşlukların uzunluğu cevaba uygun değil</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Kaldırma Kuvveti - Kavram Eşleştirme</h2>
+                    <p class="text-gray-500 text-sm">Yetersiz etkileşim alanları örneği</p>
+                </div>
+                <div class="simulation-body">
+                    <p style="font-size: 10px; color: gray; margin-bottom: 10px;">Kavramları tanımlarıyla eşleştirin:</p>
+                    
+                    <!-- Çok Küçük Eşleştirme Alanları -->
+                    <div style="display: flex; justify-content: space-between; font-size: 9px;">
+                        <div style="width: 45%;">
+                            <div style="background: #f0f0f0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #ccc; cursor: pointer; font-size: 8px;">Kaldırma Kuv.</div>
+                            <div style="background: #f0f0f0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #ccc; cursor: pointer; font-size: 8px;">Yoğunluk</div>
+                            <div style="background: #f0f0f0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #ccc; cursor: pointer; font-size: 8px;">Archimedes</div>
+                        </div>
+                        <div style="width: 45%;">
+                            <div style="background: #e0e0e0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #999; font-size: 7px;">m/V formülü</div>
+                            <div style="background: #e0e0e0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #999; font-size: 7px;">Yunan bilim insanı</div>
+                            <div style="background: #e0e0e0; padding: 3px 5px; margin-bottom: 3px; border: 1px solid #999; font-size: 7px;">Sıvının cisme uyguladığı kuvvet</div>
+                        </div>
+                    </div>
+
+                    <!-- Çok Küçük Yazma Alanları -->
+                    <div style="margin-top: 15px;">
+                        <p style="font-size: 9px; color: gray;">Boşlukları doldurun:</p>
+                        <p style="font-size: 10px; line-height: 2;">
+                            Bir cisim sıvıya bırakıldığında, cismin yoğunluğu sıvının yoğunluğundan 
+                            <input type="text" style="width: 30px; font-size: 8px; border: 1px solid #ccc; padding: 1px;"> 
+                            ise cisim <input type="text" style="width: 20px; font-size: 8px; border: 1px solid #ccc; padding: 1px;">. 
+                            Kaldırma kuvveti <input type="text" style="width: 25px; font-size: 8px; border: 1px solid #ccc; padding: 1px;"> ile hesaplanır.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-700 text-sm">
+                            <strong>Sorunlar:</strong> Butonlar çok küçük (parmakla zor tıklanır), yazı boyutu okunamıyor,
+                            input alanları yetersiz, eşleşme görsel bağlantısı yok.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Etkileşim alanları dokunmatik ekranlar için yeterli büyüklükte (min 44x44px)</li>
+                        <li>Eşleşen ögeler arasında görsel çizgi bağlantısı var</li>
+                        <li>Yazma alanları yeterli büyüklükte</li>
+                        <li>Yazı tipi ve boyutu okunaklı (min 14px)</li>
+                        <li>Boşlukların uzunluğu beklenen cevaba uygun</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-cyan-600 to-blue-600 text-white">
+                    <h2 class="text-lg font-bold">Kaldırma Kuvveti - Kavram Eşleştirme</h2>
+                    <p class="text-cyan-100 text-sm">Kavramları tanımlarıyla eşleştirin</p>
+                </div>
+                <div class="simulation-body">
+                    <!-- Yönerge -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p class="text-blue-800 text-sm flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            <strong>Yönerge:</strong> Sol taraftaki kavramları sağdaki tanımlarla eşleştirmek için önce kavrama, sonra tanıma tıklayın.
+                        </p>
+                    </div>
+
+                    <!-- Eşleştirme Alanı -->
+                    <div class="relative" id="matching-area">
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none" id="lines-svg">
+                            <!-- Eşleşme çizgileri buraya eklenecek -->
+                        </svg>
+                        
+                        <div class="flex justify-between items-start gap-4">
+                            <!-- Sol Kavramlar -->
+                            <div class="flex-1 space-y-3" id="concepts">
+                                <div class="match-item bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="buoyancy" data-side="left" onclick="selectItem(this)">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-white font-bold">1</span>
+                                    </div>
+                                    <span class="font-semibold text-blue-900">Kaldırma Kuvveti</span>
+                                </div>
+                                
+                                <div class="match-item bg-gradient-to-r from-purple-100 to-purple-50 border-2 border-purple-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="density" data-side="left" onclick="selectItem(this)">
+                                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-white font-bold">2</span>
+                                    </div>
+                                    <span class="font-semibold text-purple-900">Yoğunluk</span>
+                                </div>
+                                
+                                <div class="match-item bg-gradient-to-r from-emerald-100 to-emerald-50 border-2 border-emerald-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="archimedes" data-side="left" onclick="selectItem(this)">
+                                    <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-white font-bold">3</span>
+                                    </div>
+                                    <span class="font-semibold text-emerald-900">Archimedes Prensibi</span>
+                                </div>
+                                
+                                <div class="match-item bg-gradient-to-r from-orange-100 to-orange-50 border-2 border-orange-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="volume" data-side="left" onclick="selectItem(this)">
+                                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-white font-bold">4</span>
+                                    </div>
+                                    <span class="font-semibold text-orange-900">Batan Hacim</span>
+                                </div>
+                            </div>
+
+                            <!-- Sağ Tanımlar -->
+                            <div class="flex-1 space-y-3" id="definitions">
+                                <div class="match-item bg-white border-2 border-gray-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="density" data-side="right" onclick="selectItem(this)">
+                                    <span class="text-gray-800">Birim hacim başına düşen kütle (m/V)</span>
+                                </div>
+                                
+                                <div class="match-item bg-white border-2 border-gray-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="archimedes" data-side="right" onclick="selectItem(this)">
+                                    <span class="text-gray-800">Bir cismin sıvı içinde kaybettiği ağırlık, taşırdığı sıvının ağırlığına eşittir</span>
+                                </div>
+                                
+                                <div class="match-item bg-white border-2 border-gray-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="buoyancy" data-side="right" onclick="selectItem(this)">
+                                    <span class="text-gray-800">Sıvının cisme yukarı doğru uyguladığı kuvvet (F = ρ × V × g)</span>
+                                </div>
+                                
+                                <div class="match-item bg-white border-2 border-gray-300 rounded-xl p-4 min-h-[60px] flex items-center"
+                                    data-id="volume" data-side="right" onclick="selectItem(this)">
+                                    <span class="text-gray-800">Cismin sıvı içinde kalan kısmının hacmi</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boşluk Doldurma -->
+                    <div class="mt-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            Boşlukları Doldurun
+                        </h3>
+                        
+                        <div class="space-y-4 text-gray-700 leading-relaxed">
+                            <p class="flex flex-wrap items-center gap-2">
+                                <span>Bir cisim sıvıya bırakıldığında, cismin yoğunluğu sıvının yoğunluğundan</span>
+                                <input type="text" id="fill1" placeholder="küçük/büyük" 
+                                    class="px-4 py-2 border-2 border-gray-300 rounded-lg w-32 text-center font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+                                <span>ise cisim</span>
+                                <input type="text" id="fill2" placeholder="yüzer/batar" 
+                                    class="px-4 py-2 border-2 border-gray-300 rounded-lg w-28 text-center font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">.
+                            </p>
+                            
+                            <p class="flex flex-wrap items-center gap-2">
+                                <span>Kaldırma kuvveti formülü:</span>
+                                <span class="font-bold">F =</span>
+                                <input type="text" id="fill3" placeholder="ρ × V × g" 
+                                    class="px-4 py-2 border-2 border-gray-300 rounded-lg w-36 text-center font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+                            </p>
+                            
+                            <p class="flex flex-wrap items-center gap-2">
+                                <span>Archimedes prensibini keşfeden bilim insanı</span>
+                                <input type="text" id="fill4" placeholder="Antik Yunan" 
+                                    class="px-4 py-2 border-2 border-gray-300 rounded-lg w-40 text-center font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+                                <span>döneminde yaşamıştır.</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Butonlar -->
+                    <div class="flex flex-wrap gap-3 justify-center mt-6">
+                        <button onclick="checkAllAnswers()" class="btn btn-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Kontrol Et
+                        </button>
+                        <button onclick="resetAll()" class="btn btn-secondary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Yeniden Başla
+                        </button>
+                    </div>
+
+                    <!-- Sonuç Alanı -->
+                    <div id="result-area" class="hidden mt-4"></div>
+                </div>
+            </div>
+
+            <!-- İpucu -->
+            <div class="hint-box mt-4">
+                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span><strong>İpucu:</strong> Eşleştirme yaparken aynı renkteki kavram ve tanımları bulun. Doğru eşleşmelerde çizgi yeşile döner!</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.2.4</p>
+    </footer>
+
+    <script>
+        let selectedItem = null;
+        let matches = {};
+        const correctMatches = {
+            'buoyancy': 'buoyancy',
+            'density': 'density',
+            'archimedes': 'archimedes',
+            'volume': 'volume'
+        };
+
+        const matchColors = {
+            'buoyancy': '#3b82f6',
+            'density': '#a855f7',
+            'archimedes': '#10b981',
+            'volume': '#f97316'
+        };
+
+        function switchTab(tab) {
+            const tabBad = document.getElementById('tab-bad');
+            const tabGood = document.getElementById('tab-good');
+            const contentBad = document.getElementById('content-bad');
+            const contentGood = document.getElementById('content-good');
+
+            if (tab === 'bad') {
+                tabBad.classList.add('active');
+                tabGood.classList.remove('active');
+                contentBad.classList.remove('hidden');
+                contentGood.classList.add('hidden');
+            } else {
+                tabGood.classList.add('active');
+                tabBad.classList.remove('active');
+                contentGood.classList.remove('hidden');
+                contentBad.classList.add('hidden');
+            }
+        }
+
+        function selectItem(element) {
+            const side = element.dataset.side;
+            const id = element.dataset.id;
+
+            // Eğer zaten eşleşmiş bir öğe seçildiyse, eşleşmeyi kaldır
+            if (element.classList.contains('correct') || element.classList.contains('incorrect')) {
+                removeMatch(id, side);
+                return;
+            }
+
+            if (!selectedItem) {
+                // İlk seçim
+                selectedItem = element;
+                element.classList.add('selected');
+            } else {
+                // İkinci seçim
+                const firstSide = selectedItem.dataset.side;
+                const firstId = selectedItem.dataset.id;
+
+                if (firstSide === side) {
+                    // Aynı taraftan seçim, değiştir
+                    selectedItem.classList.remove('selected');
+                    selectedItem = element;
+                    element.classList.add('selected');
+                } else {
+                    // Farklı taraflardan, eşleştir
+                    selectedItem.classList.remove('selected');
+                    
+                    const leftId = firstSide === 'left' ? firstId : id;
+                    const rightId = firstSide === 'right' ? firstId : id;
+                    const leftElement = firstSide === 'left' ? selectedItem : element;
+                    const rightElement = firstSide === 'right' ? selectedItem : element;
+
+                    // Eşleşmeyi kaydet ve çizgiyi çiz
+                    matches[leftId] = {
+                        rightId: rightId,
+                        leftElement: leftElement,
+                        rightElement: rightElement
+                    };
+
+                    drawLine(leftElement, rightElement, leftId);
+                    
+                    selectedItem = null;
+                }
+            }
+        }
+
+        function removeMatch(id, side) {
+            // Eşleşmeyi bul ve kaldır
+            for (const [leftId, match] of Object.entries(matches)) {
+                if (leftId === id || match.rightId === id) {
+                    match.leftElement.classList.remove('selected', 'correct', 'incorrect');
+                    match.rightElement.classList.remove('selected', 'correct', 'incorrect');
+                    
+                    const line = document.getElementById(`line-${leftId}`);
+                    if (line) line.remove();
+                    
+                    delete matches[leftId];
+                    break;
+                }
+            }
+        }
+
+        function drawLine(leftElement, rightElement, id) {
+            const svg = document.getElementById('lines-svg');
+            const container = document.getElementById('matching-area');
+            const containerRect = container.getBoundingClientRect();
+
+            const leftRect = leftElement.getBoundingClientRect();
+            const rightRect = rightElement.getBoundingClientRect();
+
+            const x1 = leftRect.right - containerRect.left;
+            const y1 = leftRect.top + leftRect.height / 2 - containerRect.top;
+            const x2 = rightRect.left - containerRect.left;
+            const y2 = rightRect.top + rightRect.height / 2 - containerRect.top;
+
+            // Eski çizgiyi kaldır
+            const existingLine = document.getElementById(`line-${id}`);
+            if (existingLine) existingLine.remove();
+
+            // Yeni çizgi oluştur
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('id', `line-${id}`);
+            line.setAttribute('class', 'match-line');
+            line.setAttribute('stroke', matchColors[id] || '#6b7280');
+            
+            // Bezier eğrisi
+            const midX = (x1 + x2) / 2;
+            line.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+            
+            svg.appendChild(line);
+        }
+
+        function checkAllAnswers() {
+            let matchCorrect = 0;
+            let matchTotal = Object.keys(correctMatches).length;
+
+            // Eşleştirmeleri kontrol et
+            for (const [leftId, match] of Object.entries(matches)) {
+                const line = document.getElementById(`line-${leftId}`);
+                
+                if (correctMatches[leftId] === match.rightId) {
+                    matchCorrect++;
+                    match.leftElement.classList.add('correct');
+                    match.rightElement.classList.add('correct');
+                    if (line) line.setAttribute('stroke', '#22c55e');
+                } else {
+                    match.leftElement.classList.add('incorrect');
+                    match.rightElement.classList.add('incorrect');
+                    if (line) line.setAttribute('stroke', '#ef4444');
+                }
+            }
+
+            // Boşluk doldurma kontrolü
+            const fillAnswers = {
+                'fill1': ['küçük', 'kucuk'],
+                'fill2': ['yüzer', 'yuzer'],
+                'fill3': ['ρ × v × g', 'ρvg', 'ρ*v*g', 'rho v g', 'p v g', 'pvg'],
+                'fill4': ['antik yunan', 'eski yunan']
+            };
+
+            let fillCorrect = 0;
+            for (const [id, answers] of Object.entries(fillAnswers)) {
+                const input = document.getElementById(id);
+                const value = input.value.toLowerCase().trim();
+                
+                if (answers.some(a => value.includes(a.toLowerCase()))) {
+                    fillCorrect++;
+                    input.classList.remove('border-red-500');
+                    input.classList.add('border-green-500', 'bg-green-50');
+                } else if (value) {
+                    input.classList.remove('border-green-500', 'bg-green-50');
+                    input.classList.add('border-red-500', 'bg-red-50');
+                }
+            }
+
+            // Sonuç göster
+            const resultArea = document.getElementById('result-area');
+            resultArea.classList.remove('hidden');
+
+            const totalQuestions = matchTotal + 4;
+            const totalCorrect = matchCorrect + fillCorrect;
+
+            if (totalCorrect === totalQuestions) {
+                resultArea.innerHTML = `
+                    <div class="success-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                        Tebrikler! Tüm soruları doğru cevapladınız! 🎉
+                    </div>
+                `;
+            } else {
+                resultArea.innerHTML = `
+                    <div class="error-message">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        ${totalCorrect}/${totalQuestions} doğru. Yeşil olanlar doğru, kırmızılar yanlış.
+                    </div>
+                `;
+            }
+        }
+
+        function resetAll() {
+            // Eşleştirmeleri temizle
+            const svg = document.getElementById('lines-svg');
+            svg.innerHTML = '';
+            matches = {};
+            selectedItem = null;
+
+            // Öğelerin stillerini sıfırla
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // Input alanlarını temizle
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = '';
+                input.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            });
+
+            // Sonucu gizle
+            document.getElementById('result-area').classList.add('hidden');
+        }
+
+        // Pencere boyutu değiştiğinde çizgileri yeniden çiz
+        window.addEventListener('resize', () => {
+            for (const [leftId, match] of Object.entries(matches)) {
+                drawLine(match.leftElement, match.rightElement, leftId);
+            }
+        });
+    </script>
+</body>
+</html>

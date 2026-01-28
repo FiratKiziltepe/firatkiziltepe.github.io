@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.6.1 VR/AR Standartları - Işık Kırılması 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">VR/AR Standartları</h1>
+                    <p class="scorm-subtitle">Kriter 8.6.1</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.6.1</span>
+            <span class="criterion-title">VR ve AR uygulamaları standartlara uygun hazırlanmalıdır.</span>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <main class="flex-1 content-area">
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Düşük kare hızı (15 FPS) - baş dönmesine neden olur</li>
+                        <li>Yetersiz 3D derinlik hissi</li>
+                        <li>Zayıf etkileşim - nesnelerle etkileşim sınırlı</li>
+                        <li>Düşük kalite dokular ve modeller</li>
+                        <li>Yüksek gecikme süresi</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Işık Kırılması 3D - Düşük Kalite</h2>
+                </div>
+                <div class="simulation-body p-0">
+                    <div class="relative bg-gray-900" style="aspect-ratio: 16/9;">
+                        <canvas id="bad-3d-canvas" class="w-full h-full"></canvas>
+                        <div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                            15 FPS - Düşük Performans
+                        </div>
+                        <div class="absolute bottom-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">
+                            Gecikme: ~150ms
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <h4 class="font-bold text-red-800 text-sm mb-2">Performans Sorunları</h4>
+                                <ul class="text-red-700 text-xs space-y-1">
+                                    <li>• 15 FPS - VR için minimum 90 FPS gerekli</li>
+                                    <li>• Yüksek gecikme - hareket hastalığı riski</li>
+                                    <li>• Optimize edilmemiş render</li>
+                                </ul>
+                            </div>
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <h4 class="font-bold text-red-800 text-sm mb-2">Görsel Sorunlar</h4>
+                                <ul class="text-red-700 text-xs space-y-1">
+                                    <li>• Düşük çözünürlük dokular</li>
+                                    <li>• Yetersiz ışıklandırma</li>
+                                    <li>• Derinlik algısı zayıf</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Örnek Neden Uygun?</h3>
+                    <ul>
+                        <li>Yüksek kare hızı (60+ FPS) - akıcı deneyim</li>
+                        <li>Gerçekçi 3D derinlik ve perspektif</li>
+                        <li>Zengin etkileşim - fare/dokunmatik/VR kontrolcü desteği</li>
+                        <li>Yüksek kaliteli render ve ışıklandırma</li>
+                        <li>Düşük gecikme süresi</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                    <h2 class="text-lg font-bold">Işık Kırılması 3D Simülasyonu</h2>
+                    <p class="text-indigo-100 text-sm">Three.js ile etkileşimli prizma deneyimi</p>
+                </div>
+                <div class="simulation-body p-0">
+                    <div class="relative" style="aspect-ratio: 16/9;">
+                        <div id="threejs-container" class="w-full h-full"></div>
+                        <div class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded" id="fps-counter">
+                            60 FPS
+                        </div>
+                        <div class="absolute top-2 left-2 bg-black/60 text-white text-xs px-3 py-2 rounded">
+                            <p>🖱️ Sürükle: Döndür</p>
+                            <p>📜 Scroll: Yakınlaştır</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-gray-50 border-t">
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block font-medium text-gray-800 mb-2">Işık Açısı</label>
+                                <input type="range" id="light-angle" min="-45" max="45" value="0" class="w-full" oninput="updateLightAngle(this.value)">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-gray-800 mb-2">Prizma Dönüşü</label>
+                                <input type="range" id="prism-rotation" min="0" max="360" value="0" class="w-full" oninput="updatePrismRotation(this.value)">
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="resetCamera()" class="btn btn-secondary">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Görünümü Sıfırla
+                            </button>
+                            <button onclick="toggleAutoRotate()" id="auto-rotate-btn" class="btn btn-secondary">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Otomatik Döndür
+                            </button>
+                            <button onclick="toggleSpectrum()" class="btn btn-primary">
+                                🌈 Spektrumu Göster
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D/VR Özellikler -->
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-800 mb-4">VR/3D Özellikleri</h3>
+                        <div class="grid md:grid-cols-4 gap-3">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-green-600">60+</p>
+                                <p class="text-xs text-green-700">FPS</p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-green-600">&lt;20ms</p>
+                                <p class="text-xs text-green-700">Gecikme</p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-green-600">WebGL</p>
+                                <p class="text-xs text-green-700">Render</p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-green-600">PBR</p>
+                                <p class="text-xs text-green-700">Materyal</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                            <h4 class="font-bold text-indigo-900 mb-2">VR Uyumluluk</h4>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-500">✓</span>
+                                    <span>WebXR API desteği</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-500">✓</span>
+                                    <span>VR başlık uyumlu (Oculus, HTC Vive)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-500">✓</span>
+                                    <span>Stereo render (3D derinlik)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-500">✓</span>
+                                    <span>Kontrolcü etkileşimi</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.6.1</p>
+    </footer>
+
+    <script>
+        let scene, camera, renderer, prism, lightBeam, spectrumRays = [];
+        let autoRotate = false;
+        let showSpectrum = false;
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        function switchTab(tab) {
+            document.getElementById('tab-bad').classList.toggle('active', tab === 'bad');
+            document.getElementById('tab-good').classList.toggle('active', tab === 'good');
+            document.getElementById('content-bad').classList.toggle('hidden', tab !== 'bad');
+            document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
+            
+            if (tab === 'bad') {
+                drawBad3D();
+            } else {
+                initThreeJS();
+            }
+        }
+
+        // Kötü 3D örneği (canvas 2D ile)
+        function drawBad3D() {
+            const canvas = document.getElementById('bad-3d-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+            const w = canvas.width, h = canvas.height;
+
+            // Düşük kalite render
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, w, h);
+
+            // Basit 2D prizma (3D hissi yok)
+            ctx.fillStyle = '#446';
+            ctx.beginPath();
+            ctx.moveTo(w/2, h * 0.2);
+            ctx.lineTo(w * 0.3, h * 0.8);
+            ctx.lineTo(w * 0.7, h * 0.8);
+            ctx.closePath();
+            ctx.fill();
+
+            // Düşük kalite ışık
+            ctx.strokeStyle = '#ff0';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(50, h/2);
+            ctx.lineTo(w * 0.4, h/2);
+            ctx.stroke();
+
+            // "Pikselleşme" efekti
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            for (let i = 0; i < 20; i++) {
+                ctx.fillRect(Math.random() * w, Math.random() * h, 10, 10);
+            }
+        }
+
+        // Three.js 3D sahne
+        function initThreeJS() {
+            const container = document.getElementById('threejs-container');
+            if (scene) {
+                // Zaten başlatılmış
+                return;
+            }
+
+            // Sahne
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+
+            // Kamera
+            camera = new THREE.PerspectiveCamera(60, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(0, 2, 8);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Işıklar
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(-5, 5, 5);
+            scene.add(pointLight);
+
+            // Zemin
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a2e,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Prizma
+            const prismGeometry = new THREE.ConeGeometry(1.5, 3, 3);
+            const prismMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x88ccff,
+                transparent: true,
+                opacity: 0.7,
+                roughness: 0,
+                metalness: 0,
+                transmission: 0.9,
+                thickness: 1
+            });
+            prism = new THREE.Mesh(prismGeometry, prismMaterial);
+            prism.rotation.x = Math.PI / 2;
+            prism.rotation.z = Math.PI / 6;
+            prism.castShadow = true;
+            scene.add(prism);
+
+            // Işık kaynağı (küre)
+            const lightSourceGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+            const lightSourceMaterial = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+            const lightSource = new THREE.Mesh(lightSourceGeometry, lightSourceMaterial);
+            lightSource.position.set(-5, 0, 0);
+            scene.add(lightSource);
+
+            // Işık ışını (silindir)
+            const beamGeometry = new THREE.CylinderGeometry(0.05, 0.05, 4, 8);
+            const beamMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            lightBeam = new THREE.Mesh(beamGeometry, beamMaterial);
+            lightBeam.rotation.z = Math.PI / 2;
+            lightBeam.position.set(-3, 0, 0);
+            scene.add(lightBeam);
+
+            // Spektrum ışınları (başlangıçta gizli)
+            const spectrumColors = [0xff0000, 0xff7700, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3];
+            for (let i = 0; i < 7; i++) {
+                const rayGeometry = new THREE.CylinderGeometry(0.03, 0.03, 4, 8);
+                const rayMaterial = new THREE.MeshBasicMaterial({ color: spectrumColors[i] });
+                const ray = new THREE.Mesh(rayGeometry, rayMaterial);
+                ray.rotation.z = Math.PI / 2 - (i - 3) * 0.08;
+                ray.position.set(3, (i - 3) * 0.3, 0);
+                ray.visible = false;
+                spectrumRays.push(ray);
+                scene.add(ray);
+            }
+
+            // Fare kontrolü
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', () => isDragging = true);
+            renderer.domElement.addEventListener('mouseup', () => isDragging = false);
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = {
+                        x: e.offsetX - previousMousePosition.x,
+                        y: e.offsetY - previousMousePosition.y
+                    };
+                    camera.position.x += deltaMove.x * 0.01;
+                    camera.position.y -= deltaMove.y * 0.01;
+                    camera.lookAt(0, 0, 0);
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+
+            renderer.domElement.addEventListener('wheel', (e) => {
+                camera.position.z += e.deltaY * 0.01;
+                camera.position.z = Math.max(3, Math.min(15, camera.position.z));
+            });
+
+            // Dokunmatik destek
+            let touchStartX, touchStartY;
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                camera.position.x += deltaX * 0.01;
+                camera.position.y -= deltaY * 0.01;
+                camera.lookAt(0, 0, 0);
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (autoRotate && prism) {
+                prism.rotation.y += 0.01;
+            }
+
+            if (renderer) {
+                renderer.render(scene, camera);
+            }
+
+            // FPS sayacı
+            frameCount++;
+            const currentTime = performance.now();
+            if (currentTime - lastTime >= 1000) {
+                document.getElementById('fps-counter').textContent = frameCount + ' FPS';
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+        }
+
+        function updateLightAngle(angle) {
+            if (lightBeam) {
+                lightBeam.rotation.y = angle * Math.PI / 180;
+            }
+        }
+
+        function updatePrismRotation(rotation) {
+            if (prism) {
+                prism.rotation.y = rotation * Math.PI / 180;
+            }
+        }
+
+        function resetCamera() {
+            if (camera) {
+                camera.position.set(0, 2, 8);
+                camera.lookAt(0, 0, 0);
+            }
+        }
+
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+            const btn = document.getElementById('auto-rotate-btn');
+            btn.classList.toggle('bg-blue-500', autoRotate);
+            btn.classList.toggle('text-white', autoRotate);
+        }
+
+        function toggleSpectrum() {
+            showSpectrum = !showSpectrum;
+            spectrumRays.forEach(ray => ray.visible = showSpectrum);
+            if (lightBeam) lightBeam.visible = !showSpectrum;
+        }
+
+        // Pencere boyutu değişikliği
+        window.addEventListener('resize', () => {
+            if (renderer && camera) {
+                const container = document.getElementById('threejs-container');
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            }
+        });
+
+        // İlk yükleme
+        window.addEventListener('load', () => {
+            drawBad3D();
+        });
+    </script>
+</body>
+</html>
