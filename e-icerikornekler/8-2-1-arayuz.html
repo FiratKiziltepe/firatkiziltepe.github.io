@@ -64,65 +64,96 @@
                 <div>
                     <h3>Bu Örnek Neden Uygun Değil?</h3>
                     <ul>
-                        <li>Menüler ve düğmeler işlevini yansıtmıyor</li>
-                        <li>Anlaşılması zor simgeler ve etiketler</li>
-                        <li>Karmaşık ve dağınık arayüz</li>
-                        <li>Eksik denetim ögeleri</li>
-                        <li>Kullanıcı dostu olmayan tasarım</li>
+                        <li>Bazı düğmeler sadece simge içeriyor, işlevi belirsiz</li>
+                        <li>Sıvı seçimi açılır menüsü eksik</li>
+                        <li>Sonuç paneli yok - değerler nerede görünecek?</li>
+                        <li>"?" butonu ne işe yarıyor belli değil</li>
+                        <li>Cisim boyutu ayarı eksik</li>
                     </ul>
                 </div>
             </div>
 
             <div class="simulation-container">
-                <div class="simulation-header" style="background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb); padding: 0.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                        <button style="background: #333; color: #0f0; padding: 2px 8px; font-size: 10px; border: none; font-family: monospace;">SYS_INIT</button>
-                        <button style="background: purple; color: yellow; padding: 2px 8px; font-size: 10px; border: none; transform: rotate(-5deg);">???</button>
-                        <button style="background: red; color: white; padding: 2px 8px; font-size: 10px; border: none;">X</button>
-                        <button style="background: lime; color: black; padding: 2px 8px; font-size: 10px; border: none;">▶</button>
-                        <span style="font-size: 10px; color: white; text-shadow: 1px 1px black;">v0.0.1-alpha-test</span>
-                    </div>
+                <div class="simulation-header bg-gradient-to-r from-blue-600 to-cyan-500 text-white">
+                    <h2 class="text-lg font-bold">Sıvıların Kaldırma Kuvveti Simülasyonu</h2>
+                    <p class="text-blue-100 text-sm">Archimedes Prensibi - Etkileşimli Deney</p>
                 </div>
-                <div class="simulation-body" style="background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px);">
-                    <h2 style="font-size: 14px; color: #666; margin-bottom: 10px; font-style: italic;">sıvı_kaldırma_kuvveti_sim_v2_final_son_GERCEK</h2>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <!-- Sol Panel - Kafa karıştırıcı -->
-                        <div style="flex: 1; min-width: 150px; background: #ddd; padding: 10px; border: 3px dashed orange;">
-                            <p style="font-size: 10px; color: red; margin-bottom: 5px;">* OPT_PANEL *</p>
-                            <div style="margin-bottom: 8px;">
-                                <label style="font-size: 9px; color: gray;">ρ (kg/m³):</label>
-                                <input type="text" value="1000" style="width: 50px; font-size: 10px; background: black; color: lime; border: none;">
+                <div class="simulation-body">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <!-- Kontrol Paneli - Eksik ve belirsiz -->
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                            <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                </svg>
+                                Ayarlar
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <!-- Sadece cisim seçimi var, sıvı yok -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cisim</label>
+                                    <select id="bad-object" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="wood">Tahta</option>
+                                        <option value="plastic">Plastik</option>
+                                        <option value="iron">Demir</option>
+                                        <option value="cork">Mantar</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Yoğunluk değeri var ama ne işe yaradığı belirsiz -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ρ Değeri</label>
+                                    <input type="number" value="1000" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                </div>
                             </div>
-                            <div style="margin-bottom: 8px;">
-                                <label style="font-size: 9px; color: gray;">Vol:</label>
-                                <input type="text" value="0.001" style="width: 50px; font-size: 10px; background: black; color: lime; border: none;">
+
+                            <!-- Belirsiz butonlar -->
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="startBadSim()" class="flex-1 btn btn-success">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="resetBadSim()" class="flex-1 btn btn-secondary">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                </button>
+                                <button class="flex-1 btn btn-secondary">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </button>
                             </div>
-                            <button style="background: gray; color: white; border: 2px outset gray; font-size: 9px; padding: 2px 5px; width: 100%;">EXEC</button>
-                            <button style="background: gray; color: white; border: 2px outset gray; font-size: 9px; padding: 2px 5px; width: 100%; margin-top: 3px;">RST</button>
                         </div>
 
-                        <!-- Simülasyon Alanı -->
-                        <div style="flex: 2; min-width: 200px;">
-                            <canvas id="bad-canvas" width="300" height="250" style="border: 5px ridge brown; background: linear-gradient(#87CEEB, #4169E1);"></canvas>
-                            <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
-                                <button onclick="badSimStart()" style="background: #008000; color: white; font-size: 10px; padding: 3px 8px; border: 2px outset green;">GO</button>
-                                <button onclick="badSimStop()" style="background: #800000; color: white; font-size: 10px; padding: 3px 8px; border: 2px outset red;">HALT</button>
-                                <button style="background: #000080; color: yellow; font-size: 10px; padding: 3px 8px; border: 2px outset blue;">??</button>
-                                <button style="background: #808080; color: black; font-size: 10px; padding: 3px 8px; border: 2px outset gray;">cfg</button>
+                        <!-- Simülasyon Görünümü -->
+                        <div class="md:col-span-2">
+                            <div class="canvas-container" style="min-height: 300px;">
+                                <canvas id="bad-canvas" width="500" height="300"></canvas>
                             </div>
-                        </div>
-
-                        <!-- Sağ Panel -->
-                        <div style="flex: 1; min-width: 100px; background: #333; color: #0f0; padding: 5px; font-family: monospace; font-size: 9px;">
-                            <div>OUT:</div>
-                            <div>F_b=???</div>
-                            <div>W=???</div>
-                            <div>stat: IDLE</div>
-                            <div style="margin-top: 10px; color: red;">ERR: null</div>
+                            
+                            <!-- Sonuç paneli YOK - sadece durum gösteriliyor -->
+                            <div class="mt-4 p-3 bg-gray-100 rounded-lg text-center">
+                                <p class="text-gray-600" id="bad-status-text">Simülasyonu başlatın</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Sorunları açıklayan kutu -->
+            <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <h4 class="font-bold text-amber-800 mb-2">🔍 İnceleme Notları:</h4>
+                <ul class="text-amber-700 text-sm space-y-1">
+                    <li>• Butonlarda sadece simge var, metin etiket yok - kullanıcı ne yaptığını anlamıyor</li>
+                    <li>• Sıvı türü seçimi eksik (su mu, yağ mı, cıva mı?)</li>
+                    <li>• "ρ Değeri" etiketi teknik, öğrenci "yoğunluk" anlamaz</li>
+                    <li>• Kaldırma kuvveti ve ağırlık değerleri gösterilmiyor</li>
+                    <li>• Cisim boyutu ayarlanamıyor</li>
+                    <li>• "?" butonu ne işe yarar belirsiz</li>
+                </ul>
             </div>
         </div>
 
@@ -268,35 +299,96 @@
             }
         }
 
-        // Kötü simülasyon
-        let badAnimId = null;
+        // Kötü simülasyon - güzel görünüyor ama eksik
         const badCanvas = document.getElementById('bad-canvas');
         const badCtx = badCanvas.getContext('2d');
+        let badObjectY = 50;
+        let badAnimRunning = false;
 
-        function drawBadSim() {
-            badCtx.fillStyle = '#87CEEB';
-            badCtx.fillRect(0, 0, 300, 100);
-            badCtx.fillStyle = '#4169E1';
-            badCtx.fillRect(0, 100, 300, 150);
-            
-            // Basit kare cisim
-            badCtx.fillStyle = '#8B4513';
-            badCtx.fillRect(130, 80, 40, 40);
-            
-            badCtx.fillStyle = 'white';
-            badCtx.font = '10px monospace';
-            badCtx.fillText('OBJ_01', 135, 105);
-        }
-
-        function badSimStart() {
+        function initBadCanvas() {
+            badCanvas.width = badCanvas.parentElement.offsetWidth;
+            badCanvas.height = 300;
             drawBadSim();
         }
 
-        function badSimStop() {
-            // Hiçbir şey yapmaz
+        function drawBadSim() {
+            const width = badCanvas.width;
+            const height = badCanvas.height;
+            const waterLevel = height * 0.3;
+
+            // Arka plan
+            badCtx.fillStyle = '#E0F7FA';
+            badCtx.fillRect(0, 0, width, waterLevel);
+            
+            // Su (her zaman aynı - sıvı seçimi yok)
+            badCtx.fillStyle = '#2196F390';
+            badCtx.fillRect(0, waterLevel, width, height - waterLevel);
+            
+            // Su yüzeyi
+            badCtx.strokeStyle = '#2196F3';
+            badCtx.lineWidth = 3;
+            badCtx.beginPath();
+            badCtx.moveTo(0, waterLevel);
+            badCtx.lineTo(width, waterLevel);
+            badCtx.stroke();
+            
+            // Kap kenarları
+            badCtx.strokeStyle = '#546E7A';
+            badCtx.lineWidth = 4;
+            badCtx.beginPath();
+            badCtx.moveTo(20, waterLevel - 20);
+            badCtx.lineTo(20, height - 10);
+            badCtx.lineTo(width - 20, height - 10);
+            badCtx.lineTo(width - 20, waterLevel - 20);
+            badCtx.stroke();
+            
+            // Cisim (sabit boyut - ayarlanamıyor)
+            const objType = document.getElementById('bad-object').value;
+            const colors = { wood: '#8B4513', plastic: '#FF6B6B', iron: '#4A5568', cork: '#D4A574' };
+            const size = 40; // Sabit boyut
+            
+            badCtx.fillStyle = colors[objType] || '#888';
+            badCtx.beginPath();
+            badCtx.roundRect(width/2 - size/2, badObjectY, size, size, 8);
+            badCtx.fill();
         }
 
-        drawBadSim();
+        function startBadSim() {
+            if (badAnimRunning) return;
+            badAnimRunning = true;
+            badObjectY = 20;
+            animateBad();
+        }
+
+        function animateBad() {
+            const waterLevel = badCanvas.height * 0.3;
+            const maxY = badCanvas.height - 50;
+            
+            badObjectY += 2;
+            
+            if (badObjectY > maxY) {
+                badObjectY = maxY;
+                badAnimRunning = false;
+                document.getElementById('bad-status-text').textContent = 'Simülasyon tamamlandı';
+                return;
+            }
+            
+            if (badObjectY > waterLevel) {
+                document.getElementById('bad-status-text').textContent = 'Cisim suda...';
+            }
+            
+            drawBadSim();
+            requestAnimationFrame(animateBad);
+        }
+
+        function resetBadSim() {
+            badAnimRunning = false;
+            badObjectY = 50;
+            drawBadSim();
+            document.getElementById('bad-status-text').textContent = 'Simülasyonu başlatın';
+        }
+
+        initBadCanvas();
 
         // İyi simülasyon
         const goodCanvas = document.getElementById('good-canvas');
@@ -525,11 +617,15 @@
         // Sayfa yüklendiğinde
         window.addEventListener('load', () => {
             initGoodCanvas();
+            initBadCanvas();
         });
 
         window.addEventListener('resize', () => {
             if (!document.getElementById('content-good').classList.contains('hidden')) {
                 initGoodCanvas();
+            }
+            if (!document.getElementById('content-bad').classList.contains('hidden')) {
+                initBadCanvas();
             }
         });
     </script>

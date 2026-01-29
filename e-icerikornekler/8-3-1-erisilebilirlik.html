@@ -98,72 +98,105 @@
                 <div>
                     <h3>Bu Örnek Neden Uygun Değil?</h3>
                     <ul>
-                        <li>Düşük kontrast - WCAG standartlarına uymuyor</li>
-                        <li>Bilgi sadece renkle ayırt ediliyor</li>
-                        <li>Renk körlüğüne uygun olmayan renkler (kırmızı-yeşil)</li>
-                        <li>Alternatif metin yok veya yetersiz</li>
-                        <li>Klavye ile erişim sorunlu</li>
-                        <li>Tab sırası mantıklı değil</li>
-                        <li>Ekran okuyucu etiketleri eksik</li>
+                        <li>Kontrast biraz yetersiz (WCAG AA sınırında)</li>
+                        <li>Bilgi sadece renkle ayırt ediliyor (sembol/metin yok)</li>
+                        <li>Alternatif metin var ama yetersiz</li>
+                        <li>Focus göstergesi çok zayıf</li>
+                        <li>Form alanı etiketsiz (placeholder ile idare edilmiş)</li>
                     </ul>
                 </div>
             </div>
 
             <div class="simulation-container">
-                <div class="simulation-header" style="background: #ccc; color: #999;">
-                    <h2 style="color: #aaa;">Işığın Kırılması</h2>
+                <div class="simulation-header bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                    <h2 class="text-lg font-bold">Işığın Kırılması Simülasyonu</h2>
+                    <p class="text-indigo-200 text-sm">Prizmada ışık davranışı</p>
                 </div>
-                <div class="simulation-body" style="background: #e8e8e8;">
-                    <!-- Düşük kontrastlı içerik -->
-                    <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 15px;">
-                        Aşağıdaki simülasyonda ışık kırılmasını inceleyin.
-                    </p>
-
-                    <!-- Renk körlüğüne uygun olmayan gösterim -->
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <div style="background: #ff0000; width: 40px; height: 40px; border-radius: 50%;" title="Kırmızı"></div>
-                        <div style="background: #00ff00; width: 40px; height: 40px; border-radius: 50%;" title="Yeşil"></div>
-                        <div style="background: #ffff00; width: 40px; height: 40px; border-radius: 50%;" title="Sarı"></div>
-                        <span style="color: #b0b0b0; font-size: 12px; align-self: center;">(Renklere göre seçin)</span>
+                <div class="simulation-body">
+                    <!-- Görünüşte iyi yönerge ama kontrast sorunu -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+                        <h3 class="font-bold text-blue-400 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            Kullanım Kılavuzu
+                        </h3>
+                        <p class="text-blue-300 text-sm">Işık türünü renklerden seçin ve simülasyonu başlatın.</p>
                     </div>
 
-                    <!-- Eksik alt metin -->
-                    <div style="margin-bottom: 15px;">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100' fill='%23ddd'%3E%3Crect width='200' height='100'/%3E%3Ctext x='50%25' y='50%25' fill='%23999' text-anchor='middle' dy='.3em'%3EPrizma%3C/text%3E%3C/svg%3E" alt="image001.png">
+                    <!-- Işık seçimi - SADECE RENKLE (sembol/metin yok) -->
+                    <div class="mb-6">
+                        <p class="font-medium text-gray-700 mb-3">Işık Türü Seçimi:</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="selectBadLight('white')" class="bad-light-btn w-12 h-12 rounded-full bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400 border-4 border-gray-200 hover:border-gray-400" style="outline-offset: 1px;"></button>
+                            <button onclick="selectBadLight('red')" class="bad-light-btn w-12 h-12 rounded-full bg-red-500 border-4 border-gray-200 hover:border-gray-400" style="outline-offset: 1px;"></button>
+                            <button onclick="selectBadLight('green')" class="bad-light-btn w-12 h-12 rounded-full bg-green-500 border-4 border-gray-200 hover:border-gray-400" style="outline-offset: 1px;"></button>
+                            <span class="text-gray-400 text-sm self-center ml-2">(Bir renk seçin)</span>
+                        </div>
                     </div>
 
-                    <!-- Focus göstergesi olmayan butonlar -->
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button class="bad-no-focus" style="background: #d0d0d0; color: #b0b0b0; border: none; padding: 8px 15px; cursor: pointer;" tabindex="5">
-                            tıklayınız
+                    <!-- Simülasyon Alanı -->
+                    <div class="mb-6">
+                        <div class="canvas-container rounded-xl overflow-hidden">
+                            <canvas id="bad-prism-canvas" width="600" height="280"></canvas>
+                        </div>
+                        <!-- Yetersiz alt metin örneği -->
+                        <p class="text-xs text-gray-400 mt-1">Görsel: prizma_sim.png</p>
+                    </div>
+
+                    <!-- Kontroller - focus sorunu -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="mb-4">
+                            <p class="text-gray-500 text-sm mb-2">Açı: <span id="bad-angle-val" class="text-gray-600">45°</span></p>
+                            <input type="range" id="bad-angle" min="0" max="90" value="45" 
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                style="outline: none;"
+                                onchange="updateBadAngle(this.value)">
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="startBadPrism()" class="bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-600" style="outline: 1px solid transparent;">
+                                Başlat
+                            </button>
+                            <button onclick="resetBadPrism()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-300" style="outline: 1px solid transparent;">
+                                Sıfırla
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form - etiket sorunu -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <h3 class="font-bold text-gray-800 mb-4">Test Sorusu</h3>
+                        
+                        <div class="mb-4">
+                            <!-- Etiket yok, sadece placeholder -->
+                            <input type="text" id="bad-answer" 
+                                placeholder="Cevabınızı buraya yazın..."
+                                class="w-full md:w-64 px-4 py-3 border border-gray-300 rounded-lg text-base"
+                                style="outline-color: #ddd;">
+                            <span class="text-red-400 text-sm ml-1">*</span>
+                        </div>
+
+                        <button onclick="checkBadAnswer()" class="bg-green-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600" style="outline: 1px solid transparent;">
+                            Kontrol Et
                         </button>
-                        <button class="bad-no-focus" style="background: #e0e0e0; color: #c0c0c0; border: none; padding: 8px 15px; cursor: pointer;" tabindex="1">
-                            Gönder
-                        </button>
-                        <button class="bad-no-focus" style="background: #d5d5d5; color: #b5b5b5; border: none; padding: 8px 15px; cursor: pointer;" tabindex="3">
-                            >>>
-                        </button>
-                    </div>
-
-                    <!-- Erişilebilir olmayan form -->
-                    <div style="margin-top: 20px;">
-                        <input type="text" placeholder="" style="border: 1px solid #ddd; padding: 5px; color: #ccc; background: #f5f5f5;">
-                        <span style="color: #c0c0c0; font-size: 11px;"> (zorunlu alan)</span>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-red-700 text-sm">
-                            <strong>Erişilebilirlik Sorunları:</strong><br>
-                            • Kontrast oranı yetersiz (4.5:1 altında)<br>
-                            • Renk körlerinin ayırt edemeyeceği renkler<br>
-                            • Alt metin dosya adı içeriyor (image001.png)<br>
-                            • Tab sırası karışık (5, 1, 3)<br>
-                            • Focus göstergesi yok<br>
-                            • "tıklayınız" belirsiz bağlantı metni<br>
-                            • Form alanı etiketsiz
-                        </p>
+                        
+                        <div id="bad-answer-result" class="mt-3"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Sorunları açıklayan kutu -->
+            <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <h4 class="font-bold text-amber-800 mb-2">🔍 Erişilebilirlik Sorunları:</h4>
+                <ul class="text-amber-700 text-sm space-y-1">
+                    <li>• <strong>Kontrast:</strong> "Kullanım Kılavuzu" başlığı ve metin çok açık mavi (4.5:1 altında)</li>
+                    <li>• <strong>Renk bağımlılığı:</strong> Işık türleri SADECE renkle gösteriliyor, renk körü kullanıcı ayırt edemez</li>
+                    <li>• <strong>Alt metin:</strong> "prizma_sim.png" dosya adı - içeriği açıklamıyor</li>
+                    <li>• <strong>Focus göstergesi:</strong> Range input ve butonlarda focus çerçevesi yok/çok zayıf</li>
+                    <li>• <strong>Form etiketi:</strong> Input alanının label'ı yok, sadece placeholder var (ekran okuyucu için yetersiz)</li>
+                    <li>• <strong>Kırmızı-yeşil:</strong> Işık seçeneklerinde renk körleri için sorunlu kombinasyon</li>
+                </ul>
             </div>
         </div>
 
@@ -377,12 +410,123 @@
             });
         });
 
+        // Kötü örnek için canvas
+        const badPrismCanvas = document.getElementById('bad-prism-canvas');
+        const badPrismCtx = badPrismCanvas.getContext('2d');
+        let badSelectedLight = 'white';
+
+        function initBadPrismCanvas() {
+            badPrismCanvas.width = badPrismCanvas.parentElement.offsetWidth;
+            badPrismCanvas.height = 280;
+            drawBadPrism();
+        }
+
+        function selectBadLight(type) {
+            badSelectedLight = type;
+            document.querySelectorAll('.bad-light-btn').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-indigo-400');
+            });
+            event.target.classList.add('ring-4', 'ring-indigo-400');
+            drawBadPrism();
+        }
+
+        function drawBadPrism() {
+            const width = badPrismCanvas.width;
+            const height = badPrismCanvas.height;
+            const angle = parseInt(document.getElementById('bad-angle')?.value || 45);
+
+            badPrismCtx.fillStyle = '#0f172a';
+            badPrismCtx.fillRect(0, 0, width, height);
+
+            // Işık kaynağı
+            badPrismCtx.fillStyle = '#fff';
+            badPrismCtx.beginPath();
+            badPrismCtx.arc(50, height/2, 15, 0, Math.PI * 2);
+            badPrismCtx.fill();
+
+            // Gelen ışın
+            const lightColors = { white: '#fff', red: '#ef4444', green: '#22c55e' };
+            badPrismCtx.strokeStyle = lightColors[badSelectedLight];
+            badPrismCtx.lineWidth = 4;
+            badPrismCtx.beginPath();
+            badPrismCtx.moveTo(65, height/2);
+            badPrismCtx.lineTo(width * 0.35, height/2);
+            badPrismCtx.stroke();
+
+            // Prizma
+            const prismX = width * 0.4;
+            const prismY = height / 2;
+            const prismSize = 80;
+
+            badPrismCtx.fillStyle = 'rgba(147, 197, 253, 0.3)';
+            badPrismCtx.beginPath();
+            badPrismCtx.moveTo(prismX, prismY - prismSize/2);
+            badPrismCtx.lineTo(prismX - prismSize/2, prismY + prismSize/2);
+            badPrismCtx.lineTo(prismX + prismSize/2, prismY + prismSize/2);
+            badPrismCtx.closePath();
+            badPrismCtx.fill();
+            badPrismCtx.strokeStyle = '#60a5fa';
+            badPrismCtx.lineWidth = 2;
+            badPrismCtx.stroke();
+
+            // Kırılan ışınlar
+            if (badSelectedLight === 'white') {
+                const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
+                colors.forEach((color, i) => {
+                    const angleOffset = (i - 2.5) * (angle / 12);
+                    badPrismCtx.strokeStyle = color;
+                    badPrismCtx.lineWidth = 3;
+                    badPrismCtx.beginPath();
+                    badPrismCtx.moveTo(prismX + 25, prismY + 8);
+                    const endX = width - 20;
+                    const endY = prismY + 8 + Math.tan(angleOffset * Math.PI / 180) * (endX - prismX - 25);
+                    badPrismCtx.lineTo(endX, endY);
+                    badPrismCtx.stroke();
+                });
+            } else {
+                badPrismCtx.strokeStyle = lightColors[badSelectedLight];
+                badPrismCtx.lineWidth = 4;
+                badPrismCtx.beginPath();
+                badPrismCtx.moveTo(prismX + 25, prismY + 8);
+                badPrismCtx.lineTo(width - 20, prismY + 8 + Math.tan(angle * 0.2 * Math.PI / 180) * (width - prismX - 45));
+                badPrismCtx.stroke();
+            }
+        }
+
+        function updateBadAngle(val) {
+            document.getElementById('bad-angle-val').textContent = val + '°';
+            drawBadPrism();
+        }
+
+        function startBadPrism() {
+            drawBadPrism();
+        }
+
+        function resetBadPrism() {
+            document.getElementById('bad-angle').value = 45;
+            updateBadAngle(45);
+            badSelectedLight = 'white';
+            drawBadPrism();
+        }
+
+        function checkBadAnswer() {
+            const answer = document.getElementById('bad-answer').value.trim();
+            const result = document.getElementById('bad-answer-result');
+            if (answer === '7' || answer.toLowerCase() === 'yedi') {
+                result.innerHTML = '<p class="text-green-600 font-medium">✓ Doğru!</p>';
+            } else {
+                result.innerHTML = '<p class="text-red-600 font-medium">✗ Yanlış, tekrar deneyin.</p>';
+            }
+        }
+
+        // Uygun örnek için canvas
         const canvas = document.getElementById('accessible-canvas');
         const ctx = canvas.getContext('2d');
 
         function initCanvas() {
             canvas.width = canvas.parentElement.offsetWidth;
             drawSimulation();
+            initBadPrismCanvas();
         }
 
         function drawSimulation() {
