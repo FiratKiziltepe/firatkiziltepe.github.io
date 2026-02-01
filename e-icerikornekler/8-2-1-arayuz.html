@@ -64,79 +64,91 @@
                 <div>
                     <h3>Bu Örnek Neden Uygun Değil?</h3>
                     <ul>
-                        <li>Bazı düğmeler sadece simge içeriyor, işlevi belirsiz</li>
-                        <li>Sıvı seçimi açılır menüsü eksik</li>
-                        <li>Sonuç paneli yok - değerler nerede görünecek?</li>
-                        <li>"?" butonu ne işe yarıyor belli değil</li>
-                        <li>Cisim boyutu ayarı eksik</li>
+                        <li>Navigasyon düğmeleri (ileri/geri) alışılmışın dışında bir konumda (sağ üst)</li>
+                        <li>Ses açma/kapama düğmesi, diğer kontrollerden uzak ve simülasyonun köşesinde</li>
+                        <li>Ana sayfa düğmesi, standart navigasyon çubuğunun dışında, sağ alt köşede</li>
+                        <li>Düğme boyutları ve aralıkları tutarsız, tıklama zorluğu yaratıyor</li>
+                        <li>Görsel hiyerarşi zayıf; en önemli düğme (Başlat) diğerleriyle aynı ağırlıkta</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="simulation-container">
-                <div class="simulation-header bg-gradient-to-r from-blue-600 to-cyan-500 text-white">
-                    <h2 class="text-lg font-bold">Sıvıların Kaldırma Kuvveti Simülasyonu</h2>
-                    <p class="text-blue-100 text-sm">Archimedes Prensibi - Etkileşimli Deney</p>
+            <div class="simulation-container relative">
+                <!-- Yanlış konumlandırılmış ama profesyonel görünümlü üst bar -->
+                <div class="bg-gray-100 border-b px-4 py-2 flex justify-between items-center">
+                    <h2 class="text-sm font-bold text-gray-700">Sıvıların Kaldırma Kuvveti - Deney Alanı</h2>
+                    <!-- Navigasyon sağ üstte (Alışılmışın dışında) -->
+                    <div class="flex gap-1">
+                        <button onclick="badAction('back')" class="p-1.5 border rounded bg-white hover:bg-gray-50" title="Geri">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button onclick="badAction('next')" class="p-1.5 border rounded bg-white hover:bg-gray-50" title="İleri">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="simulation-body">
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <!-- Kontrol Paneli - Eksik ve belirsiz -->
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                            <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                                </svg>
-                                Ayarlar
-                            </h3>
+
+                <div class="simulation-body p-0">
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Simülasyon Alanı -->
+                        <div class="flex-1 relative bg-white" style="min-height: 320px;">
+                            <canvas id="bad-canvas" width="500" height="320" class="w-full h-full"></canvas>
                             
-                            <div class="space-y-4">
-                                <!-- Sadece cisim seçimi var, sıvı yok -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cisim</label>
-                                    <select id="bad-object" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
-                                        <option value="wood">Tahta</option>
-                                        <option value="plastic">Plastik</option>
-                                        <option value="iron">Demir</option>
-                                        <option value="cork">Mantar</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Yoğunluk değeri var ama ne işe yaradığı belirsiz -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">ρ Değeri</label>
-                                    <input type="number" value="1000" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
-                                </div>
+                            <!-- Ses düğmesi: Simülasyonun köşesinde, kontrollerden kopuk -->
+                            <div class="absolute top-2 right-2">
+                                <button class="p-1.5 bg-gray-100/80 rounded border border-gray-300 hover:bg-gray-200" title="Ses">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                </button>
                             </div>
 
-                            <!-- Belirsiz butonlar -->
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="startBadSim()" class="flex-1 btn btn-success">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8 5v14l11-7z"/>
-                                    </svg>
-                                </button>
-                                <button onclick="resetBadSim()" class="flex-1 btn btn-secondary">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                    </svg>
-                                </button>
-                                <button class="flex-1 btn btn-secondary">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
+                            <!-- Ana Sayfa düğmesi: Sağ altta, navigasyondan bağımsız -->
+                            <div class="absolute bottom-2 right-2">
+                                <button onclick="window.location.href='index.html'" class="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded border border-gray-300 text-[10px] hover:bg-gray-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                    ANA SAYFA
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Simülasyon Görünümü -->
-                        <div class="md:col-span-2">
-                            <div class="canvas-container" style="min-height: 300px;">
-                                <canvas id="bad-canvas" width="500" height="300"></canvas>
-                            </div>
-                            
-                            <!-- Sonuç paneli YOK - sadece durum gösteriliyor -->
-                            <div class="mt-4 p-3 bg-gray-100 rounded-lg text-center">
-                                <p class="text-gray-600" id="bad-status-text">Simülasyonu başlatın</p>
+                        <!-- Kontrol Paneli -->
+                        <div class="w-full md:w-60 bg-gray-50 border-l p-4">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Nesne Materyali</label>
+                                    <div class="flex flex-wrap gap-1">
+                                        <button onclick="setBadObject('wood')" class="px-3 py-1.5 border rounded bg-white text-xs hover:border-blue-400">Tahta</button>
+                                        <button onclick="setBadObject('iron')" class="px-3 py-1.5 border rounded bg-white text-xs hover:border-blue-400">Demir</button>
+                                        <button onclick="setBadObject('plastic')" class="px-3 py-1.5 border rounded bg-white text-xs hover:border-blue-400">Plastik</button>
+                                        <button onclick="setBadObject('cork')" class="px-3 py-1.5 border rounded bg-white text-xs hover:border-blue-400">Mantar</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Sıvı Ortamı</label>
+                                    <select id="bad-liquid" class="w-full p-2 border rounded bg-white text-sm" onchange="updateBadSim()">
+                                        <option value="1000">Su (Saf)</option>
+                                        <option value="800">Zeytinyağı</option>
+                                        <option value="1025">Deniz Suyu</option>
+                                    </select>
+                                </div>
+
+                                <!-- Kontroller: Başlat ve Sıfırla aynı boyutta (Hiyerarşi hatası) -->
+                                <div class="pt-4 border-t grid grid-cols-2 gap-2">
+                                    <button onclick="startBadSim()" class="py-2 border border-blue-500 text-blue-600 rounded text-xs font-bold hover:bg-blue-50">BAŞLAT</button>
+                                    <button onclick="resetBadSim()" class="py-2 border border-gray-300 text-gray-600 rounded text-xs font-bold hover:bg-gray-100">SIFIRLA</button>
+                                </div>
+
+                                <!-- Veri Ekranı -->
+                                <div class="bg-white border rounded p-3">
+                                    <div class="flex justify-between text-[11px] mb-1">
+                                        <span class="text-gray-400">Kaldırma Kuvveti:</span>
+                                        <span class="font-bold text-gray-700"><span id="bad-fb">0.00</span> N</span>
+                                    </div>
+                                    <div class="flex justify-between text-[11px]">
+                                        <span class="text-gray-400">Cisim Ağırlığı:</span>
+                                        <span class="font-bold text-gray-700"><span id="bad-w">0.00</span> N</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -145,14 +157,25 @@
 
             <!-- Sorunları açıklayan kutu -->
             <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <h4 class="font-bold text-amber-800 mb-2">🔍 İnceleme Notları:</h4>
+                <h4 class="font-bold text-amber-800 mb-2">🔍 Kullanılabilirlik Analizi (Kısmi Uyumsuzluklar):</h4>
                 <ul class="text-amber-700 text-sm space-y-1">
-                    <li>• Butonlarda sadece simge var, metin etiket yok - kullanıcı ne yaptığını anlamıyor</li>
-                    <li>• Sıvı türü seçimi eksik (su mu, yağ mı, cıva mı?)</li>
-                    <li>• "ρ Değeri" etiketi teknik, öğrenci "yoğunluk" anlamaz</li>
-                    <li>• Kaldırma kuvveti ve ağırlık değerleri gösterilmiyor</li>
-                    <li>• Cisim boyutu ayarlanamıyor</li>
-                    <li>• "?" butonu ne işe yarar belirsiz</li>
+                    <li>• <strong>Navigasyon Yerleşimi:</strong> İleri/Geri düğmeleri standart olan alt bar veya sol üst yerine sağ üstte toplanmış.</li>
+                    <li>• <strong>Kontrol Dağınıklığı:</strong> Ses düğmesi ve Ana Sayfa düğmesi, ana kontrol panelinden ve navigasyon grubundan kopuk, ekranın farklı köşelerine dağıtılmış.</li>
+                    <li>• <strong>Görsel Hiyerarşi:</strong> "Başlat" düğmesi, ikincil bir işlem olan "Sıfırla" ile aynı görsel ağırlığa sahip. Kullanıcıyı yönlendiren bir vurgu yok.</li>
+                    <li>• <strong>Tutarsız Gruplandırma:</strong> Navigasyon (İleri/Geri) bir yerde, sistem kontrolleri (Ana Sayfa) başka bir yerde.</li>
+                </ul>
+            </div>
+        </div>
+
+            <!-- Sorunları açıklayan kutu -->
+            <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <h4 class="font-bold text-amber-800 mb-2">🔍 Kullanılabilirlik Sorunları:</h4>
+                <ul class="text-amber-700 text-sm space-y-1">
+                    <li>• <strong>Navigasyon:</strong> İleri ve Geri düğmeleri alışılmışın dışında sol üstte ve dikey konumlandırılmış.</li>
+                    <li>• <strong>Ses Kontrolü:</strong> Ses düğmesi simülasyon alanının içinde, görseli kapatacak bir yerde duruyor.</li>
+                    <li>• <strong>Ana Sayfa:</strong> Ana sayfa bağlantısı çok küçük ve simülasyonun altına gizlenmiş, bulunması zor.</li>
+                    <li>• <strong>Düğme Hiyerarşisi:</strong> Başlat ve Sıfırla düğmeleri birbirinden uzak ve farklı stillerde, ilişki kurmak zor.</li>
+                    <li>• <strong>Görsel Dağınıklık:</strong> Kontrol paneli çok dar, metinler ve butonlar iç içe geçmiş.</li>
                 </ul>
             </div>
         </div>
@@ -299,93 +322,162 @@
             }
         }
 
-        // Kötü simülasyon - güzel görünüyor ama eksik
+        // Kötü simülasyon - çalışıyor ama arayüz karmaşık
         const badCanvas = document.getElementById('bad-canvas');
         const badCtx = badCanvas.getContext('2d');
         let badObjectY = 50;
         let badAnimRunning = false;
+        let badAnimId = null;
+
+        const badObjects = {
+            wood: { density: 600, color: '#8B4513' },
+            plastic: { density: 900, color: '#FF6B6B' },
+            iron: { density: 7800, color: '#4A5568' },
+            cork: { density: 200, color: '#D4A574' }
+        };
 
         function initBadCanvas() {
-            badCanvas.width = badCanvas.parentElement.offsetWidth;
-            badCanvas.height = 300;
+            const container = badCanvas.parentElement;
+            badCanvas.width = container.offsetWidth;
+            badCanvas.height = 350;
             drawBadSim();
+        }
+
+        function setBadObject(type) {
+            const select = document.getElementById('bad-object');
+            if (select) {
+                select.value = type;
+                updateBadSim();
+            }
         }
 
         function drawBadSim() {
             const width = badCanvas.width;
             const height = badCanvas.height;
-            const waterLevel = height * 0.3;
+            const waterLevel = height * 0.4;
+
+            badCtx.clearRect(0, 0, width, height);
 
             // Arka plan
-            badCtx.fillStyle = '#E0F7FA';
+            badCtx.fillStyle = '#f0f9ff';
             badCtx.fillRect(0, 0, width, waterLevel);
             
-            // Su (her zaman aynı - sıvı seçimi yok)
-            badCtx.fillStyle = '#2196F390';
+            // Sıvı
+            const liquidDensity = parseInt(document.getElementById('bad-liquid')?.value || 1000);
+            let waterColor = '#3b82f6';
+            if (liquidDensity === 800) waterColor = '#eab308';
+            else if (liquidDensity === 1025) waterColor = '#0891b2';
+            
+            badCtx.fillStyle = waterColor + '40';
             badCtx.fillRect(0, waterLevel, width, height - waterLevel);
             
             // Su yüzeyi
-            badCtx.strokeStyle = '#2196F3';
-            badCtx.lineWidth = 3;
+            badCtx.strokeStyle = waterColor;
+            badCtx.lineWidth = 2;
             badCtx.beginPath();
             badCtx.moveTo(0, waterLevel);
             badCtx.lineTo(width, waterLevel);
             badCtx.stroke();
             
-            // Kap kenarları
-            badCtx.strokeStyle = '#546E7A';
+            // Kap
+            badCtx.strokeStyle = '#94a3b8';
             badCtx.lineWidth = 4;
-            badCtx.beginPath();
-            badCtx.moveTo(20, waterLevel - 20);
-            badCtx.lineTo(20, height - 10);
-            badCtx.lineTo(width - 20, height - 10);
-            badCtx.lineTo(width - 20, waterLevel - 20);
-            badCtx.stroke();
+            badCtx.strokeRect(40, waterLevel - 20, width - 80, height - waterLevel);
             
-            // Cisim (sabit boyut - ayarlanamıyor)
-            const objType = document.getElementById('bad-object').value;
-            const colors = { wood: '#8B4513', plastic: '#FF6B6B', iron: '#4A5568', cork: '#D4A574' };
-            const size = 40; // Sabit boyut
+            // Cisim
+            const objType = document.getElementById('bad-object')?.value || 'wood';
+            const obj = badObjects[objType];
+            const size = 50;
             
-            badCtx.fillStyle = colors[objType] || '#888';
+            badCtx.fillStyle = obj.color;
             badCtx.beginPath();
-            badCtx.roundRect(width/2 - size/2, badObjectY, size, size, 8);
+            badCtx.roundRect(width/2 - size/2, badObjectY, size, size, 4);
             badCtx.fill();
+            badCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+            badCtx.stroke();
+        }
+
+        function updateBadSim() {
+            drawBadSim();
+            calculateBadForces();
+        }
+
+        function calculateBadForces() {
+            const liquidDensity = parseInt(document.getElementById('bad-liquid')?.value || 1000);
+            const objType = document.getElementById('bad-object')?.value || 'wood';
+            const obj = badObjects[objType];
+            const size = 50;
+            
+            const volume = Math.pow(size / 100, 3);
+            const weight = obj.density * volume * 9.8;
+            const waterLevel = badCanvas.height * 0.4;
+            
+            let submergedVolume = 0;
+            if (badObjectY + size > waterLevel) {
+                const submergedHeight = Math.min(size, badObjectY + size - waterLevel);
+                submergedVolume = (submergedHeight / size) * volume;
+            }
+            
+            const buoyancy = liquidDensity * submergedVolume * 9.8;
+            
+            document.getElementById('bad-fb').textContent = buoyancy.toFixed(2);
+            document.getElementById('bad-w').textContent = weight.toFixed(2);
         }
 
         function startBadSim() {
             if (badAnimRunning) return;
             badAnimRunning = true;
-            badObjectY = 20;
+            badObjectY = 40;
             animateBad();
         }
 
         function animateBad() {
-            const waterLevel = badCanvas.height * 0.3;
-            const maxY = badCanvas.height - 50;
+            const liquidDensity = parseInt(document.getElementById('bad-liquid')?.value || 1000);
+            const objType = document.getElementById('bad-object')?.value || 'wood';
+            const obj = badObjects[objType];
+            const size = 50;
+            const waterLevel = badCanvas.height * 0.4;
+            const maxY = badCanvas.height - size - 20;
             
-            badObjectY += 2;
+            const volume = Math.pow(size / 100, 3);
+            const mass = obj.density * volume;
+            const weight = mass * 9.8;
             
-            if (badObjectY > maxY) {
-                badObjectY = maxY;
-                badAnimRunning = false;
-                document.getElementById('bad-status-text').textContent = 'Simülasyon tamamlandı';
-                return;
+            let submergedVolume = 0;
+            if (badObjectY + size > waterLevel) {
+                const submergedHeight = Math.min(size, badObjectY + size - waterLevel);
+                submergedVolume = (submergedHeight / size) * volume;
             }
             
-            if (badObjectY > waterLevel) {
-                document.getElementById('bad-status-text').textContent = 'Cisim suda...';
-            }
+            const buoyancy = liquidDensity * submergedVolume * 9.8;
+            const netForce = weight - buoyancy;
+            
+            badObjectY += netForce > 0 ? 2 : -1;
+            
+            if (badObjectY > maxY) badObjectY = maxY;
+            if (badObjectY < 20) badObjectY = 20;
             
             drawBadSim();
-            requestAnimationFrame(animateBad);
+            calculateBadForces();
+            
+            if (badAnimRunning && Math.abs(netForce) > 0.01) {
+                badAnimId = requestAnimationFrame(animateBad);
+            } else {
+                badAnimRunning = false;
+            }
         }
 
         function resetBadSim() {
+            if (badAnimId) cancelAnimationFrame(badAnimId);
             badAnimRunning = false;
             badObjectY = 50;
             drawBadSim();
-            document.getElementById('bad-status-text').textContent = 'Simülasyonu başlatın';
+            document.getElementById('bad-fb').textContent = '0.00';
+            document.getElementById('bad-w').textContent = '0.00';
+        }
+
+        function badAction(action) {
+            alert('Navigasyon: ' + (action === 'back' ? 'Geri' : 'İleri'));
         }
 
         initBadCanvas();
