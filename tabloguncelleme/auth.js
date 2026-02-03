@@ -299,9 +299,12 @@ function hideLoginModal() {
     if (modal) {
         modal.classList.remove('active');
         // Form alanlarını temizle
-        document.getElementById('tcKimlik').value = '';
-        document.getElementById('password').value = '';
-        document.getElementById('loginError').textContent = '';
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('password');
+        const errorDiv = document.getElementById('loginError');
+        if (emailInput) emailInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+        if (errorDiv) errorDiv.textContent = '';
     }
 }
 
