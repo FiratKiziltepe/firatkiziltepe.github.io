@@ -17,14 +17,10 @@ let currentProfile = null;
 // =====================================================
 
 /**
- * TC Kimlik ve şifre ile giriş
- * Şifre formatı: Ad Soyadın ilk 5 harfi küçük harf
+ * Email ve şifre ile giriş
  */
-async function login(tcKimlik, password) {
+async function login(email, password) {
     const sb = getSupabase();
-    
-    // E-posta formatına dönüştür (Supabase Auth için)
-    const email = `${tcKimlik}@eicerik.local`;
     
     try {
         const { data, error } = await sb.auth.signInWithPassword({
@@ -35,7 +31,7 @@ async function login(tcKimlik, password) {
         if (error) {
             // Hata mesajlarını Türkçeleştir
             if (error.message.includes('Invalid login credentials')) {
-                throw new Error('TC Kimlik veya şifre hatalı');
+                throw new Error('Email veya şifre hatalı');
             }
             throw error;
         }
@@ -315,14 +311,14 @@ function hideLoginModal() {
 async function handleLoginSubmit(e) {
     e.preventDefault();
     
-    const tcKimlik = document.getElementById('tcKimlik').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('loginError');
     const submitBtn = document.getElementById('loginSubmitBtn');
     
     // Validasyon
-    if (!tcKimlik || tcKimlik.length !== 11) {
-        errorDiv.textContent = 'TC Kimlik numarası 11 haneli olmalıdır';
+    if (!email || !email.includes('@')) {
+        errorDiv.textContent = 'Geçerli bir email adresi girin';
         return;
     }
     
@@ -337,7 +333,7 @@ async function handleLoginSubmit(e) {
     errorDiv.textContent = '';
     
     try {
-        await login(tcKimlik, password);
+        await login(email, password);
         hideLoginModal();
         
         // Başarılı giriş mesajı

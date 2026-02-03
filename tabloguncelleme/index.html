@@ -56,15 +56,14 @@
             </div>
             <form id="loginForm" class="login-form">
                 <div class="form-group">
-                    <label for="tcKimlik">TC Kimlik Numarası</label>
-                    <input type="text" id="tcKimlik" name="tcKimlik" maxlength="11" 
-                           pattern="[0-9]{11}" placeholder="11 haneli TC Kimlik No" required>
+                    <label for="emailInput">Email</label>
+                    <input type="email" id="emailInput" name="email" 
+                           placeholder="ornek@email.com" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Şifre</label>
                     <input type="password" id="password" name="password" 
-                           placeholder="Ad soyadınızın ilk 5 harfi" required>
-                    <small class="form-hint">Şifreniz ad soyadınızın ilk 5 harfidir (küçük harf)</small>
+                           placeholder="Şifrenizi girin" required>
                 </div>
                 <div id="loginError" class="form-error"></div>
                 <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block">
