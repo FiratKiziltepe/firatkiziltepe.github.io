@@ -9,6 +9,7 @@ import Dashboard from './components/Dashboard';
 import ContentTable from './components/ContentTable';
 import AdminPanel from './components/AdminPanel';
 import ChangeHistory from './components/ChangeHistory';
+import ReportPanel from './components/ReportPanel';
 
 const App: React.FC = () => {
   const { user, profile, loading } = useAuth();
@@ -18,7 +19,7 @@ const App: React.FC = () => {
   const [deleteProposals, setDeleteProposals] = useState<SilmeTalebi[]>([]);
   const [logs, setLogs] = useState<DegisiklikLogu[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'table' | 'admin' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'table' | 'admin' | 'history' | 'report'>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -329,6 +330,9 @@ const App: React.FC = () => {
                   users={users}
                   profile={profile}
                 />
+              )}
+              {activeTab === 'report' && profile.rol === 'admin' && (
+                <ReportPanel data={data} />
               )}
               {activeTab === 'admin' && profile.rol === 'admin' && (
             <AdminPanel 

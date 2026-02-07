@@ -95,6 +95,22 @@ const DiffSpan: React.FC<{ oldStr?: string; newStr?: string }> = ({ oldStr = "",
   );
 };
 
+/** Arama terimini sarı highlight ile gösterir */
+const HighlightText: React.FC<{ text: string; term: string; className?: string }> = ({ text, term, className }) => {
+  if (!term || !text) return <span className={className}>{text}</span>;
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+  return (
+    <span className={className}>
+      {parts.map((part, i) =>
+        part.toLowerCase() === term.toLowerCase()
+          ? <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5 font-bold">{part}</mark>
+          : <React.Fragment key={i}>{part}</React.Fragment>
+      )}
+    </span>
+  );
+};
+
 const EDIT_FIELDS = ['ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama'] as const;
 
 const ContentTable: React.FC<ContentTableProps> = ({
@@ -126,6 +142,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
   }>({ open: false, type: 'degisiklik', proposal: null });
   const [editProposalForm, setEditProposalForm] = useState<Record<string, string>>({});
   const [showChanges, setShowChanges] = useState(false);
+  const [onlyProposals, setOnlyProposals] = useState(false);
 
   const canModerate = profile.rol === 'admin' || profile.rol === 'moderator';
 
@@ -143,15 +160,24 @@ const ContentTable: React.FC<ContentTableProps> = ({
     });
   }, [newRowProposals, lessonFilter, programFilter, searchTerm]);
 
+  // Öneri olan satır ID'leri seti (performans için)
+  const rowsWithProposals = useMemo(() => {
+    const ids = new Set<number>();
+    proposals.forEach(p => ids.add(p.e_icerik_id));
+    deleteProposals.forEach(p => ids.add(p.e_icerik_id));
+    return ids;
+  }, [proposals, deleteProposals]);
+
   const filteredData = useMemo(() => {
     return data.filter(row => {
       const matchLesson = !lessonFilter || row.ders_adi === lessonFilter;
       const matchProgram = programFilter === 'Tümü' || row.program_turu === programFilter;
       const matchSearch = !searchTerm || [row.ders_adi, row.unite_tema, row.kazanim, row.aciklama, row.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchLesson && matchProgram && matchSearch;
+      const matchProposals = !onlyProposals || rowsWithProposals.has(row.id);
+      return matchLesson && matchProgram && matchSearch && matchProposals;
     });
-  }, [data, lessonFilter, programFilter, searchTerm]);
+  }, [data, lessonFilter, programFilter, searchTerm, onlyProposals, rowsWithProposals]);
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
@@ -326,18 +352,29 @@ const ContentTable: React.FC<ContentTableProps> = ({
           <input type="text" placeholder="Kazanım, ünite ara..." className="w-full border-2 border-slate-100 rounded-xl pl-3 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }} />
           <Search className="absolute right-3 top-9 text-slate-400" size={18} />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowChanges(!showChanges)}
+              className={`flex-1 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider ${
+                showChanges ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {showChanges ? <EyeOff size={13} /> : <Eye size={13} />}
+              {showChanges ? 'GİZLE' : 'DEĞİŞİKLİKLER'}
+            </button>
+            <button onClick={() => { setSearchTerm(''); setLessonFilter(''); setProgramFilter('Tümü'); setOnlyProposals(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
+              <RotateCcw size={13} /> TEMİZLE
+            </button>
+          </div>
           <button
-            onClick={() => setShowChanges(!showChanges)}
-            className={`flex-1 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all uppercase tracking-wider ${
-              showChanges ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            onClick={() => { setOnlyProposals(!onlyProposals); setCurrentPage(1); }}
+            className={`w-full px-3 py-2 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider ${
+              onlyProposals ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200'
             }`}
           >
-            {showChanges ? <EyeOff size={14} /> : <Eye size={14} />}
-            {showChanges ? 'GİZLE' : 'DEĞİŞİKLİKLER'}
-          </button>
-          <button onClick={() => { setSearchTerm(''); setLessonFilter(''); setProgramFilter('Tümü'); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-4 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 hover:bg-slate-200 transition-all uppercase tracking-wider">
-            <RotateCcw size={14} /> TEMİZLE
+            <FileEdit size={13} />
+            {onlyProposals ? 'TÜM SATIRLAR' : 'ÖNERİLİ SATIRLAR'}
           </button>
         </div>
       </div>
@@ -395,7 +432,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   if (showChanges) {
                     // Tüm öneriler (bekleyen + onaylanan + reddedilen) durum badge'leriyle
                     const allFps = proposals.filter(p => p.e_icerik_id === row.id && p.alan === fieldName);
-                    if (allFps.length === 0) return <span className={cellClass}>{originalValue}</span>;
+                    if (allFps.length === 0) return <HighlightText text={originalValue} term={searchTerm} className={cellClass} />;
                     return (
                       <div className="space-y-1.5">
                         {allFps.map(fp => (
@@ -422,7 +459,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   }
                   // Normal mod: sadece bekleyen öneriler DiffSpan ile gösterilir
                   const fps = getFieldProposals(row.id, fieldName);
-                  if (fps.length === 0) return <span className={cellClass}>{originalValue}</span>;
+                  if (fps.length === 0) return <HighlightText text={originalValue} term={searchTerm} className={cellClass} />;
                   if (fps.length === 1) {
                     return (
                       <div>
@@ -433,7 +470,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   }
                   return (
                     <div className="space-y-2">
-                      <span className={`${cellClass} block mb-1`}>{originalValue}</span>
+                      <HighlightText text={originalValue} term={searchTerm} className={`${cellClass} block mb-1`} />
                       {fps.map(fp => (
                         <div key={fp.id} className="border-l-3 border-amber-300 pl-2 py-1 bg-amber-50/50 rounded-r-lg">
                           <p className="text-[9px] font-bold text-amber-700 mb-0.5">📝 {getUserName(fp.user_id)}</p>
@@ -495,7 +532,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
                       <div className="flex flex-wrap gap-1">
                         {(() => {
                           const cleanTags = (row.e_icerik_turu || '').split('/').filter(s => s.trim()).map((ec, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-[9px] font-black text-slate-500 rounded-md uppercase">{ec.trim()}</span>
+                            <span key={i} className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-[9px] font-black text-slate-500 rounded-md uppercase">
+                              <HighlightText text={ec.trim()} term={searchTerm} />
+                            </span>
                           ));
 
                           if (showChanges) {

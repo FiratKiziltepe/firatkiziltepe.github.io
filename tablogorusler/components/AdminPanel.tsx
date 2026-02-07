@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { Profile, DegisiklikLogu, EIcerik } from '../lib/supabase';
 import { supabase, SUPABASE_URL } from '../lib/supabase';
-import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle } from 'lucide-react';
+import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson } from 'lucide-react';
 
 interface AdminPanelProps {
   users: Profile[];
@@ -26,6 +26,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
   const [editUser, setEditUser] = useState<Partial<Profile>>({});
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  // DB CRUD states
+  const [showDeleteLessonModal, setShowDeleteLessonModal] = useState(false);
+  const [deleteLessonName, setDeleteLessonName] = useState('');
+  const [deleteLessonProgram, setDeleteLessonProgram] = useState('Tümü');
+  const [deletingLesson, setDeletingLesson] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'append' | 'replace'>('append');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.from('e_icerikler').select('ders_adi').then(({ data }) => {
@@ -131,6 +143,95 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
     }).eq('id', editingUserId);
     setEditingUserId(null);
     await onRefresh();
+  };
+
+  // Ders bazlı toplu silme
+  const handleDeleteLesson = async () => {
+    if (!deleteLessonName) return;
+    setDeletingLesson(true);
+    try {
+      let query = supabase.from('e_icerikler').delete().eq('ders_adi', deleteLessonName);
+      if (deleteLessonProgram !== 'Tümü') {
+        query = query.eq('program_turu', deleteLessonProgram);
+      }
+      const { error } = await query;
+      if (error) throw error;
+      setShowDeleteLessonModal(false);
+      setDeleteLessonName('');
+      await onRefresh();
+    } catch (err: any) {
+      alert('Silme hatası: ' + (err.message || 'Bilinmeyen hata'));
+    }
+    setDeletingLesson(false);
+  };
+
+  // JSON dosyası yükleme
+  const handleUpload = async () => {
+    if (!uploadFile) return;
+    setUploading(true);
+    setUploadProgress('Dosya okunuyor...');
+
+    try {
+      const text = await uploadFile.text();
+      let jsonData: any[];
+
+      try {
+        const parsed = JSON.parse(text);
+        jsonData = Array.isArray(parsed) ? parsed : (parsed.data || parsed.rows || parsed.items || [parsed]);
+      } catch {
+        alert('Geçersiz JSON dosyası!');
+        setUploading(false);
+        return;
+      }
+
+      if (jsonData.length === 0) {
+        alert('Dosyada veri bulunamadı!');
+        setUploading(false);
+        return;
+      }
+
+      // Replace modunda önce tüm tabloyu sil
+      if (uploadMode === 'replace') {
+        setUploadProgress('Mevcut veriler siliniyor...');
+        // Önce önerileri sil
+        await Promise.all([
+          supabase.from('degisiklik_onerileri').delete().neq('id', 0),
+          supabase.from('yeni_satir_onerileri').delete().neq('id', 0),
+          supabase.from('silme_talepleri').delete().neq('id', 0),
+          supabase.from('degisiklik_loglari').delete().neq('id', 0),
+        ]);
+        await supabase.from('e_icerikler').delete().neq('id', 0);
+      }
+
+      // Batch insert (500'erli)
+      const BATCH = 500;
+      let inserted = 0;
+      for (let i = 0; i < jsonData.length; i += BATCH) {
+        const batch = jsonData.slice(i, i + BATCH).map((row: any, idx: number) => ({
+          sira_no: row.sira_no || row['SIRA NO'] || (i + idx + 1),
+          ders_adi: row.ders_adi || row['DERS ADI'] || '',
+          unite_tema: row.unite_tema || row['ÜNİTE/TEMA'] || '',
+          kazanim: row.kazanim || row['KAZANIM/ÇIKTI'] || '',
+          e_icerik_turu: row.e_icerik_turu || row['E-İÇERİK TÜRÜ'] || '',
+          aciklama: row.aciklama || row['AÇIKLAMA'] || '',
+          program_turu: row.program_turu || row['PROGRAM TÜRÜ'] || 'TYMM',
+        }));
+        const { error } = await supabase.from('e_icerikler').insert(batch);
+        if (error) throw error;
+        inserted += batch.length;
+        setUploadProgress(`${inserted} / ${jsonData.length} satır yüklendi...`);
+      }
+
+      setUploadProgress('');
+      setShowUploadModal(false);
+      setUploadFile(null);
+      await onRefresh();
+      alert(`${inserted} satır başarıyla yüklendi!`);
+    } catch (err: any) {
+      alert('Yükleme hatası: ' + (err.message || 'Bilinmeyen hata'));
+    }
+    setUploading(false);
+    setUploadProgress('');
   };
 
   const handleResetAllProposals = async () => {
@@ -284,6 +385,183 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
           </div>
         </div>
       </div>
+
+      {/* Veritabanı Yönetimi */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-black text-slate-700 flex items-center gap-3 px-2"><Database size={22} className="text-indigo-600" /> Veritabanı Yönetimi</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button onClick={() => setShowDeleteLessonModal(true)} className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/30 hover:border-red-200 hover:shadow-red-100/30 transition-all group">
+            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all">
+              <Trash2 size={22} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-black text-slate-800">Ders Bazlı Silme</p>
+              <p className="text-[10px] text-slate-400 font-medium">Belirli bir dersi toplu sil</p>
+            </div>
+          </button>
+
+          <button onClick={() => { setShowUploadModal(true); setUploadMode('append'); setUploadFile(null); }} className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/30 hover:border-emerald-200 hover:shadow-emerald-100/30 transition-all group">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+              <Upload size={22} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-black text-slate-800">JSON Yükle</p>
+              <p className="text-[10px] text-slate-400 font-medium">Yeni veri ekle veya değiştir</p>
+            </div>
+          </button>
+
+          <button onClick={() => { setShowUploadModal(true); setUploadMode('replace'); setUploadFile(null); }} className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/30 hover:border-amber-200 hover:shadow-amber-100/30 transition-all group">
+            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-all">
+              <FileJson size={22} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-black text-slate-800">Tabloyu Sıfırla & Yükle</p>
+              <p className="text-[10px] text-slate-400 font-medium">Tüm veriyi silip JSON ile değiştir</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Ders Silme Modalı */}
+      {showDeleteLessonModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center">
+                  <Trash2 size={28} className="text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Ders Bazlı Toplu Silme</h3>
+                  <p className="text-xs text-slate-400 font-medium">Seçtiğiniz dersin tüm satırları silinecek</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 block">DERS ADI *</label>
+                  <select className="w-full border-2 border-slate-100 p-3 rounded-xl font-bold text-sm focus:ring-2 focus:ring-red-200 outline-none" value={deleteLessonName} onChange={e => setDeleteLessonName(e.target.value)}>
+                    <option value="">Ders Seçin...</option>
+                    {allLessons.map(l => {
+                      const count = data.filter(d => d.ders_adi === l).length;
+                      return <option key={l} value={l}>{l} ({count} satır)</option>;
+                    })}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 block">PROGRAM TÜRÜ</label>
+                  <select className="w-full border-2 border-slate-100 p-3 rounded-xl font-bold text-sm focus:ring-2 focus:ring-red-200 outline-none" value={deleteLessonProgram} onChange={e => setDeleteLessonProgram(e.target.value)}>
+                    <option value="Tümü">Tümü (Tüm program türleri)</option>
+                    <option value="TYMM">TYMM</option>
+                    <option value="DİĞER">DİĞER</option>
+                  </select>
+                </div>
+
+                {deleteLessonName && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                    <p className="text-xs text-red-700 font-bold">
+                      ⚠️ {deleteLessonName} dersinden {deleteLessonProgram === 'Tümü'
+                        ? data.filter(d => d.ders_adi === deleteLessonName).length
+                        : data.filter(d => d.ders_adi === deleteLessonName && d.program_turu === deleteLessonProgram).length
+                      } satır silinecek!
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={handleDeleteLesson} disabled={!deleteLessonName || deletingLesson} className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-red-200 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+                  {deletingLesson ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Trash2 size={14} /> SİL</>}
+                </button>
+                <button onClick={() => setShowDeleteLessonModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs">İPTAL</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* JSON Yükleme Modalı */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${uploadMode === 'replace' ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+                  <Upload size={28} className={uploadMode === 'replace' ? 'text-amber-600' : 'text-emerald-600'} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">
+                    {uploadMode === 'replace' ? 'Tabloyu Sıfırla & Yükle' : 'JSON Dosyası Yükle'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium">
+                    {uploadMode === 'replace' ? 'Mevcut tüm veriler silinip yeni dosya yüklenecek' : 'Mevcut verilere ek olarak yüklenecek'}
+                  </p>
+                </div>
+              </div>
+
+              {uploadMode === 'replace' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+                  <p className="text-xs text-amber-700 font-bold">⚠️ DİKKAT: Bu işlem mevcut tüm e-içerik verilerini, önerileri ve logları silecektir!</p>
+                </div>
+              )}
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 block">JSON DOSYASI SEÇ</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={e => setUploadFile(e.target.files?.[0] || null)}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-all"
+                  >
+                    {uploadFile ? (
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{uploadFile.name}</p>
+                        <p className="text-xs text-slate-400">{(uploadFile.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <FileJson size={32} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-sm font-bold text-slate-500">Dosya seçmek için tıklayın</p>
+                        <p className="text-[10px] text-slate-400">.json formatı desteklenir</p>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Desteklenen Alanlar</p>
+                  <p className="text-[10px] text-slate-400">sira_no, ders_adi, unite_tema, kazanim, e_icerik_turu, aciklama, program_turu</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Veya: SIRA NO, DERS ADI, ÜNİTE/TEMA, KAZANIM/ÇIKTI, E-İÇERİK TÜRÜ, AÇIKLAMA, PROGRAM TÜRÜ</p>
+                </div>
+              </div>
+
+              {uploadProgress && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                    <p className="text-xs font-bold text-blue-700">{uploadProgress}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button onClick={handleUpload} disabled={!uploadFile || uploading} className={`flex-1 font-black py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50 ${
+                  uploadMode === 'replace' ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+                }`}>
+                  {uploading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Upload size={14} /> YÜKLE</>}
+                </button>
+                <button onClick={() => { setShowUploadModal(false); setUploadFile(null); setUploadProgress(''); }} disabled={uploading} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs disabled:opacity-50">İPTAL</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Yeni Kullanıcı Modalı */}
       {showModal && (

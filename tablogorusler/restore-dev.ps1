@@ -1,3 +1,11 @@
+# Restore development index.html
+if (Test-Path "index.dev.html") {
+    Copy-Item -Path "index.dev.html" -Destination "index.html" -Force
+    Write-Host "Development mode restored!" -ForegroundColor Green
+    Write-Host "You can now run: npm run dev" -ForegroundColor Cyan
+} else {
+    Write-Host "index.dev.html not found. Creating from template..." -ForegroundColor Yellow
+    @"
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -15,3 +23,7 @@
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
+"@ | Out-File -FilePath "index.html" -Encoding utf8
+    Write-Host "Development index.html created!" -ForegroundColor Green
+}
+

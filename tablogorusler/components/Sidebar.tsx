@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Table, ShieldCheck, BookOpen, History, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { LayoutDashboard, Table, ShieldCheck, BookOpen, History, PanelLeftClose, PanelLeft, BarChart3 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -20,6 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
   }
 
   if (userRole === 'admin') {
+    menuItems.push({ id: 'report', label: 'Raporlar', icon: <BarChart3 size={20} /> });
     menuItems.push({ id: 'admin', label: 'Yönetim Paneli', icon: <ShieldCheck size={20} /> });
   }
 
