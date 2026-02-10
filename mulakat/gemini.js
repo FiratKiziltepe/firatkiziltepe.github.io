@@ -131,7 +131,7 @@ Be encouraging but honest. The goal is to help the candidate improve their Engli
       }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 4096
+        maxOutputTokens: 16384
       }
     })
   });

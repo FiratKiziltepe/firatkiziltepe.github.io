@@ -24,9 +24,12 @@
       </select>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap;">
       <div id="questionCount" class="text-muted" style="font-size:0.85rem;"></div>
-      <button class="btn btn-outline btn-sm" id="toggleAllBtn" onclick="toggleAll()">🔽 Tümünü Kapat</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="exportExcel()">📥 Excel İndir</button>
+        <button class="btn btn-outline btn-sm" id="toggleAllBtn" onclick="toggleAll()">🔽 Tümünü Kapat</button>
+      </div>
     </div>
 
     <!-- Questions -->
@@ -34,6 +37,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="supabase-client.js"></script>
   <script>checkAuth();</script>
   <script src="browse.js"></script>

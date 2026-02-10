@@ -133,6 +133,42 @@ function updateToggleBtn() {
   }
 }
 
+function exportExcel() {
+  if (allQuestions.length === 0) {
+    showToast('İndirilecek soru yok');
+    return;
+  }
+
+  const rows = allQuestions.map((q, i) => ({
+    'Sıra': i + 1,
+    'Kategori': q.category || '',
+    'Soru': q.question || '',
+    'Model Cevap': q.model_answer || '',
+    'Vocabulary Hints': (q.vocabulary_hints || []).map(v => {
+      let s = v.word || '';
+      if (v.meaning) s += ' - ' + v.meaning;
+      if (v.example) s += ' (' + v.example + ')';
+      return s;
+    }).join(', ')
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    { wch: 5 },   // Sıra
+    { wch: 20 },  // Kategori
+    { wch: 50 },  // Soru
+    { wch: 80 },  // Model Cevap
+    { wch: 50 }   // Vocabulary
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sorular');
+  XLSX.writeFile(wb, 'mulakat_sorulari.xlsx');
+  showToast('Excel indirildi');
+}
+
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
