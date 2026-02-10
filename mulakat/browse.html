@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tüm Sorular - Interview Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="header-back">← Ana Sayfa</a>
+    <span class="header-title">Tüm Sorular</span>
+    <div></div>
+  </div>
+
+  <div class="container">
+    <!-- Filter & Search -->
+    <div class="filter-bar">
+      <input type="text" class="form-input" id="searchInput" placeholder="🔍 Soru ara..." oninput="filterQuestions()">
+      <select class="form-select" id="categoryFilter" onchange="filterQuestions()" style="max-width:180px;">
+        <option value="all">Tüm Kategoriler</option>
+      </select>
+    </div>
+
+    <div id="questionCount" class="text-muted mb-16" style="font-size:0.85rem;"></div>
+
+    <!-- Questions -->
+    <div id="questionsContainer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="browse.js"></script>
+
+</body>
+</html>

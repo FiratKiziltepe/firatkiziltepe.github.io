@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Interview Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-title">🎤 Interview Practice</span>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openSettings()">⚙️ Ayarlar</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="home-hero">
+      <h1>Interview Practice</h1>
+      <p>Mülakat sorularını pratik yap, konuşmanı geliştir</p>
+    </div>
+
+    <div class="home-grid">
+      <a href="practice.html" class="card card-clickable">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Pratik Yap</div>
+        <div class="card-desc">Soruları gör, konuş, model cevapla karşılaştır</div>
+      </a>
+
+      <a href="browse.html" class="card card-clickable">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Tüm Sorular</div>
+        <div class="card-desc">Tüm soru ve model cevapları incele</div>
+      </a>
+
+      <a href="admin.html" class="card card-clickable">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Admin Panel</div>
+        <div class="card-desc">Soru ekle, düzenle, Excel yükle</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-title">Ayarlar</div>
+
+      <div class="form-group">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" class="form-input" id="geminiKeyInput" placeholder="API key'inizi girin...">
+        <small class="text-muted" style="margin-top:4px;display:block;font-size:0.8rem;">
+          Sadece bu tarayıcıda saklanır. Hiçbir sunucuya gönderilmez.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Admin Şifresi</label>
+        <input type="password" class="form-input" id="adminPasswordInput" placeholder="Admin paneli için şifre belirleyin">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="closeSettings()">İptal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSettings() {
+      document.getElementById('geminiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
+      document.getElementById('adminPasswordInput').value = localStorage.getItem('admin_password') || '';
+      document.getElementById('settingsModal').classList.add('open');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('open');
+    }
+
+    function saveSettings() {
+      const key = document.getElementById('geminiKeyInput').value.trim();
+      const pass = document.getElementById('adminPasswordInput').value.trim();
+
+      if (key) localStorage.setItem('gemini_api_key', key);
+      else localStorage.removeItem('gemini_api_key');
+
+      if (pass) localStorage.setItem('admin_password', pass);
+      else localStorage.removeItem('admin_password');
+
+      closeSettings();
+
+      // Simple toast
+      const t = document.createElement('div');
+      t.className = 'toast show';
+      t.textContent = 'Ayarlar kaydedildi';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    // Close modal on overlay click
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+      if (e.target === this) closeSettings();
+    });
+  </script>
+
+</body>
+</html>
