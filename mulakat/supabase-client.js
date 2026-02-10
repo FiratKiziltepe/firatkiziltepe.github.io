@@ -89,6 +89,43 @@ async function fetchCategories() {
   return unique.sort();
 }
 
+// ===== Auth Guard =====
+function checkAuth() {
+  if (sessionStorage.getItem('logged_in') !== 'true') {
+    window.location.href = 'index.html';
+    return false;
+  }
+  return true;
+}
+
+// ===== Practice History =====
+async function savePracticeSession({ answers, feedback, total_questions, answered_count }) {
+  const { data, error } = await getSupabase()
+    .from('practice_history')
+    .insert([{ answers, feedback, total_questions, answered_count }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function fetchPracticeHistory() {
+  const { data, error } = await getSupabase()
+    .from('practice_history')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function deletePracticeSession(id) {
+  const { error } = await getSupabase()
+    .from('practice_history')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 // ===== Toast Utility =====
 function showToast(message, duration = 3000) {
   let toast = document.getElementById('toast');

@@ -6,6 +6,9 @@ let recognition = null;
 let finalTranscript = '';
 let interimTranscript = '';
 
+// Batch: stores user speech per question index
+let answeredQuestions = {}; // { questionIndex: { question, model_answer, user_speech } }
+
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
@@ -20,6 +23,7 @@ async function init() {
     }
 
     document.getElementById('practiceArea').classList.remove('hidden');
+    document.getElementById('batchTotal').textContent = questions.length;
     initSpeechRecognition();
     showQuestion();
   } catch (err) {
@@ -65,7 +69,6 @@ function initSpeechRecognition() {
 
   recognition.onend = () => {
     if (isRecording) {
-      // Auto-restart if still in recording mode
       try { recognition.start(); } catch (e) {}
     }
   };
@@ -85,7 +88,10 @@ function startRecording() {
     return;
   }
 
-  finalTranscript = '';
+  // If resuming, keep existing text
+  if (!finalTranscript.trim()) {
+    finalTranscript = '';
+  }
   interimTranscript = '';
   isRecording = true;
 
@@ -94,7 +100,15 @@ function startRecording() {
   btn.classList.remove('btn-primary');
   btn.classList.add('btn-danger');
 
-  document.getElementById('speechText').textContent = 'Dinleniyor...';
+  // Disable editing while recording
+  const speechEl = document.getElementById('speechText');
+  speechEl.removeAttribute('contenteditable');
+  document.getElementById('editHint').classList.add('hidden');
+  document.getElementById('editableHint').classList.add('hidden');
+
+  if (!finalTranscript.trim()) {
+    speechEl.textContent = 'Dinleniyor...';
+  }
 
   try {
     recognition.start();
@@ -117,21 +131,66 @@ function stopRecording() {
 
   updateSpeechDisplay();
 
-  // Show feedback button if there's speech
+  // Enable editing if there is speech
   if (finalTranscript.trim()) {
-    document.getElementById('feedbackBtn').classList.remove('hidden');
+    makeEditable();
+    saveCurrentAnswer();
   }
+}
+
+function makeEditable() {
+  const speechEl = document.getElementById('speechText');
+  speechEl.setAttribute('contenteditable', 'true');
+  document.getElementById('editHint').classList.remove('hidden');
+  document.getElementById('editableHint').classList.remove('hidden');
+
+  // Save edits on blur/input
+  speechEl.addEventListener('input', onSpeechEdit);
+}
+
+function onSpeechEdit() {
+  finalTranscript = document.getElementById('speechText').textContent;
+  saveCurrentAnswer();
 }
 
 function updateSpeechDisplay() {
   const el = document.getElementById('speechText');
   if (finalTranscript || interimTranscript) {
     el.innerHTML = escapeHtml(finalTranscript) +
-      (interimTranscript ? `<span class="interim" style="color:var(--text-muted);font-style:italic;">${escapeHtml(interimTranscript)}</span>` : '');
+      (interimTranscript ? `<span style="color:var(--text-muted);font-style:italic;">${escapeHtml(interimTranscript)}</span>` : '');
   } else if (isRecording) {
     el.textContent = 'Dinleniyor...';
   } else {
     el.textContent = 'Konuşmaya başlamak için mikrofon butonuna basın...';
+  }
+}
+
+// ===== Answer Tracking =====
+function saveCurrentAnswer() {
+  const speech = finalTranscript.trim();
+  if (!speech) return;
+
+  const q = questions[currentIndex];
+  answeredQuestions[currentIndex] = {
+    question: q.question,
+    model_answer: q.model_answer,
+    user_speech: speech
+  };
+
+  updateBatchUI();
+}
+
+function updateBatchUI() {
+  const count = Object.keys(answeredQuestions).length;
+  document.getElementById('batchCount').textContent = count;
+  document.getElementById('batchFeedbackBtn').disabled = count === 0;
+
+  const badge = document.getElementById('answeredBadge');
+  if (count > 0) {
+    badge.classList.remove('hidden');
+    document.getElementById('answeredCount').textContent = count;
+  } else {
+    badge.classList.add('hidden');
   }
 }
 
@@ -144,17 +203,27 @@ function showQuestion() {
   document.getElementById('questionText').textContent = q.question;
   document.getElementById('answerText').textContent = q.model_answer;
 
-  // Hide answer and feedback
+  // Hide answer
   document.getElementById('answerArea').classList.add('hidden');
-  document.getElementById('feedbackArea').classList.add('hidden');
-  document.getElementById('feedbackBtn').classList.add('hidden');
   document.getElementById('showAnswerBtn').classList.remove('hidden');
 
-  // Reset speech
-  finalTranscript = '';
-  interimTranscript = '';
+  // Restore previous speech if exists
+  const speechEl = document.getElementById('speechText');
+  speechEl.removeAttribute('contenteditable');
+  document.getElementById('editHint').classList.add('hidden');
+  document.getElementById('editableHint').classList.add('hidden');
+
   if (isRecording) stopRecording();
-  document.getElementById('speechText').textContent = 'Konuşmaya başlamak için mikrofon butonuna basın...';
+
+  if (answeredQuestions[currentIndex]) {
+    finalTranscript = answeredQuestions[currentIndex].user_speech;
+    speechEl.textContent = finalTranscript;
+    makeEditable();
+  } else {
+    finalTranscript = '';
+    interimTranscript = '';
+    speechEl.textContent = 'Konuşmaya başlamak için mikrofon butonuna basın...';
+  }
 
   // Vocabulary
   renderVocabHints(q.vocabulary_hints);
@@ -162,6 +231,8 @@ function showQuestion() {
   // Nav buttons
   document.getElementById('prevBtn').disabled = currentIndex === 0;
   document.getElementById('nextBtn').disabled = currentIndex === questions.length - 1;
+
+  updateBatchUI();
 }
 
 function renderVocabHints(hints) {
@@ -190,15 +261,13 @@ function renderVocabHints(hints) {
 function showModelAnswer() {
   document.getElementById('answerArea').classList.remove('hidden');
   document.getElementById('showAnswerBtn').classList.add('hidden');
-
-  // Smooth scroll to answer
   document.getElementById('answerArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-async function requestFeedback() {
-  const speech = finalTranscript.trim();
-  if (!speech) {
-    showToast('Önce konuşmanız gerekiyor');
+async function requestBatchFeedback() {
+  const answered = Object.values(answeredQuestions);
+  if (answered.length === 0) {
+    showToast('Önce en az bir soruyu cevaplayın');
     return;
   }
 
@@ -207,22 +276,36 @@ async function requestFeedback() {
     return;
   }
 
-  const q = questions[currentIndex];
   const feedbackArea = document.getElementById('feedbackArea');
   const feedbackContent = document.getElementById('feedbackContent');
+  const feedbackBtn = document.getElementById('batchFeedbackBtn');
 
   feedbackArea.classList.remove('hidden');
-  feedbackContent.innerHTML = '<div class="feedback-loading"><div class="spinner"></div><br>Geri bildirim hazırlanıyor...</div>';
-
-  // Show answer too
-  document.getElementById('answerArea').classList.remove('hidden');
-  document.getElementById('showAnswerBtn').classList.add('hidden');
+  feedbackContent.innerHTML = '<div class="feedback-loading"><div class="spinner"></div><br>Toplu geri bildirim hazırlanıyor...</div>';
+  feedbackBtn.disabled = true;
+  feedbackBtn.textContent = '⏳ Analiz ediliyor...';
 
   try {
-    const feedback = await getGeminiFeedback(speech, q.model_answer, q.question);
+    const feedback = await getBatchFeedback(answered);
     feedbackContent.innerHTML = markdownToHtml(feedback);
+
+    // Save to Supabase
+    try {
+      await savePracticeSession({
+        answers: answered,
+        feedback: feedback,
+        total_questions: questions.length,
+        answered_count: answered.length
+      });
+      showToast('Geri bildirim kaydedildi');
+    } catch (saveErr) {
+      console.error('Save error:', saveErr);
+    }
   } catch (err) {
     feedbackContent.innerHTML = `<div style="color:var(--danger);">Hata: ${escapeHtml(err.message)}</div>`;
+  } finally {
+    feedbackBtn.disabled = false;
+    feedbackBtn.textContent = '🤖 Toplu Geri Bildirim Al';
   }
 
   feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -230,6 +313,11 @@ async function requestFeedback() {
 
 // ===== Navigation =====
 function nextQuestion() {
+  // Save current speech before navigating
+  if (finalTranscript.trim()) {
+    saveCurrentAnswer();
+  }
+
   if (currentIndex < questions.length - 1) {
     currentIndex++;
     showQuestion();
@@ -238,6 +326,10 @@ function nextQuestion() {
 }
 
 function prevQuestion() {
+  if (finalTranscript.trim()) {
+    saveCurrentAnswer();
+  }
+
   if (currentIndex > 0) {
     currentIndex--;
     showQuestion();
@@ -249,11 +341,20 @@ function resetCurrent() {
   finalTranscript = '';
   interimTranscript = '';
   if (isRecording) stopRecording();
-  document.getElementById('speechText').textContent = 'Konuşmaya başlamak için mikrofon butonuna basın...';
+
+  // Remove from answered
+  delete answeredQuestions[currentIndex];
+
+  const speechEl = document.getElementById('speechText');
+  speechEl.textContent = 'Konuşmaya başlamak için mikrofon butonuna basın...';
+  speechEl.removeAttribute('contenteditable');
+  document.getElementById('editHint').classList.add('hidden');
+  document.getElementById('editableHint').classList.add('hidden');
+
   document.getElementById('answerArea').classList.add('hidden');
-  document.getElementById('feedbackArea').classList.add('hidden');
-  document.getElementById('feedbackBtn').classList.add('hidden');
   document.getElementById('showAnswerBtn').classList.remove('hidden');
+
+  updateBatchUI();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -261,8 +362,10 @@ function toggleShuffle() {
   isShuffled = !isShuffled;
   const btn = document.getElementById('shuffleBtn');
 
+  // Clear answered since indices change
+  answeredQuestions = {};
+
   if (isShuffled) {
-    // Fisher-Yates shuffle
     for (let i = questions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [questions[i], questions[j]] = [questions[j], questions[i]];
@@ -276,6 +379,7 @@ function toggleShuffle() {
   }
 
   currentIndex = 0;
+  document.getElementById('feedbackArea').classList.add('hidden');
   showQuestion();
 }
 

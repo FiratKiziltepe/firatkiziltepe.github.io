@@ -1,25 +1,11 @@
-// ===== Auth =====
 let editingId = null;
 let excelData = [];
 
-function checkPassword() {
-  const input = document.getElementById('passwordInput').value;
-  const stored = localStorage.getItem('admin_password');
-
-  if (!stored) {
-    alert('Önce ana sayfadaki Ayarlar\'dan admin şifresi belirleyin.');
-    return;
-  }
-
-  if (input === stored) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    loadQuestions();
-    loadCategoryFilter();
-  } else {
-    alert('Yanlış şifre!');
-  }
-}
+// Init on load
+document.addEventListener('DOMContentLoaded', function() {
+  loadQuestions();
+  loadCategoryFilter();
+});
 
 // ===== Tabs =====
 function switchTab(tab) {

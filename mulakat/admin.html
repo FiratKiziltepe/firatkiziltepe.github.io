@@ -9,111 +9,91 @@
 </head>
 <body>
 
-  <!-- Login Screen -->
-  <div id="loginScreen">
-    <div class="header">
-      <a href="index.html" class="header-back">← Ana Sayfa</a>
-      <span class="header-title">Admin Panel</span>
-      <div></div>
-    </div>
-    <div class="admin-login">
-      <h2>🔐 Admin Girişi</h2>
-      <div class="form-group">
-        <input type="password" class="form-input" id="passwordInput" placeholder="Şifre girin..." onkeydown="if(event.key==='Enter') checkPassword()">
-      </div>
-      <button class="btn btn-primary btn-block" onclick="checkPassword()">Giriş</button>
-      <p class="text-muted mt-16" style="font-size:0.82rem">Şifreyi ana sayfadaki Ayarlar'dan belirleyin.</p>
-    </div>
+  <div class="header">
+    <a href="index.html" class="header-back">← Ana Sayfa</a>
+    <span class="header-title">Admin Panel</span>
+    <div></div>
   </div>
 
-  <!-- Admin Panel -->
-  <div id="adminPanel" class="hidden">
-    <div class="header">
-      <a href="index.html" class="header-back">← Ana Sayfa</a>
-      <span class="header-title">Admin Panel</span>
-      <div></div>
+  <div class="container">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('add')">Soru Ekle</button>
+      <button class="tab" onclick="switchTab('list')">Sorular</button>
+      <button class="tab" onclick="switchTab('excel')">Excel Yükle</button>
     </div>
 
-    <div class="container">
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('add')">Soru Ekle</button>
-        <button class="tab" onclick="switchTab('list')">Sorular</button>
-        <button class="tab" onclick="switchTab('excel')">Excel Yükle</button>
+    <!-- Add/Edit Question Tab -->
+    <div id="tabAdd">
+      <h3 id="formTitle" class="mb-16">Yeni Soru Ekle</h3>
+
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <input type="text" class="form-input" id="fCategory" placeholder="ör: Behavioral, Technical, HR...">
       </div>
 
-      <!-- Add/Edit Question Tab -->
-      <div id="tabAdd">
-        <h3 id="formTitle" class="mb-16">Yeni Soru Ekle</h3>
+      <div class="form-group">
+        <label class="form-label">Soru</label>
+        <textarea class="form-textarea" id="fQuestion" rows="3" placeholder="Interview sorusunu yazın..."></textarea>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Kategori</label>
-          <input type="text" class="form-input" id="fCategory" placeholder="ör: Behavioral, Technical, HR...">
+      <div class="form-group">
+        <label class="form-label">Model Cevap</label>
+        <textarea class="form-textarea" id="fAnswer" rows="6" placeholder="Örnek model cevabı yazın..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vocabulary / Collocations</label>
+        <div id="vocabContainer"></div>
+        <button class="btn btn-outline btn-sm mt-8" onclick="addVocabRow()">+ Kelime Ekle</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sıra No</label>
+        <input type="number" class="form-input" id="fOrder" value="0" min="0">
+      </div>
+
+      <div class="btn-group mt-16">
+        <button class="btn btn-primary flex-1" id="saveBtn" onclick="saveQuestion()">Kaydet</button>
+        <button class="btn btn-outline flex-1 hidden" id="cancelEditBtn" onclick="cancelEdit()">İptal</button>
+      </div>
+    </div>
+
+    <!-- List Tab -->
+    <div id="tabList" class="hidden">
+      <div class="filter-bar">
+        <select class="form-select" id="filterCategory" onchange="loadQuestions()">
+          <option value="all">Tüm Kategoriler</option>
+        </select>
+      </div>
+
+      <div id="questionsList" class="card" style="padding:0;"></div>
+    </div>
+
+    <!-- Excel Upload Tab -->
+    <div id="tabExcel" class="hidden">
+      <p class="mb-16" style="font-size:0.9rem;color:var(--text-secondary)">
+        Excel dosyanızda şu sütunlar olmalı: <strong>category</strong>, <strong>question</strong>, <strong>model_answer</strong>, <strong>vocabulary_hints</strong>
+        <br><small>vocabulary_hints sütunu: "kelime - anlam, kelime2 - anlam2" formatında</small>
+      </p>
+
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('excelFile').click()">
+        <div class="upload-area-icon">📄</div>
+        <div class="upload-area-text">Excel dosyası seçmek için tıklayın (.xlsx)</div>
+        <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(event)">
+      </div>
+
+      <div id="previewSection" class="hidden mt-16">
+        <h4 class="mb-8">Önizleme (<span id="previewCount">0</span> soru)</h4>
+        <div class="overflow-x">
+          <table class="preview-table" id="previewTable">
+            <thead><tr><th>Kategori</th><th>Soru</th><th>Cevap</th><th>Kelimeler</th></tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">Soru</label>
-          <textarea class="form-textarea" id="fQuestion" rows="3" placeholder="Interview sorusunu yazın..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Model Cevap</label>
-          <textarea class="form-textarea" id="fAnswer" rows="6" placeholder="Örnek model cevabı yazın..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Vocabulary / Collocations</label>
-          <div id="vocabContainer"></div>
-          <button class="btn btn-outline btn-sm mt-8" onclick="addVocabRow()">+ Kelime Ekle</button>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Sıra No</label>
-          <input type="number" class="form-input" id="fOrder" value="0" min="0">
-        </div>
-
         <div class="btn-group mt-16">
-          <button class="btn btn-primary flex-1" id="saveBtn" onclick="saveQuestion()">Kaydet</button>
-          <button class="btn btn-outline flex-1 hidden" id="cancelEditBtn" onclick="cancelEdit()">İptal</button>
-        </div>
-      </div>
-
-      <!-- List Tab -->
-      <div id="tabList" class="hidden">
-        <div class="filter-bar">
-          <select class="form-select" id="filterCategory" onchange="loadQuestions()">
-            <option value="all">Tüm Kategoriler</option>
-          </select>
-        </div>
-
-        <div id="questionsList" class="card" style="padding:0;"></div>
-      </div>
-
-      <!-- Excel Upload Tab -->
-      <div id="tabExcel" class="hidden">
-        <p class="mb-16" style="font-size:0.9rem;color:var(--text-secondary)">
-          Excel dosyanızda şu sütunlar olmalı: <strong>category</strong>, <strong>question</strong>, <strong>model_answer</strong>, <strong>vocabulary_hints</strong>
-          <br><small>vocabulary_hints sütunu: "kelime - anlam, kelime2 - anlam2" formatında</small>
-        </p>
-
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('excelFile').click()">
-          <div class="upload-area-icon">📄</div>
-          <div class="upload-area-text">Excel dosyası seçmek için tıklayın (.xlsx)</div>
-          <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(event)">
-        </div>
-
-        <div id="previewSection" class="hidden mt-16">
-          <h4 class="mb-8">Önizleme (<span id="previewCount">0</span> soru)</h4>
-          <div class="overflow-x">
-            <table class="preview-table" id="previewTable">
-              <thead><tr><th>Kategori</th><th>Soru</th><th>Cevap</th><th>Kelimeler</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="btn-group mt-16">
-            <button class="btn btn-success flex-1" onclick="uploadExcelData()">Tümünü Yükle</button>
-            <button class="btn btn-outline flex-1" onclick="clearPreview()">İptal</button>
-          </div>
+          <button class="btn btn-success flex-1" onclick="uploadExcelData()">Tümünü Yükle</button>
+          <button class="btn btn-outline flex-1" onclick="clearPreview()">İptal</button>
         </div>
       </div>
     </div>
@@ -122,6 +102,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="supabase-client.js"></script>
+  <script>checkAuth();</script>
   <script src="admin.js"></script>
 
 </body>

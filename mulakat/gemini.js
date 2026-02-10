@@ -70,6 +70,87 @@ Be encouraging but honest. The goal is to help the candidate improve their Engli
   return text;
 }
 
+// ===== Batch Feedback (multiple questions at once) =====
+async function getBatchFeedback(answeredQuestions) {
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    throw new Error('Gemini API key ayarlanmamış. Ana sayfadaki Ayarlar\'dan API key girin.');
+  }
+
+  // Build Q&A pairs text
+  let qaPairs = '';
+  answeredQuestions.forEach((item, i) => {
+    qaPairs += `
+--- Soru ${i + 1} ---
+**Interview Question:** ${item.question}
+**Model Answer:** ${item.model_answer}
+**Candidate's Answer:** ${item.user_speech}
+`;
+  });
+
+  const prompt = `You are an English interview coach helping a non-native English speaker prepare for an academic/professional interview.
+
+The candidate has answered ${answeredQuestions.length} interview questions. Here are all the question-answer pairs:
+
+${qaPairs}
+
+Please analyze ALL of the candidate's answers together and provide comprehensive feedback. Write your feedback in Turkish so the candidate can understand easily:
+
+## 📊 Genel Değerlendirme
+Give an overall score out of 10 across all questions. Summarize the candidate's general performance.
+
+## 📋 Soru Bazlı Değerlendirme
+For each question, give a brief assessment (2-3 sentences): what was good, what was missing compared to the model answer.
+
+## ✅ Güçlü Yönler
+List the candidate's strengths across all answers (content coverage, structure, vocabulary usage).
+
+## ⚠️ Geliştirilmesi Gerekenler
+List common weaknesses and areas for improvement across all answers.
+
+## 📝 Gramer ve Dil Hataları
+Point out specific grammar mistakes, awkward phrasing across all answers. Show wrong vs correct versions.
+
+## 💡 Kelime ve İfade Önerileri
+Suggest better vocabulary, collocations, or academic phrases the candidate should learn. Give example sentences for each.
+
+## 🎯 Eksik Noktalar
+List important points from model answers that the candidate missed.
+
+## 🚀 Öneri ve Aksiyon Planı
+Give 3-5 specific actionable tips for the candidate to improve their interview performance.
+
+Be encouraging but honest. The goal is to help the candidate improve their English speaking skills for interviews.`;
+
+  const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 4096
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API hatası: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!text) {
+    throw new Error('Gemini API boş yanıt döndürdü.');
+  }
+
+  return text;
+}
+
 // Simple markdown to HTML converter for feedback display
 function markdownToHtml(md) {
   if (!md) return '';

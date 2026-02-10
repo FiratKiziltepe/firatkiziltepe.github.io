@@ -6,6 +6,50 @@
   <title>Pratik - Interview Practice</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .speech-text[contenteditable="true"] {
+      cursor: text;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      min-height: 40px;
+      outline: none;
+    }
+    .speech-text[contenteditable="true"]:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+    }
+    .editable-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .answered-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .batch-feedback-bar {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
 <body>
 
@@ -32,7 +76,12 @@
 
     <!-- Practice Card -->
     <div id="practiceArea" class="hidden">
-      <div class="practice-counter" id="counter"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="practice-counter" id="counter"></div>
+        <div id="answeredBadge" class="hidden">
+          <span class="answered-badge">✓ <span id="answeredCount">0</span> cevaplandı</span>
+        </div>
+      </div>
 
       <div class="card">
         <div class="practice-question" id="questionText"></div>
@@ -48,8 +97,9 @@
         <!-- Speech Area -->
         <div style="padding:0 20px;">
           <div class="speech-area" id="speechArea">
-            <div class="speech-label">Konuşmanız</div>
+            <div class="speech-label">Konuşmanız <span id="editHint" class="hidden" style="font-weight:400;font-size:0.7rem;color:var(--primary);">(düzenleyebilirsiniz)</span></div>
             <div class="speech-text" id="speechText">Konuşmaya başlamak için mikrofon butonuna basın...</div>
+            <div class="editable-hint hidden" id="editableHint">Yanlış tanınan kelimeleri tıklayıp düzeltebilirsiniz</div>
           </div>
         </div>
 
@@ -62,9 +112,6 @@
             <button class="btn btn-success btn-lg" id="showAnswerBtn" onclick="showModelAnswer()">
               👁️ Cevabı Göster
             </button>
-            <button class="btn btn-outline btn-lg hidden" id="feedbackBtn" onclick="requestFeedback()">
-              🤖 Geri Bildirim Al
-            </button>
           </div>
         </div>
 
@@ -75,14 +122,6 @@
             <div class="answer-text" id="answerText"></div>
           </div>
         </div>
-
-        <!-- Feedback Area -->
-        <div id="feedbackArea" class="hidden" style="padding:0 20px 20px;">
-          <div class="feedback-area">
-            <div class="feedback-title">🤖 Gemini Geri Bildirimi</div>
-            <div class="feedback-content" id="feedbackContent"></div>
-          </div>
-        </div>
       </div>
 
       <!-- Navigation -->
@@ -91,11 +130,30 @@
         <button class="btn btn-outline" onclick="resetCurrent()">🔄 Sıfırla</button>
         <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Sonraki →</button>
       </div>
+
+      <!-- Batch Feedback Bar (outside question card) -->
+      <div class="batch-feedback-bar" id="batchFeedbackBar">
+        <div style="font-size:0.9rem;">
+          <strong id="batchCount">0</strong> / <span id="batchTotal">0</span> soru cevaplandı
+        </div>
+        <button class="btn btn-primary" id="batchFeedbackBtn" onclick="requestBatchFeedback()" disabled>
+          🤖 Toplu Geri Bildirim Al
+        </button>
+      </div>
+
+      <!-- Feedback Area (outside question card) -->
+      <div id="feedbackArea" class="hidden" style="margin-top:16px;">
+        <div class="feedback-area">
+          <div class="feedback-title">🤖 Gemini Geri Bildirimi</div>
+          <div class="feedback-content" id="feedbackContent"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js"></script>
+  <script>checkAuth();</script>
   <script src="gemini.js"></script>
   <script src="practice.js"></script>
 

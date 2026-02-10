@@ -12,58 +12,102 @@
 </head>
 <body>
 
-  <div class="header">
-    <span class="header-title">🎤 Interview Practice</span>
-    <div class="header-actions">
-      <button class="btn btn-ghost btn-sm" onclick="openSettings()">⚙️ Ayarlar</button>
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen">
+    <div class="container" style="max-width:400px;margin-top:15vh;">
+      <div class="text-center mb-16">
+        <div style="font-size:3rem;">🎤</div>
+        <h1 style="font-size:1.5rem;font-weight:800;margin:12px 0 4px;">Interview Practice</h1>
+        <p class="text-muted" style="font-size:0.9rem;">Mülakat pratik uygulamasına giriş yapın</p>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Kullanıcı Adı</label>
+          <input type="text" class="form-input" id="loginUsername" placeholder="Kullanıcı adı..." autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="Şifre..." autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Giriş Yap</button>
+        <p id="loginError" class="hidden" style="color:var(--danger);font-size:0.85rem;margin-top:12px;text-align:center;"></p>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="home-hero">
-      <h1>Interview Practice</h1>
-      <p>Mülakat sorularını pratik yap, konuşmanı geliştir</p>
+  <!-- ===== MAIN APP (hidden until login) ===== -->
+  <div id="mainApp" class="hidden">
+    <div class="header">
+      <span class="header-title">🎤 Interview Practice</span>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openSettings()">⚙️ Ayarlar</button>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">🚪 Çıkış</button>
+      </div>
     </div>
 
-    <div class="home-grid">
-      <a href="practice.html" class="card card-clickable">
-        <div class="card-icon">🎯</div>
-        <div class="card-title">Pratik Yap</div>
-        <div class="card-desc">Soruları gör, konuş, model cevapla karşılaştır</div>
-      </a>
+    <div class="container">
+      <div class="home-hero">
+        <h1>Interview Practice</h1>
+        <p>Mülakat sorularını pratik yap, konuşmanı geliştir</p>
+      </div>
 
-      <a href="browse.html" class="card card-clickable">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Tüm Sorular</div>
-        <div class="card-desc">Tüm soru ve model cevapları incele</div>
-      </a>
+      <div class="home-grid">
+        <a href="practice.html" class="card card-clickable">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Pratik Yap</div>
+          <div class="card-desc">Soruları gör, konuş, model cevapla karşılaştır</div>
+        </a>
 
-      <a href="admin.html" class="card card-clickable">
-        <div class="card-icon">⚙️</div>
-        <div class="card-title">Admin Panel</div>
-        <div class="card-desc">Soru ekle, düzenle, Excel yükle</div>
-      </a>
+        <a href="browse.html" class="card card-clickable">
+          <div class="card-icon">📋</div>
+          <div class="card-title">Tüm Sorular</div>
+          <div class="card-desc">Tüm soru ve model cevapları incele</div>
+        </a>
+
+        <a href="history.html" class="card card-clickable">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Geçmiş</div>
+          <div class="card-desc">Önceki pratiklerin ve geri bildirimler</div>
+        </a>
+
+        <a href="admin.html" class="card card-clickable">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Admin Panel</div>
+          <div class="card-desc">Soru ekle, düzenle, Excel yükle</div>
+        </a>
+      </div>
     </div>
   </div>
 
-  <!-- Settings Modal -->
+  <!-- ===== GEMINI API KEY MODAL ===== -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-title">Gemini API Key Gerekli</div>
+      <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;">
+        Konuşma analizi için Gemini API key'inizi girin. Sadece bu tarayıcıda saklanır.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" class="form-input" id="apiKeyInput" placeholder="API key'inizi girin...">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="skipApiKey()">Sonra</button>
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS MODAL ===== -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal">
       <div class="modal-title">Ayarlar</div>
-
       <div class="form-group">
         <label class="form-label">Gemini API Key</label>
-        <input type="password" class="form-input" id="geminiKeyInput" placeholder="API key'inizi girin...">
+        <input type="password" class="form-input" id="settingsGeminiKey" placeholder="API key'inizi girin...">
         <small class="text-muted" style="margin-top:4px;display:block;font-size:0.8rem;">
           Sadece bu tarayıcıda saklanır. Hiçbir sunucuya gönderilmez.
         </small>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Admin Şifresi</label>
-        <input type="password" class="form-input" id="adminPasswordInput" placeholder="Admin paneli için şifre belirleyin">
-      </div>
-
       <div class="modal-actions">
         <button class="btn btn-outline btn-sm" onclick="closeSettings()">İptal</button>
         <button class="btn btn-primary btn-sm" onclick="saveSettings()">Kaydet</button>
@@ -72,9 +116,62 @@
   </div>
 
   <script>
+    const ADMIN_USERNAME = 'admin';
+    const ADMIN_PASSWORD = 'admin.firat123';
+
+    // Check if already logged in
+    if (sessionStorage.getItem('logged_in') === 'true') {
+      showMainApp();
+    }
+
+    function doLogin() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        sessionStorage.setItem('logged_in', 'true');
+        showMainApp();
+      } else {
+        errorEl.textContent = 'Kullanıcı adı veya şifre hatalı!';
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    function showMainApp() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      // Check if Gemini API key exists
+      if (!localStorage.getItem('gemini_api_key')) {
+        document.getElementById('apiKeyModal').classList.add('open');
+      }
+    }
+
+    function doLogout() {
+      sessionStorage.removeItem('logged_in');
+      location.reload();
+    }
+
+    // API Key Modal
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        document.getElementById('apiKeyModal').classList.remove('open');
+        showToastSimple('API Key kaydedildi');
+      } else {
+        alert('Lütfen geçerli bir API key girin.');
+      }
+    }
+
+    function skipApiKey() {
+      document.getElementById('apiKeyModal').classList.remove('open');
+    }
+
+    // Settings Modal
     function openSettings() {
-      document.getElementById('geminiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
-      document.getElementById('adminPasswordInput').value = localStorage.getItem('admin_password') || '';
+      document.getElementById('settingsGeminiKey').value = localStorage.getItem('gemini_api_key') || '';
       document.getElementById('settingsModal').classList.add('open');
     }
 
@@ -83,29 +180,29 @@
     }
 
     function saveSettings() {
-      const key = document.getElementById('geminiKeyInput').value.trim();
-      const pass = document.getElementById('adminPasswordInput').value.trim();
-
+      const key = document.getElementById('settingsGeminiKey').value.trim();
       if (key) localStorage.setItem('gemini_api_key', key);
       else localStorage.removeItem('gemini_api_key');
-
-      if (pass) localStorage.setItem('admin_password', pass);
-      else localStorage.removeItem('admin_password');
-
       closeSettings();
+      showToastSimple('Ayarlar kaydedildi');
+    }
 
-      // Simple toast
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('open');
+        }
+      });
+    });
+
+    function showToastSimple(msg) {
       const t = document.createElement('div');
       t.className = 'toast show';
-      t.textContent = 'Ayarlar kaydedildi';
+      t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 2500);
     }
-
-    // Close modal on overlay click
-    document.getElementById('settingsModal').addEventListener('click', function(e) {
-      if (e.target === this) closeSettings();
-    });
   </script>
 
 </body>
