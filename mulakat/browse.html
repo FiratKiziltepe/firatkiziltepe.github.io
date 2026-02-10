@@ -24,7 +24,10 @@
       </select>
     </div>
 
-    <div id="questionCount" class="text-muted mb-16" style="font-size:0.85rem;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div id="questionCount" class="text-muted" style="font-size:0.85rem;"></div>
+      <button class="btn btn-outline btn-sm" id="toggleAllBtn" onclick="toggleAll()">🔽 Tümünü Kapat</button>
+    </div>
 
     <!-- Questions -->
     <div id="questionsContainer"></div>

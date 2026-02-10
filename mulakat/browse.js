@@ -1,4 +1,5 @@
 let allQuestions = [];
+let allExpanded = true; // default: all open
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -54,6 +55,9 @@ function renderQuestions(questions) {
     return;
   }
 
+  // Cards default open, vocab default open
+  const openClass = allExpanded ? 'open' : '';
+
   container.innerHTML = questions.map((q, i) => `
     <div class="question-card">
       <div class="question-card-header" onclick="toggleCard(this)">
@@ -63,7 +67,7 @@ function renderQuestions(questions) {
         </div>
         <span class="badge question-category">${escapeHtml(q.category)}</span>
       </div>
-      <div class="question-card-body">
+      <div class="question-card-body ${openClass}">
         <div class="answer-section">
           <div class="answer-label">Model Cevap</div>
           <div class="answer-text">${escapeHtml(q.model_answer)}</div>
@@ -72,16 +76,19 @@ function renderQuestions(questions) {
       </div>
     </div>
   `).join('');
+
+  updateToggleBtn();
 }
 
 function renderVocab(hints) {
   if (!hints || hints.length === 0) return '';
+  const openClass = allExpanded ? 'open' : '';
   return `
     <div class="vocab-section">
       <button class="vocab-toggle" onclick="event.stopPropagation(); this.nextElementSibling.classList.toggle('open')">
         📚 Vocabulary & Collocations (${hints.length})
       </button>
-      <div class="vocab-list">
+      <div class="vocab-list ${openClass}">
         ${hints.map(h => `
           <div class="vocab-item">
             <span class="vocab-word">${escapeHtml(h.word)}</span>
@@ -97,6 +104,33 @@ function renderVocab(hints) {
 function toggleCard(header) {
   const body = header.nextElementSibling;
   body.classList.toggle('open');
+}
+
+function toggleAll() {
+  allExpanded = !allExpanded;
+
+  // Toggle all card bodies
+  document.querySelectorAll('.question-card-body').forEach(body => {
+    if (allExpanded) body.classList.add('open');
+    else body.classList.remove('open');
+  });
+
+  // Toggle all vocab lists
+  document.querySelectorAll('.vocab-list').forEach(list => {
+    if (allExpanded) list.classList.add('open');
+    else list.classList.remove('open');
+  });
+
+  updateToggleBtn();
+}
+
+function updateToggleBtn() {
+  const btn = document.getElementById('toggleAllBtn');
+  if (allExpanded) {
+    btn.innerHTML = '🔼 Tümünü Kapat';
+  } else {
+    btn.innerHTML = '🔽 Tümünü Aç';
+  }
 }
 
 function escapeHtml(text) {
