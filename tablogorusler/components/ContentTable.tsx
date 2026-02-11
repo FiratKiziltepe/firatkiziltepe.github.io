@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { EIcerik, DegisiklikOnerisi, YeniSatirOnerisi, SilmeTalebi, Profile } from '../lib/supabase';
-import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
 import EIcerikTuruInput from './EIcerikTuruInput';
+import * as XLSX from 'xlsx';
 
 interface ContentTableProps {
   data: EIcerik[];
@@ -9,7 +10,7 @@ interface ContentTableProps {
   proposals: DegisiklikOnerisi[];
   newRowProposals: YeniSatirOnerisi[];
   deleteProposals: SilmeTalebi[];
-  onProposeChange: (eIcerikId: number, alan: string, eskiDeger: string, yeniDeger: string) => Promise<void>;
+  onProposeChange: (eIcerikId: number, alan: string, eskiDeger: string, yeniDeger: string, gerekce?: string) => Promise<void>;
   onProposeNewRow: (satir: Partial<YeniSatirOnerisi>) => Promise<void>;
   onProposeDelete: (eIcerikId: number, aciklama: string) => Promise<void>;
   onResolve: (type: 'degisiklik' | 'yeni_satir' | 'silme', proposalId: number, durum: 'approved' | 'rejected', redNedeni?: string) => Promise<void>;
@@ -133,6 +134,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const [deleteNote, setDeleteNote] = useState('');
   const [rejectModal, setRejectModal] = useState<{ open: boolean; type: string; id: number | null }>({ open: false, type: '', id: null });
   const [rejectNote, setRejectNote] = useState('');
+  const [editNote, setEditNote] = useState('');
+  const [withdrawModal, setWithdrawModal] = useState<{ open: boolean; type: 'degisiklik' | 'yeni_satir' | 'silme'; id: number; alan?: string }>({ open: false, type: 'degisiklik', id: 0 });
 
   // Moderator edit modal state
   const [editProposalModal, setEditProposalModal] = useState<{
@@ -210,8 +213,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const sortedData = useMemo(() => {
     const sortableItems = [...filteredData];
     if (sortConfig === null) {
-      // Varsayılan: sira_no'ya göre sırala
-      sortableItems.sort((a, b) => a.sira_no - b.sira_no);
+      // Varsayılan: önce ders_adi'na göre (Türkçe), sonra sira_no'ya göre sırala
+      sortableItems.sort((a, b) => {
+        const cmp = trCollator.compare(a.ders_adi || '', b.ders_adi || '');
+        if (cmp !== 0) return cmp;
+        return a.sira_no - b.sira_no;
+      });
     } else {
       sortableItems.sort((a, b) => {
         const key = sortConfig.key as keyof EIcerik;
@@ -264,6 +271,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const startEdit = (row: EIcerik) => {
     setEditingId(row.id);
     setEditingFromProposal(false);
+    setEditNote('');
     setEditForm({
       ders_adi: row.ders_adi,
       unite_tema: row.unite_tema || '',
@@ -281,6 +289,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
     const myProposals = proposals.filter(
       p => p.e_icerik_id === row.id && p.user_id === profile.id && p.durum === 'pending'
     );
+    // Mevcut gerekçeyi yükle (ilk öneriden al)
+    const existingGerekce = myProposals.find(p => p.gerekce)?.gerekce || '';
+    setEditNote(existingGerekce);
     const form: Record<string, string> = {
       ders_adi: row.ders_adi,
       unite_tema: row.unite_tema || '',
@@ -315,7 +326,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
           }
         } else if (!existingProposal) {
           // Create new proposal
-          await onProposeChange(row.id, field, oldVal, newVal);
+          await onProposeChange(row.id, field, oldVal, newVal, editNote || undefined);
         }
       } else if (existingProposal) {
         // Value reverted to original → withdraw proposal
@@ -339,6 +350,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
       e_icerik_turu: addForm.e_icerik_turu || '',
       aciklama: addForm.aciklama || '',
       program_turu: addForm.program_turu || 'TYMM',
+      gerekce: addForm.gerekce || null,
     });
     setIsAdding(false);
     setAddForm({});
@@ -391,7 +403,99 @@ const ContentTable: React.FC<ContentTableProps> = ({
     setEditingId(null);
     setEditForm({});
     setEditingFromProposal(false);
+    setEditNote('');
   };
+
+  // Excel indirme fonksiyonu - filtrelenmiş veri + bekleyen öneriler ayrı sheet
+  const handleExcelDownload = useCallback(() => {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Ana veri
+    const rows = sortedData.map(row => ({
+      'SIRA NO': row.sira_no,
+      'DERS ADI': row.ders_adi,
+      'ÜNİTE/TEMA': row.unite_tema || '',
+      'KAZANIM/ÇIKTI': row.kazanim || '',
+      'E-İÇERİK TÜRÜ': row.e_icerik_turu || '',
+      'AÇIKLAMA': row.aciklama || '',
+      'PROGRAM TÜRÜ': row.program_turu || '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+      { wch: 8 }, { wch: 30 }, { wch: 25 }, { wch: 50 }, { wch: 20 }, { wch: 50 }, { wch: 14 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, 'E-İçerikler');
+
+    // Sheet 2: Bekleyen değişiklik önerileri
+    const filteredIds = new Set(sortedData.map(r => r.id));
+    const pendingChanges = proposals
+      .filter(p => p.durum === 'pending' && filteredIds.has(p.e_icerik_id))
+      .map(p => {
+        const row = data.find(d => d.id === p.e_icerik_id);
+        return {
+          'SIRA NO': row?.sira_no ?? '',
+          'DERS ADI': row?.ders_adi ?? '',
+          'ALAN': p.alan,
+          'ESKİ DEĞER': p.eski_deger,
+          'YENİ DEĞER': p.yeni_deger,
+          'GEREKÇE': p.gerekce || '',
+          'ÖNEREN': getUserName(p.user_id),
+          'TARİH': new Date(p.created_at).toLocaleString('tr-TR'),
+        };
+      });
+    if (pendingChanges.length > 0) {
+      const ws2 = XLSX.utils.json_to_sheet(pendingChanges);
+      ws2['!cols'] = [
+        { wch: 8 }, { wch: 30 }, { wch: 16 }, { wch: 40 }, { wch: 40 }, { wch: 30 }, { wch: 22 }, { wch: 18 },
+      ];
+      XLSX.utils.book_append_sheet(wb, ws2, 'Değişiklik Önerileri');
+    }
+
+    // Sheet 3: Bekleyen yeni satır önerileri
+    const pendingNewRowsAll = newRowProposals.filter(p => p.durum === 'pending');
+    if (pendingNewRowsAll.length > 0) {
+      const newRowSheet = pendingNewRowsAll.map(p => ({
+        'DERS ADI': p.ders_adi,
+        'ÜNİTE/TEMA': p.unite_tema || '',
+        'KAZANIM': p.kazanim || '',
+        'E-İÇERİK TÜRÜ': p.e_icerik_turu || '',
+        'AÇIKLAMA': p.aciklama || '',
+        'PROGRAM TÜRÜ': p.program_turu || '',
+        'GEREKÇE': p.gerekce || '',
+        'ÖNEREN': getUserName(p.user_id),
+        'TARİH': new Date(p.created_at).toLocaleString('tr-TR'),
+      }));
+      const ws3 = XLSX.utils.json_to_sheet(newRowSheet);
+      ws3['!cols'] = [
+        { wch: 30 }, { wch: 25 }, { wch: 50 }, { wch: 20 }, { wch: 50 }, { wch: 14 }, { wch: 30 }, { wch: 22 }, { wch: 18 },
+      ];
+      XLSX.utils.book_append_sheet(wb, ws3, 'Yeni Satır Önerileri');
+    }
+
+    // Sheet 4: Bekleyen silme talepleri
+    const pendingDeletes = deleteProposals.filter(p => p.durum === 'pending');
+    if (pendingDeletes.length > 0) {
+      const delSheet = pendingDeletes.map(p => {
+        const row = data.find(d => d.id === p.e_icerik_id);
+        return {
+          'SIRA NO': row?.sira_no ?? '',
+          'DERS ADI': row?.ders_adi ?? '',
+          'KAZANIM': row?.kazanim ?? '',
+          'AÇIKLAMA': p.aciklama || '',
+          'ÖNEREN': getUserName(p.user_id),
+          'TARİH': new Date(p.created_at).toLocaleString('tr-TR'),
+        };
+      });
+      const ws4 = XLSX.utils.json_to_sheet(delSheet);
+      ws4['!cols'] = [
+        { wch: 8 }, { wch: 30 }, { wch: 50 }, { wch: 40 }, { wch: 22 }, { wch: 18 },
+      ];
+      XLSX.utils.book_append_sheet(wb, ws4, 'Silme Talepleri');
+    }
+
+    const suffix = lessonFilter ? `_${lessonFilter.replace(/\s+/g, '_')}` : '';
+    XLSX.writeFile(wb, `e_icerikler${suffix}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }, [sortedData, lessonFilter, proposals, newRowProposals, deleteProposals, data, users]);
 
   return (
     <div className="space-y-6">
@@ -430,6 +534,13 @@ const ContentTable: React.FC<ContentTableProps> = ({
             </button>
             <button onClick={() => { setSearchTerm(''); setLessonFilter(''); setProgramFilter('Tümü'); setOnlyProposals(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
               <RotateCcw size={13} /> TEMİZLE
+            </button>
+            <button
+              onClick={handleExcelDownload}
+              className="flex-1 bg-emerald-50 text-emerald-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-wider border border-emerald-200"
+              title="Tabloyu Excel olarak indir"
+            >
+              <Download size={13} /> EXCEL
             </button>
           </div>
           <button
@@ -488,7 +599,10 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   <td className="px-4 py-4"><input className="w-full border-2 border-blue-300 p-2 rounded-xl text-sm font-bold bg-white" placeholder="Ünite / Tema" value={addForm.unite_tema || ''} onChange={e => setAddForm({ ...addForm, unite_tema: e.target.value })} /></td>
                   <td className="px-4 py-4"><textarea className="w-full border-2 border-blue-300 p-2 rounded-xl text-sm font-bold h-20 bg-white resize-none" placeholder="Kazanım" value={addForm.kazanim || ''} onChange={e => setAddForm({ ...addForm, kazanim: e.target.value })} /></td>
                   <td className="px-4 py-4"><EIcerikTuruInput value={addForm.e_icerik_turu || ''} onChange={v => setAddForm({ ...addForm, e_icerik_turu: v })} /></td>
-                  <td className="px-4 py-4"><textarea className="w-full border-2 border-blue-300 p-2 rounded-xl text-xs h-20 bg-white resize-none" placeholder="Açıklama" value={addForm.aciklama || ''} onChange={e => setAddForm({ ...addForm, aciklama: e.target.value })} /></td>
+                  <td className="px-4 py-4">
+                    <textarea className="w-full border-2 border-blue-300 p-2 rounded-xl text-xs h-14 bg-white resize-none" placeholder="Açıklama" value={addForm.aciklama || ''} onChange={e => setAddForm({ ...addForm, aciklama: e.target.value })} />
+                    <textarea className="w-full border border-dashed border-amber-300 bg-amber-50/50 p-2 rounded-xl text-xs h-10 resize-none mt-1 placeholder:text-amber-300" placeholder="Gerekçe (isteğe bağlı)" value={addForm.gerekce || ''} onChange={e => setAddForm({ ...addForm, gerekce: e.target.value })} />
+                  </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex flex-col gap-2 w-full max-w-[130px] mx-auto">
                       <button onClick={handleAddRow} className="w-full flex items-center justify-center gap-1 bg-[#00966d] text-white px-3 py-2 rounded-xl text-[10px] font-black hover:brightness-110 transition-all uppercase tracking-widest"><Check size={14} /> EKLE</button>
@@ -515,6 +629,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     if (allFps.length === 0) return <HighlightText text={originalValue} term={searchTerm} className={cellClass} />;
                     return (
                       <div className="space-y-1.5">
+                        {/* Güncel (son) değer */}
+                        <div className="pb-1.5 mb-1 border-b border-slate-200">
+                          <span className="text-[8px] font-bold text-emerald-600 uppercase block mb-0.5">📌 Son Hal:</span>
+                          <HighlightText text={originalValue} term={searchTerm} className={cellClass} />
+                        </div>
+                        {/* Değişiklik geçmişi */}
                         {allFps.map(fp => (
                           <div key={fp.id} className={`border-l-2 pl-2 py-1 rounded-r-lg ${
                             fp.durum === 'approved' ? 'border-emerald-400 bg-emerald-50/50' :
@@ -531,6 +651,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
                               )}
                               <span className="text-[9px] text-slate-400 italic">— {getUserName(fp.user_id)}</span>
                             </div>
+                            {fp.gerekce && <p className="text-[8px] text-amber-600 italic mt-0.5">💬 {fp.gerekce}</p>}
+                            <div className="text-[9px] text-slate-400 mt-0.5">Orijinal → Öneri:</div>
                             <div className="text-xs"><DiffSpan oldStr={fp.eski_deger} newStr={fp.yeni_deger} /></div>
                           </div>
                         ))}
@@ -545,6 +667,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                       <div>
                         <DiffSpan oldStr={fps[0].eski_deger} newStr={fps[0].yeni_deger} />
                         <p className="text-[9px] text-slate-400 mt-1 italic">— {getUserName(fps[0].user_id)}</p>
+                        {fps[0].gerekce && <p className="text-[8px] text-amber-600 italic mt-0.5">💬 {fps[0].gerekce}</p>}
                       </div>
                     );
                   }
@@ -554,6 +677,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                       {fps.map(fp => (
                         <div key={fp.id} className="border-l-3 border-amber-300 pl-2 py-1 bg-amber-50/50 rounded-r-lg">
                           <p className="text-[9px] font-bold text-amber-700 mb-0.5">📝 {getUserName(fp.user_id)}</p>
+                          {fp.gerekce && <p className="text-[8px] text-amber-600 italic mb-0.5">💬 {fp.gerekce}</p>}
                           <DiffSpan oldStr={fp.eski_deger} newStr={fp.yeni_deger} />
                         </div>
                       ))}
@@ -623,6 +747,12 @@ const ContentTable: React.FC<ContentTableProps> = ({
                             if (allFps.length === 0) return cleanTags;
                             return (
                               <div className="space-y-1.5 w-full">
+                                {/* Güncel (son) değer */}
+                                <div className="pb-1.5 mb-1 border-b border-slate-200">
+                                  <span className="text-[8px] font-bold text-emerald-600 uppercase block mb-0.5">📌 Son Hal:</span>
+                                  <div className="flex flex-wrap gap-1">{cleanTags}</div>
+                                </div>
+                                {/* Değişiklik geçmişi */}
                                 {allFps.map(fp => (
                                   <div key={fp.id} className={`border-l-2 pl-2 py-1 rounded-r-lg ${
                                     fp.durum === 'approved' ? 'border-emerald-400 bg-emerald-50/50' :
@@ -639,6 +769,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                       )}
                                       <span className="text-[9px] text-slate-400 italic">— {getUserName(fp.user_id)}</span>
                                     </div>
+                                    {fp.gerekce && <p className="text-[8px] text-amber-600 italic mt-0.5">💬 {fp.gerekce}</p>}
+                                    <div className="text-[9px] text-slate-400 mt-0.5">Orijinal → Öneri:</div>
                                     <div className="text-xs"><DiffSpan oldStr={fp.eski_deger} newStr={fp.yeni_deger} /></div>
                                   </div>
                                 ))}
@@ -654,6 +786,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                               <div>
                                 <DiffSpan oldStr={fps[0].eski_deger} newStr={fps[0].yeni_deger} />
                                 <p className="text-[9px] text-slate-400 mt-1 italic">— {getUserName(fps[0].user_id)}</p>
+                                {fps[0].gerekce && <p className="text-[8px] text-amber-600 italic mt-0.5">💬 {fps[0].gerekce}</p>}
                               </div>
                             );
                           }
@@ -663,6 +796,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                               {fps.map(fp => (
                                 <div key={fp.id} className="border-l-3 border-amber-300 pl-2 py-1 bg-amber-50/50 rounded-r-lg">
                                   <p className="text-[9px] font-bold text-amber-700 mb-0.5">📝 {getUserName(fp.user_id)}</p>
+                                  {fp.gerekce && <p className="text-[8px] text-amber-600 italic mb-0.5">💬 {fp.gerekce}</p>}
                                   <DiffSpan oldStr={fp.eski_deger} newStr={fp.yeni_deger} />
                                 </div>
                               ))}
@@ -674,8 +808,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
 
                     {/* AÇIKLAMA */}
                     <td className="px-4 py-4">
-                      <div className="text-[11px] leading-relaxed italic text-slate-500">
-                        {renderFieldCell('aciklama', row.aciklama || '', 'text-[11px] leading-relaxed italic text-slate-500')}
+                      <div className="text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line">
+                        {renderFieldCell('aciklama', row.aciklama || '', 'text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line')}
                         </div>
                     </td>
 
@@ -699,7 +833,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                                   </div>
                                 )}
                                 {dp.user_id === profile.id && (
-                                  <button onClick={() => onWithdraw('silme', dp.id)} className="w-full flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[9px] font-black hover:bg-slate-200 transition-all"><Undo size={10} /> İPTAL</button>
+                                  <button onClick={() => setWithdrawModal({ open: true, type: 'silme', id: dp.id, alan: 'Silme Talebi' })} className="w-full flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-[9px] font-black hover:bg-slate-200 transition-all"><Undo size={10} /> İPTAL</button>
                                 )}
                               </div>
                             ))}
@@ -718,18 +852,31 @@ const ContentTable: React.FC<ContentTableProps> = ({
                               <div key={alan} className="bg-white border border-slate-200 rounded-xl p-2 space-y-1.5">
                                 <p className="text-[9px] font-bold text-slate-500 uppercase border-b border-slate-100 pb-1">{alan}</p>
                                 {fieldProps.map(p => (
-                                  <div key={p.id} className={`rounded-lg p-1.5 ${fieldProps.length > 1 ? 'bg-slate-50 border border-slate-100' : ''}`}>
-                                    <p className="text-[9px] text-slate-500 font-medium">
-                                      <span className="font-bold text-slate-700">{getUserName(p.user_id)}</span>
-                                    </p>
-                                    {/* Moderator actions per proposal */}
-                                    {canModerate && (
-                                      <div className="flex gap-1 justify-center pt-1">
-                                        <button onClick={() => onResolve('degisiklik', p.id, 'approved')} title="Onayla" className="p-1 bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-600 hover:text-white transition-all border border-emerald-200"><Check size={11} /></button>
-                                        <button onClick={() => openEditProposalModal('degisiklik', p)} title="Düzenle & Onayla" className="p-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-600 hover:text-white transition-all border border-blue-200"><PenLine size={11} /></button>
-                                        <button onClick={() => { setRejectModal({ open: true, type: 'degisiklik', id: p.id }); setRejectNote(''); }} title="Reddet" className="p-1 bg-red-100 text-red-700 rounded-md hover:bg-red-600 hover:text-white transition-all border border-red-200"><X size={11} /></button>
-                              </div>
-                            )}
+                                  <div key={p.id} className={`rounded-lg p-1.5 relative ${fieldProps.length > 1 ? 'bg-slate-50 border border-slate-100' : ''}`}>
+                                    <div className="flex items-start justify-between gap-1">
+                                      <p className="text-[9px] text-slate-500 font-medium">
+                                        <span className="font-bold text-slate-700">{getUserName(p.user_id)}</span>
+                                      </p>
+                                      <div className="flex gap-0.5 flex-shrink-0">
+                                        {/* Moderatör: onayla/düzenle/reddet butonları alan köşesinde */}
+                                        {canModerate && (
+                                          <>
+                                            <button onClick={(e) => { e.stopPropagation(); onResolve('degisiklik', p.id, 'approved'); }} title="Onayla" className="p-0.5 bg-emerald-50 text-emerald-600 rounded hover:bg-emerald-600 hover:text-white transition-all border border-emerald-200"><Check size={10} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); openEditProposalModal('degisiklik', p); }} title="Düzenle & Onayla" className="p-0.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-all border border-blue-200"><PenLine size={10} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); setRejectModal({ open: true, type: 'degisiklik', id: p.id }); setRejectNote(''); }} title="Reddet" className="p-0.5 bg-red-50 text-red-600 rounded hover:bg-red-600 hover:text-white transition-all border border-red-200"><X size={10} /></button>
+                                          </>
+                                        )}
+                                        {/* Kendi önerisiyse geri al butonu alan köşesinde */}
+                                        {!canModerate && p.user_id === profile.id && (
+                                          <button onClick={(e) => { e.stopPropagation(); setWithdrawModal({ open: true, type: 'degisiklik', id: p.id, alan: p.alan }); }} title={`${p.alan} geri al`} className="p-0.5 bg-slate-100 text-slate-500 rounded hover:bg-red-100 hover:text-red-600 transition-all border border-slate-200">
+                                            <Undo size={10} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {p.gerekce && (
+                                      <p className="text-[9px] text-amber-600 italic mt-0.5 bg-amber-50 px-1.5 py-0.5 rounded">💬 {p.gerekce}</p>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -738,16 +885,11 @@ const ContentTable: React.FC<ContentTableProps> = ({
                             {/* Teacher actions */}
                             {!canModerate && (
                               rowProposals.some(p => p.user_id === profile.id) ? (
-                                /* Kendi önerileri varsa: Düzenle + İptal butonları */
+                                /* Kendi önerileri varsa: Düzenle butonu (geri al butonları her alanın köşesinde) */
                                 <div className="flex gap-1 justify-center pt-1">
                                   <button onClick={() => startEditFromProposal(row)} title="Satırı Düzenle" className="flex-1 flex items-center justify-center gap-1 p-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all border border-blue-200 text-[9px] font-bold">
                                     <Edit2 size={11} /> Düzenle
                                   </button>
-                                  {rowProposals.filter(p => p.user_id === profile.id).map(p => (
-                                    <button key={p.id} onClick={() => onWithdraw('degisiklik', p.id)} title={`${p.alan} İptal Et`} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-all border border-slate-200">
-                                      <Undo size={11} />
-                                    </button>
-                                  ))}
                                 </div>
                               ) : (
                                 /* Başka öğretmenlerin önerisi var ama bu öğretmenin yok: yeni öneri ekle butonları */
@@ -824,6 +966,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   </td>
                   <td className="px-4 py-4">
                     <div className="text-[11px] leading-relaxed italic text-emerald-600">{proposal.aciklama}</div>
+                    {proposal.gerekce && (
+                      <p className="text-[9px] text-amber-600 italic mt-1 bg-amber-50 px-1.5 py-0.5 rounded">💬 {proposal.gerekce}</p>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex flex-col items-center gap-2 w-full max-w-[200px] mx-auto">
@@ -842,7 +987,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                       )}
 
                       {proposal.user_id === profile.id && !canModerate && (
-                        <button onClick={() => onWithdraw('yeni_satir', proposal.id)} className="w-full flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-[10px] font-black hover:bg-slate-200 transition-all"><Undo size={12} /> İPTAL ET</button>
+                        <button onClick={() => setWithdrawModal({ open: true, type: 'yeni_satir', id: proposal.id, alan: 'Yeni Satır' })} className="w-full flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-[10px] font-black hover:bg-slate-200 transition-all"><Undo size={12} /> İPTAL ET</button>
                       )}
                     </div>
                   </td>
@@ -1039,7 +1184,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   />
                 </div>
 
-                {/* Diff preview (tüm değişen alanlar) */}
+                {/* Diff preview + Düzeltme Gerekçesi (sadece değişiklik varsa görünür) */}
                 {(() => {
                   const fieldLabels: Record<string, string> = {
                     ders_adi: 'Ders Adı', unite_tema: 'Ünite/Tema', kazanim: 'Kazanım',
@@ -1048,15 +1193,26 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   const changedFields = EDIT_FIELDS.filter(f => ((editRow as any)[f] || '') !== (editForm[f] || ''));
                   if (changedFields.length === 0) return null;
                   return (
-                    <div className="mb-3 p-3 bg-amber-50/70 rounded-lg border border-amber-100">
-                      <p className="text-[10px] font-bold text-amber-600 uppercase mb-1">Değişiklik Önizleme</p>
-                      {changedFields.map(field => (
-                        <div key={field} className="mb-1">
-                          <span className="text-[9px] font-bold text-slate-500 uppercase mr-1">{fieldLabels[field] || field}:</span>
-                          <span className="text-xs"><DiffSpan oldStr={(editRow as any)[field] || ''} newStr={editForm[field] || ''} /></span>
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <div className="mb-3 p-3 bg-amber-50/70 rounded-lg border border-amber-100">
+                        <p className="text-[10px] font-bold text-amber-600 uppercase mb-1">Değişiklik Önizleme</p>
+                        {changedFields.map(field => (
+                          <div key={field} className="mb-1">
+                            <span className="text-[9px] font-bold text-slate-500 uppercase mr-1">{fieldLabels[field] || field}:</span>
+                            <span className="text-xs"><DiffSpan oldStr={(editRow as any)[field] || ''} newStr={editForm[field] || ''} /></span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mb-3">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">DÜZELTME GEREKÇESİ <span className="text-slate-300 normal-case font-medium">(boş bırakılabilir)</span></label>
+                        <textarea
+                          className="w-full border border-dashed border-slate-300 bg-slate-50/50 px-3 py-2 rounded-lg text-sm font-medium leading-relaxed focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:bg-white outline-none resize-none h-16 placeholder:text-slate-300"
+                          placeholder="Neden bu düzeltmeyi öneriyorsunuz? (isteğe bağlı)"
+                          value={editNote}
+                          onChange={e => setEditNote(e.target.value)}
+                        />
+                      </div>
+                    </>
                   );
                 })()}
 
@@ -1094,6 +1250,28 @@ const ContentTable: React.FC<ContentTableProps> = ({
               <div className="flex gap-4">
                 <button onClick={confirmDelete} className="flex-1 bg-[#e63931] hover:brightness-110 text-white font-black py-4 rounded-[1.5rem] transition-all shadow-xl shadow-red-200 uppercase tracking-widest text-xs">TALEBİ GÖNDER</button>
                 <button onClick={() => setDeleteModal({ open: false, id: null })} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-4 rounded-[1.5rem] transition-all uppercase tracking-widest text-xs">VAZGEÇ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Geri Alma Onay Modalı */}
+      {withdrawModal.open && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-sm overflow-hidden border-2 border-slate-100">
+            <div className="p-10 text-center">
+              <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5 shadow-xl shadow-amber-100">
+                <Undo size={28} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2 tracking-tight">Öneriyi Geri Al</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                {withdrawModal.alan && <><span className="font-bold text-slate-700">{withdrawModal.alan}</span> alanındaki </>}
+                önerinizi geri almak istediğinize emin misiniz?
+              </p>
+              <div className="flex gap-3">
+                <button onClick={async () => { await onWithdraw(withdrawModal.type, withdrawModal.id); setWithdrawModal({ open: false, type: 'degisiklik', id: 0 }); }} className="flex-1 bg-red-600 hover:brightness-110 text-white font-black py-3.5 rounded-[1.5rem] transition-all shadow-xl shadow-red-200 uppercase tracking-widest text-xs">GERİ AL</button>
+                <button onClick={() => setWithdrawModal({ open: false, type: 'degisiklik', id: 0 })} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3.5 rounded-[1.5rem] transition-all uppercase tracking-widest text-xs">VAZGEÇ</button>
               </div>
             </div>
           </div>

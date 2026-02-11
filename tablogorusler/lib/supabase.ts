@@ -40,6 +40,7 @@ export type DegisiklikOnerisi = {
   durum: 'pending' | 'approved' | 'rejected';
   onaylayan_id: string | null;
   red_nedeni: string | null;
+  gerekce: string | null;
   created_at: string;
   onay_tarihi: string | null;
 };
@@ -56,6 +57,7 @@ export type YeniSatirOnerisi = {
   durum: 'pending' | 'approved' | 'rejected';
   onaylayan_id: string | null;
   red_nedeni: string | null;
+  gerekce: string | null;
   created_at: string;
   onay_tarihi: string | null;
 };

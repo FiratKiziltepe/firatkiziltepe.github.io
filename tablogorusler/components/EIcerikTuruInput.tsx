@@ -3,21 +3,8 @@ import { ChevronDown, X } from 'lucide-react';
 
 const E_ICERIK_TURLERI = [
   'Video',
+  'Ses',
   'Etkileşimli İçerik',
-  'Animasyon',
-  'Simülasyon',
-  'Infografik',
-  'E-Kitap',
-  'Podcast',
-  'Oyun',
-  'Artırılmış Gerçeklik',
-  'Sanal Gerçeklik',
-  'Doküman',
-  'Sunum',
-  'Test/Değerlendirme',
-  'Konu Anlatımı',
-  'Çalışma Yaprağı',
-  'Etkinlik',
 ];
 
 interface EIcerikTuruInputProps {
@@ -40,11 +27,7 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
-        // If there's text in input, add it as a tag
-        if (inputText.trim()) {
-          addTag(inputText.trim());
-          setInputText('');
-        }
+        setInputText('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -52,7 +35,8 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
   }, [inputText, tags]);
 
   const addTag = (tag: string) => {
-    if (!tag || tags.includes(tag)) return;
+    // Sadece izin verilen türler eklenebilir
+    if (!tag || tags.includes(tag) || !E_ICERIK_TURLERI.includes(tag)) return;
     const newTags = [...tags, tag];
     onChange(newTags.join('/'));
     setInputText('');
@@ -66,9 +50,7 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
-      if (inputText.trim()) {
-        addTag(inputText.trim());
-      }
+      // Sadece dropdown'dan seçim yapılabilir, serbest metin eklenmez
     } else if (e.key === 'Backspace' && !inputText && tags.length > 0) {
       removeTag(tags.length - 1);
     } else if (e.key === 'Escape') {
@@ -101,7 +83,7 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
           ref={inputRef}
           type="text"
           className="flex-1 min-w-[80px] outline-none text-xs font-bold px-1 py-0.5 bg-transparent"
-          placeholder={tags.length === 0 ? 'Tür seçin veya yazın...' : 'Ekle...'}
+          placeholder={tags.length === 0 ? 'Tür seçin...' : 'Ekle...'}
           value={inputText}
           onChange={e => { setInputText(e.target.value); setIsOpen(true); }}
           onFocus={() => setIsOpen(true)}

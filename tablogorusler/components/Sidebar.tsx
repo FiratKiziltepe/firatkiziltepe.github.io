@@ -15,9 +15,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
     { id: 'table', label: 'Veri İnceleme & Onay', icon: <Table size={20} /> },
   ];
 
-  if (userRole === 'admin' || userRole === 'moderator') {
-    menuItems.push({ id: 'history', label: 'Değişiklik Geçmişi', icon: <History size={20} /> });
-  }
+  // Tüm roller değişiklik geçmişini görebilir
+  menuItems.push({ id: 'history', label: 'Değişiklik Geçmişi', icon: <History size={20} /> });
 
   if (userRole === 'admin') {
     menuItems.push({ id: 'report', label: 'Raporlar', icon: <BarChart3 size={20} /> });
@@ -31,16 +30,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
         <div className="bg-blue-600 p-2 rounded-2xl shadow-lg shadow-blue-500/20 flex-shrink-0">
           <BookOpen size={20} className="text-white" />
         </div>
-        {!collapsed && <h1 className="text-lg font-black tracking-tight uppercase whitespace-nowrap">MEB Panel</h1>}
+        {!collapsed && <h1 className="text-lg font-black tracking-tight uppercase whitespace-nowrap">E-İçerik Tablosu</h1>}
       </div>
 
-      {/* Toggle Button */}
+      {/* Toggle Button - Modern & Visible */}
       <button
         onClick={onToggle}
-        className="mx-auto mt-3 mb-1 p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
-        title={collapsed ? 'Paneli Aç' : 'Paneli Kapat'}
+        className={`mx-3 mt-3 mb-1 flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-300 border ${
+          collapsed
+            ? 'justify-center bg-slate-800 border-slate-700 text-slate-300 hover:bg-blue-600 hover:border-blue-500 hover:text-white'
+            : 'bg-slate-800/60 border-slate-700/50 text-slate-400 hover:bg-blue-600/20 hover:border-blue-500/50 hover:text-blue-300'
+        }`}
+        title={collapsed ? 'Menüyü Genişlet' : 'Menüyü Daralt'}
       >
         {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+        {!collapsed && <span className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">Menüyü Daralt</span>}
       </button>
 
       {/* Nav */}
@@ -66,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
       {!collapsed && (
         <div className="p-4 mt-auto">
           <div className="bg-slate-800/50 rounded-2xl p-4 text-sm text-slate-400 border border-slate-700/50 backdrop-blur-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Eğitim Materyalleri</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">E-İçerik Tablosu</p>
             <p className="font-black text-white text-lg tracking-tight">V2.0.0</p>
           </div>
         </div>

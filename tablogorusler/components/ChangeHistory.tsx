@@ -28,6 +28,7 @@ type UnifiedProposal = {
   eski_deger: string | null;
   yeni_deger: string | null;
   aciklama: string | null;
+  gerekce: string | null;
   // For new row
   unite_tema?: string;
   kazanim?: string;
@@ -149,6 +150,7 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
         eski_deger: p.eski_deger,
         yeni_deger: p.yeni_deger,
         aciklama: null,
+        gerekce: p.gerekce,
       });
     }
 
@@ -168,6 +170,7 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
         eski_deger: null,
         yeni_deger: null,
         aciklama: p.aciklama,
+        gerekce: p.gerekce,
         unite_tema: p.unite_tema,
         kazanim: p.kazanim,
         e_icerik_turu: p.e_icerik_turu,
@@ -192,6 +195,7 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
         eski_deger: null,
         yeni_deger: null,
         aciklama: p.aciklama,
+        gerekce: null,
       });
     }
 
@@ -213,7 +217,11 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
       if (statusFilter !== 'all' && p.durum !== statusFilter) return false;
       if (typeFilter !== 'all' && p.type !== typeFilter) return false;
       if (lessonFilter && p.ders_adi !== lessonFilter) return false;
-      // Moderator: only show proposals for assigned lessons
+      // Teacher: sadece kendi önerilerini görsün
+      if (profile.rol === 'teacher') {
+        return p.user_id === profile.id;
+      }
+      // Moderator: atanan derslerle sınırlı
       if (profile.rol === 'moderator') {
         return profile.atanan_dersler.includes(p.ders_adi);
       }
@@ -223,9 +231,11 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
 
   // Stats
   const stats = useMemo(() => {
-    const base = profile.rol === 'moderator'
-      ? allProposals.filter(p => profile.atanan_dersler.includes(p.ders_adi))
-      : allProposals;
+    const base = profile.rol === 'teacher'
+      ? allProposals.filter(p => p.user_id === profile.id)
+      : profile.rol === 'moderator'
+        ? allProposals.filter(p => profile.atanan_dersler.includes(p.ders_adi))
+        : allProposals;
     return {
       total: base.length,
       pending: base.filter(p => p.durum === 'pending').length,
@@ -256,7 +266,9 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900">Değişiklik Geçmişi</h2>
-          <p className="text-sm text-slate-400 mt-1">Tüm öneri, onay ve red işlemlerinin takibi</p>
+          <p className="text-sm text-slate-400 mt-1">
+            {profile.rol === 'teacher' ? 'Gönderdiğiniz önerilerin durumunu takip edin' : 'Tüm öneri, onay ve red işlemlerinin takibi'}
+          </p>
         </div>
       </div>
 
@@ -438,6 +450,16 @@ const ChangeHistory: React.FC<ChangeHistoryProps> = ({
                                 <div className="bg-red-50 p-4 rounded-xl border border-red-200">
                                   <p className="text-sm text-red-700 font-bold mb-1">Satır #{p.sira_no} — {p.ders_adi}</p>
                                   {p.aciklama && <p className="text-xs text-red-600 italic mt-2">Gerekçe: {p.aciklama}</p>}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Gerekçe */}
+                            {p.gerekce && (
+                              <div className="col-span-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">DÜZELTME GEREKÇESİ</p>
+                                <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-700 italic">
+                                  💬 {p.gerekce}
                                 </div>
                               </div>
                             )}

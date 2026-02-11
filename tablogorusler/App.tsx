@@ -11,6 +11,23 @@ import AdminPanel from './components/AdminPanel';
 import ChangeHistory from './components/ChangeHistory';
 import ReportPanel from './components/ReportPanel';
 
+/** Eşzamanlı kullanım için retry mekanizması (70+ kullanıcı desteği) */
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 500): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const isRetryable = err?.code === '40001' || err?.code === 'PGRST116' || err?.message?.includes('deadlock') || err?.message?.includes('could not serialize') || err?.message?.includes('Too Many');
+      if (isRetryable && attempt < maxRetries - 1) {
+        await new Promise(r => setTimeout(r, delayMs * (attempt + 1) + Math.random() * 300));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
 const App: React.FC = () => {
   const { user, profile, loading } = useAuth();
   const [data, setData] = useState<EIcerik[]>([]);
@@ -94,55 +111,63 @@ const App: React.FC = () => {
     if (newLog) setLogs(prev => [newLog, ...prev]);
   }, [user]);
 
-  // Degisiklik onerisi (alan bazli)
-  const handleProposeChange = useCallback(async (eIcerikId: number, alan: string, eskiDeger: string, yeniDeger: string) => {
+  // Degisiklik onerisi (alan bazli) - retry ile
+  const handleProposeChange = useCallback(async (eIcerikId: number, alan: string, eskiDeger: string, yeniDeger: string, gerekce?: string) => {
     if (!user) return;
-    const { data: newProposal } = await supabase.from('degisiklik_onerileri').insert({
-      e_icerik_id: eIcerikId,
-      user_id: user.id,
-      alan,
-      eski_deger: eskiDeger,
-      yeni_deger: yeniDeger,
-    }).select().single();
+    const { data: newProposal } = await withRetry(() =>
+      supabase.from('degisiklik_onerileri').insert({
+        e_icerik_id: eIcerikId,
+        user_id: user.id,
+        alan,
+        eski_deger: eskiDeger,
+        yeni_deger: yeniDeger,
+        gerekce: gerekce || null,
+      }).select().single().then(r => { if (r.error) throw r.error; return r; })
+    );
     if (newProposal) {
       setProposals(prev => [newProposal, ...prev]);
       await addLog('degisiklik_onerisi', `${alan} alanı için düzenleme önerisi`, eIcerikId);
     }
   }, [user, addLog]);
 
-  // Yeni satir onerisi
+  // Yeni satir onerisi - retry ile
   const handleProposeNewRow = useCallback(async (satir: Partial<YeniSatirOnerisi>) => {
     if (!user) return;
-    const { data: newProposal } = await supabase.from('yeni_satir_onerileri').insert({
-      user_id: user.id,
-      ders_adi: satir.ders_adi,
-      unite_tema: satir.unite_tema,
-      kazanim: satir.kazanim,
-      e_icerik_turu: satir.e_icerik_turu,
-      aciklama: satir.aciklama,
-      program_turu: satir.program_turu,
-    }).select().single();
+    const { data: newProposal } = await withRetry(() =>
+      supabase.from('yeni_satir_onerileri').insert({
+        user_id: user.id,
+        ders_adi: satir.ders_adi,
+        unite_tema: satir.unite_tema,
+        kazanim: satir.kazanim,
+        e_icerik_turu: satir.e_icerik_turu,
+        aciklama: satir.aciklama,
+        program_turu: satir.program_turu,
+        gerekce: satir.gerekce || null,
+      }).select().single().then(r => { if (r.error) throw r.error; return r; })
+    );
     if (newProposal) {
       setNewRowProposals(prev => [newProposal, ...prev]);
       await addLog('yeni_satir_onerisi', `${satir.ders_adi} için yeni satır ekleme önerisi`);
     }
   }, [user, addLog]);
 
-  // Silme talebi
+  // Silme talebi - retry ile
   const handleProposeDelete = useCallback(async (eIcerikId: number, aciklama: string) => {
     if (!user) return;
-    const { data: newDel } = await supabase.from('silme_talepleri').insert({
-      e_icerik_id: eIcerikId,
-      user_id: user.id,
-      aciklama,
-    }).select().single();
+    const { data: newDel } = await withRetry(() =>
+      supabase.from('silme_talepleri').insert({
+        e_icerik_id: eIcerikId,
+        user_id: user.id,
+        aciklama,
+      }).select().single().then(r => { if (r.error) throw r.error; return r; })
+    );
     if (newDel) {
       setDeleteProposals(prev => [newDel, ...prev]);
       await addLog('silme_talebi', `Satır silme talebi`, eIcerikId);
     }
   }, [user, addLog]);
 
-  // Onaylama/Reddetme
+  // Onaylama/Reddetme - retry ile
   const handleResolveProposal = useCallback(async (
     type: 'degisiklik' | 'yeni_satir' | 'silme',
     proposalId: number,
@@ -152,22 +177,28 @@ const App: React.FC = () => {
     if (!user) return;
     const table = type === 'degisiklik' ? 'degisiklik_onerileri' : type === 'yeni_satir' ? 'yeni_satir_onerileri' : 'silme_talepleri';
 
-    await supabase.from(table).update({
-      durum,
-      onaylayan_id: user.id,
-      onay_tarihi: new Date().toISOString(),
-      red_nedeni: redNedeni || null,
-    }).eq('id', proposalId);
+    await withRetry(() =>
+      supabase.from(table).update({
+        durum,
+        onaylayan_id: user.id,
+        onay_tarihi: new Date().toISOString(),
+        red_nedeni: redNedeni || null,
+      }).eq('id', proposalId).then(r => { if (r.error) throw r.error; return r; })
+    );
 
     if (durum === 'approved') {
       if (type === 'degisiklik') {
         const proposal = proposals.find(p => p.id === proposalId);
         if (proposal) {
-          // Veriyi güncelle
-          await supabase.from('e_icerikler').update({
+          // Veriyi güncelle (hata kontrolü ile)
+          const { error: updateErr } = await supabase.from('e_icerikler').update({
             [proposal.alan]: proposal.yeni_deger,
             updated_at: new Date().toISOString(),
           }).eq('id', proposal.e_icerik_id);
+          if (updateErr) {
+            console.error('e_icerikler güncelleme hatası:', updateErr);
+            alert('Veri güncellenirken hata oluştu: ' + updateErr.message);
+          }
 
           // Aynı satır+alan için diğer bekleyen önerileri otomatik reddet
           const otherProposals = proposals.filter(
@@ -189,7 +220,7 @@ const App: React.FC = () => {
         const proposal = newRowProposals.find(p => p.id === proposalId);
         if (proposal) {
           const maxSiraNo = data.length > 0 ? Math.max(...data.map(d => d.sira_no)) : 0;
-          await supabase.from('e_icerikler').insert({
+          const { error: insertErr } = await supabase.from('e_icerikler').insert({
             sira_no: maxSiraNo + 1,
             ders_adi: proposal.ders_adi,
             unite_tema: proposal.unite_tema,
@@ -198,12 +229,20 @@ const App: React.FC = () => {
             aciklama: proposal.aciklama,
             program_turu: proposal.program_turu,
           });
+          if (insertErr) {
+            console.error('e_icerikler ekleme hatası:', insertErr);
+            alert('Yeni satır eklenirken hata oluştu: ' + insertErr.message);
+          }
         }
       } else if (type === 'silme') {
         const proposal = deleteProposals.find(p => p.id === proposalId);
         if (proposal) {
           // Satırı sil
-          await supabase.from('e_icerikler').delete().eq('id', proposal.e_icerik_id);
+          const { error: deleteErr } = await supabase.from('e_icerikler').delete().eq('id', proposal.e_icerik_id);
+          if (deleteErr) {
+            console.error('e_icerikler silme hatası:', deleteErr);
+            alert('Satır silinirken hata oluştu: ' + deleteErr.message);
+          }
 
           // Aynı satır için diğer bekleyen silme taleplerini otomatik reddet
           const otherDelProposals = deleteProposals.filter(
@@ -243,11 +282,14 @@ const App: React.FC = () => {
     await fetchData();
   }, [user, proposals, newRowProposals, deleteProposals, data, addLog, fetchData]);
 
-  // Talep geri cekme
+  // Talep geri cekme - retry ile
   const handleWithdrawProposal = useCallback(async (type: 'degisiklik' | 'yeni_satir' | 'silme', proposalId: number) => {
     const table = type === 'degisiklik' ? 'degisiklik_onerileri' : type === 'yeni_satir' ? 'yeni_satir_onerileri' : 'silme_talepleri';
-    const { error } = await supabase.from(table).delete().eq('id', proposalId);
-    if (error) {
+    try {
+      await withRetry(() =>
+        supabase.from(table).delete().eq('id', proposalId).then(r => { if (r.error) throw r.error; return r; })
+      );
+    } catch (error: any) {
       console.error('Withdraw error:', error);
       alert('Talep iptal edilemedi: ' + error.message);
       return;
@@ -256,15 +298,18 @@ const App: React.FC = () => {
     await fetchData();
   }, [addLog, fetchData]);
 
-  // Öneriyi düzenleme (moderatör veya öğretmen kendi önerisini)
+  // Öneriyi düzenleme (moderatör veya öğretmen kendi önerisini) - retry ile
   const handleUpdateProposal = useCallback(async (
     type: 'degisiklik' | 'yeni_satir',
     proposalId: number,
     updatedData: Record<string, string>
   ) => {
     const table = type === 'degisiklik' ? 'degisiklik_onerileri' : 'yeni_satir_onerileri';
-    const { error } = await supabase.from(table).update(updatedData).eq('id', proposalId);
-    if (error) {
+    try {
+      await withRetry(() =>
+        supabase.from(table).update(updatedData).eq('id', proposalId).then(r => { if (r.error) throw r.error; return r; })
+      );
+    } catch (error: any) {
       console.error('Update proposal error:', error);
       alert('Öneri güncellenemedi: ' + error.message);
       return;
@@ -326,7 +371,7 @@ const App: React.FC = () => {
                   users={users}
                 />
               )}
-              {activeTab === 'history' && (profile.rol === 'admin' || profile.rol === 'moderator') && (
+              {activeTab === 'history' && (
                 <ChangeHistory
                   data={data}
                   proposals={proposals}
