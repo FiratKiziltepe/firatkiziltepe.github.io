@@ -194,6 +194,48 @@ async function deletePracticeSession(id) {
   if (error) throw error;
 }
 
+// ===== AI Interview CRUD =====
+async function createAIInterview(topic) {
+  const uid = getUserId();
+  const { data, error } = await getSupabase()
+    .from('ai_interviews')
+    .insert([{ user_id: uid, topic, conversation: [], status: 'active' }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function updateAIInterview(id, updates) {
+  const { data, error } = await getSupabase()
+    .from('ai_interviews')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function fetchAIInterviews() {
+  const uid = getUserId();
+  const { data, error } = await getSupabase()
+    .from('ai_interviews')
+    .select('*')
+    .eq('user_id', uid)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function deleteAIInterview(id) {
+  const { error } = await getSupabase()
+    .from('ai_interviews')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 // ===== Toast Utility =====
 function showToast(message, duration = 3000) {
   let toast = document.getElementById('toast');
