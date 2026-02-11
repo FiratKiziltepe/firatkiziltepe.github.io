@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { Profile, DegisiklikLogu, EIcerik } from '../lib/supabase';
 import { supabase, SUPABASE_URL } from '../lib/supabase';
-import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson } from 'lucide-react';
+import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface AdminPanelProps {
   users: Profile[];
@@ -39,10 +40,62 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
   const [uploadProgress, setUploadProgress] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Başlık satırı değerleri (header row values from Excel)
+  const HEADER_ROW_VALUES = ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ', 'Program Türü',
+    'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu',
+    'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'];
+  const REQUIRED_CANONICAL_FIELDS = ['ders_adi', 'unite_tema', 'kazanim'];
+
+  const normalizeHeader = (value: string) =>
+    value
+      .trim()
+      .toLocaleLowerCase('tr-TR')
+      .replace(/ı/g, 'i')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/[\s\-\/]+/g, '_')
+      .replace(/[()]/g, '')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+
+  const KEY_ALIASES: Record<string, string[]> = {
+    sira_no: ['sira_no', 'sira_no_', 'sirano', 'sirano', 'sira', 'sira_numarasi'],
+    ders_adi: ['ders_adi', 'ders', 'dersadi'],
+    unite_tema: ['unite_tema', 'unite_tema_ogrenme_alani', 'unite_tema_ogrenme', 'unite', 'tema'],
+    kazanim: ['kazanim', 'kazanim_ogrenme_ciktisi_bolum', 'kazanim_cikti', 'kazanım', 'cikti'],
+    e_icerik_turu: ['e_icerik_turu', 'e_icerik', 'icerik_turu', 'e_icerik_turleri'],
+    aciklama: ['aciklama'],
+    program_turu: ['program_turu', 'program', 'program_tur'],
+  };
+
+  const toCanonicalKey = (rawKey: string) => {
+    const normalized = normalizeHeader(rawKey);
+    for (const [canonical, aliases] of Object.entries(KEY_ALIASES)) {
+      if (aliases.includes(normalized)) return canonical;
+    }
+    return null;
+  };
+
+  const normalizeProgramTuru = (value: unknown) => {
+    const raw = String(value ?? '').trim().toLocaleUpperCase('tr-TR');
+    if (raw === 'DİĞER' || raw === 'DIGER') return 'DİĞER';
+    return 'TYMM';
+  };
+
+  const normalizeEIcerikTuru = (value: unknown) => {
+    if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean).join('/');
+    return String(value ?? '').trim();
+  };
+
   useEffect(() => {
     supabase.from('e_icerikler').select('ders_adi').then(({ data }) => {
       if (data) {
-        const unique = Array.from(new Set(data.map((d: any) => d.ders_adi))).sort() as string[];
+        const unique = Array.from(new Set(data.map((d: any) => d.ders_adi)))
+          .filter(name => name && !HEADER_ROW_VALUES.includes(name))
+          .sort((a, b) => a.localeCompare(b, 'tr')) as string[];
         setAllLessons(unique);
       }
     });
@@ -165,27 +218,82 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
     setDeletingLesson(false);
   };
 
-  // JSON dosyası yükleme
+  // JSON veya Excel dosyası yükleme
   const handleUpload = async () => {
     if (!uploadFile) return;
     setUploading(true);
     setUploadProgress('Dosya okunuyor...');
 
     try {
-      const text = await uploadFile.text();
       let jsonData: any[];
+      const fileName = uploadFile.name.toLowerCase();
+      const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.xlsm');
 
-      try {
-        const parsed = JSON.parse(text);
-        jsonData = Array.isArray(parsed) ? parsed : (parsed.data || parsed.rows || parsed.items || [parsed]);
-      } catch {
-        alert('Geçersiz JSON dosyası!');
+      if (isExcel) {
+        // Excel dosyası parse
+        try {
+          const buffer = await uploadFile.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+        } catch {
+          alert('Geçersiz Excel dosyası! (.xlsx, .xls formatları desteklenir)');
+          setUploading(false);
+          return;
+        }
+      } else {
+        // JSON dosyası parse
+        try {
+          const text = await uploadFile.text();
+          const parsed = JSON.parse(text);
+          jsonData = Array.isArray(parsed) ? parsed : (parsed.data || parsed.rows || parsed.items || [parsed]);
+        } catch {
+          alert('Geçersiz JSON dosyası!');
+          setUploading(false);
+          return;
+        }
+      }
+
+      // Dosya sütunlarını kanonik alanlara eşleştir
+      const providedCanonicalCols = new Set<string>();
+      jsonData.forEach((row: any) => {
+        Object.keys(row || {}).forEach((key) => {
+          const canonical = toCanonicalKey(key);
+          if (canonical) providedCanonicalCols.add(canonical);
+        });
+      });
+
+      const missingRequiredColumns = REQUIRED_CANONICAL_FIELDS.filter(col => !providedCanonicalCols.has(col));
+      if (missingRequiredColumns.length > 0) {
+        alert(`Eksik zorunlu sütun(lar): ${missingRequiredColumns.join(', ')}`);
         setUploading(false);
         return;
       }
 
+      const canonicalRows = jsonData.map((row: any) => {
+        const mapped: Record<string, unknown> = {};
+        Object.entries(row || {}).forEach(([rawKey, rawValue]) => {
+          const canonical = toCanonicalKey(rawKey);
+          if (!canonical) return;
+          if (mapped[canonical] === undefined || mapped[canonical] === null || mapped[canonical] === '') {
+            mapped[canonical] = rawValue;
+          }
+        });
+        return mapped;
+      });
+
+      // Başlık/boş satırları filtrele
+      jsonData = canonicalRows.filter((row: any) => {
+        const dersAdi = String(row.ders_adi ?? '').trim();
+        const uniteTema = String(row.unite_tema ?? '').trim();
+        const kazanim = String(row.kazanim ?? '').trim();
+        if (!dersAdi && !uniteTema && !kazanim) return false;
+        if (HEADER_ROW_VALUES.includes(dersAdi)) return false;
+        return true;
+      });
+
       if (jsonData.length === 0) {
-        alert('Dosyada veri bulunamadı!');
+        alert('Dosyada veri bulunamadı! (Başlık satırları filtrelendi)');
         setUploading(false);
         return;
       }
@@ -193,29 +301,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
       // Replace modunda önce tüm tabloyu sil
       if (uploadMode === 'replace') {
         setUploadProgress('Mevcut veriler siliniyor...');
-        // Önce önerileri sil
-        await Promise.all([
+        // Önce bağlı tabloları temizle
+        const resetResults = await Promise.all([
           supabase.from('degisiklik_onerileri').delete().neq('id', 0),
           supabase.from('yeni_satir_onerileri').delete().neq('id', 0),
           supabase.from('silme_talepleri').delete().neq('id', 0),
           supabase.from('degisiklik_loglari').delete().neq('id', 0),
         ]);
-        await supabase.from('e_icerikler').delete().neq('id', 0);
+        const resetError = resetResults.find(r => r.error)?.error;
+        if (resetError) throw resetError;
+        const { error: deleteMainError } = await supabase.from('e_icerikler').delete().neq('id', 0);
+        if (deleteMainError) throw deleteMainError;
       }
 
       // Batch insert (500'erli)
       const BATCH = 500;
       let inserted = 0;
       for (let i = 0; i < jsonData.length; i += BATCH) {
-        const batch = jsonData.slice(i, i + BATCH).map((row: any, idx: number) => ({
-          sira_no: row.sira_no || row['SIRA NO'] || (i + idx + 1),
-          ders_adi: row.ders_adi || row['DERS ADI'] || '',
-          unite_tema: row.unite_tema || row['ÜNİTE/TEMA'] || '',
-          kazanim: row.kazanim || row['KAZANIM/ÇIKTI'] || '',
-          e_icerik_turu: row.e_icerik_turu || row['E-İÇERİK TÜRÜ'] || '',
-          aciklama: row.aciklama || row['AÇIKLAMA'] || '',
-          program_turu: row.program_turu || row['PROGRAM TÜRÜ'] || 'TYMM',
-        }));
+        const batch = jsonData.slice(i, i + BATCH).map((row: any, idx: number) => {
+          const siraNoRaw = row.sira_no;
+          const siraNo = siraNoRaw !== null && siraNoRaw !== undefined && siraNoRaw !== ''
+            ? (typeof siraNoRaw === 'number' ? siraNoRaw : parseInt(String(siraNoRaw), 10))
+            : (i + idx + 1);
+
+          return {
+            sira_no: isNaN(siraNo) ? (i + idx + 1) : siraNo,
+            ders_adi: String(row.ders_adi ?? '').trim(),
+            unite_tema: String(row.unite_tema ?? '').trim(),
+            kazanim: String(row.kazanim ?? '').trim(),
+            e_icerik_turu: normalizeEIcerikTuru(row.e_icerik_turu),
+            aciklama: String(row.aciklama ?? '').trim(),
+            program_turu: normalizeProgramTuru(row.program_turu),
+          };
+        });
         const { error } = await supabase.from('e_icerikler').insert(batch);
         if (error) throw error;
         inserted += batch.length;
@@ -405,18 +523,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
               <Upload size={22} />
             </div>
             <div className="text-left">
-              <p className="text-sm font-black text-slate-800">JSON Yükle</p>
-              <p className="text-[10px] text-slate-400 font-medium">Yeni veri ekle veya değiştir</p>
+              <p className="text-sm font-black text-slate-800">Veri Yükle</p>
+              <p className="text-[10px] text-slate-400 font-medium">JSON veya Excel ile yeni veri ekle</p>
             </div>
           </button>
 
           <button onClick={() => { setShowUploadModal(true); setUploadMode('replace'); setUploadFile(null); }} className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/30 hover:border-amber-200 hover:shadow-amber-100/30 transition-all group">
             <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-all">
-              <FileJson size={22} />
+              <FileSpreadsheet size={22} />
             </div>
             <div className="text-left">
               <p className="text-sm font-black text-slate-800">Tabloyu Sıfırla & Yükle</p>
-              <p className="text-[10px] text-slate-400 font-medium">Tüm veriyi silip JSON ile değiştir</p>
+              <p className="text-[10px] text-slate-400 font-medium">Tüm veriyi silip yeniden yükle</p>
             </div>
           </button>
         </div>
@@ -491,10 +609,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-slate-900">
-                    {uploadMode === 'replace' ? 'Tabloyu Sıfırla & Yükle' : 'JSON Dosyası Yükle'}
+                    {uploadMode === 'replace' ? 'Tabloyu Sıfırla & Yükle' : 'Dosya Yükle'}
                   </h3>
                   <p className="text-xs text-slate-400 font-medium">
-                    {uploadMode === 'replace' ? 'Mevcut tüm veriler silinip yeni dosya yüklenecek' : 'Mevcut verilere ek olarak yüklenecek'}
+                    {uploadMode === 'replace' ? 'Mevcut tüm veriler silinip yeni dosya yüklenecek' : 'JSON veya Excel dosyasından veri ekle'}
                   </p>
                 </div>
               </div>
@@ -507,11 +625,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
 
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 block">JSON DOSYASI SEÇ</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 block">DOSYA SEÇ (JSON veya Excel)</label>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".json"
+                    accept=".json,.xlsx,.xls,.xlsm"
                     className="hidden"
                     onChange={e => setUploadFile(e.target.files?.[0] || null)}
                   />
@@ -523,12 +641,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                       <div>
                         <p className="text-sm font-bold text-slate-800">{uploadFile.name}</p>
                         <p className="text-xs text-slate-400">{(uploadFile.size / 1024).toFixed(1)} KB</p>
+                        <p className="text-[9px] text-blue-500 font-bold mt-1">
+                          {uploadFile.name.toLowerCase().endsWith('.json') ? '📄 JSON Dosyası' : '📊 Excel Dosyası'}
+                        </p>
                       </div>
                     ) : (
                       <div>
-                        <FileJson size={32} className="mx-auto text-slate-300 mb-2" />
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <FileJson size={28} className="text-slate-300" />
+                          <FileSpreadsheet size={28} className="text-slate-300" />
+                        </div>
                         <p className="text-sm font-bold text-slate-500">Dosya seçmek için tıklayın</p>
-                        <p className="text-[10px] text-slate-400">.json formatı desteklenir</p>
+                        <p className="text-[10px] text-slate-400">.json, .xlsx, .xls formatları desteklenir</p>
                       </div>
                     )}
                   </button>
@@ -538,6 +662,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                   <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Desteklenen Alanlar</p>
                   <p className="text-[10px] text-slate-400">sira_no, ders_adi, unite_tema, kazanim, e_icerik_turu, aciklama, program_turu</p>
                   <p className="text-[10px] text-slate-400 mt-1">Veya: SIRA NO, DERS ADI, ÜNİTE/TEMA, KAZANIM/ÇIKTI, E-İÇERİK TÜRÜ, AÇIKLAMA, PROGRAM TÜRÜ</p>
+                  <p className="text-[10px] text-blue-500 font-bold mt-1">💡 Excel dosyasının ilk sayfası okunur. Sütun başlıkları otomatik eşleştirilir.</p>
                 </div>
               </div>
 

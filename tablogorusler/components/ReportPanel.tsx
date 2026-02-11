@@ -17,8 +17,18 @@ const ReportPanel: React.FC<ReportPanelProps> = ({ data }) => {
     return Array.from(types).sort();
   }, [data]);
 
-  // Benzersiz dersler
-  const allLessons = useMemo(() => Array.from(new Set(data.map(d => d.ders_adi))).sort(), [data]);
+  // Başlık satırı değerleri (header row values)
+  const HEADER_VALUES = ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ',
+    'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu', 'Program Türü',
+    'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'];
+
+  // Benzersiz dersler (başlık satırları hariç)
+  const allLessons = useMemo(() => {
+    const names: string[] = Array.from(new Set(data.map(d => d.ders_adi)));
+    return names
+      .filter(name => name && !HEADER_VALUES.includes(name))
+      .sort((a, b) => a.localeCompare(b, 'tr'));
+  }, [data]);
 
   // Ders arama sonuçları (dropdown için)
   const searchResults = useMemo(() => {

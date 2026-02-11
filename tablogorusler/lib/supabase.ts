@@ -84,3 +84,11 @@ export type DegisiklikLogu = {
   created_at: string;
 };
 
+export type ResolveProposalAtomicResult = {
+  status: 'ok' | 'noop';
+  reason?: string;
+  type: 'degisiklik' | 'yeni_satir' | 'silme';
+  proposal_id: number;
+  durum?: 'approved' | 'rejected';
+};
+

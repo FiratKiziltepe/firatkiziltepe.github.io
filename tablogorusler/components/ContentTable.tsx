@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { EIcerik, DegisiklikOnerisi, YeniSatirOnerisi, SilmeTalebi, Profile } from '../lib/supabase';
-import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import EIcerikTuruInput from './EIcerikTuruInput';
 
 interface ContentTableProps {
@@ -95,9 +95,9 @@ const DiffSpan: React.FC<{ oldStr?: string; newStr?: string }> = ({ oldStr = "",
   );
 };
 
-/** Arama terimini sarı highlight ile gösterir */
+/** Arama terimini sarı highlight ile gösterir – sadece tam arama terimi eşleşirse highlight eder */
 const HighlightText: React.FC<{ text: string; term: string; className?: string }> = ({ text, term, className }) => {
-  if (!term || !text) return <span className={className}>{text}</span>;
+  if (!term || !text || term.length < 3) return <span className={className}>{text}</span>;
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
   return (
@@ -143,10 +143,33 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const [editProposalForm, setEditProposalForm] = useState<Record<string, string>>({});
   const [showChanges, setShowChanges] = useState(false);
   const [onlyProposals, setOnlyProposals] = useState(false);
+  
+  // Sorting State: null = varsayılan sıralama (ders_adi ASC, sira_no ASC)
+  // Sadece ders_adi sütununda sıralama: null=varsayılan(ders_adi+sira_no), 'asc'=A-Z, 'desc'=Z-A
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const handleSort = (_key: string) => {
+    if (sortConfig === null) {
+      setSortConfig({ key: 'ders_adi', direction: 'asc' });
+    } else if (sortConfig.direction === 'asc') {
+      setSortConfig({ key: 'ders_adi', direction: 'desc' });
+    } else {
+      setSortConfig(null);
+    }
+  };
+
 
   const canModerate = profile.rol === 'admin' || profile.rol === 'moderator';
 
-  const allLessons = useMemo(() => Array.from(new Set(data.map(d => d.ders_adi))).sort(), [data]);
+  const HEADER_VALUES = useMemo(() => ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ',
+    'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu', 'Program Türü',
+    'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'], []);
+  const trLessonCollator = useMemo(() => new Intl.Collator('tr', { sensitivity: 'variant' }), []);
+  const allLessons = useMemo(() =>
+    Array.from(new Set(data.map(d => d.ders_adi)))
+      .filter(name => name && !HEADER_VALUES.includes(name))
+      .sort((a, b) => trLessonCollator.compare(a, b)),
+    [data, HEADER_VALUES, trLessonCollator]);
 
   // Pending new row proposals (filtered)
   const pendingNewRows = useMemo(() => {
@@ -154,7 +177,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
       if (p.durum !== 'pending') return false;
       const matchLesson = !lessonFilter || p.ders_adi === lessonFilter;
       const matchProgram = programFilter === 'Tümü' || p.program_turu === programFilter;
-      const matchSearch = !searchTerm || [p.ders_adi, p.unite_tema, p.kazanim, p.aciklama, p.e_icerik_turu]
+      // Arama en az 3 karakter girildiğinde aktif olur
+      const matchSearch = !searchTerm || searchTerm.length < 3 || [p.ders_adi, p.unite_tema, p.kazanim, p.aciklama, p.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchLesson && matchProgram && matchSearch;
     });
@@ -172,19 +196,66 @@ const ContentTable: React.FC<ContentTableProps> = ({
     return data.filter(row => {
       const matchLesson = !lessonFilter || row.ders_adi === lessonFilter;
       const matchProgram = programFilter === 'Tümü' || row.program_turu === programFilter;
-      const matchSearch = !searchTerm || [row.ders_adi, row.unite_tema, row.kazanim, row.aciklama, row.e_icerik_turu]
+      // Arama en az 3 karakter girildiğinde aktif olur
+      const matchSearch = !searchTerm || searchTerm.length < 3 || [row.ders_adi, row.unite_tema, row.kazanim, row.aciklama, row.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchProposals = !onlyProposals || rowsWithProposals.has(row.id);
       return matchLesson && matchProgram && matchSearch && matchProposals;
     });
   }, [data, lessonFilter, programFilter, searchTerm, onlyProposals, rowsWithProposals]);
 
+  // Türkçe sıralama için Intl.Collator (performanslı ve doğru Türkçe harf sıralaması)
+  const trCollator = useMemo(() => new Intl.Collator('tr', { numeric: true, sensitivity: 'variant' }), []);
+
+  const sortedData = useMemo(() => {
+    const sortableItems = [...filteredData];
+    if (sortConfig === null) {
+      // Varsayılan: ders_adi (A-Z), eşitse sira_no (ASC)
+      sortableItems.sort((a, b) => {
+        const aLesson = (a.ders_adi || '').trim();
+        const bLesson = (b.ders_adi || '').trim();
+        const lessonResult = trCollator.compare(aLesson, bLesson);
+        if (lessonResult !== 0) return lessonResult;
+        return a.sira_no - b.sira_no;
+      });
+    } else {
+      sortableItems.sort((a, b) => {
+        const key = sortConfig.key as keyof EIcerik;
+        const aValue = a[key];
+        const bValue = b[key];
+
+        let result: number;
+        if (key === 'sira_no' || key === 'id') {
+          // Sayısal sıralama
+          result = (Number(aValue) || 0) - (Number(bValue) || 0);
+        } else {
+          // Metin sıralama: boş/null değerleri sona at
+          const aStr = (aValue ?? '') as string;
+          const bStr = (bValue ?? '') as string;
+          if (!aStr && !bStr) result = 0;
+          else if (!aStr) result = 1;
+          else if (!bStr) result = -1;
+          else result = trCollator.compare(aStr, bStr);
+        }
+
+        if (sortConfig.direction === 'desc') result *= -1;
+
+        // İkincil sıralama: sira_no
+        if (result === 0 && sortConfig.key !== 'sira_no') {
+          return a.sira_no - b.sira_no;
+        }
+        return result;
+      });
+    }
+    return sortableItems;
+  }, [filteredData, sortConfig, trCollator]);
+
   const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const pagedData = useMemo(() => {
     const start = (safePage - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, safePage, pageSize]);
+    return sortedData.slice(start, start + pageSize);
+  }, [sortedData, safePage, pageSize]);
 
   const getRowProposals = (eIcerikId: number) => proposals.filter(p => p.e_icerik_id === eIcerikId && p.durum === 'pending');
   const getDeleteProposals = (eIcerikId: number) => deleteProposals.filter(p => p.e_icerik_id === eIcerikId && p.durum === 'pending');
@@ -384,13 +455,28 @@ const ContentTable: React.FC<ContentTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1400px]">
             <thead>
-              <tr className="bg-[#8c949e] text-white">
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 w-16 text-center uppercase tracking-wider">SIRA</th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 uppercase tracking-wider min-w-[160px]">DERS ADI</th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 uppercase tracking-wider min-w-[180px]">ÜNİTE/TEMA</th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 uppercase tracking-wider min-w-[280px]">KAZANIM/ÇIKTI</th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 uppercase tracking-wider w-40">E-İÇERİK TÜRÜ</th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-white/20 uppercase tracking-wider min-w-[200px]">AÇIKLAMA</th>
+              <tr className="bg-slate-700 text-white">
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 w-16 text-center uppercase tracking-wider">
+                  SIRA
+                </th>
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[160px] cursor-pointer hover:bg-slate-600 transition-colors select-none" onClick={() => handleSort('ders_adi')}>
+                  <div className="flex items-center gap-1">
+                    DERS ADI
+                    {sortConfig?.key === 'ders_adi' ? (sortConfig.direction === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} className="opacity-30" />}
+                  </div>
+                </th>
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[180px]">
+                  ÜNİTE/TEMA
+                </th>
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[280px]">
+                  KAZANIM/ÇIKTI
+                </th>
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider w-40">
+                  E-İÇERİK TÜRÜ
+                </th>
+                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[200px]">
+                  AÇIKLAMA
+                </th>
                 <th className="px-4 py-5 text-[11px] font-bold text-center uppercase tracking-wider w-[220px]">İŞLEMLER</th>
               </tr>
             </thead>

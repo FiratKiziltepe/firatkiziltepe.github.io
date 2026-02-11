@@ -63,7 +63,12 @@ const App: React.FC = () => {
       supabase.from('profiles').select('*').order('created_at', { ascending: true }).then(r => r.data),
     ]);
 
-    if (eIcerikler) setData(eIcerikler);
+    // Başlık satırlarını filtrele (Excel'den gelen header row'lar)
+    const HEADER_VALUES = ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ',
+      'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu',
+      'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI', 'Program Türü'];
+    const cleanData = eIcerikler ? eIcerikler.filter((row: any) => !HEADER_VALUES.includes(row.ders_adi)) : [];
+    setData(cleanData);
     if (degOnerileri) setProposals(degOnerileri);
     if (yeniSatirlar) setNewRowProposals(yeniSatirlar);
     if (silmeTalepleri) setDeleteProposals(silmeTalepleri);
@@ -137,8 +142,8 @@ const App: React.FC = () => {
     }
   }, [user, addLog]);
 
-  // Onaylama/Reddetme
-  const handleResolveProposal = useCallback(async (
+  // Onaylama/Reddetme (legacy fallback)
+  const handleResolveProposalLegacy = useCallback(async (
     type: 'degisiklik' | 'yeni_satir' | 'silme',
     proposalId: number,
     durum: 'approved' | 'rejected',
@@ -237,6 +242,36 @@ const App: React.FC = () => {
     );
     await fetchData();
   }, [user, proposals, newRowProposals, deleteProposals, data, addLog, fetchData]);
+
+  // Onaylama/Reddetme (atomik RPC + fallback)
+  const handleResolveProposal = useCallback(async (
+    type: 'degisiklik' | 'yeni_satir' | 'silme',
+    proposalId: number,
+    durum: 'approved' | 'rejected',
+    redNedeni?: string
+  ) => {
+    if (!user) return;
+
+    const { error } = await supabase.rpc('resolve_proposal_atomic', {
+      p_type: type,
+      p_proposal_id: proposalId,
+      p_durum: durum,
+      p_onaylayan_id: user.id,
+      p_red_nedeni: redNedeni || null,
+    });
+
+    if (error) {
+      console.warn('resolve_proposal_atomic kullanılamadı, legacy akışa dönülüyor:', error.message);
+      await handleResolveProposalLegacy(type, proposalId, durum, redNedeni);
+      return;
+    }
+
+    await addLog(
+      durum === 'approved' ? 'onaylandi' : 'reddedildi',
+      `${type} talebi ${durum === 'approved' ? 'onaylandı' : 'reddedildi'}`
+    );
+    await fetchData();
+  }, [user, addLog, fetchData, handleResolveProposalLegacy]);
 
   // Talep geri cekme
   const handleWithdrawProposal = useCallback(async (type: 'degisiklik' | 'yeni_satir' | 'silme', proposalId: number) => {
