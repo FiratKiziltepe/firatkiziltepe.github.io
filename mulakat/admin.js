@@ -1,10 +1,16 @@
 let editingId = null;
+let editingUserId = null;
 let excelData = [];
 
 // Init on load
 document.addEventListener('DOMContentLoaded', function() {
   loadQuestions();
   loadCategoryFilter();
+
+  // Show users tab if admin
+  if (isAdmin()) {
+    document.getElementById('tabUsersBtn').classList.remove('hidden');
+  }
 });
 
 // ===== Tabs =====
@@ -13,6 +19,8 @@ function switchTab(tab) {
   document.getElementById('tabAdd').classList.add('hidden');
   document.getElementById('tabList').classList.add('hidden');
   document.getElementById('tabExcel').classList.add('hidden');
+  const tabUsers = document.getElementById('tabUsers');
+  if (tabUsers) tabUsers.classList.add('hidden');
 
   if (tab === 'add') {
     document.querySelectorAll('.tab')[0].classList.add('active');
@@ -24,6 +32,10 @@ function switchTab(tab) {
   } else if (tab === 'excel') {
     document.querySelectorAll('.tab')[2].classList.add('active');
     document.getElementById('tabExcel').classList.remove('hidden');
+  } else if (tab === 'users') {
+    document.getElementById('tabUsersBtn').classList.add('active');
+    tabUsers.classList.remove('hidden');
+    loadUsers();
   }
 }
 
@@ -262,6 +274,127 @@ async function uploadExcelData() {
     loadCategoryFilter();
   } catch (err) {
     alert('Yükleme hatası: ' + err.message);
+  }
+}
+
+// ===== User Management (Admin Only) =====
+function generatePassword() {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
+  let pwd = '';
+  for (let i = 0; i < 10; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+  document.getElementById('uSifre').value = pwd;
+}
+
+async function saveUser() {
+  const ad = document.getElementById('uAd').value.trim();
+  const soyad = document.getElementById('uSoyad').value.trim();
+  const kullanici_adi = document.getElementById('uKullaniciAdi').value.trim();
+  const sifre = document.getElementById('uSifre').value.trim();
+
+  if (!ad || !soyad || !kullanici_adi) {
+    alert('Ad, soyad ve kullanıcı adı zorunludur!');
+    return;
+  }
+
+  if (!editingUserId && !sifre) {
+    alert('Yeni kullanıcı için şifre zorunludur!');
+    return;
+  }
+
+  try {
+    document.getElementById('userSaveBtn').disabled = true;
+
+    if (editingUserId) {
+      await updateUser(editingUserId, { ad, soyad, kullanici_adi, sifre });
+      showToast('Kullanıcı güncellendi');
+    } else {
+      await createUser({ ad, soyad, kullanici_adi, sifre, role: 'user' });
+      showToast('Kullanıcı eklendi');
+    }
+
+    clearUserForm();
+    loadUsers();
+  } catch (err) {
+    alert('Hata: ' + err.message);
+  } finally {
+    document.getElementById('userSaveBtn').disabled = false;
+  }
+}
+
+function clearUserForm() {
+  editingUserId = null;
+  document.getElementById('uAd').value = '';
+  document.getElementById('uSoyad').value = '';
+  document.getElementById('uKullaniciAdi').value = '';
+  document.getElementById('uSifre').value = '';
+  document.getElementById('uSifre').placeholder = 'Şifre';
+  document.getElementById('userFormTitle').textContent = 'Yeni Kullanıcı Ekle';
+  document.getElementById('userSaveBtn').textContent = 'Kullanıcı Ekle';
+  document.getElementById('cancelUserEditBtn').classList.add('hidden');
+}
+
+function cancelUserEdit() {
+  clearUserForm();
+}
+
+function editUser(id, ad, soyad, kullanici_adi) {
+  editingUserId = id;
+  document.getElementById('uAd').value = ad;
+  document.getElementById('uSoyad').value = soyad;
+  document.getElementById('uKullaniciAdi').value = kullanici_adi;
+  document.getElementById('uSifre').value = '';
+  document.getElementById('uSifre').placeholder = 'Boş bırakılırsa değişmez';
+  document.getElementById('userFormTitle').textContent = 'Kullanıcıyı Düzenle';
+  document.getElementById('userSaveBtn').textContent = 'Güncelle';
+  document.getElementById('cancelUserEditBtn').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function removeUser(id, kullanici_adi) {
+  if (kullanici_adi === 'admin') {
+    alert('Admin hesabı silinemez!');
+    return;
+  }
+  if (!confirm(`"${kullanici_adi}" kullanıcısını silmek istediğinize emin misiniz?`)) return;
+  try {
+    await deleteUser(id);
+    showToast('Kullanıcı silindi');
+    loadUsers();
+  } catch (err) {
+    alert('Hata: ' + err.message);
+  }
+}
+
+async function loadUsers() {
+  try {
+    const users = await fetchUsers();
+    const container = document.getElementById('usersList');
+
+    if (users.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-text">Henüz kullanıcı yok</div></div>';
+      return;
+    }
+
+    container.innerHTML = users.map(u => `
+      <div class="question-list-item">
+        <div class="question-list-text">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:2px;">
+            <span class="badge${u.role === 'admin' ? '' : '-success'}" style="font-size:0.7rem;">${u.role === 'admin' ? 'Admin' : 'Kullanıcı'}</span>
+          </div>
+          <div style="font-weight:600;">${escapeHtml(u.ad)} ${escapeHtml(u.soyad)}</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">@${escapeHtml(u.kullanici_adi)}</div>
+        </div>
+        <div class="question-list-actions">
+          ${u.role !== 'admin' ? `
+            <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}', '${escapeHtml(u.ad)}', '${escapeHtml(u.soyad)}', '${escapeHtml(u.kullanici_adi)}')" title="Düzenle">✏️</button>
+            <button class="btn btn-ghost btn-sm" onclick="removeUser('${u.id}', '${escapeHtml(u.kullanici_adi)}')" title="Sil">🗑️</button>
+          ` : '<span style="font-size:0.75rem;color:var(--text-muted);">Sistem</span>'}
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+    showToast('Kullanıcılar yüklenemedi');
   }
 }
 

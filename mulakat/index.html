@@ -40,6 +40,7 @@
     <div class="header">
       <span class="header-title">🎤 Interview Practice</span>
       <div class="header-actions">
+        <span id="userDisplayName" style="font-size:0.85rem;color:var(--text-secondary);font-weight:500;"></span>
         <button class="btn btn-ghost btn-sm" onclick="openSettings()">⚙️ Ayarlar</button>
         <button class="btn btn-ghost btn-sm" onclick="doLogout()">🚪 Çıkış</button>
       </div>
@@ -76,7 +77,7 @@
           <div class="card-desc">Mülakat hazırlık dokümanını görüntüle (PDF)</div>
         </a>
 
-        <a href="admin.html" class="card card-clickable">
+        <a href="admin.html" class="card card-clickable" id="adminPanelLink">
           <div class="card-icon">⚙️</div>
           <div class="card-title">Admin Panel</div>
           <div class="card-desc">Soru ekle, düzenle, Excel yükle</div>
@@ -121,25 +122,27 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
   <script>
-    const ADMIN_USERNAME = 'admin';
-    const ADMIN_PASSWORD = 'admin.firat123';
-
     // Check if already logged in
     if (sessionStorage.getItem('logged_in') === 'true') {
       showMainApp();
     }
 
-    function doLogin() {
+    async function doLogin() {
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
+      errorEl.classList.add('hidden');
 
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      try {
+        const user = await loginUser(username, password);
         sessionStorage.setItem('logged_in', 'true');
+        sessionStorage.setItem('current_user', JSON.stringify(user));
         showMainApp();
-      } else {
-        errorEl.textContent = 'Kullanıcı adı veya şifre hatalı!';
+      } catch (err) {
+        errorEl.textContent = err.message;
         errorEl.classList.remove('hidden');
       }
     }
@@ -147,6 +150,22 @@
     function showMainApp() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
+
+      // Show user info in header
+      const user = getCurrentUser();
+      if (user) {
+        const nameEl = document.getElementById('userDisplayName');
+        if (nameEl) nameEl.textContent = user.ad + ' ' + user.soyad;
+      }
+
+      // Admin panel link - all users can access (they manage their own questions)
+      // but label changes based on role
+      const adminLink = document.getElementById('adminPanelLink');
+      if (adminLink && user) {
+        if (user.role === 'admin') {
+          adminLink.querySelector('.card-desc').textContent = 'Soru ekle, düzenle, kullanıcı yönet';
+        }
+      }
 
       // Check if Gemini API key exists
       if (!localStorage.getItem('gemini_api_key')) {
@@ -156,6 +175,7 @@
 
     function doLogout() {
       sessionStorage.removeItem('logged_in');
+      sessionStorage.removeItem('current_user');
       location.reload();
     }
 

@@ -21,6 +21,7 @@
       <button class="tab active" onclick="switchTab('add')">Soru Ekle</button>
       <button class="tab" onclick="switchTab('list')">Sorular</button>
       <button class="tab" onclick="switchTab('excel')">Excel Yükle</button>
+      <button class="tab hidden" id="tabUsersBtn" onclick="switchTab('users')">Kullanıcılar</button>
     </div>
 
     <!-- Add/Edit Question Tab -->
@@ -96,6 +97,44 @@
           <button class="btn btn-outline flex-1" onclick="clearPreview()">İptal</button>
         </div>
       </div>
+    </div>
+
+    <!-- Users Management Tab (Admin Only) -->
+    <div id="tabUsers" class="hidden">
+      <h3 class="mb-16">Kullanıcı Yönetimi</h3>
+
+      <!-- Add User Form -->
+      <div class="card mb-16" id="userFormCard">
+        <h4 id="userFormTitle" class="mb-16">Yeni Kullanıcı Ekle</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Ad</label>
+            <input type="text" class="form-input" id="uAd" placeholder="Ad">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Soyad</label>
+            <input type="text" class="form-input" id="uSoyad" placeholder="Soyad">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kullanıcı Adı</label>
+          <input type="text" class="form-input" id="uKullaniciAdi" placeholder="Kullanıcı adı">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" class="form-input" id="uSifre" placeholder="Şifre">
+            <button class="btn btn-outline btn-sm" onclick="generatePassword()" title="Otomatik şifre oluştur" style="white-space:nowrap;">🔑 Oluştur</button>
+          </div>
+        </div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary flex-1" id="userSaveBtn" onclick="saveUser()">Kullanıcı Ekle</button>
+          <button class="btn btn-outline flex-1 hidden" id="cancelUserEditBtn" onclick="cancelUserEdit()">İptal</button>
+        </div>
+      </div>
+
+      <!-- Users List -->
+      <div id="usersList" class="card" style="padding:0;"></div>
     </div>
   </div>
 
