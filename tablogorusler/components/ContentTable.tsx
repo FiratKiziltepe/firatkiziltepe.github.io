@@ -144,8 +144,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const [showChanges, setShowChanges] = useState(false);
   const [onlyProposals, setOnlyProposals] = useState(false);
   
-  // Sorting State: null = varsayılan sıralama (ders_adi ASC, sira_no ASC)
-  // Sadece ders_adi sütununda sıralama: null=varsayılan(ders_adi+sira_no), 'asc'=A-Z, 'desc'=Z-A
+  // Sorting State: null = varsayılan sıralama (sira_no ASC)
+  // Sadece ders_adi sütununda sıralama: null=varsayılan(sira_no), 'asc'=A-Z, 'desc'=Z-A
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   const handleSort = (_key: string) => {
@@ -210,14 +210,8 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const sortedData = useMemo(() => {
     const sortableItems = [...filteredData];
     if (sortConfig === null) {
-      // Varsayılan: ders_adi (A-Z), eşitse sira_no (ASC)
-      sortableItems.sort((a, b) => {
-        const aLesson = (a.ders_adi || '').trim();
-        const bLesson = (b.ders_adi || '').trim();
-        const lessonResult = trCollator.compare(aLesson, bLesson);
-        if (lessonResult !== 0) return lessonResult;
-        return a.sira_no - b.sira_no;
-      });
+      // Varsayılan: sira_no'ya göre sırala
+      sortableItems.sort((a, b) => a.sira_no - b.sira_no);
     } else {
       sortableItems.sort((a, b) => {
         const key = sortConfig.key as keyof EIcerik;

@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
   }
 
   return (
-    <aside className={`${collapsed ? 'w-[72px]' : 'w-64'} relative bg-slate-900 text-white flex flex-col shadow-2xl z-20 transition-all duration-300 ease-in-out flex-shrink-0`}>
+    <aside className={`${collapsed ? 'w-[72px]' : 'w-64'} bg-slate-900 text-white flex flex-col shadow-2xl z-20 transition-all duration-300 ease-in-out flex-shrink-0`}>
       {/* Header */}
       <div className={`${collapsed ? 'p-4 justify-center' : 'p-6'} flex items-center gap-3 border-b border-slate-800/50`}>
         <div className="bg-blue-600 p-2 rounded-2xl shadow-lg shadow-blue-500/20 flex-shrink-0">
@@ -37,12 +37,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, userRole, co
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        aria-label={collapsed ? 'Paneli Genişlet' : 'Paneli Daralt'}
+        className="mx-auto mt-3 mb-1 p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
         title={collapsed ? 'Paneli Aç' : 'Paneli Kapat'}
-        className="absolute -right-4 top-20 z-30 inline-flex items-center gap-2 rounded-full border border-blue-200/40 bg-slate-800/95 px-3 py-2 text-[11px] font-bold text-slate-100 shadow-xl shadow-blue-500/20 ring-1 ring-slate-700/60 backdrop-blur hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white transition-all"
       >
-        {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
-        {!collapsed && <span className="hidden lg:inline">Paneli Daralt</span>}
+        {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
       </button>
 
       {/* Nav */}

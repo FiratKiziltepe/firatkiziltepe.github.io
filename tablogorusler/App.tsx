@@ -142,8 +142,8 @@ const App: React.FC = () => {
     }
   }, [user, addLog]);
 
-  // Onaylama/Reddetme (legacy fallback)
-  const handleResolveProposalLegacy = useCallback(async (
+  // Onaylama/Reddetme
+  const handleResolveProposal = useCallback(async (
     type: 'degisiklik' | 'yeni_satir' | 'silme',
     proposalId: number,
     durum: 'approved' | 'rejected',
@@ -242,36 +242,6 @@ const App: React.FC = () => {
     );
     await fetchData();
   }, [user, proposals, newRowProposals, deleteProposals, data, addLog, fetchData]);
-
-  // Onaylama/Reddetme (atomik RPC + fallback)
-  const handleResolveProposal = useCallback(async (
-    type: 'degisiklik' | 'yeni_satir' | 'silme',
-    proposalId: number,
-    durum: 'approved' | 'rejected',
-    redNedeni?: string
-  ) => {
-    if (!user) return;
-
-    const { error } = await supabase.rpc('resolve_proposal_atomic', {
-      p_type: type,
-      p_proposal_id: proposalId,
-      p_durum: durum,
-      p_onaylayan_id: user.id,
-      p_red_nedeni: redNedeni || null,
-    });
-
-    if (error) {
-      console.warn('resolve_proposal_atomic kullanılamadı, legacy akışa dönülüyor:', error.message);
-      await handleResolveProposalLegacy(type, proposalId, durum, redNedeni);
-      return;
-    }
-
-    await addLog(
-      durum === 'approved' ? 'onaylandi' : 'reddedildi',
-      `${type} talebi ${durum === 'approved' ? 'onaylandı' : 'reddedildi'}`
-    );
-    await fetchData();
-  }, [user, addLog, fetchData, handleResolveProposalLegacy]);
 
   // Talep geri cekme
   const handleWithdrawProposal = useCallback(async (type: 'degisiklik' | 'yeni_satir' | 'silme', proposalId: number) => {

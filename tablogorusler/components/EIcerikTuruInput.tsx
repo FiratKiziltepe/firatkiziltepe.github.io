@@ -1,7 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 
-const E_ICERIK_TURLERI = ['Video', 'Etkileşimli İçerik'];
+const E_ICERIK_TURLERI = [
+  'Video',
+  'Etkileşimli İçerik',
+  'Animasyon',
+  'Simülasyon',
+  'Infografik',
+  'E-Kitap',
+  'Podcast',
+  'Oyun',
+  'Artırılmış Gerçeklik',
+  'Sanal Gerçeklik',
+  'Doküman',
+  'Sunum',
+  'Test/Değerlendirme',
+  'Konu Anlatımı',
+  'Çalışma Yaprağı',
+  'Etkinlik',
+];
 
 interface EIcerikTuruInputProps {
   value: string;
@@ -23,15 +40,19 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
-        setInputText('');
+        // If there's text in input, add it as a tag
+        if (inputText.trim()) {
+          addTag(inputText.trim());
+          setInputText('');
+        }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [inputText, tags]);
 
   const addTag = (tag: string) => {
-    if (!E_ICERIK_TURLERI.includes(tag) || tags.includes(tag)) return;
+    if (!tag || tags.includes(tag)) return;
     const newTags = [...tags, tag];
     onChange(newTags.join('/'));
     setInputText('');
@@ -43,10 +64,10 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
-      if (filteredSuggestions.length > 0) {
-        addTag(filteredSuggestions[0]);
+      if (inputText.trim()) {
+        addTag(inputText.trim());
       }
     } else if (e.key === 'Backspace' && !inputText && tags.length > 0) {
       removeTag(tags.length - 1);
@@ -80,7 +101,7 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
           ref={inputRef}
           type="text"
           className="flex-1 min-w-[80px] outline-none text-xs font-bold px-1 py-0.5 bg-transparent"
-          placeholder={tags.length === 0 ? 'Yalnızca Video / Etkileşimli İçerik' : 'Filtrele...'}
+          placeholder={tags.length === 0 ? 'Tür seçin veya yazın...' : 'Ekle...'}
           value={inputText}
           onChange={e => { setInputText(e.target.value); setIsOpen(true); }}
           onFocus={() => setIsOpen(true)}

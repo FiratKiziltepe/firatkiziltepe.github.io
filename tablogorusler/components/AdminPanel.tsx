@@ -44,51 +44,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
   const HEADER_ROW_VALUES = ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ', 'Program Türü',
     'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu',
     'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'];
-  const REQUIRED_CANONICAL_FIELDS = ['ders_adi', 'unite_tema', 'kazanim'];
-
-  const normalizeHeader = (value: string) =>
-    value
-      .trim()
-      .toLocaleLowerCase('tr-TR')
-      .replace(/ı/g, 'i')
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/[\s\-\/]+/g, '_')
-      .replace(/[()]/g, '')
-      .replace(/_+/g, '_')
-      .replace(/^_|_$/g, '');
-
-  const KEY_ALIASES: Record<string, string[]> = {
-    sira_no: ['sira_no', 'sira_no_', 'sirano', 'sirano', 'sira', 'sira_numarasi'],
-    ders_adi: ['ders_adi', 'ders', 'dersadi'],
-    unite_tema: ['unite_tema', 'unite_tema_ogrenme_alani', 'unite_tema_ogrenme', 'unite', 'tema'],
-    kazanim: ['kazanim', 'kazanim_ogrenme_ciktisi_bolum', 'kazanim_cikti', 'kazanım', 'cikti'],
-    e_icerik_turu: ['e_icerik_turu', 'e_icerik', 'icerik_turu', 'e_icerik_turleri'],
-    aciklama: ['aciklama'],
-    program_turu: ['program_turu', 'program', 'program_tur'],
-  };
-
-  const toCanonicalKey = (rawKey: string) => {
-    const normalized = normalizeHeader(rawKey);
-    for (const [canonical, aliases] of Object.entries(KEY_ALIASES)) {
-      if (aliases.includes(normalized)) return canonical;
-    }
-    return null;
-  };
-
-  const normalizeProgramTuru = (value: unknown) => {
-    const raw = String(value ?? '').trim().toLocaleUpperCase('tr-TR');
-    if (raw === 'DİĞER' || raw === 'DIGER') return 'DİĞER';
-    return 'TYMM';
-  };
-
-  const normalizeEIcerikTuru = (value: unknown) => {
-    if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean).join('/');
-    return String(value ?? '').trim();
-  };
 
   useEffect(() => {
     supabase.from('e_icerikler').select('ders_adi').then(({ data }) => {
@@ -254,42 +209,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
         }
       }
 
-      // Dosya sütunlarını kanonik alanlara eşleştir
-      const providedCanonicalCols = new Set<string>();
-      jsonData.forEach((row: any) => {
-        Object.keys(row || {}).forEach((key) => {
-          const canonical = toCanonicalKey(key);
-          if (canonical) providedCanonicalCols.add(canonical);
-        });
-      });
-
-      const missingRequiredColumns = REQUIRED_CANONICAL_FIELDS.filter(col => !providedCanonicalCols.has(col));
-      if (missingRequiredColumns.length > 0) {
-        alert(`Eksik zorunlu sütun(lar): ${missingRequiredColumns.join(', ')}`);
-        setUploading(false);
-        return;
-      }
-
-      const canonicalRows = jsonData.map((row: any) => {
-        const mapped: Record<string, unknown> = {};
-        Object.entries(row || {}).forEach(([rawKey, rawValue]) => {
-          const canonical = toCanonicalKey(rawKey);
-          if (!canonical) return;
-          if (mapped[canonical] === undefined || mapped[canonical] === null || mapped[canonical] === '') {
-            mapped[canonical] = rawValue;
-          }
-        });
-        return mapped;
-      });
-
-      // Başlık/boş satırları filtrele
-      jsonData = canonicalRows.filter((row: any) => {
-        const dersAdi = String(row.ders_adi ?? '').trim();
-        const uniteTema = String(row.unite_tema ?? '').trim();
-        const kazanim = String(row.kazanim ?? '').trim();
-        if (!dersAdi && !uniteTema && !kazanim) return false;
-        if (HEADER_ROW_VALUES.includes(dersAdi)) return false;
-        return true;
+      // Başlık satırlarını filtrele (Excel'den dönüştürülmüş JSON'da olabilir)
+      const HEADER_VALUES = ['SIRA NO', 'DERS ADI', 'ÜNİTE/TEMA', 'KAZANIM', 'E-İÇERİK TÜRÜ', 'AÇIKLAMA', 'PROGRAM TÜRÜ', 'Program Türü',
+        'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu',
+        'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'];
+      jsonData = jsonData.filter((row: any) => {
+        // ders_adi veya DERS ADI değeri bir başlık ismiyse bu satır başlık satırıdır
+        const dersAdi = row.ders_adi || row['DERS ADI'] || '';
+        return !HEADER_VALUES.includes(dersAdi);
       });
 
       if (jsonData.length === 0) {
@@ -301,17 +228,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
       // Replace modunda önce tüm tabloyu sil
       if (uploadMode === 'replace') {
         setUploadProgress('Mevcut veriler siliniyor...');
-        // Önce bağlı tabloları temizle
-        const resetResults = await Promise.all([
+        // Önce önerileri sil
+        await Promise.all([
           supabase.from('degisiklik_onerileri').delete().neq('id', 0),
           supabase.from('yeni_satir_onerileri').delete().neq('id', 0),
           supabase.from('silme_talepleri').delete().neq('id', 0),
           supabase.from('degisiklik_loglari').delete().neq('id', 0),
         ]);
-        const resetError = resetResults.find(r => r.error)?.error;
-        if (resetError) throw resetError;
-        const { error: deleteMainError } = await supabase.from('e_icerikler').delete().neq('id', 0);
-        if (deleteMainError) throw deleteMainError;
+        await supabase.from('e_icerikler').delete().neq('id', 0);
       }
 
       // Batch insert (500'erli)
@@ -319,19 +243,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
       let inserted = 0;
       for (let i = 0; i < jsonData.length; i += BATCH) {
         const batch = jsonData.slice(i, i + BATCH).map((row: any, idx: number) => {
-          const siraNoRaw = row.sira_no;
-          const siraNo = siraNoRaw !== null && siraNoRaw !== undefined && siraNoRaw !== ''
-            ? (typeof siraNoRaw === 'number' ? siraNoRaw : parseInt(String(siraNoRaw), 10))
-            : (i + idx + 1);
+          // Sütun isimlerini esnek şekilde bul (Türkçe karakterler, büyük/küçük harf farkı)
+          const getValue = (keys: string[]) => {
+            for (const key of keys) {
+              if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+                return row[key];
+              }
+            }
+            return null;
+          };
+
+          // sira_no: integer'a çevir
+          const siraNoRaw = getValue(['sira_no', 'SIRA NO', 'SIRA_NO', 'siraNo', 'SiraNo']);
+          const siraNo = siraNoRaw !== null ? (typeof siraNoRaw === 'number' ? siraNoRaw : parseInt(String(siraNoRaw), 10)) : (i + idx + 1);
+          
+          // unite_tema: farklı sütun isimlerini dene
+          const uniteTema = getValue(['unite_tema', 'ÜNİTE/TEMA', 'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'uniteTema', 'UniteTema']) || '';
+          
+          // kazanim: farklı sütun isimlerini dene
+          const kazanim = getValue(['kazanim', 'KAZANIM/ÇIKTI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'kazanimCikti', 'KazanimCikti']) || '';
+          
+          // program_turu: büyük/küçük harf farkını dikkate al
+          const programTuru = getValue(['program_turu', 'PROGRAM TÜRÜ', 'Program Türü', 'programTuru', 'ProgramTuru']) || 'TYMM';
 
           return {
             sira_no: isNaN(siraNo) ? (i + idx + 1) : siraNo,
-            ders_adi: String(row.ders_adi ?? '').trim(),
-            unite_tema: String(row.unite_tema ?? '').trim(),
-            kazanim: String(row.kazanim ?? '').trim(),
-            e_icerik_turu: normalizeEIcerikTuru(row.e_icerik_turu),
-            aciklama: String(row.aciklama ?? '').trim(),
-            program_turu: normalizeProgramTuru(row.program_turu),
+            ders_adi: getValue(['ders_adi', 'DERS ADI', 'dersAdi', 'DersAdi']) || '',
+            unite_tema: uniteTema,
+            kazanim: kazanim,
+            e_icerik_turu: getValue(['e_icerik_turu', 'E-İÇERİK TÜRÜ', 'eIcerikTuru', 'EIcerikTuru']) || '',
+            aciklama: getValue(['aciklama', 'AÇIKLAMA', 'Aciklama']) || '',
+            program_turu: programTuru,
           };
         });
         const { error } = await supabase.from('e_icerikler').insert(batch);
