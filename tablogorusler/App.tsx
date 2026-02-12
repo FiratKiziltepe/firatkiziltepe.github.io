@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './context/AuthContext';
-import { Lock, Save, AlertCircle } from 'lucide-react';
+import { Lock, Save, AlertCircle, LogOut } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import type { EIcerik, DegisiklikOnerisi, YeniSatirOnerisi, SilmeTalebi, DegisiklikLogu, Profile } from './lib/supabase';
 import LoginPage from './components/LoginPage';
@@ -30,7 +30,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 500)
 }
 
 const App: React.FC = () => {
-  const { user, profile, loading, needsPasswordChange, changePassword } = useAuth();
+  const { user, profile, loading, needsPasswordChange, changePassword, signOut } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwError, setPwError] = useState('');
@@ -377,6 +377,12 @@ const App: React.FC = () => {
               className="w-full mt-6 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-black py-4 rounded-xl transition-all shadow-2xl shadow-amber-500/30 flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
               {pwLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={18} /> ŞİFREYİ DEĞİŞTİR</>}
+            </button>
+            <button
+              onClick={() => { signOut(); setNewPassword(''); setConfirmPassword(''); setPwError(''); }}
+              className="w-full mt-3 bg-transparent hover:bg-white/10 text-blue-300/70 hover:text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm border border-white/10"
+            >
+              <LogOut size={16} /> Çıkış Yap
             </button>
           </div>
         </div>
