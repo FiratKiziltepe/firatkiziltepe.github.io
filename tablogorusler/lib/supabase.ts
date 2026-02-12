@@ -13,6 +13,8 @@ export type Profile = {
   brans: string;
   rol: 'admin' | 'moderator' | 'teacher';
   atanan_dersler: string[];
+  sifre?: string | null;
+  sifre_degistirildi?: boolean;
   created_at: string;
   updated_at: string;
 };

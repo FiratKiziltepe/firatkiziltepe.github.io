@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './context/AuthContext';
+import { Lock, Save, AlertCircle } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import type { EIcerik, DegisiklikOnerisi, YeniSatirOnerisi, SilmeTalebi, DegisiklikLogu, Profile } from './lib/supabase';
 import LoginPage from './components/LoginPage';
@@ -29,7 +30,11 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 500)
 }
 
 const App: React.FC = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, needsPasswordChange, changePassword } = useAuth();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
   const [data, setData] = useState<EIcerik[]>([]);
   const [proposals, setProposals] = useState<DegisiklikOnerisi[]>([]);
   const [newRowProposals, setNewRowProposals] = useState<YeniSatirOnerisi[]>([]);
@@ -328,6 +333,55 @@ const App: React.FC = () => {
 
   if (!user || !profile) {
     return <LoginPage />;
+  }
+
+  // İlk giriş şifre değiştirme modalı
+  if (needsPasswordChange) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-2xl shadow-2xl shadow-amber-500/30 mb-4">
+              <Lock size={32} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Şifre Değiştirme</h1>
+            <p className="text-blue-300/70 text-sm font-medium">İlk girişinizde şifrenizi değiştirmeniz gerekmektedir.</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-8 shadow-2xl">
+            {pwError && (
+              <div className="flex items-center gap-3 bg-red-500/20 border border-red-400/30 text-red-200 px-4 py-3 rounded-xl mb-5 text-sm font-bold">
+                <AlertCircle size={16} /> {pwError}
+              </div>
+            )}
+            <div className="space-y-5">
+              <div>
+                <label className="text-[10px] font-black text-blue-300/60 uppercase tracking-[0.2em] ml-1 mb-1.5 block">Yeni Şifre</label>
+                <input type="password" className="w-full bg-white/10 border-2 border-white/10 text-white placeholder-white/30 p-3.5 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 outline-none transition-all" placeholder="En az 6 karakter" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-blue-300/60 uppercase tracking-[0.2em] ml-1 mb-1.5 block">Şifre Tekrar</label>
+                <input type="password" className="w-full bg-white/10 border-2 border-white/10 text-white placeholder-white/30 p-3.5 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 outline-none transition-all" placeholder="Şifreyi tekrar giriniz" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+              </div>
+            </div>
+            <button
+              disabled={pwLoading}
+              onClick={async () => {
+                setPwError('');
+                if (newPassword.length < 6) { setPwError('Şifre en az 6 karakter olmalıdır.'); return; }
+                if (newPassword !== confirmPassword) { setPwError('Şifreler eşleşmiyor!'); return; }
+                setPwLoading(true);
+                const { error } = await changePassword(newPassword);
+                if (error) setPwError(error);
+                setPwLoading(false);
+              }}
+              className="w-full mt-6 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-black py-4 rounded-xl transition-all shadow-2xl shadow-amber-500/30 flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+            >
+              {pwLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={18} /> ŞİFREYİ DEĞİŞTİR</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

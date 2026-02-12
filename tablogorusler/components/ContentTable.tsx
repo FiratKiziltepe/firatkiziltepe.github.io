@@ -174,10 +174,18 @@ const ContentTable: React.FC<ContentTableProps> = ({
       .sort((a, b) => trLessonCollator.compare(a, b)),
     [data, HEADER_VALUES, trLessonCollator]);
 
-  // Pending new row proposals (filtered)
+  // Yeni satır düzenleme state
+  const [editNewRowModal, setEditNewRowModal] = useState<{ open: boolean; proposal: YeniSatirOnerisi | null }>({ open: false, proposal: null });
+  const [editNewRowForm, setEditNewRowForm] = useState<Record<string, string>>({});
+
+  // Pending new row proposals (filtered) - ders atamasına göre de filtrele
   const pendingNewRows = useMemo(() => {
     return newRowProposals.filter(p => {
       if (p.durum !== 'pending') return false;
+      // Öğretmenler sadece kendi atanmış derslerindeki önerileri görsün
+      if (profile.rol !== 'admin' && profile.atanan_dersler.length > 0) {
+        if (!profile.atanan_dersler.includes(p.ders_adi)) return false;
+      }
       const matchLesson = !lessonFilter || p.ders_adi === lessonFilter;
       const matchProgram = programFilter === 'Tümü' || p.program_turu === programFilter;
       // Arama en az 3 karakter girildiğinde aktif olur
@@ -185,7 +193,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchLesson && matchProgram && matchSearch;
     });
-  }, [newRowProposals, lessonFilter, programFilter, searchTerm]);
+  }, [newRowProposals, lessonFilter, programFilter, searchTerm, profile]);
 
   // Öneri olan satır ID'leri seti (performans için)
   const rowsWithProposals = useMemo(() => {
@@ -558,55 +566,55 @@ const ContentTable: React.FC<ContentTableProps> = ({
       {/* Tablo */}
       <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1400px]">
+          <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
               <tr className="bg-slate-700 text-white">
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 w-16 text-center uppercase tracking-wider">
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 w-12 text-center uppercase tracking-wider">
                   SIRA
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[160px] cursor-pointer hover:bg-slate-600 transition-colors select-none" onClick={() => handleSort('ders_adi')}>
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[120px] cursor-pointer hover:bg-slate-600 transition-colors select-none" onClick={() => handleSort('ders_adi')}>
                   <div className="flex items-center gap-1">
                     DERS ADI
-                    {sortConfig?.key === 'ders_adi' ? (sortConfig.direction === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} className="opacity-30" />}
+                    {sortConfig?.key === 'ders_adi' ? (sortConfig.direction === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />) : <ArrowUpDown size={11} className="opacity-30" />}
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[180px]">
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[130px]">
                   ÜNİTE/TEMA
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[280px]">
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[200px]">
                   KAZANIM/ÇIKTI
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider w-40">
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 uppercase tracking-wider w-32">
                   E-İÇERİK TÜRÜ
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[200px]">
+                <th className="px-3 py-4 text-[10px] font-bold border-r border-slate-600 uppercase tracking-wider min-w-[160px]">
                   AÇIKLAMA
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-center uppercase tracking-wider w-[220px]">İŞLEMLER</th>
+                <th className="px-3 py-4 text-[10px] font-bold text-center uppercase tracking-wider w-[180px] sticky right-0 bg-slate-700 z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">İŞLEMLER</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {/* YENİ SATIR EKLEME */}
               {isAdding && (
                 <tr className="bg-blue-50/70 border-l-8 border-blue-500">
-                  <td className="px-4 py-4 text-sm font-black text-blue-600 text-center italic">YENİ</td>
-                  <td className="px-4 py-4">
-                    <select className="w-full border-2 border-blue-300 p-2 rounded-xl text-sm font-bold bg-white" value={addForm.ders_adi || ''} onChange={e => setAddForm({ ...addForm, ders_adi: e.target.value })}>
+                  <td className="px-3 py-3 text-xs font-black text-blue-600 text-center italic">YENİ</td>
+                  <td className="px-3 py-3">
+                    <select className="w-full border-2 border-blue-300 p-1.5 rounded-lg text-xs font-bold bg-white" value={addForm.ders_adi || ''} onChange={e => setAddForm({ ...addForm, ders_adi: e.target.value })}>
                       <option value="">Ders Seç...</option>
                       {(profile.rol === 'admin' ? allLessons : profile.atanan_dersler).map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                   </td>
-                  <td className="px-4 py-4"><input className="w-full border-2 border-blue-300 p-2 rounded-xl text-sm font-bold bg-white" placeholder="Ünite / Tema" value={addForm.unite_tema || ''} onChange={e => setAddForm({ ...addForm, unite_tema: e.target.value })} /></td>
-                  <td className="px-4 py-4"><textarea className="w-full border-2 border-blue-300 p-2 rounded-xl text-sm font-bold h-20 bg-white resize-none" placeholder="Kazanım" value={addForm.kazanim || ''} onChange={e => setAddForm({ ...addForm, kazanim: e.target.value })} /></td>
-                  <td className="px-4 py-4"><EIcerikTuruInput value={addForm.e_icerik_turu || ''} onChange={v => setAddForm({ ...addForm, e_icerik_turu: v })} /></td>
-                  <td className="px-4 py-4">
-                    <textarea className="w-full border-2 border-blue-300 p-2 rounded-xl text-xs h-14 bg-white resize-none" placeholder="Açıklama" value={addForm.aciklama || ''} onChange={e => setAddForm({ ...addForm, aciklama: e.target.value })} />
-                    <textarea className="w-full border border-dashed border-amber-300 bg-amber-50/50 p-2 rounded-xl text-xs h-10 resize-none mt-1 placeholder:text-amber-300" placeholder="Gerekçe (isteğe bağlı)" value={addForm.gerekce || ''} onChange={e => setAddForm({ ...addForm, gerekce: e.target.value })} />
+                  <td className="px-3 py-3"><input className="w-full border-2 border-blue-300 p-1.5 rounded-lg text-xs font-bold bg-white" placeholder="Ünite / Tema" value={addForm.unite_tema || ''} onChange={e => setAddForm({ ...addForm, unite_tema: e.target.value })} /></td>
+                  <td className="px-3 py-3"><textarea className="w-full border-2 border-blue-300 p-1.5 rounded-lg text-xs font-bold h-16 bg-white resize-none" placeholder="Kazanım" value={addForm.kazanim || ''} onChange={e => setAddForm({ ...addForm, kazanim: e.target.value })} /></td>
+                  <td className="px-3 py-3"><EIcerikTuruInput value={addForm.e_icerik_turu || ''} onChange={v => setAddForm({ ...addForm, e_icerik_turu: v })} /></td>
+                  <td className="px-3 py-3">
+                    <textarea className="w-full border-2 border-blue-300 p-1.5 rounded-lg text-xs h-12 bg-white resize-none" placeholder="Açıklama" value={addForm.aciklama || ''} onChange={e => setAddForm({ ...addForm, aciklama: e.target.value })} />
+                    <textarea className="w-full border border-dashed border-amber-300 bg-amber-50/50 p-1.5 rounded-lg text-xs h-8 resize-none mt-1 placeholder:text-amber-300" placeholder="Gerekçe (isteğe bağlı)" value={addForm.gerekce || ''} onChange={e => setAddForm({ ...addForm, gerekce: e.target.value })} />
                   </td>
-                  <td className="px-4 py-4 text-center">
-                    <div className="flex flex-col gap-2 w-full max-w-[130px] mx-auto">
-                      <button onClick={handleAddRow} className="w-full flex items-center justify-center gap-1 bg-[#00966d] text-white px-3 py-2 rounded-xl text-[10px] font-black hover:brightness-110 transition-all uppercase tracking-widest"><Check size={14} /> EKLE</button>
-                      <button onClick={() => setIsAdding(false)} className="w-full flex items-center justify-center gap-1 bg-[#e5e7eb] text-slate-600 px-3 py-2 rounded-xl text-[10px] font-black hover:bg-slate-300 transition-all uppercase tracking-widest"><X size={14} /> VAZGEÇ</button>
+                  <td className="px-3 py-3 text-center sticky right-0 bg-blue-50 z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                    <div className="flex flex-col gap-1.5 w-full max-w-[120px] mx-auto">
+                      <button onClick={handleAddRow} className="w-full flex items-center justify-center gap-1 bg-[#00966d] text-white px-2 py-1.5 rounded-lg text-[9px] font-black hover:brightness-110 transition-all uppercase tracking-widest"><Check size={12} /> EKLE</button>
+                      <button onClick={() => setIsAdding(false)} className="w-full flex items-center justify-center gap-1 bg-[#e5e7eb] text-slate-600 px-2 py-1.5 rounded-lg text-[9px] font-black hover:bg-slate-300 transition-all uppercase tracking-widest"><X size={12} /> VAZGEÇ</button>
                     </div>
                   </td>
                 </tr>
@@ -706,33 +714,33 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     (showChanges && hasResolvedProposals) ? 'bg-blue-50/30 border-l-4 border-blue-200' :
                     'hover:bg-slate-50/50'
                   }`}>
-                    <td className="px-4 py-4 text-sm font-black text-slate-500 text-center">
+                    <td className="px-3 py-3 text-xs font-black text-slate-500 text-center">
                       {isDeleting ? <span className="line-through text-red-400">{row.sira_no}</span> : row.sira_no}
                     </td>
 
                     {/* DERS ADI */}
-                    <td className="px-4 py-4">
-                      <span className={`text-sm font-extrabold ${isDeleting ? 'line-through text-red-300' : 'text-slate-800'}`}>
-                        {renderFieldCell('ders_adi', row.ders_adi, `text-sm font-extrabold ${isDeleting ? 'line-through text-red-300' : 'text-slate-800'}`)}
+                    <td className="px-3 py-3">
+                      <span className={`text-xs font-extrabold ${isDeleting ? 'line-through text-red-300' : 'text-slate-800'}`}>
+                        {renderFieldCell('ders_adi', row.ders_adi, `text-xs font-extrabold ${isDeleting ? 'line-through text-red-300' : 'text-slate-800'}`)}
                         </span>
                     </td>
 
                     {/* ÜNİTE */}
-                    <td className="px-4 py-4">
-                      <div className="text-sm font-black text-blue-600 uppercase">
-                        {renderFieldCell('unite_tema', row.unite_tema || '', 'text-sm font-black text-blue-600 uppercase')}
+                    <td className="px-3 py-3">
+                      <div className="text-xs font-black text-blue-600 uppercase">
+                        {renderFieldCell('unite_tema', row.unite_tema || '', 'text-xs font-black text-blue-600 uppercase')}
                         </div>
                     </td>
 
                     {/* KAZANIM */}
-                    <td className="px-4 py-4">
-                      <div className="text-sm font-bold text-slate-700 leading-relaxed">
-                        {renderFieldCell('kazanim', row.kazanim || '', 'text-sm font-bold text-slate-700 leading-relaxed')}
+                    <td className="px-3 py-3">
+                      <div className="text-xs font-bold text-slate-700 leading-relaxed">
+                        {renderFieldCell('kazanim', row.kazanim || '', 'text-xs font-bold text-slate-700 leading-relaxed')}
                         </div>
                     </td>
 
                     {/* E-İÇERİK TÜRÜ */}
-                    <td className="px-4 py-4">
+                    <td className="px-3 py-3">
                       <div className="flex flex-wrap gap-1">
                         {(() => {
                           const cleanTags = (row.e_icerik_turu || '').split('/').filter(s => s.trim()).map((ec, i) => (
@@ -807,14 +815,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     </td>
 
                     {/* AÇIKLAMA */}
-                    <td className="px-4 py-4">
+                    <td className="px-3 py-3">
                       <div className="text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line">
                         {renderFieldCell('aciklama', row.aciklama || '', 'text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line')}
                         </div>
                     </td>
 
                     {/* İŞLEMLER */}
-                    <td className="px-4 py-4 text-center">
+                    <td className={`px-3 py-3 text-center sticky right-0 z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.05)] ${
+                      isDeleting ? 'bg-red-50' : hasChanges ? 'bg-[#fefce8]' : (showChanges && hasResolvedProposals) ? 'bg-blue-50' : 'bg-white'
+                    }`}>
                       <div className="flex flex-col items-center gap-2">
                         {isDeleting ? (
                           <div className="space-y-2 w-full max-w-[220px]">
@@ -945,36 +955,36 @@ const ContentTable: React.FC<ContentTableProps> = ({
               {/* YENİ SATIR ÖNERİLERİ - tablonun içinde */}
               {pendingNewRows.map(proposal => (
                 <tr key={`new-${proposal.id}`} className="bg-emerald-50/70 border-l-8 border-emerald-500 transition-all duration-300">
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-3 py-3 text-center">
                     <span className="text-xs font-black text-emerald-600 italic">+</span>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="text-sm font-extrabold text-emerald-700">{proposal.ders_adi}</span>
+                  <td className="px-3 py-3">
+                    <span className="text-xs font-extrabold text-emerald-700">{proposal.ders_adi}</span>
                   </td>
-                  <td className="px-4 py-4">
-                    <p className="text-sm font-black text-emerald-600 uppercase">{proposal.unite_tema}</p>
+                  <td className="px-3 py-3">
+                    <p className="text-xs font-black text-emerald-600 uppercase">{proposal.unite_tema}</p>
                   </td>
-                  <td className="px-4 py-4">
-                    <p className="text-sm font-bold text-emerald-700 leading-relaxed">{proposal.kazanim}</p>
+                  <td className="px-3 py-3">
+                    <p className="text-xs font-bold text-emerald-700 leading-relaxed">{proposal.kazanim}</p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3">
                     <div className="flex flex-wrap gap-1">
                       {(proposal.e_icerik_turu || '').split('/').map((ec, i) => (
                         <span key={i} className="px-2 py-0.5 bg-emerald-100 border border-emerald-200 text-[9px] font-black text-emerald-600 rounded-md uppercase">{ec.trim()}</span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3">
                     <div className="text-[11px] leading-relaxed italic text-emerald-600">{proposal.aciklama}</div>
                     {proposal.gerekce && (
                       <p className="text-[9px] text-amber-600 italic mt-1 bg-amber-50 px-1.5 py-0.5 rounded">💬 {proposal.gerekce}</p>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center">
-                    <div className="flex flex-col items-center gap-2 w-full max-w-[200px] mx-auto">
-                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 border border-emerald-200 rounded-full">
-                        <Plus size={12} className="text-emerald-600" />
-                        <span className="text-[10px] font-black text-emerald-700 uppercase">Yeni satır önerisi</span>
+                  <td className="px-3 py-3 text-center sticky right-0 bg-emerald-50 z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                    <div className="flex flex-col items-center gap-2 w-full max-w-[180px] mx-auto">
+                      <div className="flex items-center gap-2 px-2 py-1.5 bg-emerald-100 border border-emerald-200 rounded-full">
+                        <Plus size={11} className="text-emerald-600" />
+                        <span className="text-[9px] font-black text-emerald-700 uppercase">Yeni satır</span>
                       </div>
                       <p className="text-[9px] text-slate-400">Öneren: {getUserName(proposal.user_id)}</p>
 
@@ -987,7 +997,21 @@ const ContentTable: React.FC<ContentTableProps> = ({
                       )}
 
                       {proposal.user_id === profile.id && !canModerate && (
-                        <button onClick={() => setWithdrawModal({ open: true, type: 'yeni_satir', id: proposal.id, alan: 'Yeni Satır' })} className="w-full flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-[10px] font-black hover:bg-slate-200 transition-all"><Undo size={12} /> İPTAL ET</button>
+                        <div className="flex gap-1 w-full">
+                          <button onClick={() => {
+                            setEditNewRowForm({
+                              ders_adi: proposal.ders_adi || '',
+                              unite_tema: proposal.unite_tema || '',
+                              kazanim: proposal.kazanim || '',
+                              e_icerik_turu: proposal.e_icerik_turu || '',
+                              aciklama: proposal.aciklama || '',
+                              program_turu: proposal.program_turu || 'TYMM',
+                              gerekce: proposal.gerekce || '',
+                            });
+                            setEditNewRowModal({ open: true, proposal });
+                          }} className="flex-1 flex items-center justify-center gap-1 bg-blue-100 text-blue-700 px-2 py-2 rounded-xl text-[9px] font-black hover:bg-blue-200 transition-all"><Edit2 size={11} /> DÜZENLE</button>
+                          <button onClick={() => setWithdrawModal({ open: true, type: 'yeni_satir', id: proposal.id, alan: 'Yeni Satır' })} className="flex-1 flex items-center justify-center gap-1 bg-slate-100 text-slate-600 px-2 py-2 rounded-xl text-[9px] font-black hover:bg-slate-200 transition-all"><Undo size={11} /> İPTAL</button>
+                        </div>
                       )}
                     </div>
                   </td>
@@ -1291,6 +1315,72 @@ const ContentTable: React.FC<ContentTableProps> = ({
               <div className="flex gap-4">
                 <button onClick={confirmReject} className="flex-1 bg-red-600 hover:brightness-110 text-white font-black py-4 rounded-[1.5rem] transition-all shadow-xl shadow-red-200 uppercase tracking-widest text-xs">REDDET</button>
                 <button onClick={() => setRejectModal({ open: false, type: '', id: null })} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-4 rounded-[1.5rem] transition-all uppercase tracking-widest text-xs">VAZGEÇ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Yeni Satır Düzenleme Modalı (öğretmen kendi önerisini düzenler) */}
+      {editNewRowModal.open && editNewRowModal.proposal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-slate-200">
+            <div className="sticky top-0 z-10 bg-white border-b border-slate-100 px-5 py-3 flex items-center justify-between">
+              <span className="text-sm font-black text-emerald-700">Yeni Satır Önerisini Düzenle</span>
+              <button onClick={() => setEditNewRowModal({ open: false, proposal: null })} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"><X size={18} /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="grid grid-cols-12 gap-3">
+                <div className="col-span-5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">DERS ADI</label>
+                  <select className="w-full border border-slate-200 px-3 py-2 rounded-lg text-sm font-bold" value={editNewRowForm.ders_adi || ''} onChange={e => setEditNewRowForm({ ...editNewRowForm, ders_adi: e.target.value })}>
+                    <option value="">Ders Seç...</option>
+                    {(profile.rol === 'admin' ? allLessons : profile.atanan_dersler).map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">PROGRAM</label>
+                  <select className="w-full border border-slate-200 px-3 py-2 rounded-lg text-sm font-bold" value={editNewRowForm.program_turu || 'TYMM'} onChange={e => setEditNewRowForm({ ...editNewRowForm, program_turu: e.target.value })}>
+                    <option value="TYMM">TYMM</option>
+                    <option value="DİĞER">DİĞER</option>
+                  </select>
+                </div>
+                <div className="col-span-5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">ÜNİTE / TEMA</label>
+                  <input className="w-full border border-slate-200 px-3 py-2 rounded-lg text-sm font-bold" value={editNewRowForm.unite_tema || ''} onChange={e => setEditNewRowForm({ ...editNewRowForm, unite_tema: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-12 gap-3">
+                <div className="col-span-8">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">KAZANIM / ÇIKTI</label>
+                  <textarea className="w-full border border-slate-200 px-3 py-2 rounded-lg text-sm font-medium resize-none h-20" value={editNewRowForm.kazanim || ''} onChange={e => setEditNewRowForm({ ...editNewRowForm, kazanim: e.target.value })} />
+                </div>
+                <div className="col-span-4">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">E-İÇERİK TÜRÜ</label>
+                  <EIcerikTuruInput value={editNewRowForm.e_icerik_turu || ''} onChange={v => setEditNewRowForm({ ...editNewRowForm, e_icerik_turu: v })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">AÇIKLAMA</label>
+                <textarea className="w-full border border-slate-200 px-3 py-2 rounded-lg text-sm font-medium resize-y min-h-[80px]" value={editNewRowForm.aciklama || ''} onChange={e => setEditNewRowForm({ ...editNewRowForm, aciklama: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">GEREKÇE <span className="text-slate-300 normal-case font-medium">(isteğe bağlı)</span></label>
+                <textarea className="w-full border border-dashed border-slate-300 bg-slate-50/50 px-3 py-2 rounded-lg text-sm font-medium resize-none h-14 placeholder:text-slate-300" placeholder="Neden bu satırı ekliyorsunuz?" value={editNewRowForm.gerekce || ''} onChange={e => setEditNewRowForm({ ...editNewRowForm, gerekce: e.target.value })} />
+              </div>
+              <div className="flex gap-3 pt-3 border-t border-slate-100">
+                <button
+                  onClick={async () => {
+                    if (onUpdateProposal && editNewRowModal.proposal) {
+                      await onUpdateProposal('yeni_satir', editNewRowModal.proposal.id, editNewRowForm);
+                      setEditNewRowModal({ open: false, proposal: null });
+                    }
+                  }}
+                  className="flex-1 bg-emerald-600 hover:brightness-110 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-emerald-200 uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                >
+                  <Save size={14} /> KAYDET
+                </button>
+                <button onClick={() => setEditNewRowModal({ open: false, proposal: null })} className="px-8 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs">VAZGEÇ</button>
               </div>
             </div>
           </div>

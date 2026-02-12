@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { Profile, DegisiklikLogu, EIcerik } from '../lib/supabase';
 import { supabase, SUPABASE_URL } from '../lib/supabase';
-import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson, FileSpreadsheet } from 'lucide-react';
+import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson, FileSpreadsheet, Key, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface AdminPanelProps {
@@ -27,6 +27,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
   const [editUser, setEditUser] = useState<Partial<Profile>>({});
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  // Şifre yönetimi
+  const [showPasswordModal, setShowPasswordModal] = useState<{ open: boolean; user: Profile | null }>({ open: false, user: null });
+  const [newPasswordValue, setNewPasswordValue] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [resetAllPwModal, setResetAllPwModal] = useState(false);
+  const [resetAllPwLoading, setResetAllPwLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
 
   // DB CRUD states
   const [showDeleteLessonModal, setShowDeleteLessonModal] = useState(false);
@@ -311,6 +320,55 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
     setResetting(false);
   };
 
+  const handleAdminChangePassword = async () => {
+    if (!showPasswordModal.user || !newPasswordValue || newPasswordValue.length < 6) return;
+    setPasswordSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ action: 'admin_change_password', user_id: showPasswordModal.user.id, new_password: newPasswordValue }),
+      });
+      const result = await res.json();
+      if (!res.ok) { alert('Hata: ' + (result.error || 'Şifre değiştirilemedi')); }
+      else {
+        alert('Şifre başarıyla değiştirildi!');
+        setShowPasswordModal({ open: false, user: null });
+        setNewPasswordValue('');
+        await onRefresh();
+      }
+    } catch (err: any) { alert('Bağlantı hatası: ' + err.message); }
+    setPasswordSaving(false);
+  };
+
+  const handleResetAllPasswords = async () => {
+    setResetAllPwLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ action: 'reset_all_passwords' }),
+      });
+      const result = await res.json();
+      if (!res.ok) { alert('Hata: ' + (result.error || 'Sıfırlama başarısız')); }
+      else {
+        const msg = `${result.updated}/${result.total} kullanıcının şifresi sıfırlandı.${result.errors?.length > 0 ? '\n\nHatalar:\n' + result.errors.join('\n') : ''}`;
+        alert(msg);
+        setResetAllPwModal(false);
+        await onRefresh();
+      }
+    } catch (err: any) { alert('Bağlantı hatası: ' + err.message); }
+    setResetAllPwLoading(false);
+  };
+
+  const filteredUsers = useMemo(() => {
+    if (!userSearch) return users;
+    const term = userSearch.toLowerCase();
+    return users.filter(u => u.ad_soyad.toLowerCase().includes(term) || u.kullanici_adi.toLowerCase().includes(term) || u.brans.toLowerCase().includes(term));
+  }, [users, userSearch]);
+
   const rolLabels: Record<string, string> = { admin: 'ADMİN', moderator: 'MODERATÖR', teacher: 'ÖĞRETMEN' };
   const rolColors: Record<string, string> = { admin: 'bg-purple-100 text-purple-700', moderator: 'bg-amber-100 text-amber-700', teacher: 'bg-blue-100 text-blue-700' };
 
@@ -342,27 +400,40 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Kullanıcı Yönetimi */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
+          <div className="flex items-center justify-between px-2 flex-wrap gap-2">
             <h3 className="text-lg font-black text-slate-700 flex items-center gap-3"><Users size={22} className="text-blue-600" /> Kullanıcı Yönetimi</h3>
-            <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-black rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-100 shadow-sm flex items-center gap-2 uppercase tracking-widest">
-              <UserPlus size={14} /> Yeni Ekle
-            </button>
+            <div className="flex gap-2 flex-wrap">
+              <div className="relative">
+                <input type="text" placeholder="Kullanıcı ara..." className="border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-medium w-44 focus:ring-2 focus:ring-blue-400 outline-none" value={userSearch} onChange={e => setUserSearch(e.target.value)} />
+                <Search size={13} className="absolute left-2.5 top-2.5 text-slate-400" />
+              </div>
+              <button onClick={() => setShowPasswords(!showPasswords)} className={`px-3 py-2 text-xs font-black rounded-xl border flex items-center gap-1.5 transition-all ${showPasswords ? 'bg-amber-500 text-white border-amber-500' : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-500 hover:text-white'}`}>
+                {showPasswords ? <EyeOff size={13} /> : <Eye size={13} />} Şifreler
+              </button>
+              <button onClick={() => setResetAllPwModal(true)} className="px-3 py-2 bg-orange-50 text-orange-600 text-xs font-black rounded-xl hover:bg-orange-500 hover:text-white transition-all border border-orange-200 flex items-center gap-1.5">
+                <RefreshCw size={13} /> Tüm Şifreleri Sıfırla
+              </button>
+              <button onClick={() => setShowModal(true)} className="px-3 py-2 bg-blue-50 text-blue-600 text-xs font-black rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-100 flex items-center gap-1.5">
+                <UserPlus size={13} /> Yeni Ekle
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kullanıcı / Branş</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Rol</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dersler</th>
-                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">İşlem</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kullanıcı / Branş</th>
+                  <th className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Rol</th>
+                  {showPasswords && <th className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Şifre</th>}
+                  <th className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dersler</th>
+                  <th className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">İşlem</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {users.map(u => (
+                {filteredUsers.map(u => (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       {editingUserId === u.id ? (
                         <div className="space-y-1">
                           <input className="w-full border border-blue-300 p-1 rounded text-sm font-bold" value={editUser.ad_soyad || ''} onChange={e => setEditUser({ ...editUser, ad_soyad: e.target.value })} />
@@ -375,7 +446,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                         </>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-3 py-3 text-center">
                       {editingUserId === u.id ? (
                         <select className="border border-blue-300 p-1 rounded text-xs font-bold" value={editUser.rol || 'teacher'} onChange={e => setEditUser({ ...editUser, rol: e.target.value as any })}>
                           <option value="teacher">Öğretmen</option>
@@ -383,28 +454,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                           <option value="admin">Admin</option>
                         </select>
                       ) : (
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${rolColors[u.rol]}`}>{rolLabels[u.rol]}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter ${rolColors[u.rol]}`}>{rolLabels[u.rol]}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    {showPasswords && (
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-1">
+                          <code className="text-[11px] font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">{u.sifre || '—'}</code>
+                          <button onClick={() => { setShowPasswordModal({ open: true, user: u }); setNewPasswordValue(''); }} className="p-1 bg-amber-50 text-amber-600 rounded hover:bg-amber-500 hover:text-white transition-all" title="Şifre Değiştir"><Key size={11} /></button>
+                        </div>
+                        {u.sifre_degistirildi && <span className="text-[8px] text-emerald-500 font-bold">✓ Değiştirildi</span>}
+                      </td>
+                    )}
+                    <td className="px-3 py-3">
                       <div className="flex flex-wrap gap-1">
                         {u.atanan_dersler.length > 0 ? u.atanan_dersler.slice(0, 3).map(l => (
-                          <span key={l} className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-black rounded-md border border-slate-200 uppercase">{l}</span>
+                          <span key={l} className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[8px] font-black rounded-md border border-slate-200 uppercase">{l}</span>
                         )) : <span className="text-[10px] text-slate-300 italic">—</span>}
-                        {u.atanan_dersler.length > 3 && <span className="text-[10px] text-blue-500 font-bold">+{u.atanan_dersler.length - 3}</span>}
+                        {u.atanan_dersler.length > 3 && <span className="text-[9px] text-blue-500 font-bold">+{u.atanan_dersler.length - 3}</span>}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-center">
+                    <td className="px-3 py-3 text-center">
                       <div className="flex gap-1 justify-center">
                         {editingUserId === u.id ? (
                           <>
-                            <button onClick={handleSaveUserEdit} className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"><Save size={14} /></button>
-                            <button onClick={() => setEditingUserId(null)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-all"><X size={14} /></button>
+                            <button onClick={handleSaveUserEdit} className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"><Save size={13} /></button>
+                            <button onClick={() => setEditingUserId(null)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-all"><X size={13} /></button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => startEditUser(u)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all" title="Düzenle"><Edit2 size={14} /></button>
-                            <button onClick={() => openAssignModal(u)} className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all" title="Ders Ata"><BookOpen size={14} /></button>
+                            <button onClick={() => startEditUser(u)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all" title="Düzenle"><Edit2 size={13} /></button>
+                            <button onClick={() => openAssignModal(u)} className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all" title="Ders Ata"><BookOpen size={13} /></button>
+                            <button onClick={() => { setShowPasswordModal({ open: true, user: u }); setNewPasswordValue(''); }} className="p-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-500 hover:text-white transition-all" title="Şifre Değiştir"><Key size={13} /></button>
                           </>
                         )}
                       </div>
@@ -722,6 +803,64 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                 >
                   İPTAL
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Şifre Değiştirme Modalı */}
+      {showPasswordModal.open && showPasswordModal.user && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                  <Key size={28} className="text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Şifre Değiştir</h3>
+                  <p className="text-xs text-slate-400 font-bold">{showPasswordModal.user.ad_soyad} — {showPasswordModal.user.kullanici_adi}</p>
+                </div>
+              </div>
+              {showPasswordModal.user.sifre && (
+                <div className="bg-slate-50 rounded-xl p-3 mb-4">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Mevcut Şifre</p>
+                  <code className="text-sm font-mono font-bold text-slate-700">{showPasswordModal.user.sifre}</code>
+                </div>
+              )}
+              <div className="mb-6">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 block">Yeni Şifre (en az 6 karakter)</label>
+                <input type="text" className="w-full border-2 border-slate-100 p-3 rounded-xl font-bold text-sm focus:ring-2 focus:ring-amber-200 outline-none" placeholder="Yeni şifre..." value={newPasswordValue} onChange={e => setNewPasswordValue(e.target.value)} />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={handleAdminChangePassword} disabled={!newPasswordValue || newPasswordValue.length < 6 || passwordSaving} className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-amber-200 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+                  {passwordSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Key size={14} /> DEĞİŞTİR</>}
+                </button>
+                <button onClick={() => setShowPasswordModal({ open: false, user: null })} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs">İPTAL</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tüm Şifreleri Sıfırla Modalı */}
+      {resetAllPwModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <RefreshCw size={32} className="text-orange-600" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Tüm Şifreleri Sıfırla</h3>
+              <p className="text-sm text-slate-500 font-medium mb-6 leading-relaxed">
+                Tüm kullanıcıların şifreleri <strong>kullanıcı adlarıyla aynı</strong> olarak sıfırlanacak. Kullanıcılar bir sonraki girişte şifrelerini değiştirmeleri istenecektir.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={handleResetAllPasswords} disabled={resetAllPwLoading} className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+                  {resetAllPwLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><RefreshCw size={14} /> SIFIRLA</>}
+                </button>
+                <button onClick={() => setResetAllPwModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs">İPTAL</button>
               </div>
             </div>
           </div>
