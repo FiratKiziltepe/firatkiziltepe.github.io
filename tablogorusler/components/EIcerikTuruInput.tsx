@@ -27,7 +27,7 @@ const EIcerikTuruInput: React.FC<EIcerikTuruInputProps> = ({ value, onChange, cl
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
-        setInputText('');
+          setInputText('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
