@@ -21,9 +21,9 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, dataCount, pendingCount,
     { label: 'Kayıtlı Kullanıcı', value: users.length || '-', icon: <CheckCircle className="text-emerald-600" />, color: 'bg-emerald-50' },
   ];
 
-  // Öğretmenler için "Kayıtlı Kullanıcı" kartını gizle
+  // Öğretmenler için "Kayıtlı Kullanıcı" ve "Bekleyen Talepler" kartlarını gizle
   const stats = profile.rol === 'teacher'
-    ? allStats.filter(s => s.label !== 'Kayıtlı Kullanıcı')
+    ? allStats.filter(s => s.label !== 'Kayıtlı Kullanıcı' && s.label !== 'Bekleyen Talepler')
     : allStats;
 
   // Öğretmenler sadece kendi aktivitelerini görsün
@@ -44,7 +44,7 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, dataCount, pendingCount,
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 md:grid-cols-2 ${stats.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${stats.length <= 2 ? 'lg:grid-cols-2' : stats.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-4">
             <div className={`${stat.color} p-3 rounded-xl`}>{stat.icon}</div>
