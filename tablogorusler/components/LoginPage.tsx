@@ -29,8 +29,7 @@ const LoginPage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-3xl shadow-2xl shadow-blue-500/30 mb-6">
             <BookOpen size={40} className="text-white" />
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">E-İçerik İnceleme Sistemi</h1>
-          <p className="text-blue-300/70 text-sm font-medium">Müfredat Düzenleme ve Onay Platformu</p>
+          <h1 className="text-3xl font-black text-white tracking-tight mb-2">E-İçerik Tablosu Görüş Sistemi</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl">
@@ -85,9 +84,6 @@ const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <p className="text-center text-blue-400/40 text-xs mt-8 font-bold">
-          Eğitim Materyalleri İnceleme Sistemi v2.0
-        </p>
       </div>
     </div>
   );

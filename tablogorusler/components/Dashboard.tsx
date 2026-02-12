@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Profile, DegisiklikLogu } from '../lib/supabase';
 import { FileText, Clock, AlertCircle, CheckCircle, History } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
   profile: Profile;
@@ -11,12 +12,27 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ profile, dataCount, pendingCount, logs, users }) => {
-  const stats = [
+  const { user } = useAuth();
+
+  const allStats = [
     { label: 'İncelenen Ders Sayısı', value: profile.atanan_dersler.length || 'Tümü', icon: <FileText className="text-blue-600" />, color: 'bg-blue-50' },
     { label: 'Toplam İçerik Satırı', value: dataCount, icon: <Clock className="text-purple-600" />, color: 'bg-purple-50' },
     { label: 'Bekleyen Talepler', value: pendingCount, icon: <AlertCircle className="text-amber-600" />, color: 'bg-amber-50' },
     { label: 'Kayıtlı Kullanıcı', value: users.length || '-', icon: <CheckCircle className="text-emerald-600" />, color: 'bg-emerald-50' },
   ];
+
+  // Öğretmenler için "Kayıtlı Kullanıcı" kartını gizle
+  const stats = profile.rol === 'teacher'
+    ? allStats.filter(s => s.label !== 'Kayıtlı Kullanıcı')
+    : allStats;
+
+  // Öğretmenler sadece kendi aktivitelerini görsün
+  const filteredLogs = useMemo(() => {
+    if (profile.rol === 'teacher' && user) {
+      return logs.filter(log => log.user_id === user.id);
+    }
+    return logs;
+  }, [logs, profile.rol, user]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -28,7 +44,7 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, dataCount, pendingCount,
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${stats.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-4">
             <div className={`${stat.color} p-3 rounded-xl`}>{stat.icon}</div>
@@ -47,7 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({ profile, dataCount, pendingCount,
           </h3>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="divide-y divide-gray-50">
-              {logs.length > 0 ? logs.map((log) => (
+              {filteredLogs.length > 0 ? filteredLogs.map((log) => (
                 <div key={log.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center gap-4">
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xs font-bold">
                     {log.islem_tipi?.charAt(0)?.toUpperCase() || 'L'}
