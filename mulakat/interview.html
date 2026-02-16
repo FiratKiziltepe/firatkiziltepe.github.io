@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AI Mülakat - Interview Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 0;
+      max-height: 60vh;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    .chat-bubble {
+      max-width: 85%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 0.93rem;
+      line-height: 1.6;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-ai {
+      background: var(--primary-light);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .chat-ai .chat-role {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-user {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-user .chat-role {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+    }
+    .chat-typing {
+      align-self: flex-start;
+      background: var(--primary-light);
+      padding: 14px 18px;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+    }
+    .typing-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+    .interview-input-area {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .speech-text-interview {
+      min-height: 60px;
+      font-size: 0.93rem;
+      line-height: 1.6;
+      color: var(--text);
+      padding: 10px;
+      background: var(--surface-hover);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+    }
+    .speech-text-interview[contenteditable="true"] {
+      cursor: text;
+      border: 1px dashed var(--border);
+      outline: none;
+    }
+    .speech-text-interview[contenteditable="true"]:focus {
+      border-color: var(--primary);
+    }
+    .interview-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .setup-card {
+      text-align: center;
+      padding: 32px 20px;
+    }
+    .setup-card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    .setup-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .topic-input-group {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .interview-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    .status-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--success);
+      font-weight: 600;
+    }
+    .status-live::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.2s infinite;
+    }
+    .tts-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .tts-btn:hover { opacity: 1; }
+    .history-section { margin-top: 32px; }
+    .history-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .history-item:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="header-back">← Ana Sayfa</a>
+    <span class="header-title">AI Mülakat</span>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm hidden" id="ttsToggleBtn" onclick="toggleTTS()" title="Sesli yanıt aç/kapat">🔊</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Setup Screen -->
+    <div id="setupScreen">
+      <div class="card setup-card">
+        <div style="font-size:3rem;margin-bottom:16px;">🤖</div>
+        <h2>AI Mülakat Simülasyonu</h2>
+        <p>Gerçekçi bir mülakat deneyimi yaşayın. AI mülakatçı size sorular soracak, cevaplarınıza göre follow-up sorularla derinleşecek.</p>
+
+        <div class="topic-input-group">
+          <div class="form-group">
+            <label class="form-label">Mülakat Konusu / Pozisyon</label>
+            <input type="text" class="form-input" id="topicInput" placeholder="ör: React Frontend Developer, PhD NLP Araştırması, İngilizce Öğretmenliği...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mülakat Dili</label>
+            <select class="form-select" id="langSelect">
+              <option value="en">İngilizce</option>
+              <option value="tr">Türkçe</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Yaklaşık Soru Sayısı</label>
+            <select class="form-select" id="questionCountSelect">
+              <option value="5">5 soru</option>
+              <option value="8" selected>8 soru</option>
+              <option value="10">10 soru</option>
+              <option value="15">15 soru</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg mt-16" onclick="startInterview()">🎙️ Mülakata Başla</button>
+        </div>
+      </div>
+
+      <!-- Past Interviews -->
+      <div class="history-section" id="historySection">
+        <h3 class="mb-16">Geçmiş Mülakatlar</h3>
+        <div class="card" style="padding:0;" id="interviewHistory">
+          <div class="empty-state" style="padding:24px;">
+            <div class="text-muted">Yükleniyor...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview Screen -->
+    <div id="interviewScreen" class="hidden">
+      <div class="interview-status">
+        <div class="status-live" id="statusText">Mülakat Devam Ediyor</div>
+        <div>
+          <span id="questionCounter" style="color:var(--text-muted);font-weight:600;">Soru 1</span>
+          <button class="btn btn-danger btn-sm" style="margin-left:12px;" onclick="endInterview()">Bitir</button>
+        </div>
+      </div>
+
+      <div class="chat-container" id="chatContainer"></div>
+
+      <!-- Input Area -->
+      <div class="interview-input-area" id="inputArea">
+        <div class="speech-text-interview" id="speechText">Mikrofon butonuna basarak konuşmaya başlayın veya yazın...</div>
+        <div class="interview-controls">
+          <button class="btn btn-primary flex-1" id="micBtn" onclick="toggleRecording()">🎤 Konuş</button>
+          <button class="btn btn-success flex-1" id="sendBtn" onclick="sendAnswer()" disabled>📤 Gönder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Screen -->
+    <div id="feedbackScreen" class="hidden">
+      <div class="card" style="text-align:center;padding:24px;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🎉</div>
+        <h2 style="margin-bottom:8px;">Mülakat Tamamlandı!</h2>
+        <p style="color:var(--text-secondary);margin-bottom:20px;" id="feedbackSummary"></p>
+      </div>
+
+      <div class="feedback-area mt-16">
+        <div class="feedback-title">🤖 Genel Değerlendirme</div>
+        <div class="feedback-content" id="feedbackContent">
+          <div class="feedback-loading"><div class="spinner"></div><br>Geri bildirim hazırlanıyor...</div>
+        </div>
+      </div>
+
+      <div class="mt-16" style="text-align:center;">
+        <button class="btn btn-primary btn-lg" onclick="backToSetup()">← Yeni Mülakat</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script>checkAuth();</script>
+  <script src="gemini.js"></script>
+  <script src="interview.js"></script>
+
+</body>
+</html>

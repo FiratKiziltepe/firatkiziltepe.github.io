@@ -68,71 +68,167 @@
             </div>
 
             <div class="simulation-container">
-                <div class="simulation-header">
-                    <h2>Fotosentez - Sabit Genişlik</h2>
+                <div class="simulation-header bg-gradient-to-r from-gray-600 to-gray-700 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez - Sabit Genişlik (1200px)</h2>
+                    <p class="text-gray-300 text-sm">Duyarlı tasarım uygulanmamış içerik</p>
                 </div>
-                <div class="simulation-body overflow-x-auto">
-                    <!-- Sabit genişlikli içerik simülasyonu -->
-                    <div class="border-2 border-red-300 rounded-lg p-4 bg-red-50">
-                        <p class="text-red-600 text-sm mb-3">⚠️ Aşağıdaki içerik 1200px sabit genişlikte tasarlanmış:</p>
-                        
-                        <div style="width: 1200px; background: white; border: 1px solid #ddd; padding: 20px; font-size: 12px;">
-                            <div style="display: flex; gap: 20px;">
-                                <div style="width: 300px; flex-shrink: 0;">
-                                    <h3 style="font-size: 14px; margin-bottom: 10px;">Kontrol Paneli</h3>
-                                    <button style="padding: 5px 10px; font-size: 10px; margin: 2px;">Küçük Buton</button>
-                                    <button style="padding: 5px 10px; font-size: 10px; margin: 2px;">Küçük Buton</button>
-                                    <input type="text" style="width: 100%; padding: 3px; font-size: 10px; margin-top: 5px;" placeholder="Küçük input">
-                                </div>
-                                <div style="flex: 1; background: #f0f0f0; padding: 10px;">
-                                    <p style="font-size: 10px;">Simülasyon alanı - 900px genişlik</p>
-                                    <div style="width: 100%; height: 200px; background: linear-gradient(#87ceeb, #228b22); display: flex; align-items: center; justify-content: center;">
-                                        <span style="background: white; padding: 10px; font-size: 11px;">Fotosentez Animasyonu</span>
+                <div class="simulation-body">
+                    <!-- Etkileşimli Cihaz Seçici -->
+                    <div class="mb-6">
+                        <label class="block font-medium text-gray-800 mb-2">Cihaz Seçin ve Sorunu Görün:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="setBadViewport('mobile')" class="btn btn-secondary" id="bad-btn-mobile">
+                                📱 Mobil (375px)
+                            </button>
+                            <button onclick="setBadViewport('tablet')" class="btn btn-secondary" id="bad-btn-tablet">
+                                📱 Tablet (768px)
+                            </button>
+                            <button onclick="setBadViewport('laptop')" class="btn btn-secondary" id="bad-btn-laptop">
+                                💻 Laptop (1024px)
+                            </button>
+                            <button onclick="setBadViewport('desktop')" class="btn btn-secondary" id="bad-btn-desktop">
+                                🖥️ Masaüstü (1440px)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cihaz Simülatörü -->
+                    <div class="bg-gray-200 rounded-xl p-6 flex flex-col items-center">
+                        <!-- Cihaz Çerçevesi -->
+                        <div id="bad-device-frame" class="bg-gray-800 rounded-2xl p-3 transition-all duration-500 shadow-2xl" style="width: 400px;">
+                            <!-- Cihaz Üst Kısım (Kamera/Speaker) -->
+                            <div id="bad-device-notch" class="bg-gray-900 rounded-full mx-auto mb-2 hidden" style="width: 80px; height: 6px;"></div>
+                            
+                            <!-- Ekran -->
+                            <div id="bad-device-screen" class="bg-white rounded-lg overflow-hidden relative" style="height: 300px;">
+                                <!-- Sabit 1200px içerik -->
+                                <div id="bad-content-wrapper" class="absolute top-0 left-0 transition-transform duration-500" style="width: 1200px;">
+                                    <!-- Header -->
+                                    <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 15px; color: white;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <h3 style="font-size: 18px; font-weight: bold; margin: 0;">Fotosentez Simülasyonu</h3>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 5px; font-size: 12px;">Ayarlar</button>
+                                                <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 5px; font-size: 12px;">Yardım</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- İçerik -->
+                                    <div style="display: flex; padding: 20px; gap: 20px; background: #f8fafc;">
+                                        <!-- Sol Panel - 300px Sabit -->
+                                        <div style="width: 300px; flex-shrink: 0; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                            <h4 style="font-size: 14px; font-weight: bold; margin-bottom: 15px; color: #1e3a5f;">Kontrol Paneli</h4>
+                                            <div style="margin-bottom: 10px;">
+                                                <label style="font-size: 11px; color: #666;">Işık Yoğunluğu:</label>
+                                                <input type="range" style="width: 100%; margin-top: 5px;">
+                                            </div>
+                                            <div style="margin-bottom: 10px;">
+                                                <label style="font-size: 11px; color: #666;">CO₂ Seviyesi:</label>
+                                                <input type="range" style="width: 100%; margin-top: 5px;">
+                                            </div>
+                                            <div style="display: flex; gap: 5px; margin-top: 15px;">
+                                                <button style="flex: 1; background: #22c55e; color: white; border: none; padding: 8px; border-radius: 5px; font-size: 11px;">Başlat</button>
+                                                <button style="flex: 1; background: #e5e7eb; border: none; padding: 8px; border-radius: 5px; font-size: 11px;">Sıfırla</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Orta - Simülasyon Alanı 600px -->
+                                        <div style="width: 600px; flex-shrink: 0; background: linear-gradient(180deg, #87CEEB 0%, #90EE90 50%, #8B4513 100%); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                            <div style="font-size: 50px; margin-bottom: 10px;">🌳☀️💧</div>
+                                            <p style="background: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold;">Fotosentez Animasyonu</p>
+                                        </div>
+                                        
+                                        <!-- Sağ Panel - 240px -->
+                                        <div style="width: 240px; flex-shrink: 0; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                            <h4 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #1e3a5f;">Sonuçlar</h4>
+                                            <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                                                <span>O₂ Üretimi:</span>
+                                                <span style="float: right; font-weight: bold; color: #22c55e;">45 ml/dk</span>
+                                            </div>
+                                            <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                                                <span>Glikoz:</span>
+                                                <span style="float: right; font-weight: bold; color: #3b82f6;">12 mg</span>
+                                            </div>
+                                            <div style="font-size: 11px; color: #666;">
+                                                <span>Verimlilik:</span>
+                                                <span style="float: right; font-weight: bold; color: #f59e0b;">78%</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Taşma Göstergesi -->
+                                <div id="bad-overflow-indicator" class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-red-500/50 to-transparent hidden items-center justify-center">
+                                    <span class="text-white text-2xl animate-pulse">→</span>
+                                </div>
+                                
+                                <!-- Yatay Kaydırma Çubuğu -->
+                                <div id="bad-scrollbar" class="absolute bottom-0 left-0 right-0 h-3 bg-gray-200 hidden">
+                                    <div id="bad-scrollbar-thumb" class="h-full bg-red-400 rounded transition-all" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Home Button (Mobil için) -->
+                            <div id="bad-home-button" class="bg-gray-700 rounded-full mx-auto mt-2 hidden" style="width: 40px; height: 40px;"></div>
+                        </div>
+                        
+                        <!-- Cihaz Bilgisi -->
+                        <div id="bad-device-info" class="mt-4 text-center">
+                            <p class="text-lg font-bold text-gray-800" id="bad-device-name">Cihaz seçin</p>
+                            <p class="text-sm text-gray-600" id="bad-device-size">Ekran genişliği: -</p>
+                        </div>
+                    </div>
+
+                    <!-- Sorun Açıklaması -->
+                    <div id="bad-problem-box" class="mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-xl hidden">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="font-bold text-red-800" id="bad-problem-title">Sorun</h4>
+                                <p class="text-red-700 text-sm" id="bad-problem-desc">Açıklama</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Cihaz simülasyonu -->
-                    <div class="mt-6">
-                        <h3 class="font-bold text-gray-800 mb-4">Farklı Cihazlarda Görünüm</h3>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div class="text-center">
-                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
-                                    <div class="bg-white rounded" style="width: 120px; height: 200px; overflow: hidden;">
-                                        <div style="width: 1200px; transform: scale(0.1); transform-origin: top left;">
-                                            <div style="background: #f0f0f0; padding: 20px;">
-                                                <p>İçerik çok küçük</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-sm text-red-600 mt-2">📱 Mobil - Okunamaz</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
-                                    <div class="bg-white rounded" style="width: 180px; height: 120px; overflow: hidden;">
-                                        <div style="width: 1200px; transform: scale(0.15); transform-origin: top left;">
-                                            <div style="background: #f0f0f0; padding: 20px;">
-                                                <p>İçerik kesildi</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-sm text-red-600 mt-2">📱 Tablet - Kesiliyor</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="bg-gray-800 rounded-lg p-2 inline-block">
-                                    <div class="bg-white rounded" style="width: 200px; height: 120px; overflow: auto;">
-                                        <div style="width: 1200px; background: #f0f0f0; padding: 10px;">
-                                            <p style="font-size: 8px;">Yatay kaydırma gerekli</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-sm text-orange-600 mt-2">💻 Laptop - Scroll gerekli</p>
-                            </div>
-                        </div>
+                    <!-- Karşılaştırma Tablosu -->
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border p-2 text-left">Cihaz</th>
+                                    <th class="border p-2 text-left">Ekran</th>
+                                    <th class="border p-2 text-left">İçerik (1200px)</th>
+                                    <th class="border p-2 text-left">Sonuç</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border p-2">📱 Mobil</td>
+                                    <td class="border p-2">375px</td>
+                                    <td class="border p-2">1200px</td>
+                                    <td class="border p-2 text-red-600 font-bold">%31 görünür, %69 taşıyor</td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-2">📱 Tablet</td>
+                                    <td class="border p-2">768px</td>
+                                    <td class="border p-2">1200px</td>
+                                    <td class="border p-2 text-red-600 font-bold">%64 görünür, %36 taşıyor</td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-2">💻 Laptop</td>
+                                    <td class="border p-2">1024px</td>
+                                    <td class="border p-2">1200px</td>
+                                    <td class="border p-2 text-orange-600 font-bold">%85 görünür, %15 taşıyor</td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-2">🖥️ Masaüstü</td>
+                                    <td class="border p-2">1440px</td>
+                                    <td class="border p-2">1200px</td>
+                                    <td class="border p-2 text-green-600 font-bold">%100 görünür ✓</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -251,12 +347,145 @@
             document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
         }
 
+        // Uygun olmayan örnek için cihaz simülasyonu
+        function setBadViewport(device) {
+            const frame = document.getElementById('bad-device-frame');
+            const screen = document.getElementById('bad-device-screen');
+            const content = document.getElementById('bad-content-wrapper');
+            const notch = document.getElementById('bad-device-notch');
+            const homeBtn = document.getElementById('bad-home-button');
+            const overflow = document.getElementById('bad-overflow-indicator');
+            const scrollbar = document.getElementById('bad-scrollbar');
+            const scrollThumb = document.getElementById('bad-scrollbar-thumb');
+            const deviceName = document.getElementById('bad-device-name');
+            const deviceSize = document.getElementById('bad-device-size');
+            const problemBox = document.getElementById('bad-problem-box');
+            const problemTitle = document.getElementById('bad-problem-title');
+            const problemDesc = document.getElementById('bad-problem-desc');
+
+            // Buton stillerini güncelle
+            document.querySelectorAll('[id^="bad-btn-"]').forEach(btn => {
+                btn.classList.remove('bg-red-500', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            document.getElementById('bad-btn-' + device).classList.remove('bg-gray-200');
+            document.getElementById('bad-btn-' + device).classList.add('bg-red-500', 'text-white');
+
+            // Cihaza göre ayarlar
+            const devices = {
+                mobile: {
+                    frameWidth: 200,
+                    screenWidth: 175,
+                    screenHeight: 350,
+                    showNotch: true,
+                    showHome: true,
+                    name: '📱 Mobil Telefon',
+                    size: '375px genişlik',
+                    scale: 375 / 1200,
+                    visible: 31,
+                    problem: 'İçerik Tamamen Taşıyor!',
+                    desc: 'Sabit 1200px içerik, 375px mobil ekrana sığmıyor. Kullanıcı içeriğin %69\'unu göremez, yatay kaydırma çok zor. Butonlar ve yazılar çok küçük, dokunmatik kullanım imkansız.'
+                },
+                tablet: {
+                    frameWidth: 350,
+                    screenWidth: 320,
+                    screenHeight: 240,
+                    showNotch: false,
+                    showHome: true,
+                    name: '📱 Tablet',
+                    size: '768px genişlik',
+                    scale: 768 / 1200,
+                    visible: 64,
+                    problem: 'İçerik Kesiliyor!',
+                    desc: 'İçeriğin %36\'sı ekran dışında kalıyor. Sağ panel tamamen görünmez. Kullanıcı yatay kaydırma yapmak zorunda, bu da kötü kullanıcı deneyimi demek.'
+                },
+                laptop: {
+                    frameWidth: 450,
+                    screenWidth: 420,
+                    screenHeight: 260,
+                    showNotch: false,
+                    showHome: false,
+                    name: '💻 Laptop',
+                    size: '1024px genişlik',
+                    scale: 1024 / 1200,
+                    visible: 85,
+                    problem: 'Yatay Kaydırma Gerekli',
+                    desc: 'İçerik neredeyse sığıyor ama hâlâ %15\'lik bir taşma var. Sağ panel kısmen kesilmiş, yatay kaydırma çubuğu görünüyor.'
+                },
+                desktop: {
+                    frameWidth: 550,
+                    screenWidth: 520,
+                    screenHeight: 300,
+                    showNotch: false,
+                    showHome: false,
+                    name: '🖥️ Masaüstü',
+                    size: '1440px genişlik',
+                    scale: 1,
+                    visible: 100,
+                    problem: 'Sorun Yok (Bu boyutta)',
+                    desc: 'Geniş ekranlarda içerik sığıyor, ancak bu içerik SADECE masaüstü için tasarlanmış demek. Kullanıcıların %60\'ından fazlası mobil cihaz kullanıyor!'
+                }
+            };
+
+            const d = devices[device];
+
+            // Çerçeve boyutları
+            frame.style.width = d.frameWidth + 'px';
+            screen.style.width = d.screenWidth + 'px';
+            screen.style.height = d.screenHeight + 'px';
+
+            // Mobil göstergeleri
+            notch.classList.toggle('hidden', !d.showNotch);
+            homeBtn.classList.toggle('hidden', !d.showHome);
+
+            // İçerik ölçekleme
+            content.style.transform = `scale(${d.scale})`;
+            content.style.transformOrigin = 'top left';
+
+            // Taşma göstergesi
+            if (d.visible < 100) {
+                overflow.classList.remove('hidden');
+                overflow.classList.add('flex');
+                scrollbar.classList.remove('hidden');
+                scrollThumb.style.width = d.visible + '%';
+            } else {
+                overflow.classList.add('hidden');
+                overflow.classList.remove('flex');
+                scrollbar.classList.add('hidden');
+            }
+
+            // Cihaz bilgisi
+            deviceName.textContent = d.name;
+            deviceSize.textContent = 'Ekran genişliği: ' + d.size + ' | Görünür: %' + d.visible;
+
+            // Sorun kutusu
+            problemBox.classList.remove('hidden');
+            problemTitle.textContent = d.problem;
+            problemDesc.textContent = d.desc;
+
+            // Sorun kutusunun rengini ayarla
+            if (d.visible === 100) {
+                problemBox.className = 'mt-4 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl';
+                problemTitle.className = 'font-bold text-yellow-800';
+                problemDesc.className = 'text-yellow-700 text-sm';
+            } else if (d.visible >= 80) {
+                problemBox.className = 'mt-4 p-4 bg-orange-50 border-2 border-orange-300 rounded-xl';
+                problemTitle.className = 'font-bold text-orange-800';
+                problemDesc.className = 'text-orange-700 text-sm';
+            } else {
+                problemBox.className = 'mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-xl';
+                problemTitle.className = 'font-bold text-red-800';
+                problemDesc.className = 'text-red-700 text-sm';
+            }
+        }
+
+        // Uygun örnek için cihaz simülasyonu
         function setViewport(size) {
             const container = document.getElementById('preview-container');
             const grid = document.getElementById('layout-grid');
             
             // Buton stillerini güncelle
-            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+            document.querySelectorAll('[id^="btn-"]:not([id^="bad-btn-"])').forEach(btn => {
                 btn.classList.remove('bg-blue-500', 'text-white');
                 btn.classList.add('bg-gray-200');
             });

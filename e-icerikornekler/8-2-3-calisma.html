@@ -103,67 +103,131 @@
                 <div>
                     <h3>Bu Örnek Neden Uygun Değil?</h3>
                     <ul>
-                        <li>Sürükle-bırak çalışmıyor veya takılıyor</li>
-                        <li>Ögeler kolayca seçilip taşınamıyor</li>
-                        <li>Hedef alanlara yerleştirme sorunlu</li>
-                        <li>Düğmeler tıklandığında beklenen işlevi yapmıyor</li>
-                        <li>Etkinlik her açılışta baştan başlamıyor</li>
+                        <li>Sürükle-bırak çalışıyor ama bazen gecikiyor</li>
+                        <li>Hedef alanlar küçük, yerleştirme hassas</li>
+                        <li>"Kontrol Et" butonu bir kez çalışıyor, sonra donuyor</li>
+                        <li>"Yeniden Başla" tüm öğeleri sıfırlamıyor</li>
+                        <li>İlerleme çubuğu güncellenmeden kalıyor</li>
                     </ul>
                 </div>
             </div>
 
             <div class="simulation-container">
-                <div class="simulation-header">
-                    <h2>Fotosentez Bileşenlerini Eşleştir</h2>
-                    <p class="text-gray-500 text-sm">Hatalı sürükle-bırak örneği</p>
+                <div class="simulation-header bg-gradient-to-r from-green-600 to-emerald-500 text-white">
+                    <h2 class="text-lg font-bold">Fotosentez Bileşenlerini Eşleştir</h2>
+                    <p class="text-green-100 text-sm">Sürükle-bırak etkinliği</p>
                 </div>
                 <div class="simulation-body">
-                    <p class="text-sm text-gray-600 mb-4">Aşağıdaki bileşenleri doğru kutulara sürükleyip bırakın:</p>
-                    
-                    <!-- Hatalı Sürüklenebilir Öğeler -->
-                    <div class="flex flex-wrap gap-2 mb-6 p-3 bg-gray-100 rounded-lg">
-                        <div class="bad-draggable bg-yellow-200 px-3 py-2 rounded text-sm" 
-                            onclick="alert('HATA: Bu öğe sürüklenemiyor!')">
-                            ☀️ Güneş Işığı
-                        </div>
-                        <div class="bad-draggable bg-blue-200 px-3 py-2 rounded text-sm opacity-50">
-                            💧 Su (H₂O)
-                        </div>
-                        <div class="bad-draggable bg-gray-300 px-3 py-2 rounded text-sm" 
-                            style="pointer-events: none;">
-                            💨 CO₂
-                        </div>
-                        <div class="bad-draggable bg-green-200 px-3 py-2 rounded text-sm"
-                            draggable="true" ondragstart="event.preventDefault()">
-                            🌿 Klorofil
-                        </div>
-                    </div>
-
-                    <!-- Hatalı Hedef Alanlar -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[80px] bg-gray-50">
-                            <p class="text-xs text-gray-400 mb-2">Girdi Maddeleri</p>
-                            <p class="text-gray-400 text-sm">Bırakma alanı çalışmıyor</p>
-                        </div>
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[80px] bg-gray-50">
-                            <p class="text-xs text-gray-400 mb-2">Çıktı Maddeleri</p>
-                            <p class="text-gray-400 text-sm">Bırakma alanı çalışmıyor</p>
-                        </div>
-                    </div>
-
-                    <!-- Hatalı Butonlar -->
-                    <div class="flex gap-2 mt-4">
-                        <button class="btn btn-primary opacity-50" disabled>Kontrol Et</button>
-                        <button class="btn btn-secondary" onclick="location.reload()">Yeniden Başla (Sayfa yenilenir)</button>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-red-700 text-sm">
-                            <strong>Sorunlar:</strong> Öğeler sürüklenemiyor, bazıları pasif, bırakma alanları çalışmıyor,
-                            kontrol butonu devre dışı, yeniden başlatma sayfayı yeniliyor.
+                    <!-- Yönerge -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p class="text-blue-800 text-sm flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            <strong>Yönerge:</strong> Bileşenleri doğru kategorilere sürükleyip bırakın.
                         </p>
                     </div>
+
+                    <!-- İlerleme - Güncellenmeden kalıyor -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm text-gray-600">İlerleme:</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="bad-progress-bar" class="h-full bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="bad-progress-text" class="text-sm font-medium text-gray-700">0/6</span>
+                        </div>
+                    </div>
+
+                    <!-- Sürüklenebilir Öğeler - çalışıyor ama sorunlu -->
+                    <div id="bad-items-container" class="flex flex-wrap gap-3 mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+                        <div class="bad-draggable-item bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="light" data-category="input">
+                            <span class="text-lg">☀️</span> Güneş Işığı
+                        </div>
+                        <div class="bad-draggable-item bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="water" data-category="input">
+                            <span class="text-lg">💧</span> Su (H₂O)
+                        </div>
+                        <div class="bad-draggable-item bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="co2" data-category="input">
+                            <span class="text-lg">💨</span> CO₂
+                        </div>
+                        <div class="bad-draggable-item bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="glucose" data-category="output">
+                            <span class="text-lg">🍬</span> Glikoz
+                        </div>
+                        <div class="bad-draggable-item bg-gradient-to-r from-teal-400 to-cyan-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="oxygen" data-category="output">
+                            <span class="text-lg">💨</span> Oksijen (O₂)
+                        </div>
+                        <div class="bad-draggable-item bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg shadow-md font-medium text-sm flex items-center gap-2 cursor-grab"
+                            draggable="true" data-item="chlorophyll" data-category="catalyst">
+                            <span class="text-lg">🌿</span> Klorofil
+                        </div>
+                    </div>
+
+                    <!-- Hedef Alanlar - Daha küçük ve hassas -->
+                    <div class="grid md:grid-cols-3 gap-3 mb-6">
+                        <div class="bad-drop-zone border-2 border-dashed border-blue-200 rounded-lg p-3 min-h-[90px] bg-blue-50"
+                            data-category="input">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-bold text-blue-700 text-sm">Girdi</span>
+                            </div>
+                            <div class="bad-dropped-items flex flex-wrap gap-1"></div>
+                            <p class="text-blue-300 text-xs mt-1 bad-empty-text">Bırakın</p>
+                        </div>
+
+                        <div class="bad-drop-zone border-2 border-dashed border-green-200 rounded-lg p-3 min-h-[90px] bg-green-50"
+                            data-category="catalyst">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-bold text-green-700 text-sm">Katalizör</span>
+                            </div>
+                            <div class="bad-dropped-items flex flex-wrap gap-1"></div>
+                            <p class="text-green-300 text-xs mt-1 bad-empty-text">Bırakın</p>
+                        </div>
+
+                        <div class="bad-drop-zone border-2 border-dashed border-orange-200 rounded-lg p-3 min-h-[90px] bg-orange-50"
+                            data-category="output">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-bold text-orange-700 text-sm">Çıktı</span>
+                            </div>
+                            <div class="bad-dropped-items flex flex-wrap gap-1"></div>
+                            <p class="text-orange-300 text-xs mt-1 bad-empty-text">Bırakın</p>
+                        </div>
+                    </div>
+
+                    <!-- Kontrol ve Sıfırlama - Sorunlu butonlar -->
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button id="bad-check-btn" onclick="checkBadAnswers()" class="btn btn-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Kontrol Et
+                        </button>
+                        <button onclick="resetBadActivity()" class="btn btn-secondary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Yeniden Başla
+                        </button>
+                    </div>
+
+                    <!-- Sonuç Alanı -->
+                    <div id="bad-result-area" class="hidden mt-4"></div>
                 </div>
+            </div>
+
+            <!-- Sorunları açıklayan kutu -->
+            <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <h4 class="font-bold text-amber-800 mb-2">🔍 İnceleme Notları (Etkileşim sorunları):</h4>
+                <ul class="text-amber-700 text-sm space-y-1">
+                    <li>• <strong>Gecikme:</strong> Sürükleme işlemi bazen 300ms gecikiyor (kasıtlı olarak eklenmiş)</li>
+                    <li>• <strong>Hedef alanlar:</strong> Drop zone'lar küçük, tam üstüne bırakmak gerekiyor</li>
+                    <li>• <strong>Kontrol butonu:</strong> Bir kez tıklandıktan sonra çalışmıyor</li>
+                    <li>• <strong>Sıfırlama:</strong> "Yeniden Başla" sadece 4/6 öğeyi geri döndürüyor (2 tanesi kaybolmuş gibi)</li>
+                    <li>• <strong>İlerleme:</strong> Progress bar güncellenmeden sabit kalıyor</li>
+                </ul>
             </div>
         </div>
 
@@ -340,6 +404,7 @@
                 tabGood.classList.remove('active');
                 contentBad.classList.remove('hidden');
                 contentGood.classList.add('hidden');
+                initBadDragDrop();
             } else {
                 tabGood.classList.add('active');
                 tabBad.classList.remove('active');
@@ -347,6 +412,134 @@
                 contentBad.classList.add('hidden');
                 initDragDrop();
             }
+        }
+
+        // ========== KÖTÜ ÖRNEK - Sorunlu sürükle-bırak ==========
+        let badDraggedElement = null;
+        let badCheckUsed = false;
+
+        function initBadDragDrop() {
+            const draggables = document.querySelectorAll('.bad-draggable-item');
+            const dropZones = document.querySelectorAll('.bad-drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', handleBadDragStart);
+                draggable.addEventListener('dragend', handleBadDragEnd);
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleBadDragOver);
+                zone.addEventListener('dragleave', handleBadDragLeave);
+                zone.addEventListener('drop', handleBadDrop);
+            });
+        }
+
+        function handleBadDragStart(e) {
+            // 300ms gecikme simülasyonu
+            setTimeout(() => {
+                badDraggedElement = e.target;
+                e.target.classList.add('opacity-50');
+            }, 300);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleBadDragEnd(e) {
+            e.target.classList.remove('opacity-50');
+            badDraggedElement = null;
+        }
+
+        function handleBadDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('bg-blue-100', 'border-blue-400');
+        }
+
+        function handleBadDragLeave(e) {
+            e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
+        }
+
+        function handleBadDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
+            
+            if (badDraggedElement) {
+                const dropZone = e.currentTarget;
+                const droppedItems = dropZone.querySelector('.bad-dropped-items');
+                const emptyText = dropZone.querySelector('.bad-empty-text');
+                
+                droppedItems.appendChild(badDraggedElement);
+                emptyText.style.display = 'none';
+                
+                // İlerleme çubuğu GÜNCELLENMİYOR (sorun)
+                // updateBadProgress(); // Kasıtlı olarak çağrılmıyor
+            }
+        }
+
+        function checkBadAnswers() {
+            // Bir kez çalışıyor, sonra donuyor
+            if (badCheckUsed) {
+                return; // İkinci tıklamada hiçbir şey yapmıyor
+            }
+            badCheckUsed = true;
+            
+            const dropZones = document.querySelectorAll('.bad-drop-zone');
+            let correct = 0;
+            let total = 0;
+
+            dropZones.forEach(zone => {
+                const category = zone.dataset.category;
+                const items = zone.querySelectorAll('.bad-draggable-item');
+                
+                items.forEach(item => {
+                    total++;
+                    if (item.dataset.category === category) {
+                        correct++;
+                        item.classList.add('ring-2', 'ring-green-500');
+                    } else {
+                        item.classList.add('ring-2', 'ring-red-500');
+                    }
+                });
+            });
+
+            const resultArea = document.getElementById('bad-result-area');
+            resultArea.classList.remove('hidden');
+
+            if (total === 0) {
+                resultArea.innerHTML = '<div class="error-message">Lütfen önce bileşenleri yerleştirin!</div>';
+            } else if (correct === total && total === 6) {
+                resultArea.innerHTML = '<div class="success-message">Tebrikler! Tüm doğru! 🎉</div>';
+            } else {
+                resultArea.innerHTML = '<div class="error-message">' + correct + '/' + total + ' doğru.</div>';
+            }
+
+            // Buton artık çalışmıyor görünsün
+            document.getElementById('bad-check-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function resetBadActivity() {
+            const container = document.getElementById('bad-items-container');
+            const draggables = document.querySelectorAll('.bad-draggable-item');
+            const dropZones = document.querySelectorAll('.bad-drop-zone');
+
+            // SORUN: Sadece 4 öğeyi geri döndürüyor, 2'si "kaybolmuş"
+            let resetCount = 0;
+            draggables.forEach(item => {
+                if (resetCount < 4) { // Sadece 4 tanesi
+                    item.classList.remove('ring-2', 'ring-green-500', 'ring-red-500');
+                    container.appendChild(item);
+                    resetCount++;
+                }
+            });
+
+            dropZones.forEach(zone => {
+                const emptyText = zone.querySelector('.bad-empty-text');
+                if (zone.querySelector('.bad-dropped-items').children.length === 0) {
+                    emptyText.style.display = 'block';
+                }
+            });
+
+            document.getElementById('bad-result-area').classList.add('hidden');
+            // Buton hâlâ çalışmıyor kalıyor (sıfırlanmıyor)
+            // badCheckUsed = false; // Kasıtlı olarak sıfırlanmıyor
         }
 
         function initDragDrop() {
@@ -594,7 +787,10 @@
         }
 
         // Sayfa yüklendiğinde
-        window.addEventListener('load', initDragDrop);
+        window.addEventListener('load', () => {
+            initDragDrop();
+            initBadDragDrop();
+        });
     </script>
 </body>
 </html>

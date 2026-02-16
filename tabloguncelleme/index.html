@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eğitim İçerik Yönetim Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.js"></script>
+</head>
+<body>
+    <div class="header-container">
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="logo.png" alt="Logo" class="header-logo">
+                    <div class="title-section">
+                        <h1>DERS KİTAPLARI VE EĞİTİM ARAÇLARI E-İÇERİK TABLOSU</h1>
+                        <p class="subtitle">Elektronik Eğitim İçerikleri</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="status-section">
+                        <div class="data-status" id="dataStatus">
+                            <span>Veriler yükleniyor...</span>
+                        </div>
+                    </div>
+                    <!-- Auth Section -->
+                    <div class="auth-section">
+                        <button id="loginBtn" class="btn btn-primary">
+                            <span class="btn-icon">👤</span>
+                            Giriş Yap
+                        </button>
+                        <div id="userInfo" class="user-info" style="display: none;">
+                            <span id="userName" class="user-name"></span>
+                            <span id="userRole" class="user-role"></span>
+                            <button id="logoutBtn" class="btn btn-secondary btn-sm">Çıkış</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Giriş Yap</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="emailInput">Email</label>
+                    <input type="email" id="emailInput" name="email" 
+                           placeholder="ornek@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <input type="password" id="password" name="password" 
+                           placeholder="Şifrenizi girin" required>
+                </div>
+                <div id="loginError" class="form-error"></div>
+                <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block">
+                    Giriş Yap
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <div class="control-panel" id="filterSection" style="display: none;">
+            <div class="panel-header">
+                <h2>Filtreleme ve Arama</h2>
+            </div>
+            
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label for="dersFilter" class="filter-label">Ders Seçimi</label>
+                    <div class="multiselect-container">
+                        <div class="multiselect-input-container">
+                            <input type="text" id="dersFilter" class="multiselect-input" placeholder="Ders ara..." autocomplete="on">
+                            <div class="selected-tags" id="selectedTags"></div>
+                            <span class="multiselect-arrow">▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="dersDropdown">
+                            <div class="multiselect-controls">
+                                <button type="button" class="select-all-btn" id="selectAllBtn">Tümünü Seç</button>
+                                <button type="button" class="clear-all-btn" id="clearAllBtn">Temizle</button>
+                            </div>
+                            <div class="multiselect-options" id="multiselectOptions">
+                                <!-- Options will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-item program-turu-item">
+                    <label for="programTuru" class="filter-label">Program Türü</label>
+                    <div class="select-container">
+                        <select id="programTuru" class="select-input">
+                            <option value="">Tümü</option>
+                            <option value="TYMM">TYMM</option>
+                            <option value="Diğer">Diğer</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="searchInput" class="filter-label">Genel Arama</label>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="İçerikte arama yapın...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">İşlemler</label>
+                    <div class="button-group">
+                        <button id="clearFilters" class="btn btn-secondary">
+                            <span class="btn-icon">🔄</span>
+                            Temizle
+                        </button>
+                        <button id="exportExcel" class="btn btn-success">
+                            <span class="btn-icon">⬇</span>
+                            Excel İndir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-bar" id="resultsInfo" style="display: none;">
+            <div class="info-content">
+                <span id="resultCount" class="result-text"></span>
+            </div>
+        </div>
+
+        <div class="data-section" id="tableContainer" style="display: none;">
+            <div class="table-wrapper">
+                <table id="dataTable" class="data-table">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-section" id="paginationContainer" style="display: none;">
+            <div class="pagination-info">
+                <span id="paginationInfo" class="pagination-text"></span>
+            </div>
+            <div class="pagination-controls">
+                <div class="page-size-control">
+                    <label for="pageSize" class="control-label">Sayfa başına:</label>
+                    <select id="pageSize" class="page-size-select">
+                        <option value="10">10 kayıt</option>
+                        <option value="25" selected>25 kayıt</option>
+                        <option value="50">50 kayıt</option>
+                        <option value="100">100 kayıt</option>
+                    </select>
+                </div>
+                <div class="pagination-buttons" id="paginationButtons">
+                    <!-- Pagination buttons will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-overlay" id="loading" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Veriler yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Değişiklik Önerisi Modal -->
+    <div id="suggestionModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Değişiklik Önerisi</h2>
+                <button class="modal-close" onclick="closeSuggestionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="suggestion-info">
+                    <p><strong>Ders:</strong> <span id="suggestionDers"></span></p>
+                    <p><strong>Kazanım:</strong> <span id="suggestionKazanim"></span></p>
+                    <p><strong>Düzenlenecek Alan:</strong> <span id="suggestionAlan"></span></p>
+                </div>
+                <div class="form-group">
+                    <label>Mevcut Değer:</label>
+                    <div id="suggestionEskiDeger" class="readonly-field"></div>
+                </div>
+                <div class="form-group">
+                    <label for="suggestionYeniDeger">Önerilen Yeni Değer:</label>
+                    <textarea id="suggestionYeniDeger" rows="5" class="form-control" 
+                              placeholder="Değişiklik önerinizi buraya yazın..."></textarea>
+                    <small class="form-hint">Word'deki gibi, mevcut metnin altına eklemek istiyorsanız mevcut metni de dahil edin.</small>
+                </div>
+                <input type="hidden" id="suggestionEIcerikId">
+                <input type="hidden" id="suggestionAlanKey">
+                <div id="suggestionError" class="form-error"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSuggestionModal()">İptal</button>
+                <button class="btn btn-primary" onclick="submitSuggestion()">Öneri Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yeni Satır Ekleme Modal -->
+    <div id="newRowModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Yeni Satır Önerisi</h2>
+                <button class="modal-close" onclick="closeNewRowModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newRowForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newDersAdi">Ders Adı *</label>
+                            <select id="newDersAdi" class="form-control" required>
+                                <option value="">Seçiniz...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newProgramTuru">Program Türü</label>
+                            <select id="newProgramTuru" class="form-control">
+                                <option value="TYMM">TYMM</option>
+                                <option value="Diğer">Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newUniteTema">Ünite/Tema/Öğrenme Alanı</label>
+                        <input type="text" id="newUniteTema" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="newKazanim">Kazanım/Öğrenme Çıktısı *</label>
+                        <textarea id="newKazanim" rows="3" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newEIcerikTuru">E-İçerik Türü</label>
+                        <input type="text" id="newEIcerikTuru" class="form-control" 
+                               placeholder="Örn: Video/Etkileşimli İçerik">
+                    </div>
+                    <div class="form-group">
+                        <label for="newAciklama">Açıklama *</label>
+                        <textarea id="newAciklama" rows="4" class="form-control" required></textarea>
+                    </div>
+                </form>
+                <div id="newRowError" class="form-error"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeNewRowModal()">İptal</button>
+                <button class="btn btn-primary" onclick="submitNewRow()">Öneri Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Komisyon Başkanı Onay Paneli -->
+    <div id="approvalPanel" class="side-panel chairman-only" style="display: none;">
+        <div class="panel-header">
+            <h3>Bekleyen Öneriler</h3>
+            <button class="panel-toggle" onclick="toggleApprovalPanel()">◀</button>
+        </div>
+        <div class="panel-content">
+            <div class="panel-tabs">
+                <button class="panel-tab active" data-tab="changes">Değişiklikler</button>
+                <button class="panel-tab" data-tab="newrows">Yeni Satırlar</button>
+            </div>
+            <div id="pendingChangesList" class="pending-list"></div>
+            <div id="pendingNewRowsList" class="pending-list" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Admin Log Paneli -->
+    <div id="adminPanel" class="side-panel admin-only" style="display: none;">
+        <div class="panel-header">
+            <h3>Değişiklik Geçmişi</h3>
+            <button class="panel-toggle" onclick="toggleAdminPanel()">◀</button>
+        </div>
+        <div class="panel-content">
+            <div id="changeLogList" class="log-list"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script src="panel.js"></script>
+</body>
+</html>

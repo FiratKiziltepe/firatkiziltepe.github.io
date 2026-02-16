@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3.6 Geri Bildirimler - E-İçerik Örnekleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/scorm-style.css">
+    <style>
+        .feedback-card {
+            transition: all 0.3s ease;
+        }
+        .option-btn {
+            @apply w-full text-left p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all mb-3 flex items-center justify-between;
+        }
+        .option-btn.selected {
+            @apply border-blue-500 bg-blue-50;
+        }
+        .option-btn.correct {
+            @apply border-green-500 bg-green-50;
+        }
+        .option-btn.incorrect {
+            @apply border-red-500 bg-red-50;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- SCORM Header -->
+    <header class="scorm-header">
+        <div class="scorm-header-content">
+            <div class="scorm-logo">
+                <div class="scorm-logo-icon">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="scorm-title">Geri Bildirim Tasarımı</h1>
+                    <p class="scorm-subtitle">Kriter 8.3.6</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn-home">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Ana Sayfa
+            </a>
+        </div>
+    </header>
+
+    <!-- Kriter Bandı -->
+    <div class="criterion-banner">
+        <div class="criterion-banner-content">
+            <span class="criterion-number">8.3.6</span>
+            <span class="criterion-title">Etkileşimli içeriklerde tür, konu ve öğrenen özelliklerine uygun geri bildirimler sağlanmalıdır.</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigasyonu -->
+    <div class="tab-container">
+        <button id="tab-bad" class="tab-btn tab-btn-bad active" onclick="switchTab('bad')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Uygun Olmayan
+        </button>
+        <button id="tab-good" class="tab-btn tab-btn-good" onclick="switchTab('good')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Uygun Örnek
+        </button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 content-area">
+        <!-- UYGUN OLMAYAN ÖRNEK -->
+        <div id="content-bad" class="fade-in">
+            <div class="explanation-card explanation-card-bad">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <h3>Bu Geri Bildirim Neden Uygun Değil?</h3>
+                    <ul>
+                        <li>Sadece "Doğru" veya "Yanlış" bilgisi veriyor.</li>
+                        <li>Neden yanlış olduğu veya nasıl düzeltileceği hakkında bilgi içermiyor.</li>
+                        <li>Öğrenciyi teşvik etmiyor, sadece yargılıyor.</li>
+                        <li>Görsel veya işitsel destekten yoksun.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <h2>Soru: Fotosentez nerede gerçekleşir?</h2>
+                </div>
+                <div class="simulation-body">
+                    <div class="space-y-2">
+                        <button onclick="badFeedback(false)" class="option-btn">A) Mitokondri</button>
+                        <button onclick="badFeedback(true)" class="option-btn">B) Kloroplast</button>
+                        <button onclick="badFeedback(false)" class="option-btn">C) Ribozom</button>
+                    </div>
+                    <div id="bad-result" class="mt-4 hidden p-4 rounded-lg font-bold text-center"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UYGUN ÖRNEK -->
+        <div id="content-good" class="hidden fade-in">
+            <div class="explanation-card explanation-card-good">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <h3>Bu Geri Bildirim Neden Uygun?</h3>
+                    <ul>
+                        <li>Yapıcı ve teşvik edici bir dil kullanıyor.</li>
+                        <li>Yanlış cevaplarda açıklayıcı ipuçları ve yönlendirmeler sunuyor.</li>
+                        <li>Doğru cevaplarda bilginin neden doğru olduğunu pekiştiriyor.</li>
+                        <li>Görsel ikonlar ve renklerle zenginleştirilmiş.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="simulation-container">
+                <div class="simulation-header bg-gradient-to-r from-green-600 to-teal-600 text-white">
+                    <h2 class="text-lg font-bold">Soru: Fotosentez nerede gerçekleşir?</h2>
+                </div>
+                <div class="simulation-body">
+                    <div class="space-y-3" id="good-options">
+                        <button onclick="goodFeedback('mitochondria')" class="option-btn" id="opt-mit">
+                            <span>A) Mitokondri</span>
+                            <span class="status-icon"></span>
+                        </button>
+                        <button onclick="goodFeedback('chloroplast')" class="option-btn" id="opt-chlo">
+                            <span>B) Kloroplast</span>
+                            <span class="status-icon"></span>
+                        </button>
+                        <button onclick="goodFeedback('ribosome')" class="option-btn" id="opt-rib">
+                            <span>C) Ribozom</span>
+                            <span class="status-icon"></span>
+                        </button>
+                    </div>
+                    
+                    <div id="good-result" class="mt-6 hidden transform transition-all duration-500 scale-95 opacity-0">
+                        <!-- Dinamik Geri Bildirim Buraya Gelecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="scorm-footer">
+        <p>E-İçerik İnceleme Kriterleri Eğitim Platformu - Kriter 8.3.6</p>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('tab-bad').classList.toggle('active', tab === 'bad');
+            document.getElementById('tab-good').classList.toggle('active', tab === 'good');
+            document.getElementById('content-bad').classList.toggle('hidden', tab !== 'bad');
+            document.getElementById('content-good').classList.toggle('hidden', tab !== 'good');
+            resetSimulations();
+        }
+
+        function badFeedback(isCorrect) {
+            const result = document.getElementById('bad-result');
+            result.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+            
+            if (isCorrect) {
+                result.innerText = "DOĞRU!";
+                result.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                result.innerText = "YANLIŞ!";
+                result.classList.add('bg-red-100', 'text-red-700');
+            }
+        }
+
+        function goodFeedback(choice) {
+            const result = document.getElementById('good-result');
+            const options = document.querySelectorAll('#good-options .option-btn');
+            
+            options.forEach(opt => opt.classList.remove('correct', 'incorrect', 'selected'));
+            result.classList.remove('hidden', 'scale-100', 'opacity-100');
+            result.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                result.classList.remove('scale-95', 'opacity-0');
+                result.classList.add('hidden', 'scale-100', 'opacity-100');
+                result.classList.remove('hidden');
+
+                if (choice === 'chloroplast') {
+                    document.getElementById('opt-chlo').classList.add('correct');
+                    result.innerHTML = `
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-xl">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">🌟</span>
+                                <h4 class="font-bold text-green-800">Harika bir cevap!</h4>
+                            </div>
+                            <p class="text-green-700">Bitkiler, kloroplast organeli sayesinde güneş ışığını kullanarak kendi besinlerini üretirler. Bu süreçte klorofil pigmenti hayati rol oynar. Bilgin çok taze!</p>
+                        </div>
+                    `;
+                } else if (choice === 'mitochondria') {
+                    document.getElementById('opt-mit').classList.add('incorrect');
+                    result.innerHTML = `
+                        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">💡</span>
+                                <h4 class="font-bold text-amber-800">Küçük bir ipucu ister misin?</h4>
+                            </div>
+                            <p class="text-amber-700">Mitokondri hücrenin "enerji santralidir" ve solunumdan sorumludur. Besin üretimi (fotosentez) ise bitkiye yeşil rengini veren pigmentlerin olduğu başka bir organelde gerçekleşir. Tekrar denemeye ne dersin?</p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('opt-rib').classList.add('incorrect');
+                    result.innerHTML = `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">🔍</span>
+                                <h4 class="font-bold text-blue-800">Yaklaştın ama tam değil...</h4>
+                            </div>
+                            <p class="text-blue-700">Ribozomlar protein sentezinden sorumludur. Fotosentez için güneş ışığını soğuran özel bir organel gereklidir. Bitki hücrelerini ve yeşil yaprakları düşünerek tekrar dene!</p>
+                        </div>
+                    `;
+                }
+            }, 100);
+        }
+
+        function resetSimulations() {
+            document.getElementById('bad-result').classList.add('hidden');
+            document.getElementById('good-result').classList.add('hidden');
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('correct', 'incorrect', 'selected');
+            });
+        }
+    </script>
+</body>
+</html>

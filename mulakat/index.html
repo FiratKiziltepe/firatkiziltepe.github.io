@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Interview Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen">
+    <div class="container" style="max-width:400px;margin-top:15vh;">
+      <div class="text-center mb-16">
+        <div style="font-size:3rem;">🎤</div>
+        <h1 style="font-size:1.5rem;font-weight:800;margin:12px 0 4px;">Interview Practice</h1>
+        <p class="text-muted" style="font-size:0.9rem;">Mülakat pratik uygulamasına giriş yapın</p>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Kullanıcı Adı</label>
+          <input type="text" class="form-input" id="loginUsername" placeholder="Kullanıcı adı..." autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="Şifre..." autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Giriş Yap</button>
+        <p id="loginError" class="hidden" style="color:var(--danger);font-size:0.85rem;margin-top:12px;text-align:center;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP (hidden until login) ===== -->
+  <div id="mainApp" class="hidden">
+    <div class="header">
+      <span class="header-title">🎤 Interview Practice</span>
+      <div class="header-actions">
+        <span id="userDisplayName" style="font-size:0.85rem;color:var(--text-secondary);font-weight:500;"></span>
+        <button class="btn btn-ghost btn-sm" onclick="openSettings()">⚙️ Ayarlar</button>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">🚪 Çıkış</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="home-hero">
+        <h1>Interview Practice</h1>
+        <p>Mülakat sorularını pratik yap, konuşmanı geliştir</p>
+      </div>
+
+      <div class="home-grid">
+        <a href="interview.html" class="card card-clickable" style="border:2px solid var(--primary);position:relative;">
+          <div style="position:absolute;top:-8px;right:12px;background:var(--primary);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;">YENİ</div>
+          <div class="card-icon">🤖</div>
+          <div class="card-title">AI Mülakat</div>
+          <div class="card-desc">Gerçekçi AI mülakatçı ile canlı mülakat simülasyonu</div>
+        </a>
+
+        <a href="practice.html" class="card card-clickable">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Pratik Yap</div>
+          <div class="card-desc">Soruları gör, konuş, model cevapla karşılaştır</div>
+        </a>
+
+        <a href="browse.html" class="card card-clickable">
+          <div class="card-icon">📋</div>
+          <div class="card-title">Tüm Sorular</div>
+          <div class="card-desc">Tüm soru ve model cevapları incele</div>
+        </a>
+
+        <a href="history.html" class="card card-clickable">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Geçmiş</div>
+          <div class="card-desc">Önceki pratiklerin ve geri bildirimler</div>
+        </a>
+
+        <a href="https://gaziedutr-my.sharepoint.com/:b:/g/personal/24810201001_gazi_edu_tr/IQAhfYcclYdGQIlGqfmyzD3VAR9DiRUme1uHbfF8sopEzCg?e=AgTjAC" target="_blank" rel="noopener" class="card card-clickable">
+          <div class="card-icon">📄</div>
+          <div class="card-title">Genel Bilgi</div>
+          <div class="card-desc">Mülakat hazırlık dokümanını görüntüle (PDF)</div>
+        </a>
+
+        <a href="admin.html" class="card card-clickable" id="adminPanelLink">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Admin Panel</div>
+          <div class="card-desc">Soru ekle, düzenle, Excel yükle</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GEMINI API KEY MODAL ===== -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-title">Gemini API Key Gerekli</div>
+      <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;">
+        Konuşma analizi için Gemini API key'inizi girin. Sadece bu tarayıcıda saklanır.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" class="form-input" id="apiKeyInput" placeholder="API key'inizi girin...">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="skipApiKey()">Sonra</button>
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS MODAL ===== -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-title">Ayarlar</div>
+      <div class="form-group">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" class="form-input" id="settingsGeminiKey" placeholder="API key'inizi girin...">
+        <small class="text-muted" style="margin-top:4px;display:block;font-size:0.8rem;">
+          Sadece bu tarayıcıda saklanır. Hiçbir sunucuya gönderilmez.
+        </small>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="closeSettings()">İptal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script>
+    // Check if already logged in
+    if (sessionStorage.getItem('logged_in') === 'true') {
+      showMainApp();
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.classList.add('hidden');
+
+      try {
+        const user = await loginUser(username, password);
+        sessionStorage.setItem('logged_in', 'true');
+        sessionStorage.setItem('current_user', JSON.stringify(user));
+        showMainApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    function showMainApp() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      // Show user info in header
+      const user = getCurrentUser();
+      if (user) {
+        const nameEl = document.getElementById('userDisplayName');
+        if (nameEl) nameEl.textContent = user.ad + ' ' + user.soyad;
+      }
+
+      // Admin panel link - all users can access (they manage their own questions)
+      // but label changes based on role
+      const adminLink = document.getElementById('adminPanelLink');
+      if (adminLink && user) {
+        if (user.role === 'admin') {
+          adminLink.querySelector('.card-desc').textContent = 'Soru ekle, düzenle, kullanıcı yönet';
+        }
+      }
+
+      // Check if Gemini API key exists
+      if (!localStorage.getItem('gemini_api_key')) {
+        document.getElementById('apiKeyModal').classList.add('open');
+      }
+    }
+
+    function doLogout() {
+      sessionStorage.removeItem('logged_in');
+      sessionStorage.removeItem('current_user');
+      location.reload();
+    }
+
+    // API Key Modal
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        document.getElementById('apiKeyModal').classList.remove('open');
+        showToastSimple('API Key kaydedildi');
+      } else {
+        alert('Lütfen geçerli bir API key girin.');
+      }
+    }
+
+    function skipApiKey() {
+      document.getElementById('apiKeyModal').classList.remove('open');
+    }
+
+    // Settings Modal
+    function openSettings() {
+      document.getElementById('settingsGeminiKey').value = localStorage.getItem('gemini_api_key') || '';
+      document.getElementById('settingsModal').classList.add('open');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('open');
+    }
+
+    function saveSettings() {
+      const key = document.getElementById('settingsGeminiKey').value.trim();
+      if (key) localStorage.setItem('gemini_api_key', key);
+      else localStorage.removeItem('gemini_api_key');
+      closeSettings();
+      showToastSimple('Ayarlar kaydedildi');
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('open');
+        }
+      });
+    });
+
+    function showToastSimple(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast show';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+  </script>
+
+</body>
+</html>

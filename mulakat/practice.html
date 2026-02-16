@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Pratik - Interview Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .speech-text[contenteditable="true"] {
+      cursor: text;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      min-height: 40px;
+      outline: none;
+    }
+    .speech-text[contenteditable="true"]:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+    }
+    .editable-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .answered-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .batch-feedback-bar {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="header-back">← Ana Sayfa</a>
+    <span class="header-title">Pratik Modu</span>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleShuffle()" id="shuffleBtn" title="Karıştır">🔀</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Loading -->
+    <div id="loadingState" class="empty-state">
+      <div class="feedback-loading"><div class="spinner"></div><br>Sorular yükleniyor...</div>
+    </div>
+
+    <!-- Empty -->
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-state-icon">📭</div>
+      <div class="empty-state-text">Henüz soru eklenmemiş</div>
+      <a href="admin.html" class="btn btn-primary mt-16">Admin Panele Git</a>
+    </div>
+
+    <!-- Practice Card -->
+    <div id="practiceArea" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="practice-counter" id="counter"></div>
+        <div id="answeredBadge" class="hidden">
+          <span class="answered-badge">✓ <span id="answeredCount">0</span> cevaplandı</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="practice-question" id="questionText"></div>
+
+        <!-- Vocabulary Hints -->
+        <div id="vocabArea" class="hidden" style="padding:0 20px 16px;">
+          <button class="vocab-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+            📚 Vocabulary & Collocations (<span id="vocabCount">0</span>)
+          </button>
+          <div class="vocab-list" id="vocabList"></div>
+        </div>
+
+        <!-- Speech Area -->
+        <div style="padding:0 20px;">
+          <div class="speech-area" id="speechArea">
+            <div class="speech-label">Konuşmanız <span id="editHint" class="hidden" style="font-weight:400;font-size:0.7rem;color:var(--primary);">(düzenleyebilirsiniz)</span></div>
+            <div class="speech-text" id="speechText">Konuşmaya başlamak için mikrofon butonuna basın...</div>
+            <div class="editable-hint hidden" id="editableHint">Yanlış tanınan kelimeleri tıklayıp düzeltebilirsiniz</div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="padding:0 20px 20px;">
+          <div class="practice-actions">
+            <button class="btn btn-primary btn-lg" id="micBtn" onclick="toggleRecording()">
+              🎤 Konuşmaya Başla
+            </button>
+            <button class="btn btn-success btn-lg" id="showAnswerBtn" onclick="showModelAnswer()">
+              👁️ Cevabı Göster
+            </button>
+          </div>
+        </div>
+
+        <!-- Model Answer (hidden initially) -->
+        <div id="answerArea" class="hidden" style="padding:0 20px 20px;">
+          <div class="answer-section">
+            <div class="answer-label">Model Cevap</div>
+            <div class="answer-text" id="answerText"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="practice-nav">
+        <button class="btn btn-outline" onclick="prevQuestion()" id="prevBtn">← Önceki</button>
+        <button class="btn btn-outline" onclick="resetCurrent()">🔄 Sıfırla</button>
+        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Sonraki →</button>
+      </div>
+
+      <!-- Batch Feedback Bar (outside question card) -->
+      <div class="batch-feedback-bar" id="batchFeedbackBar">
+        <div style="font-size:0.9rem;">
+          <strong id="batchCount">0</strong> / <span id="batchTotal">0</span> soru cevaplandı
+        </div>
+        <button class="btn btn-primary" id="batchFeedbackBtn" onclick="requestBatchFeedback()" disabled>
+          🤖 Toplu Geri Bildirim Al
+        </button>
+      </div>
+
+      <!-- Feedback Area (outside question card) -->
+      <div id="feedbackArea" class="hidden" style="margin-top:16px;">
+        <div class="feedback-area">
+          <div class="feedback-title">🤖 Gemini Geri Bildirimi</div>
+          <div class="feedback-content" id="feedbackContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script>checkAuth();</script>
+  <script src="gemini.js"></script>
+  <script src="practice.js"></script>
+
+</body>
+</html>
