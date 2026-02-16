@@ -1,0 +1,259 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Plus, X, Trash2, BookOpen, BrainCircuit, CheckCircle, AlertCircle } from 'lucide-react';
+
+export default function App() {
+  // Genişletilmiş Veritabanı (Fırat Kızıltepe ve Popüler Eğitim Araçları)
+  const INITIAL_TOOLS = [
+    // Sohbet & Asistan
+    { id: 1, name: "ChatGPT", category: "Chatbot" },
+    { id: 2, name: "Claude 3.5 Sonnet", category: "Chatbot" },
+    { id: 3, name: "Gemini 1.5 Pro", category: "Chatbot" },
+    { id: 4, name: "Microsoft Copilot", category: "Asistan" },
+    { id: 5, name: "Perplexity", category: "Araştırma/Arama" },
+    { id: 6, name: "Poe", category: "Chatbot Platformu" },
+    { id: 7, name: "Venice.ai", category: "Gizlilik Odaklı Chat" },
+    { id: 8, name: "Mistral", category: "Açık Kaynak LLM" },
+    { id: 9, name: "Llama 3", category: "Açık Kaynak LLM" },
+
+    // Görsel & Tasarım
+    { id: 10, name: "Midjourney", category: "Görsel Üretim" },
+    { id: 11, name: "Dall-E 3", category: "Görsel Üretim" },
+    { id: 12, name: "Leonardo.ai", category: "Görsel Üretim" },
+    { id: 13, name: "Stable Diffusion", category: "Görsel Üretim" },
+    { id: 14, name: "Canva Magic Studio", category: "Tasarım" },
+    { id: 15, name: "Freepik Pikaso", category: "Çizim" },
+
+    // Sunum & İçerik
+    { id: 16, name: "Gamma", category: "Sunum Hazırlama" },
+    { id: 17, name: "Tome", category: "Hikaye/Sunum" },
+    { id: 18, name: "Curipod", category: "İnteraktif Sunum" },
+    { id: 19, name: "Slidesgo AI", category: "Sunum Şablonu" },
+    
+    // Eğitim & Planlama (Öğretmen Özel)
+    { id: 20, name: "MagicSchool.ai", category: "Eğitim Platformu" },
+    { id: 21, name: "Eduaide.ai", category: "Ders Planlama" },
+    { id: 22, name: "Diffit", category: "Materyal Farklılaştırma" },
+    { id: 23, name: "Brisk Teaching", category: "Geri Bildirim/Notlandırma" },
+    { id: 24, name: "Khanmigo", category: "Özel Ders Asistanı" },
+    { id: 25, name: "Socratic", category: "Ödev Yardımı" },
+
+    // Doküman & Analiz
+    { id: 26, name: "NotebookLM", category: "Not/Araştırma" },
+    { id: 27, name: "ChatPDF", category: "PDF Analizi" },
+    { id: 28, name: "Humata", category: "Akademik Okuma" },
+    { id: 29, name: "Elicit", category: "Literatür Tarama" },
+
+    // Ses & Video & Müzik
+    { id: 30, name: "ElevenLabs", category: "Ses Klonlama/Seslendirme" },
+    { id: 31, name: "Suno AI", category: "Müzik Besteleme" },
+    { id: 32, name: "Udio", category: "Müzik Üretim" },
+    { id: 33, name: "HeyGen", category: "Video Avatar" },
+    { id: 34, name: "Runway Gen-2", category: "Video Üretim" },
+    { id: 35, name: "Sora", category: "Video (Beta)" },
+
+    // Ölçme & Değerlendirme & Oyun
+    { id: 36, name: "Kahoot AI", category: "Oyunlaştırma" },
+    { id: 37, name: "Quizizz AI", category: "Sınav Hazırlama" },
+    { id: 38, name: "Character.ai", category: "Roleplay/Karakter" },
+    
+    // Kodlama & Geliştirici
+    { id: 39, name: "Cursor", category: "Kodlama Editörü" },
+    { id: 40, name: "Replit AI", category: "Kodlama" },
+    { id: 41, name: "LM Studio", category: "Lokal LLM Çalıştırma" }
+  ];
+
+  // State Yönetimi
+  const [tools, setTools] = useState(INITIAL_TOOLS); 
+  const [query, setQuery] = useState(""); 
+  const [isOpen, setIsOpen] = useState(false); 
+  const [lessonPlan, setLessonPlan] = useState([]); 
+  
+  const dropdownRef = useRef(null);
+
+  // Dışarı tıklandığında menüyü kapatma
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filtreleme Mantığı
+  const filteredTools = query.length >= 3 
+    ? tools.filter(tool => tool.name.toLowerCase().startsWith(query.toLowerCase()))
+    : [];
+
+  const exactMatch = tools.some(tool => tool.name.toLowerCase() === query.toLowerCase());
+
+  // Yeni araç ekleme
+  const addNewTool = () => {
+    if (!query.trim()) return;
+    
+    const newTool = {
+      id: Date.now(),
+      name: query.charAt(0).toUpperCase() + query.slice(1), 
+      category: "Kullanıcı Tanımlı"
+    };
+
+    setTools([...tools, newTool]);
+    addToLessonPlan(newTool);
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  // Listeye ekleme
+  const addToLessonPlan = (tool) => {
+    const isAlreadyAdded = lessonPlan.some(item => item.id === tool.id);
+    if (!isAlreadyAdded) {
+      setLessonPlan([...lessonPlan, tool]);
+    }
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  // Listeden çıkarma
+  const removeFromPlan = (id) => {
+    setLessonPlan(lessonPlan.filter(item => item.id !== id));
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 p-4 md:p-8">
+      
+      {/* Üst Başlık */}
+      <div className="max-w-3xl mx-auto mb-8 text-center">
+        <div className="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-full mb-4">
+          <BrainCircuit className="w-8 h-8 text-indigo-600" />
+        </div>
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Kullanacağınız Yapay Zekâ Araçlarını Seçiniz</h1>
+      </div>
+
+      <div className="max-w-xl mx-auto space-y-8">
+        
+        {/* Arama ve Seçim Alanı */}
+        <div className="bg-white p-6 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 relative z-50">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Araç Ara veya Ekle
+          </label>
+          
+          <div className="relative" ref={dropdownRef}>
+            <div className="relative">
+              <input
+                type="text"
+                className={`w-full pl-10 pr-4 py-3 bg-slate-50 border-2 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all duration-200 ${
+                  query.length > 0 && query.length < 3 
+                    ? 'border-amber-300 focus:border-amber-400' 
+                    : 'border-slate-200 focus:border-indigo-500'
+                }`}
+                placeholder="Araç adını yazınız"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setIsOpen(true);
+                }}
+                onFocus={() => setIsOpen(true)}
+              />
+              <Search className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+              
+              {query.length > 0 && query.length < 3 && (
+                <div className="absolute right-3 top-3.5 flex items-center gap-1 text-amber-600 text-xs font-medium animate-pulse">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>3 harf girin</span>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown Menü */}
+            {isOpen && query.length >= 3 && (
+              <div className="absolute w-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top">
+                <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                  
+                  {filteredTools.length > 0 ? (
+                    filteredTools.map((tool) => (
+                      <button
+                        key={tool.id}
+                        onClick={() => addToLessonPlan(tool)}
+                        className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center justify-between group transition-colors border-b border-slate-50 last:border-0"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-900 group-hover:text-indigo-700">
+                            <span className="text-indigo-600 font-bold">{tool.name.substring(0, query.length)}</span>
+                            {tool.name.substring(query.length)}
+                          </span>
+                          <span className="text-xs text-slate-500">{tool.category}</span>
+                        </div>
+                        <Plus className="w-4 h-4 text-slate-300 group-hover:text-indigo-500" />
+                      </button>
+                    ))
+                  ) : !exactMatch ? (
+                    <button
+                      onClick={addNewTool}
+                      className="w-full text-left px-4 py-4 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-3 transition-colors text-indigo-700"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center flex-shrink-0">
+                        <Plus className="w-5 h-5 text-indigo-700" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold">"{query}" aracını ekle</span>
+                        <span className="text-xs text-indigo-600/70">Bu araç listede yok, veritabanına ekle.</span>
+                      </div>
+                    </button>
+                  ) : null}
+                </div>
+                
+                <div className="px-3 py-2 bg-slate-50 border-t border-slate-100 text-[10px] text-slate-400 text-center uppercase tracking-wider font-semibold">
+                  {filteredTools.length} Sonuç Bulundu
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Seçilen Araçlar Listesi */}
+        <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-2 px-1">
+                <BookOpen className="w-5 h-5 text-slate-600" />
+                <h2 className="text-lg font-bold text-slate-800">Seçtiğiniz araçlar</h2>
+                <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {lessonPlan.length}
+                </span>
+            </div>
+
+            {lessonPlan.length === 0 ? (
+                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
+                    <p className="text-slate-400">Henüz bir araç seçilmedi.</p>
+                </div>
+            ) : (
+                <div className="grid gap-3">
+                    {lessonPlan.map((item) => (
+                        <div key={item.id} className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                    item.category === 'Kullanıcı Tanımlı' ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'
+                                }`}>
+                                    {item.category === 'Kullanıcı Tanımlı' ? <Plus className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-slate-800">{item.name}</h3>
+                                    <p className="text-xs text-slate-500">{item.category}</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => removeFromPlan(item.id)}
+                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Listeden Çıkar"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
