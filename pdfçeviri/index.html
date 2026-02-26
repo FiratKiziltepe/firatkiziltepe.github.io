@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dosya Çevirici</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Dosya Çevirici</h1>
+            <p class="subtitle">PDF, PPTX, DOCX ve TXT dosyalarınızı anında çevirin</p>
+        </header>
+
+        <section class="config-section">
+            <div class="api-key-group">
+                <label for="apiKey">Gemini API Anahtarı</label>
+                <div class="input-row">
+                    <input type="password" id="apiKey" placeholder="API anahtarınızı girin...">
+                    <button id="toggleApiKey" class="btn-icon" title="Göster/Gizle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="lang-group">
+                <label for="langDirection">Çeviri Yönü</label>
+                <select id="langDirection">
+                    <option value="en-tr">İngilizce → Türkçe</option>
+                    <option value="tr-en">Türkçe → İngilizce</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="notes-config">
+            <details open>
+                <summary>Not Ayarları</summary>
+                <div class="notes-options">
+                    <div class="opt-group">
+                        <label for="noteDetail">Detay Seviyesi</label>
+                        <select id="noteDetail">
+                            <option value="short">Kısa (2-3 cümle)</option>
+                            <option value="medium" selected>Orta (3-5 cümle)</option>
+                            <option value="detailed">Detaylı (5-8 cümle)</option>
+                        </select>
+                    </div>
+                    <div class="opt-group">
+                        <label for="noteLang">Not Dili</label>
+                        <select id="noteLang">
+                            <option value="target">Hedef Dil</option>
+                            <option value="source">Kaynak Dil</option>
+                        </select>
+                    </div>
+                    <div class="opt-group">
+                        <label for="existingNotes">Mevcut Notlar (PPTX)</label>
+                        <select id="existingNotes">
+                            <option value="overwrite">Üzerine Yaz</option>
+                            <option value="merge">Birleştir (Eskiyi Koru + Yeni Ekle)</option>
+                            <option value="keep">Koru (Varsa Dokunma)</option>
+                        </select>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section class="upload-section">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-content">
+                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p class="drop-text">Dosyanızı sürükleyip bırakın</p>
+                    <p class="drop-subtext">veya tıklayarak seçin</p>
+                    <p class="supported-formats">PDF, PPTX, DOCX, TXT</p>
+                </div>
+                <input type="file" id="fileInput" accept=".pdf,.pptx,.docx,.txt" hidden>
+            </div>
+        </section>
+
+        <section class="file-info" id="fileInfo" style="display:none;">
+            <div class="file-card">
+                <div class="file-icon" id="fileIcon">📄</div>
+                <div class="file-details">
+                    <span class="file-name" id="fileName"></span>
+                    <span class="file-size" id="fileSize"></span>
+                </div>
+                <button class="btn-remove" id="removeFile" title="Kaldır">✕</button>
+            </div>
+        </section>
+
+        <section class="action-section">
+            <button class="btn-translate" id="translateBtn" disabled>
+                <span class="btn-text">Çeviriyi Başlat</span>
+                <svg class="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </section>
+
+        <section class="progress-section" id="progressSection" style="display:none;">
+            <div class="progress-header">
+                <span class="progress-label" id="progressLabel">Çevriliyor...</span>
+                <span class="progress-percent" id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-detail" id="progressDetail"></div>
+        </section>
+
+        <section class="result-section" id="resultSection" style="display:none;">
+            <div class="result-card">
+                <div class="result-icon">✅</div>
+                <div class="result-info">
+                    <h3>Çeviri Tamamlandı!</h3>
+                    <p id="resultSummary"></p>
+                </div>
+                <button class="btn-download" id="downloadBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    İndir
+                </button>
+            </div>
+        </section>
+
+        <section class="log-section" id="logSection" style="display:none;">
+            <details>
+                <summary>İşlem Günlüğü</summary>
+                <div class="log-content" id="logContent"></div>
+            </details>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
