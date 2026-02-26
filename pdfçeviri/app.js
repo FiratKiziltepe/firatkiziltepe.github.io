@@ -1,6 +1,23 @@
 (function () {
     'use strict';
 
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/full/ttf/NotoSans-Regular.ttf';
+    const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/full/ttf/NotoSans-Bold.ttf';
+    let cachedFontRegular = null;
+    let cachedFontBold = null;
+
+    async function loadFonts() {
+        if (cachedFontRegular && cachedFontBold) return;
+        const [r, b] = await Promise.all([
+            fetch(FONT_URL_REGULAR).then(r => r.arrayBuffer()),
+            fetch(FONT_URL_BOLD).then(r => r.arrayBuffer())
+        ]);
+        cachedFontRegular = new Uint8Array(r);
+        cachedFontBold = new Uint8Array(b);
+    }
+
     const $ = (sel) => document.querySelector(sel);
     const apiKeyInput = $('#apiKey');
     const toggleApiKeyBtn = $('#toggleApiKey');
@@ -27,10 +44,17 @@
     const noteDetailSelect = $('#noteDetail');
     const noteLangSelect = $('#noteLang');
     const existingNotesSelect = $('#existingNotes');
+    const notesEnabledCheck = $('#notesEnabled');
+    const notesOptionsPanel = $('#notesOptionsPanel');
+    const previewSection = $('#previewSection');
+    const previewList = $('#previewList');
+    const previewCount = $('#previewCount');
+    const selectAllCheck = $('#selectAll');
 
     let currentFile = null;
     let translatedBlob = null;
     let translatedFileName = '';
+    let previewItems = [];
 
     const FILE_ICONS = { pdf: '📕', pptx: '📙', docx: '📘', txt: '📄' };
 
@@ -43,6 +67,11 @@
 
     toggleApiKeyBtn.addEventListener('click', () => {
         apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
+    });
+
+    // --- Notes toggle ---
+    notesEnabledCheck.addEventListener('change', () => {
+        notesOptionsPanel.classList.toggle('hidden', !notesEnabledCheck.checked);
     });
 
     // --- File upload ---
@@ -62,6 +91,9 @@
         currentFile = null;
         fileInput.value = '';
         fileInfo.style.display = 'none';
+        previewSection.style.display = 'none';
+        previewList.innerHTML = '';
+        previewItems = [];
         dropZone.style.display = 'block';
         hideResults();
         updateTranslateBtn();
@@ -81,6 +113,111 @@
         dropZone.style.display = 'none';
         hideResults();
         updateTranslateBtn();
+        loadPreview(file, ext);
+    }
+
+    // --- Preview / Page selection ---
+    selectAllCheck.addEventListener('change', () => {
+        const boxes = previewList.querySelectorAll('input[type="checkbox"]');
+        boxes.forEach(cb => { cb.checked = selectAllCheck.checked; });
+        updateSelectionCount();
+    });
+
+    function updateSelectionCount() {
+        const boxes = previewList.querySelectorAll('input[type="checkbox"]');
+        const checked = previewList.querySelectorAll('input[type="checkbox"]:checked').length;
+        previewCount.textContent = `${checked} / ${boxes.length} seçili`;
+        selectAllCheck.checked = checked === boxes.length;
+        selectAllCheck.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function getSelectedIndices() {
+        const boxes = previewList.querySelectorAll('input[type="checkbox"]');
+        const indices = [];
+        boxes.forEach((cb, i) => { if (cb.checked) indices.push(i); });
+        return indices;
+    }
+
+    function renderPreviewItems(items, labelPrefix) {
+        previewItems = items;
+        previewList.innerHTML = '';
+        items.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `<input type="checkbox" checked data-idx="${i}">` +
+                `<span class="preview-num">${labelPrefix} ${i + 1}</span>` +
+                `<span class="preview-text">${escapeHtml(item.substring(0, 150)) || '(boş)'}</span>`;
+            div.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    const cb = div.querySelector('input');
+                    cb.checked = !cb.checked;
+                }
+                updateSelectionCount();
+            });
+            previewList.appendChild(div);
+        });
+        selectAllCheck.checked = true;
+        selectAllCheck.indeterminate = false;
+        previewCount.textContent = `${items.length} / ${items.length} seçili`;
+        previewSection.style.display = 'block';
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function loadPreview(file, ext) {
+        previewList.innerHTML = '<div class="preview-loading">Dosya okunuyor...</div>';
+        previewSection.style.display = 'block';
+
+        try {
+            const buf = await file.arrayBuffer();
+
+            if (ext === 'pptx') {
+                const zip = await JSZip.loadAsync(buf);
+                const slides = Object.keys(zip.files)
+                    .filter(f => /^ppt\/slides\/slide\d+\.xml$/.test(f))
+                    .sort((a, b) => parseInt(a.match(/slide(\d+)/)[1]) - parseInt(b.match(/slide(\d+)/)[1]));
+                const texts = [];
+                for (const sf of slides) {
+                    const xml = await zip.file(sf).async('string');
+                    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+                    const t = Array.from(doc.querySelectorAll('t')).map(n => n.textContent).filter(s => s.trim()).join(' ');
+                    texts.push(t);
+                }
+                renderPreviewItems(texts, 'Slayt');
+
+            } else if (ext === 'pdf') {
+                const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+                const texts = [];
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    texts.push(content.items.map(it => it.str).join(' '));
+                }
+                renderPreviewItems(texts, 'Sayfa');
+
+            } else if (ext === 'docx') {
+                const zip = await JSZip.loadAsync(buf);
+                const docFile = zip.file('word/document.xml');
+                if (!docFile) { previewSection.style.display = 'none'; return; }
+                const xml = await docFile.async('string');
+                const doc = new DOMParser().parseFromString(xml, 'application/xml');
+                const paras = [];
+                doc.querySelectorAll('p').forEach(p => {
+                    const t = Array.from(p.querySelectorAll('t')).map(n => n.textContent).join('');
+                    if (t.trim()) paras.push(t);
+                });
+                renderPreviewItems(paras, 'Paragraf');
+
+            } else if (ext === 'txt') {
+                const text = await file.text();
+                const paras = text.split(/\n\s*\n/).filter(p => p.trim());
+                renderPreviewItems(paras, 'Paragraf');
+            }
+        } catch (e) {
+            previewList.innerHTML = '<div class="preview-loading">Önizleme yüklenemedi.</div>';
+        }
     }
 
     function getExtension(name) {
@@ -362,27 +499,32 @@
     // ========================
     async function handlePPTX(sourceLang, targetLang) {
         const { code: langCode } = getLangs();
+        const wantNotes = notesEnabledCheck.checked;
+        const selected = new Set(getSelectedIndices());
+
         log('PPTX dosyası açılıyor...');
         const arrayBuffer = await currentFile.arrayBuffer();
         const zip = await JSZip.loadAsync(arrayBuffer);
 
         const slideFiles = Object.keys(zip.files)
             .filter(f => /^ppt\/slides\/slide\d+\.xml$/.test(f))
-            .sort((a, b) => {
-                const na = parseInt(a.match(/slide(\d+)/)[1]);
-                const nb = parseInt(b.match(/slide(\d+)/)[1]);
-                return na - nb;
-            });
+            .sort((a, b) => parseInt(a.match(/slide(\d+)/)[1]) - parseInt(b.match(/slide(\d+)/)[1]));
 
-        log(`${slideFiles.length} slayt bulundu.`);
-        const totalSteps = slideFiles.length * 2;
+        const selectedCount = selected.size || slideFiles.length;
+        log(`${slideFiles.length} slayt bulundu, ${selectedCount} tanesi seçili.`);
+        const totalSteps = selectedCount * (wantNotes ? 2 : 1);
+        let stepsDone = 0;
         let totalTranslated = 0;
         const slideTranslatedTexts = [];
 
-        // Pass 1: Translate slide content
         for (let i = 0; i < slideFiles.length; i++) {
+            if (selected.size && !selected.has(i)) {
+                slideTranslatedTexts.push('');
+                continue;
+            }
+
             const slideFile = slideFiles[i];
-            showProgress('Çevriliyor...', (i / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
+            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
 
             const xml = await zip.file(slideFile).async('string');
             const parser = new DOMParser();
@@ -392,103 +534,85 @@
             const texts = [];
             const nodes = [];
             textNodes.forEach(node => {
-                if (node.textContent.trim()) {
-                    texts.push(node.textContent);
-                    nodes.push(node);
-                }
+                if (node.textContent.trim()) { texts.push(node.textContent); nodes.push(node); }
             });
 
             if (texts.length > 0) {
                 log(`Slayt ${i + 1}: ${texts.length} metin bloğu çevriliyor...`);
-
                 if (texts.length <= 30 && texts.join('').length < 4000) {
                     const translated = await translateBatch(texts, sourceLang, targetLang);
                     translated.forEach((t, j) => { nodes[j].textContent = t; });
                     totalTranslated += texts.length;
                 } else {
                     for (let j = 0; j < texts.length; j++) {
-                        const translated = await translateText(texts[j], sourceLang, targetLang);
-                        nodes[j].textContent = translated;
+                        nodes[j].textContent = await translateText(texts[j], sourceLang, targetLang);
                         totalTranslated++;
                         if (j > 0 && j % 5 === 0) await delay(500);
                     }
                 }
-
-                const serializer = new XMLSerializer();
-                const newXml = serializer.serializeToString(doc);
+                const newXml = new XMLSerializer().serializeToString(doc);
                 zip.file(slideFile, newXml);
-
-                const translatedContent = Array.from(doc.querySelectorAll('t'))
-                    .map(n => n.textContent).filter(t => t.trim()).join(' ');
-                slideTranslatedTexts.push(translatedContent);
+                slideTranslatedTexts.push(Array.from(doc.querySelectorAll('t')).map(n => n.textContent).filter(t => t.trim()).join(' '));
             } else {
                 log(`Slayt ${i + 1}: Metin bulunamadı, atlanıyor.`);
                 slideTranslatedTexts.push('');
             }
 
-            showProgress('Çevriliyor...', ((i + 1) / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
-            if (i < slideFiles.length - 1) await delay(300);
+            stepsDone++;
+            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
+            await delay(300);
         }
 
-        // Pass 2: Generate speaker notes
-        const existingNotesMode = existingNotesSelect.value;
-        log(`Konuşmacı notları oluşturuluyor... (Mod: ${existingNotesMode === 'overwrite' ? 'Üzerine Yaz' : existingNotesMode === 'merge' ? 'Birleştir' : 'Koru'})`);
+        if (wantNotes) {
+            const existingNotesMode = existingNotesSelect.value;
+            log(`Konuşmacı notları oluşturuluyor... (${existingNotesMode === 'overwrite' ? 'Üzerine Yaz' : existingNotesMode === 'merge' ? 'Birleştir' : 'Koru'})`);
 
-        for (let i = 0; i < slideFiles.length; i++) {
-            const slideNum = parseInt(slideFiles[i].match(/slide(\d+)/)[1]);
-            const content = slideTranslatedTexts[i];
+            for (let i = 0; i < slideFiles.length; i++) {
+                if (selected.size && !selected.has(i)) continue;
 
-            showProgress('Notlar oluşturuluyor...', ((slideFiles.length + i) / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
+                const slideNum = parseInt(slideFiles[i].match(/slide(\d+)/)[1]);
+                const content = slideTranslatedTexts[i];
+                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
 
-            if (!content.trim()) {
-                log(`Slayt ${i + 1}: İçerik yok, not atlanıyor.`);
-                continue;
+                if (!content.trim()) { stepsDone++; continue; }
+
+                const existing = await extractExistingNotes(zip, slideNum);
+                if (existing && existingNotesMode === 'keep') { log(`Slayt ${i + 1}: Mevcut not korunuyor.`); stepsDone++; continue; }
+
+                const newNotes = await generateNotes(content);
+                if (!newNotes) { stepsDone++; continue; }
+
+                let finalNotes = newNotes;
+                if (existing && existingNotesMode === 'merge') {
+                    finalNotes = existing + '\n\n---\n\n' + newNotes;
+                }
+
+                zip.file(`ppt/notesSlides/notesSlide${slideNum}.xml`, buildNotesSlideXml(finalNotes, langCode));
+                zip.file(`ppt/notesSlides/_rels/notesSlide${slideNum}.xml.rels`, buildNotesSlideRels(slideNum));
+                await ensureSlideNotesRel(zip, slideNum);
+                await ensureNotesContentType(zip, slideNum);
+
+                log(`Slayt ${i + 1}: Not eklendi.`);
+                stepsDone++;
+                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
+                await delay(300);
             }
-
-            const existing = await extractExistingNotes(zip, slideNum);
-
-            if (existing && existingNotesMode === 'keep') {
-                log(`Slayt ${i + 1}: Mevcut not korunuyor.`);
-                continue;
-            }
-
-            const newNotes = await generateNotes(content);
-            if (!newNotes) {
-                log(`Slayt ${i + 1}: Not oluşturulamadı.`);
-                continue;
-            }
-
-            let finalNotes = newNotes;
-            if (existing && existingNotesMode === 'merge') {
-                finalNotes = existing + '\n\n---\n\n' + newNotes;
-                log(`Slayt ${i + 1}: Mevcut not ile birleştirildi.`);
-            }
-
-            const notesPath = `ppt/notesSlides/notesSlide${slideNum}.xml`;
-            const notesRelsPath = `ppt/notesSlides/_rels/notesSlide${slideNum}.xml.rels`;
-
-            zip.file(notesPath, buildNotesSlideXml(finalNotes, langCode));
-            zip.file(notesRelsPath, buildNotesSlideRels(slideNum));
-            await ensureSlideNotesRel(zip, slideNum);
-            await ensureNotesContentType(zip, slideNum);
-
-            log(`Slayt ${i + 1}: Konuşmacı notu eklendi.`);
-            showProgress('Notlar oluşturuluyor...', ((slideFiles.length + i + 1) / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
-            await delay(300);
         }
 
         log('Yeni PPTX oluşturuluyor...');
         const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-
         translatedBlob = blob;
         translatedFileName = currentFile.name.replace(/\.pptx$/i, '_translated.pptx');
-        resultSummary.textContent = `${slideFiles.length} slayt, ${totalTranslated} metin bloğu çevrildi (notlar eklendi).`;
+        const noteInfo = wantNotes ? ' (notlar eklendi)' : '';
+        resultSummary.textContent = `${selectedCount} slayt, ${totalTranslated} metin bloğu çevrildi${noteInfo}.`;
     }
 
     // ========================
     // DOCX HANDLER
     // ========================
     async function handleDOCX(sourceLang, targetLang) {
+        const selected = new Set(getSelectedIndices());
+
         log('DOCX dosyası açılıyor...');
         const arrayBuffer = await currentFile.arrayBuffer();
         const zip = await JSZip.loadAsync(arrayBuffer);
@@ -513,15 +637,25 @@
             paraTextNodes.push(Array.from(tNodes));
         });
 
-        log(`${paraTexts.length} paragraf bulundu.`);
-        showProgress('Çevriliyor...', 0, `0 / ${paraTexts.length} paragraf`);
+        const selectedParas = selected.size ? paraTexts.filter((_, i) => selected.has(i)) : paraTexts;
+        log(`${paraTexts.length} paragraf bulundu, ${selectedParas.length} tanesi seçili.`);
+        showProgress('Çevriliyor...', 0, `0 / ${selectedParas.length} paragraf`);
 
         const BATCH_SIZE = 20;
         let translatedCount = 0;
+        let globalIdx = 0;
 
         for (let i = 0; i < paraTexts.length; i += BATCH_SIZE) {
-            const batch = paraTexts.slice(i, i + BATCH_SIZE);
-            const batchNodes = paraTextNodes.slice(i, i + BATCH_SIZE);
+            const indices = [];
+            const batch = [];
+            const batchNodes = [];
+            for (let j = i; j < Math.min(i + BATCH_SIZE, paraTexts.length); j++) {
+                if (selected.size && !selected.has(j)) continue;
+                indices.push(j);
+                batch.push(paraTexts[j]);
+                batchNodes.push(paraTextNodes[j]);
+            }
+            if (!batch.length) continue;
 
             let translated;
             if (batch.join('').length < 4000) {
@@ -540,34 +674,32 @@
                     nodes[0].textContent = t;
                 } else {
                     nodes[0].textContent = t;
-                    for (let k = 1; k < nodes.length; k++) {
-                        nodes[k].textContent = '';
-                    }
+                    for (let k = 1; k < nodes.length; k++) nodes[k].textContent = '';
                 }
             });
 
             translatedCount += batch.length;
-            showProgress('Çevriliyor...', (translatedCount / paraTexts.length) * 100, `${translatedCount} / ${paraTexts.length} paragraf`);
-            log(`${translatedCount} / ${paraTexts.length} paragraf çevrildi.`);
-            if (i + BATCH_SIZE < paraTexts.length) await delay(300);
+            showProgress('Çevriliyor...', (translatedCount / selectedParas.length) * 100, `${translatedCount} / ${selectedParas.length} paragraf`);
+            log(`${translatedCount} / ${selectedParas.length} paragraf çevrildi.`);
+            await delay(300);
         }
 
-        const serializer = new XMLSerializer();
-        const newXml = serializer.serializeToString(doc);
-        zip.file('word/document.xml', newXml);
+        zip.file('word/document.xml', new XMLSerializer().serializeToString(doc));
 
         log('Yeni DOCX oluşturuluyor...');
         const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
         translatedBlob = blob;
         translatedFileName = currentFile.name.replace(/\.docx$/i, '_translated.docx');
-        resultSummary.textContent = `${paraTexts.length} paragraf çevrildi.`;
+        resultSummary.textContent = `${selectedParas.length} paragraf çevrildi.`;
     }
 
     // ========================
     // PDF HANDLER
     // ========================
     async function handlePDF(sourceLang, targetLang) {
+        const wantNotes = notesEnabledCheck.checked;
+        const selected = new Set(getSelectedIndices());
+
         log('PDF dosyası okunuyor...');
         const arrayBuffer = await currentFile.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -578,49 +710,57 @@
         for (let i = 1; i <= numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            const text = content.items.map(item => item.str).join(' ');
-            pageTexts.push(text);
+            pageTexts.push(content.items.map(it => it.str).join(' '));
         }
 
-        const totalSteps = numPages * 2;
+        const selectedCount = selected.size || numPages;
+        const totalSteps = selectedCount * (wantNotes ? 2 : 1);
+        let stepsDone = 0;
         showProgress('Çevriliyor...', 0, `0 / ${numPages} sayfa`);
 
         const translatedPages = [];
         const pageNotes = [];
 
-        // Pass 1: Translate
         for (let i = 0; i < pageTexts.length; i++) {
-            if (!pageTexts[i].trim()) {
-                translatedPages.push('');
-                continue;
-            }
-            const translated = await translateText(pageTexts[i], sourceLang, targetLang);
-            translatedPages.push(translated);
-            showProgress('Çevriliyor...', ((i + 1) / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Çeviri`);
-            log(`Sayfa ${i + 1} çevrildi.`);
-            if (i < pageTexts.length - 1) await delay(300);
-        }
-
-        // Pass 2: Generate notes
-        log('Konuşmacı notları oluşturuluyor...');
-        for (let i = 0; i < translatedPages.length; i++) {
-            if (!translatedPages[i].trim()) {
+            if (selected.size && !selected.has(i)) {
+                translatedPages.push(pageTexts[i]);
                 pageNotes.push('');
                 continue;
             }
-            showProgress('Notlar oluşturuluyor...', ((numPages + i) / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Not`);
-            const notes = await generateNotes(translatedPages[i]);
-            pageNotes.push(notes);
-            log(`Sayfa ${i + 1}: Konuşmacı notu oluşturuldu.`);
-            showProgress('Notlar oluşturuluyor...', ((numPages + i + 1) / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Not`);
+            if (!pageTexts[i].trim()) { translatedPages.push(''); pageNotes.push(''); stepsDone++; continue; }
+
+            translatedPages.push(await translateText(pageTexts[i], sourceLang, targetLang));
+            stepsDone++;
+            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Çeviri`);
+            log(`Sayfa ${i + 1} çevrildi.`);
             await delay(300);
         }
 
+        if (wantNotes) {
+            log('Konuşmacı notları oluşturuluyor...');
+            for (let i = 0; i < translatedPages.length; i++) {
+                if (selected.size && !selected.has(i)) continue;
+                if (!translatedPages[i].trim()) { pageNotes.push(''); stepsDone++; continue; }
+
+                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Not`);
+                pageNotes[i] = await generateNotes(translatedPages[i]);
+                stepsDone++;
+                await delay(300);
+            }
+        } else {
+            for (let i = 0; i < translatedPages.length; i++) {
+                if (!pageNotes[i]) pageNotes[i] = '';
+            }
+        }
+
         log('Yeni PDF oluşturuluyor...');
-        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        log('Fontlar yükleniyor...');
+        await loadFonts();
+        const { PDFDocument, rgb } = PDFLib;
         const pdfDoc = await PDFDocument.create();
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        pdfDoc.registerFontkit(fontkit);
+        const font = await pdfDoc.embedFont(cachedFontRegular, { subset: true });
+        const fontBold = await pdfDoc.embedFont(cachedFontBold, { subset: true });
 
         function wrapText(text, maxW, fnt, fSize) {
             const words = text.split(/\s+/);
@@ -628,12 +768,8 @@
             let cur = '';
             for (const w of words) {
                 const test = cur ? cur + ' ' + w : w;
-                if (fnt.widthOfTextAtSize(test, fSize) > maxW && cur) {
-                    lines.push(cur);
-                    cur = w;
-                } else {
-                    cur = test;
-                }
+                if (fnt.widthOfTextAtSize(test, fSize) > maxW && cur) { lines.push(cur); cur = w; }
+                else { cur = test; }
             }
             if (cur) lines.push(cur);
             return lines;
@@ -648,12 +784,10 @@
             const notes = pageNotes[i];
             const margin = 50;
             const maxWidth = page.getWidth() - margin * 2;
-
             let y = page.getHeight() - margin;
 
             if (text) {
-                const mainLines = wrapText(text, maxWidth, font, 11);
-                for (const line of mainLines) {
+                for (const line of wrapText(text, maxWidth, font, 11)) {
                     if (y < 200) break;
                     page.drawText(line, { x: margin, y, size: 11, font, color: rgb(0.1, 0.1, 0.1) });
                     y -= 15.4;
@@ -663,17 +797,10 @@
             if (notes) {
                 y -= 20;
                 if (y > 120) {
-                    page.drawLine({
-                        start: { x: margin, y: y + 10 },
-                        end: { x: page.getWidth() - margin, y: y + 10 },
-                        thickness: 0.5,
-                        color: rgb(0.7, 0.7, 0.7)
-                    });
+                    page.drawLine({ start: { x: margin, y: y + 10 }, end: { x: page.getWidth() - margin, y: y + 10 }, thickness: 0.5, color: rgb(0.7, 0.7, 0.7) });
                     page.drawText(notesLabel, { x: margin, y, size: 9, font: fontBold, color: rgb(0.4, 0.4, 0.4) });
                     y -= 14;
-
-                    const noteLines = wrapText(notes, maxWidth, font, 9);
-                    for (const line of noteLines) {
+                    for (const line of wrapText(notes, maxWidth, font, 9)) {
                         if (y < 50) break;
                         page.drawText(line, { x: margin, y, size: 9, font, color: rgb(0.45, 0.45, 0.45) });
                         y -= 12.6;
@@ -681,47 +808,48 @@
                 }
             }
 
-            const pageNum = `${i + 1}`;
-            const pnWidth = font.widthOfTextAtSize(pageNum, 9);
-            page.drawText(pageNum, {
-                x: (page.getWidth() - pnWidth) / 2,
-                y: 30,
-                size: 9,
-                font,
-                color: rgb(0.5, 0.5, 0.5)
-            });
+            const pn = `${i + 1}`;
+            page.drawText(pn, { x: (page.getWidth() - font.widthOfTextAtSize(pn, 9)) / 2, y: 30, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
         }
 
         const pdfBytes = await pdfDoc.save();
         translatedBlob = new Blob([pdfBytes], { type: 'application/pdf' });
         translatedFileName = currentFile.name.replace(/\.pdf$/i, '_translated.pdf');
-        resultSummary.textContent = `${numPages} sayfa çevrildi (notlar eklendi).`;
+        const noteInfo = wantNotes ? ' (notlar eklendi)' : '';
+        resultSummary.textContent = `${selectedCount} sayfa çevrildi${noteInfo}.`;
     }
 
     // ========================
     // TXT HANDLER
     // ========================
     async function handleTXT(sourceLang, targetLang) {
+        const selected = new Set(getSelectedIndices());
+
         log('TXT dosyası okunuyor...');
         const text = await currentFile.text();
         if (!text.trim()) throw new Error('Dosya boş.');
 
         const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
-        log(`${paragraphs.length} paragraf bulundu.`);
-        showProgress('Çevriliyor...', 0, `0 / ${paragraphs.length} paragraf`);
+        const selectedCount = selected.size || paragraphs.length;
+        log(`${paragraphs.length} paragraf, ${selectedCount} seçili.`);
+        showProgress('Çevriliyor...', 0, `0 / ${selectedCount} paragraf`);
 
         const translatedParagraphs = [];
+        let done = 0;
         for (let i = 0; i < paragraphs.length; i++) {
-            const translated = await translateText(paragraphs[i], sourceLang, targetLang);
-            translatedParagraphs.push(translated);
-            showProgress('Çevriliyor...', ((i + 1) / paragraphs.length) * 100, `${i + 1} / ${paragraphs.length} paragraf`);
-            if (i < paragraphs.length - 1) await delay(200);
+            if (selected.size && !selected.has(i)) {
+                translatedParagraphs.push(paragraphs[i]);
+                continue;
+            }
+            translatedParagraphs.push(await translateText(paragraphs[i], sourceLang, targetLang));
+            done++;
+            showProgress('Çevriliyor...', (done / selectedCount) * 100, `${done} / ${selectedCount} paragraf`);
+            if (done < selectedCount) await delay(200);
         }
 
-        const result = translatedParagraphs.join('\n\n');
-        translatedBlob = new Blob([result], { type: 'text/plain;charset=utf-8' });
+        translatedBlob = new Blob([translatedParagraphs.join('\n\n')], { type: 'text/plain;charset=utf-8' });
         translatedFileName = currentFile.name.replace(/\.txt$/i, '_translated.txt');
-        resultSummary.textContent = `${paragraphs.length} paragraf çevrildi.`;
+        resultSummary.textContent = `${selectedCount} paragraf çevrildi.`;
         log('Çeviri tamamlandı.', 'success');
     }
 })();

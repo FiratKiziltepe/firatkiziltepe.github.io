@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
@@ -38,34 +39,37 @@
         </section>
 
         <section class="notes-config">
-            <details open>
-                <summary>Not Ayarları</summary>
-                <div class="notes-options">
-                    <div class="opt-group">
-                        <label for="noteDetail">Detay Seviyesi</label>
-                        <select id="noteDetail">
-                            <option value="short">Kısa (2-3 cümle)</option>
-                            <option value="medium" selected>Orta (3-5 cümle)</option>
-                            <option value="detailed">Detaylı (5-8 cümle)</option>
-                        </select>
-                    </div>
-                    <div class="opt-group">
-                        <label for="noteLang">Not Dili</label>
-                        <select id="noteLang">
-                            <option value="target">Hedef Dil</option>
-                            <option value="source">Kaynak Dil</option>
-                        </select>
-                    </div>
-                    <div class="opt-group">
-                        <label for="existingNotes">Mevcut Notlar (PPTX)</label>
-                        <select id="existingNotes">
-                            <option value="overwrite">Üzerine Yaz</option>
-                            <option value="merge">Birleştir (Eskiyi Koru + Yeni Ekle)</option>
-                            <option value="keep">Koru (Varsa Dokunma)</option>
-                        </select>
-                    </div>
+            <div class="notes-toggle-row">
+                <label class="toggle-label">
+                    <input type="checkbox" id="notesEnabled" checked>
+                    <span>Konuşmacı Notu Ekle</span>
+                </label>
+            </div>
+            <div class="notes-options" id="notesOptionsPanel">
+                <div class="opt-group">
+                    <label for="noteDetail">Detay Seviyesi</label>
+                    <select id="noteDetail">
+                        <option value="short">Kısa (2-3 cümle)</option>
+                        <option value="medium" selected>Orta (3-5 cümle)</option>
+                        <option value="detailed">Detaylı (5-8 cümle)</option>
+                    </select>
                 </div>
-            </details>
+                <div class="opt-group">
+                    <label for="noteLang">Not Dili</label>
+                    <select id="noteLang">
+                        <option value="target">Hedef Dil</option>
+                        <option value="source">Kaynak Dil</option>
+                    </select>
+                </div>
+                <div class="opt-group">
+                    <label for="existingNotes">Mevcut Notlar (PPTX)</label>
+                    <select id="existingNotes">
+                        <option value="overwrite">Üzerine Yaz</option>
+                        <option value="merge">Birleştir (Eskiyi Koru + Yeni Ekle)</option>
+                        <option value="keep">Koru (Varsa Dokunma)</option>
+                    </select>
+                </div>
+            </div>
         </section>
 
         <section class="upload-section">
@@ -93,6 +97,17 @@
                 </div>
                 <button class="btn-remove" id="removeFile" title="Kaldır">✕</button>
             </div>
+        </section>
+
+        <section class="preview-section" id="previewSection" style="display:none;">
+            <div class="preview-header">
+                <label class="select-all-label">
+                    <input type="checkbox" id="selectAll" checked>
+                    <span>Tümünü Seç</span>
+                </label>
+                <span class="preview-count" id="previewCount"></span>
+            </div>
+            <div class="preview-list" id="previewList"></div>
         </section>
 
         <section class="action-section">
