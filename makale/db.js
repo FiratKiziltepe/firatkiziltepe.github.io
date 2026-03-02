@@ -7,6 +7,26 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let sb = null;
 
+function isLockAbortError(err) {
+  const msg = String(err?.message || err || '').toLowerCase();
+  const details = String(err?.details || '').toLowerCase();
+  return msg.includes('lock broken by another request') || details.includes('lock broken by another request');
+}
+
+async function withLockRetry(opName, fn, maxRetries = 2) {
+  let lastErr;
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (!isLockAbortError(err) || i === maxRetries) throw err;
+      console.warn(`[${opName}] lock abort, retry ${i + 1}/${maxRetries}`);
+    }
+  }
+  throw lastErr;
+}
+
 function initSupabase() {
   if (typeof supabase === 'undefined') {
     console.error('Supabase JS kütüphanesi yüklenmedi!');
@@ -29,12 +49,14 @@ function getSupabase() {
 async function fetchColumns() {
   const client = getSupabase();
   if (!client) throw new Error('Supabase bağlantısı yok');
-  const { data, error } = await client
-    .from('columns_config')
-    .select('*')
-    .order('sort_order', { ascending: true });
-  if (error) throw error;
-  return data || [];
+  return withLockRetry('fetchColumns', async () => {
+    const { data, error } = await client
+      .from('columns_config')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  });
 }
 
 async function createColumn(col) {
@@ -73,22 +95,26 @@ async function deleteColumn(id) {
 async function fetchArticles() {
   const client = getSupabase();
   if (!client) throw new Error('Supabase bağlantısı yok');
-  const { data, error } = await client
-    .from('articles')
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  return data || [];
+  return withLockRetry('fetchArticles', async () => {
+    const { data, error } = await client
+      .from('articles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  });
 }
 
 async function createArticle(articleData, rating = 0) {
-  const { data, error } = await getSupabase()
-    .from('articles')
-    .insert({ data: articleData, rating })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return withLockRetry('createArticle', async () => {
+    const { data, error } = await getSupabase()
+      .from('articles')
+      .insert({ data: articleData, rating })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  });
 }
 
 async function updateArticle(id, articleData, rating) {
@@ -96,14 +122,16 @@ async function updateArticle(id, articleData, rating) {
   if (articleData !== undefined) updates.data = articleData;
   if (rating !== undefined) updates.rating = rating;
 
-  const { data, error } = await getSupabase()
-    .from('articles')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return withLockRetry('updateArticle', async () => {
+    const { data, error } = await getSupabase()
+      .from('articles')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  });
 }
 
 async function deleteArticle(id) {

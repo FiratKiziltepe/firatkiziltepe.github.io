@@ -29,7 +29,7 @@ async function checkSession() {
   try {
     const client = getSupabase();
     if (!client) return false;
-    const { data: { session } } = await client.auth.getSession();
+    const { data: { session } } = await withLockRetry('checkSession', () => client.auth.getSession());
     if (session) {
       currentUser = session.user;
       await loadProfile();
@@ -47,11 +47,11 @@ async function checkSession() {
 
 async function loadProfile() {
   if (!currentUser) return null;
-  const { data, error } = await getSupabase()
+  const { data, error } = await withLockRetry('loadProfile', async () => getSupabase()
     .from('profiles')
     .select('*')
     .eq('id', currentUser.id)
-    .single();
+    .single());
 
   if (error || !data) {
     currentProfile = {

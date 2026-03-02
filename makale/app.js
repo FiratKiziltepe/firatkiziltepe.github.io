@@ -62,24 +62,22 @@ async function loadData() {
     // #region agent log
     fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:start',message:'loadData started',data:{},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
-    const results = await Promise.allSettled([fetchColumns(), fetchArticles()]);
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:results',message:'loadData settled',data:{columnsStatus:results[0].status,articlesStatus:results[1].status},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    if (results[0].status === 'fulfilled') {
-      columns = results[0].value || [];
-    } else {
-      console.error('Sütun yükleme hatası:', results[0].reason);
+    try {
+      columns = await fetchColumns();
+    } catch (err) {
+      console.error('Sütun yükleme hatası:', err);
       columns = [];
     }
 
-    if (results[1].status === 'fulfilled') {
-      articles = results[1].value || [];
-    } else {
-      console.error('Makale yükleme hatası:', results[1].reason);
+    try {
+      articles = await fetchArticles();
+    } catch (err) {
+      console.error('Makale yükleme hatası:', err);
       articles = [];
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H4',location:'app.js:loadData:results',message:'loadData sequential done',data:{columnsCount:columns.length,articlesCount:articles.length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     columns.forEach(c => {
       if (localVisibility[c.column_key] === undefined) {
