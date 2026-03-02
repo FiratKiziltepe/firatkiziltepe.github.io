@@ -58,9 +58,9 @@ function onAuthChange() {
 
 function getDensityClasses() {
   switch (density) {
-    case 'sm': return 'px-3 py-2 text-xs';
-    case 'lg': return 'px-6 py-5 text-base';
-    default: return 'px-4 py-3 text-sm';
+    case 'sm': return 'px-2.5 py-1.5 text-xs';
+    case 'lg': return 'px-4 py-3.5 text-sm';
+    default: return 'px-3 py-2 text-xs';
   }
 }
 
@@ -120,6 +120,8 @@ function renderTable() {
   const visibleCols = columns.filter(c => localVisibility[c.column_key] !== false).sort((a, b) => a.sort_order - b.sort_order);
 
   document.getElementById('rowCount').textContent = `${processed.length} / ${articles.length} kayıt`;
+  const footerEl = document.getElementById('footerCount');
+  if (footerEl) footerEl.textContent = `Toplam ${articles.length} makale listeleniyor`;
 
   const table = document.getElementById('mainTable');
   const empty = document.getElementById('emptyState');
@@ -137,27 +139,26 @@ function renderTable() {
 
   // HEAD
   const thead = document.getElementById('tableHead');
+  const dc = getDensityClasses();
   let headHTML = '<tr>';
 
   // Rating column
-  headHTML += `<th class="${getDensityClasses()} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none w-24 text-center" onclick="handleSort('rating')">
-    <div class="flex items-center justify-center gap-1">
-      <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"/></svg>
-      ${sortKey === 'rating' ? (sortDir === 'asc' ? '&#9650;' : '&#9660;') : ''}
+  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center w-16" onclick="handleSort('rating')">
+    <div class="flex items-center justify-center gap-0.5">
+      <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"/></svg>
+      ${sortKey === 'rating' ? `<span class="text-[9px] text-blue-500">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : ''}
     </div>
   </th>`;
 
   visibleCols.forEach(col => {
-    const isTitle = col.column_key === 'title';
-    const sortIcon = sortKey === col.column_key ? (sortDir === 'asc' ? '&#9650;' : '&#9660;') : '';
-    headHTML += `<th class="${getDensityClasses()} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none ${isTitle ? 'sticky left-0 bg-slate-100 z-10 shadow-[1px_0_0_rgba(203,213,225,1)]' : ''}" onclick="handleSort('${col.column_key}')">
-      <div class="flex items-center gap-1">${escapeHTML(col.name)} <span class="text-blue-500 text-[10px]">${sortIcon}</span></div>
+    const sortIcon = sortKey === col.column_key ? `<span class="text-[9px] text-blue-500 ml-0.5">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : '';
+    headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none" onclick="handleSort('${col.column_key}')">
+      <div class="flex items-center">${escapeHTML(col.name)}${sortIcon}</div>
     </th>`;
   });
 
-  // Actions column
   if (isAdmin()) {
-    headHTML += `<th class="${getDensityClasses()} border-b border-slate-200 sticky right-0 bg-slate-100 shadow-[-1px_0_0_rgba(203,213,225,1)] text-center w-20 z-10">İşlem</th>`;
+    headHTML += `<th class="${dc} border-b border-slate-200 text-center w-24">İşlemler</th>`;
   }
   headHTML += '</tr>';
   thead.innerHTML = headHTML;
@@ -167,33 +168,31 @@ function renderTable() {
   let bodyHTML = '';
 
   processed.forEach(article => {
-    bodyHTML += `<tr class="group hover:bg-blue-50/40 transition-colors cursor-pointer" onclick="openViewDrawer(${article.id})">`;
+    bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="openViewDrawer(${article.id})">`;
 
     // Rating cell
-    bodyHTML += `<td class="${getDensityClasses()} align-top text-center">${renderStars(article.rating || 0, article.id, true)}</td>`;
+    bodyHTML += `<td class="${dc} cell-rating align-middle text-center">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
 
     visibleCols.forEach(col => {
-      const isTitle = col.column_key === 'title';
       const val = article.data ? article.data[col.column_key] : '';
-      const stickyClass = isTitle ? 'sticky left-0 bg-white group-hover:bg-blue-50/40 shadow-[1px_0_0_rgba(241,245,249,1)] z-[5] transition-colors' : '';
-
-      if (isTitle) {
-        bodyHTML += `<td class="${getDensityClasses()} align-top ${stickyClass}">
-          <div class="font-semibold text-slate-800 leading-snug">${val ? escapeHTML(val) : '<span class="text-slate-400 italic">İsimsiz</span>'}</div>
-        </td>`;
-      } else {
-        bodyHTML += `<td class="${getDensityClasses()} align-top ${stickyClass}">${renderCellContent(col, val)}</td>`;
-      }
+      const cellClass = getCellClass(col);
+      bodyHTML += `<td class="${dc} ${cellClass} align-middle">${renderCellContent(col, val)}</td>`;
     });
 
     if (isAdmin()) {
-      bodyHTML += `<td class="${getDensityClasses()} sticky right-0 bg-white group-hover:bg-blue-50/40 shadow-[-1px_0_0_rgba(241,245,249,1)] align-top z-[5] transition-colors">
-        <div class="flex items-center justify-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-          <button onclick="event.stopPropagation(); openEditModal(${article.id})" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Düzenle">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+      bodyHTML += `<td class="${dc} cell-action align-middle text-center">
+        <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onclick="event.stopPropagation(); openViewDrawer(${article.id})" class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Görüntüle">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
           </button>
-          <button onclick="event.stopPropagation(); openDeleteModal(${article.id})" class="p-1.5 text-red-500 hover:bg-red-100 rounded transition-colors" title="Sil">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          <button onclick="event.stopPropagation(); openEditModal(${article.id})" class="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Düzenle">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+          </button>
+          <button onclick="event.stopPropagation(); duplicateArticle(${article.id})" class="p-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded transition-colors" title="Kopyala">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/></svg>
+          </button>
+          <button onclick="event.stopPropagation(); openDeleteModal(${article.id})" class="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Sil">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
           </button>
         </div>
       </td>`;
@@ -211,53 +210,91 @@ function renderTable() {
   }
 }
 
+function getCellClass(col) {
+  switch (col.type) {
+    case 'longtext': return 'cell-long';
+    case 'multiselect': return 'cell-tag';
+    case 'select': return 'cell-badge';
+    default: return col.column_key === 'title' ? 'cell-title font-medium text-slate-800' : '';
+  }
+}
+
+function renderStarsCompact(rating, articleId) {
+  let html = '<div class="flex gap-px justify-center">';
+  for (let i = 1; i <= 5; i++) {
+    const filled = i <= rating;
+    html += `<button onclick="event.stopPropagation(); setRating(${articleId}, ${i})" class="focus:outline-none">
+      <svg class="w-3 h-3 ${filled ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
+      </svg>
+    </button>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+async function duplicateArticle(articleId) {
+  const article = articles.find(a => a.id === articleId);
+  if (!article) return;
+  try {
+    const newData = { ...article.data, title: (article.data.title || '') + ' (Kopya)' };
+    const created = await createArticle(newData, article.rating || 0);
+    articles.unshift(created);
+    renderTable();
+    showNotification('Kayıt kopyalandı', 'success');
+  } catch (err) {
+    showNotification('Kopyalama hatası: ' + err.message, 'error');
+  }
+}
+
 // =====================================================
 // CELL RENDERERS
 // =====================================================
 
 function renderCellContent(col, value) {
-  if (value === undefined || value === null || value === '') return '<span class="text-slate-400 italic text-xs">-</span>';
+  if (value === undefined || value === null || value === '') return '<span class="text-slate-300">-</span>';
 
   switch (col.type) {
     case 'url':
-      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline font-medium" title="${escapeHTML(value)}">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-        Link
+      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs truncate block max-w-[120px]" title="${escapeHTML(value)}">
+        ${escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '').substring(0, 25)}...
       </a>`;
 
     case 'select': {
       const colorMap = {
-        'Okunacak': 'bg-slate-100 text-slate-700',
+        'Okunacak': 'bg-slate-100 text-slate-600',
         'Okunuyor': 'bg-blue-100 text-blue-700',
+        'Reading': 'bg-blue-100 text-blue-700',
         'Okundu': 'bg-emerald-100 text-emerald-700',
         'Özetlendi': 'bg-purple-100 text-purple-700',
-        'Bırakıldı': 'bg-gray-100 text-gray-500',
-        'Temel Kaynak': 'bg-rose-100 text-rose-700 font-bold',
+        'Bırakıldı': 'bg-gray-100 text-gray-400',
+        'Temel Kaynak': 'bg-rose-100 text-rose-700',
         'Doğrudan': 'bg-orange-100 text-orange-700',
         'Kısmen': 'bg-yellow-100 text-yellow-700',
         'İlişkisiz': 'bg-slate-100 text-slate-500',
+        'Not related': 'bg-slate-100 text-slate-500',
       };
-      const cls = colorMap[value] || 'bg-gray-100 text-gray-700';
-      return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHTML(value)}</span>`;
+      const cls = colorMap[value] || 'bg-gray-100 text-gray-600';
+      return `<span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${cls}">${escapeHTML(value)}</span>`;
     }
 
     case 'multiselect': {
       const tags = typeof value === 'string' ? value.split(',') : (Array.isArray(value) ? value : [value]);
-      return `<div class="flex flex-wrap gap-1.5">${tags.map(t => {
+      return `<div class="flex flex-wrap gap-1">${tags.map(t => {
         const tag = t.trim();
         if (!tag) return '';
-        return `<span class="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded text-xs font-medium">${escapeHTML(tag)}</span>`;
+        return `<span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[10px] font-medium">${escapeHTML(tag)}</span>`;
       }).join('')}</div>`;
     }
 
     case 'longtext':
-      return `<div class="text-slate-600 leading-relaxed min-w-[200px] max-w-[450px]" title="${escapeHTML(value)}">${escapeHTML(value)}</div>`;
+      return `<span class="text-slate-500" title="${escapeHTML(value)}">${escapeHTML(value)}</span>`;
 
     case 'boolean':
-      return value ? '<span class="text-emerald-600 font-semibold">Evet</span>' : '<span class="text-slate-400">Hayır</span>';
+      return value ? '<span class="text-emerald-600">Evet</span>' : '<span class="text-slate-300">-</span>';
 
     default:
-      return `<span class="text-slate-700 min-w-[100px] block">${escapeHTML(value)}</span>`;
+      return `<span class="text-slate-700">${escapeHTML(value)}</span>`;
   }
 }
 
@@ -305,8 +342,19 @@ function setFormRating(r) {
 }
 
 function renderFormRatingStars() {
-  document.getElementById('formRating').innerHTML = renderStars(formRating, null, false)
-    .replace(/setRating\(null, (\d)\)/g, 'setFormRating($1)');
+  const el = document.getElementById('formRating');
+  if (!el) return;
+  let html = '<div class="flex gap-0.5">';
+  for (let i = 1; i <= 5; i++) {
+    const filled = i <= formRating;
+    html += `<button type="button" onclick="setFormRating(${i})" class="focus:outline-none hover:scale-110 transition-transform">
+      <svg class="w-5 h-5 ${filled ? 'text-amber-400 fill-amber-400' : 'text-slate-300 hover:text-amber-300'}" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
+      </svg>
+    </button>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function renderViewRating() {
@@ -515,34 +563,41 @@ function renderFormFields(data) {
   const shortCols = sortedCols.filter(c => c.type !== 'longtext');
   const longCols = sortedCols.filter(c => c.type === 'longtext');
 
-  let html = '<div class="space-y-4">';
-  shortCols.forEach(col => {
-    html += `<div>
-      <label class="block text-sm font-bold text-slate-700 mb-1.5">${escapeHTML(col.name)}</label>
-      ${renderFormInput(col, data[col.column_key])}
-    </div>`;
-  });
-  html += '</div>';
+  let html = '';
 
-  html += '<div class="space-y-4 flex flex-col">';
+  // Rating row
+  html += `<div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+    <span class="text-xs font-semibold text-slate-500">Değerlendirme</span>
+    <div id="formRating" class="flex gap-0.5"></div>
+  </div>`;
+
+  // Short fields: 2-column grid
+  if (shortCols.length > 0) {
+    html += '<div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">';
+    shortCols.forEach(col => {
+      const isTitle = col.column_key === 'title';
+      html += `<div${isTitle ? ' class="col-span-2 sm:col-span-1"' : ''}>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">${escapeHTML(col.name)}${isTitle ? ' *' : ''}</label>
+        ${renderFormInput(col, data[col.column_key])}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Long text fields: single column
   longCols.forEach(col => {
-    const isNotes = col.column_key === 'notes';
-    const labelClass = isNotes ? 'text-amber-700' : 'text-slate-700';
-    const inputClass = isNotes
-      ? 'border-amber-200 focus:ring-amber-500 focus:border-amber-500 bg-amber-50/30'
-      : 'border-slate-300 focus:ring-blue-500 focus:border-blue-500 bg-white';
-    html += `<div class="flex flex-col flex-1">
-      <label class="block text-sm font-bold ${labelClass} mb-1.5">${escapeHTML(col.name)}</label>
-      <textarea data-key="${col.column_key}" rows="3" class="w-full flex-1 border rounded-lg p-3 text-sm focus:ring-2 outline-none resize-y min-h-[80px] shadow-sm ${inputClass}" placeholder="${escapeHTML(col.name)} girin...">${escapeHTML(data[col.column_key] || '')}</textarea>
+    html += `<div class="mb-3">
+      <label class="block text-xs font-semibold text-slate-500 mb-1">${escapeHTML(col.name)}</label>
+      <textarea data-key="${col.column_key}" rows="3" class="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y bg-white" placeholder="${escapeHTML(col.name)} girin...">${escapeHTML(data[col.column_key] || '')}</textarea>
     </div>`;
   });
-  html += '</div>';
 
   grid.innerHTML = html;
+  renderFormRatingStars();
 }
 
 function renderFormInput(col, value) {
-  const base = 'w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-sm bg-white';
+  const base = 'w-full border border-slate-200 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white';
   const v = value || '';
 
   switch (col.type) {
@@ -559,14 +614,14 @@ function renderFormInput(col, value) {
     case 'url':
       return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="https://..." />`;
     case 'boolean':
-      return `<label class="flex items-center gap-2 cursor-pointer mt-1">
-        <input data-key="${col.column_key}" type="checkbox" ${v ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300" />
-        <span class="text-sm text-slate-700 font-medium">Evet</span>
+      return `<label class="flex items-center gap-2 cursor-pointer">
+        <input data-key="${col.column_key}" type="checkbox" ${v ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300" />
+        <span class="text-sm text-slate-600">Evet</span>
       </label>`;
     case 'date':
       return `<input data-key="${col.column_key}" type="date" value="${escapeHTML(v)}" class="${base}" />`;
     default:
-      return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="${escapeHTML(col.name)} girin..." />`;
+      return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="" />`;
   }
 }
 
