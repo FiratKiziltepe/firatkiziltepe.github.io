@@ -27,12 +27,14 @@ function getSupabase() {
 // =====================================================
 
 async function fetchColumns() {
-  const { data, error } = await getSupabase()
+  const client = getSupabase();
+  if (!client) throw new Error('Supabase bağlantısı yok');
+  const { data, error } = await client
     .from('columns_config')
     .select('*')
     .order('sort_order', { ascending: true });
   if (error) throw error;
-  return data;
+  return data || [];
 }
 
 async function createColumn(col) {
@@ -69,12 +71,14 @@ async function deleteColumn(id) {
 // =====================================================
 
 async function fetchArticles() {
-  const { data, error } = await getSupabase()
+  const client = getSupabase();
+  if (!client) throw new Error('Supabase bağlantısı yok');
+  const { data, error } = await client
     .from('articles')
     .select('*')
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return data;
+  return data || [];
 }
 
 async function createArticle(articleData, rating = 0) {

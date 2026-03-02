@@ -26,15 +26,23 @@ async function logout() {
 }
 
 async function checkSession() {
-  const { data: { session } } = await getSupabase().auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProfile();
+  try {
+    const client = getSupabase();
+    if (!client) return false;
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      await loadProfile();
+      updateAuthUI();
+      return true;
+    }
     updateAuthUI();
-    return true;
+    return false;
+  } catch (e) {
+    console.error('Oturum kontrol hatası:', e);
+    updateAuthUI();
+    return false;
   }
-  updateAuthUI();
-  return false;
 }
 
 async function loadProfile() {
@@ -92,6 +100,8 @@ function updateAuthUI() {
   const userName = document.getElementById('userName');
   const userRole = document.getElementById('userRole');
 
+  if (!btnLogin || !userInfo) return;
+
   const adminEls = document.querySelectorAll('.admin-only');
   const advisorEls = document.querySelectorAll('.advisor-only');
 
@@ -109,7 +119,7 @@ function updateAuthUI() {
       advisor: 'bg-amber-100 text-amber-700',
       viewer: 'bg-blue-100 text-blue-700'
     };
-    userRole.className = `text-xs px-2 py-0.5 rounded-full font-medium ${roleColorMap[currentProfile.role] || roleColorMap.viewer}`;
+    userRole.className = `text-[10px] px-1.5 py-0.5 rounded-full font-medium ${roleColorMap[currentProfile.role] || roleColorMap.viewer}`;
 
     adminEls.forEach(el => {
       if (isAdmin()) {
@@ -140,7 +150,10 @@ function updateAuthUI() {
 }
 
 function setupAuthListeners() {
-  getSupabase().auth.onAuthStateChange(async (event, session) => {
+  const client = getSupabase();
+  if (!client) { console.error('Supabase client yok, auth listener kurulamadı'); return; }
+
+  client.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
       currentUser = session.user;
       await loadProfile();

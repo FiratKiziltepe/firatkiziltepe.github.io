@@ -20,32 +20,64 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-  initSupabase();
-  setupAuthListeners();
+  try {
+    initSupabase();
+  } catch (e) {
+    console.error('Supabase init hatası:', e);
+  }
+
   setupUIListeners();
-  await checkSession();
+
+  try {
+    setupAuthListeners();
+    await checkSession();
+  } catch (e) {
+    console.error('Auth hatası:', e);
+  }
+
   await loadData();
 });
 
 async function loadData() {
   try {
-    [columns, articles] = await Promise.all([fetchColumns(), fetchArticles()]);
+    const results = await Promise.allSettled([fetchColumns(), fetchArticles()]);
+
+    if (results[0].status === 'fulfilled') {
+      columns = results[0].value || [];
+    } else {
+      console.error('Sütun yükleme hatası:', results[0].reason);
+      columns = [];
+    }
+
+    if (results[1].status === 'fulfilled') {
+      articles = results[1].value || [];
+    } else {
+      console.error('Makale yükleme hatası:', results[1].reason);
+      articles = [];
+    }
+
     columns.forEach(c => {
       if (localVisibility[c.column_key] === undefined) {
         localVisibility[c.column_key] = c.visible;
       }
     });
+
     renderTable();
-    hideLoading();
+
+    if (columns.length === 0) {
+      showNotification('Veritabanı tabloları bulunamadı. schema.sql çalıştırıldığından emin olun.', 'error');
+    }
   } catch (err) {
     console.error('Veri yükleme hatası:', err);
+    showNotification('Veri yüklenirken hata: ' + (err.message || err), 'error');
+  } finally {
     hideLoading();
-    showNotification('Veri yüklenirken hata oluştu', 'error');
   }
 }
 
 function hideLoading() {
-  document.getElementById('loadingState').classList.add('hidden');
+  const el = document.getElementById('loadingState');
+  if (el) el.classList.add('hidden');
 }
 
 function onAuthChange() {
@@ -119,14 +151,17 @@ function renderTable() {
   const processed = getProcessedArticles();
   const visibleCols = columns.filter(c => localVisibility[c.column_key] !== false).sort((a, b) => a.sort_order - b.sort_order);
 
-  document.getElementById('rowCount').textContent = `${processed.length} / ${articles.length} kayıt`;
+  const rowCountEl = document.getElementById('rowCount');
+  if (rowCountEl) rowCountEl.textContent = `${processed.length} / ${articles.length} kayıt`;
   const footerEl = document.getElementById('footerCount');
   if (footerEl) footerEl.textContent = `Toplam ${articles.length} makale listeleniyor`;
 
   const table = document.getElementById('mainTable');
   const empty = document.getElementById('emptyState');
 
-  if (processed.length === 0 && articles.length === 0) {
+  if (!table || !empty) return;
+
+  if (processed.length === 0) {
     table.classList.add('hidden');
     empty.classList.remove('hidden');
     empty.classList.add('flex');
