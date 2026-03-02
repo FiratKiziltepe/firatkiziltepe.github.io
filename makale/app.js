@@ -557,7 +557,7 @@ function renderFormInput(col, value) {
     case 'multiselect':
       return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="Virgülle ayırın..." />`;
     case 'url':
-      return `<input data-key="${col.column_key}" type="url" value="${escapeHTML(v)}" class="${base}" placeholder="https://..." />`;
+      return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="https://..." />`;
     case 'boolean':
       return `<label class="flex items-center gap-2 cursor-pointer mt-1">
         <input data-key="${col.column_key}" type="checkbox" ${v ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300" />
@@ -586,6 +586,12 @@ function collectFormData() {
 async function handleFormSubmit(e) {
   e.preventDefault();
   const data = collectFormData();
+  const submitBtn = e.target.querySelector('[type="submit"]');
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.querySelector('span').textContent = 'Kaydediliyor...';
+  }
 
   try {
     if (editingArticleId) {
@@ -601,7 +607,14 @@ async function handleFormSubmit(e) {
     closeFormModal();
     renderTable();
   } catch (err) {
-    showNotification('Kayıt hatası: ' + err.message, 'error');
+    console.error('Form submit error:', err);
+    showNotification('Kayıt hatası: ' + (err.message || 'Bilinmeyen hata'), 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      const textEl = submitBtn.querySelector('span');
+      if (textEl) textEl.textContent = editingArticleId ? 'Değişiklikleri Kaydet' : 'Kaydet';
+    }
   }
 }
 
@@ -794,6 +807,7 @@ function renderColumnList() {
 
   list.innerHTML = sorted.map((col, idx) => {
     const vis = localVisibility[col.column_key] !== false;
+    const editingThis = editingColumnId === col.id;
     return `<li class="flex items-center gap-3 p-3 bg-white hover:bg-slate-50 border border-transparent hover:border-slate-100 rounded-lg group transition-all">
       <div class="flex flex-col opacity-30 group-hover:opacity-100 transition-opacity">
         <button onclick="moveColumnOrder(${col.id}, 'up')" ${idx === 0 ? 'disabled' : ''} class="hover:text-blue-600 disabled:opacity-0 p-0.5">
@@ -804,9 +818,18 @@ function renderColumnList() {
         </button>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-slate-700 truncate">${escapeHTML(col.name)}</p>
+        ${editingThis
+          ? `<input id="colRenameInput" type="text" value="${escapeHTML(col.name)}" class="text-sm font-medium text-slate-700 border border-blue-400 rounded px-1.5 py-0.5 w-full focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();saveColumnRename(${col.id});}if(event.key==='Escape'){cancelColumnRename();}" />`
+          : `<p class="text-sm font-medium text-slate-700 truncate ${isAdmin() ? 'cursor-pointer hover:text-blue-600' : ''}" ${isAdmin() ? `ondblclick="startColumnRename(${col.id})"` : ''}>${escapeHTML(col.name)}</p>`
+        }
         <p class="text-[10px] text-slate-400 uppercase tracking-wider">${escapeHTML(col.type)}</p>
       </div>
+      ${isAdmin() && !editingThis ? `<button onclick="startColumnRename(${col.id})" class="p-1 text-slate-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all" title="Adı Düzenle">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+      </button>` : ''}
+      ${isAdmin() && editingThis ? `<button onclick="saveColumnRename(${col.id})" class="p-1 text-emerald-500 hover:text-emerald-700 transition-all" title="Kaydet">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m4.5 12.75 6 6 9-13.5"/></svg>
+      </button>` : ''}
       ${isAdmin() ? `<button onclick="handleDeleteColumn(${col.id}, '${escapeHTML(col.name)}')" class="p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" title="Sütunu Sil">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
       </button>` : ''}
@@ -860,6 +883,42 @@ async function moveColumnOrder(colId, direction) {
 
   renderColumnList();
   renderTable();
+}
+
+// Column rename state
+let editingColumnId = null;
+
+function startColumnRename(colId) {
+  editingColumnId = colId;
+  renderColumnList();
+  setTimeout(() => {
+    const input = document.getElementById('colRenameInput');
+    if (input) { input.focus(); input.select(); }
+  }, 50);
+}
+
+function cancelColumnRename() {
+  editingColumnId = null;
+  renderColumnList();
+}
+
+async function saveColumnRename(colId) {
+  const input = document.getElementById('colRenameInput');
+  if (!input) return;
+  const newName = input.value.trim();
+  if (!newName) return;
+
+  try {
+    await updateColumn(colId, { name: newName });
+    const col = columns.find(c => c.id === colId);
+    if (col) col.name = newName;
+    editingColumnId = null;
+    renderColumnList();
+    renderTable();
+    showNotification('Sütun adı güncellendi', 'success');
+  } catch (err) {
+    showNotification('Sütun adı güncellenemedi: ' + err.message, 'error');
+  }
 }
 
 async function handleDeleteColumn(colId, colName) {
