@@ -20,27 +20,52 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // #region agent log
+  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H1',location:'app.js:DOMContentLoaded',message:'DOMContentLoaded started',data:{readyState:document.readyState},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
   try {
     initSupabase();
   } catch (e) {
     console.error('Supabase init hatası:', e);
   }
 
-  setupUIListeners();
+  try {
+    setupUIListeners();
+  } catch (e) {
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H1',location:'app.js:setupUIListeners',message:'setupUIListeners threw',data:{error:String(e&&e.message||e)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    throw e;
+  }
 
   try {
     setupAuthListeners();
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H3',location:'app.js:authBootstrap',message:'before checkSession',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     await checkSession();
   } catch (e) {
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H3',location:'app.js:authBootstrap',message:'auth bootstrap failed',data:{error:String(e&&e.message||e)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     console.error('Auth hatası:', e);
   }
 
+  // #region agent log
+  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:beforeLoadData',message:'calling loadData',data:{},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
   await loadData();
 });
 
 async function loadData() {
   try {
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:start',message:'loadData started',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     const results = await Promise.allSettled([fetchColumns(), fetchArticles()]);
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:results',message:'loadData settled',data:{columnsStatus:results[0].status,articlesStatus:results[1].status},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     if (results[0].status === 'fulfilled') {
       columns = results[0].value || [];
@@ -68,9 +93,15 @@ async function loadData() {
       showNotification('Veritabanı tabloları bulunamadı. schema.sql çalıştırıldığından emin olun.', 'error');
     }
   } catch (err) {
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:catch',message:'loadData catch',data:{error:String(err&&err.message||err)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     console.error('Veri yükleme hatası:', err);
     showNotification('Veri yüklenirken hata: ' + (err.message || err), 'error');
   } finally {
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:finally',message:'loadData finally -> hideLoading',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     hideLoading();
   }
 }
@@ -78,6 +109,9 @@ async function loadData() {
 function hideLoading() {
   const el = document.getElementById('loadingState');
   if (el) el.classList.add('hidden');
+  // #region agent log
+  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:hideLoading',message:'hideLoading invoked',data:{hasElement:!!el,isHidden:!!(el&&el.classList.contains('hidden'))},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 }
 
 function onAuthChange() {
