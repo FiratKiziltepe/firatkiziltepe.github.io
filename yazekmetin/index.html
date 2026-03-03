@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eğitimde YZ Etik Kılavuzu</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0a58ca;
+        }
+
+        .category-header {
+            background-color: #f8f9fa !important;
+            font-weight: 700 !important;
+            color: #333 !important;
+        }
+
+        /* Vurgulama (Highlight) Stili */
+        mark {
+            background-color: #ffeb3b;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Arama Kutusu Stilleri */
+        .search-container {
+            max-width: 900px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        #faqSearch {
+            padding-left: 45px;
+            height: 55px;
+            border-radius: 30px;
+            border: 2px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        #faqSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.1);
+        }
+
+        .controls-container {
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 10px;
+        }
+
+        .search-count {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-control {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 8px 20px;
+            border-radius: 25px;
+            transition: all 0.25s ease-in-out;
+            min-width: 170px;
+            background-color: transparent;
+        }
+
+        .btn-control:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: #ffffff !important;
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+        }
+
+        .btn-control:active {
+            transform: scale(0.98);
+        }
+
+        /* Listeler için düzeltme */
+        .list-group-item {
+            background-color: transparent;
+        }
+
+        /* Görsel Kart Stili */
+        .visual-card {
+            border-top: 4px solid var(--primary-color);
+            background-color: #f8f9fa;
+        }
+
+        .visual-img {
+            height: 280px;
+            width: 280px;
+            object-fit: contain;
+            background-color: #fff;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .visual-img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <section id="sss" class="py-5">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="display-7 fw-bold">Eğitimde Yapay Zekâ Uygulamaları</h2>
+                <p class="text-muted mx-auto" style="max-width: 800px;">
+                    Yapay zekâ etiği beyan süreci hakkında sıkça sorulan soruların cevapları.
+                </p>
+            </div>
+
+            <!-- ARAMA BÖLÜMÜ -->
+            <div class="search-container mx-auto">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="faqSearch" class="form-control shadow-sm"
+                    placeholder="Soru veya anahtar kelime yazın (Örn: kurul, etik, beyan)...">
+            </div>
+
+            <!-- KONTROL BUTONU -->
+            <div class="controls-container mx-auto">
+                <div id="searchCount" class="search-count" style="visibility: hidden;">0 sonuç bulundu.</div>
+                <button type="button" id="toggleAll" class="btn-control">
+                    <i class="bi bi-plus-square me-2"></i><span>Tümünü Aç</span>
+                </button>
+            </div>
+
+            <div class="accordion mx-auto" id="faqAccordion" style="max-width: 900px;">
+
+                <!-- 1. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category1">
+                            YAZEK PROJESİNİN AMACI VE MOTİVASYONU
+                        </button>
+                    </h2>
+                    <div id="category1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, öncelikle YAZEK projesinin ne olduğunu, temel amacını ve bu sistemi
+                                kurarken sizi harekete geçiren ana motivasyonu bizimle paylaşır mısınız?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Cumhurbaşkanlığının vizyonu ve 11. Kalkınma Planı doğrultusunda yürürlüğe konulan
+                                    Ulusal Yapay Zekâ Stratejisi çerçevesinde hazırlanan "Eğitimde Yapay Zekâ Politika
+                                    Belgesi ve Eylem Planı (2025-2029)", Millî Eğitim Bakanlığının dijital dönüşüm ve
+                                    yapay zekâ ekosistemine yönelik en kapsamlı yol haritalarından biri olarak 17
+                                    Haziran 2025 tarihinden itibaren uygulamaya alınmıştır.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel1.jpg" alt="POLİTİKA BELGESİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i
+                                                    class="bi bi-image me-2"></i>POLİTİKA BELGESİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Belge; yönetimden okul süreçlerine, öğretmen eğitiminden öğrenci kazanımlarına kadar
+                                    uzanan geniş bir kapsamda 4 hedef, 15 politika ve 40 eylem adımı içermektedir.</p>
+                                <p>Eylem Planı kapsamında, Bakanlık bünyesinde yapay zekâ projelerini, kullanılan
+                                    araçları ve bu araçların kullanım çerçevesini etik açıdan değerlendirmek ve
+                                    denetlemek amacıyla "Yapay Zekâ Uygulamaları Etik Kurulu" ve bu kurula bağlı alt
+                                    komisyonların kurulması hedeflenmiştir. Bu doğrultuda, Talim ve Terbiye Kurulu
+                                    Başkanlığı koordinasyonunda ilgili genel müdürlüklerle birlikte yürütülen çalışmalar
+                                    sonucunda "Millî Eğitim Bakanlığı Yapay Zekâ Uygulamaları Etik Kurulu Yönergesi"
+                                    hazırlanmış ve 22.10.2025 tarihli Bakanlık Oluru ile yürürlüğe girmiştir.</p>
+                                <p>Anılan Yönerge hükümleri uyarınca, eğitim ve öğretim kurumlarında gerçekleştirilen
+                                    yapay zekâ uygulamalarında etik ilkelere uygunluğun sağlanması amacıyla öğretmenler
+                                    ile Bakanlığın merkez ve taşra teşkilatı birimleri tarafından Yapay Zekâ
+                                    Uygulamaları Etik Beyan Bildirim Sistemi (YAZEK) üzerinden Etik Beyan Formunun
+                                    çevrimiçi olarak doldurulması esası getirildi. YAZEK’i Millî Eğitim Bakanlığına
+                                    bağlı kurumlarda gerçekleştirilen yapay zekâ uygulamalarının etik ilkelere
+                                    uygunluğunu beyan etmek, takip etmek ve olası etik ihlal süreçlerini yönetmek
+                                    amacıyla oluşturulmuş yönetişim altyapısı olarak konumlandırıyoruz. 22 Ekim 2025’te
+                                    yürürlüğe giren Millî Eğitim Bakanlığı Yapay Zekâ Uygulamaları Etik Kurulu Yönergesi
+                                    YAZEK ve ilgili çalışmaların hukuki-idari zeminini oluşturdu; 2 Şubat 2026
+                                    itibarıyla da Yapay Zekâ Uygulamaları Etik Beyan Sistemi (YAZEK) devreye alındı.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel2.jpg" alt="YAZEK GÖRSELİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>YAZEK
+                                                GÖRSELİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Bu çerçevede, Bakanlık bünyesinde yürütülen yapay zekâ uygulamalarına yönelik etik
+                                    ilkelerin belirlenmesi, uygulanması, izlenmesi ve değerlendirilmesine ilişkin usul
+                                    ve esasları açıklamak; Yapay Zekâ Uygulamaları Etik Üst Kurulu, il ve ilçe yapay
+                                    zekâ uygulamaları etik kurulları ile okul yapay zekâ etiği ekiplerinin oluşumu,
+                                    yapısı, görev, yetki ve sorumluluklarına ilişkin düzenlemeleri ortaya koymak
+                                    amacıyla "Eğitimde Yapay Zekâ Uygulamaları Etik Kılavuzu" hazırlandı.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel3.jpg" alt="EĞİTİMDE YAPAY ZEKÂ UYGULAMALARI ETİK KILAVUZU"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i
+                                                    class="bi bi-image me-2"></i>EĞİTİMDE YAPAY ZEKÂ UYGULAMALARI ETİK
+                                                KILAVUZU</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Buradaki ana motivasyonumuz çok net: Yapay zekâ eğitimde hızla yaygınlaşıyor; biz de
+                                    “önce etik ve hesap verebilirlik”, “sonra ölçekleme” yaklaşımıyla sahada izlenebilir
+                                    bir sistem kuruyoruz. Bu kapsamda YAZEK’in kuruluş gerekçelerinin, özellikle
+                                    eğitimde yapay zekâ uygulamaları için etik ilkelerin belirlenmesi ve kullanım
+                                    standartlarının oluşturulmasının “Eğitimde Yapay Zekâ Kültürü Oluşturmak” hedefinin
+                                    ilk halkası olduğunu söyleyebiliriz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category2">
+                            NEDEN İHTİYAÇ DUYULDU?
+                        </button>
+                    </h2>
+                    <div id="category2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                YAZEK sistemine neden ihtiyaç duyuldu?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>YAZEK’in önemini anlamak için önce hizmet ettiğimiz kitlenin devasa büyüklüğüne
+                                    bakmamız gerekir. 2024-2025 eğitim öğretim yılı verilerimize göre Türkiye’de örgün
+                                    eğitim kapsamında tam 17 milyon 956 bin 523 öğrencimiz var. Bu sadece bir rakam
+                                    değil; bu, Avrupa’daki pek çok ülkenin toplam nüfusundan daha büyük bir öğrenci
+                                    kitlesinden bahsediyoruz demektir.</p>
+                                <p>Bu 18 milyona yakın evladımızın yaklaşık;</p>
+                                <ul>
+                                    <li>1.7 milyonu okul öncesi eğitimde,</li>
+                                    <li>5.7 milyonu ilkokulda,</li>
+                                    <li>5.1 milyonu ortaokulda,</li>
+                                    <li>5.3 milyonu ise ortaöğretimde eğitim görüyor.</li>
+                                    <li>Öğrencilerin 15 milyon 366 bin 143'ü resmî, 1 milyon 539 bin 579'u özel ve 1
+                                        milyon 50 bin 801'i ise açık öğretim kurumlarında eğitim görüyor.</li>
+                                </ul>
+                                <p>Ayrıca bu süreçlerin mimarı olan 1 milyon 187 bin 409 öğretmenimiz sahada görev
+                                    yapıyor. Yapay zekâ bugün dersliklerimize, ödevlere, hatta değerlendirme süreçlerine
+                                    girmiş durumda. Örgün eğitimde, 2024-2025 eğitim öğretim yılında 59 bin 336'sı resmî
+                                    okul, 14 bin 700'ü özel okul ve 4'ü açık öğretim okulu olmak üzere toplam 74 bin 40
+                                    okulun ve 753 bin 571 dersliğin olduğu bir ekosistemde, yapay zekânın “kontrolsüz ve
+                                    rehbersiz kullanılmaması” için 18 milyon öğrenci ve 1.2 milyon öğretmenin olduğu bu
+                                    büyük ailede, yapay zekânın etik sınırlarını çizmek, evlatlarımızın verilerini
+                                    korumak bizim için bir seçenek değil, asli bir görevdir. YAZEK, işte bu devasa
+                                    ölçekte “önce etik ve hesap verebilirlik” diyebilmek için kurulmuş dünyadaki sayılı
+                                    yönetişim sistemlerinden biridir.</p>
+                                <p>Bu açıdan bakıldığında “Neden ihtiyaç duyuldu?” sorusunun cevabı, eğitim bağlamında
+                                    yapay zekânın doğasıyla ilgili: Yapay zekâ artık sadece içerik üretmiyor; kimi
+                                    senaryolarda öğrenci verisini (yazı/ses/görüntü/not vb.) işliyor ya da çıktıları
+                                    öğrenci hakkında değerlendirme/karar süreçlerine (not verme, seviye belirleme,
+                                    yönlendirme vb.) temas edebiliyor. Üstelik algoritmik yanlılık ve veri temelli
+                                    önyargı riski, bazı öğrenci grupları aleyhine adaletsiz sonuçlar üretebiliyor.</p>
+                                <p>Tam da bu yüzden YAZEK tüm uygulamaların Eğitimde Yapay Zekâ Uygulamaları Etik
+                                    Kılavuzumuzda belirttiğimiz sekiz etik ilkeyi gözeterek tasarlanmasını ve
+                                    yürütülmesini zorunlu çerçeve olarak tarif ediyor:</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel4.jpg" alt="UYULMASI GEREKEN TEMEL İLKELER"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i
+                                                    class="bi bi-image me-2"></i>UYULMASI GEREKEN TEMEL İLKELER</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <ol>
+                                    <li><strong>İnsan Merkezli ve Hak Temelli Yaklaşım:</strong> Yapay zekâyı bir amaç
+                                        değil, öğrencinin akademik ve sosyal gelişimini destekleyen bir araç olarak
+                                        görüyoruz. Öğrenci özerkliğini korumak ve teknolojinin sosyal etkileşimi
+                                        zayıflatmak yerine güçlendirmesini sağlamak temel önceliğimizdir.</li>
+                                    <li><strong>Eşitlik ve Kapsayıcılık:</strong> Yapay zekâ araçları cinsiyet, coğrafya
+                                        veya sosyoekonomik durum nedeniyle hiçbir öğrencimiz aleyhine ayrımcılık
+                                        yapmamalıdır. Özellikle özel gereksinimli evlatlarımız için bu araçların
+                                        erişilebilir olmasını bir hak olarak görüyoruz.</li>
+                                    <li><strong>Şeffaflık ve Açıklanabilirlik:</strong> Öğrenci ve velilerimiz bir yapay
+                                        zekâ sistemiyle etkileşimde olduklarını bilmelidir. Ayrıca, sistem bir öneri
+                                        sunuyorsa bu sonuca hangi verilerle ulaştığını anlaşılır bir dille
+                                        açıklayabilmelidir.</li>
+                                    <li><strong>Mahremiyet, Gizlilik ve Veri Yönetişimi:</strong> KVKK ile tam uyum
+                                        içerisinde, sadece eğitsel amaç için gerekli olan asgari verinin toplanmasını ve
+                                        bu verilerin en üst düzey güvenlik standartlarıyla korunmasını esas alıyoruz.
+                                    </li>
+                                    <li><strong>Güvenilirlik, Emniyet ve Teknik Sağlamlık:</strong> Kullanılan
+                                        sistemlerin teknik olarak doğru sonuçlar üretmesi, "halüsinasyon" dediğimiz
+                                        yanlış bilgi üretiminden arınmış olması ve siber saldırılara karşı dirençli
+                                        olması zorunludur.</li>
+                                    <li><strong>Hesap Verebilirlik ve İnsan Denetimi:</strong> Teknolojik karar ne kadar
+                                        gelişmiş olursa olsun, nihai sorumluluk her zaman insandadır. Not verme veya
+                                        disiplin gibi kritik kararlarda yapay zekâ asla tek başına karar verici olamaz;
+                                        mutlaka bir öğretmen denetimi şarttır.</li>
+                                    <li><strong>Eğitsel Değer ve Nitelikli Katkı:</strong> Yapay zekâ kullanımı sadece
+                                        bir "trend" olduğu için değil, öğretim programındaki hedeflere somut bir katkı
+                                        sağladığı için tercih edilmelidir. Derin öğrenmeyi ve yaratıcılığı desteklemeyen
+                                        uygulamalara mesafeli yaklaşıyoruz.</li>
+                                    <li><strong>Millî ve Manevi Değerlere Uyum:</strong> Yapay zekânın ürettiği
+                                        içerikler milli eğitimin genel amaçlarıyla, kültürel mirasımızla ve toplumsal
+                                        etik normlarımızla çelişmemeli, aksine bu değerleri desteklemelidir.</li>
+                                </ol>
+                                <p>Burada bizim özellikle vurguladığımız nokta şu: Sahada yapay zekânın etkili, verimli
+                                    kullanım ve teknik beceriler öne çıktığında etik bazen istemeden de olsa geri plana
+                                    itilebiliyor; oysa biz sürdürülebilir entegrasyonun şartının etik farkındalığın
+                                    sistematik biçimde gelişmesi olduğuna inanıyoruz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category3">
+                            YAZEK HANGİ OKUL VE KURUMLARI KAPSAMAKTADIR?
+                        </button>
+                    </h2>
+                    <div id="category3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                YAZEK kapsamı nedir?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>YAZEK, Millî Eğitim Bakanlığına bağlı her tür ve derecedeki resmî okulları, özel
+                                    öğretim kurumlarını (özel okullar), bilim ve sanat merkezlerini (BİLSEM) ve halk
+                                    eğitimi merkezlerini kapsamaktadır.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category4">
+                            ETİK YÖNETİŞİM YAPISI
+                        </button>
+                    </h2>
+                    <div id="category4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, bu etik denetim tek bir merkezden mi yapılıyor yoksa sahada nasıl bir
+                                teşkilatlanma söz konusu? Etik yönetişim yapınızdan bahseder misiniz?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Biz bu sistemi “çok katmanlı bir yönetişim modeli” üzerine inşa ettik.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel5.jpg" alt="ETİK YÖNETİŞİM YAPISI"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>ETİK
+                                                YÖNETİŞİM YAPISI</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Değerlendirme ve rehberlik tek bir merkezden değil, bizzat uygulamanın yapıldığı
+                                    okuldan başlıyor ve merkeze doğru dört ana halkadan oluşuyor:</p>
+                                <p>İlk halkamız <strong>Okul Yapay Zekâ Etiği Ekipleri</strong>. Her okulumuzda müdür
+                                    başkanlığında; müdür yardımcısı, varsa bilişim teknolojileri ve rehber
+                                    öğretmenlerimizden oluşan bu ekipler, sahadaki ilk rehberlik ve denetim noktasıdır.
+                                    Uygulamaları yerinde görür ve olası risklere anında müdahale ederler.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel6.jpg" alt="OKUL YAPAY ZEKÂ ETİĞİ EKİBİ YAPISI VE GÖREVLERİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>OKUL
+                                                YAPAY ZEKÂ ETİĞİ EKİBİ YAPISI VE GÖREVLERİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>İkinci ve üçüncü halkalarımız ise <strong>İl ve İlçe Yapay Zekâ Uygulamaları Etik
+                                        Kurulları</strong>. Bu kurullarımız, gelen itirazları değerlendirmenin yanı sıra
+                                    bölge düzeyinde öğretmenlerimize rehberlik ederek etik farkındalık eğitimleri
+                                    düzenlerler. Süreçlerin yerel düzeyde standartlara uygun ilerlemesini sağlarlar.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel7.jpg"
+                                            alt="İL YAPAY ZEKÂ UYGULAMALARI ETİK KURULU YAPISI VE GÖREVLERİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>İL
+                                                YAPAY ZEKÂ UYGULAMALARI ETİK KURULU YAPISI VE GÖREVLERİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>En tepede ise <strong>Yapay Zekâ Uygulamaları Etik Üst Kurulu</strong> yer alıyor.
+                                    Başkanlığını yürüttüğüm bu kurul; Bakanlığımızın hukuktan stratejiye kadar farklı
+                                    birimlerinin yanı sıra sivil toplum ve akademi temsilcilerini de barındıran çok
+                                    geniş bir yapıya sahip. Biz burada sadece nihai kararları vermiyoruz, aynı zamanda
+                                    ülkemizin eğitimde yapay zekâ politikalarını ve etik standartlarını belirliyoruz.
+                                    Yani okuldan merkeze uzanan, her halkası birbirine bağlı, yaşayan ve izlenebilir bir
+                                    denetim ve rehberlik ağı kurduk.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category5">
+                            TEORİK ALTYAPI VE DÜNYA ÖRNEKLERİ
+                        </button>
+                    </h2>
+                    <div id="category5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, bu sistemi kurgularken teorik olarak nerelerden beslendiniz? Dünyadaki
+                                diğer ülkeler bu etik meseleyi nasıl yönetiyor?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>YAZEK’i kurgularken kapsamlı bir literatür taraması gerçekleştirdik. Teorik
+                                    altyapımızı oluştururken <strong>UNESCO</strong>’nun 2021’deki “Yapay Zekâ Etiği
+                                    Tavsiye Kararı”ndaki dört temel değer ve on ilkeyi, <strong>Avrupa
+                                        Birliği</strong>’nin (AB) “Yapay Zekâ Yasası”ndaki (AI Act) risk temelli
+                                    yaklaşımı ve “Güvenilir YZ” kriterlerini titizlikle inceledik. Bunların yanı sıra
+                                    ulusal ve UNICEF gibi uluslararası birçok kuruluşun ve sivil toplum örgütlerinin
+                                    hazırladığı raporları analiz ettik ve insanı merkeze alan bir anlayışla bir süreç
+                                    planladık.</p>
+                                <p>Biz bu çalışmada şunu gördük: Dünyanın çoğu ülkesinde etik ilkeler sadece “temenni”
+                                    düzeyinde kalırken biz Türkiye olarak bunu <strong>YAZEK</strong> ile izlenebilir
+                                    bir “yönetişim mekanizmasına” dönüştürdük. Belirlediğimiz sekiz etik ilke küresel
+                                    literatürün bir sentezi ama bizim millî değerlerimizle yoğurulmuş bir halidir.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category6">
+                            YAZEK SİSTEMİNİN İŞLEYİŞİ VE ÖĞRETMENE ETKİSİ
+                        </button>
+                    </h2>
+                    <div id="category6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Öğretmenlerimiz için bu sistem yeni bir bürokratik yük mü getirecek? Sistem pratikte
+                                nasıl çalışıyor?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Kesinlikle hayır. Yapay zekâ hayatımızın bir gerçeği, ancak en büyük endişenin “Acaba
+                                    üzerimize yeni bir evrak yükü mü binecek?” olduğunu biliyorum. Şunu en başta ve çok
+                                    net söyleyeyim: <strong>YAZEK bürokratik bir yapı bildirmiyor, güven zemini
+                                        oluşturuyor.</strong> Bizim yaklaşımımız bürokrasi üretmek değil sahada etik
+                                    farkındalığı bir mesleki kültür haline getirmektir.</p>
+
+                                <h5 class="mt-4 text-primary">Sistem Nasıl İşliyor?</h5>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel8.jpg" alt="HANGİ DURUMLARDA ETİK BEYAN FORMU GEREKLİDİR?"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>HANGİ
+                                                DURUMLARDA ETİK BEYAN FORMU GEREKLİDİR?</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>İşleyiş son derece sade. Eğer bir öğretmenimiz yapay zekâyı kendi ders hazırlığı için
+                                    kullanıyorsa, kişisel gelişimi için faydalanıyorsa <strong>hiçbir beyan zorunluluğu
+                                        yok.</strong></p>
+                                <p>Ne zaman ki işin içine evlatlarımız giriyor; yani yapay zekâ öğrenciyle doğrudan
+                                    etkileşim kuruyor veya öğrenci verisini işleyip bir değerlendirme yapıyorsa, işte
+                                    orada devreye giriyoruz. Öğretmenimiz YAZEK üzerinden çevrim içi olarak kısa bir
+                                    <strong>Etik Beyan Formu</strong> dolduruyor.
+                                </p>
+                                <p>Bu kapsamda öğretmenler ile Bakanlığın merkez ve taşra teşkilatı birimleri
+                                    gerçekleştirecekleri yapay zekâ uygulamaları için YAZEK üzerinden beyan formunu
+                                    doldurmak zorundadır.</p>
+
+                                <h5 class="mt-4 text-primary">“Onay” Değil, “Beyan” Esası</h5>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel9.jpg" alt="ÖĞRETMEN ETİK BEYAN SÜRECİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i
+                                                    class="bi bi-image me-2"></i>ÖĞRETMEN ETİK BEYAN SÜRECİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Buradaki kritik nokta şu: Bu bir “izin alma” süreci değildir. Öğretmenimiz bize
+                                    sormuyor; aksine, “Ben bu teknolojiyi şu etik değerleri koruyarak şu güvenlik
+                                    önlemleriyle kullanacağım” diyerek taahhüt veriyor ve <strong>hemen uygulamasına
+                                        başlıyor.</strong> Başında bir kurulun onayını beklemiyor.</p>
+                                <p>Okullarımızda, il/ilçelerimizde kurduğumuz Yapay Zekâ Etiği Ekipleri ve kurullar
+                                    birer “denetmen” değil, birer <strong>“rehberdir.”</strong> Sadece ve sadece bariz
+                                    bir risk, örneğin kişisel verilerin korunmasına aykırı bir durum veya bir mahremiyet
+                                    ihlali, tespit edilirse öğrenci ve öğretmeni korumak açısından “Lütfen durun, burada
+                                    bir risk var” diyerek müdahale edebilirler.</p>
+                                <p>Özetle hedefimiz şudur: <strong>Hata yapıldığında ceza kesen bir sistem değil, hata
+                                        daha oluşmadan onu engelleyen, öğretmenimizi koruyan ve okullarımızı dijital
+                                        dünyada daha güvenli kılan bir yapı kurmak.</strong> Biz öğretmenin elini
+                                    zayıflatmaya değil, o eli etik ilkelerle güçlendirmeye geliyoruz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category7">
+                            ETİK İHLAL BAŞVURUSU VE İNCELEME SÜREÇLERİ
+                        </button>
+                    </h2>
+                    <div id="category7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Peki Sayın Başkanım, her şeye rağmen bir etik ihlal iddiası ortaya çıkarsa süreç nasıl
+                                işliyor? Vatandaşlarımız ve öğretmenlerimiz bu denetim mekanizmasına nasıl dahil oluyor?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Süreç son derece şeffaf ve izlenebilir bir iş akışına sahip. Eğer bir öğrenci, veli
+                                    veya okul personeli; okulda yürütülen yapay zekâ uygulamasında bir etik ihlal
+                                    (örneğin KVKK aykırılığı, mahremiyet ihlali veya pedagojik olmayan bir yönlendirme)
+                                    tespit ederse, durumu bir dilekçe ile okul müdürlüğüne bildiriyor.</p>
+
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="gorsel10.jpg" alt="ETİK İHLAL BİLDİRİMİ"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>ETİK
+                                                İHLAL BİLDİRİMİ</h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p>Süreç şöyle ilerliyor:</p>
+                                <ul>
+                                    <li><strong>Kayıt ve Takip:</strong> Okul idaresi başvuruyu alır almaz YAZEK
+                                        sistemine işliyor ve başvuru sahibi için benzersiz bir “takip kodu” üretiliyor.
+                                    </li>
+                                    <li><strong>Okul Düzeyinde İnceleme:</strong> Okul Yapay Zekâ Etiği Ekibi, en geç 15
+                                        gün içinde toplanarak başvuruyu inceliyor. Gerekirse öğretmenden materyalleri
+                                        istiyor veya taraflarla görüşüyor.</li>
+                                    <li><strong>Karar ve Müdahale:</strong> Eğer bir ihlal tespit edilirse uygulama
+                                        “derhal” durduruluyor. İhlalin niteliğine göre disiplin veya idari süreçler
+                                        devreye alınabiliyor.</li>
+                                    <li><strong>İtiraz Mekanizması:</strong> Diyelim ki taraflar okulun kararından
+                                        memnun kalmadı; süreç bir üst basamağa, yani ilçe veya il kurullarımıza
+                                        taşınıyor. Hatta gerekirse nihai karar için bizim Etik Üst Kurulumuza kadar
+                                        gelebiliyor.</li>
+                                </ul>
+                                <p>Burada altını çizmek istediğim nokta şudur: Bu mekanizma cezalandırıcı bir refleks
+                                    değil, “önleyici bir güvence”dir. Amacımız sahadaki sorumlu kullanım kültürünü
+                                    yerleşik hale getirmektir. Bizim beklentimiz, ihlal başvurularının “yok denecek
+                                    kadar az” düzeyde kalması çünkü hedef sahadaki uygulamaları daha baştan doğru
+                                    ilkelere oturtmak.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category8">
+                            EĞİTİMDE YAPAY ZEKÂ UYGULAMALARI ETİK KILAVUZUNUN KAPSAMI
+                        </button>
+                    </h2>
+                    <div id="category8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, az önce Etik Kılavuz’dan bahsettiniz. Peki, bu kılavuz tam olarak neleri
+                                kapsıyor?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Kılavuz; yapay zekâ uygulamaları planlanırken ve gerçekleştirilirken gözetilecek
+                                    sekiz temel etik ilkeyi, uygulama ölçütlerini, etik beyanın hangi durumlarda zorunlu
+                                    olduğunu ve etik ihlal tanımlarını en ince ayrıntısına kadar tarif eder.</p>
+                                <p>Daha da önemlisi, bildirim ve izleme usulleri ile biraz önce bahsettiğim çok katmanlı
+                                    yönetişim yapısının (Yapay Zekâ Uygulamaları Etik Üst Kurulu, il/ilçe kurulları ve
+                                    okul ekipleri) çalışma prensiplerini detaylandırır.</p>
+                                <p>Buradaki temel yaklaşımımız; etik beyanların merkezî ve standart bir biçimde
+                                    toplanması, ihlal bildirimlerinin ise sistematik ve izlenebilir şekilde takip
+                                    edilmesini sağlamaktır. Böylece eğitimde kullanılan teknolojilerin etik ilkelere
+                                    dayalı, güvenli ve kapsayıcı bir çerçevede uygulanmasını hedefliyoruz. Şunu
+                                    özellikle vurgulamalıyım: Amacımız öğretmenlerimize ekstra bürokratik yük üretmek
+                                    değil, sahada etik farkındalığı güçlendirerek sorumlu yapay zekâ kullanımını mesleki
+                                    sorumluluğun bir parçası haline getirmektir.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. KATEGORİ -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category9">
+                            DİJİTAL VATANDAŞLIK EĞİTİMİ VE TYMM
+                        </button>
+                    </h2>
+                    <div id="category9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, Türkiye Yüzyılı Maarif Modeli'nde öğrencilerimizi Dijital Vatandaşlığa
+                                nasıl hazırlıyoruz?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Bu konu bizim için oldukça önemli. Türkiye Yüzyılı Maarif Modeli kapsamında 26
+                                    öğretim programımızı, Avrupa Konseyi’nin “Dijital Vatandaşlık Eğitimi Planlayıcısı”
+                                    çerçevesinde sistematik olarak inceledik.</p>
+                                <p>Şunu net bir şekilde söyleyebilirim: Bu çalışma, uluslararası literatürde bu ölçekte
+                                    yapılan İLK çalışmadır. Avrupa Konseyi üye ülkelere bu planlayıcıyı kullanmalarını
+                                    tavsiye ediyordu ancak bugüne kadar hiçbir ülke bizim yaptığımız gibi bütüncül ve
+                                    karşılaştırmalı bir program analizi yayımlamamıştı. Çalışmamızın İngilizce çevirisi
+                                    bizzat Avrupa Konseyi tarafından üstlenildi ve tüm üye ülkelerle paylaşılacak.</p>
+                                <p>Bu analizde gördük ki Maarif Modelimiz; “öğrenme ve yaratıcılık” ile “medya
+                                    okuryazarlığı” boyutlarında çok güçlü. Bizim YAZEK ile kurduğumuz etik yapı, bu
+                                    dijital vatandaşlık becerilerini sadece kâğıt üzerinde bırakmıyor; sınıfta,
+                                    uygulamada ve öğretmenin bilincinde ete kemiğe büründürüyor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- 10. KATEGORİ -->
+                 <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category10">
+                            YAZEK İstatistikler
+                        </button>
+                    </h2>
+                    <div id="category10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Sayın Başkanım, YAZEK’e erişim istatistikleri beyan formu doldurma istatistikleri ne durumda?                            </h5>
+                            <div class="faq-answer">
+                                <p>  Son bir aylık verilere göre YAZEK sisteminin sahada aktif biçimde kullanıldığını görüyoruz. 
+                                   Öncelikle yönetişim altyapısı büyük ölçüde tamamlanmış durumdadır: 81 ilin tamamında ve 307 ilçede Yapay Zekâ Etik Kurulu oluşturulmuştur. 32.000 okulda Okul Yapay Zekâ Etiği Ekibi kurulmuştur.
+                                    Bu kurumsal yapılanma ile birlikte sistem kullanımında da dikkat çekici bir yoğunluk söz konusudur: YAZEK platformuna son bir ayda 430.000 giriş yapılmıştır. 2.280 kez Etik Beyan Formu doldurulmuştur.
+                                    Başvuru dağılımlarına baktığımızda:
+                                    GÖRSEL 12
+                                    En Çok Başvuru Yapılan Dersler: Matematik (275), Türkçe (245), Bilişim Teknolojileri ve Yazılım (196), Fen Bilimleri (154), Yabancı Dil (148)
+                                    Bu tablo, yapay zekâ uygulamalarının özellikle temel akademik derslerde yoğunlaştığını göstermektedir.
+                                    Sınıf Düzeyine Göre Başvurular: 5. sınıf (306), 6. sınıf (242), 9. sınıf (215), 4. sınıf (193), 7. sınıf (186)
+                                    Özellikle ortaokul düzeyinde belirgin bir yoğunluk olduğu görülmektedir.
+                                    Uygulama Kapsamına Göre ise beyanlar yapay zekâ kullanımının en çok öğretim sürecini destekleme ve içerik üretimi alanlarında yoğunlaştığını; ölçme-değerlendirme ve davranışsal analiz gibi daha hassas alanlarda ise görece daha temkinli bir kullanım eğilimi bulunduğunu göstermektedir.</p>
+                                    <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                        <div class="card-body p-4">
+                                            <img src="gorsel11.jpg" alt="YAZEK İSTATİSTİKLER"
+                                                class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                                <div>
+                                                    <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>YAZEK İSTATİSTİKLER</h6>
+                                                </div>
+                                    </div>
+                                    <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                        <div class="card-body p-4">
+                                            <img src="gorsel12.jpg" alt="YAZEK İSTATİSTİKLER"
+                                                class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                                <div>
+                                                    <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>YAZEK İSTATİSTİKLER</h6>
+                                                </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 11. KATEGORİ -->
+
+                
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#category10">
+                            SONUÇ VE KAPANIŞ
+                        </button>
+                    </h2>
+                    <div id="category10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">
+                                Son olarak, velilere ve eğitim camiasına mesajınız nedir?
+                            </h5>
+                            <div class="faq-answer">
+                                <p>Velilerimiz müsterih olsunlar; 18 milyon evladımızın dijital dünyadaki hakları,
+                                    verileri ve mahremiyetleri bize emanettir. Öğretmenlerimiz ise bu yeni teknoloji
+                                    çağında yalnız değiller. YAZEK, onların elindeki yapay zekâ araçlarını sorumlu,
+                                    güvenli ve etkili kullanmaları için bir pusuladır. Biz “önce etik” diyoruz çünkü
+                                    ahlaki ve etik bir temel üzerine inşa edilmeyen hiçbir teknolojik gelişim, insanlığa
+                                    kalıcı bir fayda sağlayamaz.</p>
+                                  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Resim Büyütme Modalı -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat" style="background-color: white; padding: 0.5rem; border-radius: 50%;"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Büyük Görsel" style="max-height: 85vh; object-fit: contain; background-color: #fff; padding: 0.5rem;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('faqSearch');
+            const searchCount = document.getElementById('searchCount');
+            const toggleAllBtn = document.getElementById('toggleAll');
+
+            const faqItems = document.querySelectorAll('.faq-item');
+            const faqCategories = document.querySelectorAll('.faq-category');
+            const allCollapses = document.querySelectorAll('.accordion-collapse');
+            const allButtons = document.querySelectorAll('.accordion-button');
+
+            let isAllOpen = false;
+
+            // Orijinal içerikleri sakla
+            const originalData = new Map();
+            document.querySelectorAll('.faq-question, .faq-answer').forEach(el => {
+                originalData.set(el, el.innerHTML);
+            });
+
+            function updateToggleBtn() {
+                const btnSpan = toggleAllBtn.querySelector('span');
+                const btnIcon = toggleAllBtn.querySelector('i');
+                if (isAllOpen) {
+                    btnSpan.innerText = "Tümünü Kapat";
+                    btnIcon.className = "bi bi-dash-square me-2";
+                } else {
+                    btnSpan.innerText = "Tümünü Aç";
+                    btnIcon.className = "bi bi-plus-square me-2";
+                }
+            }
+
+            toggleAllBtn.addEventListener('click', () => {
+                isAllOpen = !isAllOpen;
+                allCollapses.forEach(el => {
+                    if (isAllOpen) el.classList.add('show');
+                    else el.classList.remove('show');
+                });
+                allButtons.forEach(el => {
+                    if (isAllOpen) el.classList.remove('collapsed');
+                    else el.classList.add('collapsed');
+                });
+                updateToggleBtn();
+            });
+
+            searchInput.addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLocaleLowerCase('tr-TR').trim();
+
+                if (searchTerm.length < 3) {
+                    resetFAQ();
+                    searchCount.style.visibility = 'hidden';
+                    return;
+                }
+
+                let matchesFound = 0;
+                faqCategories.forEach(cat => cat.style.display = 'none');
+                faqItems.forEach(item => item.style.display = 'none');
+
+                faqItems.forEach(item => {
+                    const qEl = item.querySelector('.faq-question');
+                    const aEl = item.querySelector('.faq-answer');
+
+                    const qText = originalData.get(qEl).toLocaleLowerCase('tr-TR');
+                    const aText = originalData.get(aEl).toLocaleLowerCase('tr-TR');
+
+                    if (qText.includes(searchTerm) || aText.includes(searchTerm)) {
+                        matchesFound++;
+                        item.style.display = 'block';
+                        const parentCategory = item.closest('.faq-category');
+                        if (parentCategory) parentCategory.style.display = 'block';
+
+                        highlightElement(qEl, searchTerm);
+                        highlightElement(aEl, searchTerm);
+                        openAccordion(item);
+                    }
+                });
+
+                searchCount.innerText = `${matchesFound} sonuç bulundu.`;
+                searchCount.style.visibility = 'visible';
+
+                if (matchesFound > 0) {
+                    isAllOpen = true;
+                    updateToggleBtn();
+                }
+            });
+
+            function highlightElement(el, term) {
+                const originalHTML = originalData.get(el);
+                const regex = new RegExp(`(${term})`, 'gi');
+                el.innerHTML = originalHTML.replace(regex, '<mark>$1</mark>');
+            }
+
+            function openAccordion(itemEl) {
+                const collapseItem = itemEl.querySelector('.accordion-collapse');
+                if (collapseItem) collapseItem.classList.add('show');
+                const buttonItem = itemEl.querySelector('.accordion-button');
+                if (buttonItem) buttonItem.classList.remove('collapsed');
+
+                const parentCategory = itemEl.closest('.faq-category');
+                if (parentCategory) {
+                    const catCollapse = parentCategory.querySelector('.accordion-collapse');
+                    if (catCollapse) catCollapse.classList.add('show');
+                    const catButton = parentCategory.querySelector('.accordion-button');
+                    if (catButton) catButton.classList.remove('collapsed');
+                }
+            }
+
+            function resetFAQ() {
+                faqCategories.forEach(cat => cat.style.display = 'block');
+                faqItems.forEach(item => {
+                    item.style.display = 'block';
+                    const q = item.querySelector('.faq-question');
+                    const a = item.querySelector('.faq-answer');
+                    q.innerHTML = originalData.get(q);
+                    a.innerHTML = originalData.get(a);
+                });
+                isAllOpen = false;
+                allCollapses.forEach(el => el.classList.remove('show'));
+                allButtons.forEach(el => el.classList.add('collapsed'));
+                updateToggleBtn();
+            }
+
+            // Resim Büyütme İşlemi
+            const imageModalElement = document.getElementById('imageModal');
+            if (imageModalElement) {
+                const imageModal = new bootstrap.Modal(imageModalElement);
+                const modalImage = document.getElementById('modalImage');
+                
+                document.querySelectorAll('.visual-img').forEach(img => {
+                    img.addEventListener('click', function() {
+                        modalImage.src = this.src;
+                        modalImage.alt = this.alt;
+                        imageModal.show();
+                    });
+                });
+            }
+        });
+    </script>
+
+</body>
+
+</html>
