@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-İçerik Sayaç Raporu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            padding: 15px;
+        }
+
+        .header-container {
+            background: linear-gradient(135deg, #4472C4 0%, #70B7BA 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .header-content {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .title-section h1 {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: #e8f4f8;
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        .report-container {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .report-header {
+            background: #f8f9fa;
+            border-bottom: 2px solid #4472C4;
+            padding: 12px 15px;
+        }
+
+        .report-header h2 {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #4472C4;
+        }
+
+        th {
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #ffffff;
+            border: 1px solid #2c5aa0;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+        }
+
+        th:first-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        th:nth-child(2) {
+            text-align: left;
+            padding-left: 15px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background-color: #f8f9fa;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        td:first-child {
+            text-align: center;
+            font-weight: 500;
+            color: #6c757d;
+            width: 60px;
+        }
+
+        td:nth-child(2) {
+            text-align: left;
+            font-weight: 500;
+            padding-left: 15px;
+            color: #495057;
+        }
+
+        tfoot {
+            background: #8e959a;
+            font-weight: 600;
+        }
+
+        tfoot td {
+            color: #ffffff;
+            border: 1px solid #6c757d;
+            padding: 10px 8px;
+            font-size: 13px;
+        }
+
+        tfoot td:first-child {
+            text-align: center;
+        }
+
+        tfoot td:nth-child(2) {
+            text-align: left;
+            padding-left: 15px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(248, 249, 250, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: #495057;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e9ecef;
+            border-top: 4px solid #4472C4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .header-container {
+                box-shadow: none;
+            }
+            
+            .report-container {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="logo.png" alt="Logo" class="header-logo">
+                <div class="title-section">
+                    <h1>E-İÇERİK SAYAÇ RAPORU</h1>
+                    <p class="subtitle">Program Türü Bazında Ders Dağılımı</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-container">
+        <div class="report-header">
+            <h2>Ders Adı ve Program Türü Dağılımı</h2>
+        </div>
+        <div class="table-wrapper">
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th>Sıra No</th>
+                        <th>Ders Adı</th>
+                        <th>Diğer</th>
+                        <th>TYMM</th>
+                        <th>Genel Toplam</th>
+                    </tr>
+                </thead>
+                <tbody id="reportBody">
+                    <!-- Veriler buraya yüklenecek -->
+                </tbody>
+                <tfoot id="reportFooter">
+                    <!-- Toplam satırı buraya yüklenecek -->
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Rapor hazırlanıyor...</p>
+        </div>
+    </div>
+
+    <script>
+        class ReportManager {
+            constructor() {
+                this.data = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadData();
+                this.generateReport();
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            async loadData() {
+                try {
+                    const response = await fetch('data.json');
+                    if (!response.ok) {
+                        throw new Error('Veri dosyası bulunamadı');
+                    }
+                    
+                    const jsonData = await response.json();
+                    this.data = jsonData;
+                } catch (error) {
+                    console.error('Veri yükleme hatası:', error);
+                    alert('Veriler yüklenemedi!');
+                }
+            }
+
+            generateReport() {
+                const reportData = {};
+                
+                // Her ders için program türüne göre sayıları topla
+                this.data.forEach(row => {
+                    const dersAdi = row['DERS ADI'];
+                    const programTuru = row['Program Türü'] || '';
+                    
+                    // DERS ADI satırını ve boş satırları hariç tut
+                    if (!dersAdi || dersAdi === 'DERS ADI') return;
+                    
+                    if (!reportData[dersAdi]) {
+                        reportData[dersAdi] = {
+                            'Diğer': 0,
+                            'TYMM': 0,
+                            'Genel Toplam': 0
+                        };
+                    }
+                    
+                    if (programTuru === 'TYMM') {
+                        reportData[dersAdi]['TYMM']++;
+                    } else if (programTuru === 'Diğer') {
+                        reportData[dersAdi]['Diğer']++;
+                    }
+                    
+                    reportData[dersAdi]['Genel Toplam']++;
+                });
+
+                // Dersleri alfabetik olarak sırala
+                const sortedDersler = Object.keys(reportData).sort((a, b) => 
+                    a.localeCompare(b, 'tr')
+                );
+
+                // Tablo gövdesini oluştur
+                const tbody = document.getElementById('reportBody');
+                tbody.innerHTML = '';
+                
+                let totalDiger = 0;
+                let totalTYMM = 0;
+                let totalGenel = 0;
+
+                sortedDersler.forEach((ders, index) => {
+                    const data = reportData[ders];
+                    const row = document.createElement('tr');
+                    
+                    const digerValue = data['Diğer'] || '';
+                    const tymmValue = data['TYMM'] || '';
+                    const genelValue = data['Genel Toplam'];
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${ders}</td>
+                        <td>${digerValue}</td>
+                        <td>${tymmValue}</td>
+                        <td>${genelValue}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                    
+                    totalDiger += data['Diğer'];
+                    totalTYMM += data['TYMM'];
+                    totalGenel += data['Genel Toplam'];
+                });
+
+                // Toplam satırını oluştur
+                const tfoot = document.getElementById('reportFooter');
+                tfoot.innerHTML = `
+                    <tr>
+                        <td></td>
+                        <td>Genel Toplam</td>
+                        <td>${totalDiger}</td>
+                        <td>${totalTYMM}</td>
+                        <td>${totalGenel}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Sayfa yüklendiğinde raporu başlat
+        document.addEventListener('DOMContentLoaded', () => {
+            new ReportManager();
+        });
+    </script>
+</body>
+</html>
+
