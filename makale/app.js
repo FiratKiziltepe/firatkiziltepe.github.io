@@ -589,6 +589,13 @@ async function deleteNote(noteId, articleId) {
 // =====================================================
 
 function openAddModal() {
+  if (!canWrite()) {
+    showNotification('Kayıt eklemek için yönetici girişi gerekli', 'error');
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H5',location:'app.js:openAddModal',message:'blocked add modal for non-admin',data:{role:(typeof getUserRole==='function'?getUserRole():'unknown')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return;
+  }
   editingArticleId = null;
   formRating = 0;
   document.getElementById('formTitle').textContent = 'Yeni Kayıt Oluştur';
@@ -599,6 +606,13 @@ function openAddModal() {
 }
 
 function openEditModal(articleId) {
+  if (!canWrite()) {
+    showNotification('Kayıt düzenlemek için yönetici girişi gerekli', 'error');
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H5',location:'app.js:openEditModal',message:'blocked edit modal for non-admin',data:{articleId,role:(typeof getUserRole==='function'?getUserRole():'unknown')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return;
+  }
   const article = articles.find(a => a.id === articleId);
   if (!article) return;
   editingArticleId = articleId;
@@ -707,12 +721,23 @@ function collectFormData() {
 
 async function handleFormSubmit(e) {
   e.preventDefault();
+  // #region agent log
+  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H5',location:'app.js:handleFormSubmit:start',message:'form submit start',data:{editingArticleId,role:(typeof getUserRole==='function'?getUserRole():'unknown')},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+  if (!canWrite()) {
+    showNotification('Kaydetmek için yönetici girişi gerekli', 'error');
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H5',location:'app.js:handleFormSubmit:block',message:'form submit blocked by role',data:{role:(typeof getUserRole==='function'?getUserRole():'unknown')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return;
+  }
   const data = collectFormData();
   const submitBtn = e.target.querySelector('[type="submit"]');
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Kaydediliyor...';
+    const s = submitBtn.querySelector('span');
+    if (s) s.textContent = 'Kaydediliyor...';
   }
 
   try {
@@ -730,7 +755,14 @@ async function handleFormSubmit(e) {
     renderTable();
   } catch (err) {
     console.error('Form submit error:', err);
-    showNotification('Kayıt hatası: ' + (err.message || 'Bilinmeyen hata'), 'error');
+    const errMsg = String(err?.message || '');
+    const readable = (err?.code === 'PGRST116' || errMsg.includes('0 rows'))
+      ? 'Güncelleme yetkisi yok veya kayıt bulunamadı'
+      : ('Kayıt hatası: ' + (err.message || 'Bilinmeyen hata'));
+    showNotification(readable, 'error');
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H5',location:'app.js:handleFormSubmit:catch',message:'form submit failed',data:{code:err?.code||null,message:errMsg},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;

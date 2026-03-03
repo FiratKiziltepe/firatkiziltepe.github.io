@@ -127,10 +127,14 @@ async function updateArticle(id, articleData, rating) {
       .from('articles')
       .update(updates)
       .eq('id', id)
-      .select()
-      .single();
+      .select();
     if (error) throw error;
-    return data;
+    if (!Array.isArray(data) || data.length === 0) {
+      const e = new Error('Güncelleme yetkisi yok veya kayıt bulunamadı');
+      e.code = 'PGRST116';
+      throw e;
+    }
+    return data[0];
   });
 }
 
