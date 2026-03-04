@@ -179,7 +179,7 @@ async function createAdvisorNote(articleId, advisorId, note) {
   const { data, error } = await getSupabase()
     .from('advisor_notes')
     .insert({ article_id: articleId, advisor_id: advisorId, note })
-    .select('*, profiles(display_name, role)')
+    .select()
     .single();
   if (error) throw error;
   return data;

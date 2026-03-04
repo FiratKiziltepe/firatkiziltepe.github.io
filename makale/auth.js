@@ -26,36 +26,21 @@ function showApp() {
 // =====================================================
 
 async function login(email, password) {
-  // #region agent log
-  console.log('[DEBUG] login() start', { email });
-  // #endregion
   const { data, error } = await getSupabase().auth.signInWithPassword({ email, password });
-  // #region agent log
-  console.log('[DEBUG] signInWithPassword done', { ok: !!data?.user, err: error?.message });
-  // #endregion
   if (error) {
     if (error.message.includes('Invalid login credentials')) throw new Error('E-posta veya şifre hatalı');
     throw error;
   }
   currentUser = data.user;
   await loadProfile();
-  // #region agent log
-  console.log('[DEBUG] login complete', { role: currentProfile?.role });
-  // #endregion
   return { user: currentUser, profile: currentProfile };
 }
 
 async function checkSession() {
-  // #region agent log
-  console.log('[DEBUG] checkSession start');
-  // #endregion
   try {
     const client = getSupabase();
     if (!client) return false;
     const { data: { session } } = await client.auth.getSession();
-    // #region agent log
-    console.log('[DEBUG] checkSession result', { hasSession: !!session });
-    // #endregion
     if (session) {
       currentUser = session.user;
       await loadProfile();
@@ -63,25 +48,19 @@ async function checkSession() {
     }
     return false;
   } catch (e) {
-    console.error('[DEBUG] checkSession error:', e);
+    console.error('checkSession error:', e);
     return false;
   }
 }
 
 async function loadProfile() {
   if (!currentUser) return null;
-  // #region agent log
-  console.log('[DEBUG] loadProfile start', { userId: currentUser.id });
-  // #endregion
   try {
     const { data, error } = await getSupabase()
       .from('profiles')
       .select('*')
       .eq('id', currentUser.id)
       .single();
-    // #region agent log
-    console.log('[DEBUG] loadProfile done', { hasData: !!data, err: error?.message, role: data?.role });
-    // #endregion
     if (error || !data) {
       currentProfile = {
         id: currentUser.id,
@@ -93,7 +72,7 @@ async function loadProfile() {
       currentProfile = data;
     }
   } catch (e) {
-    console.error('[DEBUG] loadProfile exception:', e);
+    console.error('loadProfile exception:', e);
     currentProfile = {
       id: currentUser.id,
       email: currentUser.email,
@@ -157,11 +136,8 @@ function setupAuthListeners() {
   const client = getSupabase();
   if (!client) { console.error('Supabase client yok'); return; }
 
-  // onAuthStateChange: SADECE dahili state güncelle, AĞIR İŞLEM YOK
+  // onAuthStateChange: sadece dahili state güncelle
   client.auth.onAuthStateChange((event, session) => {
-    // #region agent log
-    console.log('[DEBUG] onAuthStateChange', { event });
-    // #endregion
     if (event === 'TOKEN_REFRESHED' && session) {
       currentUser = session.user;
     }
@@ -185,11 +161,8 @@ function setupAuthListeners() {
       showApp();
       showLoading();
       await loadData();
-      // #region agent log
-      console.log('[DEBUG] login flow complete, app shown');
-      // #endregion
     } catch (err) {
-      console.error('[DEBUG] login error:', err);
+      console.error('Login error:', err);
       errorEl.textContent = err.message || 'Giriş yapılamadı';
       errorEl.classList.remove('hidden');
     } finally {
@@ -202,9 +175,6 @@ function setupAuthListeners() {
   document.getElementById('btnLogout').addEventListener('click', async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // #region agent log
-    console.log('[DEBUG] logout clicked');
-    // #endregion
     currentUser = null;
     currentProfile = null;
     showLoginPage();

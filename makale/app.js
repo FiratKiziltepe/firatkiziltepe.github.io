@@ -11,6 +11,7 @@ let searchQuery = '';
 let editingArticleId = null;
 let viewingArticle = null;
 let formRating = 0;
+let dataLoaded = false;
 
 // Local visibility overrides (browser-only, not saved to DB unless admin)
 let localVisibility = {};
@@ -20,38 +21,28 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[DEBUG] DOMContentLoaded fired');
-
   try {
     const client = initSupabase();
-    console.log('[DEBUG] initSupabase:', { hasClient: !!client });
     setupUIListeners();
     setupAuthListeners();
 
-    console.log('[DEBUG] checking session...');
     const hasSession = await checkSession();
-    console.log('[DEBUG] checkSession done', { hasSession, hasUser: !!currentUser });
 
     if (hasSession && currentUser) {
       updateAuthUI();
       showApp();
       showLoading();
       await loadData();
-      console.log('[DEBUG] init complete with session', { columns: columns.length, articles: articles.length });
     } else {
       showLoginPage();
-      console.log('[DEBUG] no session, showing login page');
     }
   } catch (e) {
-    console.error('[DEBUG] Init EXCEPTION:', e?.message || e?.stack || e);
+    console.error('Init error:', e);
     showLoginPage();
   }
 });
 
 async function loadData() {
-  // #region agent log
-  console.log('[DEBUG] loadData() called');
-  // #endregion
   try {
     const [colResult, artResult] = await Promise.allSettled([
       fetchColumns(),
@@ -60,13 +51,6 @@ async function loadData() {
 
     columns = colResult.status === 'fulfilled' ? colResult.value : [];
     articles = artResult.status === 'fulfilled' ? artResult.value : [];
-
-    // #region agent log
-    console.log('[DEBUG] loadData results:', {
-      colStatus: colResult.status, colCount: columns.length, colError: colResult.reason?.message,
-      artStatus: artResult.status, artCount: articles.length, artError: artResult.reason?.message
-    });
-    // #endregion
 
     if (colResult.status === 'rejected') console.error('Sütun yükleme hatası:', colResult.reason);
     if (artResult.status === 'rejected') console.error('Makale yükleme hatası:', artResult.reason);
@@ -77,15 +61,14 @@ async function loadData() {
       }
     });
 
+    dataLoaded = true;
     renderTable();
 
     if (columns.length === 0) {
       showNotification('Veritabanı tabloları bulunamadı.', 'error');
     }
   } catch (err) {
-    // #region agent log
-    console.error('[DEBUG] loadData EXCEPTION:', err);
-    // #endregion
+    console.error('loadData error:', err);
     showNotification('Veri yüklenirken hata: ' + (err.message || err), 'error');
   } finally {
     hideLoading();
@@ -103,7 +86,7 @@ function hideLoading() {
 }
 
 function onAuthChange() {
-  renderTable();
+  if (dataLoaded) renderTable();
 }
 
 // =====================================================
@@ -182,6 +165,9 @@ function renderTable() {
   const empty = document.getElementById('emptyState');
 
   if (!table || !empty) return;
+
+  // Veri henüz yüklenmediyse tablo render etme
+  if (!dataLoaded) return;
 
   if (columns.length === 0 && articles.length === 0) {
     table.classList.add('hidden');
@@ -964,9 +950,9 @@ function renderColumnList() {
       </div>
       <div class="flex-1 min-w-0">
         ${editingThis
-          ? `<input id="colRenameInput" type="text" value="${escapeHTML(col.name)}" class="text-sm font-medium text-slate-700 border border-blue-400 rounded px-1.5 py-0.5 w-full focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();saveColumnRename(${col.id});}if(event.key==='Escape'){cancelColumnRename();}" />`
-          : `<p class="text-sm font-medium text-slate-700 truncate ${isAdmin() ? 'cursor-pointer hover:text-blue-600' : ''}" ${isAdmin() ? `ondblclick="startColumnRename(${col.id})"` : ''}>${escapeHTML(col.name)}</p>`
-        }
+        ? `<input id="colRenameInput" type="text" value="${escapeHTML(col.name)}" class="text-sm font-medium text-slate-700 border border-blue-400 rounded px-1.5 py-0.5 w-full focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();saveColumnRename(${col.id});}if(event.key==='Escape'){cancelColumnRename();}" />`
+        : `<p class="text-sm font-medium text-slate-700 truncate ${isAdmin() ? 'cursor-pointer hover:text-blue-600' : ''}" ${isAdmin() ? `ondblclick="startColumnRename(${col.id})"` : ''}>${escapeHTML(col.name)}</p>`
+      }
         <p class="text-[10px] text-slate-400 uppercase tracking-wider">${escapeHTML(col.type)}</p>
       </div>
       ${isAdmin() && !editingThis ? `<button onclick="startColumnRename(${col.id})" class="p-1 text-slate-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all" title="Adı Düzenle">
@@ -992,7 +978,7 @@ function toggleColumnVis(colKey) {
   if (isAdmin()) {
     const col = columns.find(c => c.column_key === colKey);
     if (col) {
-      updateColumn(col.id, { visible: localVisibility[colKey] }).catch(() => {});
+      updateColumn(col.id, { visible: localVisibility[colKey] }).catch(() => { });
       col.visible = localVisibility[colKey];
     }
   }
