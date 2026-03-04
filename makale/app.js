@@ -61,6 +61,18 @@ async function loadData() {
       }
     });
 
+    // Kullanıcının kayıtlı sütun tercihlerini DB'den yükle
+    if (currentUser) {
+      try {
+        const savedVis = await fetchColumnVisibility(currentUser.id);
+        if (savedVis && Object.keys(savedVis).length > 0) {
+          Object.keys(savedVis).forEach(key => {
+            localVisibility[key] = savedVis[key];
+          });
+        }
+      } catch (e) { /* ignore */ }
+    }
+
     dataLoaded = true;
     renderTable();
 
@@ -900,6 +912,12 @@ async function handleFormSubmit(e) {
       const updated = await updateArticle(editingArticleId, data, formRating);
       const idx = articles.findIndex(a => a.id === editingArticleId);
       if (idx !== -1) articles[idx] = updated;
+      // Detay sayfası açıksa güncelle
+      if (viewingArticle && viewingArticle.id === editingArticleId) {
+        viewingArticle = updated;
+        renderDetailHeader();
+        renderDetailContent();
+      }
       showNotification('Kayıt güncellendi', 'success');
     } else {
       const created = await createArticle(data, formRating);
@@ -1150,12 +1168,18 @@ function renderColumnList() {
 function toggleColumnVis(colKey) {
   localVisibility[colKey] = !(localVisibility[colKey] !== false);
 
+  // Admin ise global sütun ayarını da güncelle
   if (isAdmin()) {
     const col = columns.find(c => c.column_key === colKey);
     if (col) {
       updateColumn(col.id, { visible: localVisibility[colKey] }).catch(() => { });
       col.visible = localVisibility[colKey];
     }
+  }
+
+  // Kullanıcının tercihini DB'ye kaydet
+  if (currentUser) {
+    saveColumnVisibility(currentUser.id, { ...localVisibility }).catch(() => { });
   }
 
   renderColumnList();
@@ -1314,6 +1338,10 @@ function setupUIListeners() {
   // Excel download
   document.getElementById('btnExcelDownload').addEventListener('click', downloadExcel);
 
+  // Logo click → ana sayfaya dön
+  document.getElementById('headerLogo').addEventListener('click', () => {
+    if (viewingArticle) hideDetailPage();
+  });
   // Column Manager
   document.getElementById('btnColumnManager').addEventListener('click', openColumnManager);
   document.getElementById('columnManagerClose').addEventListener('click', closeColumnManager);
