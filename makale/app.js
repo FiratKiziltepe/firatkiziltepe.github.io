@@ -227,7 +227,7 @@ function renderTable() {
   let bodyHTML = '';
 
   processed.forEach(article => {
-    bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="openViewDrawer(${article.id})">`;
+    bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="showDetailPage(${article.id})">`;
 
     // Rating cell
     bodyHTML += `<td class="${dc} cell-rating align-middle text-center">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
@@ -241,7 +241,7 @@ function renderTable() {
     if (isAdmin()) {
       bodyHTML += `<td class="${dc} cell-action align-middle text-center">
         <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onclick="event.stopPropagation(); openViewDrawer(${article.id})" class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Görüntüle">
+          <button onclick="event.stopPropagation(); showDetailPage(${article.id})" class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Görüntüle">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
           </button>
           <button onclick="event.stopPropagation(); openEditModal(${article.id})" class="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Düzenle">
@@ -388,7 +388,7 @@ async function setRating(articleId, rating) {
     renderTable();
     if (viewingArticle && viewingArticle.id === articleId) {
       viewingArticle.rating = rating;
-      renderViewRating();
+      renderDetailHeader();
     }
   } catch (err) {
     showNotification('Değerlendirme kaydedilemedi', 'error');
@@ -416,144 +416,167 @@ function renderFormRatingStars() {
   el.innerHTML = html;
 }
 
-function renderViewRating() {
-  if (!viewingArticle) return;
-  const container = document.getElementById('viewRating');
-  container.innerHTML = renderStars(viewingArticle.rating || 0, viewingArticle.id, false)
-    .replace(/setFormRating\((\d)\)/g, `setRating(${viewingArticle.id}, $1)`);
-}
-
 // =====================================================
-// VIEW DRAWER
+// DETAIL PAGE (full page view)
 // =====================================================
 
-async function openViewDrawer(articleId) {
+async function showDetailPage(articleId) {
   viewingArticle = articles.find(a => a.id === articleId);
   if (!viewingArticle) return;
 
-  renderViewRating();
-  renderViewContent();
+  // Hide table, show detail
+  document.getElementById('tableArea').classList.add('hidden');
+  document.getElementById('tableFooter').classList.add('hidden');
+  document.getElementById('detailPage').classList.remove('hidden');
+
+  // Render actions
+  renderDetailActions();
+  renderDetailHeader();
+  renderDetailContent();
   await loadAdvisorNotes(articleId);
 
-  // Show/hide advisor note form based on role
-  const noteForm = document.getElementById('advisorNoteForm');
-  if (canAddNote()) {
-    noteForm.classList.remove('hidden');
-  } else {
-    noteForm.classList.add('hidden');
-  }
+  // Show/hide note form
+  const noteForm = document.getElementById('detailNoteForm');
+  if (canAddNote()) noteForm.classList.remove('hidden');
+  else noteForm.classList.add('hidden');
 
-  // Show admin buttons
-  if (isAdmin()) {
-    document.getElementById('viewEditBtn').classList.remove('hidden');
-    document.getElementById('viewEditBtn').classList.add('flex');
-    document.getElementById('viewDeleteBtn').classList.remove('hidden');
-  } else {
-    document.getElementById('viewEditBtn').classList.add('hidden');
-    document.getElementById('viewDeleteBtn').classList.add('hidden');
-  }
-
-  document.getElementById('viewOverlay').classList.remove('hidden');
-  document.getElementById('viewDrawer').classList.remove('hidden');
-  document.getElementById('viewDrawer').classList.add('flex');
+  // Scroll to top
+  document.getElementById('detailPage').scrollTop = 0;
 }
 
-function closeViewDrawer() {
-  document.getElementById('viewOverlay').classList.add('hidden');
-  document.getElementById('viewDrawer').classList.add('hidden');
-  document.getElementById('viewDrawer').classList.remove('flex');
+function hideDetailPage() {
+  document.getElementById('detailPage').classList.add('hidden');
+  document.getElementById('tableArea').classList.remove('hidden');
+  document.getElementById('tableFooter').classList.remove('hidden');
   viewingArticle = null;
 }
 
-function renderViewContent() {
+function renderDetailActions() {
+  const container = document.getElementById('detailActions');
+  if (!isAdmin()) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <button onclick="if(viewingArticle){openEditModal(viewingArticle.id);}" class="flex items-center justify-center rounded border border-slate-200 h-7 px-3 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors shadow-sm">
+      <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+      Düzenle
+    </button>
+    <button onclick="if(viewingArticle){openDeleteModal(viewingArticle.id);}" class="flex items-center justify-center rounded border border-red-200 h-7 px-3 bg-white text-red-600 text-xs font-medium hover:bg-red-50 transition-colors shadow-sm">
+      <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+      Sil
+    </button>`;
+}
+
+function renderDetailHeader() {
   if (!viewingArticle) return;
   const data = viewingArticle.data || {};
-  const content = document.getElementById('viewContent');
-
+  const header = document.getElementById('detailHeader');
   const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
 
-  // Title + URL header
-  let html = '<div class="pb-4 border-b border-slate-100">';
-  html += `<h2 class="text-2xl font-extrabold text-slate-900 mb-2 leading-tight">${escapeHTML(data.title || 'İsimsiz Makale')}</h2>`;
-  if (data.url) {
-    html += `<a href="${escapeHTML(data.url)}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-blue-600 hover:underline font-medium text-sm bg-blue-50 px-3 py-1.5 rounded-md">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-      Orijinal Kaynağa Git
-    </a>`;
-  }
-  html += '</div>';
+  // Title
+  let html = `<h1 class="text-xl font-bold leading-tight mb-2 text-slate-900">${escapeHTML(data.title || 'İsimsiz Makale')}</h1>`;
 
-  // Metadata grid (short fields)
-  const metaKeys = ['author', 'year', 'status', 'relation', 'section', 'method'];
-  const metaCols = sortedCols.filter(c => metaKeys.includes(c.column_key));
-  if (metaCols.length > 0) {
-    html += '<div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">';
-    metaCols.forEach(col => {
-      const val = data[col.column_key];
-      if (!val) return;
-      html += `<div class="flex flex-col gap-1">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${escapeHTML(col.name)}</span>
-        <div class="text-sm font-medium text-slate-800">${renderCellContent(col, val)}</div>
-      </div>`;
-    });
-    html += '</div>';
+  // Meta line: author, year, URL
+  const metaInline = [];
+  if (data.author) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">Yazar(lar):</span><span class="font-medium text-slate-900">${escapeHTML(data.author)}</span></div>`);
+  if (data.year) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">Yıl:</span><span>${escapeHTML(data.year)}</span></div>`);
+  if (data.url) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">URL:</span><a href="${escapeHTML(data.url)}" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline truncate max-w-[300px]">${escapeHTML(data.url)}</a></div>`);
+  if (metaInline.length > 0) {
+    html += `<div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-600 border-b border-slate-100 pb-3 mb-3">${metaInline.join('')}</div>`;
   }
 
-  // Long text fields + others
-  const skipKeys = ['title', 'url', ...metaKeys];
-  const otherCols = sortedCols.filter(c => !skipKeys.includes(c.column_key));
+  // Badge row
+  const badgeCols = ['status', 'relation', 'section', 'method'];
+  let badges = '';
 
-  html += '<div class="space-y-5 pt-2">';
-  otherCols.forEach(col => {
+  // Rating badge
+  const rating = viewingArticle.rating || 0;
+  let starsHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    const filled = i <= rating;
+    starsHtml += `<svg class="w-3.5 h-3.5 ${filled ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>`;
+  }
+  badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Değerlendirme</span><div class="flex items-center gap-1 text-amber-500"><span class="text-sm font-bold text-slate-900 mr-1">${rating}.0</span>${starsHtml}</div></div>`;
+
+  badgeCols.forEach(key => {
+    const col = sortedCols.find(c => c.column_key === key);
+    const val = data[key];
+    if (!col || !val) return;
+    badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4 last:border-0"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">${escapeHTML(col.name)}</span><div class="text-sm font-medium text-slate-900">${renderCellContent(col, val)}</div></div>`;
+  });
+
+  // Tags
+  if (data.tags) {
+    const tagsCol = sortedCols.find(c => c.column_key === 'tags');
+    if (tagsCol) {
+      badges += `<div class="flex flex-col gap-1"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Etiketler</span><div>${renderCellContent(tagsCol, data.tags)}</div></div>`;
+    }
+  }
+
+  html += `<div class="grid grid-cols-2 md:grid-cols-5 gap-4">${badges}</div>`;
+  header.innerHTML = html;
+}
+
+function renderDetailContent() {
+  if (!viewingArticle) return;
+  const data = viewingArticle.data || {};
+  const container = document.getElementById('detailContent');
+  const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
+  const skipKeys = ['title', 'url', 'author', 'year', 'status', 'relation', 'section', 'tags'];
+  const contentCols = sortedCols.filter(c => !skipKeys.includes(c.column_key));
+
+  let html = '';
+  contentCols.forEach(col => {
     const val = data[col.column_key];
     if (!val) return;
-    const isNotes = col.column_key === 'notes';
-    const wrapClass = isNotes ? 'bg-amber-50/50 p-4 rounded-xl border border-amber-100' : '';
-    const titleClass = isNotes ? 'text-amber-800' : 'text-slate-800';
-    const textClass = isNotes ? 'text-amber-900' : 'text-slate-600';
-
-    html += `<div class="${wrapClass}">
-      <h4 class="text-sm font-bold ${titleClass} mb-2">${escapeHTML(col.name)}</h4>
-      <div class="text-sm leading-relaxed ${textClass}">${col.type === 'multiselect' ? renderCellContent(col, val) : escapeHTML(val)}</div>
+    const isWide = col.type === 'longtext' && (col.column_key === 'summary' || col.column_key === 'findings');
+    const span = isWide ? 'md:col-span-2' : '';
+    html += `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm ${span}">
+      <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500 mb-2">${escapeHTML(col.name)}</h3>
+      <div class="text-slate-700 text-sm leading-snug">${col.type === 'multiselect' ? renderCellContent(col, val) : escapeHTML(val)}</div>
     </div>`;
   });
-  html += '</div>';
 
-  content.innerHTML = html;
+  container.innerHTML = html;
 }
 
 // =====================================================
-// ADVISOR NOTES
+// ADVISOR NOTES (chat-style)
 // =====================================================
 
 async function loadAdvisorNotes(articleId) {
-  const list = document.getElementById('advisorNotesList');
+  const list = document.getElementById('detailNotesList');
   try {
     const notes = await fetchAdvisorNotes(articleId);
     if (notes.length === 0) {
-      list.innerHTML = '<p class="text-xs text-amber-600 italic">Henüz danışman görüşü eklenmemiş.</p>';
+      list.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Henüz görüş eklenmemiş.</p>';
       return;
     }
-    list.innerHTML = notes.map(n => `
-      <div class="bg-white border border-amber-100 rounded-lg p-3 text-sm">
-        <div class="flex justify-between items-start mb-1">
-          <span class="font-semibold text-amber-800 text-xs">${escapeHTML(n.profiles?.display_name || 'Danışman')}</span>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-amber-500">${new Date(n.created_at).toLocaleDateString('tr-TR')}</span>
-            ${(isAdmin() || (currentProfile && n.advisor_id === currentProfile.id)) ? `<button onclick="deleteNote(${n.id}, ${articleId})" class="text-red-400 hover:text-red-600 text-xs">&times;</button>` : ''}
-          </div>
-        </div>
-        <p class="text-slate-700 leading-relaxed">${escapeHTML(n.note)}</p>
-      </div>
-    `).join('');
+    list.innerHTML = notes.reverse().map(n => {
+      const isMe = currentProfile && n.advisor_id === currentProfile.id;
+      const name = n.profiles?.display_name || 'Danışman';
+      const date = new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ', ' + new Date(n.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const deleteBtn = (isAdmin() || isMe) ? `<button onclick="deleteNote(${n.id}, ${articleId})" class="text-slate-300 hover:text-red-500 text-[10px] ml-1">&times;</button>` : '';
+
+      if (isMe) {
+        return `<div class="flex flex-col gap-0.5 items-end">
+          <div class="flex items-center gap-1"><span class="text-[9px] text-slate-400">${date}</span>${deleteBtn}<span class="text-[11px] font-bold text-blue-600">Sen</span></div>
+          <div class="bg-blue-50 border border-blue-100 rounded rounded-tr-none p-2 text-xs text-slate-800 leading-snug max-w-[90%]">${escapeHTML(n.note)}</div>
+        </div>`;
+      }
+      return `<div class="flex flex-col gap-0.5">
+        <div class="flex items-center gap-1"><span class="text-[11px] font-bold text-slate-900">${escapeHTML(name)}</span>${deleteBtn}<span class="text-[9px] text-slate-400">${date}</span></div>
+        <div class="bg-slate-100 rounded rounded-tl-none p-2 text-xs text-slate-700 leading-snug max-w-[90%]">${escapeHTML(n.note)}</div>
+      </div>`;
+    }).join('');
+    // Scroll to bottom
+    list.scrollTop = list.scrollHeight;
   } catch (err) {
-    list.innerHTML = '<p class="text-xs text-red-500">Notlar yüklenemedi.</p>';
+    list.innerHTML = '<p class="text-xs text-red-500 text-center">Notlar yüklenemedi.</p>';
   }
 }
 
 async function saveAdvisorNote() {
   if (!viewingArticle || !canAddNote()) return;
-  const input = document.getElementById('advisorNoteInput');
+  const input = document.getElementById('detailNoteInput');
   const note = input.value.trim();
   if (!note) return;
 
@@ -561,9 +584,9 @@ async function saveAdvisorNote() {
     await createAdvisorNote(viewingArticle.id, currentProfile.id, note);
     input.value = '';
     await loadAdvisorNotes(viewingArticle.id);
-    showNotification('Not eklendi', 'success');
+    showNotification('Görüş eklendi', 'success');
   } catch (err) {
-    showNotification('Not eklenemedi: ' + err.message, 'error');
+    showNotification('Görüş eklenemedi: ' + err.message, 'error');
   }
 }
 
@@ -607,7 +630,6 @@ function openEditModal(articleId) {
   document.getElementById('formSubmitText').textContent = 'Değişiklikleri Kaydet';
   renderFormFields(article.data || {});
   renderFormRatingStars();
-  closeViewDrawer();
   showFormModal();
 }
 
@@ -907,7 +929,7 @@ async function handleDelete() {
     await deleteArticle(articleToDelete.id);
     articles = articles.filter(a => a.id !== articleToDelete.id);
     closeDeleteModal();
-    closeViewDrawer();
+    hideDetailPage();
     renderTable();
     showNotification('Kayıt silindi', 'success');
   } catch (err) {
@@ -1157,18 +1179,11 @@ function setupUIListeners() {
   document.getElementById('btnCancelPaste').addEventListener('click', () => document.getElementById('pasteArea').classList.add('hidden'));
   document.getElementById('btnApplyPaste').addEventListener('click', applyPaste);
 
-  // View drawer
-  document.getElementById('viewClose').addEventListener('click', closeViewDrawer);
-  document.getElementById('viewOverlay').addEventListener('click', closeViewDrawer);
-  document.getElementById('viewEditBtn').addEventListener('click', () => {
-    if (viewingArticle) openEditModal(viewingArticle.id);
-  });
-  document.getElementById('viewDeleteBtn').addEventListener('click', () => {
-    if (viewingArticle) openDeleteModal(viewingArticle.id);
-  });
+  // Detail page
+  document.getElementById('detailBackBtn').addEventListener('click', hideDetailPage);
 
   // Advisor note
-  document.getElementById('btnSaveAdvisorNote').addEventListener('click', saveAdvisorNote);
+  document.getElementById('btnSaveDetailNote').addEventListener('click', saveAdvisorNote);
 
   // Delete modal
   document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
@@ -1199,9 +1214,9 @@ function setupUIListeners() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeFormModal();
-      closeViewDrawer();
       closeColumnManager();
       closeDeleteModal();
+      if (viewingArticle) hideDetailPage();
     }
   });
 }
