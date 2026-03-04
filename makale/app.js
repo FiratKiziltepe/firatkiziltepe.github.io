@@ -688,7 +688,9 @@ function renderFormFields(data) {
     html += '<div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">';
     shortCols.forEach(col => {
       const isTitle = col.column_key === 'title';
-      html += `<div${isTitle ? ' class="col-span-2 sm:col-span-1"' : ''}>
+      const isMulti = col.type === 'multiselect';
+      const spanClass = (isTitle || isMulti) ? ' class="col-span-2"' : '';
+      html += `<div${spanClass}>
         <label class="block text-xs font-semibold text-slate-500 mb-1">${escapeHTML(col.name)}${isTitle ? ' *' : ''}</label>
         ${renderFormInput(col, data[col.column_key])}
       </div>`;
@@ -706,6 +708,7 @@ function renderFormFields(data) {
 
   grid.innerHTML = html;
   renderFormRatingStars();
+  initTagInputs();
 }
 
 function renderFormInput(col, value) {
@@ -721,8 +724,18 @@ function renderFormInput(col, value) {
       opts.forEach(o => { html += `<option value="${escapeHTML(o)}" ${o === v ? 'selected' : ''}>${escapeHTML(o)}</option>`; });
       return html + '</select>';
     }
-    case 'multiselect':
-      return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="Virgülle ayırın..." />`;
+    case 'multiselect': {
+      // Tag chips + input with autocomplete
+      return `<div class="tag-input-container relative border border-slate-200 rounded-lg bg-white p-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all" data-key="${col.column_key}" data-col-key="${col.column_key}">
+        <input type="hidden" data-key="${col.column_key}" value="${escapeHTML(v)}" />
+        <div class="tag-chips flex flex-wrap gap-1 mb-1"></div>
+        <div class="flex items-center gap-1">
+          <input type="text" class="tag-text-input flex-1 border-0 outline-none text-sm px-1 py-0.5 bg-transparent min-w-[120px]" placeholder="Yeni etiket ekle..." autocomplete="off" />
+          <button type="button" class="tag-add-btn shrink-0 w-6 h-6 rounded bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold flex items-center justify-center transition-colors" title="Ekle">+</button>
+        </div>
+        <div class="tag-suggestions hidden absolute left-0 right-0 top-full z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto text-sm"></div>
+      </div>`;
+    }
     case 'url':
       return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="https://..." />`;
     case 'boolean':
@@ -737,10 +750,127 @@ function renderFormInput(col, value) {
   }
 }
 
+// Tüm makalelerden kullanılmış etiketleri topla
+function getAllUsedTags(colKey) {
+  const tagSet = new Set();
+  articles.forEach(a => {
+    const val = a.data?.[colKey];
+    if (val) {
+      String(val).split(',').map(t => t.trim()).filter(Boolean).forEach(t => tagSet.add(t));
+    }
+  });
+  return [...tagSet].sort((a, b) => a.localeCompare(b, 'tr'));
+}
+
+// Tag input bileşenlerini başlat
+function initTagInputs() {
+  document.querySelectorAll('.tag-input-container').forEach(container => {
+    const colKey = container.dataset.colKey;
+    const hiddenInput = container.querySelector('input[type="hidden"]');
+    const chipsDiv = container.querySelector('.tag-chips');
+    const textInput = container.querySelector('.tag-text-input');
+    const addBtn = container.querySelector('.tag-add-btn');
+    const suggestionsDiv = container.querySelector('.tag-suggestions');
+
+    // Mevcut etiketleri parse et
+    let currentTags = hiddenInput.value ? hiddenInput.value.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const allTags = getAllUsedTags(colKey);
+
+    function renderChips() {
+      chipsDiv.innerHTML = currentTags.map(tag =>
+        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs font-medium">
+          ${escapeHTML(tag)}
+          <button type="button" class="tag-remove text-blue-400 hover:text-red-500 text-sm leading-none font-bold" data-tag="${escapeHTML(tag)}">&times;</button>
+        </span>`
+      ).join('');
+      hiddenInput.value = currentTags.join(', ');
+    }
+
+    function addTag(tag) {
+      tag = tag.trim();
+      if (!tag || currentTags.includes(tag)) return;
+      currentTags.push(tag);
+      renderChips();
+      textInput.value = '';
+      hideSuggestions();
+    }
+
+    function removeTag(tag) {
+      currentTags = currentTags.filter(t => t !== tag);
+      renderChips();
+    }
+
+    function showSuggestions(filter) {
+      const q = filter.toLowerCase();
+      const matches = allTags.filter(t => t.toLowerCase().includes(q) && !currentTags.includes(t));
+      if (matches.length === 0 || !q) { hideSuggestions(); return; }
+      suggestionsDiv.innerHTML = matches.slice(0, 10).map(t =>
+        `<div class="tag-suggestion px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-slate-700 transition-colors" data-val="${escapeHTML(t)}">${escapeHTML(t).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<b class="text-blue-600">$1</b>')}</div>`
+      ).join('');
+      suggestionsDiv.classList.remove('hidden');
+    }
+
+    function hideSuggestions() {
+      suggestionsDiv.classList.add('hidden');
+      suggestionsDiv.innerHTML = '';
+    }
+
+    // Event: type in input
+    textInput.addEventListener('input', () => {
+      showSuggestions(textInput.value);
+    });
+
+    // Event: focus shows suggestions
+    textInput.addEventListener('focus', () => {
+      if (textInput.value.trim()) showSuggestions(textInput.value);
+    });
+
+    // Event: click suggestion
+    suggestionsDiv.addEventListener('mousedown', (e) => {
+      const item = e.target.closest('.tag-suggestion');
+      if (item) { addTag(item.dataset.val); }
+    });
+
+    // Event: Enter key to add
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (textInput.value.trim()) addTag(textInput.value);
+      }
+      if (e.key === 'Backspace' && !textInput.value && currentTags.length > 0) {
+        removeTag(currentTags[currentTags.length - 1]);
+      }
+      if (e.key === 'Escape') { hideSuggestions(); }
+    });
+
+    // Event: + button
+    addBtn.addEventListener('click', () => {
+      if (textInput.value.trim()) addTag(textInput.value);
+      textInput.focus();
+    });
+
+    // Event: remove chip
+    chipsDiv.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tag-remove');
+      if (btn) removeTag(btn.dataset.tag);
+    });
+
+    // Event: click outside to hide
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) hideSuggestions();
+    });
+
+    // İlk render
+    renderChips();
+  });
+}
+
 function collectFormData() {
   const data = {};
   document.querySelectorAll('#formGrid [data-key]').forEach(el => {
     const key = el.dataset.key;
+    // Tag container hidden input'ları zaten doğru değere sahip
+    if (el.closest('.tag-input-container') && el.type !== 'hidden') return;
     if (el.type === 'checkbox') {
       data[key] = el.checked;
     } else {
