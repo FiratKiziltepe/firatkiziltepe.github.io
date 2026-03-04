@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('[DEBUG] no session, showing login page');
     }
   } catch (e) {
-    console.error('[DEBUG] Init EXCEPTION:', e);
+    console.error('[DEBUG] Init EXCEPTION:', e?.message || e?.stack || e);
     showLoginPage();
   }
 });

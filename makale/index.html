@@ -251,15 +251,15 @@
 </div>
 <script>
   const _origLog=console.log,_origErr=console.error;
-  function _dbg(t,a){const s=Array.from(a).map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(' ');if(!s.includes('[DEBUG]'))return;const el=document.getElementById('debugLog');if(el){const d=document.createElement('div');d.style.color=t==='error'?'#fca5a5':'#86efac';d.textContent=new Date().toLocaleTimeString()+' '+s;el.appendChild(d);el.parentElement.scrollTop=el.parentElement.scrollHeight;}}
+  function _dbg(t,a){const s=Array.from(a).map(x=>x instanceof Error?(x.message||x.stack||String(x)):typeof x==='object'?JSON.stringify(x):String(x)).join(' ');if(!s.includes('[DEBUG]'))return;const el=document.getElementById('debugLog');if(el){const d=document.createElement('div');d.style.color=t==='error'?'#fca5a5':'#86efac';d.textContent=new Date().toLocaleTimeString()+' '+s;el.appendChild(d);el.parentElement.scrollTop=el.parentElement.scrollHeight;}}
   console.log=function(){_origLog.apply(console,arguments);_dbg('log',arguments);};
   console.error=function(){_origErr.apply(console,arguments);_dbg('error',arguments);};
 </script>
 <!-- #endregion -->
 
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="db.js"></script>
-<script src="auth.js"></script>
-<script src="app.js"></script>
+<script src="db.js?v=20260304"></script>
+<script src="auth.js?v=20260304"></script>
+<script src="app.js?v=20260304"></script>
 </body>
 </html>
