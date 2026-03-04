@@ -173,8 +173,16 @@ function setupAuthListeners() {
 
   document.getElementById('loginModalClose').addEventListener('click', closeLoginModal);
 
+  let loginModalMouseDownTarget = null;
+  document.getElementById('loginModal').addEventListener('mousedown', (e) => {
+    loginModalMouseDownTarget = e.target;
+  });
   document.getElementById('loginModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('loginModal')) closeLoginModal();
+    const modal = document.getElementById('loginModal');
+    if (e.target === modal && loginModalMouseDownTarget === modal) {
+      closeLoginModal();
+    }
+    loginModalMouseDownTarget = null;
   });
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -201,9 +209,19 @@ function setupAuthListeners() {
     }
   });
 
-  document.getElementById('btnLogout').addEventListener('click', async () => {
-    await logout();
+  document.getElementById('btnLogout').addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    currentUser = null;
+    currentProfile = null;
+    updateAuthUI();
+    renderTable();
     showNotification('Çıkış yapıldı', 'info');
+    try {
+      await getSupabase().auth.signOut();
+    } catch (err) {
+      console.error('Logout hatası:', err);
+    }
   });
 
   document.addEventListener('keydown', (e) => {

@@ -20,43 +20,44 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const loadingTimeout = setTimeout(() => {
+    hideLoading();
+    if (articles.length === 0) {
+      showNotification('Bağlantı zaman aşımına uğradı. Sayfayı yenileyin.', 'error');
+    }
+  }, 12000);
+
   try {
     initSupabase();
-  } catch (e) {
-    console.error('Supabase init hatası:', e);
-  }
-
-  try {
     setupUIListeners();
-  } catch (e) {
-    throw e;
-  }
-
-  try {
     setupAuthListeners();
-    await checkSession();
-  } catch (e) {
-    console.error('Auth hatası:', e);
-  }
 
-  await loadData();
+    await Promise.allSettled([
+      checkSession().catch(e => console.error('Auth hatası:', e)),
+      loadData()
+    ]);
+
+    renderTable();
+  } catch (e) {
+    console.error('Init hatası:', e);
+  } finally {
+    clearTimeout(loadingTimeout);
+    hideLoading();
+  }
 });
 
 async function loadData() {
   try {
-    try {
-      columns = await fetchColumns();
-    } catch (err) {
-      console.error('Sütun yükleme hatası:', err);
-      columns = [];
-    }
+    const [colResult, artResult] = await Promise.allSettled([
+      fetchColumns(),
+      fetchArticles()
+    ]);
 
-    try {
-      articles = await fetchArticles();
-    } catch (err) {
-      console.error('Makale yükleme hatası:', err);
-      articles = [];
-    }
+    columns = colResult.status === 'fulfilled' ? colResult.value : [];
+    articles = artResult.status === 'fulfilled' ? artResult.value : [];
+
+    if (colResult.status === 'rejected') console.error('Sütun yükleme hatası:', colResult.reason);
+    if (artResult.status === 'rejected') console.error('Makale yükleme hatası:', artResult.reason);
 
     columns.forEach(c => {
       if (localVisibility[c.column_key] === undefined) {
@@ -67,7 +68,7 @@ async function loadData() {
     renderTable();
 
     if (columns.length === 0) {
-      showNotification('Veritabanı tabloları bulunamadı. schema.sql çalıştırıldığından emin olun.', 'error');
+      showNotification('Veritabanı tabloları bulunamadı.', 'error');
     }
   } catch (err) {
     console.error('Veri yükleme hatası:', err);
@@ -1114,6 +1115,9 @@ function setupUIListeners() {
     renderTable();
   });
 
+  // Excel download
+  document.getElementById('btnExcelDownload').addEventListener('click', downloadExcel);
+
   // Column Manager
   document.getElementById('btnColumnManager').addEventListener('click', openColumnManager);
   document.getElementById('columnManagerClose').addEventListener('click', closeColumnManager);
@@ -1179,6 +1183,48 @@ function setupUIListeners() {
       closeDeleteModal();
     }
   });
+}
+
+// =====================================================
+// EXCEL DOWNLOAD
+// =====================================================
+
+function downloadExcel() {
+  if (typeof XLSX === 'undefined') {
+    showNotification('Excel kütüphanesi yüklenemedi', 'error');
+    return;
+  }
+
+  const processed = getProcessedArticles();
+  const visibleCols = columns
+    .filter(c => localVisibility[c.column_key] !== false)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  const headers = ['Değerlendirme', ...visibleCols.map(c => c.name)];
+
+  const rows = processed.map(article => {
+    const row = [article.rating || 0];
+    visibleCols.forEach(col => {
+      let val = article.data ? article.data[col.column_key] : '';
+      if (Array.isArray(val)) val = val.join(', ');
+      row.push(val || '');
+    });
+    return row;
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  const colWidths = headers.map((h, i) => {
+    let max = h.length;
+    rows.forEach(r => { max = Math.max(max, String(r[i] || '').length); });
+    return { wch: Math.min(max + 2, 50) };
+  });
+  ws['!cols'] = colWidths;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Makaleler');
+  XLSX.writeFile(wb, `makaleler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  showNotification(`${processed.length} makale Excel olarak indirildi`, 'success');
 }
 
 // =====================================================
