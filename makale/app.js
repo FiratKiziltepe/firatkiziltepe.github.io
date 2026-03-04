@@ -20,9 +20,6 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H1',location:'app.js:DOMContentLoaded',message:'DOMContentLoaded started',data:{readyState:document.readyState},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   try {
     initSupabase();
   } catch (e) {
@@ -32,36 +29,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     setupUIListeners();
   } catch (e) {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H1',location:'app.js:setupUIListeners',message:'setupUIListeners threw',data:{error:String(e&&e.message||e)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     throw e;
   }
 
   try {
     setupAuthListeners();
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H3',location:'app.js:authBootstrap',message:'before checkSession',data:{},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     await checkSession();
   } catch (e) {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H3',location:'app.js:authBootstrap',message:'auth bootstrap failed',data:{error:String(e&&e.message||e)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     console.error('Auth hatası:', e);
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:beforeLoadData',message:'calling loadData',data:{},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   await loadData();
 });
 
 async function loadData() {
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:start',message:'loadData started',data:{},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     try {
       columns = await fetchColumns();
     } catch (err) {
@@ -75,9 +57,6 @@ async function loadData() {
       console.error('Makale yükleme hatası:', err);
       articles = [];
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'post-fix',hypothesisId:'H4',location:'app.js:loadData:results',message:'loadData sequential done',data:{columnsCount:columns.length,articlesCount:articles.length},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
 
     columns.forEach(c => {
       if (localVisibility[c.column_key] === undefined) {
@@ -91,15 +70,9 @@ async function loadData() {
       showNotification('Veritabanı tabloları bulunamadı. schema.sql çalıştırıldığından emin olun.', 'error');
     }
   } catch (err) {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:catch',message:'loadData catch',data:{error:String(err&&err.message||err)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     console.error('Veri yükleme hatası:', err);
     showNotification('Veri yüklenirken hata: ' + (err.message || err), 'error');
   } finally {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:loadData:finally',message:'loadData finally -> hideLoading',data:{},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     hideLoading();
   }
 }
@@ -107,9 +80,6 @@ async function loadData() {
 function hideLoading() {
   const el = document.getElementById('loadingState');
   if (el) el.classList.add('hidden');
-  // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/b023c46a-511c-4c17-9776-da716466e988',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6c9bb1'},body:JSON.stringify({sessionId:'6c9bb1',runId:'run1',hypothesisId:'H4',location:'app.js:hideLoading',message:'hideLoading invoked',data:{hasElement:!!el,isHidden:!!(el&&el.classList.contains('hidden'))},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
 }
 
 function onAuthChange() {
@@ -589,6 +559,10 @@ async function deleteNote(noteId, articleId) {
 // =====================================================
 
 function openAddModal() {
+  if (!canWrite()) {
+    showNotification('Kayıt eklemek için yönetici girişi gerekli', 'error');
+    return;
+  }
   editingArticleId = null;
   formRating = 0;
   document.getElementById('formTitle').textContent = 'Yeni Kayıt Oluştur';
@@ -599,6 +573,10 @@ function openAddModal() {
 }
 
 function openEditModal(articleId) {
+  if (!canWrite()) {
+    showNotification('Kayıt düzenlemek için yönetici girişi gerekli', 'error');
+    return;
+  }
   const article = articles.find(a => a.id === articleId);
   if (!article) return;
   editingArticleId = articleId;
@@ -707,12 +685,17 @@ function collectFormData() {
 
 async function handleFormSubmit(e) {
   e.preventDefault();
+  if (!canWrite()) {
+    showNotification('Kaydetmek için yönetici girişi gerekli', 'error');
+    return;
+  }
   const data = collectFormData();
   const submitBtn = e.target.querySelector('[type="submit"]');
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Kaydediliyor...';
+    const s = submitBtn.querySelector('span');
+    if (s) s.textContent = 'Kaydediliyor...';
   }
 
   try {
@@ -730,7 +713,11 @@ async function handleFormSubmit(e) {
     renderTable();
   } catch (err) {
     console.error('Form submit error:', err);
-    showNotification('Kayıt hatası: ' + (err.message || 'Bilinmeyen hata'), 'error');
+    const errMsg = String(err?.message || '');
+    const readable = (err?.code === 'PGRST116' || errMsg.includes('0 rows'))
+      ? 'Güncelleme yetkisi yok veya kayıt bulunamadı'
+      : ('Kayıt hatası: ' + (err.message || 'Bilinmeyen hata'));
+    showNotification(readable, 'error');
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
