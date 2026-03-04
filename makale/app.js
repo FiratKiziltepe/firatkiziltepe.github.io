@@ -20,49 +20,31 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // #region agent log
   console.log('[DEBUG] DOMContentLoaded fired');
-  // #endregion
-  const loadingTimeout = setTimeout(() => {
-    // #region agent log
-    console.log('[DEBUG] TIMEOUT: 15s elapsed, force hideLoading');
-    // #endregion
-    hideLoading();
-    if (articles.length === 0) {
-      showNotification('Bağlantı zaman aşımına uğradı. Sayfayı yenileyin.', 'error');
-    }
-  }, 15000);
 
   try {
     const client = initSupabase();
-    // #region agent log
     console.log('[DEBUG] initSupabase:', { hasClient: !!client });
-    // #endregion
     setupUIListeners();
     setupAuthListeners();
 
-    // #region agent log
-    console.log('[DEBUG] about to checkSession');
-    // #endregion
-    await Promise.race([
-      checkSession(),
-      new Promise(resolve => setTimeout(() => resolve(false), 5000))
-    ]).catch(e => console.error('Auth hatası:', e));
+    console.log('[DEBUG] checking session...');
+    const hasSession = await checkSession();
+    console.log('[DEBUG] checkSession done', { hasSession, hasUser: !!currentUser });
 
-    // #region agent log
-    console.log('[DEBUG] checkSession done, hasUser:', !!currentUser);
-    // #endregion
-    await loadData();
-    // #region agent log
-    console.log('[DEBUG] init complete', { columns: columns.length, articles: articles.length });
-    // #endregion
+    if (hasSession && currentUser) {
+      updateAuthUI();
+      showApp();
+      showLoading();
+      await loadData();
+      console.log('[DEBUG] init complete with session', { columns: columns.length, articles: articles.length });
+    } else {
+      showLoginPage();
+      console.log('[DEBUG] no session, showing login page');
+    }
   } catch (e) {
-    // #region agent log
     console.error('[DEBUG] Init EXCEPTION:', e);
-    // #endregion
-  } finally {
-    clearTimeout(loadingTimeout);
-    hideLoading();
+    showLoginPage();
   }
 });
 
@@ -110,9 +92,14 @@ async function loadData() {
   }
 }
 
+function showLoading() {
+  const el = document.getElementById('loadingState');
+  if (el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+}
+
 function hideLoading() {
   const el = document.getElementById('loadingState');
-  if (el) el.classList.add('hidden');
+  if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
 }
 
 function onAuthChange() {
