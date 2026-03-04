@@ -318,6 +318,30 @@
   </div>
 </div>
 
+<!-- #region agent log -->
+<div id="debugPanel" style="position:fixed;bottom:0;left:0;right:0;max-height:150px;overflow-y:auto;background:#1e293b;color:#86efac;font-family:monospace;font-size:11px;padding:6px 10px;z-index:9999;display:block;">
+  <strong style="color:#fbbf24;">DEBUG LOG:</strong>
+  <div id="debugLog"></div>
+</div>
+<script>
+  const _origLog = console.log;
+  const _origErr = console.error;
+  function _dbg(type, args) {
+    const s = Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+    if (!s.includes('[DEBUG]')) return;
+    const el = document.getElementById('debugLog');
+    if (el) {
+      const d = document.createElement('div');
+      d.style.color = type === 'error' ? '#fca5a5' : '#86efac';
+      d.textContent = new Date().toLocaleTimeString() + ' ' + s;
+      el.appendChild(d);
+      el.parentElement.scrollTop = el.parentElement.scrollHeight;
+    }
+  }
+  console.log = function() { _origLog.apply(console, arguments); _dbg('log', arguments); };
+  console.error = function() { _origErr.apply(console, arguments); _dbg('error', arguments); };
+</script>
+<!-- #endregion -->
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="db.js"></script>
 <script src="auth.js"></script>

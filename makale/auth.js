@@ -7,15 +7,11 @@ let currentProfile = null;
 
 async function login(email, password) {
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:login-start',message:'login() called',data:{email},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+  console.log('[DEBUG] login() called', { email });
   // #endregion
-  const client = getSupabase();
+  const { data, error } = await getSupabase().auth.signInWithPassword({ email, password });
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:login-client',message:'getSupabase result',data:{hasClient:!!client},timestamp:Date.now(),hypothesisId:'H5'})}).catch(()=>{});
-  // #endregion
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
-  // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:login-after-signin',message:'signInWithPassword result',data:{hasData:!!data,hasUser:!!data?.user,errorMsg:error?.message||null},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
+  console.log('[DEBUG] signInWithPassword result', { hasData: !!data, hasUser: !!data?.user, error: error?.message });
   // #endregion
   if (error) {
     if (error.message.includes('Invalid login credentials')) throw new Error('E-posta veya şifre hatalı');
@@ -23,11 +19,11 @@ async function login(email, password) {
   }
   currentUser = data.user;
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:login-before-profile',message:'about to loadProfile',data:{userId:currentUser?.id},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+  console.log('[DEBUG] login: about to loadProfile');
   // #endregion
   await loadProfile();
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:login-after-profile',message:'loadProfile done',data:{profile:currentProfile?.role},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+  console.log('[DEBUG] login: loadProfile done', { role: currentProfile?.role });
   // #endregion
   updateAuthUI();
   return { user: currentUser, profile: currentProfile };
@@ -42,10 +38,16 @@ async function logout() {
 }
 
 async function checkSession() {
+  // #region agent log
+  console.log('[DEBUG] checkSession start');
+  // #endregion
   try {
     const client = getSupabase();
-    if (!client) return false;
+    if (!client) { console.log('[DEBUG] checkSession: no client'); return false; }
     const { data: { session } } = await withLockRetry('checkSession', () => client.auth.getSession());
+    // #region agent log
+    console.log('[DEBUG] checkSession result', { hasSession: !!session });
+    // #endregion
     if (session) {
       currentUser = session.user;
       await loadProfile();
@@ -55,7 +57,7 @@ async function checkSession() {
     updateAuthUI();
     return false;
   } catch (e) {
-    console.error('Oturum kontrol hatası:', e);
+    console.error('[DEBUG] checkSession error:', e);
     updateAuthUI();
     return false;
   }
@@ -64,26 +66,15 @@ async function checkSession() {
 async function loadProfile() {
   if (!currentUser) return null;
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:loadProfile-start',message:'loadProfile query start',data:{userId:currentUser.id},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+  console.log('[DEBUG] loadProfile start', { userId: currentUser.id });
   // #endregion
-  let data, error;
-  try {
-    const result = await withLockRetry('loadProfile', async () => getSupabase()
-      .from('profiles')
-      .select('*')
-      .eq('id', currentUser.id)
-      .single());
-    data = result.data;
-    error = result.error;
-  } catch (e) {
-    // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:loadProfile-exception',message:'loadProfile threw exception',data:{error:e?.message||String(e)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
-    error = e;
-    data = null;
-  }
+  const { data, error } = await withLockRetry('loadProfile', async () => getSupabase()
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single());
   // #region agent log
-  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:loadProfile-result',message:'loadProfile query done',data:{hasData:!!data,errorMsg:error?.message||null,role:data?.role},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+  console.log('[DEBUG] loadProfile result', { hasData: !!data, error: error?.message, role: data?.role });
   // #endregion
 
   if (error || !data) {
@@ -188,26 +179,17 @@ function setupAuthListeners() {
 
   client.auth.onAuthStateChange(async (event, session) => {
     // #region agent log
-    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:onAuthStateChange',message:'auth state changed',data:{event,hasSession:!!session},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+    console.log('[DEBUG] onAuthStateChange', { event, hasSession: !!session });
     // #endregion
     if (event === 'SIGNED_IN') {
       currentUser = session.user;
-      // #region agent log
-      fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:onAuth-SIGNED_IN-beforeProfile',message:'SIGNED_IN: about to loadProfile',data:{userId:session.user?.id},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       await loadProfile();
-      // #region agent log
-      fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:onAuth-SIGNED_IN-afterProfile',message:'SIGNED_IN: loadProfile done, about to loadData',data:{profile:currentProfile?.role},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       updateAuthUI();
       if (typeof loadData === 'function') {
         const ls = document.getElementById('loadingState');
         if (ls) ls.classList.remove('hidden');
         await loadData();
       }
-      // #region agent log
-      fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'auth.js:onAuth-SIGNED_IN-done',message:'SIGNED_IN: all done',data:{},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
@@ -254,6 +236,9 @@ function setupAuthListeners() {
       closeLoginModal();
       showNotification('Giriş başarılı!', 'success');
     } catch (err) {
+      // #region agent log
+      console.error('[DEBUG] login form error:', err);
+      // #endregion
       errorEl.textContent = err.message || 'Giriş yapılamadı';
       errorEl.classList.remove('hidden');
     } finally {
