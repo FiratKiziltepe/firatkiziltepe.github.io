@@ -471,23 +471,36 @@ function renderDetailHeader() {
   const header = document.getElementById('detailHeader');
   const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
 
-  // Title
-  let html = `<h1 class="text-xl font-bold leading-tight mb-2 text-slate-900">${escapeHTML(data.title || 'İsimsiz Makale')}</h1>`;
+  // Başlık: 'title' key'li sütun veya ilk text sütun
+  const titleCol = sortedCols.find(c => c.column_key === 'title') || sortedCols.find(c => c.type === 'text');
+  const titleVal = titleCol ? (data[titleCol.column_key] || '') : '';
+  let html = `<h1 class="text-xl font-bold leading-tight mb-2 text-slate-900">${escapeHTML(titleVal || 'İsimsiz Makale')}</h1>`;
 
-  // Meta line: author, year, URL
+  // Meta satırı: URL sütunları + kısa text sütunları (title hariç, ilk 4 tanesi)
+  const urlCols = sortedCols.filter(c => c.type === 'url');
+  const shortTextCols = sortedCols.filter(c => c.type === 'text' && c !== titleCol);
   const metaInline = [];
-  if (data.author) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">Yazar(lar):</span><span class="font-medium text-slate-900">${escapeHTML(data.author)}</span></div>`);
-  if (data.year) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">Yıl:</span><span>${escapeHTML(data.year)}</span></div>`);
-  if (data.url) metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">URL:</span><a href="${escapeHTML(data.url)}" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline truncate max-w-[300px]">${escapeHTML(data.url)}</a></div>`);
+
+  shortTextCols.slice(0, 4).forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+    metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">${escapeHTML(col.name)}:</span><span class="font-medium text-slate-900">${escapeHTML(val)}</span></div>`);
+  });
+  urlCols.forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+    metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">${escapeHTML(col.name)}:</span><a href="${escapeHTML(val)}" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline truncate max-w-[300px]">${escapeHTML(val)}</a></div>`);
+  });
   if (metaInline.length > 0) {
     html += `<div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-600 border-b border-slate-100 pb-3 mb-3">${metaInline.join('')}</div>`;
   }
 
-  // Badge row
-  const badgeCols = ['status', 'relation', 'section', 'method'];
+  // Badge satırı: Değerlendirme + select/multiselect/boolean/date sütunları
+  const badgeTypes = ['select', 'multiselect', 'boolean', 'date'];
+  const badgeCols = sortedCols.filter(c => badgeTypes.includes(c.type));
   let badges = '';
 
-  // Rating badge
+  // Değerlendirme (rating)
   const rating = viewingArticle.rating || 0;
   let starsHtml = '';
   for (let i = 1; i <= 5; i++) {
@@ -496,22 +509,22 @@ function renderDetailHeader() {
   }
   badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Değerlendirme</span><div class="flex items-center gap-1 text-amber-500"><span class="text-sm font-bold text-slate-900 mr-1">${rating}.0</span>${starsHtml}</div></div>`;
 
-  badgeCols.forEach(key => {
-    const col = sortedCols.find(c => c.column_key === key);
-    const val = data[key];
-    if (!col || !val) return;
+  badgeCols.forEach(col => {
+    const val = data[col.column_key];
+    if (val === undefined || val === null || val === '') return;
     badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4 last:border-0"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">${escapeHTML(col.name)}</span><div class="text-sm font-medium text-slate-900">${renderCellContent(col, val)}</div></div>`;
   });
 
-  // Tags
-  if (data.tags) {
-    const tagsCol = sortedCols.find(c => c.column_key === 'tags');
-    if (tagsCol) {
-      badges += `<div class="flex flex-col gap-1"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Etiketler</span><div>${renderCellContent(tagsCol, data.tags)}</div></div>`;
-    }
-  }
+  // Kalan kısa text sütunları (meta'da gösterilmeyen 4+)
+  shortTextCols.slice(4).forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+    badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4 last:border-0"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">${escapeHTML(col.name)}</span><div class="text-sm font-medium text-slate-900">${escapeHTML(val)}</div></div>`;
+  });
 
-  html += `<div class="grid grid-cols-2 md:grid-cols-5 gap-4">${badges}</div>`;
+  const badgeCount = (badges.match(/<div class="flex flex-col/g) || []).length;
+  const gridCols = badgeCount <= 3 ? 'md:grid-cols-3' : badgeCount <= 5 ? 'md:grid-cols-5' : 'md:grid-cols-6';
+  html += `<div class="grid grid-cols-2 ${gridCols} gap-4">${badges}</div>`;
   header.innerHTML = html;
 }
 
@@ -520,18 +533,28 @@ function renderDetailContent() {
   const data = viewingArticle.data || {};
   const container = document.getElementById('detailContent');
   const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
-  const skipKeys = ['title', 'url', 'author', 'year', 'status', 'relation', 'section', 'tags'];
-  const contentCols = sortedCols.filter(c => !skipKeys.includes(c.column_key));
+
+  // İçerik kartları: sadece longtext sütunları (başlık hariç, badge'de gösterilenler hariç)
+  const contentCols = sortedCols.filter(c => c.type === 'longtext');
 
   let html = '';
   contentCols.forEach(col => {
     const val = data[col.column_key];
     if (!val) return;
-    const isWide = col.type === 'longtext' && (col.column_key === 'summary' || col.column_key === 'findings');
+
+    // İçerik uzunluğuna göre genişlik: 200+ karakter → tam genişlik
+    const isWide = String(val).length > 200;
     const span = isWide ? 'md:col-span-2' : '';
-    html += `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm ${span}">
-      <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500 mb-2">${escapeHTML(col.name)}</h3>
-      <div class="text-slate-700 text-sm leading-snug">${col.type === 'multiselect' ? renderCellContent(col, val) : escapeHTML(val)}</div>
+
+    // "notes" sütunu özel sarımsı arka plan
+    const isNotes = col.column_key === 'notes';
+    const cardBg = isNotes ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200';
+    const titleColor = isNotes ? 'text-amber-700' : 'text-slate-500';
+    const textColor = isNotes ? 'text-amber-900' : 'text-slate-700';
+
+    html += `<div class="${cardBg} border rounded-lg p-4 shadow-sm ${span}">
+      <h3 class="text-sm font-bold uppercase tracking-wide ${titleColor} mb-2">${escapeHTML(col.name)}</h3>
+      <div class="${textColor} text-sm leading-snug whitespace-pre-line">${escapeHTML(val)}</div>
     </div>`;
   });
 
