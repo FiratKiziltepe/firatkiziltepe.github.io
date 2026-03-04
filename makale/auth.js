@@ -158,10 +158,18 @@ function setupAuthListeners() {
       currentUser = session.user;
       await loadProfile();
       updateAuthUI();
+      if (typeof loadData === 'function') {
+        const ls = document.getElementById('loadingState');
+        if (ls) ls.classList.remove('hidden');
+        await loadData();
+      }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
       updateAuthUI();
+      if (typeof loadData === 'function') {
+        await loadData();
+      }
     }
   });
 

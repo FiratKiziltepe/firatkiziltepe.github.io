@@ -25,19 +25,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (articles.length === 0) {
       showNotification('Bağlantı zaman aşımına uğradı. Sayfayı yenileyin.', 'error');
     }
-  }, 12000);
+  }, 15000);
 
   try {
     initSupabase();
     setupUIListeners();
     setupAuthListeners();
 
-    await Promise.allSettled([
-      checkSession().catch(e => console.error('Auth hatası:', e)),
-      loadData()
-    ]);
+    await Promise.race([
+      checkSession(),
+      new Promise(resolve => setTimeout(() => resolve(false), 5000))
+    ]).catch(e => console.error('Auth hatası:', e));
 
-    renderTable();
+    await loadData();
   } catch (e) {
     console.error('Init hatası:', e);
   } finally {
@@ -164,8 +164,24 @@ function renderTable() {
 
   if (!table || !empty) return;
 
+  if (columns.length === 0 && articles.length === 0) {
+    table.classList.add('hidden');
+    empty.innerHTML = `
+      <svg class="w-12 h-12 text-red-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+      <p class="text-lg font-medium text-red-500">Veritabanı bağlantısı kurulamadı</p>
+      <p class="text-sm mt-1">Supabase bağlantısını veya RLS ayarlarını kontrol edin.</p>
+      <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">Yeniden Dene</button>`;
+    empty.classList.remove('hidden');
+    empty.classList.add('flex');
+    return;
+  }
+
   if (processed.length === 0) {
     table.classList.add('hidden');
+    empty.innerHTML = `
+      <svg class="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+      <p class="text-lg font-medium">Kayıt bulunamadı</p>
+      <p class="text-sm mt-1">Arama kriterlerini değiştirin veya yeni bir kayıt ekleyin.</p>`;
     empty.classList.remove('hidden');
     empty.classList.add('flex');
     return;
