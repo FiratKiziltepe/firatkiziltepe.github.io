@@ -20,6 +20,9 @@ let localVisibility = {};
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // #region agent log
+  fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'app.js:init-start',message:'DOMContentLoaded fired',data:{},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
+  // #endregion
   const loadingTimeout = setTimeout(() => {
     hideLoading();
     if (articles.length === 0) {
@@ -28,16 +31,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 15000);
 
   try {
-    initSupabase();
+    const client = initSupabase();
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'app.js:init-supabase',message:'initSupabase result',data:{hasClient:!!client},timestamp:Date.now(),hypothesisId:'H5'})}).catch(()=>{});
+    // #endregion
     setupUIListeners();
     setupAuthListeners();
 
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'app.js:init-before-session',message:'about to checkSession',data:{},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
+    // #endregion
     await Promise.race([
       checkSession(),
       new Promise(resolve => setTimeout(() => resolve(false), 5000))
     ]).catch(e => console.error('Auth hatası:', e));
 
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'app.js:init-after-session',message:'checkSession done, about to loadData',data:{hasUser:!!currentUser},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
+    // #endregion
     await loadData();
+    // #region agent log
+    fetch('http://127.0.0.1:7920/ingest/49da3808-6d89-4221-81e0-7d70b67e2148',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'93f0e9'},body:JSON.stringify({sessionId:'93f0e9',location:'app.js:init-done',message:'init complete',data:{columnsCount:columns.length,articlesCount:articles.length},timestamp:Date.now(),hypothesisId:'H4'})}).catch(()=>{});
+    // #endregion
   } catch (e) {
     console.error('Init hatası:', e);
   } finally {
