@@ -79,15 +79,30 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 220px;
     }
 
+    /* --- Column widths by type --- */
     td.cell-title {
-      max-width: 180px;
+      min-width: 220px;
+      max-width: 280px;
     }
 
     td.cell-long {
+      min-width: 180px;
+      max-width: 250px;
+    }
+
+    td.cell-tag {
+      overflow: visible;
+      white-space: normal;
+      min-width: 120px;
       max-width: 200px;
+    }
+
+    td.cell-badge {
+      overflow: visible;
+      max-width: none;
+      white-space: nowrap;
     }
 
     td.cell-action {
@@ -101,15 +116,75 @@
       max-width: none;
     }
 
-    td.cell-tag {
-      overflow: visible;
-      white-space: normal;
-      max-width: 180px;
+    td.cell-url {
+      min-width: 100px;
+      max-width: 160px;
     }
 
-    td.cell-badge {
-      overflow: visible;
-      max-width: none;
+    td.cell-text {
+      min-width: 80px;
+      max-width: 160px;
+    }
+
+    /* --- Expand (full content) mode --- */
+    .expand-mode td {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      max-width: none !important;
+    }
+
+    .expand-mode td.cell-long {
+      min-width: 300px;
+    }
+
+    .expand-mode td.cell-title {
+      min-width: 250px;
+    }
+
+    /* --- Sticky columns: rating + title --- */
+    .sticky-col-rating {
+      position: sticky;
+      left: 0;
+      z-index: 11;
+      background: inherit;
+    }
+
+    .sticky-col-title {
+      position: sticky;
+      left: 64px;
+      /* width of rating col */
+      z-index: 11;
+      background: inherit;
+    }
+
+    thead .sticky-col-rating,
+    thead .sticky-col-title {
+      z-index: 22;
+      background: rgb(248 250 252);
+      /* bg-slate-50 */
+    }
+
+    tbody tr .sticky-col-rating,
+    tbody tr .sticky-col-title {
+      background: white;
+    }
+
+    tbody tr:hover .sticky-col-rating,
+    tbody tr:hover .sticky-col-title {
+      background: rgb(248 250 252);
+      /* hover:bg-slate-50 */
+    }
+
+    .sticky-col-title::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+      pointer-events: none;
     }
   </style>
 </head>
@@ -203,6 +278,14 @@
               <path d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25H12" />
             </svg>
           </button>
+          <div class="w-px bg-slate-300 mx-0.5"></div>
+          <button id="btnExpandContent" class="p-1 rounded text-slate-500 transition-colors hover:bg-slate-200"
+            title="Tüm İçeriği Göster">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path
+                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>
+          </button>
         </div>
 
         <button id="btnExcelDownload"
@@ -263,7 +346,7 @@
           <p class="text-sm text-slate-500">Veriler yükleniyor...</p>
         </div>
       </div>
-      <table id="mainTable" class="w-full text-left border-collapse hidden">
+      <table id="mainTable" class="min-w-full text-left border-collapse hidden">
         <thead id="tableHead"
           class="bg-slate-50 text-slate-500 text-[11px] font-semibold sticky top-0 z-20 border-b border-slate-200">
         </thead>

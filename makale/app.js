@@ -5,6 +5,7 @@
 let columns = [];
 let articles = [];
 let density = 'md';
+let expandContent = false;
 let sortKey = null;
 let sortDir = 'asc';
 let searchQuery = '';
@@ -213,8 +214,16 @@ function renderTable() {
   const dc = getDensityClasses();
   let headHTML = '<tr>';
 
-  // Rating column
-  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center w-16" onclick="handleSort('rating')">
+  // Expand mode class
+  const tableEl = document.getElementById('mainTable');
+  if (expandContent) tableEl.classList.add('expand-mode');
+  else tableEl.classList.remove('expand-mode');
+
+  // Find title column for sticky
+  const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
+
+  // Rating column (sticky)
+  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center w-16 sticky-col-rating" onclick="handleSort('rating')">
     <div class="flex items-center justify-center gap-0.5">
       <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"/></svg>
       ${sortKey === 'rating' ? `<span class="text-[9px] text-blue-500">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : ''}
@@ -223,7 +232,8 @@ function renderTable() {
 
   visibleCols.forEach(col => {
     const sortIcon = sortKey === col.column_key ? `<span class="text-[9px] text-blue-500 ml-0.5">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : '';
-    headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none" onclick="handleSort('${col.column_key}')">
+    const stickyClass = col.column_key === titleColKey ? 'sticky-col-title' : '';
+    headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none ${stickyClass}" onclick="handleSort('${col.column_key}')">
       <div class="flex items-center">${escapeHTML(col.name)}${sortIcon}</div>
     </th>`;
   });
@@ -241,13 +251,14 @@ function renderTable() {
   processed.forEach(article => {
     bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="showDetailPage(${article.id})">`;
 
-    // Rating cell
-    bodyHTML += `<td class="${dc} cell-rating align-middle text-center">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
+    // Rating cell (sticky)
+    bodyHTML += `<td class="${dc} cell-rating align-middle text-center sticky-col-rating">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
 
     visibleCols.forEach(col => {
       const val = article.data ? article.data[col.column_key] : '';
       const cellClass = getCellClass(col);
-      bodyHTML += `<td class="${dc} ${cellClass} align-middle">${renderCellContent(col, val)}</td>`;
+      const stickyClass = col.column_key === titleColKey ? 'sticky-col-title' : '';
+      bodyHTML += `<td class="${dc} ${cellClass} ${stickyClass} align-middle">${renderCellContent(col, val)}</td>`;
     });
 
     if (isAdmin()) {
@@ -286,7 +297,10 @@ function getCellClass(col) {
     case 'longtext': return 'cell-long';
     case 'multiselect': return 'cell-tag';
     case 'select': return 'cell-badge';
-    default: return col.column_key === 'title' ? 'cell-title font-medium text-slate-800' : '';
+    case 'url': return 'cell-url';
+    case 'date': return 'cell-text';
+    case 'boolean': return 'cell-badge';
+    default: return col.column_key === 'title' ? 'cell-title font-medium text-slate-800' : 'cell-text';
   }
 }
 
@@ -327,8 +341,8 @@ function renderCellContent(col, value) {
 
   switch (col.type) {
     case 'url':
-      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs truncate block max-w-[120px]" title="${escapeHTML(value)}">
-        ${escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '').substring(0, 25)}...
+      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs truncate block" title="${escapeHTML(value)}">
+        ${escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '')}
       </a>`;
 
     case 'select': {
@@ -1342,6 +1356,21 @@ function setupUIListeners() {
   document.getElementById('headerLogo').addEventListener('click', () => {
     if (viewingArticle) hideDetailPage();
   });
+
+  // Expand content toggle
+  document.getElementById('btnExpandContent').addEventListener('click', () => {
+    expandContent = !expandContent;
+    const btn = document.getElementById('btnExpandContent');
+    if (expandContent) {
+      btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+      btn.classList.remove('text-slate-500');
+    } else {
+      btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+      btn.classList.add('text-slate-500');
+    }
+    renderTable();
+  });
+
   // Column Manager
   document.getElementById('btnColumnManager').addEventListener('click', openColumnManager);
   document.getElementById('columnManagerClose').addEventListener('click', closeColumnManager);
