@@ -99,7 +99,24 @@
       vertical-align: top !important;
       word-wrap: break-word;
       overflow-wrap: break-word;
+      min-width: 100px;
       max-width: 400px;
+    }
+
+    .expand-mode td.cell-title {
+      min-width: 200px;
+    }
+
+    .expand-mode td.cell-long {
+      min-width: 200px;
+    }
+
+    .expand-mode td.cell-url {
+      min-width: 150px;
+    }
+
+    .expand-mode td.cell-text {
+      min-width: 80px;
     }
 
     .expand-mode td * {
@@ -116,6 +133,7 @@
       white-space: nowrap !important;
       vertical-align: middle !important;
       max-width: none;
+      min-width: auto;
     }
 
     /* --- Sticky columns: rating + title --- */
