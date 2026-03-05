@@ -71,24 +71,16 @@
       }
     }
 
-    #mainTable {
-      table-layout: fixed;
+    th {
+      white-space: nowrap;
     }
 
-    /* --- Base: expand mode is default --- */
     td {
       white-space: normal;
-      overflow: hidden;
-      text-overflow: ellipsis;
       vertical-align: top;
       word-wrap: break-word;
       overflow-wrap: break-word;
-    }
-
-    th {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 400px;
     }
 
     td.cell-badge,
@@ -97,6 +89,7 @@
       overflow: visible;
       white-space: nowrap;
       vertical-align: middle;
+      max-width: none;
     }
 
     td.cell-tag {
@@ -106,32 +99,6 @@
 
     td.cell-url a {
       word-break: break-all;
-    }
-
-    /* --- Compact mode (when expand is OFF) --- */
-    .compact-mode td {
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      vertical-align: middle !important;
-    }
-
-    .compact-mode td * {
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-    }
-
-    .compact-mode td.cell-badge,
-    .compact-mode td.cell-action,
-    .compact-mode td.cell-rating {
-      overflow: visible !important;
-    }
-
-    .compact-mode td.cell-tag,
-    .compact-mode td.cell-tag * {
-      white-space: normal !important;
-      overflow: visible !important;
     }
 
     /* --- Sticky columns: rating + title --- */

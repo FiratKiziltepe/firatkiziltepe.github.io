@@ -237,92 +237,6 @@ function updateTagFilterBadge() {
 
 
 // =====================================================
-// DYNAMIC COLUMN WIDTHS
-// =====================================================
-
-function calculateColumnWidths(visibleCols, articlesData, isExpanded) {
-  const widths = {};
-
-  if (!isExpanded) {
-    // ---- COMPACT MODE: sabit genişlikler (sütun tipine göre) ----
-    visibleCols.forEach(col => {
-      const key = col.column_key;
-      switch (col.type) {
-        case 'longtext': widths[key] = 160; break;
-        case 'url': widths[key] = 130; break;
-        case 'select': widths[key] = 100; break;
-        case 'multiselect': widths[key] = 120; break;
-        case 'boolean': widths[key] = 60; break;
-        case 'date': widths[key] = 90; break;
-        case 'rating': widths[key] = 60; break;
-        default:
-          widths[key] = (key === 'title') ? 180 : 100;
-      }
-    });
-    return widths;
-  }
-
-  // ---- EXPAND MODE: içerik uzunluğuna göre dinamik ----
-  const PX_PER_CHAR = 7;
-
-  visibleCols.forEach(col => {
-    const key = col.column_key;
-    let totalLen = 0;
-    let maxLen = 0;
-    let count = 0;
-
-    articlesData.forEach(a => {
-      const val = a.data?.[key];
-      if (val !== undefined && val !== null && val !== '') {
-        const len = String(val).length;
-        totalLen += len;
-        if (len > maxLen) maxLen = len;
-        count++;
-      }
-    });
-
-    const avgLen = count > 0 ? totalLen / count : col.name.length;
-    if (maxLen === 0) maxLen = col.name.length;
-
-    // Weighted: 60% average + 40% max
-    const effectiveLen = avgLen * 0.6 + maxLen * 0.4;
-    let rawWidth = Math.ceil(effectiveLen * PX_PER_CHAR);
-
-    // Type-based min/max clamps
-    switch (col.type) {
-      case 'longtext':
-        rawWidth = Math.max(120, Math.min(rawWidth, 500));
-        break;
-      case 'url':
-        rawWidth = Math.max(100, Math.min(rawWidth, 220));
-        break;
-      case 'select':
-        rawWidth = Math.max(70, Math.min(rawWidth, 130));
-        break;
-      case 'multiselect':
-        rawWidth = Math.max(80, Math.min(rawWidth, 180));
-        break;
-      case 'boolean':
-        rawWidth = Math.max(50, Math.min(rawWidth, 80));
-        break;
-      case 'date':
-        rawWidth = Math.max(80, Math.min(rawWidth, 120));
-        break;
-      default:
-        if (key === 'title') {
-          rawWidth = Math.max(160, Math.min(rawWidth, 350));
-        } else {
-          rawWidth = Math.max(60, Math.min(rawWidth, 200));
-        }
-    }
-
-    widths[key] = rawWidth;
-  });
-
-  return widths;
-}
-
-// =====================================================
 // RENDER TABLE
 // =====================================================
 
@@ -375,30 +289,13 @@ function renderTable() {
   const dc = getDensityClasses();
   let headHTML = '<tr>';
 
-  // Compact/Expand mode
+  // Remove stale colgroup if any
   const tableEl = document.getElementById('mainTable');
-  if (!expandContent) tableEl.classList.add('compact-mode');
-  else tableEl.classList.remove('compact-mode');
+  const oldCG = tableEl.querySelector('colgroup');
+  if (oldCG) oldCG.remove();
 
   // Find title column for sticky
   const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
-
-  // ---- Dynamic column widths based on content ----
-  const colWidths = calculateColumnWidths(visibleCols, processed, expandContent);
-
-  // Build <colgroup>
-  let colgroupHTML = '<colgroup>';
-  colgroupHTML += '<col style="width:60px">'; // rating
-  visibleCols.forEach(col => {
-    colgroupHTML += `<col style="width:${colWidths[col.column_key]}px">`;
-  });
-  if (isAdmin()) colgroupHTML += '<col style="width:90px">'; // actions
-  colgroupHTML += '</colgroup>';
-
-  // Remove old colgroup (if any) and prepend new one
-  const oldCG = tableEl.querySelector('colgroup');
-  if (oldCG) oldCG.remove();
-  tableEl.insertAdjacentHTML('afterbegin', colgroupHTML);
 
   // Rating column (sticky)
   headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center sticky-col-rating" onclick="handleSort('rating')">
@@ -517,11 +414,21 @@ async function duplicateArticle(articleId) {
 function renderCellContent(col, value) {
   if (value === undefined || value === null || value === '') return '<span class="text-slate-300">-</span>';
 
+  // Compact mode: truncate long content in JS
+  const truncate = (text, maxLen) => {
+    if (expandContent || text.length <= maxLen) return escapeHTML(text);
+    return escapeHTML(text.substring(0, maxLen)) + '…';
+  };
+
   switch (col.type) {
-    case 'url':
-      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs truncate block" title="${escapeHTML(value)}">
-        ${escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '')}
+    case 'url': {
+      const display = expandContent
+        ? escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '')
+        : escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '').substring(0, 35) + (value.length > 45 ? '…' : '');
+      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs" title="${escapeHTML(value)}">
+        ${display}
       </a>`;
+    }
 
     case 'select': {
       const colorMap = {
@@ -551,13 +458,13 @@ function renderCellContent(col, value) {
     }
 
     case 'longtext':
-      return `<span class="text-slate-500" title="${escapeHTML(value)}">${escapeHTML(value)}</span>`;
+      return `<span class="text-slate-500" title="${escapeHTML(value)}">${truncate(value, 80)}</span>`;
 
     case 'boolean':
       return value ? '<span class="text-emerald-600">Evet</span>' : '<span class="text-slate-300">-</span>';
 
     default:
-      return `<span class="text-slate-700">${escapeHTML(value)}</span>`;
+      return `<span class="text-slate-700">${truncate(value, 50)}</span>`;
   }
 }
 
