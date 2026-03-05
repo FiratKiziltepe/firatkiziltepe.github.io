@@ -71,19 +71,24 @@
       }
     }
 
-    th {
-      white-space: nowrap;
+    #mainTable {
+      table-layout: fixed;
     }
 
     /* --- Base: expand mode is default --- */
     td {
       white-space: normal;
-      overflow: visible;
-      text-overflow: clip;
-      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       vertical-align: top;
       word-wrap: break-word;
       overflow-wrap: break-word;
+    }
+
+    th {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     td.cell-badge,
@@ -91,14 +96,12 @@
     td.cell-rating {
       overflow: visible;
       white-space: nowrap;
-      max-width: none;
       vertical-align: middle;
     }
 
     td.cell-tag {
       overflow: visible;
       white-space: normal;
-      max-width: 250px;
     }
 
     td.cell-url a {
@@ -110,7 +113,6 @@
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
-      max-width: 220px !important;
       vertical-align: middle !important;
     }
 
@@ -120,23 +122,13 @@
       text-overflow: ellipsis !important;
     }
 
-    .compact-mode td.cell-title {
-      max-width: 200px !important;
-    }
-
     .compact-mode td.cell-badge,
     .compact-mode td.cell-action,
     .compact-mode td.cell-rating {
       overflow: visible !important;
-      max-width: none !important;
     }
 
-    .compact-mode td.cell-tag {
-      overflow: visible !important;
-      white-space: normal !important;
-      max-width: 180px !important;
-    }
-
+    .compact-mode td.cell-tag,
     .compact-mode td.cell-tag * {
       white-space: normal !important;
       overflow: visible !important;
@@ -152,8 +144,7 @@
 
     .sticky-col-title {
       position: sticky;
-      left: 64px;
-      /* width of rating col */
+      left: 60px;
       z-index: 11;
       background: inherit;
     }

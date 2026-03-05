@@ -235,6 +235,72 @@ function updateTagFilterBadge() {
   }
 }
 
+
+// =====================================================
+// DYNAMIC COLUMN WIDTHS
+// =====================================================
+
+function calculateColumnWidths(visibleCols, articlesData) {
+  const widths = {};
+  const PX_PER_CHAR = 7; // approximate px per character at text-xs
+
+  visibleCols.forEach(col => {
+    const key = col.column_key;
+    let totalLen = 0;
+    let maxLen = 0;
+    let count = 0;
+
+    articlesData.forEach(a => {
+      const val = a.data?.[key];
+      if (val !== undefined && val !== null && val !== '') {
+        const len = String(val).length;
+        totalLen += len;
+        if (len > maxLen) maxLen = len;
+        count++;
+      }
+    });
+
+    const avgLen = count > 0 ? totalLen / count : col.name.length;
+    if (maxLen === 0) maxLen = col.name.length;
+
+    // Weighted: 60% average + 40% max — avoids extremes
+    const effectiveLen = avgLen * 0.6 + maxLen * 0.4;
+    let rawWidth = Math.ceil(effectiveLen * PX_PER_CHAR);
+
+    // Type-based min/max clamps
+    switch (col.type) {
+      case 'longtext':
+        rawWidth = Math.max(100, Math.min(rawWidth, 500));
+        break;
+      case 'url':
+        rawWidth = Math.max(80, Math.min(rawWidth, 200));
+        break;
+      case 'select':
+        rawWidth = Math.max(70, Math.min(rawWidth, 130));
+        break;
+      case 'multiselect':
+        rawWidth = Math.max(80, Math.min(rawWidth, 180));
+        break;
+      case 'boolean':
+        rawWidth = Math.max(50, Math.min(rawWidth, 80));
+        break;
+      case 'date':
+        rawWidth = Math.max(80, Math.min(rawWidth, 120));
+        break;
+      default: // text
+        if (key === 'title' || col.column_key === 'title') {
+          rawWidth = Math.max(150, Math.min(rawWidth, 350));
+        } else {
+          rawWidth = Math.max(60, Math.min(rawWidth, 180));
+        }
+    }
+
+    widths[key] = rawWidth;
+  });
+
+  return widths;
+}
+
 // =====================================================
 // RENDER TABLE
 // =====================================================
@@ -296,8 +362,25 @@ function renderTable() {
   // Find title column for sticky
   const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
 
+  // ---- Dynamic column widths based on content ----
+  const colWidths = calculateColumnWidths(visibleCols, processed);
+
+  // Build <colgroup>
+  let colgroupHTML = '<colgroup>';
+  colgroupHTML += '<col style="width:60px">'; // rating
+  visibleCols.forEach(col => {
+    colgroupHTML += `<col style="width:${colWidths[col.column_key]}px">`;
+  });
+  if (isAdmin()) colgroupHTML += '<col style="width:90px">'; // actions
+  colgroupHTML += '</colgroup>';
+
+  // Remove old colgroup (if any) and prepend new one
+  const oldCG = tableEl.querySelector('colgroup');
+  if (oldCG) oldCG.remove();
+  tableEl.insertAdjacentHTML('afterbegin', colgroupHTML);
+
   // Rating column (sticky)
-  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center w-16 sticky-col-rating" onclick="handleSort('rating')">
+  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center sticky-col-rating" onclick="handleSort('rating')">
     <div class="flex items-center justify-center gap-0.5">
       <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"/></svg>
       ${sortKey === 'rating' ? `<span class="text-[9px] text-blue-500">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : ''}
@@ -313,7 +396,7 @@ function renderTable() {
   });
 
   if (isAdmin()) {
-    headHTML += `<th class="${dc} border-b border-slate-200 text-center w-24">İşlemler</th>`;
+    headHTML += `<th class="${dc} border-b border-slate-200 text-center">İşlemler</th>`;
   }
   headHTML += '</tr>';
   thead.innerHTML = headHTML;
