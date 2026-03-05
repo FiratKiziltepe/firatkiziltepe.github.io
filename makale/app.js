@@ -294,6 +294,10 @@ function renderTable() {
   const oldCG = tableEl.querySelector('colgroup');
   if (oldCG) oldCG.remove();
 
+  // Expand/compact mode class
+  if (expandContent) tableEl.classList.add('expand-mode');
+  else tableEl.classList.remove('expand-mode');
+
   // Find title column for sticky
   const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
 

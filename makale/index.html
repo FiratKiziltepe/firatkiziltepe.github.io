@@ -75,12 +75,14 @@
       white-space: nowrap;
     }
 
+    /* Base: compact mode (JS truncates content) */
     td {
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    td.cell-tag {
       white-space: normal;
-      vertical-align: top;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      max-width: 400px;
     }
 
     td.cell-badge,
@@ -89,16 +91,31 @@
       overflow: visible;
       white-space: nowrap;
       vertical-align: middle;
-      max-width: none;
     }
 
-    td.cell-tag {
-      overflow: visible;
-      white-space: normal;
+    /* Expand mode: show full content with wrapping */
+    .expand-mode td {
+      white-space: normal !important;
+      vertical-align: top !important;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 400px;
     }
 
-    td.cell-url a {
+    .expand-mode td * {
+      white-space: normal !important;
+    }
+
+    .expand-mode td.cell-url a {
       word-break: break-all;
+    }
+
+    .expand-mode td.cell-badge,
+    .expand-mode td.cell-action,
+    .expand-mode td.cell-rating {
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      max-width: none;
     }
 
     /* --- Sticky columns: rating + title --- */
