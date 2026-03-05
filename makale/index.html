@@ -75,89 +75,71 @@
       white-space: nowrap;
     }
 
+    /* --- Base: expand mode is default --- */
     td {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      max-width: 400px;
+      vertical-align: top;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    td.cell-badge,
+    td.cell-action,
+    td.cell-rating {
+      overflow: visible;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* --- Column widths by type --- */
-    td.cell-title {
-      min-width: 220px;
-      max-width: 280px;
-    }
-
-    td.cell-long {
-      min-width: 180px;
-      max-width: 250px;
+      max-width: none;
+      vertical-align: middle;
     }
 
     td.cell-tag {
       overflow: visible;
       white-space: normal;
-      min-width: 120px;
-      max-width: 200px;
+      max-width: 250px;
     }
 
-    td.cell-badge {
-      overflow: visible;
-      max-width: none;
-      white-space: nowrap;
+    td.cell-url a {
+      word-break: break-all;
     }
 
-    td.cell-action {
-      overflow: visible;
-      white-space: nowrap;
-      max-width: none;
+    /* --- Compact mode (when expand is OFF) --- */
+    .compact-mode td {
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 220px !important;
+      vertical-align: middle !important;
     }
 
-    td.cell-rating {
-      overflow: visible;
-      max-width: none;
+    .compact-mode td * {
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
 
-    td.cell-url {
-      min-width: 100px;
-      max-width: 160px;
+    .compact-mode td.cell-title {
+      max-width: 200px !important;
     }
 
-    td.cell-text {
-      min-width: 80px;
-      max-width: 160px;
-    }
-
-    /* --- Expand (full content) mode --- */
-    .expand-mode td,
-    .expand-mode td * {
-      white-space: normal !important;
+    .compact-mode td.cell-badge,
+    .compact-mode td.cell-action,
+    .compact-mode td.cell-rating {
       overflow: visible !important;
-      text-overflow: clip !important;
       max-width: none !important;
     }
 
-    .expand-mode td {
-      vertical-align: top;
+    .compact-mode td.cell-tag {
+      overflow: visible !important;
+      white-space: normal !important;
+      max-width: 180px !important;
     }
 
-    .expand-mode td.cell-long {
-      min-width: 300px;
-    }
-
-    .expand-mode td.cell-title {
-      min-width: 280px;
-    }
-
-    .expand-mode td.cell-url {
-      min-width: 200px;
-      word-break: break-all;
-    }
-
-    .expand-mode td.cell-url a {
-      word-break: break-all;
-    }
-
-    .expand-mode td.cell-text {
-      min-width: 120px;
+    .compact-mode td.cell-tag * {
+      white-space: normal !important;
+      overflow: visible !important;
     }
 
     /* --- Sticky columns: rating + title --- */
@@ -277,6 +259,36 @@
             class="pl-8 pr-3 py-1.5 w-full text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white" />
         </div>
 
+        <!-- Tag Filter -->
+        <div class="relative">
+          <button id="btnTagFilter"
+            class="flex items-center gap-1 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-slate-50 hover:bg-white transition-colors text-slate-600"
+            title="Etiket Filtresi">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path
+                d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+              <path d="M6 6h.008v.008H6V6Z" />
+            </svg>
+            <span>Etiketler</span>
+            <span id="tagFilterCount"
+              class="hidden bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+          </button>
+          <div id="tagFilterDropdown"
+            class="hidden absolute top-full left-0 mt-1 w-64 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+            <div class="p-2 border-b border-slate-100">
+              <input id="tagFilterSearch" type="text" placeholder="Etiket ara..."
+                class="w-full text-xs border border-slate-200 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div id="tagFilterList" class="p-1"></div>
+            <div class="p-2 border-t border-slate-100 flex justify-between">
+              <button id="btnClearTagFilter"
+                class="text-[11px] text-slate-500 hover:text-red-500 transition-colors">Temizle</button>
+              <button id="btnApplyTagFilter"
+                class="text-[11px] text-blue-600 font-semibold hover:text-blue-800 transition-colors">Uygula</button>
+            </div>
+          </div>
+        </div>
+
         <div class="hidden sm:flex bg-slate-100 rounded-md p-0.5 border border-slate-200" id="densityGroup">
           <button data-density="sm" class="p-1 rounded text-slate-500 transition-colors hover:bg-slate-200" title="Dar">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -297,7 +309,7 @@
             </svg>
           </button>
           <div class="w-px bg-slate-300 mx-0.5"></div>
-          <button id="btnExpandContent" class="p-1 rounded text-slate-500 transition-colors hover:bg-slate-200"
+          <button id="btnExpandContent" class="p-1 rounded text-blue-600 bg-white shadow-sm transition-colors"
             title="Tüm İçeriği Göster">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path

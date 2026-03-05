@@ -5,7 +5,8 @@
 let columns = [];
 let articles = [];
 let density = 'md';
-let expandContent = false;
+let expandContent = true;
+let selectedTags = [];
 let sortKey = null;
 let sortDir = 'asc';
 let searchQuery = '';
@@ -108,9 +109,9 @@ function onAuthChange() {
 
 function getDensityClasses() {
   switch (density) {
-    case 'sm': return 'px-2.5 py-1.5 text-xs';
-    case 'lg': return 'px-4 py-3.5 text-sm';
-    default: return 'px-3 py-2 text-xs';
+    case 'sm': return 'px-2 py-1 text-xs';
+    case 'lg': return 'px-3 py-3 text-sm';
+    default: return 'px-2.5 py-1.5 text-xs';
   }
 }
 
@@ -126,6 +127,20 @@ function getProcessedArticles() {
     result = result.filter(a => {
       const dataStr = Object.values(a.data || {}).join(' ').toLowerCase();
       return dataStr.includes(q);
+    });
+  }
+
+  // Etiket filtresi
+  if (selectedTags.length > 0) {
+    const tagCols = columns.filter(c => c.type === 'multiselect').map(c => c.column_key);
+    result = result.filter(a => {
+      if (!a.data) return false;
+      const articleTags = tagCols.flatMap(key => {
+        const val = a.data[key];
+        if (!val) return [];
+        return String(val).split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+      });
+      return selectedTags.some(st => articleTags.includes(st.toLowerCase()));
     });
   }
 
@@ -159,6 +174,65 @@ function handleSort(key) {
     sortDir = 'asc';
   }
   renderTable();
+}
+
+// =====================================================
+// TAG FILTER
+// =====================================================
+
+function getAllUsedTagsFromArticles() {
+  const tagCols = columns.filter(c => c.type === 'multiselect').map(c => c.column_key);
+  const tagSet = new Set();
+  articles.forEach(a => {
+    if (!a.data) return;
+    tagCols.forEach(key => {
+      const val = a.data[key];
+      if (!val) return;
+      String(val).split(',').forEach(t => {
+        const trimmed = t.trim();
+        if (trimmed) tagSet.add(trimmed);
+      });
+    });
+  });
+  return [...tagSet].sort((a, b) => a.localeCompare(b, 'tr'));
+}
+
+function renderTagFilterList(searchText) {
+  const allTags = getAllUsedTagsFromArticles();
+  const filtered = searchText
+    ? allTags.filter(t => t.toLowerCase().includes(searchText))
+    : allTags;
+
+  const list = document.getElementById('tagFilterList');
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">Etiket bulunamadı</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(tag => {
+    const checked = selectedTags.includes(tag) ? 'checked' : '';
+    return `<label class="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-50 cursor-pointer text-xs text-slate-700">
+      <input type="checkbox" data-tag="${escapeHTML(tag)}" ${checked} class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" />
+      <span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[10px] font-medium">${escapeHTML(tag)}</span>
+    </label>`;
+  }).join('');
+}
+
+function updateTagFilterBadge() {
+  const badge = document.getElementById('tagFilterCount');
+  const btn = document.getElementById('btnTagFilter');
+  if (selectedTags.length > 0) {
+    badge.textContent = selectedTags.length;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+    btn.classList.add('border-blue-300', 'bg-blue-50', 'text-blue-700');
+    btn.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
+  } else {
+    badge.classList.add('hidden');
+    badge.classList.remove('flex');
+    btn.classList.remove('border-blue-300', 'bg-blue-50', 'text-blue-700');
+    btn.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+  }
 }
 
 // =====================================================
@@ -214,10 +288,10 @@ function renderTable() {
   const dc = getDensityClasses();
   let headHTML = '<tr>';
 
-  // Expand mode class
+  // Compact/Expand mode
   const tableEl = document.getElementById('mainTable');
-  if (expandContent) tableEl.classList.add('expand-mode');
-  else tableEl.classList.remove('expand-mode');
+  if (!expandContent) tableEl.classList.add('compact-mode');
+  else tableEl.classList.remove('compact-mode');
 
   // Find title column for sticky
   const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
@@ -1371,6 +1445,62 @@ function setupUIListeners() {
     renderTable();
   });
 
+  // ---- Tag Filter ----
+  const tagFilterBtn = document.getElementById('btnTagFilter');
+  const tagFilterDropdown = document.getElementById('tagFilterDropdown');
+  const tagFilterSearch = document.getElementById('tagFilterSearch');
+
+  tagFilterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !tagFilterDropdown.classList.contains('hidden');
+    if (isOpen) {
+      tagFilterDropdown.classList.add('hidden');
+    } else {
+      renderTagFilterList();
+      tagFilterDropdown.classList.remove('hidden');
+      tagFilterSearch.value = '';
+      tagFilterSearch.focus();
+    }
+  });
+
+  tagFilterSearch.addEventListener('input', () => {
+    renderTagFilterList(tagFilterSearch.value.trim().toLowerCase());
+  });
+
+  tagFilterSearch.addEventListener('click', e => e.stopPropagation());
+
+  document.getElementById('tagFilterList').addEventListener('change', (e) => {
+    if (e.target.type === 'checkbox') {
+      const tag = e.target.dataset.tag;
+      if (e.target.checked) {
+        if (!selectedTags.includes(tag)) selectedTags.push(tag);
+      } else {
+        selectedTags = selectedTags.filter(t => t !== tag);
+      }
+    }
+  });
+
+  document.getElementById('btnClearTagFilter').addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedTags = [];
+    updateTagFilterBadge();
+    renderTable();
+    tagFilterDropdown.classList.add('hidden');
+  });
+
+  document.getElementById('btnApplyTagFilter').addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateTagFilterBadge();
+    renderTable();
+    tagFilterDropdown.classList.add('hidden');
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!tagFilterDropdown.contains(e.target) && e.target !== tagFilterBtn && !tagFilterBtn.contains(e.target)) {
+      tagFilterDropdown.classList.add('hidden');
+    }
+  });
   // Column Manager
   document.getElementById('btnColumnManager').addEventListener('click', openColumnManager);
   document.getElementById('columnManagerClose').addEventListener('click', closeColumnManager);
