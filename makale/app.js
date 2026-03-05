@@ -5,7 +5,7 @@
 let columns = [];
 let articles = [];
 let density = 'md';
-let expandContent = true;
+let expandContent = false;
 let selectedTags = [];
 let sortKey = null;
 let sortDir = 'asc';
@@ -240,9 +240,30 @@ function updateTagFilterBadge() {
 // DYNAMIC COLUMN WIDTHS
 // =====================================================
 
-function calculateColumnWidths(visibleCols, articlesData) {
+function calculateColumnWidths(visibleCols, articlesData, isExpanded) {
   const widths = {};
-  const PX_PER_CHAR = 7; // approximate px per character at text-xs
+
+  if (!isExpanded) {
+    // ---- COMPACT MODE: sabit genişlikler (sütun tipine göre) ----
+    visibleCols.forEach(col => {
+      const key = col.column_key;
+      switch (col.type) {
+        case 'longtext': widths[key] = 160; break;
+        case 'url': widths[key] = 130; break;
+        case 'select': widths[key] = 100; break;
+        case 'multiselect': widths[key] = 120; break;
+        case 'boolean': widths[key] = 60; break;
+        case 'date': widths[key] = 90; break;
+        case 'rating': widths[key] = 60; break;
+        default:
+          widths[key] = (key === 'title') ? 180 : 100;
+      }
+    });
+    return widths;
+  }
+
+  // ---- EXPAND MODE: içerik uzunluğuna göre dinamik ----
+  const PX_PER_CHAR = 7;
 
   visibleCols.forEach(col => {
     const key = col.column_key;
@@ -263,17 +284,17 @@ function calculateColumnWidths(visibleCols, articlesData) {
     const avgLen = count > 0 ? totalLen / count : col.name.length;
     if (maxLen === 0) maxLen = col.name.length;
 
-    // Weighted: 60% average + 40% max — avoids extremes
+    // Weighted: 60% average + 40% max
     const effectiveLen = avgLen * 0.6 + maxLen * 0.4;
     let rawWidth = Math.ceil(effectiveLen * PX_PER_CHAR);
 
     // Type-based min/max clamps
     switch (col.type) {
       case 'longtext':
-        rawWidth = Math.max(100, Math.min(rawWidth, 500));
+        rawWidth = Math.max(120, Math.min(rawWidth, 500));
         break;
       case 'url':
-        rawWidth = Math.max(80, Math.min(rawWidth, 200));
+        rawWidth = Math.max(100, Math.min(rawWidth, 220));
         break;
       case 'select':
         rawWidth = Math.max(70, Math.min(rawWidth, 130));
@@ -287,11 +308,11 @@ function calculateColumnWidths(visibleCols, articlesData) {
       case 'date':
         rawWidth = Math.max(80, Math.min(rawWidth, 120));
         break;
-      default: // text
-        if (key === 'title' || col.column_key === 'title') {
-          rawWidth = Math.max(150, Math.min(rawWidth, 350));
+      default:
+        if (key === 'title') {
+          rawWidth = Math.max(160, Math.min(rawWidth, 350));
         } else {
-          rawWidth = Math.max(60, Math.min(rawWidth, 180));
+          rawWidth = Math.max(60, Math.min(rawWidth, 200));
         }
     }
 
@@ -363,7 +384,7 @@ function renderTable() {
   const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
 
   // ---- Dynamic column widths based on content ----
-  const colWidths = calculateColumnWidths(visibleCols, processed);
+  const colWidths = calculateColumnWidths(visibleCols, processed, expandContent);
 
   // Build <colgroup>
   let colgroupHTML = '<colgroup>';
