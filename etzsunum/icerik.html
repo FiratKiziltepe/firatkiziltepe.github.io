@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Zekâ Çağında Eğitimin Pusulası – Konuşma Metni</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0a58ca;
+        }
+
+        .category-header {
+            background-color: #f8f9fa !important;
+            font-weight: 700 !important;
+            color: #333 !important;
+        }
+
+        mark {
+            background-color: #ffeb3b;
+            padding: 0;
+            color: inherit;
+        }
+
+        .search-container {
+            max-width: 900px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        #faqSearch {
+            padding-left: 45px;
+            height: 55px;
+            border-radius: 30px;
+            border: 2px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        #faqSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.1);
+        }
+
+        .controls-container {
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 10px;
+        }
+
+        .search-count {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-control {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 8px 20px;
+            border-radius: 25px;
+            transition: all 0.25s ease-in-out;
+            min-width: 170px;
+            background-color: transparent;
+        }
+
+        .btn-control:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: #ffffff !important;
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+        }
+
+        .btn-control:active {
+            transform: scale(0.98);
+        }
+
+        .list-group-item {
+            background-color: transparent;
+        }
+
+        .visual-card {
+            border-top: 4px solid var(--primary-color);
+            background-color: #f8f9fa;
+        }
+
+        .visual-img {
+            height: 280px;
+            width: 480px;
+            object-fit: contain;
+            background-color: #fff;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .visual-img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <section id="sss" class="py-5">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="display-7 fw-bold">Yapay Zekâ Çağında Eğitimin Pusulası</h2>
+                <p class="text-muted mx-auto" style="max-width: 800px;">
+                    Panel konuşma metninin slayt bazlı özeti
+                </p>
+            </div>
+
+            <div class="search-container mx-auto">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="faqSearch" class="form-control shadow-sm"
+                    placeholder="Slayt başlığı veya anahtar kelime yazın (Örn: etik, beyan, YAZEK)...">
+            </div>
+
+            <div class="controls-container mx-auto">
+                <div id="searchCount" class="search-count" style="visibility: hidden;">0 sonuç bulundu.</div>
+                <button type="button" id="toggleAll" class="btn-control">
+                    <i class="bi bi-plus-square me-2"></i><span>Tümünü Aç</span>
+                </button>
+            </div>
+
+            <div class="accordion mx-auto" id="faqAccordion" style="max-width: 900px;">
+
+
+                <!-- Slayt 1 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt1">
+                            Slayt 1: Sunum İçeriği (Giriş)
+                        </button>
+                    </h2>
+                    <div id="slayt1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 1: Sunum İçeriği (Giriş)</h5>
+                            <div class="faq-answer">
+                                <p>Saygıdeğer konuklar, kıymetli meslektaşlarım ve eğitim teknolojileri alanındaki değerli çalışanlar; hepinizi saygıyla selamlıyorum.</p>
+                                <p>Bugün burada çok kritik bir soruyu birlikte tartışmak için bulunuyoruz: <strong>Yapay zekâ çağında eğitim hangi yöne gidecek?</strong></p>
+                                <p>Çünkü bugün artık şunu net olarak görüyoruz: Yapay zekâ sadece bir teknoloji değildir… Eğitimin doğasını, öğretmenin rolünü ve öğrencinin öğrenme biçimini değiştiren bir dönüşümdür.</p>
+                                <p>Ama burada çok kritik bir nokta var:</p>
+                                <ul>
+                                    <li>Teknoloji yön vermez, teknoloji yön arar.</li>
+                                    <li>Asıl pusula, değerlerdir.</li>
+                                </ul>
+                                <p>Eğer bu pusulayı doğru tanımlamazsak, aynı teknoloji hem büyük fırsatlar hem de ciddi riskler üretebilir. Biz bugün tam olarak bunu konuşacağız:</p>
+                                <ul>
+                                    <li>Eğitimde yapay zekâyı nasıl yöneteceğiz?</li>
+                                    <li>Nasıl bir çerçeveyle ilerleyeceğiz?</li>
+                                    <li>Ve en önemlisi, çocuklarımızı bu dünyaya nasıl hazırlayacağız?</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim1.jpg" alt="Slayt 1: Sunum İçeriği (Giriş)"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 1: Sunum İçeriği (Giriş)</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 2 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt2">
+                            Slayt 2: MEB İstatistikler
+                        </button>
+                    </h2>
+                    <div id="slayt2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 2: MEB İstatistikler</h5>
+                            <div class="faq-answer">
+                                <p>Şimdi içinde bulunduğumuz ekosistemin büyüklüğünü birlikte düşünelim. Bugün Türkiye'de eğitim sistemi;</p>
+                                <ul>
+                                    <li>17,5 milyondan fazla öğrenci,</li>
+                                    <li>1,2 milyon öğretmen,</li>
+                                    <li>74 binden fazla okul,</li>
+                                    <li>yüz binlerce derslik ve dijital altyapı ile</li>
+                                </ul>
+                                <p>devasa bir yapıdan oluşuyor.</p>
+                                <p>Bu şu anlama geliyor:</p>
+                                <ul>
+                                    <li>Biz küçük bir sistemden bahsetmiyoruz.</li>
+                                    <li>Bir ülkenin geleceğini şekillendiren bir yapıdan bahsediyoruz.</li>
+                                </ul>
+                                <p>Ve artık bu yapının içine yapay zekâ da girmiş durumda. Ödevlerde var, içerik üretiminde var, değerlendirmede var… Hatta bazı durumlarda karar süreçlerine bile dokunuyor. Dolayısıyla burada mesele sadece "teknoloji kullanımı" değil:</p>
+                                <ul>
+                                    <li>Bu ölçekte yapay zekâyı etik ve güvenli şekilde yönetmek bir tercih değil, zorunluluktur.</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim2.jpg" alt="Slayt 2: MEB İstatistikler"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 2: MEB İstatistikler</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 3 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt3">
+                            Slayt 3: MEBİ - EBA ve İçerik Ekosistemi
+                        </button>
+                    </h2>
+                    <div id="slayt3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 3: MEBİ - EBA ve İçerik Ekosistemi</h5>
+                            <div class="faq-answer">
+                                <p>Aslında Türkiye bu dönüşüme hazırlıksız değil. EBA ve MEBİ gibi platformlarla çok güçlü bir dijital içerik ve erişim altyapısı oluşturarak bu alanda öncü bir konuma ulaştık. Özellikle yeni nesil platformumuz MEBİ; bünyesindeki yapay zekâ desteği sayesinde her öğrencimizin <strong>öğrenme hızını ve eksiklerini analiz edip onlara tamamen kişiselleştirilmiş bir çalışma planı</strong> sunmaktadır. MEBİ'nin sunduğu bu <strong> uyarlanabilir öğrenme yapısı</strong>; yapay zekânın sadece bir içerik sağlayıcı değil, öğrencinin başarısını artıran akıllı bir rehber olarak kullanılmasının en somut örneğidir. EBA ise devasa içerik havuzuyla bu ekosistemin veri ve kaynak merkezini oluşturmaya devam etmektedir.</p>
+                                <p>Bugün:</p>
+                                <ul>
+                                    <li>binlerce içerik,</li>
+                                    <li>yüzlerce eğitim materyali,</li>
+                                    <li>milyonlarca kullanıcı etkileşimi</li>
+                                </ul>
+                                <p>tek bir dijital ekosistem içinde gerçekleşiyor. Bu çok önemli bir avantaj. Ama burada kritik bir kırılma noktası var:</p>
+                                <ul>
+                                    <li>Altyapıyı kurmak birinci aşamaydı.</li>
+                                    <li>Şimdi ikinci aşamadayız: Bu altyapıyı doğru yönlendirmek.</li>
+                                </ul>
+                                <p>Yani artık sorumuz şu:</p>
+                                <ul>
+                                    <li>Bu sistemde yapay zekâ nasıl kullanılacak?</li>
+                                    <li>Öğrenci verisi nasıl korunacak?</li>
+                                    <li>Öğretmen nasıl desteklenecek?</li>
+                                </ul>
+                                <p>İşte bu noktada artık teknik değil etik ve yönetişim temelli bir yaklaşıma ihtiyaç duyuyoruz.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim3.jpg" alt="Slayt 3: MEBİ - EBA ve İçerik Ekosistemi"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 3: MEBİ - EBA ve İçerik Ekosistemi</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 4 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt4">
+                            Slayt 4: Türkiye Yüzyılı Maarif Modeli Öğrenci Profili
+                        </button>
+                    </h2>
+                    <div id="slayt4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 4: Türkiye Yüzyılı Maarif Modeli Öğrenci Profili</h5>
+                            <div class="faq-answer">
+                                <p>Türkiye Yüzyılı Maarif Modeli bu noktada bize çok güçlü bir referans sunuyor. Değerli misafirler, Millî Eğitim Bakanlığı olarak, geleceğin eğitim vizyonunu şekillendiren Türkiye Yüzyılı Maarif Modeli'ni hayata geçirdik. Bu modelin temelinde, sadece bilgiyle donanmış değil, aynı zamanda <strong>yetkin ve erdemli insan</strong> yetiştirme hedefi yatmaktadır.</p>
+                                <p>Bu model ile; ahlaklı, bilge, cesaretli, estetik, iradeli, merhametli, sağlıklı, sorgulayıcı, üretken ve vatansever bireyler yetiştirmeyi hedefliyoruz. Bu özellikler, gençlerimizin hem akademik başarılarını destekleyecek hem de onları topluma faydalı, duyarlı ve sorumluluk sahibi vatandaşlar olarak yetiştirecektir.</p>
+                                <p>Tüm bu teknolojik imkânlar, "Türkiye Yüzyılı Maarif Modeli" ile tanımladığımız "Yetkin ve Erdemli İnsan" profilini desteklemektedir. Bilgiye ulaşan ve ulaştığı bilgiyi ahlaki değerlerle harmanlayıp insanlığın ortak faydasına sunan bireyler yetiştirmek temel gayemizdir.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim4.jpg" alt="Slayt 4: Türkiye Yüzyılı Maarif Modeli Öğrenci Profili"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 4: TYMM Öğrenci Profili</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 5 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt5">
+                            Slayt 5: TYMM Bütüncül Eğitim Yaklaşımı
+                        </button>
+                    </h2>
+                    <div id="slayt5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 5: TYMM Bütüncül Eğitim Yaklaşımı</h5>
+                            <div class="faq-answer">
+                                <p>Yeni modelimizde <strong>"Bütüncül Eğitim"</strong> yaklaşımı temel esastır. Öğrenme çıktıları çerçevemizden farklılaştırılmış öğretime kadar her bileşen, disiplinler arası bir mantıkla yapılandırılmıştır. Bu sistemde teknoloji, sadece bağımsız bir konu başlığı değil; tüm öğretim süreçlerine içselleştirilmiş bir okuryazarlık becerisi olarak yer almaktadır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim5.jpg" alt="Slayt 5: TYMM Bütüncül Eğitim Yaklaşımı"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 5: TYMM Bütüncül Eğitim Yaklaşımı</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 6 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt6">
+                            Slayt 6: TYMM Alan Becerileri (Bilişim)
+                        </button>
+                    </h2>
+                    <div id="slayt6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 6: TYMM Alan Becerileri (Bilişim)</h5>
+                            <div class="faq-answer">
+                                <p>Türkiye Yüzyılı Maarif Modeli'nde öğrenme sürecini, bilgiyi eyleme dönüştüren "Alan Becerileri" çerçevesinde kurguladık. Bu yapı; Türkçe, Matematik, Fen Bilimleri ve Sosyal Bilimler gibi temel disiplinlerin her birinde, öğrencinin derinlemesine uzmanlaşmasını sağlayan özgün beceri setlerini içermektedir. Beceriyi merkeze alan bu yaklaşım sayesinde öğrencilerimiz, teorik bilgiyi hayatın içinde işlevsel kılarak kalıcı öğrenmeye ulaşmaktadır. Bu kapsamlı beceri mimarisi içerisinde Bilişim Teknolojileri ve Yazılım alan becerileri, dijital çağın gerektirdiği yetkinlikleri sistematik bir şekilde sunan stratejik bir alandır.</p>
+                                <p>Bilişim teknolojilerini artık sadece araç kullanımı düzeyinde değil, daha kapsamlı beceriler üzerinden ele alıyoruz. Bilişim Teknolojileri ve Yazılım alan becerileri kapsamında;</p>
+                                <ul>
+                                    <li>Bilgi İşlemsel Düşünme,</li>
+                                    <li>Yazılım Geliştirme,</li>
+                                    <li>Veri Yönetimi,</li>
+                                    <li>Dijital Güvenlik</li>
+                                </ul>
+                                <p>gibi kritik yetkinlikleri tanımladık. Amacımız, öğrencilerin teknolojiyi sadece tüketen değil; sistem tasarlayan, veriyi analiz eden ve dijital dünyada güvenliğini sağlayabilen bireyler olmalarına katkı sağlamaktır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim6.jpg" alt="Slayt 6: TYMM Alan Becerileri (Bilişim)"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 6: TYMM Alan Becerileri (Bilişim)</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 7 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt7">
+                            Slayt 7: Okuryazarlık Becerileri (Farkındalık-İşlevsellik-Eylemsellik)
+                        </button>
+                    </h2>
+                    <div id="slayt7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 7: Okuryazarlık Becerileri (Farkındalık-İşlevsellik-Eylemsellik)</h5>
+                            <div class="faq-answer">
+                                <p>Türkiye Yüzyılı Maarif Modeli'nde yer alan okuryazarlık becerileri, süreç bileşenleri itibarıyla üç temel düzeyde öğrencilerimize kazandırılmak üzere kurgulanmıştır:</p>
+                                <ul>
+                                    <li><strong>Farkındalık Düzeyi:</strong> Öğrencilerimizin ilgili okuryazarlık türündeki temel bilgi, terim, kavram ve olguları tanımlamalarını, anlamalarını ve bu konulara yönelik bir duyarlılık geliştirmelerini amaçlıyoruz.</li>
+                                    <li><strong>İşlevsellik Düzeyi (İnceleme süreci):</strong> Öğrencilerimizin bu kavramlar arasındaki bütüncül ilişkiyi fark ederek bilgiyi anlamlı hale getirmelerini sağlıyoruz.</li>
+                                    <li><strong>Eylemsellik Düzeyi:</strong> Edinilen bu donanımın somut bir eyleme dönüşmesini hedefliyoruz.</li>
+                                </ul>
+                                <p>Gelişime uygun ve sarmal bir yapıda yapılandırılan bu süreç, farkındalıkla başlayıp eylemsellik ile tamamlanan bir olgunlaşma yolculuğudur. Bununla birlikte eğitim süreçlerimizde sarmal yapının bir gereği olarak; bazı durumlarda işlevsellik aşamasında derinleşen süreç, doğrudan eyleme geçmek yerine daha geniş kapsamlı bir farkındalığa dönüşerek devam edebilmektedir. Bu yaklaşım, pasif bir kullanımın ötesinde aktif ve sorumlu bir dijital vatandaşlık yapısını temsil etmektedir.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim7.jpg" alt="Slayt 7: Okuryazarlık Becerileri"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 7: Okuryazarlık Becerileri (Farkındalık-İşlevsellik-Eylemsellik)</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 8 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt8">
+                            Slayt 8: Dijital Okuryazarlık Becerileri
+                        </button>
+                    </h2>
+                    <div id="slayt8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 8: Dijital Okuryazarlık Becerileri</h5>
+                            <div class="faq-answer">
+                                <p>Türkiye Yüzyılı Maarif Modeli'nde yer alan dokuz okuryazarlık türünden biri olan dijital okuryazarlığı <strong>dokuz temel başlıkta </strong> detaylandırdık. Fikri mülkiyet haklarından siber güvenliğe, içerik üretiminden eleştirel düşünmeye kadar her alan, yapay zekâ çağının gerekliliklerine uygun olarak tasarlandı.</p>
+                                <p>Dijital okuryazarlık artık temel bir yaşam becerisi. Öğrencinin dijital ortamda bilgiye ulaşması, iletişim kurması, içerik üretmesi ve bunu etik şekilde yapması gerekiyor. <strong>Dijital beceri ile dijital bilinç aynı şey değildir. Bizim hedefimiz sadece beceri değil, bilinç kazandırmak.</strong></p>
+                                <h6 class="mt-3 mb-2 text-primary fw-bold">Yapay Zekâ ve Dijital Okuryazarlık ile İlgili Dersler</h6>
+                                <p>Türkiye Yüzyılı Maarif Modeli kapsamında yapay zekâ ve dijital okuryazarlık, öğretim programlarımızda iki temel şekilde yer almaktadır:</p>
+                                <p><strong>Birincisi,</strong> doğrudan teknoloji odaklı dersler: Bilişim Teknolojileri ve Yazılım dersi başta olmak üzere, Robotik Kodlama, Yapay Zekâ Uygulamaları ve mesleki eğitimdeki Yapay Zekâ alanı öğrencilerimize temel ve ileri düzey teknik beceriler kazandırmaktadır.</p>
+                                <p><strong>İkincisi,</strong> farklı derslere entegrasyon: Sosyal bilgilerde dijitalleşmenin toplumsal etkileri, kimyada sürdürülebilirlik bağlamı, tarihte ise araştırma süreçleri içinde ele alınmaktadır.</p>
+                                <h6 class="mt-3 mb-2 text-primary fw-bold">İlköğretim ve Ortaöğretimde Seçmeli ve Zorunlu Dersler</h6>
+                                <ul>
+                                    <li>Robotik Kodlama (7 veya 8. Sınıf, haftada 2 saat – seçmeli)</li>
+                                    <li>Bilişim Teknolojileri ve Yazılım (5 ve 6. Sınıflar, haftada 2 saat – zorunlu)</li>
+                                    <li>Yapay Zekâ Uygulamaları (7 veya 8. Sınıf, haftada 2 saat – seçmeli)</li>
+                                    <li>Bilişim Teknolojileri ve Yazılım Dersi (Seçmeli Lise) – bu ders altında "Yapay Zekâ Uygulamaları" modülü bulunmaktadır.</li>
+                                    <li>Mesleki ve Teknik Eğitim – Yapay Zekâ Alanı</li>
+                                </ul>
+                                <h6 class="mt-3 mb-2 text-primary fw-bold">Öğretim Programı Örnekleri</h6>
+                                <ul>
+                                    <li><strong>Sosyal Bilgiler:</strong> (SB.6.4.3.) Vatandaşlık haklarının kullanımında dijitalleşme ve teknolojik gelişmelerin etkilerini sorgulayabilme</li>
+                                    <li><strong>Kimya:</strong> (KİM.12.3.3.) Yapay zekâ uygulamalarının sürdürülebilirliğe etkilerine yönelik eleştirel düşünebilme</li>
+                                    <li><strong>Tarih:</strong> Tarih Araştırma ve Yazımında Dijitalleşme</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim8.jpg" alt="Slayt 8: Dijital Okuryazarlık Becerileri"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 8: Dijital Okuryazarlık Becerileri</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim21.jpg" alt="Slayt 8: Dijital Okuryazarlık Becerileri"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 9 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt9">
+                            Slayt 9: PISA ve TIMMS Raporları ile İlişkilendirme
+                        </button>
+                    </h2>
+                    <div id="slayt9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 9: PISA ve TIMMS Raporları ile İlişkilendirme</h5>
+                            <div class="faq-answer">
+                                <p>Değerli katılımcılar, biz sadece kendi içimize bakmıyoruz; dünyada nerede olduğumuzu ve nereye gittiğimizi de düzenli olarak takip ediyoruz. Bu kapsamda yeni müfredatımızı, dünya standartları kabul edilen PISA yeterlik düzeyleri ve TIMMS bilişsel alanlarıyla yan yana getirdik.</p>
+                                <p>İzleme ve Değerlendirme Daire Başkanlığımızın somut verilerine göre; Maarif Modelimizdeki beceriler, PISA'nın en üst düzey beklentileriyle tam bir uyum içinde. Örneğin:</p>
+                                <ul>
+                                    <li>Ortaokul Matematik programımız PISA'nın 3, 4 ve hatta 5. düzeylerine doğrudan hitap ediyor.</li>
+                                    <li>Fen Bilimleri dersimiz 3 ve 4. düzeyleri karşılıyor.</li>
+                                    <li>Türkçe programımız okuma becerilerinde 4, 5 ve 6. düzeylere kadar uzanıyor.</li>
+                                </ul>
+                                <p>Bu şu anlama geliyor: Modelimiz kâğıt üzerinde kalmıyor; çocuklarımızı <strong>eleştirel düşünme, problem çözme ve analitik beceriler</strong> gibi üst düzey yetkinliklerde dünya sahnesine hazırlıyor. Müfredatımız kademeli olarak hayata geçtikçe, PISA gibi uluslararası testlerdeki okuryazarlık düzeylerimizin de kalıcı olarak iyileşeceğini öngörüyoruz. Yani biz sadece yerel bir model değil, küresel rekabete hazır bir nesil inşa ediyoruz.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim9.jpg" alt="Slayt 9: PISA ve TIMMS Raporları ile İlişkilendirme"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 9: PISA ve TIMMS Raporları ile İlişkilendirme</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 10 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt10">
+                            Slayt 10: Dijital Vatandaşlık Planlayıcısı Raporu
+                        </button>
+                    </h2>
+                    <div id="slayt10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 10: Dijital Vatandaşlık Planlayıcısı Raporu</h5>
+                            <div class="faq-answer">
+                                <p>Türkiye Yüzyılı Maarif Modeli kapsamında okul öncesi eğitim programı ile 25 dersimize ait öğretim programlarımızı, Avrupa Konseyi'nin <strong>"Dijital Vatandaşlık Eğitimi Planlayıcısı"</strong> çerçevesinde sistematik olarak inceledik.</p>
+                                <p>Şunu net bir şekilde söyleyebilirim: <strong>Bu çalışma, uluslararası literatürde bu ölçekte yapılan İLK çalışmadır.</strong> Avrupa Konseyi üye ülkelere bu planlayıcıyı kullanmalarını tavsiye ediyordu ancak bugüne kadar hiçbir ülke bizim yaptığımız gibi bütüncül ve karşılaştırmalı bir program analizi yayımlamamıştı. Çalışmamızın İngilizce çevirisi bizzat Avrupa Konseyi tarafından üstlenildi ve tüm üye ülkelerle paylaşıldı.</p>
+                                <p>Bulgularımız, Maarif Modeli'nin dijital vatandaşlığın özellikle <strong>"öğrenme ve yaratıcılık"</strong> ile <strong>"medya okuryazarlığı"</strong> boyutlarında oldukça güçlü olduğunu göstermektedir. Buna karşılık, hukuk, güvenlik ve etik gibi bazı boyutların daha sınırlı; dijital sağlık ve dijital tüketicilikle ilişkili çıktılarının ise görece daha az yer aldığı görülmektedir.</p>
+                                <p>Alan yazını açısından son derece değerli olduğuna inandığımız bu çalışma, ortaya koyduğu somut önerilerle Bakanlığımızın program geliştirme çalışmalarına ışık tutacak ve politika süreçlerine de katkı sağlayacaktır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim10.jpg" alt="Slayt 10: Dijital Vatandaşlık Planlayıcısı Raporu"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 10: Dijital Vatandaşlık Planlayıcısı Raporu</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 11 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt11">
+                            Slayt 11: Uluslararası Raporlar ve OECD 2026/2040
+                        </button>
+                    </h2>
+                    <div id="slayt11" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 11: Uluslararası Raporlar ve OECD 2026/2040</h5>
+                            <div class="faq-answer">
+                                <p>Aynı şekilde küresel düzeydeki stratejik raporları da yakından takip ediyoruz. OECD'nin dijital eğitim vizyonu, üretken yapay zekânın eğitimdeki etkin kullanımını odak noktasına almaktadır. Biz de stratejilerimizi bu projeksiyonlar doğrultusunda güncelleyerek eğitim sistemimizi gelecek on yılların ihtiyaçlarına hazırlıyoruz.</p>
+                                <p>OECD Dijital Eğitim Görünümü 2026 Raporu, Türkiye açısından dikkat çekici bulgular ortaya koymaktadır. Rapora göre ülkemizde öğrenciler yapay zekâyı en çok bilgi edinmek, açıklayıcı içeriklere ulaşmak ve kavramları anlamlandırmak için kullanmaktadır. Aynı raporda Türkiye'de yürütülen saha çalışması ise, yapay zekâ destekli öğrenmenin özellikle doğru pedagojik tasarımla sunulduğunda öğrenci performansını anlamlı biçimde artırabildiğini ortaya koymaktadır.</p>
+                                <p>Öğretmenler boyutunda ise OECD, yapay zekânın öğretmenin yerini alan değil, öğretmenin kapasitesini güçlendiren bir araç olarak ele alınması gerektiğini vurgulamaktadır.</p>
+                                <p>Daha da önemlisi, <strong>Türkiye OECD raporunda, üretken yapay zekâyı eğitim alanındaki resmî stratejilerine dâhil eden sınırlı sayıdaki ülkeler arasında gösterilmektedir.</strong> Bu yönüyle Türkiye, eğitimde yapay zekâya ilişkin yalnızca uyum sağlayan değil, örnek oluşturan ülkelerden biri hâline gelmiştir.</p>
+                                <p>OECD'nin PISA 2029 kapsamında ilk kez <strong>"Medya ve Yapay Zekâ Okuryazarlığı"</strong>nı ayrı bir değerlendirme alanı olarak tanımlaması son derece anlamlıdır. Bu da bize açıkça göstermektedir ki yapay zekâ okuryazarlığı eğitim sistemlerinin bugün ciddiyetle ele alması gereken temel bir yetkinlik alanıdır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim11.jpg" alt="Slayt 11: Uluslararası Raporlar ve OECD 2026/2040"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 11: Uluslararası Raporlar ve OECD 2026/2040</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 12 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt12">
+                            Slayt 12: World Economic Forum (WEF) 2025-2030 Becerileri
+                        </button>
+                    </h2>
+                    <div id="slayt12" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 12: World Economic Forum (WEF) 2025-2030 Becerileri</h5>
+                            <div class="faq-answer">
+                                <p>Dünya Ekonomik Forumu tarafından yayımlanan <strong>"Skills on the Rise 2025-2030"</strong> raporu; geleceğin iş dünyasında yapay zekâ ve büyük veri odaklı yetkinliklere duyulan ihtiyacın <strong>%88 oranında artacağını</strong> öngörerek eğitim sistemleri için hayati bir sorumluluk tanımlamaktadır.</p>
+                                <p>Raporda yükselen beceriler olarak tanımlanan <strong>düşünme, bilişsel esneklik, öz disiplin ve teknolojik okuryazarlık</strong> gibi alanlar; Türkiye Yüzyılı Maarif Modeli'nde (TYMM) kurguladığımız "Yetkin ve Erdemli İnsan" profilinin yapı taşlarıyla tam bir uyum içindedir.</p>
+                                <p>Bizler TYMM ile öğrencilerimizi <strong> teknik birer kullanıcı olarak değil</strong>; bu teknolojileri <strong>"bilge" ve "üretken" bir kimlikle yönetebilen, etik sorumluluklarını teknik donanımıyla harmanlayan</strong> şahsiyetler olarak yetiştiriyoruz. Dolayısıyla küresel raporların "geleceğin zorunlu becerileri" olarak sunduğu bu yetkinlik setini; bizler müfredatımızın kalbine yerleştirerek gençlerimizi 2030'lu yılların dünyasına hazırlamış durumdayız.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim12.jpg" alt="Slayt 12: WEF 2025-2030 Becerileri"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 12: WEF 2025-2030 Becerileri</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 13 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt13">
+                            Slayt 13: Eğitimde Yapay Zekâ: Fırsatlar ve Riskler
+                        </button>
+                    </h2>
+                    <div id="slayt13" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 13: Eğitimde Yapay Zekâ: Fırsatlar ve Riskler</h5>
+                            <div class="faq-answer">
+                                <p>Yapay zekâ teknolojileri eğitimde önemli avantajlar sunarken bazı riskleri de beraberinde getirmektedir. Kişiselleştirilmiş öğrenme süreçleri ne kadar faydalıysa; algoritmik yanlılık ve veri güvenliği gibi hususlar da o derece dikkatle yönetilmesi gereken alanlardır. Temel görevimiz, bu teknolojilerin sorumlu ve güvenli bir şekilde kullanımını sağlamaktır.</p>
+                                <p class="mb-1"><strong>Fırsatlar:</strong></p>
+                                <ul>
+                                    <li><strong>Kişiselleştirilmiş Öğrenme ve Uyarlanabilir İçerik:</strong> Her öğrencinin kendi hızında ve ilgi alanlarına göre öğrenmesini sağlama.</li>
+                                    <li><strong>Ölçme Değerlendirme ve Anlık Geri Bildirim:</strong> Öğrenci performansını daha doğru ve hızlı bir şekilde değerlendirme, anında geri bildirim sağlama.</li>
+                                    <li><strong>Öğretmen Desteği ve İçerik Üretim Sistemleri:</strong> Öğretmenlerin idari yükünü azaltma, ders materyali hazırlama süreçlerini kolaylaştırma.</li>
+                                    <li><strong>Öğrenme Analitiği ve Erken Uyarı Mekanizmaları:</strong> Öğrenci gelişimini takip etme, risk altındaki öğrencileri erken tespit etme.</li>
+                                    <li><strong>Erişilebilirlik ve Kapsayıcı Eğitim Çözümleri:</strong> Özel gereksinimli öğrenciler için daha erişilebilir öğrenme ortamları sunma.</li>
+                                    <li><strong>Çoklu Ortam İçerik Üretimi ve Zenginleştirme:</strong> Ders içeriklerini daha etkileşimli ve ilgi çekici hale getirme.</li>
+                                </ul>
+                                <p class="mb-1"><strong>Tehditler:</strong></p>
+                                <ul>
+                                    <li><strong>Algoritmik Önyargı ve Adaletsiz Karar Mekanizmaları:</strong> Yapay zeka algoritmalarının veri setlerindeki önyargıları yansıtması ve adaletsiz sonuçlar doğurması.</li>
+                                    <li><strong>Mahremiyet ve Veri Güvenliği İhlalleri:</strong> Öğrenci verilerinin toplanması ve kullanılmasıyla ilgili mahremiyet endişeleri.</li>
+                                    <li><strong>Aşırı Bağımlılık ve Eleştirel Düşünmenin Zayıflaması:</strong> Öğrencilerin yapay zekâya aşırı bağımlı hale gelmesi ve eleştirel düşünme becerilerinin körelmesi.</li>
+                                    <li><strong>Yanlış Bilgi ve Halüsinatif İçerik Üretimi:</strong> Yapay zekânın yanlış veya yanıltıcı bilgiler üretme potansiyeli.</li>
+                                    <li><strong>Dijital Eşitsizlik ve Erişim Sorunları:</strong> Yapay zeka teknolojilerine erişimde yaşanan eşitsizlikler.</li>
+                                    <li><strong>Etik Belirsizlik ve Sorumluluk Problemleri:</strong> Yapay zeka uygulamalarının etik sorumluluklarının belirlenmesindeki zorluklar.</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim13.jpg" alt="Slayt 13: Eğitimde Yapay Zekâ: Fırsatlar ve Riskler"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 13: Fırsatlar ve Riskler</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 14 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt14">
+                            Slayt 14: Hangi İnsan?
+                        </button>
+                    </h2>
+                    <div id="slayt14" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 14: Hangi İnsan?</h5>
+                            <div class="faq-answer">
+                                <p>Gelişen teknoloji karşısında sormamız gereken temel soru insan odaklılıktır. Harvard Üniversitesi'nden bir grup araştırmacının yayımladıkları <strong>"Which Humans?"</strong> başlıklı çalışma, yapay zekâ modellerinin veri setlerindeki kültürel yanlılığa dikkat çekmektedir.</p>
+                                <p>Mevcut geniş dil modellerinin büyük oranda <strong>"WEIRD"</strong> olarak tanımlanan; Batılı (Western), eğitimli (Educated), sanayileşmiş (Industrialized), zengin (Rich) ve demokratik (Democratic) toplumların kültürel kodlarını yansıttığını görüyoruz. Bu durum, yerel değerlerin ve farklı kültürel perspektiflerin algoritmik bir tek tipleşmeye maruz kalması riskini doğurmaktadır.</p>
+                                <p>Bu nedenle yapay zekâ uygulamalarının kültürel etkilerini analiz ederken insanı kendi medeniyet değerleriyle "özne" tutmak zorundayız. Yapay zekâ, insanın zihinsel kapasitesini <strong> ikame eden değil</strong>, bu kapasiteyi kültürel çeşitliliği gözeterek daha nitelikli hale getiren <strong>yardımcı bir mekanizma</strong> olarak konumlandırılmalıdır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim14.jpg" alt="Slayt 14: Hangi İnsan?"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 14: Hangi İnsan?</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 15 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt15">
+                            Slayt 15: YAZEK ve Politika Belgeleri
+                        </button>
+                    </h2>
+                    <div id="slayt15" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 15: YAZEK ve Politika Belgeleri</h5>
+                            <div class="faq-answer">
+                                <p>İşte tam bu noktada biz YAZEK'i devreye aldık. Cumhurbaşkanımızın vizyonu ve 11. Kalkınma Planı doğrultusunda yürürlüğe konulan Ulusal Yapay Zekâ Stratejisi çerçevesinde hazırlanan <strong>"Eğitimde Yapay Zekâ Politika Belgesi ve Eylem Planı (2025-2029)"</strong>, Bakanlığımızın dijital dönüşüm ve yapay zekâ ekosistemine yönelik en kapsamlı yol haritalarından biri olarak 17 Haziran 2025 tarihinden itibaren uygulamaya alınmıştır.</p>
+                                <p>İlgili belgemiz; yönetimden okul süreçlerine, öğretmen eğitiminden öğrenci kazanımlarına kadar uzanan geniş bir kapsamda <strong>4 hedef, 15 politika ve 40 eylem adımı</strong> içermektedir.</p>
+                                <p>YAZEK sistemini eğitim ve öğretim kurumlarımızda gerçekleştirilen uygulamaların etik ilkelere uygunluğunu beyan etmek ve olası ihlal süreçlerini yönetmek amacıyla oluşturulmuş bir yönetişim altyapısı olarak konumlandırıyoruz. <strong>2 Şubat 2026 itibarıyla devreye aldığımız</strong> bu platform aracılığıyla; öğretmenlerimizin ve geliştiricilerimizin riskleri önceden öngörerek sorumlu kullanım konusunda bilinçli kararlar almalarına rehberlik ediyoruz.</p>
+                                <p>Buradaki ana motivasyonumuz son derece nettir: Yapay zekâ eğitimde hızla yaygınlaşırken biz de <strong>"önce etik ve hesap verebilirlik", "sonra ölçekleme"</strong> yaklaşımıyla sahada izlenebilir bir güven zemini inşa ediyoruz.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim15.jpg" alt="Slayt 15: YAZEK ve Politika Belgeleri"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 15: YAZEK ve Politika Belgeleri</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 16 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt16">
+                            Slayt 16: YAZEK Etik İlkeler
+                        </button>
+                    </h2>
+                    <div id="slayt16" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 16: YAZEK Etik İlkeler</h5>
+                            <div class="faq-answer">
+                                <p>YAZEK sistemimizi sekiz temel etik ilke üzerine inşa ettik. Hiçbir yapay zekâ uygulaması, öğrencinin verisini ve güvenliğini koruma altına almadan eğitim süreçlerine dahil edilemez.</p>
+                                <p>YAZEK'te biz şunu söylüyoruz: <em>Yapay zekâ uygulaması varsa, etik çerçeve zorunludur.</em> Yani; teknoloji insanın önüne geçmez, öğrenci her zaman merkezdedir, yapay zekâ bir amaç değil araçtır.</p>
+                                <p class="mb-1 mt-3"><strong>Sekiz Temel Etik İlke:</strong></p>
+                                <ul>
+                                    <li><strong>1. İnsan Merkezli ve Hak Temelli Yaklaşım:</strong> Yapay zekâ eğitimde hiçbir zaman bir amaç değil, bir araç olmalı. Öğrencinin akademik, sosyal ve duygusal esenliği teknolojinin önüne geçmeli.</li>
+                                    <li><strong>2. Eşitlik ve Kapsayıcılık:</strong> Yapay zekâ, coğrafi konumdan sosyoekonomik duruma kadar hiçbir faktöre dayalı ayrımcılığa zemin hazırlamamalı.</li>
+                                    <li><strong>3. Şeffaflık ve Açıklanabilirlik:</strong> İç işleyişi kapalı "kara kutu" sistemlerin öğrenci başarısını etkileyen kararlar almasına izin verilmemeli.</li>
+                                    <li><strong>4. Mahremiyet, Gizlilik ve Veri Yönetişimi:</strong> Öğrenci verisi — ses, görüntü, yazı, not — en yüksek güvenlik standartlarıyla korunmalı. Yalnızca gerekli asgari veri toplanmalı.</li>
+                                    <li><strong>5. Güvenilirlik, Emniyet ve Teknik Sağlamlık:</strong> Halüsinasyon denen yanıltıcı bilgi üretimi, sistem çökmeleri, siber saldırılara karşı dayanıklılık; kritik alanlarda bu riskler önceden test edilmeli.</li>
+                                    <li><strong>6. Hesap Verebilirlik ve İnsan Denetimi:</strong> Bir yapay zekâ sistemi hiçbir koşulda tek başına öğrencinin akademik geleceğini belirleyemez. Son karar her zaman insana ait.</li>
+                                    <li><strong>7. Eğitsel Değer ve Nitelikli Katkı:</strong> Yapay zekâ kullanımının gerekçesi teknik popülerlik değil, kanıta dayalı eğitsel fayda olmalı.</li>
+                                    <li><strong>8. Millî ve Manevi Değerlere Uyum:</strong> Kullandığımız araçlar, kültürel hassasiyetlerimize saygılı içerikler üretmeli; toplumsal etik normları yansıtmalı.</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim16.jpg" alt="Slayt 16: YAZEK Etik İlkeler"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 16: YAZEK Etik İlkeler</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 17 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt17">
+                            Slayt 17: Etik Yönetişim Yapısı
+                        </button>
+                    </h2>
+                    <div id="slayt17" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 17: Etik Yönetişim Yapısı</h5>
+                            <div class="faq-answer">
+                                <p>Biz bu sistemi <strong>"çok katmanlı bir yönetişim modeli"</strong> üzerine inşa ettik. Değerlendirme ve rehberlik tek bir merkezden değil, bizzat uygulamanın yapıldığı okuldan başlıyor ve merkeze doğru dört ana halkadan oluşuyor:</p>
+                                <p><strong>1. Halka — Okul Yapay Zekâ Etiği Ekipleri:</strong> Her okulumuzda müdür başkanlığında; müdür yardımcısı, varsa bilişim teknolojileri ve rehber öğretmenlerimizden oluşan bu ekipler, sahadaki ilk rehberlik ve denetim noktasıdır. Uygulamaları yerinde görür ve olası risklere anında müdahale ederler.</p>
+                                <p><strong>2. ve 3. Halkalar — İl ve İlçe Yapay Zekâ Uygulamaları Etik Kurulları:</strong> Bu kurullarımız, gelen itirazları değerlendirmenin yanı sıra bölge düzeyinde öğretmenlerimize rehberlik ederek etik farkındalık eğitimleri düzenlerler. Süreçlerin yerel düzeyde standartlara uygun ilerlemesini sağlarlar.</p>
+                                <p><strong>4. Halka — Yapay Zekâ Uygulamaları Etik Üst Kurulu:</strong> En tepede yer alan bu kurul; Bakanlığımızın hukuktan stratejiye kadar farklı birimlerinin yanı sıra sivil toplum ve akademi temsilcilerini de barındıran çok geniş bir yapıya sahip. Biz burada sadece nihai kararları vermiyoruz, aynı zamanda ülkemizin eğitimde yapay zekâ politikalarını ve etik standartlarını belirliyoruz.</p>
+                                <p>Yani okuldan merkeze uzanan, her halkası birbirine bağlı, yaşayan ve izlenebilir bir denetim ve rehberlik ağı kurduk.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim17.jpg" alt="Slayt 17: Etik Yönetişim Yapısı"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 17: Etik Yönetişim Yapısı</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 18 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt18">
+                            Slayt 18: Etik Beyan Formu Gerekliliği
+                        </button>
+                    </h2>
+                    <div id="slayt18" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 18: Etik Beyan Formu Gerekliliği</h5>
+                            <div class="faq-answer">
+                                <p>Bu süreçte bize en çok yöneltilen sorulardan biri, hangi durumlarda etik beyanın gerekli olduğudur. Eğer;</p>
+                                <ul>
+                                    <li>öğrencinin doğrudan yapay zekâ ile etkileşimi söz konusuysa,</li>
+                                    <li>öğrenci verisi işleniyorsa,</li>
+                                    <li>ya da yapay zekâ bir karar destek mekanizması olarak kullanılıyorsa</li>
+                                </ul>
+                                <p>etik beyan zorunludur. Buna karşılık, öğretmenlerimizin yalnızca ders hazırlığı sürecinde ya da kendi bireysel mesleki gelişimleri kapsamında gerçekleştirdikleri kullanımlar bu zorunluluğun dışında kalmaktadır.</p>
+                                <p>Yeni bir beyan ancak dört temel unsurdan biri değiştiğinde gereklidir:</p>
+                                <ul>
+                                    <li>Uygulamanın kapsamı,</li>
+                                    <li>öğretimsel amaç,</li>
+                                    <li>hedef kitle,</li>
+                                    <li>veya kullanılan yapay zekâ aracının kendisi.</li>
+                                </ul>
+                                <p>Buradaki amacımız yeni bir bürokratik yük oluşturmak değil; etik farkındalığı güçlendirmek ve güvenli bir kullanım kültürü oluşturmaktır.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim18.jpg" alt="Slayt 18: Etik Beyan Formu Gerekliliği"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 18: Etik Beyan Formu Gerekliliği</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 19 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt19">
+                            Slayt 19: Etik İhlal Bildirimi Akış Diyagramı
+                        </button>
+                    </h2>
+                    <div id="slayt19" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 19: Etik İhlal Bildirimi Akış Diyagramı</h5>
+                            <div class="faq-answer">
+                                <p>Olası bir ihlal durumunda paydaşlarımızın haklarını koruyan, izlenebilir bir iş akışımız bulunmaktadır. Eğer bir öğrenci, veli veya okul personeli; okulda yürütülen yapay zekâ uygulamasında bir etik ihlal (örneğin KVKK aykırılığı, mahremiyet ihlali veya pedagojik olmayan bir yönlendirme) tespit ederse, durumu bir dilekçe ile okul müdürlüğüne bildiriyor.</p>
+                                <p>Süreç şöyle ilerliyor:</p>
+                                <ul>
+                                    <li><strong>Kayıt ve Takip:</strong> Okul idaresi başvuruyu alır almaz YAZEK sistemine işliyor ve başvuru sahibi için benzersiz bir "takip kodu" üretiliyor.</li>
+                                    <li><strong>Okul Düzeyinde İnceleme:</strong> Okul Yapay Zekâ Etiği Ekibi, en geç 15 gün içinde toplanarak başvuruyu inceliyor. Gerekirse öğretmenden materyalleri istiyor veya taraflarla görüşüyor.</li>
+                                    <li><strong>Karar ve Müdahale:</strong> Eğer bir ihlal tespit edilirse uygulama "derhal" durduruluyor. İhlalin niteliğine göre disiplin veya idari süreçler devreye alınabiliyor.</li>
+                                    <li><strong>İtiraz Mekanizması:</strong> Taraflar okulun kararından memnun kalmadıysa; süreç bir üst basamağa, yani ilçe veya il kurullarımıza taşınıyor. Hatta gerekirse nihai karar için Etik Üst Kurulumuza kadar gelebiliyor.</li>
+                                </ul>
+                                <p>Bu mekanizma cezalandırıcı bir refleks değil, <strong>"önleyici bir güvence"</strong>dir. Amacımız sahadaki sorumlu kullanım kültürünü yerleşik hale getirmektir.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim19.jpg" alt="Slayt 19: Etik İhlal Bildirimi Akış Diyagramı"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 19: Etik İhlal Bildirimi Akış Diyagramı</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 20 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt20">
+                            Slayt 20: YAZEK İstatistikleri (İlk Ay)
+                        </button>
+                    </h2>
+                    <div id="slayt20" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 20: YAZEK İstatistikleri</h5>
+                            <div class="faq-answer">
+                                <p>Sistemin ilk ayına ilişkin veriler, sahadaki aktif kullanımı göstermektedir. <strong>81 ilde ve 331 ilçede kurullarımız teşkil edildi ve 37.361 okulumuzda ekiplerimiz oluşturuldu.</strong> Platforma yapılan <strong>516.719 giriş</strong> ve doldurulan <strong>3.263 etik beyan formu</strong>, öğretmenlerimizin bu süreci benimsediğinin bir göstergesidir.</p>
+                                <p class="mb-1 mt-3"><strong>En Çok Etik Beyan Başvurusu Yapılan Dersler:</strong></p>
+                                <ul>
+                                    <li>Matematik: 344</li>
+                                    <li>Türkçe: 291</li>
+                                    <li>Bilişim Teknolojileri ve Yazılım: 235</li>
+                                    <li>Yabancı Dil: 211</li>
+                                    <li>Fen Bilimleri: 179</li>
+                                </ul>
+                                <p class="mb-1 mt-3"><strong>Sınıf Düzeyine Göre Başvurular:</strong></p>
+                                <ul>
+                                    <li>9. Sınıf: 391 (%12)</li>
+                                    <li>5. Sınıf: 356 (%11)</li>
+                                    <li>10. Sınıf: 350 (%11)</li>
+                                    <li>6. Sınıf: 284 (%9)</li>
+                                    <li>4. Sınıf: 240 (%8)</li>
+                                </ul>
+                                <p class="mb-1 mt-3"><strong>Yapay Zekâ Uygulamalarının Kapsamı:</strong></p>
+                                <ul>
+                                    <li>Öğretim Desteği ve Sunumu (Öğretmen Odaklı): 1916 (%60)</li>
+                                    <li>İçerik Üretimi ve Kodlama (Öğrenci – Ürün): 1303 (%41)</li>
+                                    <li>Öğrenme Deneyimi, Etkileşim ve Alıştırma (Öğrenci – Süreç): 1124 (%35)</li>
+                                    <li>Ölçme, Değerlendirme ve Geri Bildirim: 862 (%27)</li>
+                                    <li>İzleme, Yönlendirme ve Davranışsal Analiz: 709 (%22)</li>
+                                </ul>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim20.jpg" alt="Slayt 20: YAZEK İstatistikleri (İlk Ay)"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 20: YAZEK İstatistikleri (İlk Ay)</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slayt 21 -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#slayt21">
+                            Slayt 21: Kapanış
+                        </button>
+                    </h2>
+                    <div id="slayt21" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4 faq-item">
+                            <h5 class="faq-question text-primary mb-3 fw-bold">Slayt 21: Kapanış</h5>
+                            <div class="faq-answer">
+                                <p>Değerli katılımcılar; yapay zekâ eğitimde hızlı bir dönüşüm süreci başlatmış olsa da bizler rotamızı belirlemiş durumdayız. Türkiye Yüzyılı Maarif Modeli ve YAZEK ile bu dönüşümü insani ve ahlaki değerler temelinde yönetiyoruz. İlginiz için teşekkür ediyor; <strong>teknolojinin insan onuruna hizmet ettiği bir eğitim geleceği</strong> temenni ediyorum.</p>
+                                <div class="card mb-4 shadow-sm border-0 visual-card text-center">
+                                    <div class="card-body p-4">
+                                        <img src="resim21.jpg" alt="Slayt 21: Kapanış"
+                                            class="img-fluid rounded border border-secondary-subtle mb-3 visual-img shadow-sm">
+                                        <div>
+                                            <h6 class="text-secondary mb-1 fw-bold"><i class="bi bi-image me-2"></i>Slayt 21: Kapanış</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soru ve Cevaplar -->
+                <div class="accordion-item faq-category">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button category-header collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#soruCevaplar">
+                            Soru ve Cevaplar
+                        </button>
+                    </h2>
+                    <div id="soruCevaplar" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body p-4">
+
+                            <div class="faq-item mb-5">
+                                <h5 class="faq-question text-primary mb-3 fw-bold">
+                                    1. Dijital Vatandaşlık Eğitimi çerçevesinde hazırlanan raporla ilgili öne çıkan en önemli veriyi paylaşabilir misiniz?
+                                </h5>
+                                <div class="faq-answer">
+                                    <p>Bulgularımız, Maarif Modeli'nin dijital vatandaşlığın özellikle <strong>"öğrenme ve yaratıcılık"</strong> ile <strong>"medya okuryazarlığı"</strong> boyutlarında oldukça güçlü olduğunu göstermektedir. Özellikle öğrenme ve yaratıcılık boyutunun hemen tüm programlarda öne çıkması, dijital araçların eğitim süreçlerinde etkili kullanımına verilen önemi açıkça ortaya koymaktadır.</p>
+                                    <p>Aynı zamanda mevcut programlarımızın, PISA 2029'da ilk kez değerlendirme alanı olarak ele alınacak <strong>"Medya ve Yapay Zekâ Okuryazarlığı"</strong> kapsamında güçlü bir yapıya sahip olması, programlarımızın uluslararası değerlendirme çerçeveleri ve güncel gelişmelerle dikkat çekici bir uyum içinde olduğunu göstermektedir.</p>
+                                    <p>Buna karşılık, hukuk, güvenlik ve etik gibi bazı boyutların daha sınırlı; dijital sağlık ve dijital tüketicilikle ilişkili çıktılarının ise görece daha az yer aldığı görülmektedir. Kısacası bu bulgular, Bakanlığımızın eğitim sistemini yalnızca bugünün dijital ihtiyaçlarına göre değil, 21. yüzyıl becerilerini ve gelecekte ölçülecek yetkinlik alanlarını da gözeten bir vizyonla şekillendirdiğinin açık bir kanıtıdır.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item mb-5">
+                                <h5 class="faq-question text-primary mb-3 fw-bold">
+                                    2. "Hangi uygulamalara izin var?", "Kurul ne zaman kurulmalı?", "Beyan sonradan yapılabilir mi?" sorularına topluca yanıt verebilir misiniz?
+                                </h5>
+                                <div class="faq-answer">
+                                    <p>Bizim yaklaşımımızı çok net bir şekilde ifade etmek isterim: <strong>Biz yasaklar listesi oluşturan bir sistem kurmadık.</strong> Bakanlık olarak biz bir "yasaklılar" veya "izin verilenler" listesi yayımlamıyoruz. Çünkü teknoloji çok hızlı değişiyor. Bu nedenle biz aracı değil, <strong>kullanımın niteliğini merkeze alıyoruz.</strong></p>
+                                    <p>Eğer bir yapay zekâ uygulaması;</p>
+                                    <ul>
+                                        <li>mahremiyet,</li>
+                                        <li>şeffaflık,</li>
+                                        <li>eğitsel değer</li>
+                                    </ul>
+                                    <p>gibi temel etik ilkelere uygunsa kullanılabilir. Ama uygun değilse, hangi araç olursa olsun sorun teşkil eder.</p>
+                                    <p><strong>"Kurul ne zaman kurulmalı?"</strong> sorusuna gelirsek; Okul YZ Etiği Ekiplerinin tüm okullarda hemen kurulmuş olması gerekir. Çünkü biz 2 Şubat 2026 itibarıyla YAZEK platformunu açtık ve tüm okullardan ekipleri kurmaları için resmî yazıları gönderdik.</p>
+                                    <p><strong>Beyan konusundaki kırmızı çizgimiz:</strong> Etik beyan, uygulama başlamadan önce yapılmalıdır. Beyan edilmeden gerçekleştirilen bir uygulama; öğretmeni Bakanlığın kurumsal ve hukuki "etik koruma şemsiyesi" dışına çıkarır. Bu konuda şunu ifade ediyoruz: <strong>"Beyan et, devam et."</strong></p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <h5 class="faq-question text-primary mb-3 fw-bold">
+                                    3. YAZEK sistemi sayesinde topladığınız veriler arasından en dikkat çekici bulguları paylaşabilir misiniz?
+                                </h5>
+                                <div class="faq-answer">
+                                    <p>YAZEK'in ilk ay verileri bize çok net bir tablo sunuyor: Sistem sahada hızla benimsenmiş durumda ve öğretmenlerimiz bu sürecin aktif bir parçası hâline gelmiş.</p>
+                                    <p>En dikkat çekici nokta şu: Yapay zekâ kullanımı özellikle <strong>Matematik, Türkçe ve Fen</strong> gibi temel derslerde yoğunlaşıyor. Bu da bize şunu gösteriyor:</p>
+                                    <p><strong>→ Yapay zekâ artık sadece bir teknoloji aracı değil, temel öğrenme süreçlerinin doğal bir parçası hâline gelmiş durumda.</strong></p>
+                                    <p>Ayrıca kullanımın büyük ölçüde;</p>
+                                    <ul>
+                                        <li>öğretimi destekleme,</li>
+                                        <li>içerik üretme,</li>
+                                        <li>ve öğrenme sürecini zenginleştirme</li>
+                                    </ul>
+                                    <p>amacıyla gerçekleştiğini görüyoruz. Kısacası bugün geldiğimiz noktada: <strong>→ Yapay zekâ, sınıfta "yardımcı bir araç" olmaktan çıkmış, öğrenme deneyimini dönüştüren bir yapı hâline gelmiştir.</strong></p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Resim Büyütme Modalı -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"
+                        style="background-color: white; padding: 0.5rem; border-radius: 50%;"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Büyük Görsel"
+                        style="max-height: 85vh; object-fit: contain; background-color: #fff; padding: 0.5rem;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('faqSearch');
+            const searchCount = document.getElementById('searchCount');
+            const toggleAllBtn = document.getElementById('toggleAll');
+
+            const faqItems = document.querySelectorAll('.faq-item');
+            const faqCategories = document.querySelectorAll('.faq-category');
+            const allCollapses = document.querySelectorAll('.accordion-collapse');
+            const allButtons = document.querySelectorAll('.accordion-button');
+
+            let isAllOpen = false;
+
+            const originalData = new Map();
+            document.querySelectorAll('.faq-question, .faq-answer').forEach(el => {
+                originalData.set(el, el.innerHTML);
+            });
+
+            function updateToggleBtn() {
+                const btnSpan = toggleAllBtn.querySelector('span');
+                const btnIcon = toggleAllBtn.querySelector('i');
+                if (isAllOpen) {
+                    btnSpan.innerText = "Tümünü Kapat";
+                    btnIcon.className = "bi bi-dash-square me-2";
+                } else {
+                    btnSpan.innerText = "Tümünü Aç";
+                    btnIcon.className = "bi bi-plus-square me-2";
+                }
+            }
+
+            toggleAllBtn.addEventListener('click', () => {
+                isAllOpen = !isAllOpen;
+                allCollapses.forEach(el => {
+                    if (isAllOpen) el.classList.add('show');
+                    else el.classList.remove('show');
+                });
+                allButtons.forEach(el => {
+                    if (isAllOpen) el.classList.remove('collapsed');
+                    else el.classList.add('collapsed');
+                });
+                updateToggleBtn();
+            });
+
+            searchInput.addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLocaleLowerCase('tr-TR').trim();
+
+                if (searchTerm.length < 3) {
+                    resetFAQ();
+                    searchCount.style.visibility = 'hidden';
+                    return;
+                }
+
+                let matchesFound = 0;
+                faqCategories.forEach(cat => cat.style.display = 'none');
+                faqItems.forEach(item => item.style.display = 'none');
+
+                faqItems.forEach(item => {
+                    const qEl = item.querySelector('.faq-question');
+                    const aEl = item.querySelector('.faq-answer');
+
+                    const qText = originalData.get(qEl).toLocaleLowerCase('tr-TR');
+                    const aText = originalData.get(aEl).toLocaleLowerCase('tr-TR');
+
+                    if (qText.includes(searchTerm) || aText.includes(searchTerm)) {
+                        matchesFound++;
+                        item.style.display = 'block';
+                        const parentCategory = item.closest('.faq-category');
+                        if (parentCategory) parentCategory.style.display = 'block';
+
+                        highlightElement(qEl, searchTerm);
+                        highlightElement(aEl, searchTerm);
+                        openAccordion(item);
+                    }
+                });
+
+                searchCount.innerText = `${matchesFound} sonuç bulundu.`;
+                searchCount.style.visibility = 'visible';
+
+                if (matchesFound > 0) {
+                    isAllOpen = true;
+                    updateToggleBtn();
+                }
+            });
+
+            function highlightElement(el, term) {
+                const originalHTML = originalData.get(el);
+                const regex = new RegExp(`(${term})`, 'gi');
+                el.innerHTML = originalHTML.replace(regex, '<mark>$1</mark>');
+            }
+
+            function openAccordion(itemEl) {
+                const collapseItem = itemEl.querySelector('.accordion-collapse');
+                if (collapseItem) collapseItem.classList.add('show');
+                const buttonItem = itemEl.querySelector('.accordion-button');
+                if (buttonItem) buttonItem.classList.remove('collapsed');
+
+                const parentCategory = itemEl.closest('.faq-category');
+                if (parentCategory) {
+                    const catCollapse = parentCategory.querySelector('.accordion-collapse');
+                    if (catCollapse) catCollapse.classList.add('show');
+                    const catButton = parentCategory.querySelector('.accordion-button');
+                    if (catButton) catButton.classList.remove('collapsed');
+                }
+            }
+
+            function resetFAQ() {
+                faqCategories.forEach(cat => cat.style.display = 'block');
+                faqItems.forEach(item => {
+                    item.style.display = 'block';
+                    const q = item.querySelector('.faq-question');
+                    const a = item.querySelector('.faq-answer');
+                    if (q) q.innerHTML = originalData.get(q);
+                    if (a) a.innerHTML = originalData.get(a);
+                });
+                isAllOpen = false;
+                allCollapses.forEach(el => el.classList.remove('show'));
+                allButtons.forEach(el => el.classList.add('collapsed'));
+                updateToggleBtn();
+            }
+
+            // Resim Büyütme İşlemi
+            const imageModalElement = document.getElementById('imageModal');
+            if (imageModalElement) {
+                const imageModal = new bootstrap.Modal(imageModalElement);
+                const modalImage = document.getElementById('modalImage');
+
+                document.querySelectorAll('.visual-img').forEach(img => {
+                    img.addEventListener('click', function () {
+                        modalImage.src = this.src;
+                        modalImage.alt = this.alt;
+                        imageModal.show();
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
