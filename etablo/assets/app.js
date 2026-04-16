@@ -397,6 +397,15 @@
   }
 
   // ---------------- Excel export ----------------
+  function aciklamaForExcel(text) {
+    if (!text) return "";
+    const parts = text
+      .split(/(?<=hazırlanır\.)\s+/giu)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    return parts.length > 1 ? parts.join("\n") : text;
+  }
+
   function exportXlsx() {
     if (typeof XLSX === "undefined") {
       alert("Excel kütüphanesi yüklenemedi.");
@@ -414,13 +423,37 @@
     ];
     const aoa = [header];
     for (const r of rows) {
-      aoa.push([r.sira, r.ders, r.unite, r.kazanim, r.tur, r.aciklama, r.program]);
+      aoa.push([
+        r.sira,
+        r.ders,
+        r.unite,
+        r.kazanim,
+        r.tur,
+        aciklamaForExcel(r.aciklama),
+        r.program,
+      ]);
     }
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws["!cols"] = [
       { wch: 8 }, { wch: 28 }, { wch: 34 }, { wch: 50 },
       { wch: 28 }, { wch: 60 }, { wch: 14 },
     ];
+
+    const ACIKLAMA_COL = 5;
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let R = range.s.r; R <= range.e.r; R++) {
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = ws[addr];
+        if (!cell) continue;
+        cell.s = cell.s || {};
+        cell.s.alignment = {
+          vertical: "top",
+          wrapText: C === ACIKLAMA_COL || R === 0,
+        };
+      }
+    }
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "E-İçerik");
     const stamp = new Date().toISOString().slice(0, 10);

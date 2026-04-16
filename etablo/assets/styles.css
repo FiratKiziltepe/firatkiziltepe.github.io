@@ -339,7 +339,7 @@ col.c-tur { width: 120px; }
 col.c-program { width: 92px; }
 
 td.multiline p { margin: 0; }
-td.multiline p + p { margin-top: 4px; }
+td.multiline p + p { margin-top: 8px; }
 
 th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
 th.sortable:hover { background: var(--meb-blue-darker); }
