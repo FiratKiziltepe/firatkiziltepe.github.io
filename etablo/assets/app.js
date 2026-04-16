@@ -9,6 +9,14 @@
     pageSize: 25,
     page: 1,
     filtered: [],
+    sortKey: null,
+    sortDir: "asc",
+  };
+
+  const SORTABLE = {
+    ders: (r) => r.ders,
+    unite: (r) => r.unite,
+    program: (r) => r.program,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -182,6 +190,19 @@
       if (q && !r._search.includes(q)) continue;
       out.push(r);
     }
+
+    if (state.sortKey && SORTABLE[state.sortKey]) {
+      const getter = SORTABLE[state.sortKey];
+      const dir = state.sortDir === "desc" ? -1 : 1;
+      out.sort((a, b) => {
+        const va = getter(a) || "";
+        const vb = getter(b) || "";
+        const c = collator.compare(va, vb);
+        if (c !== 0) return c * dir;
+        return a.id - b.id;
+      });
+    }
+
     state.filtered = out;
     state.page = 1;
   }
@@ -206,15 +227,31 @@
     const start = (state.page - 1) * ps;
     const slice = state.filtered.slice(start, start + ps);
 
+    const sortClass = (key) =>
+      state.sortKey === key ? ` sort-${state.sortDir}` : "";
+    const arrow = (key) =>
+      state.sortKey === key
+        ? state.sortDir === "asc" ? "▲" : "▼"
+        : "↕";
+
     let html = `<div class="table-wrap"><table>
+      <colgroup>
+        <col class="c-sira">
+        <col class="c-ders">
+        <col>
+        <col>
+        <col>
+        <col>
+        <col class="c-program">
+      </colgroup>
       <thead><tr>
         <th class="num">SIRA NO</th>
-        <th>DERS ADI</th>
-        <th>ÜNİTE/TEMA/ÖĞRENME ALANI</th>
+        <th class="sortable${sortClass("ders")}" data-sort="ders">DERS ADI<span class="arrow">${arrow("ders")}</span></th>
+        <th class="sortable${sortClass("unite")}" data-sort="unite">ÜNİTE/TEMA/ÖĞRENME ALANI<span class="arrow">${arrow("unite")}</span></th>
         <th>KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM</th>
         <th>E-İÇERİK TÜRÜ</th>
         <th>AÇIKLAMA</th>
-        <th class="center">PROGRAM TÜRÜ</th>
+        <th class="center sortable${sortClass("program")}" data-sort="program">PROGRAM TÜRÜ<span class="arrow">${arrow("program")}</span></th>
       </tr></thead><tbody>`;
     const q = state.query.trim();
     for (const r of slice) {
@@ -231,6 +268,20 @@
     }
     html += `</tbody></table></div>`;
     host.innerHTML = html;
+
+    host.querySelectorAll("th.sortable").forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (state.sortKey === key) {
+          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        } else {
+          state.sortKey = key;
+          state.sortDir = "asc";
+        }
+        applyFilters();
+        render();
+      });
+    });
   }
 
   function renderPagination() {
@@ -304,6 +355,8 @@
     state.query = "";
     state.page = 1;
     state.pageSize = 25;
+    state.sortKey = null;
+    state.sortDir = "asc";
 
     const progSel = $("program-select");
     if (progSel) progSel.value = "";

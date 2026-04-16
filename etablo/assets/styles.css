@@ -331,6 +331,21 @@ mark.hl {
   border-radius: 2px;
 }
 
+col.c-sira { width: 56px; }
+col.c-ders { width: 260px; }
+col.c-program { width: 96px; }
+
+th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+th.sortable:hover { background: var(--meb-blue-darker); }
+th.sortable .arrow {
+  display: inline-block;
+  margin-left: 6px;
+  opacity: 0.4;
+  font-size: 11px;
+}
+th.sortable.sort-asc .arrow,
+th.sortable.sort-desc .arrow { opacity: 1; }
+
 .badge {
   display: inline-block;
   padding: 2px 8px;
