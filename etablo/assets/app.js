@@ -22,6 +22,19 @@
       .replace(/"/g, "&quot;");
   }
 
+  function escapeRegex(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function highlight(text, query) {
+    const safe = escapeHtml(text);
+    if (!query) return safe;
+    const trimmed = query.trim();
+    if (!trimmed) return safe;
+    const re = new RegExp(escapeRegex(trimmed), "giu");
+    return safe.replace(re, (m) => `<mark class="hl">${m}</mark>`);
+  }
+
   function debounce(fn, ms) {
     let t;
     return (...args) => {
@@ -203,15 +216,16 @@
         <th>AÇIKLAMA</th>
         <th class="center">PROGRAM TÜRÜ</th>
       </tr></thead><tbody>`;
+    const q = state.query.trim();
     for (const r of slice) {
       const badgeClass = r.program === "TYMM" ? "tymm" : r.program === "Diğer" ? "diger" : "";
       html += `<tr>
         <td class="num">${escapeHtml(r.sira)}</td>
-        <td>${escapeHtml(r.ders)}</td>
-        <td>${escapeHtml(r.unite)}</td>
-        <td>${escapeHtml(r.kazanim)}</td>
-        <td>${escapeHtml(r.tur)}</td>
-        <td class="multiline">${escapeHtml(r.aciklama)}</td>
+        <td>${highlight(r.ders, q)}</td>
+        <td>${highlight(r.unite, q)}</td>
+        <td>${highlight(r.kazanim, q)}</td>
+        <td>${highlight(r.tur, q)}</td>
+        <td class="multiline">${highlight(r.aciklama, q)}</td>
         <td class="center"><span class="badge ${badgeClass}">${escapeHtml(r.program || "-")}</span></td>
       </tr>`;
     }
@@ -283,6 +297,60 @@
     renderPagination();
   }
 
+  // ---------------- Clear filters ----------------
+  function clearFilters() {
+    state.selectedDersler.clear();
+    state.program = "";
+    state.query = "";
+    state.page = 1;
+    state.pageSize = 25;
+
+    const progSel = $("program-select");
+    if (progSel) progSel.value = "";
+    const searchEl = $("search-input");
+    if (searchEl) searchEl.value = "";
+    const pageSizeEl = $("page-size");
+    if (pageSizeEl) pageSizeEl.value = "25";
+    if (multi.searchEl) multi.searchEl.value = "";
+    multi.filterText = "";
+
+    renderMultiTrigger();
+    renderMultiList();
+    closeMulti();
+    onFilterChange();
+  }
+
+  // ---------------- Excel export ----------------
+  function exportXlsx() {
+    if (typeof XLSX === "undefined") {
+      alert("Excel kütüphanesi yüklenemedi.");
+      return;
+    }
+    const rows = state.filtered;
+    const header = [
+      "SIRA NO",
+      "DERS ADI",
+      "ÜNİTE/TEMA/ÖĞRENME ALANI",
+      "KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM",
+      "E-İÇERİK TÜRÜ",
+      "AÇIKLAMA",
+      "PROGRAM TÜRÜ",
+    ];
+    const aoa = [header];
+    for (const r of rows) {
+      aoa.push([r.sira, r.ders, r.unite, r.kazanim, r.tur, r.aciklama, r.program]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [
+      { wch: 8 }, { wch: 28 }, { wch: 34 }, { wch: 50 },
+      { wch: 28 }, { wch: 60 }, { wch: 14 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "E-İçerik");
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `e-icerik-tablosu-${stamp}.xlsx`);
+  }
+
   // ---------------- Init ----------------
   async function init() {
     initMulti();
@@ -300,6 +368,9 @@
       state.page = 1;
       render();
     });
+
+    $("clear-filters").addEventListener("click", clearFilters);
+    $("export-xlsx").addEventListener("click", exportXlsx);
 
     try {
       const data = await EtabloData.load();

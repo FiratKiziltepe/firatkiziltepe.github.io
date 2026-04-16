@@ -12,10 +12,6 @@
     <div class="inner">
       <img src="./logo.png" alt="MEB" class="logo" />
       <h1>E-İçerik Özet Raporu</h1>
-      <nav>
-        <a href="./index.html">Tablo</a>
-        <a href="./rapor.html" class="active">Rapor</a>
-      </nav>
     </div>
   </header>
 
@@ -29,7 +25,7 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <input type="search" id="ders-search" placeholder="Ders ara..." style="width:240px;" />
-          <button type="button" class="ghost small" id="export-t1">CSV indir</button>
+          <button type="button" class="small" id="export-t1">Excel olarak indir</button>
         </div>
       </div>
       <div id="ders-table" class="table-wrap"><div class="loader">Veri yükleniyor...</div></div>
@@ -48,13 +44,14 @@
             <button type="button" data-mode="raw">Ham</button>
           </div>
           <input type="search" id="tur-search" placeholder="Tür ara..." style="width:200px;" />
-          <button type="button" class="ghost small" id="export-t2">CSV indir</button>
+          <button type="button" class="small" id="export-t2">Excel olarak indir</button>
         </div>
       </div>
       <div id="tur-table" class="table-wrap"><div class="loader">Veri yükleniyor...</div></div>
     </section>
   </main>
 
+  <script src="./assets/xlsx.full.min.js"></script>
   <script src="./assets/data-loader.js"></script>
   <script src="./assets/report.js"></script>
 </body>

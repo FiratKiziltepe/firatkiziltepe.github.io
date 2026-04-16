@@ -12,10 +12,6 @@
     <div class="inner">
       <img src="./logo.png" alt="MEB" class="logo" />
       <h1>Ders Kitapları ve Eğitim Araçları E-İçerik Tablosu</h1>
-      <nav>
-        <a href="./index.html" class="active">Tablo</a>
-        <a href="./rapor.html">Rapor</a>
-      </nav>
     </div>
   </header>
 
@@ -72,6 +68,10 @@
           Toplam içerik: <strong id="count-total">0</strong> /
           Görüntülenen: <strong id="count-visible">0</strong>
         </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="ghost small" id="clear-filters">Filtreleri Temizle</button>
+          <button type="button" class="small" id="export-xlsx">Excel olarak indir</button>
+        </div>
       </div>
       <div id="table-host">
         <div class="loader">Veri yükleniyor...</div>
@@ -83,6 +83,7 @@
     </section>
   </main>
 
+  <script src="./assets/xlsx.full.min.js"></script>
   <script src="./assets/data-loader.js"></script>
   <script src="./assets/app.js"></script>
 </body>

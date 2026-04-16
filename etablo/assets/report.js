@@ -159,51 +159,70 @@
     $("tur-total").textContent = fullTotal.toLocaleString("tr");
   }
 
-  // ---------------- CSV ----------------
-  function toCsv(rows) {
-    return rows
-      .map((r) =>
-        r
-          .map((c) => {
-            const s = String(c == null ? "" : c);
-            return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-          })
-          .join(";")
-      )
-      .join("\n");
+  // ---------------- Excel (XLSX) ----------------
+  function ensureXlsx() {
+    if (typeof XLSX === "undefined") {
+      alert("Excel kütüphanesi yüklenemedi.");
+      return false;
+    }
+    return true;
   }
 
-  function download(filename, content) {
-    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
-  }
-
-  function exportDersCsv() {
-    const rows = [["SIRA NO", "DERS ADI", ...state.programs.map((p) => p.toLocaleUpperCase("tr")), "GENEL TOPLAM"]];
+  function exportDersXlsx() {
+    if (!ensureXlsx()) return;
+    const header = ["SIRA NO", "DERS ADI", ...state.programs.map((p) => (p || "-").toLocaleUpperCase("tr")), "GENEL TOPLAM"];
+    const aoa = [header];
+    const totals = {};
+    for (const p of state.programs) totals[p] = 0;
+    let grand = 0;
     for (const r of state.dersPivot) {
       const line = [r.sira, r.ders];
-      for (const p of state.programs) line.push(r.counts[p] || 0);
+      for (const p of state.programs) {
+        const v = r.counts[p] || 0;
+        line.push(v);
+        totals[p] += v;
+      }
       line.push(r.total);
-      rows.push(line);
+      grand += r.total;
+      aoa.push(line);
     }
-    download("ders-program-ozeti.csv", toCsv(rows));
+    const totalLine = ["", "TOPLAM"];
+    for (const p of state.programs) totalLine.push(totals[p] || 0);
+    totalLine.push(grand);
+    aoa.push(totalLine);
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const widths = [{ wch: 8 }, { wch: 32 }];
+    for (let i = 0; i < state.programs.length; i++) widths.push({ wch: 12 });
+    widths.push({ wch: 14 });
+    ws["!cols"] = widths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ders-Program");
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `ders-program-ozeti-${stamp}.xlsx`);
   }
 
-  function exportTurCsv() {
+  function exportTurXlsx() {
+    if (!ensureXlsx()) return;
     const full = computeTurCounts(state.turMode);
-    const rows = [["#", "E-İÇERİK TÜRÜ", "ADET"]];
-    full.forEach((r, i) => rows.push([i + 1, r.tur, r.count]));
-    const name = state.turMode === "split" ? "e-icerik-turu-ayristirilmis.csv" : "e-icerik-turu-ham.csv";
-    download(name, toCsv(rows));
+    const aoa = [["#", "E-İÇERİK TÜRÜ", "ADET"]];
+    let total = 0;
+    full.forEach((r, i) => {
+      aoa.push([i + 1, r.tur, r.count]);
+      total += r.count;
+    });
+    aoa.push(["", "TOPLAM", total]);
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [{ wch: 6 }, { wch: 50 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    const sheetName = state.turMode === "split" ? "Ayrıştırılmış" : "Ham";
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const name = state.turMode === "split"
+      ? `e-icerik-turu-ayristirilmis-${stamp}.xlsx`
+      : `e-icerik-turu-ham-${stamp}.xlsx`;
+    XLSX.writeFile(wb, name);
   }
 
   // ---------------- Init ----------------
@@ -235,8 +254,8 @@
         });
       });
 
-      $("export-t1").addEventListener("click", exportDersCsv);
-      $("export-t2").addEventListener("click", exportTurCsv);
+      $("export-t1").addEventListener("click", exportDersXlsx);
+      $("export-t2").addEventListener("click", exportTurXlsx);
     } catch (err) {
       $("ders-table").innerHTML = `<div class="alert">Veri yüklenemedi: ${escapeHtml(err.message)}</div>`;
       $("tur-table").innerHTML = "";

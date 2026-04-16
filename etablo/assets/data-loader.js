@@ -68,7 +68,8 @@
     if (_pending) return _pending;
 
     _pending = (async () => {
-      const res = await fetch("./data.json", { cache: "force-cache" });
+      const bust = Date.now();
+      const res = await fetch("./data.json?v=" + bust, { cache: "no-store" });
       if (!res.ok) throw new Error("data.json yüklenemedi: " + res.status);
       const raw = await res.json();
 
