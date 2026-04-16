@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ders Kitapları ve Eğitim Araçları E-İçerik Tablosu</title>
+  <link rel="icon" href="./logo.png" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <img src="./logo.png" alt="MEB" class="logo" />
+      <h1>Ders Kitapları ve Eğitim Araçları E-İçerik Tablosu</h1>
+      <nav>
+        <a href="./index.html" class="active">Tablo</a>
+        <a href="./rapor.html">Rapor</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="controls">
+        <div class="field">
+          <label for="ders-trigger">Ders Adı (çoklu seçim)</label>
+          <div class="multi" id="ders-multi">
+            <div class="multi-trigger" id="ders-trigger" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="placeholder">Tüm dersler</span>
+            </div>
+            <div class="multi-panel" role="listbox">
+              <div class="search">
+                <input type="search" id="ders-search" placeholder="Ders ara..." autocomplete="off" />
+              </div>
+              <div class="actions">
+                <button type="button" class="small ghost" id="ders-all">Tümünü seç</button>
+                <button type="button" class="small ghost" id="ders-clear">Temizle</button>
+              </div>
+              <div class="list" id="ders-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="program-select">Program Türü</label>
+          <select id="program-select">
+            <option value="">Tümü</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="search-input">Arama</label>
+          <input type="search" id="search-input" placeholder="Kazanım, açıklama, ünite..." autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="page-size">Sayfa başına</label>
+          <select id="page-size">
+            <option>10</option>
+            <option selected>25</option>
+            <option>50</option>
+            <option>100</option>
+            <option>250</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar" style="margin-bottom:10px; margin-top:0;">
+        <div class="counter">
+          Toplam içerik: <strong id="count-total">0</strong> /
+          Görüntülenen: <strong id="count-visible">0</strong>
+        </div>
+      </div>
+      <div id="table-host">
+        <div class="loader">Veri yükleniyor...</div>
+      </div>
+      <div class="toolbar">
+        <div class="counter" id="page-info"></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./assets/data-loader.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
