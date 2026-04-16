@@ -332,8 +332,14 @@ mark.hl {
 }
 
 col.c-sira { width: 56px; }
-col.c-ders { width: 260px; }
-col.c-program { width: 96px; }
+col.c-ders { width: 130px; }
+col.c-unite { width: 160px; }
+col.c-kazanim { width: 240px; }
+col.c-tur { width: 120px; }
+col.c-program { width: 92px; }
+
+td.multiline p { margin: 0; }
+td.multiline p + p { margin-top: 4px; }
 
 th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
 th.sortable:hover { background: var(--meb-blue-darker); }

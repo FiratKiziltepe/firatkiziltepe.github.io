@@ -9,13 +9,11 @@
     pageSize: 25,
     page: 1,
     filtered: [],
-    sortKey: null,
-    sortDir: "asc",
+    sorts: [],
   };
 
   const SORTABLE = {
     ders: (r) => r.ders,
-    unite: (r) => r.unite,
     program: (r) => r.program,
   };
 
@@ -41,6 +39,16 @@
     if (!trimmed) return safe;
     const re = new RegExp(escapeRegex(trimmed), "giu");
     return safe.replace(re, (m) => `<mark class="hl">${m}</mark>`);
+  }
+
+  function formatAciklama(text, query) {
+    if (!text) return "";
+    const parts = text
+      .split(/(?<=hazırlanır\.)\s+/giu)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (parts.length <= 1) return highlight(text, query);
+    return parts.map((p) => `<p>${highlight(p, query)}</p>`).join("");
   }
 
   function debounce(fn, ms) {
@@ -191,14 +199,16 @@
       out.push(r);
     }
 
-    if (state.sortKey && SORTABLE[state.sortKey]) {
-      const getter = SORTABLE[state.sortKey];
-      const dir = state.sortDir === "desc" ? -1 : 1;
+    if (state.sorts.length > 0) {
       out.sort((a, b) => {
-        const va = getter(a) || "";
-        const vb = getter(b) || "";
-        const c = collator.compare(va, vb);
-        if (c !== 0) return c * dir;
+        for (const s of state.sorts) {
+          const getter = SORTABLE[s.key];
+          if (!getter) continue;
+          const va = getter(a) || "";
+          const vb = getter(b) || "";
+          const c = collator.compare(va, vb);
+          if (c !== 0) return c * (s.dir === "desc" ? -1 : 1);
+        }
         return a.id - b.id;
       });
     }
@@ -227,31 +237,37 @@
     const start = (state.page - 1) * ps;
     const slice = state.filtered.slice(start, start + ps);
 
-    const sortClass = (key) =>
-      state.sortKey === key ? ` sort-${state.sortDir}` : "";
-    const arrow = (key) =>
-      state.sortKey === key
-        ? state.sortDir === "asc" ? "▲" : "▼"
-        : "↕";
+    const sortIndex = (key) => state.sorts.findIndex((s) => s.key === key);
+    const sortClass = (key) => {
+      const i = sortIndex(key);
+      return i >= 0 ? ` sort-${state.sorts[i].dir}` : "";
+    };
+    const arrow = (key) => {
+      const i = sortIndex(key);
+      if (i < 0) return "↕";
+      const dir = state.sorts[i].dir === "asc" ? "▲" : "▼";
+      const badge = state.sorts.length > 1 ? `<sup>${i + 1}</sup>` : "";
+      return dir + badge;
+    };
 
     let html = `<div class="table-wrap"><table>
       <colgroup>
         <col class="c-sira">
         <col class="c-ders">
-        <col>
-        <col>
-        <col>
+        <col class="c-unite">
+        <col class="c-kazanim">
+        <col class="c-tur">
         <col>
         <col class="c-program">
       </colgroup>
       <thead><tr>
         <th class="num">SIRA NO</th>
-        <th class="sortable${sortClass("ders")}" data-sort="ders">DERS ADI<span class="arrow">${arrow("ders")}</span></th>
-        <th class="sortable${sortClass("unite")}" data-sort="unite">ÜNİTE/TEMA/ÖĞRENME ALANI<span class="arrow">${arrow("unite")}</span></th>
+        <th class="sortable${sortClass("ders")}" data-sort="ders" title="Sıralamak için tıklayın. Shift+Tık ile ikincil sıralama eklersiniz.">DERS ADI<span class="arrow">${arrow("ders")}</span></th>
+        <th>ÜNİTE/TEMA/ÖĞRENME ALANI</th>
         <th>KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM</th>
         <th>E-İÇERİK TÜRÜ</th>
         <th>AÇIKLAMA</th>
-        <th class="center sortable${sortClass("program")}" data-sort="program">PROGRAM TÜRÜ<span class="arrow">${arrow("program")}</span></th>
+        <th class="center sortable${sortClass("program")}" data-sort="program" title="Sıralamak için tıklayın. Shift+Tık ile ikincil sıralama eklersiniz.">PROGRAM TÜRÜ<span class="arrow">${arrow("program")}</span></th>
       </tr></thead><tbody>`;
     const q = state.query.trim();
     for (const r of slice) {
@@ -262,7 +278,7 @@
         <td>${highlight(r.unite, q)}</td>
         <td>${highlight(r.kazanim, q)}</td>
         <td>${highlight(r.tur, q)}</td>
-        <td class="multiline">${highlight(r.aciklama, q)}</td>
+        <td class="multiline">${formatAciklama(r.aciklama, q)}</td>
         <td class="center"><span class="badge ${badgeClass}">${escapeHtml(r.program || "-")}</span></td>
       </tr>`;
     }
@@ -270,13 +286,21 @@
     host.innerHTML = html;
 
     host.querySelectorAll("th.sortable").forEach((th) => {
-      th.addEventListener("click", () => {
+      th.addEventListener("click", (e) => {
         const key = th.dataset.sort;
-        if (state.sortKey === key) {
-          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        const idx = state.sorts.findIndex((s) => s.key === key);
+        if (e.shiftKey) {
+          if (idx >= 0) {
+            state.sorts[idx].dir = state.sorts[idx].dir === "asc" ? "desc" : "asc";
+          } else {
+            state.sorts.push({ key, dir: "asc" });
+          }
         } else {
-          state.sortKey = key;
-          state.sortDir = "asc";
+          if (idx >= 0 && state.sorts.length === 1) {
+            state.sorts = [{ key, dir: state.sorts[0].dir === "asc" ? "desc" : "asc" }];
+          } else {
+            state.sorts = [{ key, dir: "asc" }];
+          }
         }
         applyFilters();
         render();
@@ -355,8 +379,7 @@
     state.query = "";
     state.page = 1;
     state.pageSize = 25;
-    state.sortKey = null;
-    state.sortDir = "asc";
+    state.sorts = [];
 
     const progSel = $("program-select");
     if (progSel) progSel.value = "";
