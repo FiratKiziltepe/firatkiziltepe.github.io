@@ -69,6 +69,7 @@
           Görüntülenen: <strong id="count-visible">0</strong>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="ghost small" id="info-btn">Tablo Hakkında</button>
           <button type="button" class="ghost small" id="clear-filters">Filtreleri Temizle</button>
           <button type="button" class="small" id="export-xlsx">Excel olarak indir</button>
         </div>
@@ -82,6 +83,20 @@
       </div>
     </section>
   </main>
+
+  <div class="modal-overlay" id="info-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="info-title">
+      <div class="modal-header">
+        <h2 id="info-title">Tablo Yapısı Hakkında</h2>
+        <button type="button" class="modal-close" id="info-close" aria-label="Kapat">&times;</button>
+      </div>
+      <div class="modal-body" id="info-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="ghost" id="info-cancel" hidden>Vazgeç</button>
+        <button type="button" id="info-ack">Bilgilendirme metnini okudum</button>
+      </div>
+    </div>
+  </div>
 
   <script src="./assets/xlsx.full.min.js"></script>
   <script src="./assets/data-loader.js"></script>

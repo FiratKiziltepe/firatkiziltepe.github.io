@@ -396,6 +396,88 @@
     onFilterChange();
   }
 
+  // ---------------- Info modal ----------------
+  const INFO_HTML = `
+    <div class="info-section">
+      <div class="info-title">Ünite/Tema/Öğrenme Alanı</div>
+      <p>E-içeriğin ilişkili olduğu ünite/tema/öğrenme alanını ifade eder.</p>
+    </div>
+    <div class="info-section">
+      <div class="info-title">Kazanım/Öğrenme Çıktısı/Bölüm</div>
+      <p>E-içeriğin ilişkili olduğu kazanım, öğrenme çıktısı, öğrenme kanıtları, köprü kurma vb. bölümleri ifade eder. Tablo satırında bir hücrede <strong>birden fazla kazanım</strong> yer alıyorsa hazırlanacak e-içerik <strong>bunlardan en az biri</strong> ile ilgili olmalıdır.</p>
+    </div>
+    <div class="info-section">
+      <div class="info-title">E-İçerik Türü</div>
+      <p>Hazırlanacak e-içerik türlerini ifade eder.</p>
+      <ul>
+        <li>İlgili satırda tek bir e-içerik türü verilmişse bu durumda adı geçen e-içerik türünü içeren e-içerik hazırlanması gerekir. Örneğin 9. Sınıf Kimya Dersi için <em>"KİM.9.2.3. Kovalent bağ oluşumunu bilimsel gözleme dayalı tahmin edebilme"</em> öğrenme çıktısına yönelik tabloda e-içerik türü olarak <strong>Video</strong> belirtildiğinden bu bölüm için <strong>Video türünde</strong> e-içerik hazırlanmalıdır. Bu bölüm için etkileşimli içerik hazırlanması durumunda ise etkileşimli içerik tablodaki ilgili çıktıya yönelik Video içermelidir.</li>
+        <li>İlgili tablonun e-içerik türü bölümünde yalnızca "Video" olarak belirtilen elektronik eğitim içerikleri için, "Video" yerine kavram haritası, bilgi görseli, pdf veya video içermeyen etkileşimli içerik hazırlanması durumunda bu e-içerik <strong>hazırlanmamış</strong> olarak değerlendirilecektir.</li>
+        <li>İlgili kazanımın/öğrenme çıktısı/bölüm için eğer birden fazla e-içerik türü belirtilmiş ise o satır için bu e-içerik türlerinden en az birinin hazırlanması gerekir. Ancak bu noktada kitabın kurgusu ve programın yapısına en uygun olanlar tercih edilmeli ve kitap genelinde çeşitlilik sağlamaya özen gösterilmelidir. Bu gibi durumlar için e-içerik türü sütununda e-içerik türleri arasına "/" işareti eklenerek seçenekli olduğuna vurgu yapılmıştır. Örneğin; tabloda <strong>"BİY.9.2.7"</strong> numaralı öğrenme çıktısı için video veya etkileşimli içerikten birinin hazırlanması yeterlidir.</li>
+      </ul>
+    </div>
+    <div class="info-section">
+      <div class="info-title">Açıklama</div>
+      <p>E-içerik geliştiricilerine rehberlik etmesi açısından Başkanlığımızca önerilen asgari senaryo özetini ifade eder. Öğretim programının yapısı, kitabın <strong>kurgusu</strong> vb. durumlar göz önünde bulundurularak farklı senaryolarda e-içerikler hazırlanabilir.</p>
+    </div>
+  `;
+
+  const modalState = { open: false, mode: null, onAck: null };
+
+  function openInfoModal(opts) {
+    opts = opts || {};
+    const mode = opts.mode || "info";
+    const onAck = opts.onAck || null;
+    const modal = $("info-modal");
+    const body = $("info-body");
+    const ack = $("info-ack");
+    const cancel = $("info-cancel");
+
+    body.innerHTML = INFO_HTML;
+    if (mode === "download") {
+      ack.textContent = "Okudum, indir";
+      cancel.hidden = false;
+    } else {
+      ack.textContent = "Kapat";
+      cancel.hidden = true;
+    }
+
+    modalState.open = true;
+    modalState.mode = mode;
+    modalState.onAck = onAck;
+
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(() => ack.focus(), 0);
+  }
+
+  function closeInfoModal() {
+    const modal = $("info-modal");
+    modal.hidden = true;
+    document.body.style.overflow = "";
+    modalState.open = false;
+    modalState.mode = null;
+    modalState.onAck = null;
+  }
+
+  function ackInfoModal() {
+    const cb = modalState.onAck;
+    closeInfoModal();
+    if (typeof cb === "function") cb();
+  }
+
+  function bindModal() {
+    const modal = $("info-modal");
+    $("info-close").addEventListener("click", closeInfoModal);
+    $("info-cancel").addEventListener("click", closeInfoModal);
+    $("info-ack").addEventListener("click", ackInfoModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeInfoModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (modalState.open && e.key === "Escape") closeInfoModal();
+    });
+  }
+
   // ---------------- Excel export ----------------
   function aciklamaForExcel(text) {
     if (!text) return "";
@@ -407,6 +489,10 @@
   }
 
   function exportXlsx() {
+    openInfoModal({ mode: "download", onAck: performXlsxDownload });
+  }
+
+  function performXlsxDownload() {
     if (typeof XLSX === "undefined") {
       alert("Excel kütüphanesi yüklenemedi.");
       return;
@@ -480,6 +566,8 @@
 
     $("clear-filters").addEventListener("click", clearFilters);
     $("export-xlsx").addEventListener("click", exportXlsx);
+    $("info-btn").addEventListener("click", () => openInfoModal({ mode: "info" }));
+    bindModal();
 
     try {
       const data = await EtabloData.load();
