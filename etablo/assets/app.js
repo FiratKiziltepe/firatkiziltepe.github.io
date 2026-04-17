@@ -399,6 +399,41 @@
   // ---------------- Info modal ----------------
   const INFO_HTML = `
     <div class="info-section">
+      <div class="info-title">Örnek Tablo</div>
+      <div class="example-wrap">
+        <table class="example-table">
+          <thead>
+            <tr>
+              <th>DERS ADI</th>
+              <th>ÜNİTE/TEMA/ÖĞRENME ALANI</th>
+              <th>KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM</th>
+              <th>E-İÇERİK TÜRÜ</th>
+              <th>AÇIKLAMA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Kimya 9</td>
+              <td>2. ÇEŞİTLİLİK</td>
+              <td>KİM.9.2.3. Kovalent bağ oluşumunu bilimsel gözleme dayalı tahmin edebilme</td>
+              <td><strong>Video</strong></td>
+              <td>İki ametal atom birbirine yaklaşırken bu atomlardaki elektronların davranışında meydana gelen değişimi gösteren animasyon hazırlanır.</td>
+            </tr>
+            <tr>
+              <td>BİYOLOJİ 9</td>
+              <td>2. ORGANİZASYON</td>
+              <td>BİY.9.2.7. Küçük moleküllerin hücre zarından pasif geçişi ile ilgili deney yapabilme</td>
+              <td><strong>Video/Etkileşimli İçerik</strong></td>
+              <td>
+                <p>Farklı ortamlardaki (hipertonik, izotonik, hipotonik) hücrelerin içine ve dışına su geçişini gösteren video hazırlanır.</p>
+                <p>Öğrencilerin farklı ortamlardaki (hipertonik, izotonik, hipotonik) hücrelerin içine ve dışına su geçişini gözlemleyebilecekleri, çözünen madde miktarını ve hücre zarının geçirgenliğini değiştirebilecekleri bir benzetim (simülasyon) hazırlanır.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="info-section">
       <div class="info-title">Ünite/Tema/Öğrenme Alanı</div>
       <p>E-içeriğin ilişkili olduğu ünite/tema/öğrenme alanını ifade eder.</p>
     </div>

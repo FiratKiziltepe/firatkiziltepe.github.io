@@ -539,6 +539,41 @@ th.sortable.sort-desc .arrow { opacity: 1; }
   text-transform: uppercase;
 }
 
+.example-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+table.example-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: #fff;
+}
+table.example-table thead th {
+  background: var(--meb-blue-lighter);
+  color: var(--meb-blue-dark);
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  letter-spacing: 0.2px;
+  position: static;
+  white-space: normal;
+}
+table.example-table tbody td {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.45;
+}
+table.example-table tbody tr:nth-child(even) td {
+  background: var(--meb-blue-lighter);
+}
+table.example-table td p { margin: 0 0 6px 0; }
+table.example-table td p:last-child { margin-bottom: 0; }
+
 .modal-footer {
   display: flex;
   gap: 8px;
