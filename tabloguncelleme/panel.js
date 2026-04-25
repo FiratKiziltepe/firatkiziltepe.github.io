@@ -231,6 +231,86 @@ async function handleRejectNewRow(id) {
 // ADMİN PANELİ
 // =====================================================
 
+// =====================================================
+// ADMİN VERİ YÖNETİMİ
+// =====================================================
+
+/**
+ * JSON verisini Supabase'e yükle
+ */
+async function uploadDataToSupabase() {
+    if (!isAdmin()) {
+        showNotification('Sadece adminler veri yükleyebilir', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('uploadDataBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Yükleniyor...';
+    }
+
+    try {
+        showNotification('Veri dosyası okunuyor...', 'info');
+        const response = await fetch('data.json');
+        const data = await response.json();
+        
+        // DERS ADI olan başlık satırlarını filtrele
+        const cleanData = data.filter(row => row['DERS ADI'] !== 'DERS ADI');
+        const total = cleanData.length;
+        
+        showNotification(`${total} kayıt veritabanına yükleniyor...`, 'info');
+        
+        const sb = getSupabase();
+        const BATCH_SIZE = 100;
+        let uploaded = 0;
+        let errors = 0;
+
+        // Mevcut verileri temizle
+        await sb.from('e_icerikler').delete().neq('id', 0);
+
+        // Batch yükleme
+        for (let i = 0; i < total; i += BATCH_SIZE) {
+            const batch = cleanData.slice(i, i + BATCH_SIZE).map(row => ({
+                sira_no: row['SIRA NO'],
+                ders_adi: row['DERS ADI'],
+                unite_tema: row['ÜNİTE/TEMA/ ÖĞRENME ALANI'],
+                kazanim: row['KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM'],
+                e_icerik_turu: row['E-İÇERİK TÜRÜ'],
+                aciklama: row['AÇIKLAMA'],
+                program_turu: row['Program Türü']
+            }));
+
+            const { error } = await sb.from('e_icerikler').insert(batch);
+            
+            if (error) {
+                console.error('Batch hatası:', error);
+                errors += batch.length;
+            } else {
+                uploaded += batch.length;
+            }
+            
+            // İlerleme göster
+            const percent = Math.round((i + batch.length) / total * 100);
+            if (btn) btn.textContent = `%${percent} Yüklendi...`;
+        }
+
+        showNotification(`İşlem tamamlandı. ${uploaded} kayıt yüklendi.`, 'success');
+        
+        // Sayfayı yenile
+        setTimeout(() => location.reload(), 1500);
+
+    } catch (error) {
+        console.error('Yükleme hatası:', error);
+        showNotification('Veri yükleme hatası: ' + error.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Verileri Yeniden Yükle';
+        }
+    }
+}
+
 /**
  * Admin panelini başlat
  */
@@ -241,6 +321,27 @@ async function initAdminPanel() {
     if (!panel) return;
     
     panel.style.display = 'block';
+    
+    // Veri yükleme butonu ekle (eğer yoksa)
+    if (!document.getElementById('uploadDataBtn')) {
+        const content = panel.querySelector('.panel-content');
+        const uploadDiv = document.createElement('div');
+        uploadDiv.className = 'admin-actions';
+        uploadDiv.style.marginBottom = '20px';
+        uploadDiv.style.padding = '10px';
+        uploadDiv.style.background = '#e3f2fd';
+        uploadDiv.style.borderRadius = '6px';
+        
+        uploadDiv.innerHTML = `
+            <h4>Veritabanı Yönetimi</h4>
+            <p style="font-size:12px; margin-bottom:10px;">Mevcut verileri silip JSON dosyasından yeniden yükler.</p>
+            <button id="uploadDataBtn" class="btn btn-primary btn-sm" onclick="uploadDataToSupabase()">
+                🔄 Verileri JSON'dan Yükle
+            </button>
+        `;
+        
+        content.insertBefore(uploadDiv, content.firstChild);
+    }
     
     // Logları yükle
     await loadChangeLogs();

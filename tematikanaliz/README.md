@@ -7,7 +7,7 @@ Gemini AI ile güçlendirilmiş, öğretmen görüşlerini analiz eden profesyon
 ## Özellikler
 
 - 📊 **10,000+ Satır Excel Desteği**: Büyük veri setlerini batch processing ile hızlıca analiz edin
-- 🤖 **Gemini AI Entegrasyonu**: Google'ın en yeni Gemini 2.0 Flash modeli ile güçlendirilmiş
+- 🤖 **Gemini AI Entegrasyonu**: Google'ın en yeni Gemini 3.1 Flash Lite (Preview) modeli ile güçlendirilmiş
 - 📈 **Gelişmiş Görselleştirmeler**: Chart.js ile interaktif grafikler ve istatistikler
 - 🎯 **Tematik Analiz**: Otomatik kategorizasyon ve sentiment analizi
 - 📥 **Excel Export**: Analiz sonuçlarını Excel formatında indirin

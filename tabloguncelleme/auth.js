@@ -104,7 +104,7 @@ async function checkSession() {
 }
 
 /**
- * Kullanıcı profil bilgilerini yükle
+ * Kullanıcı profil bilgilerini yükle (Güvenli Mod)
  */
 async function loadUserProfile() {
     if (!currentUser) return null;
@@ -118,14 +118,46 @@ async function loadUserProfile() {
             .eq('id', currentUser.id)
             .single();
         
-        if (error) throw error;
+        // Profil yoksa, e-postadan rol çıkarımı yap ve geçici profil oluştur
+        if (error || !data) {
+            console.warn('Profil bulunamadı, geçici profil oluşturuluyor...');
+            
+            let derivedRole = 'viewer';
+            let derivedDers = null;
+            
+            if (currentUser.email.includes('admin')) derivedRole = 'admin';
+            else if (currentUser.email.includes('fizik')) {
+                derivedRole = 'chairman';
+                derivedDers = 'Fizik';
+            }
+            
+            currentProfile = {
+                id: currentUser.id,
+                email: currentUser.email,
+                ad_soyad: currentUser.email.split('@')[0],
+                rol: derivedRole,
+                ders_alani: derivedDers
+            };
+            
+            // Veritabanına da kaydetmeye çalış (sessizce)
+            sb.from('profiles').insert(currentProfile).then(() => console.log('Profil oluşturuldu'));
+            
+            return currentProfile;
+        }
         
         currentProfile = data;
         return currentProfile;
         
     } catch (error) {
         console.error('Profil yükleme hatası:', error);
-        return null;
+        // Hata durumunda minimum profil
+        currentProfile = {
+            id: currentUser.id,
+            email: currentUser.email,
+            ad_soyad: 'Kullanıcı',
+            rol: 'viewer'
+        };
+        return currentProfile;
     }
 }
 

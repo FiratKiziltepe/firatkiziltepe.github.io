@@ -7,7 +7,7 @@
  * Gemini API Client Class
  */
 export class GeminiAPIClient {
-    constructor(apiKey, model = 'gemini-2.0-flash-exp') {
+    constructor(apiKey, model = 'gemini-3.1-flash-lite-preview') {
         this.apiKey = apiKey;
         this.model = model;
         this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';

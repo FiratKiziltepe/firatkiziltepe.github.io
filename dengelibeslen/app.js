@@ -1,7 +1,7 @@
 // ===== Global State =====
 let currentImage = null;
 let apiKey = localStorage.getItem('geminiApiKey') || '';
-let selectedModel = localStorage.getItem('geminiModel') || 'gemini-2.0-flash';
+let selectedModel = localStorage.getItem('geminiModel') || 'gemini-3.1-flash-lite-preview';
 let userProfile = JSON.parse(localStorage.getItem('userProfile') || '{"allergies":[],"diets":[],"healthConditions":""}');
 
 // ===== DOM Elements =====
@@ -48,11 +48,7 @@ function showPage(pageName) {
 
 // ===== Model Descriptions =====
 const modelDescriptions = {
-    'gemini-2.0-flash': 'Hızlı ve dengeli performans. Ücretsiz kullanım için idealdir. (15 BGBG/gün, 1M token/dk)',
-    'gemini-2.0-flash-lite': 'En hızlı ve en yüksek ücretsiz quota. Basit analizler için önerilir. (30 BGBG/gün)',
-    'gemini-2.5-flash': 'Gelişmiş performans ve daha akıllı analizler. (10 BGBG/gün, 250K token/dk)',
-    'gemini-2.5-flash-lite': 'Hızlı ve yüksek quota. İyi denge sunar. (15 BGBG/gün)',
-    'gemini-2.5-pro': 'En gelişmiş model, en doğru sonuçlar. Düşük quota limiti. (2 BGBG/gün)'
+    'gemini-3.1-flash-lite-preview': 'En yeni, hızlı ve düşük maliyetli model. Görsel analiz ve metin için idealdir.'
 };
 
 function updateModelDescription() {

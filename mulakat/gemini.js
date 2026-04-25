@@ -1,5 +1,5 @@
-// Gemini 2.5 Flash API Integration
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+// Gemini 3.1 Flash Lite (Preview) API Integration
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent';
 
 function getGeminiKey() {
   return localStorage.getItem('gemini_api_key') || '';

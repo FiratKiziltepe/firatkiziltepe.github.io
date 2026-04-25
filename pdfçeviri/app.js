@@ -261,76 +261,7 @@
     }
 
     // --- Gemini API ---
-    const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-
-    async function translateText(text, sourceLang, targetLang) {
-        if (!text.trim()) return text;
-
-        const apiKey = apiKeyInput.value.trim();
-        const prompt = `Translate the following text from ${sourceLang} to ${targetLang}. ` +
-            `Return ONLY the translated text, nothing else. Do not add explanations. ` +
-            `Preserve any line breaks and formatting.\n\n${text}`;
-
-        const resp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1 }
-            })
-        });
-
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(`API Hatası (${resp.status}): ${err?.error?.message || 'Bilinmeyen hata'}`);
-        }
-
-        const data = await resp.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || text;
-    }
-
-    async function translateBatch(texts, sourceLang, targetLang) {
-        if (!texts.length) return [];
-        const nonEmpty = texts.filter(t => t.trim());
-        if (!nonEmpty.length) return texts;
-
-        const combined = texts.map((t, i) => `[[[BLOCK_${i}]]]\n${t}`).join('\n');
-
-        const apiKey = apiKeyInput.value.trim();
-        const prompt = `Translate the following text blocks from ${sourceLang} to ${targetLang}. ` +
-            `Each block starts with [[[BLOCK_N]]]. Keep these markers in your output. ` +
-            `Return ONLY the translated text with markers, nothing else.\n\n${combined}`;
-
-        const resp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
-            })
-        });
-
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(`API Hatası (${resp.status}): ${err?.error?.message || 'Bilinmeyen hata'}`);
-        }
-
-        const data = await resp.json();
-        const output = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-        const results = new Array(texts.length).fill('');
-        const blocks = output.split(/\[\[\[BLOCK_(\d+)\]\]\]/);
-        for (let i = 1; i < blocks.length; i += 2) {
-            const idx = parseInt(blocks[i]);
-            if (idx >= 0 && idx < texts.length) {
-                results[idx] = blocks[i + 1]?.trim() || texts[idx];
-            }
-        }
-        for (let i = 0; i < results.length; i++) {
-            if (!results[i]) results[i] = texts[i];
-        }
-        return results;
-    }
+    const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent';
 
     function getLangs() {
         const dir = langSelect.value;
@@ -347,6 +278,88 @@
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
     }
 
+    function createCharBatches(items, charLimit = 8000) {
+        const batches = [];
+        let batch = [];
+        let chars = 0;
+        for (const item of items) {
+            const len = (typeof item === 'string' ? item : item.text).length;
+            if (chars + len > charLimit && batch.length > 0) {
+                batches.push(batch);
+                batch = [];
+                chars = 0;
+            }
+            batch.push(item);
+            chars += len;
+        }
+        if (batch.length) batches.push(batch);
+        return batches;
+    }
+
+    async function callGemini(prompt, maxTokens = 8192) {
+        const apiKey = apiKeyInput.value.trim();
+        const resp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: maxTokens }
+            })
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(`API Hatası (${resp.status}): ${err?.error?.message || 'Bilinmeyen hata'}`);
+        }
+        const data = await resp.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    }
+
+    function parseBlockResponse(output, count, originals) {
+        const results = new Array(count).fill('');
+        const blocks = output.split(/\[\[\[BLOCK_(\d+)\]\]\]/);
+        for (let i = 1; i < blocks.length; i += 2) {
+            const idx = parseInt(blocks[i]);
+            if (idx >= 0 && idx < count) results[idx] = blocks[i + 1]?.trim() || '';
+        }
+        for (let i = 0; i < count; i++) {
+            if (!results[i]) results[i] = originals[i];
+        }
+        return results;
+    }
+
+    async function translateChunk(texts, sourceLang, targetLang) {
+        if (!texts.length) return [];
+        if (texts.length === 1) {
+            const result = await callGemini(
+                `Translate from ${sourceLang} to ${targetLang}. Return ONLY translated text, nothing else.\n\n${texts[0]}`
+            );
+            return [result || texts[0]];
+        }
+        const combined = texts.map((t, i) => `[[[BLOCK_${i}]]]\n${t}`).join('\n');
+        const prompt = `Translate text blocks from ${sourceLang} to ${targetLang}. ` +
+            `Keep [[[BLOCK_N]]] markers. Return ONLY translated text with markers.\n\n${combined}`;
+        const maxTokens = Math.min(Math.max(texts.join('').length * 3, 4096), 65536);
+        const output = await callGemini(prompt, maxTokens);
+        return parseBlockResponse(output, texts.length, texts);
+    }
+
+    async function generateNotesChunk(contents) {
+        if (!contents.length) return [];
+        const lang = getNoteLang();
+        const detail = noteDetailSelect.value || 'medium';
+        if (contents.length === 1) {
+            const prompt = `You are a presentation coach. Generate speaker notes in ${lang}. ` +
+                `${DETAIL_PROMPTS[detail]} Only return the notes.\n\n${contents[0]}`;
+            return [await callGemini(prompt, detail === 'detailed' ? 2048 : 1024)];
+        }
+        const combined = contents.map((c, i) => `[[[BLOCK_${i}]]]\n${c}`).join('\n\n');
+        const prompt = `You are a presentation coach. For each section (marked [[[BLOCK_N]]]), generate speaker notes in ${lang}. ` +
+            `${DETAIL_PROMPTS[detail]} Keep [[[BLOCK_N]]] markers. Return ONLY the notes with markers.\n\n${combined}`;
+        const maxTokens = Math.min(Math.max(contents.length * 800, 4096), 65536);
+        const output = await callGemini(prompt, maxTokens);
+        return parseBlockResponse(output, contents.length, contents.map(() => ''));
+    }
+
     function getNoteLang() {
         const { source, target } = getLangs();
         return noteLangSelect.value === 'source' ? source : target;
@@ -357,32 +370,6 @@
         medium: 'Keep it to 3-5 sentences. Cover the main points.',
         detailed: 'Write 5-8 sentences. Provide thorough explanations, examples, and context for each key point.'
     };
-
-    async function generateNotes(content) {
-        if (!content.trim()) return '';
-        const lang = getNoteLang();
-        const detail = noteDetailSelect.value || 'medium';
-        const apiKey = apiKeyInput.value.trim();
-        const prompt = `You are a presentation coach. Based on the following slide/page content, generate speaker notes in ${lang}. ` +
-            `The notes should explain the key points and provide talking points for a presenter. ` +
-            `${DETAIL_PROMPTS[detail]} Only return the notes text, nothing else.\n\n${content}`;
-
-        const resp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.3, maxOutputTokens: detail === 'detailed' ? 2048 : 1024 }
-            })
-        });
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            log(`Not oluşturma hatası: ${err?.error?.message || resp.status}`, 'error');
-            return '';
-        }
-        const data = await resp.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-    }
 
     async function extractExistingNotes(zip, slideNum) {
         const notesPath = `ppt/notesSlides/notesSlide${slideNum}.xml`;
@@ -471,13 +458,18 @@
                 case 'pdf': await handlePDF(source, target); break;
                 case 'txt': await handleTXT(source, target); break;
             }
-
-            resultSection.style.display = 'block';
-            log('Çeviri başarıyla tamamlandı!', 'success');
         } catch (err) {
-            log(`Hata: ${err.message}`, 'error');
-            alert('Çeviri sırasında hata oluştu: ' + err.message);
-        } finally {
+            log(`Kritik Hata: ${err.message}`, 'error');
+        }
+
+        if (translatedBlob) {
+            resultSection.style.display = 'block';
+            log('İşlem tamamlandı.', 'success');
+        } else {
+            log('Dosya oluşturulamadı.', 'error');
+        }
+
+        {
             translateBtn.classList.remove('processing');
             translateBtn.querySelector('.btn-text').textContent = 'Çeviriyi Başlat';
             progressSection.style.display = 'none';
@@ -510,101 +502,108 @@
             .filter(f => /^ppt\/slides\/slide\d+\.xml$/.test(f))
             .sort((a, b) => parseInt(a.match(/slide(\d+)/)[1]) - parseInt(b.match(/slide(\d+)/)[1]));
 
-        const selectedCount = selected.size || slideFiles.length;
-        log(`${slideFiles.length} slayt bulundu, ${selectedCount} tanesi seçili.`);
-        const totalSteps = selectedCount * (wantNotes ? 2 : 1);
-        let stepsDone = 0;
-        let totalTranslated = 0;
-        const slideTranslatedTexts = [];
+        log(`${slideFiles.length} slayt bulundu.`);
+
+        // Step 1: Parse all slides, collect all text nodes
+        const slideDocs = [];
+        const allTextItems = [];
 
         for (let i = 0; i < slideFiles.length; i++) {
-            if (selected.size && !selected.has(i)) {
-                slideTranslatedTexts.push('');
-                continue;
-            }
-
-            const slideFile = slideFiles[i];
-            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
-
-            const xml = await zip.file(slideFile).async('string');
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xml, 'application/xml');
-
-            const textNodes = doc.querySelectorAll('t');
-            const texts = [];
-            const nodes = [];
-            textNodes.forEach(node => {
-                if (node.textContent.trim()) { texts.push(node.textContent); nodes.push(node); }
+            if (selected.size && !selected.has(i)) { slideDocs.push(null); continue; }
+            const xml = await zip.file(slideFiles[i]).async('string');
+            const doc = new DOMParser().parseFromString(xml, 'application/xml');
+            slideDocs.push(doc);
+            doc.querySelectorAll('t').forEach(node => {
+                if (node.textContent.trim()) {
+                    allTextItems.push({ text: node.textContent, node, slideIdx: i });
+                }
             });
-
-            if (texts.length > 0) {
-                log(`Slayt ${i + 1}: ${texts.length} metin bloğu çevriliyor...`);
-                if (texts.length <= 30 && texts.join('').length < 4000) {
-                    const translated = await translateBatch(texts, sourceLang, targetLang);
-                    translated.forEach((t, j) => { nodes[j].textContent = t; });
-                    totalTranslated += texts.length;
-                } else {
-                    for (let j = 0; j < texts.length; j++) {
-                        nodes[j].textContent = await translateText(texts[j], sourceLang, targetLang);
-                        totalTranslated++;
-                        if (j > 0 && j % 5 === 0) await delay(500);
-                    }
-                }
-                const newXml = new XMLSerializer().serializeToString(doc);
-                zip.file(slideFile, newXml);
-                slideTranslatedTexts.push(Array.from(doc.querySelectorAll('t')).map(n => n.textContent).filter(t => t.trim()).join(' '));
-            } else {
-                log(`Slayt ${i + 1}: Metin bulunamadı, atlanıyor.`);
-                slideTranslatedTexts.push('');
-            }
-
-            stepsDone++;
-            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Çeviri`);
-            await delay(300);
         }
 
-        if (wantNotes) {
+        // Step 2: Smart batch by character count
+        const batches = createCharBatches(allTextItems);
+        log(`${allTextItems.length} metin bloğu → ${batches.length} API isteği.`);
+
+        let translatedCount = 0;
+        let hadError = false;
+
+        for (let b = 0; b < batches.length; b++) {
+            const batch = batches[b];
+            showProgress('Çevriliyor...', (b / batches.length) * (wantNotes ? 50 : 100), `İstek ${b + 1} / ${batches.length}`);
+            try {
+                const texts = batch.map(item => item.text);
+                const translated = await translateChunk(texts, sourceLang, targetLang);
+                translated.forEach((t, j) => { batch[j].node.textContent = t; });
+                translatedCount += batch.length;
+                log(`İstek ${b + 1}/${batches.length}: ${batch.length} metin çevrildi.`);
+            } catch (err) {
+                log(`API hatası (istek ${b + 1}): ${err.message}`, 'error');
+                log('Kısmi çeviri kaydediliyor...', 'info');
+                hadError = true;
+                break;
+            }
+            if (b < batches.length - 1) await delay(1000);
+        }
+
+        // Step 3: Save all slide XMLs
+        for (let i = 0; i < slideFiles.length; i++) {
+            if (!slideDocs[i]) continue;
+            zip.file(slideFiles[i], new XMLSerializer().serializeToString(slideDocs[i]));
+        }
+
+        // Step 4: Notes (batched)
+        if (wantNotes && !hadError) {
             const existingNotesMode = existingNotesSelect.value;
-            log(`Konuşmacı notları oluşturuluyor... (${existingNotesMode === 'overwrite' ? 'Üzerine Yaz' : existingNotesMode === 'merge' ? 'Birleştir' : 'Koru'})`);
+            log(`Notlar oluşturuluyor... (${existingNotesMode === 'overwrite' ? 'Üzerine Yaz' : existingNotesMode === 'merge' ? 'Birleştir' : 'Koru'})`);
 
+            const noteItems = [];
             for (let i = 0; i < slideFiles.length; i++) {
-                if (selected.size && !selected.has(i)) continue;
-
+                if (!slideDocs[i]) continue;
                 const slideNum = parseInt(slideFiles[i].match(/slide(\d+)/)[1]);
-                const content = slideTranslatedTexts[i];
-                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
-
-                if (!content.trim()) { stepsDone++; continue; }
-
+                const content = Array.from(slideDocs[i].querySelectorAll('t')).map(n => n.textContent).filter(t => t.trim()).join(' ');
+                if (!content.trim()) continue;
                 const existing = await extractExistingNotes(zip, slideNum);
-                if (existing && existingNotesMode === 'keep') { log(`Slayt ${i + 1}: Mevcut not korunuyor.`); stepsDone++; continue; }
+                if (existing && existingNotesMode === 'keep') { log(`Slayt ${i + 1}: Mevcut not korunuyor.`); continue; }
+                noteItems.push({ slideIdx: i, slideNum, content, existing });
+            }
 
-                const newNotes = await generateNotes(content);
-                if (!newNotes) { stepsDone++; continue; }
+            const noteBatches = createCharBatches(noteItems.map(n => ({ text: n.content, ...n })), 5000);
+            log(`${noteItems.length} not → ${noteBatches.length} API isteği.`);
 
-                let finalNotes = newNotes;
-                if (existing && existingNotesMode === 'merge') {
-                    finalNotes = existing + '\n\n---\n\n' + newNotes;
+            for (let b = 0; b < noteBatches.length; b++) {
+                const batch = noteBatches[b];
+                showProgress('Notlar...', 50 + (b / noteBatches.length) * 50, `Not isteği ${b + 1} / ${noteBatches.length}`);
+                try {
+                    const contents = batch.map(item => item.content);
+                    const notes = await generateNotesChunk(contents);
+                    for (let j = 0; j < batch.length; j++) {
+                        let finalNotes = notes[j] || '';
+                        if (!finalNotes) continue;
+                        const item = batch[j];
+                        if (item.existing && existingNotesMode === 'merge') {
+                            finalNotes = item.existing + '\n\n---\n\n' + finalNotes;
+                        }
+                        zip.file(`ppt/notesSlides/notesSlide${item.slideNum}.xml`, buildNotesSlideXml(finalNotes, langCode));
+                        zip.file(`ppt/notesSlides/_rels/notesSlide${item.slideNum}.xml.rels`, buildNotesSlideRels(item.slideNum));
+                        await ensureSlideNotesRel(zip, item.slideNum);
+                        await ensureNotesContentType(zip, item.slideNum);
+                    }
+                    log(`Not isteği ${b + 1}/${noteBatches.length}: ${batch.length} not oluşturuldu.`);
+                } catch (err) {
+                    log(`Not API hatası: ${err.message}`, 'error');
+                    break;
                 }
-
-                zip.file(`ppt/notesSlides/notesSlide${slideNum}.xml`, buildNotesSlideXml(finalNotes, langCode));
-                zip.file(`ppt/notesSlides/_rels/notesSlide${slideNum}.xml.rels`, buildNotesSlideRels(slideNum));
-                await ensureSlideNotesRel(zip, slideNum);
-                await ensureNotesContentType(zip, slideNum);
-
-                log(`Slayt ${i + 1}: Not eklendi.`);
-                stepsDone++;
-                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Slayt ${i + 1} / ${slideFiles.length} - Not`);
-                await delay(300);
+                if (b < noteBatches.length - 1) await delay(1000);
             }
         }
 
+        // Step 5: Always generate output
         log('Yeni PPTX oluşturuluyor...');
         const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
         translatedBlob = blob;
         translatedFileName = currentFile.name.replace(/\.pptx$/i, '_translated.pptx');
-        const noteInfo = wantNotes ? ' (notlar eklendi)' : '';
-        resultSummary.textContent = `${selectedCount} slayt, ${totalTranslated} metin bloğu çevrildi${noteInfo}.`;
+        const status = hadError ? `Kısmi çeviri: ${translatedCount}/${allTextItems.length} metin` : `${translatedCount} metin çevrildi`;
+        resultSummary.textContent = status + (wantNotes && !hadError ? ' (notlar eklendi)' : '') + '.';
     }
 
     // ========================
@@ -621,67 +620,45 @@
         if (!docXmlFile) throw new Error('document.xml bulunamadı.');
 
         const xml = await docXmlFile.async('string');
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xml, 'application/xml');
+        const doc = new DOMParser().parseFromString(xml, 'application/xml');
 
-        const paragraphs = doc.querySelectorAll('p');
-        const paraTexts = [];
-        const paraTextNodes = [];
-
-        paragraphs.forEach(p => {
-            const tNodes = p.querySelectorAll('t');
-            if (tNodes.length === 0) return;
-            const fullText = Array.from(tNodes).map(t => t.textContent).join('');
+        const allItems = [];
+        let paraIdx = 0;
+        doc.querySelectorAll('p').forEach(p => {
+            const tNodes = Array.from(p.querySelectorAll('t'));
+            if (!tNodes.length) return;
+            const fullText = tNodes.map(t => t.textContent).join('');
             if (!fullText.trim()) return;
-            paraTexts.push(fullText);
-            paraTextNodes.push(Array.from(tNodes));
+            if (!selected.size || selected.has(paraIdx)) {
+                allItems.push({ text: fullText, tNodes, paraIdx });
+            }
+            paraIdx++;
         });
 
-        const selectedParas = selected.size ? paraTexts.filter((_, i) => selected.has(i)) : paraTexts;
-        log(`${paraTexts.length} paragraf bulundu, ${selectedParas.length} tanesi seçili.`);
-        showProgress('Çevriliyor...', 0, `0 / ${selectedParas.length} paragraf`);
+        const batches = createCharBatches(allItems);
+        log(`${allItems.length} paragraf → ${batches.length} API isteği.`);
 
-        const BATCH_SIZE = 20;
         let translatedCount = 0;
-        let globalIdx = 0;
+        let hadError = false;
 
-        for (let i = 0; i < paraTexts.length; i += BATCH_SIZE) {
-            const indices = [];
-            const batch = [];
-            const batchNodes = [];
-            for (let j = i; j < Math.min(i + BATCH_SIZE, paraTexts.length); j++) {
-                if (selected.size && !selected.has(j)) continue;
-                indices.push(j);
-                batch.push(paraTexts[j]);
-                batchNodes.push(paraTextNodes[j]);
-            }
-            if (!batch.length) continue;
-
-            let translated;
-            if (batch.join('').length < 4000) {
-                translated = await translateBatch(batch, sourceLang, targetLang);
-            } else {
-                translated = [];
-                for (const text of batch) {
-                    translated.push(await translateText(text, sourceLang, targetLang));
-                    await delay(200);
-                }
-            }
-
-            translated.forEach((t, j) => {
-                const nodes = batchNodes[j];
-                if (nodes.length === 1) {
-                    nodes[0].textContent = t;
-                } else {
+        for (let b = 0; b < batches.length; b++) {
+            const batch = batches[b];
+            showProgress('Çevriliyor...', (b / batches.length) * 100, `İstek ${b + 1} / ${batches.length}`);
+            try {
+                const translated = await translateChunk(batch.map(it => it.text), sourceLang, targetLang);
+                translated.forEach((t, j) => {
+                    const nodes = batch[j].tNodes;
                     nodes[0].textContent = t;
                     for (let k = 1; k < nodes.length; k++) nodes[k].textContent = '';
-                }
-            });
-
-            translatedCount += batch.length;
-            showProgress('Çevriliyor...', (translatedCount / selectedParas.length) * 100, `${translatedCount} / ${selectedParas.length} paragraf`);
-            log(`${translatedCount} / ${selectedParas.length} paragraf çevrildi.`);
-            await delay(300);
+                });
+                translatedCount += batch.length;
+                log(`İstek ${b + 1}/${batches.length}: ${batch.length} paragraf çevrildi.`);
+            } catch (err) {
+                log(`API hatası: ${err.message}`, 'error');
+                hadError = true;
+                break;
+            }
+            if (b < batches.length - 1) await delay(1000);
         }
 
         zip.file('word/document.xml', new XMLSerializer().serializeToString(doc));
@@ -690,7 +667,8 @@
         const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
         translatedBlob = blob;
         translatedFileName = currentFile.name.replace(/\.docx$/i, '_translated.docx');
-        resultSummary.textContent = `${selectedParas.length} paragraf çevrildi.`;
+        const status = hadError ? `Kısmi çeviri: ${translatedCount}/${allItems.length}` : `${translatedCount}`;
+        resultSummary.textContent = `${status} paragraf çevrildi.`;
     }
 
     // ========================
@@ -713,43 +691,56 @@
             pageTexts.push(content.items.map(it => it.str).join(' '));
         }
 
-        const selectedCount = selected.size || numPages;
-        const totalSteps = selectedCount * (wantNotes ? 2 : 1);
-        let stepsDone = 0;
-        showProgress('Çevriliyor...', 0, `0 / ${numPages} sayfa`);
-
-        const translatedPages = [];
-        const pageNotes = [];
-
+        // Collect selected pages for batched translation
+        const selectedItems = [];
         for (let i = 0; i < pageTexts.length; i++) {
-            if (selected.size && !selected.has(i)) {
-                translatedPages.push(pageTexts[i]);
-                pageNotes.push('');
-                continue;
-            }
-            if (!pageTexts[i].trim()) { translatedPages.push(''); pageNotes.push(''); stepsDone++; continue; }
-
-            translatedPages.push(await translateText(pageTexts[i], sourceLang, targetLang));
-            stepsDone++;
-            showProgress('Çevriliyor...', (stepsDone / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Çeviri`);
-            log(`Sayfa ${i + 1} çevrildi.`);
-            await delay(300);
+            if (selected.size && !selected.has(i)) continue;
+            if (pageTexts[i].trim()) selectedItems.push({ text: pageTexts[i], pageIdx: i });
         }
 
-        if (wantNotes) {
-            log('Konuşmacı notları oluşturuluyor...');
-            for (let i = 0; i < translatedPages.length; i++) {
-                if (selected.size && !selected.has(i)) continue;
-                if (!translatedPages[i].trim()) { pageNotes.push(''); stepsDone++; continue; }
+        const translatedPages = [...pageTexts];
+        const pageNotes = new Array(numPages).fill('');
+        let hadError = false;
 
-                showProgress('Notlar...', (stepsDone / totalSteps) * 100, `Sayfa ${i + 1} / ${numPages} - Not`);
-                pageNotes[i] = await generateNotes(translatedPages[i]);
-                stepsDone++;
-                await delay(300);
+        // Batch translate pages
+        const batches = createCharBatches(selectedItems);
+        log(`${selectedItems.length} sayfa → ${batches.length} API isteği.`);
+
+        let translatedCount = 0;
+        for (let b = 0; b < batches.length; b++) {
+            const batch = batches[b];
+            showProgress('Çevriliyor...', (b / batches.length) * (wantNotes ? 50 : 100), `İstek ${b + 1} / ${batches.length}`);
+            try {
+                const translated = await translateChunk(batch.map(it => it.text), sourceLang, targetLang);
+                translated.forEach((t, j) => { translatedPages[batch[j].pageIdx] = t; });
+                translatedCount += batch.length;
+                log(`İstek ${b + 1}/${batches.length}: ${batch.length} sayfa çevrildi.`);
+            } catch (err) {
+                log(`API hatası: ${err.message}`, 'error');
+                hadError = true;
+                break;
             }
-        } else {
-            for (let i = 0; i < translatedPages.length; i++) {
-                if (!pageNotes[i]) pageNotes[i] = '';
+            if (b < batches.length - 1) await delay(1000);
+        }
+
+        // Batch generate notes
+        if (wantNotes && !hadError) {
+            const noteItems = selectedItems.filter(it => translatedPages[it.pageIdx].trim());
+            const noteBatches = createCharBatches(noteItems.map(it => ({ text: translatedPages[it.pageIdx], pageIdx: it.pageIdx })), 5000);
+            log(`${noteItems.length} not → ${noteBatches.length} API isteği.`);
+
+            for (let b = 0; b < noteBatches.length; b++) {
+                const batch = noteBatches[b];
+                showProgress('Notlar...', 50 + (b / noteBatches.length) * 50, `Not isteği ${b + 1} / ${noteBatches.length}`);
+                try {
+                    const notes = await generateNotesChunk(batch.map(it => it.text));
+                    notes.forEach((n, j) => { pageNotes[batch[j].pageIdx] = n; });
+                    log(`Not isteği ${b + 1}/${noteBatches.length}: ${batch.length} not.`);
+                } catch (err) {
+                    log(`Not hatası: ${err.message}`, 'error');
+                    break;
+                }
+                if (b < noteBatches.length - 1) await delay(1000);
             }
         }
 
@@ -815,8 +806,8 @@
         const pdfBytes = await pdfDoc.save();
         translatedBlob = new Blob([pdfBytes], { type: 'application/pdf' });
         translatedFileName = currentFile.name.replace(/\.pdf$/i, '_translated.pdf');
-        const noteInfo = wantNotes ? ' (notlar eklendi)' : '';
-        resultSummary.textContent = `${selectedCount} sayfa çevrildi${noteInfo}.`;
+        const status = hadError ? `Kısmi çeviri: ${translatedCount}/${selectedItems.length} sayfa` : `${translatedCount} sayfa çevrildi`;
+        resultSummary.textContent = status + (wantNotes && !hadError ? ' (notlar eklendi)' : '') + '.';
     }
 
     // ========================
@@ -830,26 +821,37 @@
         if (!text.trim()) throw new Error('Dosya boş.');
 
         const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
-        const selectedCount = selected.size || paragraphs.length;
-        log(`${paragraphs.length} paragraf, ${selectedCount} seçili.`);
-        showProgress('Çevriliyor...', 0, `0 / ${selectedCount} paragraf`);
-
-        const translatedParagraphs = [];
-        let done = 0;
+        const selectedItems = [];
         for (let i = 0; i < paragraphs.length; i++) {
-            if (selected.size && !selected.has(i)) {
-                translatedParagraphs.push(paragraphs[i]);
-                continue;
+            if (!selected.size || selected.has(i)) selectedItems.push({ text: paragraphs[i], idx: i });
+        }
+
+        const batches = createCharBatches(selectedItems);
+        log(`${selectedItems.length} paragraf → ${batches.length} API isteği.`);
+
+        const translatedParagraphs = [...paragraphs];
+        let translatedCount = 0;
+        let hadError = false;
+
+        for (let b = 0; b < batches.length; b++) {
+            const batch = batches[b];
+            showProgress('Çevriliyor...', (b / batches.length) * 100, `İstek ${b + 1} / ${batches.length}`);
+            try {
+                const translated = await translateChunk(batch.map(it => it.text), sourceLang, targetLang);
+                translated.forEach((t, j) => { translatedParagraphs[batch[j].idx] = t; });
+                translatedCount += batch.length;
+                log(`İstek ${b + 1}/${batches.length}: ${batch.length} paragraf çevrildi.`);
+            } catch (err) {
+                log(`API hatası: ${err.message}`, 'error');
+                hadError = true;
+                break;
             }
-            translatedParagraphs.push(await translateText(paragraphs[i], sourceLang, targetLang));
-            done++;
-            showProgress('Çevriliyor...', (done / selectedCount) * 100, `${done} / ${selectedCount} paragraf`);
-            if (done < selectedCount) await delay(200);
+            if (b < batches.length - 1) await delay(1000);
         }
 
         translatedBlob = new Blob([translatedParagraphs.join('\n\n')], { type: 'text/plain;charset=utf-8' });
         translatedFileName = currentFile.name.replace(/\.txt$/i, '_translated.txt');
-        resultSummary.textContent = `${selectedCount} paragraf çevrildi.`;
-        log('Çeviri tamamlandı.', 'success');
+        const status = hadError ? `Kısmi: ${translatedCount}/${selectedItems.length}` : `${translatedCount}`;
+        resultSummary.textContent = `${status} paragraf çevrildi.`;
     }
 })();
