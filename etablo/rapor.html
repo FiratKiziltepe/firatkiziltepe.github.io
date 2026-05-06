@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rapor - E-İçerik Tablosu</title>
+  <link rel="icon" href="./logo.png" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <img src="./logo.png" alt="MEB" class="logo" />
+      <h1>E-İçerik Özet Raporu</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Derse ve Program Türüne Göre İstenen E-İçerik Sayısı</h2>
+      <div class="toolbar" style="margin-top:0; margin-bottom:10px;">
+        <div class="counter">
+          Toplam ders: <strong id="ders-count">0</strong> &middot;
+          Toplam içerik: <strong id="ders-total">0</strong>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="search" id="ders-search" placeholder="Ders ara..." style="width:240px;" />
+          <button type="button" class="small" id="export-t1">Excel olarak indir</button>
+        </div>
+      </div>
+      <div id="ders-table" class="table-wrap"><div class="loader">Veri yükleniyor...</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>E-İçerik Türüne Göre Özet</h2>
+      <div class="toolbar" style="margin-top:0; margin-bottom:10px;">
+        <div class="counter">
+          Toplam tür: <strong id="tur-count">0</strong> &middot;
+          Toplam içerik: <strong id="tur-total">0</strong>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="segmented" role="tablist">
+            <button type="button" class="active" data-mode="split">Ayrıştırılmış</button>
+            <button type="button" data-mode="raw">Ham</button>
+          </div>
+          <input type="search" id="tur-search" placeholder="Tür ara..." style="width:200px;" />
+          <button type="button" class="small" id="export-t2">Excel olarak indir</button>
+        </div>
+      </div>
+      <div id="tur-table" class="table-wrap"><div class="loader">Veri yükleniyor...</div></div>
+    </section>
+  </main>
+
+  <script src="./assets/xlsx.full.min.js"></script>
+  <script src="./assets/data-loader.js"></script>
+  <script src="./assets/report.js"></script>
+</body>
+</html>

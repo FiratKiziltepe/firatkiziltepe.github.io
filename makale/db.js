@@ -99,7 +99,8 @@ async function fetchArticles() {
     const { data, error } = await client
       .from('articles')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(500);
     if (error) throw error;
     return data || [];
   });
@@ -178,7 +179,7 @@ async function createAdvisorNote(articleId, advisorId, note) {
   const { data, error } = await getSupabase()
     .from('advisor_notes')
     .insert({ article_id: articleId, advisor_id: advisorId, note })
-    .select('*, profiles(display_name, role)')
+    .select()
     .single();
   if (error) throw error;
   return data;
@@ -190,4 +191,26 @@ async function deleteAdvisorNote(noteId) {
     .delete()
     .eq('id', noteId);
   if (error) throw error;
+}
+
+// =====================================================
+// COLUMN VISIBILITY (per user)
+// =====================================================
+
+async function fetchColumnVisibility(userId) {
+  const { data, error } = await getSupabase()
+    .from('profiles')
+    .select('column_visibility')
+    .eq('id', userId)
+    .single();
+  if (error) return {};
+  return data?.column_visibility || {};
+}
+
+async function saveColumnVisibility(userId, visibility) {
+  const { error } = await getSupabase()
+    .from('profiles')
+    .update({ column_visibility: visibility })
+    .eq('id', userId);
+  if (error) console.error('Sütun tercihleri kaydedilemedi:', error);
 }

@@ -75,7 +75,7 @@ function loadApiKeys() {
 const state = {
     apiKeys: loadApiKeys(),
     currentApiKeyIndex: 0,
-    selectedModel: localStorage.getItem('gemini_model_dynamic') || 'gemini-2.5-flash',
+    selectedModel: localStorage.getItem('gemini_model_dynamic') || 'gemini-3.1-flash-lite-preview',
     batchSize: parseInt(localStorage.getItem('batch_size_dynamic')) || 10,
     customPrompt: localStorage.getItem('custom_prompt') || DEFAULT_SYSTEM_PROMPT,
     rawData: [],
@@ -130,24 +130,9 @@ Object.defineProperty(state, 'apiKey', {
 // Model Definitions
 const AVAILABLE_MODELS = [
     {
-        id: 'gemini-2.5-pro',
-        name: 'Gemini 2.5 Pro',
-        limitInfo: 'BGBG: 2, TPM: 125.000, RPD: 50'
-    },
-    {
-        id: 'gemini-2.5-flash',
-        name: 'Gemini 2.5 Flash',
-        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
-    },
-    {
-        id: 'gemini-2.5-flash-preview',
-        name: 'Gemini 2.5 Flash Önizlemesi',
-        limitInfo: 'BGBG: 10, TPM: 250.000, RPD: 250'
-    },
-    {
-        id: 'gemini-2.5-flash-lite',
-        name: 'Gemini 2.5 Flash-Lite',
-        limitInfo: 'BGBG: 15, TPM: 250.000, RPD: 1.000'
+        id: 'gemini-3.1-flash-lite-preview',
+        name: 'Gemini 3.1 Flash Lite (Preview)',
+        limitInfo: 'En yeni, hızlı ve düşük maliyetli model'
     }
 ];
 

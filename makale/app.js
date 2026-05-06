@@ -5,12 +5,15 @@
 let columns = [];
 let articles = [];
 let density = 'md';
+let expandContent = false;
+let selectedTags = [];
 let sortKey = null;
 let sortDir = 'asc';
 let searchQuery = '';
 let editingArticleId = null;
 let viewingArticle = null;
 let formRating = 0;
+let dataLoaded = false;
 
 // Local visibility overrides (browser-only, not saved to DB unless admin)
 let localVisibility = {};
@@ -21,42 +24,38 @@ let localVisibility = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    initSupabase();
-  } catch (e) {
-    console.error('Supabase init hatası:', e);
-  }
-
-  try {
+    const client = initSupabase();
     setupUIListeners();
-  } catch (e) {
-    throw e;
-  }
-
-  try {
     setupAuthListeners();
-    await checkSession();
-  } catch (e) {
-    console.error('Auth hatası:', e);
-  }
 
-  await loadData();
+    const hasSession = await checkSession();
+
+    if (hasSession && currentUser) {
+      updateAuthUI();
+      showApp();
+      showLoading();
+      await loadData();
+    } else {
+      showLoginPage();
+    }
+  } catch (e) {
+    console.error('Init error:', e);
+    showLoginPage();
+  }
 });
 
 async function loadData() {
   try {
-    try {
-      columns = await fetchColumns();
-    } catch (err) {
-      console.error('Sütun yükleme hatası:', err);
-      columns = [];
-    }
+    const [colResult, artResult] = await Promise.allSettled([
+      fetchColumns(),
+      fetchArticles()
+    ]);
 
-    try {
-      articles = await fetchArticles();
-    } catch (err) {
-      console.error('Makale yükleme hatası:', err);
-      articles = [];
-    }
+    columns = colResult.status === 'fulfilled' ? colResult.value : [];
+    articles = artResult.status === 'fulfilled' ? artResult.value : [];
+
+    if (colResult.status === 'rejected') console.error('Sütun yükleme hatası:', colResult.reason);
+    if (artResult.status === 'rejected') console.error('Makale yükleme hatası:', artResult.reason);
 
     columns.forEach(c => {
       if (localVisibility[c.column_key] === undefined) {
@@ -64,26 +63,44 @@ async function loadData() {
       }
     });
 
+    // Kullanıcının kayıtlı sütun tercihlerini DB'den yükle
+    if (currentUser) {
+      try {
+        const savedVis = await fetchColumnVisibility(currentUser.id);
+        if (savedVis && Object.keys(savedVis).length > 0) {
+          Object.keys(savedVis).forEach(key => {
+            localVisibility[key] = savedVis[key];
+          });
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    dataLoaded = true;
     renderTable();
 
     if (columns.length === 0) {
-      showNotification('Veritabanı tabloları bulunamadı. schema.sql çalıştırıldığından emin olun.', 'error');
+      showNotification('Veritabanı tabloları bulunamadı.', 'error');
     }
   } catch (err) {
-    console.error('Veri yükleme hatası:', err);
+    console.error('loadData error:', err);
     showNotification('Veri yüklenirken hata: ' + (err.message || err), 'error');
   } finally {
     hideLoading();
   }
 }
 
+function showLoading() {
+  const el = document.getElementById('loadingState');
+  if (el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+}
+
 function hideLoading() {
   const el = document.getElementById('loadingState');
-  if (el) el.classList.add('hidden');
+  if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
 }
 
 function onAuthChange() {
-  renderTable();
+  if (dataLoaded) renderTable();
 }
 
 // =====================================================
@@ -92,9 +109,9 @@ function onAuthChange() {
 
 function getDensityClasses() {
   switch (density) {
-    case 'sm': return 'px-2.5 py-1.5 text-xs';
-    case 'lg': return 'px-4 py-3.5 text-sm';
-    default: return 'px-3 py-2 text-xs';
+    case 'sm': return 'px-2 py-1 text-xs';
+    case 'lg': return 'px-3 py-3 text-sm';
+    default: return 'px-2.5 py-1.5 text-xs';
   }
 }
 
@@ -110,6 +127,20 @@ function getProcessedArticles() {
     result = result.filter(a => {
       const dataStr = Object.values(a.data || {}).join(' ').toLowerCase();
       return dataStr.includes(q);
+    });
+  }
+
+  // Etiket filtresi
+  if (selectedTags.length > 0) {
+    const tagCols = columns.filter(c => c.type === 'multiselect').map(c => c.column_key);
+    result = result.filter(a => {
+      if (!a.data) return false;
+      const articleTags = tagCols.flatMap(key => {
+        const val = a.data[key];
+        if (!val) return [];
+        return String(val).split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+      });
+      return selectedTags.some(st => articleTags.includes(st.toLowerCase()));
     });
   }
 
@@ -146,6 +177,66 @@ function handleSort(key) {
 }
 
 // =====================================================
+// TAG FILTER
+// =====================================================
+
+function getAllUsedTagsFromArticles() {
+  const tagCols = columns.filter(c => c.type === 'multiselect').map(c => c.column_key);
+  const tagSet = new Set();
+  articles.forEach(a => {
+    if (!a.data) return;
+    tagCols.forEach(key => {
+      const val = a.data[key];
+      if (!val) return;
+      String(val).split(',').forEach(t => {
+        const trimmed = t.trim();
+        if (trimmed) tagSet.add(trimmed);
+      });
+    });
+  });
+  return [...tagSet].sort((a, b) => a.localeCompare(b, 'tr'));
+}
+
+function renderTagFilterList(searchText) {
+  const allTags = getAllUsedTagsFromArticles();
+  const filtered = searchText
+    ? allTags.filter(t => t.toLowerCase().includes(searchText))
+    : allTags;
+
+  const list = document.getElementById('tagFilterList');
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">Etiket bulunamadı</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(tag => {
+    const checked = selectedTags.includes(tag) ? 'checked' : '';
+    return `<label class="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-50 cursor-pointer text-xs text-slate-700">
+      <input type="checkbox" data-tag="${escapeHTML(tag)}" ${checked} class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" />
+      <span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[10px] font-medium">${escapeHTML(tag)}</span>
+    </label>`;
+  }).join('');
+}
+
+function updateTagFilterBadge() {
+  const badge = document.getElementById('tagFilterCount');
+  const btn = document.getElementById('btnTagFilter');
+  if (selectedTags.length > 0) {
+    badge.textContent = selectedTags.length;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+    btn.classList.add('border-blue-300', 'bg-blue-50', 'text-blue-700');
+    btn.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
+  } else {
+    badge.classList.add('hidden');
+    badge.classList.remove('flex');
+    btn.classList.remove('border-blue-300', 'bg-blue-50', 'text-blue-700');
+    btn.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+  }
+}
+
+
+// =====================================================
 // RENDER TABLE
 // =====================================================
 
@@ -163,8 +254,27 @@ function renderTable() {
 
   if (!table || !empty) return;
 
+  // Veri henüz yüklenmediyse tablo render etme
+  if (!dataLoaded) return;
+
+  if (columns.length === 0 && articles.length === 0) {
+    table.classList.add('hidden');
+    empty.innerHTML = `
+      <svg class="w-12 h-12 text-red-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+      <p class="text-lg font-medium text-red-500">Veritabanı bağlantısı kurulamadı</p>
+      <p class="text-sm mt-1">Supabase bağlantısını veya RLS ayarlarını kontrol edin.</p>
+      <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">Yeniden Dene</button>`;
+    empty.classList.remove('hidden');
+    empty.classList.add('flex');
+    return;
+  }
+
   if (processed.length === 0) {
     table.classList.add('hidden');
+    empty.innerHTML = `
+      <svg class="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+      <p class="text-lg font-medium">Kayıt bulunamadı</p>
+      <p class="text-sm mt-1">Arama kriterlerini değiştirin veya yeni bir kayıt ekleyin.</p>`;
     empty.classList.remove('hidden');
     empty.classList.add('flex');
     return;
@@ -179,8 +289,20 @@ function renderTable() {
   const dc = getDensityClasses();
   let headHTML = '<tr>';
 
-  // Rating column
-  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center w-16" onclick="handleSort('rating')">
+  // Remove stale colgroup if any
+  const tableEl = document.getElementById('mainTable');
+  const oldCG = tableEl.querySelector('colgroup');
+  if (oldCG) oldCG.remove();
+
+  // Expand/compact mode class
+  if (expandContent) tableEl.classList.add('expand-mode');
+  else tableEl.classList.remove('expand-mode');
+
+  // Find title column for sticky
+  const titleColKey = (visibleCols.find(c => c.column_key === 'title') || visibleCols.find(c => c.type === 'text'))?.column_key;
+
+  // Rating column (sticky)
+  headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none text-center sticky-col-rating" onclick="handleSort('rating')">
     <div class="flex items-center justify-center gap-0.5">
       <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"/></svg>
       ${sortKey === 'rating' ? `<span class="text-[9px] text-blue-500">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : ''}
@@ -189,13 +311,14 @@ function renderTable() {
 
   visibleCols.forEach(col => {
     const sortIcon = sortKey === col.column_key ? `<span class="text-[9px] text-blue-500 ml-0.5">${sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>` : '';
-    headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none" onclick="handleSort('${col.column_key}')">
+    const stickyClass = col.column_key === titleColKey ? 'sticky-col-title' : '';
+    headHTML += `<th class="${dc} border-b border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors select-none ${stickyClass}" onclick="handleSort('${col.column_key}')">
       <div class="flex items-center">${escapeHTML(col.name)}${sortIcon}</div>
     </th>`;
   });
 
   if (isAdmin()) {
-    headHTML += `<th class="${dc} border-b border-slate-200 text-center w-24">İşlemler</th>`;
+    headHTML += `<th class="${dc} border-b border-slate-200 text-center">İşlemler</th>`;
   }
   headHTML += '</tr>';
   thead.innerHTML = headHTML;
@@ -205,21 +328,22 @@ function renderTable() {
   let bodyHTML = '';
 
   processed.forEach(article => {
-    bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="openViewDrawer(${article.id})">`;
+    bodyHTML += `<tr class="group hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" onclick="showDetailPage(${article.id})">`;
 
-    // Rating cell
-    bodyHTML += `<td class="${dc} cell-rating align-middle text-center">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
+    // Rating cell (sticky)
+    bodyHTML += `<td class="${dc} cell-rating align-middle text-center sticky-col-rating">${renderStarsCompact(article.rating || 0, article.id)}</td>`;
 
     visibleCols.forEach(col => {
       const val = article.data ? article.data[col.column_key] : '';
       const cellClass = getCellClass(col);
-      bodyHTML += `<td class="${dc} ${cellClass} align-middle">${renderCellContent(col, val)}</td>`;
+      const stickyClass = col.column_key === titleColKey ? 'sticky-col-title' : '';
+      bodyHTML += `<td class="${dc} ${cellClass} ${stickyClass} align-middle">${renderCellContent(col, val)}</td>`;
     });
 
     if (isAdmin()) {
       bodyHTML += `<td class="${dc} cell-action align-middle text-center">
         <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onclick="event.stopPropagation(); openViewDrawer(${article.id})" class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Görüntüle">
+          <button onclick="event.stopPropagation(); showDetailPage(${article.id})" class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Görüntüle">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
           </button>
           <button onclick="event.stopPropagation(); openEditModal(${article.id})" class="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Düzenle">
@@ -252,7 +376,10 @@ function getCellClass(col) {
     case 'longtext': return 'cell-long';
     case 'multiselect': return 'cell-tag';
     case 'select': return 'cell-badge';
-    default: return col.column_key === 'title' ? 'cell-title font-medium text-slate-800' : '';
+    case 'url': return 'cell-url';
+    case 'date': return 'cell-text';
+    case 'boolean': return 'cell-badge';
+    default: return col.column_key === 'title' ? 'cell-title font-medium text-slate-800' : 'cell-text';
   }
 }
 
@@ -291,11 +418,21 @@ async function duplicateArticle(articleId) {
 function renderCellContent(col, value) {
   if (value === undefined || value === null || value === '') return '<span class="text-slate-300">-</span>';
 
+  // Compact mode: truncate long content in JS
+  const truncate = (text, maxLen) => {
+    if (expandContent || text.length <= maxLen) return escapeHTML(text);
+    return escapeHTML(text.substring(0, maxLen)) + '…';
+  };
+
   switch (col.type) {
-    case 'url':
-      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs truncate block max-w-[120px]" title="${escapeHTML(value)}">
-        ${escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '').substring(0, 25)}...
+    case 'url': {
+      const display = expandContent
+        ? escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '')
+        : escapeHTML(value).replace(/^https?:\/\/(www\.)?/, '').substring(0, 35) + (value.length > 45 ? '…' : '');
+      return `<a href="${escapeHTML(value)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:underline text-xs" title="${escapeHTML(value)}">
+        ${display}
       </a>`;
+    }
 
     case 'select': {
       const colorMap = {
@@ -325,13 +462,13 @@ function renderCellContent(col, value) {
     }
 
     case 'longtext':
-      return `<span class="text-slate-500" title="${escapeHTML(value)}">${escapeHTML(value)}</span>`;
+      return `<span class="text-slate-500" title="${escapeHTML(value)}">${truncate(value, 80)}</span>`;
 
     case 'boolean':
       return value ? '<span class="text-emerald-600">Evet</span>' : '<span class="text-slate-300">-</span>';
 
     default:
-      return `<span class="text-slate-700">${escapeHTML(value)}</span>`;
+      return `<span class="text-slate-700">${truncate(value, 50)}</span>`;
   }
 }
 
@@ -366,7 +503,7 @@ async function setRating(articleId, rating) {
     renderTable();
     if (viewingArticle && viewingArticle.id === articleId) {
       viewingArticle.rating = rating;
-      renderViewRating();
+      renderDetailHeader();
     }
   } catch (err) {
     showNotification('Değerlendirme kaydedilemedi', 'error');
@@ -394,144 +531,190 @@ function renderFormRatingStars() {
   el.innerHTML = html;
 }
 
-function renderViewRating() {
-  if (!viewingArticle) return;
-  const container = document.getElementById('viewRating');
-  container.innerHTML = renderStars(viewingArticle.rating || 0, viewingArticle.id, false)
-    .replace(/setFormRating\((\d)\)/g, `setRating(${viewingArticle.id}, $1)`);
-}
-
 // =====================================================
-// VIEW DRAWER
+// DETAIL PAGE (full page view)
 // =====================================================
 
-async function openViewDrawer(articleId) {
+async function showDetailPage(articleId) {
   viewingArticle = articles.find(a => a.id === articleId);
   if (!viewingArticle) return;
 
-  renderViewRating();
-  renderViewContent();
+  // Hide table, show detail
+  document.getElementById('tableArea').classList.add('hidden');
+  document.getElementById('tableFooter').classList.add('hidden');
+  document.getElementById('detailPage').classList.remove('hidden');
+
+  // Render actions
+  renderDetailActions();
+  renderDetailHeader();
+  renderDetailContent();
   await loadAdvisorNotes(articleId);
 
-  // Show/hide advisor note form based on role
-  const noteForm = document.getElementById('advisorNoteForm');
-  if (canAddNote()) {
-    noteForm.classList.remove('hidden');
-  } else {
-    noteForm.classList.add('hidden');
-  }
+  // Show/hide note form
+  const noteForm = document.getElementById('detailNoteForm');
+  if (canAddNote()) noteForm.classList.remove('hidden');
+  else noteForm.classList.add('hidden');
 
-  // Show admin buttons
-  if (isAdmin()) {
-    document.getElementById('viewEditBtn').classList.remove('hidden');
-    document.getElementById('viewEditBtn').classList.add('flex');
-    document.getElementById('viewDeleteBtn').classList.remove('hidden');
-  } else {
-    document.getElementById('viewEditBtn').classList.add('hidden');
-    document.getElementById('viewDeleteBtn').classList.add('hidden');
-  }
-
-  document.getElementById('viewOverlay').classList.remove('hidden');
-  document.getElementById('viewDrawer').classList.remove('hidden');
-  document.getElementById('viewDrawer').classList.add('flex');
+  // Scroll to top
+  document.getElementById('detailPage').scrollTop = 0;
 }
 
-function closeViewDrawer() {
-  document.getElementById('viewOverlay').classList.add('hidden');
-  document.getElementById('viewDrawer').classList.add('hidden');
-  document.getElementById('viewDrawer').classList.remove('flex');
+function hideDetailPage() {
+  document.getElementById('detailPage').classList.add('hidden');
+  document.getElementById('tableArea').classList.remove('hidden');
+  document.getElementById('tableFooter').classList.remove('hidden');
   viewingArticle = null;
 }
 
-function renderViewContent() {
+function renderDetailActions() {
+  const container = document.getElementById('detailActions');
+  if (!isAdmin()) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <button onclick="if(viewingArticle){openEditModal(viewingArticle.id);}" class="flex items-center justify-center rounded border border-slate-200 h-7 px-3 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors shadow-sm">
+      <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+      Düzenle
+    </button>
+    <button onclick="if(viewingArticle){openDeleteModal(viewingArticle.id);}" class="flex items-center justify-center rounded border border-red-200 h-7 px-3 bg-white text-red-600 text-xs font-medium hover:bg-red-50 transition-colors shadow-sm">
+      <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+      Sil
+    </button>`;
+}
+
+function renderDetailHeader() {
   if (!viewingArticle) return;
   const data = viewingArticle.data || {};
-  const content = document.getElementById('viewContent');
-
+  const header = document.getElementById('detailHeader');
   const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
 
-  // Title + URL header
-  let html = '<div class="pb-4 border-b border-slate-100">';
-  html += `<h2 class="text-2xl font-extrabold text-slate-900 mb-2 leading-tight">${escapeHTML(data.title || 'İsimsiz Makale')}</h2>`;
-  if (data.url) {
-    html += `<a href="${escapeHTML(data.url)}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-blue-600 hover:underline font-medium text-sm bg-blue-50 px-3 py-1.5 rounded-md">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-      Orijinal Kaynağa Git
-    </a>`;
-  }
-  html += '</div>';
+  // Başlık: 'title' key'li sütun veya ilk text sütun
+  const titleCol = sortedCols.find(c => c.column_key === 'title') || sortedCols.find(c => c.type === 'text');
+  const titleVal = titleCol ? (data[titleCol.column_key] || '') : '';
+  let html = `<h1 class="text-xl font-bold leading-tight mb-2 text-slate-900">${escapeHTML(titleVal || 'İsimsiz Makale')}</h1>`;
 
-  // Metadata grid (short fields)
-  const metaKeys = ['author', 'year', 'status', 'relation', 'section', 'method'];
-  const metaCols = sortedCols.filter(c => metaKeys.includes(c.column_key));
-  if (metaCols.length > 0) {
-    html += '<div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">';
-    metaCols.forEach(col => {
-      const val = data[col.column_key];
-      if (!val) return;
-      html += `<div class="flex flex-col gap-1">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${escapeHTML(col.name)}</span>
-        <div class="text-sm font-medium text-slate-800">${renderCellContent(col, val)}</div>
-      </div>`;
-    });
-    html += '</div>';
-  }
+  // Meta satırı: URL sütunları + kısa text sütunları (title hariç, ilk 4 tanesi)
+  const urlCols = sortedCols.filter(c => c.type === 'url');
+  const shortTextCols = sortedCols.filter(c => c.type === 'text' && c !== titleCol);
+  const metaInline = [];
 
-  // Long text fields + others
-  const skipKeys = ['title', 'url', ...metaKeys];
-  const otherCols = sortedCols.filter(c => !skipKeys.includes(c.column_key));
-
-  html += '<div class="space-y-5 pt-2">';
-  otherCols.forEach(col => {
+  shortTextCols.slice(0, 4).forEach(col => {
     const val = data[col.column_key];
     if (!val) return;
-    const isNotes = col.column_key === 'notes';
-    const wrapClass = isNotes ? 'bg-amber-50/50 p-4 rounded-xl border border-amber-100' : '';
-    const titleClass = isNotes ? 'text-amber-800' : 'text-slate-800';
-    const textClass = isNotes ? 'text-amber-900' : 'text-slate-600';
+    metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">${escapeHTML(col.name)}:</span><span class="font-medium text-slate-900">${escapeHTML(val)}</span></div>`);
+  });
+  urlCols.forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+    metaInline.push(`<div class="flex items-center gap-1.5"><span class="font-bold text-slate-500">${escapeHTML(col.name)}:</span><a href="${escapeHTML(val)}" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline truncate max-w-[300px]">${escapeHTML(val)}</a></div>`);
+  });
+  if (metaInline.length > 0) {
+    html += `<div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-600 border-b border-slate-100 pb-3 mb-3">${metaInline.join('')}</div>`;
+  }
 
-    html += `<div class="${wrapClass}">
-      <h4 class="text-sm font-bold ${titleClass} mb-2">${escapeHTML(col.name)}</h4>
-      <div class="text-sm leading-relaxed ${textClass}">${col.type === 'multiselect' ? renderCellContent(col, val) : escapeHTML(val)}</div>
+  // Badge satırı: Değerlendirme + select/multiselect/boolean/date sütunları
+  const badgeTypes = ['select', 'multiselect', 'boolean', 'date'];
+  const badgeCols = sortedCols.filter(c => badgeTypes.includes(c.type));
+  let badges = '';
+
+  // Değerlendirme (rating)
+  const rating = viewingArticle.rating || 0;
+  let starsHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    const filled = i <= rating;
+    starsHtml += `<svg class="w-3.5 h-3.5 ${filled ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>`;
+  }
+  badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Değerlendirme</span><div class="flex items-center gap-1 text-amber-500"><span class="text-sm font-bold text-slate-900 mr-1">${rating}.0</span>${starsHtml}</div></div>`;
+
+  badgeCols.forEach(col => {
+    const val = data[col.column_key];
+    if (val === undefined || val === null || val === '') return;
+    badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4 last:border-0"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">${escapeHTML(col.name)}</span><div class="text-sm font-medium text-slate-900">${renderCellContent(col, val)}</div></div>`;
+  });
+
+  // Kalan kısa text sütunları (meta'da gösterilmeyen 4+)
+  shortTextCols.slice(4).forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+    badges += `<div class="flex flex-col gap-1 border-r border-slate-100 pr-4 last:border-0"><span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500">${escapeHTML(col.name)}</span><div class="text-sm font-medium text-slate-900">${escapeHTML(val)}</div></div>`;
+  });
+
+  const badgeCount = (badges.match(/<div class="flex flex-col/g) || []).length;
+  const gridCols = badgeCount <= 3 ? 'md:grid-cols-3' : badgeCount <= 5 ? 'md:grid-cols-5' : 'md:grid-cols-6';
+  html += `<div class="grid grid-cols-2 ${gridCols} gap-4">${badges}</div>`;
+  header.innerHTML = html;
+}
+
+function renderDetailContent() {
+  if (!viewingArticle) return;
+  const data = viewingArticle.data || {};
+  const container = document.getElementById('detailContent');
+  const sortedCols = [...columns].sort((a, b) => a.sort_order - b.sort_order);
+
+  // İçerik kartları: sadece longtext sütunları (başlık hariç, badge'de gösterilenler hariç)
+  const contentCols = sortedCols.filter(c => c.type === 'longtext');
+
+  let html = '';
+  contentCols.forEach(col => {
+    const val = data[col.column_key];
+    if (!val) return;
+
+    // İçerik uzunluğuna göre genişlik: 200+ karakter → tam genişlik
+    const isWide = String(val).length > 200;
+    const span = isWide ? 'md:col-span-2' : '';
+
+    // "notes" sütunu özel sarımsı arka plan
+    const isNotes = col.column_key === 'notes';
+    const cardBg = isNotes ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200';
+    const titleColor = isNotes ? 'text-amber-700' : 'text-slate-500';
+    const textColor = isNotes ? 'text-amber-900' : 'text-slate-700';
+
+    html += `<div class="${cardBg} border rounded-lg p-4 shadow-sm ${span}">
+      <h3 class="text-sm font-bold uppercase tracking-wide ${titleColor} mb-2">${escapeHTML(col.name)}</h3>
+      <div class="${textColor} text-sm leading-snug whitespace-pre-line">${escapeHTML(val)}</div>
     </div>`;
   });
-  html += '</div>';
 
-  content.innerHTML = html;
+  container.innerHTML = html;
 }
 
 // =====================================================
-// ADVISOR NOTES
+// ADVISOR NOTES (chat-style)
 // =====================================================
 
 async function loadAdvisorNotes(articleId) {
-  const list = document.getElementById('advisorNotesList');
+  const list = document.getElementById('detailNotesList');
   try {
     const notes = await fetchAdvisorNotes(articleId);
     if (notes.length === 0) {
-      list.innerHTML = '<p class="text-xs text-amber-600 italic">Henüz danışman görüşü eklenmemiş.</p>';
+      list.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Henüz görüş eklenmemiş.</p>';
       return;
     }
-    list.innerHTML = notes.map(n => `
-      <div class="bg-white border border-amber-100 rounded-lg p-3 text-sm">
-        <div class="flex justify-between items-start mb-1">
-          <span class="font-semibold text-amber-800 text-xs">${escapeHTML(n.profiles?.display_name || 'Danışman')}</span>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-amber-500">${new Date(n.created_at).toLocaleDateString('tr-TR')}</span>
-            ${(isAdmin() || (currentProfile && n.advisor_id === currentProfile.id)) ? `<button onclick="deleteNote(${n.id}, ${articleId})" class="text-red-400 hover:text-red-600 text-xs">&times;</button>` : ''}
-          </div>
-        </div>
-        <p class="text-slate-700 leading-relaxed">${escapeHTML(n.note)}</p>
-      </div>
-    `).join('');
+    list.innerHTML = notes.reverse().map(n => {
+      const isMe = currentProfile && n.advisor_id === currentProfile.id;
+      const name = n.profiles?.display_name || 'Danışman';
+      const date = new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ', ' + new Date(n.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const deleteBtn = (isAdmin() || isMe) ? `<button onclick="deleteNote(${n.id}, ${articleId})" class="text-slate-300 hover:text-red-500 text-[10px] ml-1">&times;</button>` : '';
+
+      if (isMe) {
+        return `<div class="flex flex-col gap-0.5 items-end">
+          <div class="flex items-center gap-1"><span class="text-[9px] text-slate-400">${date}</span>${deleteBtn}<span class="text-[11px] font-bold text-blue-600">Sen</span></div>
+          <div class="bg-blue-50 border border-blue-100 rounded rounded-tr-none p-2 text-xs text-slate-800 leading-snug max-w-[90%]">${escapeHTML(n.note)}</div>
+        </div>`;
+      }
+      return `<div class="flex flex-col gap-0.5">
+        <div class="flex items-center gap-1"><span class="text-[11px] font-bold text-slate-900">${escapeHTML(name)}</span>${deleteBtn}<span class="text-[9px] text-slate-400">${date}</span></div>
+        <div class="bg-slate-100 rounded rounded-tl-none p-2 text-xs text-slate-700 leading-snug max-w-[90%]">${escapeHTML(n.note)}</div>
+      </div>`;
+    }).join('');
+    // Scroll to bottom
+    list.scrollTop = list.scrollHeight;
   } catch (err) {
-    list.innerHTML = '<p class="text-xs text-red-500">Notlar yüklenemedi.</p>';
+    list.innerHTML = '<p class="text-xs text-red-500 text-center">Notlar yüklenemedi.</p>';
   }
 }
 
 async function saveAdvisorNote() {
   if (!viewingArticle || !canAddNote()) return;
-  const input = document.getElementById('advisorNoteInput');
+  const input = document.getElementById('detailNoteInput');
   const note = input.value.trim();
   if (!note) return;
 
@@ -539,9 +722,9 @@ async function saveAdvisorNote() {
     await createAdvisorNote(viewingArticle.id, currentProfile.id, note);
     input.value = '';
     await loadAdvisorNotes(viewingArticle.id);
-    showNotification('Not eklendi', 'success');
+    showNotification('Görüş eklendi', 'success');
   } catch (err) {
-    showNotification('Not eklenemedi: ' + err.message, 'error');
+    showNotification('Görüş eklenemedi: ' + err.message, 'error');
   }
 }
 
@@ -585,7 +768,6 @@ function openEditModal(articleId) {
   document.getElementById('formSubmitText').textContent = 'Değişiklikleri Kaydet';
   renderFormFields(article.data || {});
   renderFormRatingStars();
-  closeViewDrawer();
   showFormModal();
 }
 
@@ -621,7 +803,9 @@ function renderFormFields(data) {
     html += '<div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">';
     shortCols.forEach(col => {
       const isTitle = col.column_key === 'title';
-      html += `<div${isTitle ? ' class="col-span-2 sm:col-span-1"' : ''}>
+      const isMulti = col.type === 'multiselect';
+      const spanClass = (isTitle || isMulti) ? ' class="col-span-2"' : '';
+      html += `<div${spanClass}>
         <label class="block text-xs font-semibold text-slate-500 mb-1">${escapeHTML(col.name)}${isTitle ? ' *' : ''}</label>
         ${renderFormInput(col, data[col.column_key])}
       </div>`;
@@ -639,6 +823,7 @@ function renderFormFields(data) {
 
   grid.innerHTML = html;
   renderFormRatingStars();
+  initTagInputs();
 }
 
 function renderFormInput(col, value) {
@@ -654,8 +839,18 @@ function renderFormInput(col, value) {
       opts.forEach(o => { html += `<option value="${escapeHTML(o)}" ${o === v ? 'selected' : ''}>${escapeHTML(o)}</option>`; });
       return html + '</select>';
     }
-    case 'multiselect':
-      return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="Virgülle ayırın..." />`;
+    case 'multiselect': {
+      // Tag chips + input with autocomplete
+      return `<div class="tag-input-container relative border border-slate-200 rounded-lg bg-white p-1.5 min-h-[38px] focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all" data-key="${col.column_key}" data-col-key="${col.column_key}">
+        <input type="hidden" data-key="${col.column_key}" value="${escapeHTML(v)}" />
+        <div class="tag-chips flex flex-wrap gap-1 mb-1"></div>
+        <div class="flex items-center gap-1">
+          <input type="text" class="tag-text-input flex-1 border-0 outline-none text-sm px-1 py-0.5 bg-transparent min-w-[120px]" placeholder="Yeni etiket ekle..." autocomplete="off" />
+          <button type="button" class="tag-add-btn shrink-0 w-6 h-6 rounded bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold flex items-center justify-center transition-colors" title="Ekle">+</button>
+        </div>
+        <div class="tag-suggestions hidden absolute left-0 right-0 top-full z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto text-sm"></div>
+      </div>`;
+    }
     case 'url':
       return `<input data-key="${col.column_key}" type="text" value="${escapeHTML(v)}" class="${base}" placeholder="https://..." />`;
     case 'boolean':
@@ -670,10 +865,127 @@ function renderFormInput(col, value) {
   }
 }
 
+// Tüm makalelerden kullanılmış etiketleri topla
+function getAllUsedTags(colKey) {
+  const tagSet = new Set();
+  articles.forEach(a => {
+    const val = a.data?.[colKey];
+    if (val) {
+      String(val).split(',').map(t => t.trim()).filter(Boolean).forEach(t => tagSet.add(t));
+    }
+  });
+  return [...tagSet].sort((a, b) => a.localeCompare(b, 'tr'));
+}
+
+// Tag input bileşenlerini başlat
+function initTagInputs() {
+  document.querySelectorAll('.tag-input-container').forEach(container => {
+    const colKey = container.dataset.colKey;
+    const hiddenInput = container.querySelector('input[type="hidden"]');
+    const chipsDiv = container.querySelector('.tag-chips');
+    const textInput = container.querySelector('.tag-text-input');
+    const addBtn = container.querySelector('.tag-add-btn');
+    const suggestionsDiv = container.querySelector('.tag-suggestions');
+
+    // Mevcut etiketleri parse et
+    let currentTags = hiddenInput.value ? hiddenInput.value.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const allTags = getAllUsedTags(colKey);
+
+    function renderChips() {
+      chipsDiv.innerHTML = currentTags.map(tag =>
+        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs font-medium">
+          ${escapeHTML(tag)}
+          <button type="button" class="tag-remove text-blue-400 hover:text-red-500 text-sm leading-none font-bold" data-tag="${escapeHTML(tag)}">&times;</button>
+        </span>`
+      ).join('');
+      hiddenInput.value = currentTags.join(', ');
+    }
+
+    function addTag(tag) {
+      tag = tag.trim();
+      if (!tag || currentTags.includes(tag)) return;
+      currentTags.push(tag);
+      renderChips();
+      textInput.value = '';
+      hideSuggestions();
+    }
+
+    function removeTag(tag) {
+      currentTags = currentTags.filter(t => t !== tag);
+      renderChips();
+    }
+
+    function showSuggestions(filter) {
+      const q = filter.toLowerCase();
+      const matches = allTags.filter(t => t.toLowerCase().includes(q) && !currentTags.includes(t));
+      if (matches.length === 0 || !q) { hideSuggestions(); return; }
+      suggestionsDiv.innerHTML = matches.slice(0, 10).map(t =>
+        `<div class="tag-suggestion px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-slate-700 transition-colors" data-val="${escapeHTML(t)}">${escapeHTML(t).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<b class="text-blue-600">$1</b>')}</div>`
+      ).join('');
+      suggestionsDiv.classList.remove('hidden');
+    }
+
+    function hideSuggestions() {
+      suggestionsDiv.classList.add('hidden');
+      suggestionsDiv.innerHTML = '';
+    }
+
+    // Event: type in input
+    textInput.addEventListener('input', () => {
+      showSuggestions(textInput.value);
+    });
+
+    // Event: focus shows suggestions
+    textInput.addEventListener('focus', () => {
+      if (textInput.value.trim()) showSuggestions(textInput.value);
+    });
+
+    // Event: click suggestion
+    suggestionsDiv.addEventListener('mousedown', (e) => {
+      const item = e.target.closest('.tag-suggestion');
+      if (item) { addTag(item.dataset.val); }
+    });
+
+    // Event: Enter key to add
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (textInput.value.trim()) addTag(textInput.value);
+      }
+      if (e.key === 'Backspace' && !textInput.value && currentTags.length > 0) {
+        removeTag(currentTags[currentTags.length - 1]);
+      }
+      if (e.key === 'Escape') { hideSuggestions(); }
+    });
+
+    // Event: + button
+    addBtn.addEventListener('click', () => {
+      if (textInput.value.trim()) addTag(textInput.value);
+      textInput.focus();
+    });
+
+    // Event: remove chip
+    chipsDiv.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tag-remove');
+      if (btn) removeTag(btn.dataset.tag);
+    });
+
+    // Event: click outside to hide
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) hideSuggestions();
+    });
+
+    // İlk render
+    renderChips();
+  });
+}
+
 function collectFormData() {
   const data = {};
   document.querySelectorAll('#formGrid [data-key]').forEach(el => {
     const key = el.dataset.key;
+    // Tag container hidden input'ları zaten doğru değere sahip
+    if (el.closest('.tag-input-container') && el.type !== 'hidden') return;
     if (el.type === 'checkbox') {
       data[key] = el.checked;
     } else {
@@ -703,6 +1015,12 @@ async function handleFormSubmit(e) {
       const updated = await updateArticle(editingArticleId, data, formRating);
       const idx = articles.findIndex(a => a.id === editingArticleId);
       if (idx !== -1) articles[idx] = updated;
+      // Detay sayfası açıksa güncelle
+      if (viewingArticle && viewingArticle.id === editingArticleId) {
+        viewingArticle = updated;
+        renderDetailHeader();
+        renderDetailContent();
+      }
       showNotification('Kayıt güncellendi', 'success');
     } else {
       const created = await createArticle(data, formRating);
@@ -885,7 +1203,7 @@ async function handleDelete() {
     await deleteArticle(articleToDelete.id);
     articles = articles.filter(a => a.id !== articleToDelete.id);
     closeDeleteModal();
-    closeViewDrawer();
+    hideDetailPage();
     renderTable();
     showNotification('Kayıt silindi', 'success');
   } catch (err) {
@@ -928,9 +1246,9 @@ function renderColumnList() {
       </div>
       <div class="flex-1 min-w-0">
         ${editingThis
-          ? `<input id="colRenameInput" type="text" value="${escapeHTML(col.name)}" class="text-sm font-medium text-slate-700 border border-blue-400 rounded px-1.5 py-0.5 w-full focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();saveColumnRename(${col.id});}if(event.key==='Escape'){cancelColumnRename();}" />`
-          : `<p class="text-sm font-medium text-slate-700 truncate ${isAdmin() ? 'cursor-pointer hover:text-blue-600' : ''}" ${isAdmin() ? `ondblclick="startColumnRename(${col.id})"` : ''}>${escapeHTML(col.name)}</p>`
-        }
+        ? `<input id="colRenameInput" type="text" value="${escapeHTML(col.name)}" class="text-sm font-medium text-slate-700 border border-blue-400 rounded px-1.5 py-0.5 w-full focus:ring-2 focus:ring-blue-500 outline-none" onkeydown="if(event.key==='Enter'){event.preventDefault();saveColumnRename(${col.id});}if(event.key==='Escape'){cancelColumnRename();}" />`
+        : `<p class="text-sm font-medium text-slate-700 truncate ${isAdmin() ? 'cursor-pointer hover:text-blue-600' : ''}" ${isAdmin() ? `ondblclick="startColumnRename(${col.id})"` : ''}>${escapeHTML(col.name)}</p>`
+      }
         <p class="text-[10px] text-slate-400 uppercase tracking-wider">${escapeHTML(col.type)}</p>
       </div>
       ${isAdmin() && !editingThis ? `<button onclick="startColumnRename(${col.id})" class="p-1 text-slate-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all" title="Adı Düzenle">
@@ -953,12 +1271,18 @@ function renderColumnList() {
 function toggleColumnVis(colKey) {
   localVisibility[colKey] = !(localVisibility[colKey] !== false);
 
+  // Admin ise global sütun ayarını da güncelle
   if (isAdmin()) {
     const col = columns.find(c => c.column_key === colKey);
     if (col) {
-      updateColumn(col.id, { visible: localVisibility[colKey] }).catch(() => {});
+      updateColumn(col.id, { visible: localVisibility[colKey] }).catch(() => { });
       col.visible = localVisibility[colKey];
     }
+  }
+
+  // Kullanıcının tercihini DB'ye kaydet
+  if (currentUser) {
+    saveColumnVisibility(currentUser.id, { ...localVisibility }).catch(() => { });
   }
 
   renderColumnList();
@@ -1114,6 +1438,84 @@ function setupUIListeners() {
     renderTable();
   });
 
+  // Excel download
+  document.getElementById('btnExcelDownload').addEventListener('click', downloadExcel);
+
+  // Logo click → ana sayfaya dön
+  document.getElementById('headerLogo').addEventListener('click', () => {
+    if (viewingArticle) hideDetailPage();
+  });
+
+  // Expand content toggle
+  document.getElementById('btnExpandContent').addEventListener('click', () => {
+    expandContent = !expandContent;
+    const btn = document.getElementById('btnExpandContent');
+    if (expandContent) {
+      btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+      btn.classList.remove('text-slate-500');
+    } else {
+      btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+      btn.classList.add('text-slate-500');
+    }
+    renderTable();
+  });
+
+  // ---- Tag Filter ----
+  const tagFilterBtn = document.getElementById('btnTagFilter');
+  const tagFilterDropdown = document.getElementById('tagFilterDropdown');
+  const tagFilterSearch = document.getElementById('tagFilterSearch');
+
+  tagFilterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !tagFilterDropdown.classList.contains('hidden');
+    if (isOpen) {
+      tagFilterDropdown.classList.add('hidden');
+    } else {
+      renderTagFilterList();
+      tagFilterDropdown.classList.remove('hidden');
+      tagFilterSearch.value = '';
+      tagFilterSearch.focus();
+    }
+  });
+
+  tagFilterSearch.addEventListener('input', () => {
+    renderTagFilterList(tagFilterSearch.value.trim().toLowerCase());
+  });
+
+  tagFilterSearch.addEventListener('click', e => e.stopPropagation());
+
+  document.getElementById('tagFilterList').addEventListener('change', (e) => {
+    if (e.target.type === 'checkbox') {
+      const tag = e.target.dataset.tag;
+      if (e.target.checked) {
+        if (!selectedTags.includes(tag)) selectedTags.push(tag);
+      } else {
+        selectedTags = selectedTags.filter(t => t !== tag);
+      }
+    }
+  });
+
+  document.getElementById('btnClearTagFilter').addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedTags = [];
+    updateTagFilterBadge();
+    renderTable();
+    tagFilterDropdown.classList.add('hidden');
+  });
+
+  document.getElementById('btnApplyTagFilter').addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateTagFilterBadge();
+    renderTable();
+    tagFilterDropdown.classList.add('hidden');
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!tagFilterDropdown.contains(e.target) && e.target !== tagFilterBtn && !tagFilterBtn.contains(e.target)) {
+      tagFilterDropdown.classList.add('hidden');
+    }
+  });
   // Column Manager
   document.getElementById('btnColumnManager').addEventListener('click', openColumnManager);
   document.getElementById('columnManagerClose').addEventListener('click', closeColumnManager);
@@ -1132,18 +1534,11 @@ function setupUIListeners() {
   document.getElementById('btnCancelPaste').addEventListener('click', () => document.getElementById('pasteArea').classList.add('hidden'));
   document.getElementById('btnApplyPaste').addEventListener('click', applyPaste);
 
-  // View drawer
-  document.getElementById('viewClose').addEventListener('click', closeViewDrawer);
-  document.getElementById('viewOverlay').addEventListener('click', closeViewDrawer);
-  document.getElementById('viewEditBtn').addEventListener('click', () => {
-    if (viewingArticle) openEditModal(viewingArticle.id);
-  });
-  document.getElementById('viewDeleteBtn').addEventListener('click', () => {
-    if (viewingArticle) openDeleteModal(viewingArticle.id);
-  });
+  // Detail page
+  document.getElementById('detailBackBtn').addEventListener('click', hideDetailPage);
 
   // Advisor note
-  document.getElementById('btnSaveAdvisorNote').addEventListener('click', saveAdvisorNote);
+  document.getElementById('btnSaveDetailNote').addEventListener('click', saveAdvisorNote);
 
   // Delete modal
   document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
@@ -1174,11 +1569,53 @@ function setupUIListeners() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeFormModal();
-      closeViewDrawer();
       closeColumnManager();
       closeDeleteModal();
+      if (viewingArticle) hideDetailPage();
     }
   });
+}
+
+// =====================================================
+// EXCEL DOWNLOAD
+// =====================================================
+
+function downloadExcel() {
+  if (typeof XLSX === 'undefined') {
+    showNotification('Excel kütüphanesi yüklenemedi', 'error');
+    return;
+  }
+
+  const processed = getProcessedArticles();
+  const visibleCols = columns
+    .filter(c => localVisibility[c.column_key] !== false)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  const headers = ['Değerlendirme', ...visibleCols.map(c => c.name)];
+
+  const rows = processed.map(article => {
+    const row = [article.rating || 0];
+    visibleCols.forEach(col => {
+      let val = article.data ? article.data[col.column_key] : '';
+      if (Array.isArray(val)) val = val.join(', ');
+      row.push(val || '');
+    });
+    return row;
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  const colWidths = headers.map((h, i) => {
+    let max = h.length;
+    rows.forEach(r => { max = Math.max(max, String(r[i] || '').length); });
+    return { wch: Math.min(max + 2, 50) };
+  });
+  ws['!cols'] = colWidths;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Makaleler');
+  XLSX.writeFile(wb, `makaleler_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  showNotification(`${processed.length} makale Excel olarak indirildi`, 'success');
 }
 
 // =====================================================

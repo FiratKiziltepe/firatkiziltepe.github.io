@@ -113,10 +113,10 @@ Sonuç tablosu şu bilgileri içerir:
 - HTML5
 - CSS3 (Grid, Flexbox, Gradients)
 - Vanilla JavaScript (ES6+)
-- Google Gemini API (gemini-2.0-flash)
+- Google Gemini API (gemini-3.1-flash-lite-preview)
 
 ### API Yapılandırması
-- Model: `gemini-2.0-flash`
+- Model: `gemini-3.1-flash-lite-preview`
 - Temperature: 0.2 (tutarlı sonuçlar için)
 - Max Output Tokens: 2048
 

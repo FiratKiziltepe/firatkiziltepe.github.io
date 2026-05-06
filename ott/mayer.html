@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayer'in Çoklu Ortam Öğrenme Teorisi İnfografiği</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f7ff;
+            color: #00449E;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #00449E;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #005BC0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #50A1FF;
+        }
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0072E8;
+            margin-bottom: 0.75rem;
+        }
+        .lead {
+            font-size: 1.25rem;
+            text-align: center;
+            color: #005BC0;
+            margin-bottom: 2rem;
+        }
+        .stat-number {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #0072E8;
+            line-height: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 1.5rem auto;
+            max-height: 400px;
+        }
+        .flow-box {
+            border: 2px solid #0072E8;
+            background-color: #f0f7ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            min-width: 120px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #50A1FF;
+            margin: 0.5rem;
+            align-self: center;
+        }
+        .principle-card {
+            background-color: #f0f7ff;
+            border: 1px solid #50A1FF;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .principle-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #005BC0;
+            margin-bottom: 0.5rem;
+        }
+        .principle-card ul {
+            list-style-type: disc;
+            list-style-position: inside;
+            padding-left: 0.5rem;
+            font-size: 0.9rem;
+            color: #00449E;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 
+      Gömülü Yorum: Anlatı Planı
+      1. Başlık ve Temel İlke: Mayer'in temel multimedya ilkesi (kelime + resim > sadece kelime) ile başla.
+      2. Kanıt: Bisiklet pompası çalışmasından elde edilen transfer verilerini bir çubuk grafikle göster.
+      3. Bilişsel Teori: Temel ilkenin "neden"ini 3 varsayım (Çift Kanal, Sınırlı Kapasite, Aktif İşleme) ile açıkla.
+      4. Bilişsel Yük: 3 bilişsel yük tipini (İçsel, İlgisiz, Anlamlı) bir donut grafikle kavramsallaştır.
+      5. 5 Adımlı Süreç: Bilginin duyusal bellekten çalışma belleğine ve uzun süreli belleğe gidişini bir akış şemasıyla göster.
+      6. Tasarım İlkeleri: Bilişsel yüke göre kategorize edilmiş temel tasarım ilkelerini (Tutarlılık, Yöntem, Bölümleme vb.) kartlar halinde sun.
+      7. Hedef: Anlamlı öğrenme (iyi hatırlama + iyi transfer) ile ezbere öğrenme (iyi hatırlama + zayıf transfer) arasındaki farkı bir yığılmış çubuk grafikle göstererek bitir.
+    -->
+
+    <!-- 
+      Gömülü Yorum: Görselleştirme Seçimleri
+      1. Bisiklet Pompası Çalışması (sf. 3): Karşılaştırma hedefi. Kategorik veriler için Çubuk Grafik (Chart.js) seçildi. SVG YOK.
+      2. Bilişsel Yük Tipleri (sf. 26-27): Kompozisyon/bileşim gösterme hedefi. 3 yük tipini bir bütünün parçaları olarak göstermek için Donut Grafik (Chart.js) seçildi. SVG YOK.
+      3. 5 Adımlı Bilişsel Süreç (sf. 37, Fig 3.2): Süreç/organizasyon hedefi. Bir akışı görselleştirmek için Akış Şeması (HTML/CSS/Tailwind) seçildi. SVG/Mermaid YASAKLI olduğu için div, border ve unicode okları (→) kullanıldı.
+      4. Tasarım İlkeleri: Organizasyon/gruplama hedefi. İlkeleri 3 kategori altında listelemek için Liste/Kartlar (HTML/CSS/Tailwind) seçildi. SVG YOK.
+      5. Öğrenme Çıktıları (sf. 13, Tablo 1.5): Karşılaştırma hedefi. "Ezbere" ve "Anlamlı" öğrenmeyi iki değişken (Hatırlama, Transfer) üzerinden karşılaştırmak için Yığılmış Çubuk Grafik (Chart.js) seçildi. SVG YOK.
+    -->
+    
+    <!-- Gömülü Yorum: Onaylama: Bu dosyada Mermaid JS veya SVG kullanılmamıştır. Tüm görselleştirmeler Chart.js (Canvas) veya HTML/CSS/Tailwind ile yapılmıştır. -->
+    <!-- Gömülü Yorum: Seçilen Palet: Brilliant Blues (#00449E, #005BC0, #0072E8, #2889FF, #50A1FF) -->
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <h1>Mayer'in Çoklu Ortam Öğrenme Teorisi</h1>
+        <p class="lead">Bilgi, Zihnimizde Nasıl Görselleşir ve Anlam Kazanır?</p>
+
+        <!-- Bölüm 1: Temel İlke -->
+        <div class="card">
+            <h2>1. Çoklu Ortam İlkesi: Neden "Hem Görmek Hem Duymak"?</h2>
+            <p class="mb-4 text-base md:text-lg">Richard E. Mayer'in temel önermesi basittir: **"İnsanlar, yalnızca kelimelerden öğrendiklerine kıyasla, kelimeler ve resimlerden (görsellerden) bir arada sunulduğunda daha derin öğrenirler."** (sf. 3). Ancak bu, sadece estetik bir tercih değil, bilişsel bir gerekliliktir. Asıl hedef, bilgiyi hatırlamanın (Ezber) ötesinde, onu yeni durumlarda kullanabilmektir (Transfer).</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div class="md:col-span-2">
+                    <p class="mb-4">Mayer'in bisiklet pompası çalışması (sf. 3), öğrenme "transferi" (yani, bilgiyi problem çözmede kullanma) açısından üç yöntemi karşılaştırdı. Sonuçlar, kelime ve görsellerin birleştirilmesinin ezberlemeyi değil, **anlamlı öğrenmeyi** çarpıcı biçimde artırdığını göstermektedir.</p>
+                    <div class="w-full max-w-2xl mx-auto h-80 max-h-[450px]">
+                        <canvas id="pumpChart"></canvas>
+                    </div>
+                </div>
+                <div class="text-center p-4">
+                    <p class="text-lg font-semibold mb-2">Sadece Kelime Kullananlara Göre</p>
+                    <div class="stat-number">1.50</div>
+                    <p class="text-xl font-semibold mt-2">Daha Fazla Transfer Başarısı</p>
+                    <p class="text-sm text-[#005BC0] mt-1">(Kelime + Görsel kullananlarda gözlemlenen medyan etki büyüklüğü, sf. 3)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bölüm 2: Bilişsel Teori ve Bilişsel Yük -->
+        <div class="card">
+            <h2>2. Neden Daha İyi Öğreniyoruz? Bilişsel Teori</h2>
+            <p class="mb-4">Bu etki, insan zihninin nasıl çalıştığına dair üç temel varsayıma dayanır (sf. 32-37):</p>
+            <ol class="list-decimal list-inside mb-4 space-y-2">
+                <li>**Çift Kanal Varsayımı:** Bilgiyi işlemek için iki ayrı kanalımız vardır: Gözlerimiz için **Görsel/Resimsel Kanal** (animasyonlar, metin) ve kulaklarımız için **İşitsel/Sözel Kanal** (seslendirme).</li>
+                <li>**Sınırlı Kapasite Varsayımı:** Her bir kanal, aynı anda yalnızca sınırlı miktarda bilgiyi işleyebilir. Bir kanalı (özellikle görsel kanalı) aşırı yüklemek (örn. animasyon + uzun metin) öğrenmeyi engeller.</li>
+                <li>**Aktif İşleme Varsayımı:** Anlamlı öğrenme, bilgiyi pasifçe almakla değil, onu aktif olarak seçme, organize etme ve mevcut bilgilerle bütünleştirme çabasıyla gerçekleşir.</li>
+            </ol>
+            <p class="mb-4">Tasarımın amacı, öğrencinin çalışma belleğindeki **Bilişsel Yükü (Cognitive Load)** yönetmektir. Sweller'a göre (sf. 26-27), bu yükün üç türü vardır:</p>
+            <div class="w-full max-w-md mx-auto h-72 max-h-[350px]">
+                <canvas id="loadChart"></canvas>
+            </div>
+            <ul class="mt-4 text-center text-sm grid grid-cols-1 md:grid-cols-3 gap-2">
+                <li class="p-2 bg-gray-100 rounded">**İçsel Yük (Intrinsic):** Konunun doğal zorluğu. Bu yük *yönetilmelidir*.</li>
+                <li class="p-2 bg-gray-100 rounded">**İlgisiz Yük (Extraneous):** Kötü tasarımdan (örn. kafa karıştırıcı düzen) kaynaklanan yük. Bu yük *azaltılmalıdır*.</li>
+                <li class="p-2 bg-gray-100 rounded">**Anlamlı Yük (Germane):** Bilgiyi anlamlandırmak için harcanan çaba. Bu yük *desteklenmelidir*.</li>
+            </ul>
+        </div>
+
+        <!-- Bölüm 3: 5 Adımlı Süreç -->
+        <div class="card">
+            <h2>3. Anlamlı Öğrenme Nasıl Çalışır? 5 Adımlı Aktif İşleme Süreci</h2>
+            <p class="mb-6">Mayer'in teorisine göre (sf. 37, Şekil 3.2), anlamlı öğrenme, bilginin duyusal bellekten çalışma belleğine ve uzun süreli belleğe yaptığı yolculukta 5 bilişsel süreçten geçer.</p>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-4 overflow-x-auto p-4">
+                
+                <!-- Sunum ve Duyusal Bellek -->
+                <div class="flex-shrink-0 text-center">
+                    <div class="flow-box bg-white font-bold">Çoklu Ortam Sunumu</div>
+                    <div class="flex justify-around mt-2">
+                        <div class="text-center">
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-box">Kulaklar (İşitsel)</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="flow-arrow">↓</span>
+                            <div class="flow-box">Gözler (Görsel)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <span class="flow-arrow hidden md:block">→</span>
+                <span class="flow-arrow md:hidden">↓</span>
+
+                <!-- Çalışma Belleği (Seçme ve Organize Etme) -->
+                <div class="flex-shrink-0 border-4 border-dashed border-[#005BC0] p-4 rounded-lg">
+                    <h3 class="text-center font-bold mb-2 text-[#005BC0]">ÇALIŞMA BELLEĞİ (Sınırlı Kapasite)</h3>
+                    <!-- Sözel Yol -->
+                    <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 mb-3">
+                        <div class="flow-box bg-blue-100 border-blue-300">İlgili<br>Kelimeleri Seçme</div>
+                        <span class="flow-arrow hidden md:block">→</span><span class="flow-arrow md:hidden">↓</span>
+                        <div class="flow-box bg-blue-100 border-blue-300">Sesler</div>
+                        <span class="flow-arrow hidden md:block">→</span><span class="flow-arrow md:hidden">↓</span>
+                        <div class="flow-box bg-blue-100 border-blue-300">Kelimeleri<br>Organize Etme</div>
+                        <span class="flow-arrow hidden md:block">→</span><span class="flow-arrow md:hidden">↓</span>
+                        <div class="flow-box bg-blue-200 border-blue-400 font-bold">Sözel Model</div>
+                    </div>
+                    <!-- Görsel Yol -->
+                    <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
+                        <div class="flow-box bg-green-100 border-green-300 text-green-800">İlgili<br>Görselleri Seçme</div>
+                        <span class="flow-arrow hidden md:block text-green-500">→</span><span class="flow-arrow md:hidden text-green-500">↓</span>
+                        <div class="flow-box bg-green-100 border-green-300 text-green-800">Resimler</div>
+                        <span class="flow-arrow hidden md:block text-green-500">→</span><span class="flow-arrow md:hidden text-green-500">↓</span>
+                        <div class="flow-box bg-green-100 border-green-300 text-green-800">Görselleri<br>Organize Etme</div>
+                        <span class="flow-arrow hidden md:block text-green-500">→</span><span class="flow-arrow md:hidden text-green-500">↓</span>
+                        <div class="flow-box bg-green-200 border-green-400 font-bold text-green-900">Görsel Model</div>
+                    </div>
+                </div>
+
+                <span class="flow-arrow hidden md:block">→</span>
+                <span class="flow-arrow md:hidden">↓</span>
+
+                <!-- Bütünleştirme ve Uzun Süreli Bellek -->
+                <div class="flex-shrink-0 text-center">
+                    <div class="flow-box bg-yellow-100 border-yellow-400 text-yellow-900 font-bold">BÜTÜNLEŞTİRME</div>
+                    <span class="flow-arrow text-yellow-500">↕</span>
+                    <div class="flow-box bg-white">Uzun Süreli Bellek (Ön Bilgi)</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bölüm 4: Tasarım İlkeleri -->
+        <div class="card">
+            <h2>4. İlkeler: Etkili Tasarım Nasıl Yapılır?</h2>
+            <p class="mb-4">İyi tasarım, bilişsel yükü yöneterek aktif işlemeyi (seçme, organize etme, bütünleştirme) destekler. İlkeler üç gruba ayrılır (sf. 6-7):</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="principle-card">
+                    <h4>1. İlgisiz Yükü Azalt</h4>
+                    <p class="text-xs mb-2">(Dikkati dağıtan unsurları kaldır)</p>
+                    <ul>
+                        <li>**Tutarlılık:** İlgisiz, süslü ama gereksiz grafik, ses ve metinleri çıkarın.</li>
+                        <li>**Gereklilik:** Animasyonu seslendiriyorsanız, aynı metni ekrana YAZMAYIN (görsel kanalı aşırı yükler).</li>
+                        <li>**Bitişiklik (Uzamsal):** İlgili metin ve görselleri ekranda birbirine yakın tutun.</li>
+                        <li>**Bitişiklik (Zamansal):** İlgili seslendirmeyi animasyonla AYNI ANDA verin.</li>
+                    </ul>
+                </div>
+                <div class="principle-card">
+                    <h4>2. Temel Yükü Yönet</h4>
+                    <p class="text-xs mb-2">(Karmaşık bilgiyi basitleştir)</p>
+                    <ul>
+                        <li>**Bölümleme:** Karmaşık dersi, öğrencinin kontrol edebileceği ("Devam") küçük parçalara ayırın.</li>
+                        <li>**Ön-Eğitim:** Derse başlamadan önce temel kavramları ("piston nedir?") öğretin.</li>
+                        <li>**Yöntem (Modality):** Animasyon veya grafiği metinle değil, SESLENDİRME ile açıklayın (yükü iki kanala dağıtır).</li>
+                    </ul>
+                </div>
+                <div class="principle-card">
+                    <h4>3. Anlamlı Yükü Destekle</h4>
+                    <p class="text-xs mb-2">(Anlam kurmayı teşvik et)</p>
+                    <ul>
+                        <li>**Kişiselleştirme:** Resmi dil yerine ("piston hareket eder") sohbete dayalı dil ("pistonunuz hareket eder") kullanın.</li>
+                        <li>**Ses:** Robotik ses yerine arkadaşça, standart bir insan sesi kullanın.</li>
+                        <li>**Görüntü:** Anlatıcının ekranda görünmesi (pedagojik ajan) öğrenmeyi zorunlu olarak artırmaz, dikkat dağıtabilir.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bölüm 5: Hedef -->
+        <div class="card">
+            <h2>5. Nihai Hedef: Ezber Değil, Anlamlı Öğrenme</h2>
+            <p class="mb-4">Eğitimde amaç sadece bilgiyi hatırlamak değil, onu yeni durumlarda kullanabilmektir (Transfer). Kötü tasarım ezberlemeye (Rote Learning), iyi tasarım ise anlamlı öğrenmeye (Meaningful Learning) yol açar (sf. 13).</p>
+            <div class="w-full max-w-lg mx-auto h-72 max-h-[400px]">
+                <canvas id="learningOutcomeChart"></canvas>
+            </div>
+            <p class="mt-4 text-center">İyi tasarım (anlamlı öğrenme), sadece hatırlamayı değil, aynı zamanda **transferi** de hedefler.</p>
+        </div>
+
+        <!-- Sonuç -->
+        <div class="text-center mt-8 p-4">
+            <h3 class="text-xl">Teknoloji Odaklıdan → Öğrenen Odaklı Tasarıma</h3>
+            <p class="text-base text-[#005BC0]">Başarılı çoklu ortam tasarımı, en yeni teknolojiyi kullanmak değil, insan zihninin nasıl öğrendiğini anlayan bilişsel bilimi temel almaktır (sf. 9-10).</p>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = function() {
+            
+            const tooltipCallback = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 1. Pump Chart (Bar Chart)
+            const ctxPump = document.getElementById('pumpChart').getContext('2d');
+            new Chart(ctxPump, {
+                type: 'bar',
+                data: {
+                    labels: ['Sadece Kelimeler', 'Sadece Resimler', 'Kelime + Resim'],
+                    datasets: [{
+                        label: 'Problem Çözme Transfer Başarısı (Göreceli Skor)',
+                        data: [20, 15, 80],
+                        backgroundColor: ['#50A1FF', '#2889FF', '#00449E'],
+                        borderColor: '#00449E',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...tooltipCallback,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Transfer Başarısı'
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...tooltipCallback.plugins,
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Öğrenme Transferi Üzerindeki Etki (Bisiklet Pompası Çalışması)',
+                            padding: {
+                                bottom: 20
+                            },
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Cognitive Load Chart (Donut Chart)
+            const ctxLoad = document.getElementById('loadChart').getContext('2d');
+            new Chart(ctxLoad, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        ['İçsel Yük', '(Yönet)'], 
+                        ['Anlamlı Yük', '(Destekle)'],
+                        ['İlgisiz Yük', '(Azalt)']
+                    ],
+                    datasets: [{
+                        label: 'Bilişsel Yük Tipleri',
+                        data: [33.3, 33.3, 33.3],
+                        backgroundColor: [
+                            '#00449E', // Intrinsic
+                            '#0072E8', // Germane
+                            '#FF6384'  // Extraneous (Kontrast renk, 'kötü' olduğunu belirtmek için)
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    ...tooltipCallback,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...tooltipCallback.plugins,
+                        title: {
+                            display: true,
+                            text: 'Bilişsel Yükün Bileşenleri (Kavramsal)',
+                            padding: {
+                                bottom: 20
+                            },
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Learning Outcome Chart (Stacked Bar Chart)
+            const ctxOutcome = document.getElementById('learningOutcomeChart').getContext('2d');
+            new Chart(ctxOutcome, {
+                type: 'bar',
+                data: {
+                    labels: ['Ezbere Öğrenme (Rote)', 'Anlamlı Öğrenme (Meaningful)'],
+                    datasets: [
+                        {
+                            label: 'Hatırlama (Tutma)',
+                            data: [80, 80], // Good, Good
+                            backgroundColor: '#2889FF',
+                        },
+                        {
+                            label: 'Transfer (Problem Çözme)',
+                            data: [10, 80], // Poor, Good (Göreceli değerler)
+                            backgroundColor: '#00449E',
+                        }
+                    ]
+                },
+                options: {
+                    ...tooltipCallback,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { 
+                            stacked: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Öğrenme Başarısı (Göreceli)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...tooltipCallback.plugins,
+                        title: {
+                            display: true,
+                            text: 'Öğrenme Çıktılarının Karşılaştırması (sf. 13)',
+                            padding: {
+                                bottom: 20
+                            },
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>

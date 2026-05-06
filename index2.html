@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fırat KIZILTEPE — Kişisel Web Sayfası</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        /* ═══ GENEL ═══ */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar {
+            min-width: 260px;
+            max-width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #0b1628 0%, #152238 50%, #0d1a30 100%);
+            color: #e9ecef;
+            transition: all 0.3s;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        #sidebar.active {
+            margin-left: -260px;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 28px 18px 22px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(99, 102, 241, 0.15));
+            text-align: center;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        #sidebar .sidebar-header h3 {
+            font-size: 1.05rem;
+            margin: 14px 0 0;
+            font-weight: 600;
+            color: #60a5fa;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-profile-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: block;
+            border: 3px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+            object-fit: cover;
+        }
+
+        .sidebar-profile-icon {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            font-size: 2.8rem;
+            color: #fff;
+        }
+
+        #sidebar ul.components {
+            padding: 12px 0;
+        }
+
+        #sidebar ul li {
+            margin-bottom: 1px;
+        }
+
+        #sidebar ul li a {
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.25s;
+            border-left: 3px solid transparent;
+            letter-spacing: 0.3px;
+        }
+
+        #sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+            color: #64748b;
+            transition: color 0.25s;
+        }
+
+        #sidebar ul li a:hover {
+            background: rgba(59, 130, 246, 0.12);
+            color: #fff;
+            border-left-color: #3b82f6;
+        }
+
+        #sidebar ul li a:hover i {
+            color: #3b82f6;
+        }
+
+        #sidebar ul li.active a {
+            background: rgba(59, 130, 246, 0.2);
+            color: #fff;
+            border-left-color: #3b82f6;
+            font-weight: 500;
+        }
+
+        #sidebar ul li.active a i {
+            color: #60a5fa;
+        }
+
+        /* Scrollbar */
+        #sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+        }
+
+        /* ═══ İÇERİK ═══ */
+        #content {
+            width: 100%;
+            padding: 24px 30px;
+            min-height: 100vh;
+            transition: all 0.3s;
+            margin-left: 260px;
+            background: #f0f4f8;
+        }
+
+        #content.active {
+            margin-left: 0;
+        }
+
+        #main-content {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Toggle butonu */
+        #sidebarCollapse {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 999;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            color: #fff;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        #sidebarCollapse:hover {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            transform: scale(1.1);
+        }
+
+        /* ═══ BÖLÜMLER ═══ */
+        .section {
+            padding: 32px;
+            background: #fff;
+            margin-bottom: 24px;
+            border-radius: 14px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .section h2 {
+            margin-bottom: 28px;
+            color: #1e293b;
+            position: relative;
+            padding-bottom: 14px;
+            font-weight: 700;
+            font-size: 1.6rem;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #06b6d4);
+            border-radius: 4px;
+        }
+
+        .section h3 {
+            color: #2563eb;
+            margin: 28px 0 18px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Liste */
+        .list-unstyled li {
+            margin-bottom: 12px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 10px;
+            transition: all 0.3s;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .list-unstyled li:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.12);
+            background: #fff;
+        }
+
+        .list-unstyled li strong {
+            color: #1e40af;
+        }
+
+        .list-unstyled li a {
+            color: #2563eb;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .list-unstyled li a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .list-group-item {
+            border: none;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            margin-bottom: 10px;
+            border-radius: 10px !important;
+            transition: all 0.3s;
+            padding: 18px 22px;
+            border-left: 4px solid #06b6d4;
+        }
+
+        .list-group-item h5 {
+            color: #0e7490;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .list-group-item p {
+            color: #475569;
+            margin-bottom: 0;
+        }
+
+        .list-group-item:hover {
+            transform: translateX(8px);
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.12);
+        }
+
+        /* Timeline */
+        .timeline-item {
+            padding: 22px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            border-left: 4px solid #2563eb;
+            transition: all 0.3s;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(8px);
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.12);
+        }
+
+        .timeline-item h4 {
+            color: #1e40af;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .timeline-item p {
+            color: #475569;
+            margin-bottom: 0;
+        }
+
+        /* Kartlar */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s;
+            background: #fff;
+            border-top: 4px solid #2563eb;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card-title {
+            color: #1e40af;
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+
+        .card-text {
+            color: #475569;
+            line-height: 1.7;
+        }
+
+        /* Yayınlar */
+        .publication-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .publication-list li {
+            padding: 22px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 10px;
+            margin-bottom: 14px;
+            transition: all 0.3s;
+            border-left: 4px solid #7c3aed;
+        }
+
+        .publication-list li:hover {
+            transform: translateX(8px);
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.12);
+        }
+
+        .publication-list li strong {
+            color: #5b21b6;
+        }
+
+        .publication-list li em {
+            color: #6366f1;
+            font-style: italic;
+        }
+
+        /* Footer */
+        footer {
+            margin-left: 260px;
+            transition: margin-left 0.3s;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        footer.active {
+            margin-left: 0;
+        }
+
+        footer p {
+            margin-bottom: 0;
+            color: #94a3b8;
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width:768px) {
+            #sidebar {
+                margin-left: -260px;
+            }
+
+            #sidebar.active {
+                margin-left: 0;
+            }
+
+            #content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            #content.active {
+                margin-left: 260px;
+            }
+
+            footer {
+                margin-left: 0;
+            }
+
+            footer.active {
+                margin-left: 260px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            #sidebarCollapse {
+                left: 12px;
+                top: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-profile-icon">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <h3>Fırat KIZILTEPE</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#" data-section="kisisel" class="menu-link">
+                        <i class="bi bi-person-circle"></i> Kişisel Bilgiler
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="egitim" class="menu-link">
+                        <i class="bi bi-mortarboard"></i> Eğitim Bilgileri
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="deneyim" class="menu-link">
+                        <i class="bi bi-briefcase"></i> Mesleki Deneyim
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="yayinlar" class="menu-link">
+                        <i class="bi bi-journal-text"></i> Yayınlar
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="arastirma" class="menu-link">
+                        <i class="bi bi-search"></i> Araştırma Alanları
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="beceriler" class="menu-link">
+                        <i class="bi bi-gear"></i> Beceriler
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="iletisim" class="menu-link">
+                        <i class="bi bi-envelope"></i> İletişim
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <button type="button" id="sidebarCollapse" class="btn">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div id="main-content">
+                <!-- Dinamik içerik buraya yüklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const sections = {
+            kisisel: `
+                <section class="section">
+                    <h2>Kişisel Bilgiler</h2>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-unstyled">
+                                <li><strong>Ünvan:</strong> Eğitim Uzmanı / Doktora Öğrencisi</li>
+                                <li><strong>Kurum:</strong> Milli Eğitim Bakanlığı</li>
+                                <li><strong>Uzmanlık Alanı:</strong> Eğitimde Yapay Zekâ & Eğitim Teknolojileri</li>
+                                <li><strong>Deneyim:</strong> 13 Yıl (Kamu Hizmeti)</li>
+                                <li><strong>Akademik Çalışma:</strong> 2 Yüksek Lisans, Doktora (devam), 6 Yayın</li>
+                                <li><strong>GitHub:</strong> <a href="https://github.com/firatkiziltepe" target="_blank">github.com/firatkiziltepe</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            `,
+            egitim: `
+                <section class="section">
+                    <h2>Eğitim Bilgileri</h2>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4><i class="bi bi-book me-2"></i>Doktora (Devam Ediyor)</h4>
+                            <p>Eğitim Teknolojileri alanında doktora çalışması. Araştırma odağı: Eğitimde yapay zekâ uygulamaları ve öğrenme analitiği.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4><i class="bi bi-mortarboard me-2"></i>Yüksek Lisans — II</h4>
+                            <p>Alanında derinleşme ve disiplinler arası perspektif kazanma amacıyla tamamlanan ikinci lisansüstü derece.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4><i class="bi bi-mortarboard me-2"></i>Yüksek Lisans — I</h4>
+                            <p>Eğitim bilimleri alanında temel lisansüstü eğitim ve akademik araştırma yetkinliklerinin kazanılması.</p>
+                        </div>
+                    </div>
+                </section>
+            `,
+            deneyim: `
+                <section class="section">
+                    <h2>Mesleki Deneyim</h2>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4><i class="bi bi-building me-2"></i>Eğitim Uzmanı</h4>
+                            <p><strong>Milli Eğitim Bakanlığı</strong> — Günümüz<br>
+                            Eğitim politikalarının geliştirilmesi, müfredat çalışmaları, eğitim teknolojileri projelerinin koordinasyonu ve dijital dönüşüm süreçlerinin yönetimi.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4><i class="bi bi-clock-history me-2"></i>13 Yıllık Kamu Hizmeti</h4>
+                            <p><strong>Milli Eğitim Bakanlığı</strong><br>
+                            Farklı birimlerde eğitim yönetimi, proje koordinasyonu, öğretmen eğitimleri ve eğitim materyali geliştirme alanlarında çeşitli görevler.</p>
+                        </div>
+                    </div>
+                </section>
+            `,
+            yayinlar: `
+                <section class="section">
+                    <h2>Yayınlar</h2>
+                    <p style="color:#475569; margin-bottom:24px;">Eğitim teknolojileri ve yapay zekâ alanlarındaki araştırma çıktıları. Makale, bildiri ve kitap bölümlerinden oluşan toplam <strong style="color:#2563eb;">6 akademik yayın</strong>.</p>
+
+                    <h3>Araştırma Odağı</h3>
+                    <div class="publications">
+                        <ul class="publication-list">
+                            <li>
+                                <p><strong>Eğitimde Teknoloji Entegrasyonu</strong><br>
+                                Dijital araçların öğretim süreçlerine entegrasyonu ve bunun öğrenme çıktılarına etkisi üzerine çalışmalar.</p>
+                            </li>
+                            <li>
+                                <p><strong>Yapay Zekâ Destekli Öğretim</strong><br>
+                                Yapay zekâ algoritmalarının kişiselleştirilmiş öğrenme yolları oluşturmada kullanımı.</p>
+                            </li>
+                            <li>
+                                <p><strong>Dijital Öğrenme Ortamları</strong><br>
+                                Çevrim içi ve karma öğrenme modellerinin tasarımı, uygulanması ve değerlendirilmesi.</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-info mt-3" style="background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1px solid #93c5fd; color:#1e40af; border-radius:10px;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Detaylı yayın listesi için lütfen iletişime geçiniz.
+                    </div>
+                </section>
+            `,
+            arastirma: `
+                <section class="section">
+                    <h2>Araştırma Alanları</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-cpu me-2"></i>Eğitimde Yapay Zekâ</h5>
+                                    <p class="card-text">Yapay zekâ algoritmalarının öğrenme süreçlerine entegrasyonu, kişiselleştirilmiş öğrenme yolları ve uyarlanabilir öğretim sistemleri.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-laptop me-2"></i>Eğitim Teknolojileri</h5>
+                                    <p class="card-text">Dijital öğrenme ortamlarının tasarımı, etkileşimli eğitim materyalleri ve teknoloji destekli pedagojik yaklaşımlar.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Öğrenme Analitiği</h5>
+                                    <p class="card-text">Öğrenci verilerinin analizi, öğrenme performansının ölçülmesi ve veriye dayalı eğitim kararları alma süreçleri.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-arrow-repeat me-2"></i>Dijital Dönüşüm</h5>
+                                    <p class="card-text">Eğitim kurumlarının dijital dönüşümü, öğretmen yetkinlikleri ve teknoloji liderliği çerçevesinde kurumsal gelişim.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-book me-2"></i>Müfredat Geliştirme</h5>
+                                    <p class="card-text">21. yüzyıl becerilerine uyumlu müfredat tasarımı, yetkinlik temelli eğitim programları ve ölçme-değerlendirme.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-diagram-3 me-2"></i>Makine Öğrenmesi</h5>
+                                    <p class="card-text">Doğal dil işleme, metin analizi ve sınıflandırma algoritmalarının eğitim araştırmalarında kullanımı.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `,
+            beceriler: `
+                <section class="section">
+                    <h2>Beceriler & Yetkinlikler</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <h5><i class="bi bi-code-slash me-2" style="color:#2563eb;"></i>Programlama & Geliştirme</h5>
+                                    <p>Python, JavaScript, HTML/CSS, Web Geliştirme</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <h5><i class="bi bi-robot me-2" style="color:#2563eb;"></i>Yapay Zekâ Araçları</h5>
+                                    <p>Makine Öğrenmesi, NLP, Eğitim Analitiği</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <h5><i class="bi bi-bar-chart me-2" style="color:#2563eb;"></i>Araştırma & Analiz</h5>
+                                    <p>Akademik Araştırma, Veri Analizi, İstatistik</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <h5><i class="bi bi-people me-2" style="color:#2563eb;"></i>Yönetim & İletişim</h5>
+                                    <p>Proje Yönetimi, Eğitim Koordinasyonu, Ekip Çalışması</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            `,
+            iletisim: `
+                <section class="section">
+                    <h2>İletişim</h2>
+                    <p style="color:#475569; margin-bottom:24px;">İş birliği, araştırma veya danışmanlık için benimle iletişime geçebilirsiniz.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center" style="cursor:pointer;" onclick="window.location.href='mailto:'">
+                                <div class="card-body">
+                                    <i class="bi bi-envelope-fill" style="font-size:2.5rem; color:#2563eb;"></i>
+                                    <h5 class="card-title mt-3">E-posta</h5>
+                                    <p class="card-text">E-posta ile iletişim</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center" style="cursor:pointer;" onclick="window.open('https://github.com/firatkiziltepe','_blank')">
+                                <div class="card-body">
+                                    <i class="bi bi-github" style="font-size:2.5rem; color:#2563eb;"></i>
+                                    <h5 class="card-title mt-3">GitHub</h5>
+                                    <p class="card-text">Açık kaynak projeler</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center" style="cursor:pointer;">
+                                <div class="card-body">
+                                    <i class="bi bi-linkedin" style="font-size:2.5rem; color:#2563eb;"></i>
+                                    <h5 class="card-title mt-3">LinkedIn</h5>
+                                    <p class="card-text">Profesyonel ağ</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 text-center" style="cursor:pointer;">
+                                <div class="card-body">
+                                    <i class="bi bi-mortarboard-fill" style="font-size:2.5rem; color:#2563eb;"></i>
+                                    <h5 class="card-title mt-3">Google Scholar</h5>
+                                    <p class="card-text">Akademik profil</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `
+        };
+
+        // Sayfa yüklendiğinde kişisel bilgileri göster
+        document.addEventListener('DOMContentLoaded', function () {
+            showSection('kisisel');
+        });
+
+        // Menü linklerine tıklandığında
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.menu-link').forEach(l => l.parentElement.classList.remove('active'));
+                this.parentElement.classList.add('active');
+                const section = this.getAttribute('data-section');
+                showSection(section);
+            });
+        });
+
+        // Bölüm gösterme fonksiyonu
+        function showSection(sectionId) {
+            const mainContent = document.getElementById('main-content');
+            mainContent.style.opacity = '0';
+            setTimeout(() => {
+                mainContent.innerHTML = sections[sectionId];
+                mainContent.style.opacity = '1';
+            }, 150);
+        }
+
+        // Sidebar toggle
+        document.getElementById('sidebarCollapse').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('active');
+            document.querySelector('footer').classList.toggle('active');
+        });
+    </script>
+</body>
+
+</html>

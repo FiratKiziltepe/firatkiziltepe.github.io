@@ -18,7 +18,7 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 
 1. **API Ayarlarını Yapın**
    - [Google AI Studio](https://aistudio.google.com/app/apikey) adresinden ücretsiz Gemini API anahtarı alın
-   - Uygulamada "Model Seçimi" dropdown'ından tercih ettiğiniz modeli seçin (varsayılan: Gemini 2.0 Flash)
+   - Uygulamada model olarak Gemini 3.1 Flash Lite (Preview) kullanılır
    - API anahtarınızı girin ve "Kaydet" butonuna tıklayın
 
 2. **Kullanıcı Profilinizi Oluşturun** (Opsiyonel ama Önerilir)
@@ -45,21 +45,15 @@ Yapay zeka destekli gıda etiket analizi ile sağlık risklerini değerlendirin.
 ## 🛠️ Teknolojiler
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **API**: Google Gemini 2.x (Vision Models)
+- **API**: Google Gemini 3.1 Flash Lite (Preview, Vision)
 - **Hosting**: GitHub Pages
 - **Tasarım**: Mobile-first, Responsive
 
-## 🤖 Desteklenen Gemini Modelleri
+## 🤖 Kullanılan Gemini Modeli
 
-| Model | BGBG/Gün | Token/Dk | Açıklama |
-|-------|----------|----------|----------|
-| **Gemini 2.0 Flash** ⭐ | 15 | 1M | Önerilen - Hızlı ve dengeli |
-| **Gemini 2.0 Flash-Lite** | 30 | 1M | En yüksek ücretsiz quota |
-| **Gemini 2.5 Flash** | 10 | 250K | Gelişmiş performans |
-| **Gemini 2.5 Flash-Lite** | 15 | 250K | İyi denge |
-| **Gemini 2.5 Pro** | 2 | 125K | En gelişmiş, en doğru |
-
-*BGBG: Bedava Günlük Başvuru Garantisi (Free Requests Per Day)*
+| Model | Açıklama |
+|-------|----------|
+| **Gemini 3.1 Flash Lite (Preview)** ⭐ | En yeni, hızlı ve düşük maliyetli model (varsayılan) |
 
 ## 📱 Canlı Demo
 

@@ -38,15 +38,11 @@ Google AI Studio'dan ücretsiz API anahtarı alın:
 - **Özel Seçim**: Belirli sayfaları veya aralıkları seçin
   - Örnekler: `1-5`, `10`, `15-20`, `1-5, 10, 15-20`
 
-### Gemini Modelleri
+### Gemini Modeli
 
 | Model | RPM | Hız | Kalite | Önerilen Kullanım |
 |-------|-----|-----|--------|-------------------|
-| Gemini 2.0 Flash | 15 | ⚡⚡⚡ | ⭐⭐⭐ | Genel kullanım (Önerilen) |
-| Gemini 2.0 Flash-Lite | 30 | ⚡⚡⚡⚡ | ⭐⭐ | Hızlı işleme |
-| Gemini 2.5 Flash | 10 | ⚡⚡ | ⭐⭐⭐⭐ | Dengeli performans |
-| Gemini 2.5 Flash-Lite | 15 | ⚡⚡⚡ | ⭐⭐ | Hızlı işleme |
-| Gemini 2.5 Pro | 2 | ⚡ | ⭐⭐⭐⭐⭐ | En yüksek kalite |
+| Gemini 3.1 Flash Lite (Preview) | 30 | ⚡⚡⚡⚡ | ⭐⭐⭐⭐ | Tüm kullanım senaryoları (Varsayılan) |
 
 ### İşleme Stratejileri
 

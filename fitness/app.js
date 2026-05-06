@@ -1553,7 +1553,7 @@ function saveApiSettings() {
 // API ayarlarını yükle
 function loadApiSettings() {
     const apiKey = localStorage.getItem('gemini_api_key');
-    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+    const model = localStorage.getItem('gemini_model') || 'gemini-3.1-flash-lite-preview';
 
     if (apiKey) {
         document.getElementById('geminiApiKey').value = apiKey;
@@ -1607,7 +1607,7 @@ async function askNextQuestion() {
     }
 
     const apiKey = localStorage.getItem('gemini_api_key');
-    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+    const model = localStorage.getItem('gemini_model') || 'gemini-3.1-flash-lite-preview';
 
     document.getElementById('aiLoadingIndicator').style.display = 'flex';
     document.getElementById('aiQuestionSection').style.display = 'none';
@@ -1741,7 +1741,7 @@ function addMessageToUI(role, text) {
 // Final programı oluştur
 async function generateFinalProgram() {
     const apiKey = localStorage.getItem('gemini_api_key');
-    const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+    const model = localStorage.getItem('gemini_model') || 'gemini-3.1-flash-lite-preview';
 
     document.getElementById('aiLoadingIndicator').style.display = 'flex';
 

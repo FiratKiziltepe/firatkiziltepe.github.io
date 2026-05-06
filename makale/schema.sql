@@ -8,6 +8,7 @@ create table if not exists public.profiles (
   email text unique not null,
   display_name text not null default '',
   role text not null default 'viewer' check (role in ('admin', 'advisor', 'viewer')),
+  column_visibility jsonb default '{}'::jsonb,
   created_at timestamptz default now()
 );
 

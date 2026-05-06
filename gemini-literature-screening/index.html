@@ -5,15 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Literatür Tarama Aracı</title>
     <link rel="stylesheet" href="style.css">
-    <!-- SheetJS for Excel support -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>📚 Gemini Literatür Tarama Aracı</h1>
-            <p>Sistematik literatür taraması için yapay zeka destekli otomatik tarama sistemi</p>
+            <p>AI-assisted title/abstract screening workspace · Sistematik tarama için</p>
         </header>
+
+        <div id="resumeBanner" class="resume-banner" style="display: none;">
+            <div class="resume-content">
+                <strong>⚠️ Yarım kalan analiz var</strong>
+                <p id="resumeText"></p>
+                <div class="resume-actions">
+                    <button id="resumeBtn" class="btn-secondary">▶️ Devam Et / Durumu Kontrol Et</button>
+                    <button id="discardBtn" class="btn-tertiary">🗑️ Vazgeç</button>
+                </div>
+            </div>
+        </div>
 
         <div class="config-section">
             <div class="card">
@@ -22,52 +32,71 @@
                 <div class="form-group">
                     <label for="apiKey">Gemini API Key:</label>
                     <input type="password" id="apiKey" placeholder="API anahtarınızı buraya girin">
-                    <small>API anahtarınız tarayıcıda saklanır ve hiçbir yere gönderilmez.</small>
+                    <small>🔒 API anahtarınız sadece sekme oturumunda saklanır, sekme kapanınca silinir.</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="batchSize">Batch Size (Parti Boyutu):</label>
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect">
+                        <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Preview) — Önerilen</option>
+                        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Preview) — En güçlü, paid</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                    </select>
+                    <small id="modelInfo"></small>
+                </div>
+
+                <div class="form-group">
+                    <label>Çalışma Modu:</label>
+                    <div class="mode-toggle">
+                        <label class="mode-option">
+                            <input type="radio" name="mode" value="sync" checked>
+                            <div class="mode-card">
+                                <strong>⚡ Sync (Gerçek zamanlı)</strong>
+                                <small>Anlık sonuç. RPD/RPM limitleri uygulanır. Küçük taramalar için.</small>
+                            </div>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="mode" value="async">
+                            <div class="mode-card">
+                                <strong>🌙 Async Batch API <span class="badge-discount">-%50</span></strong>
+                                <small>24sa içinde sonuç. RPD/RPM yok. 20K+ makale için ideal.</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="batchSizeGroup">
+                    <label for="batchSize">Batch Size (Sync mod, tek istekte makale sayısı):</label>
                     <input type="number" id="batchSize" value="5" min="1" max="20">
-                    <small>Her seferde işlenecek makale sayısı (Rate limit için)</small>
+                    <small>Tek API çağrısında işlenecek makale sayısı. 5 önerilir.</small>
                 </div>
 
-                <div class="form-group">
-                    <label for="delayBetweenRequests">Makale Arası Bekleme (saniye):</label>
-                    <input type="number" id="delayBetweenRequests" value="3" min="1" max="30" step="0.5">
-                    <small>Her makale arasında beklenecek süre (Rate limit için ÖNEMLİ)</small>
-                </div>
-
-                <div class="form-group">
+                <div class="form-group" id="delaySettingsGroup">
                     <label for="delayBetweenBatches">Batch'ler Arası Bekleme (saniye):</label>
                     <input type="number" id="delayBetweenBatches" value="5" min="0" max="60">
-                    <small>Her batch arasında beklenecek süre</small>
+                    <small>Sync mod için rate limit koruması.</small>
                 </div>
 
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
 
-                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 15px;">⚡ Gemini 2.5 Flash-Lite (Free)</h3>
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
-                    <div style="font-size: 0.85rem; color: #666;">
-                        <strong>API Limitleri:</strong> RPM: 15 | TPM: 250K | RPD: 1,000
-                    </div>
-                </div>
-
+                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 15px;" id="modelLimitsTitle">⚡ Model Limitleri</h3>
                 <div class="rate-stats">
                     <div class="rate-stat-item">
-                        <span class="rate-label">Dakikada Makale:</span>
-                        <span class="rate-value" id="articlesPerMinute">-</span>
+                        <span class="rate-label">RPM:</span>
+                        <span class="rate-value" id="rpmLimit">-</span>
                     </div>
                     <div class="rate-stat-item">
-                        <span class="rate-label">API İsteği:</span>
-                        <span class="rate-value" id="requestsPerMinute">-</span>
+                        <span class="rate-label">RPD:</span>
+                        <span class="rate-value" id="rpdLimit">-</span>
                     </div>
                     <div class="rate-stat-item">
-                        <span class="rate-label">Durum:</span>
-                        <span class="rate-value" id="rateLimitStatus">-</span>
+                        <span class="rate-label">TPM:</span>
+                        <span class="rate-value" id="tpmLimit">-</span>
                     </div>
                     <div class="rate-stat-item">
-                        <span class="rate-label">100 Makale:</span>
-                        <span class="rate-value" id="estimatedTime">-</span>
+                        <span class="rate-label">Günlük Kapasite:</span>
+                        <span class="rate-value" id="dailyCapacity">-</span>
                     </div>
                 </div>
             </div>
@@ -77,36 +106,36 @@
 
                 <div class="form-group">
                     <label>Sistem Promptu (Sabit):</label>
-                    <textarea id="systemPrompt" rows="12" readonly style="background-color: #f5f5f5; cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**.
+                    <textarea id="systemPrompt" rows="10" readonly style="background-color: #f5f5f5; cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**.
 
-Kullanıcı sana her çalışma için şu bilgileri verecek:
-* **Başlık**
-* **Yıl** (varsa - dahil etme/hariç tutma kriterlerinde yıl şartı varsa kullan)
-* **Özet**
+Kullanıcı sana her çalışma için Başlık, Yıl ve Özet verecek. Görevin bu çalışmaları önceden belirlenmiş **dahil etme (IC)** ve **hariç tutma (EC)** ölçütlerine göre incelemek ve sonucu **JSON array formatında** sunmaktır.
 
-Senin görevin bu çalışmaları önceden belirlenmiş **dahil etme** ve **hariç tutma** ölçütlerine göre incelemek ve sonucu **JSON formatında** sunmaktır.
+KRİTİK: Title, Abstract, Authors, Year alanlarını YANITINDA ASLA tekrarlama. Sadece türetilmiş alanları döndür (token tasarrufu için).
 
-Her çalışma için şu bilgileri dönmelisin:
-1. **title**: Başlık
-2. **summary_tr**: Çalışmayı okumadan da anlaşılacak şekilde kısa, açık ve anlaşılır bir Türkçe özet
-3. **decision**: "Include", "Exclude" veya "Maybe"
-4. **rationale**: Kararın gerekçesi. Açık ve anlaşılır olarak yaz.</textarea>
-                    <small>Bu bölüm sabittir ve değiştirilemez.</small>
+Her çalışma için döndüreceğin alanlar:
+1. id: Sana verilen makale id'si (aynen geri ver)
+2. summary_tr: Çalışmanın kısa, anlaşılır Türkçe özeti
+3. decision: "Include", "Exclude" veya "Uncertain" (Maybe yerine Uncertain kullan)
+4. confidence: 0.0 - 1.0 arası karar güveni
+5. matched_inclusion_criteria: Eşleşen IC kodları array (örn: ["IC1", "IC2"])
+6. matched_exclusion_criteria: Eşleşen EC kodları array (örn: ["EC3"])
+7. needs_human_review: confidence < 0.7 veya kararsız ise true
+8. rationale: Kararın kısa, açık gerekçesi (kriter kodlarına atıf yap)</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="inclusionCriteria">✅ Dahil Etme Ölçütleri:</label>
-                    <textarea id="inclusionCriteria" rows="5" placeholder="Dahil etme kriterlerinizi buraya girin...">* Odak: Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) **öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine** odaklanan çalışmalar.
-* Araştırma deseni: **Ampirik çalışmalar**.</textarea>
-                    <small>Dahil etme kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
+                    <label for="inclusionCriteria">✅ Dahil Etme Ölçütleri (her satır = bir IC):</label>
+                    <textarea id="inclusionCriteria" rows="5" placeholder="Her satıra bir kriter yazın. Otomatik IC1, IC2... olarak kodlanır.">Eğitim ortamlarında (K–12, yükseköğretim, çevrimiçi öğrenme platformları) öneri sistemlerinin geliştirilmesi, uygulanması veya değerlendirilmesine odaklanan çalışmalar.
+Ampirik araştırma deseni.</textarea>
+                    <small>Her satır otomatik olarak IC1, IC2... şeklinde kodlanır.</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="exclusionCriteria">❌ Hariç Tutma Ölçütleri:</label>
-                    <textarea id="exclusionCriteria" rows="5" placeholder="Hariç tutma kriterlerinizi buraya girin...">* Kişiselleştirilmiş önerilere odaklanmayan (ör. yalnızca öngörü analitiği yapan, genel öneri sistemlerini inceleyen veya e-öğrenmenin başka yönlerine odaklanan) çalışmalar.
-* Yayın türü: **Konferans bildirileri, sunumlar, raporlar, kitaplar, tezler**.
-* Araştırma deseni: **Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları**.</textarea>
-                    <small>Hariç tutma kriterlerinizi belirleyin. Otomatik kaydedilir.</small>
+                    <label for="exclusionCriteria">❌ Hariç Tutma Ölçütleri (her satır = bir EC):</label>
+                    <textarea id="exclusionCriteria" rows="5" placeholder="Her satıra bir kriter yazın. Otomatik EC1, EC2... olarak kodlanır.">Kişiselleştirilmiş önerilere odaklanmayan çalışmalar.
+Konferans bildirileri, sunumlar, raporlar, kitaplar, tezler.
+Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler, fikir yazıları.</textarea>
+                    <small>Her satır otomatik olarak EC1, EC2... şeklinde kodlanır.</small>
                 </div>
             </div>
         </div>
@@ -114,10 +143,40 @@ Her çalışma için şu bilgileri dönmelisin:
         <div class="upload-section card">
             <h2>📤 Dosya Yükle</h2>
             <div class="form-group">
-                <label for="csvFile">CSV veya Excel Dosyası Seç:</label>
-                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
-                <small>Dosya en az Title ve Abstract sütunlarını içermelidir. ID, Authors, Year sütunları opsiyoneldir. (CSV veya Excel formatı desteklenir)</small>
+                <label for="csvFile">CSV / TSV / Excel Dosyası Seç:</label>
+                <input type="file" id="csvFile" accept=".csv,.tsv,.xlsx,.xls">
+                <small>Title ve Abstract zorunlu. ID, Authors, Year opsiyonel. Otomatik delimiter algılama (virgül, tab, noktalı virgül).</small>
             </div>
+
+            <div id="costEstimatePanel" class="cost-estimate-panel" style="display: none;">
+                <h3>💰 Maliyet Tahmini</h3>
+                <div class="cost-grid">
+                    <div class="cost-row">
+                        <span>Toplam makale:</span>
+                        <strong id="estTotalArticles">-</strong>
+                    </div>
+                    <div class="cost-row">
+                        <span>Tahmini input token:</span>
+                        <strong id="estInputTokens">-</strong>
+                    </div>
+                    <div class="cost-row">
+                        <span>Tahmini output token:</span>
+                        <strong id="estOutputTokens">-</strong>
+                    </div>
+                    <div class="cost-row cost-highlight">
+                        <span>Sync (Standard tier):</span>
+                        <strong id="estSyncCost">-</strong>
+                    </div>
+                    <div class="cost-row cost-highlight">
+                        <span>Async Batch API (-%50):</span>
+                        <strong id="estBatchCost">-</strong>
+                    </div>
+                    <div class="cost-row cost-note">
+                        <span id="freeTierNote"></span>
+                    </div>
+                </div>
+            </div>
+
             <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
         </div>
 
@@ -127,6 +186,10 @@ Her çalışma için şu bilgileri dönmelisin:
                 <div id="progressBar" class="progress-fill"></div>
             </div>
             <p id="progressText">Hazırlanıyor...</p>
+            <div id="batchJobInfo" class="batch-job-info" style="display: none;">
+                <strong>Batch Job:</strong> <code id="batchJobName"></code>
+                <span class="batch-state" id="batchJobState">-</span>
+            </div>
         </div>
 
         <div id="resultsSection" class="results-section" style="display: none;">
@@ -137,6 +200,42 @@ Her çalışma için şu bilgileri dönmelisin:
                     <button id="downloadExcelBtn" class="btn-secondary">📊 Excel İndir</button>
                 </div>
             </div>
+
+            <div id="costPanel" class="cost-live-panel">
+                <div class="cost-live-item">
+                    <span class="cost-live-label">Mod / Tier:</span>
+                    <span class="cost-live-value" id="livMode">-</span>
+                </div>
+                <div class="cost-live-item">
+                    <span class="cost-live-label">Input Token:</span>
+                    <span class="cost-live-value" id="livInputTokens">0</span>
+                </div>
+                <div class="cost-live-item">
+                    <span class="cost-live-label">Output Token:</span>
+                    <span class="cost-live-value" id="livOutputTokens">0</span>
+                </div>
+                <div class="cost-live-item cost-live-total">
+                    <span class="cost-live-label">Toplam Maliyet:</span>
+                    <span class="cost-live-value" id="livCost">$0.0000</span>
+                </div>
+                <div class="cost-live-item">
+                    <span class="cost-live-label">Free Tier:</span>
+                    <span class="cost-live-value" id="livFreeTier">-</span>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="filterDecision">
+                    <option value="all">Tüm Kararlar</option>
+                    <option value="Include">Sadece Include</option>
+                    <option value="Exclude">Sadece Exclude</option>
+                    <option value="Uncertain">Sadece Uncertain</option>
+                    <option value="review">İnsan İncelemesi Gerekli</option>
+                </select>
+                <input type="text" id="filterSearch" placeholder="🔍 Başlık, gerekçe veya özette ara...">
+                <span id="filterCount" class="filter-count"></span>
+            </div>
+
             <div class="table-container">
                 <table id="resultsTable">
                     <thead>
@@ -146,15 +245,19 @@ Her çalışma için şu bilgileri dönmelisin:
                             <th>Başlık</th>
                             <th>Yıl</th>
                             <th>Abstract (Orijinal)</th>
-                            <th>Kısa Özet (TR)</th>
+                            <th>Türkçe Özet</th>
                             <th>Karar</th>
+                            <th>Güven</th>
+                            <th>IC</th>
+                            <th>EC</th>
+                            <th>İnceleme</th>
                             <th>Gerekçe</th>
                         </tr>
                     </thead>
-                    <tbody id="resultsBody">
-                    </tbody>
+                    <tbody id="resultsBody"></tbody>
                 </table>
             </div>
+
             <div class="stats">
                 <div class="stat-card include">
                     <h3>✅ Include</h3>
@@ -165,8 +268,12 @@ Her çalışma için şu bilgileri dönmelisin:
                     <p id="excludeCount">0</p>
                 </div>
                 <div class="stat-card maybe">
-                    <h3>❓ Maybe</h3>
-                    <p id="maybeCount">0</p>
+                    <h3>❓ Uncertain</h3>
+                    <p id="uncertainCount">0</p>
+                </div>
+                <div class="stat-card review">
+                    <h3>👁️ İnceleme</h3>
+                    <p id="reviewCount">0</p>
                 </div>
                 <div class="stat-card total">
                     <h3>📚 Toplam</h3>
@@ -176,6 +283,6 @@ Her çalışma için şu bilgileri dönmelisin:
         </div>
     </div>
 
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>

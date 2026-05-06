@@ -52,13 +52,16 @@ class TableManager {
             const sb = getSupabase();
             
             // Basit bir sorgu ile bağlantıyı test et
-            const { error } = await sb.from('e_icerikler').select('id').limit(1);
+            const { data, error, count } = await sb.from('e_icerikler').select('id', { count: 'exact' }).limit(1);
             
             if (error) {
                 console.warn('Supabase bağlantı hatası, JSON moduna geçiliyor:', error.message);
                 this.useSupabase = false;
+            } else if (count === 0) {
+                console.warn('Supabase tablosu boş, JSON moduna geçiliyor');
+                this.useSupabase = false;
             } else {
-                console.log('Supabase bağlantısı başarılı');
+                console.log('Supabase bağlantısı başarılı, ' + count + ' kayıt var');
                 this.useSupabase = true;
             }
         } catch (e) {
@@ -80,7 +83,13 @@ class TableManager {
         
         try {
             if (this.useSupabase) {
-                await this.loadFromSupabase();
+                try {
+                    await this.loadFromSupabase();
+                } catch (supabaseError) {
+                    console.warn('Supabase hatası, JSON moduna geçiliyor:', supabaseError);
+                    this.useSupabase = false;
+                    await this.loadFromJSON();
+                }
             } else {
                 await this.loadFromJSON();
             }
