@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fırat KIZILTEPE — Eğitim Teknolojileri & Yapay Zekâ Araştırmacısı</title>
+    <meta name="description"
+        content="Fırat Kızıltepe — Milli Eğitim Bakanlığı Eğitim Uzmanı, Doktora Öğrencisi. Eğitimde yapay zekâ ve eğitim teknolojileri alanında araştırmacı.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ═══════ NAVİGASYON ═══════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">FK</div>
+        <button class="nav-toggle" id="navToggle" aria-label="Menüyü aç">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="#home">Ana Sayfa</a>
+            <a href="#about">Hakkımda</a>
+            <a href="#experience">Deneyim</a>
+            <a href="#education">Eğitim</a>
+            <a href="#publications">Yayınlar</a>
+            <a href="#research">Araştırma</a>
+            <a href="#contact">İletişim</a>
+        </div>
+    </nav>
+
+    <!-- ═══════ HERO ═══════ -->
+    <section id="home" class="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <p class="hero-greeting">Merhaba, ben</p>
+            <h1 class="hero-name">Fırat <span>KIZILTEPE</span></h1>
+            <p class="hero-title">
+                <span class="typed-text" id="typedText"></span><span class="cursor-blink">|</span>
+            </p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="13">0</div>
+                    <div class="stat-label">Yıl Deneyim</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" data-target="2">0</div>
+                    <div class="stat-label">Yüksek Lisans</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" data-target="6">0</div>
+                    <div class="stat-label">Akademik Yayın</div>
+                </div>
+            </div>
+            <div class="hero-cta">
+                <a href="#about" class="btn btn-primary"><i class="fas fa-user"></i> Hakkımda</a>
+                <a href="#contact" class="btn btn-outline"><i class="fas fa-envelope"></i> İletişim</a>
+            </div>
+        </div>
+        <a href="#about" class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </section>
+
+    <!-- ═══════ HAKKIMDA ═══════ -->
+    <section id="about" class="section about-section">
+        <div class="container">
+            <h2 class="section-title"><span>01.</span> Hakkımda</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>Milli Eğitim Bakanlığı bünyesinde <strong>Eğitim Uzmanı</strong> olarak görev yapmaktayım. 13
+                        yıllık kamu hizmeti sürecimde eğitim politikaları, müfredat geliştirme ve dijital dönüşüm
+                        projelerinde aktif rol aldım.</p>
+                    <p>Akademik kariyerimde <strong>iki yüksek lisans</strong> derecesini tamamladıktan sonra, şu anda
+                        <strong>doktora</strong> çalışmalarıma devam etmekteyim. Araştırma odağım, yapay zekânın eğitim
+                        ortamlarına entegrasyonu ve eğitim teknolojilerinin öğrenme süreçlerine etkisidir.</p>
+                    <p>Teknoloji ve pedagojiyi bir araya getirerek eğitimde inovasyona katkı sağlamayı, araştırma
+                        bulgularımı sahaya taşımayı ve geleceğin eğitim modellerini şekillendirmeyi hedefliyorum.</p>
+                </div>
+                <div class="about-highlights">
+                    <div class="highlight-card">
+                        <div class="highlight-icon"><i class="fas fa-landmark"></i></div>
+                        <div>
+                            <h4>MEB Eğitim Uzmanı</h4>
+                            <p>Bakanlık düzeyinde eğitim politikaları ve program geliştirme</p>
+                        </div>
+                    </div>
+                    <div class="highlight-card">
+                        <div class="highlight-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <div>
+                            <h4>Doktora Öğrencisi</h4>
+                            <p>Eğitimde yapay zekâ uygulamaları üzerine araştırma</p>
+                        </div>
+                    </div>
+                    <div class="highlight-card">
+                        <div class="highlight-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h4>Yapay Zekâ Araştırmacısı</h4>
+                            <p>Eğitim teknolojileri ve makine öğrenmesi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ DENEYİM ═══════ -->
+    <section id="experience" class="section experience-section">
+        <div class="container">
+            <h2 class="section-title"><span>02.</span> Mesleki Deneyim</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">Günümüz</div>
+                        <h3>Eğitim Uzmanı</h3>
+                        <h4>Milli Eğitim Bakanlığı</h4>
+                        <p>Eğitim politikalarının geliştirilmesi, müfredat çalışmaları, eğitim teknolojileri
+                            projelerinin koordinasyonu ve dijital dönüşüm süreçlerinin yönetimi.</p>
+                        <div class="timeline-tags">
+                            <span>Eğitim Politikaları</span>
+                            <span>Müfredat Geliştirme</span>
+                            <span>Dijital Dönüşüm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">13 Yıllık Süreç</div>
+                        <h3>Kamu Hizmeti Deneyimi</h3>
+                        <h4>Milli Eğitim Bakanlığı</h4>
+                        <p>Farklı birimlerde eğitim yönetimi, proje koordinasyonu, öğretmen eğitimleri ve eğitim
+                            materyali geliştirme alanlarında çeşitli görevler.</p>
+                        <div class="timeline-tags">
+                            <span>Proje Yönetimi</span>
+                            <span>Öğretmen Eğitimi</span>
+                            <span>Materyal Geliştirme</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ EĞİTİM ═══════ -->
+    <section id="education" class="section education-section">
+        <div class="container">
+            <h2 class="section-title"><span>03.</span> Eğitim</h2>
+            <div class="education-grid">
+                <div class="edu-card edu-active">
+                    <div class="edu-badge"><i class="fas fa-book-reader"></i></div>
+                    <div class="edu-level">Doktora</div>
+                    <h3>Eğitim Teknolojileri</h3>
+                    <p class="edu-status"><i class="fas fa-spinner fa-pulse"></i> Devam Ediyor</p>
+                    <p class="edu-desc">Eğitimde yapay zekâ uygulamaları ve öğrenme analitiği üzerine doktora tez
+                        çalışması.</p>
+                </div>
+                <div class="edu-card">
+                    <div class="edu-badge"><i class="fas fa-scroll"></i></div>
+                    <div class="edu-level">Yüksek Lisans — II</div>
+                    <h3>İkinci Yüksek Lisans</h3>
+                    <p class="edu-status"><i class="fas fa-check-circle"></i> Tamamlandı</p>
+                    <p class="edu-desc">Alanında derinleşme ve disiplinler arası perspektif kazanma amacıyla tamamlanan
+                        ikinci lisansüstü derece.</p>
+                </div>
+                <div class="edu-card">
+                    <div class="edu-badge"><i class="fas fa-scroll"></i></div>
+                    <div class="edu-level">Yüksek Lisans — I</div>
+                    <h3>Birinci Yüksek Lisans</h3>
+                    <p class="edu-status"><i class="fas fa-check-circle"></i> Tamamlandı</p>
+                    <p class="edu-desc">Eğitim bilimleri alanında temel lisansüstü eğitim ve akademik araştırma
+                        yetkinliklerinin kazanılması.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ YAYINLAR ═══════ -->
+    <section id="publications" class="section publications-section">
+        <div class="container">
+            <h2 class="section-title"><span>04.</span> Akademik Yayınlar</h2>
+            <p class="section-subtitle">Eğitim teknolojileri ve yapay zekâ alanlarındaki araştırma çıktıları</p>
+            <div class="pub-summary">
+                <div class="pub-stat">
+                    <i class="fas fa-file-alt"></i>
+                    <div>
+                        <strong>6</strong>
+                        <span>Yayın</span>
+                    </div>
+                </div>
+                <div class="pub-stat">
+                    <i class="fas fa-microscope"></i>
+                    <div>
+                        <strong>Aktif</strong>
+                        <span>Araştırma</span>
+                    </div>
+                </div>
+                <div class="pub-stat">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <strong>Doktora</strong>
+                        <span>Tez Çalışması</span>
+                    </div>
+                </div>
+            </div>
+            <div class="pub-note">
+                <i class="fas fa-info-circle"></i>
+                <p>Makale, bildiri ve kitap bölümlerinden oluşan yayınlarım; eğitimde teknoloji entegrasyonu, yapay zekâ
+                    destekli öğretim ve dijital öğrenme ortamları konularını kapsamaktadır. Detaylı yayın listesi için
+                    lütfen iletişime geçiniz.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ ARAŞTIRMA ALANLARI ═══════ -->
+    <section id="research" class="section research-section">
+        <div class="container">
+            <h2 class="section-title"><span>05.</span> Araştırma Alanları</h2>
+            <div class="research-grid">
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-brain"></i></div>
+                    <h3>Eğitimde Yapay Zekâ</h3>
+                    <p>Yapay zekâ algoritmalarının öğrenme süreçlerine entegrasyonu, kişiselleştirilmiş öğrenme yolları
+                        ve uyarlanabilir öğretim sistemleri.</p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Eğitim Teknolojileri</h3>
+                    <p>Dijital öğrenme ortamlarının tasarımı, etkileşimli eğitim materyalleri ve teknoloji destekli
+                        pedagojik yaklaşımlar.</p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Öğrenme Analitiği</h3>
+                    <p>Öğrenci verilerinin analizi, öğrenme performansının ölçülmesi ve veriye dayalı eğitim kararları
+                        alma süreçleri.</p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h3>Dijital Dönüşüm</h3>
+                    <p>Eğitim kurumlarının dijital dönüşümü, öğretmen yetkinlikleri ve teknoloji liderliği çerçevesinde
+                        kurumsal gelişim.</p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-cogs"></i></div>
+                    <h3>Müfredat Geliştirme</h3>
+                    <p>21. yüzyıl becerilerine uyumlu müfredat tasarımı, yetkinlik temelli eğitim programları ve
+                        ölçme-değerlendirme.</p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon"><i class="fas fa-network-wired"></i></div>
+                    <h3>Makine Öğrenmesi</h3>
+                    <p>Doğal dil işleme, metin analizi ve sınıflandırma algoritmalarının eğitim araştırmalarında
+                        kullanımı.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ İLETİŞİM ═══════ -->
+    <section id="contact" class="section contact-section">
+        <div class="container">
+            <h2 class="section-title"><span>06.</span> İletişim</h2>
+            <p class="section-subtitle">İş birliği, araştırma veya danışmanlık için benimle iletişime geçebilirsiniz.
+            </p>
+            <div class="contact-grid">
+                <a href="mailto:" class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <h4>E-posta</h4>
+                    <p>E-posta ile iletişim</p>
+                </a>
+                <a href="#" class="contact-card">
+                    <i class="fab fa-linkedin"></i>
+                    <h4>LinkedIn</h4>
+                    <p>Profesyonel ağ</p>
+                </a>
+                <a href="https://github.com/firatkiziltepe" class="contact-card" target="_blank">
+                    <i class="fab fa-github"></i>
+                    <h4>GitHub</h4>
+                    <p>Açık kaynak projeler</p>
+                </a>
+                <a href="#" class="contact-card">
+                    <i class="fab fa-google-scholar" style="font-family: 'Font Awesome 6 Brands';"></i>
+                    <h4>Google Scholar</h4>
+                    <p>Akademik profil</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <footer>
+        <div class="container footer-content">
+            <p>&copy; 2025 Fırat KIZILTEPE. Tüm hakları saklıdır.</p>
+            <p class="footer-tagline">Eğitim &bull; Teknoloji &bull; Araştırma</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>
