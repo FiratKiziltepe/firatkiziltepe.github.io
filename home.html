@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fırat Kızıltepe — EdTech & AI Literacy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --ink-muted: #5a5752;
+    --ink-faint: #a09b95;
+    --paper: #f4f1ea;
+    --paper-warm: #ece8df;
+    --paper-card: #faf8f4;
+    --accent: #1a4a3a;
+    --accent-glow: #2d7a5f;
+    --accent-light: #e1f5ee;
+    --accent-2: #8b5e3c;
+    --accent-2-light: #f5e8d8;
+    --border: rgba(15,14,13,0.12);
+    --border-strong: rgba(15,14,13,0.25);
+    --mono: 'DM Mono', monospace;
+    --serif: 'Fraunces', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--mono);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  /* --- NOISE TEXTURE OVERLAY --- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- LAYOUT --- */
+  .site-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* --- NAV --- */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(244,241,234,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* --- HERO --- */
+  .hero {
+    padding: 6rem 0 4rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+    align-items: end;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-glow);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hero-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent-glow);
+  }
+
+  h1.hero-name {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  h1.hero-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-tagline {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-top: 1.5rem;
+    max-width: 480px;
+    line-height: 1.8;
+  }
+
+  .hero-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  .hero-contact a {
+    color: var(--accent-glow);
+    text-decoration: none;
+  }
+
+  .hero-contact a:hover { text-decoration: underline; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-family: var(--mono);
+    margin-top: 1.5rem;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  /* --- SECTION WRAPPER --- */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    min-width: 2rem;
+  }
+
+  h2.section-title {
+    font-family: var(--serif);
+    font-size: 1.75rem;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* --- INTERESTS --- */
+  .interests-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .interest-card {
+    background: var(--paper-card);
+    padding: 2rem 1.5rem;
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .interest-card:hover { background: var(--paper-warm); }
+
+  .interest-icon {
+    font-family: var(--mono);
+    font-size: 20px;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .interest-card h3 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .interest-card p {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+
+  /* --- EXPERIENCE --- */
+  .timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent-glow), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 0 0 2.5rem 2rem;
+  }
+
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-glow);
+    background: var(--paper);
+  }
+
+  .timeline-period {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-role {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+  }
+
+  .timeline-org {
+    font-size: 12px;
+    color: var(--accent-glow);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .timeline-org .loc {
+    color: var(--ink-faint);
+  }
+
+  /* --- EDUCATION --- */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .edu-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .edu-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .edu-card.secondary::after { background: var(--accent-2); }
+
+  .edu-degree {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+  }
+
+  .edu-uni {
+    font-size: 12px;
+    color: var(--accent-glow);
+    margin-bottom: 0.75rem;
+  }
+
+  .edu-meta {
+    font-size: 11px;
+    color: var(--ink-muted);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
+
+  .badge.warm {
+    background: var(--accent-2-light);
+    color: var(--accent-2);
+  }
+
+  /* --- PUBLICATIONS --- */
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pub-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .pub-item:hover { border-color: var(--border-strong); }
+
+  .pub-type-tag {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    align-self: center;
+    transform: rotate(180deg);
+  }
+
+  .pub-title {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
+  }
+
+  .pub-meta {
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+
+  .pub-meta a {
+    color: var(--accent-glow);
+    text-decoration: none;
+  }
+
+  /* --- SKILLS --- */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .skill-group h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .skill-tag {
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  /* --- FOOTER --- */
+  footer {
+    padding: 3rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  /* --- SCROLL REVEAL --- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-contact { align-items: flex-start; }
+    .interests-grid { grid-template-columns: 1fr; }
+    .edu-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr; }
+    nav { flex-direction: column; gap: 1rem; }
+    .nav-links { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="site-wrap">
+  <nav>
+    <a href="#" class="nav-brand">fk // portfolio</a>
+    <ul class="nav-links">
+      <li><a href="#about">hakkında</a></li>
+      <li><a href="#experience">deneyim</a></li>
+      <li><a href="#publications">yayınlar</a></li>
+      <li><a href="https://firatkiziltepe.github.io/liste" target="_blank">araçlar</a></li>
+      <li><a href="#contact">iletişim</a></li>
+    </ul>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="site-wrap" id="about">
+  <header class="hero">
+    <div>
+      <p class="hero-label">Eğitim Uzmanı · Araştırmacı</p>
+      <h1 class="hero-name">Fırat<br><em>Kızıltepe</em></h1>
+      <p class="hero-tagline">
+        Eğitim teknolojileri, yapay zeka okuryazarlığı ve dijital güvenlik üzerine çalışan 
+        Millî Eğitim Uzmanı. Ankara'dan, küresel bir perspektifle.
+      </p>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        MEB · Talim ve Terbiye Kurulu Başkanlığı
+      </div>
+    </div>
+    <div class="hero-contact">
+      <span>Ankara, TR</span>
+    </div>
+  </header>
+</div>
+
+<!-- INTERESTS -->
+<div class="site-wrap">
+  <section>
+    <div class="section-header reveal">
+      <span class="section-number">01</span>
+      <h2 class="section-title">İlgi Alanları</h2>
+    </div>
+    <div class="interests-grid reveal">
+      <div class="interest-card">
+        <span class="interest-icon">⌘</span>
+        <h3>Eğitim Teknolojileri</h3>
+        <p>E-öğrenme, dijital öğrenme kaynakları, uyarlanabilir sistemler ve müfredat tasarımı üzerine araştırma ve uygulama.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">◈</span>
+        <h3>Yapay Zeka Okuryazarlığı</h3>
+        <p>K-12 düzeyinde YZ etiği rehberleri, AI literacy eğitim tasarımı, MEB için YZ politika ve çerçeveleri geliştirme.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">≋</span>
+        <h3>Vibe Coding</h3>
+        <p>Doğal dil ile kod üretimi, prototip geliştirme ve AI-assisted yazılım süreçleri — fikri çalışan ürüne dönüştürme.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">◎</span>
+        <h3>Dijital Güvenlik</h3>
+        <p>4–11 yaş çocuklar için online güvenlik eğitimi, siber zorbalık ve online trol davranışları üzerine ampirik çalışmalar.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">∿</span>
+        <h3>Kişiselleştirilmiş Öğrenme</h3>
+        <p>Yapay zeka destekli adaptif öğrenme sistemleri, akademik duygular ve motivasyon üzerine doktora araştırması.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">⬡</span>
+        <h3>Dijital Okuryazarlık</h3>
+        <p>21. yüzyıl becerileri, dijital vatandaşlık, veri okuryazarlığı ve eğitim politikası perspektifinden araştırma.</p>
+      </div>
+      <div class="interest-card">
+        <span class="interest-icon">⊞</span>
+        <h3>Dijital İçerik Geliştirme</h3>
+        <p>Etkileşimli simülasyonlar, öğrenme nesneleri, SCORM paketleri ve standart tabanlı e-öğrenme içerik üretimi.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- EXPERIENCE -->
+<div class="site-wrap" id="experience">
+  <section>
+    <div class="section-header reveal">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Deneyim</h2>
+    </div>
+    <div class="timeline reveal">
+      <div class="timeline-item">
+        <div class="timeline-period">Haz. 2017 — Günümüz</div>
+        <div class="timeline-role">Millî Eğitim Uzmanı</div>
+        <div class="timeline-org">
+          Millî Eğitim Bakanlığı · Talim ve Terbiye Kurulu Başkanlığı
+          <span class="loc">— Ankara, TR</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-period">Şub. 2013 — Haz. 2017</div>
+        <div class="timeline-role">Millî Eğitim Uzman Yrd.</div>
+        <div class="timeline-org">
+          Millî Eğitim Bakanlığı
+          <span class="loc">— Ankara, TR</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-period">Eyl. 2011 — Şub. 2013</div>
+        <div class="timeline-role">BT Öğretmeni</div>
+        <div class="timeline-org">
+          Mustafa Kemal Ortaokulu
+          <span class="loc">— Van, TR</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- EDUCATION -->
+<div class="site-wrap">
+  <section>
+    <div class="section-header reveal">
+      <span class="section-number">03</span>
+      <h2 class="section-title">Eğitim</h2>
+    </div>
+    <div class="edu-grid reveal">
+      <div class="edu-card">
+        <div class="edu-degree">MSc — Eğitim Liderliği ve Yönetimi</div>
+        <div class="edu-uni">University of East Anglia · Norwich, UK</div>
+        <div class="edu-meta">
+          <span>2020–2022</span>
+          <span class="badge">Chevening Bursu</span>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 11px; color: var(--ink-muted);">
+          Tez: Online Safety Education for Children Aged 4–11 Years in Schools: A Scoping Review
+        </div>
+      </div>
+      <div class="edu-card secondary">
+        <div class="edu-degree">Yüksek Lisans — BÖTE</div>
+        <div class="edu-uni">Hacettepe Üniversitesi · Ankara, TR</div>
+        <div class="edu-meta">
+          <span>2014–2019</span>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 11px; color: var(--ink-muted);">
+          Tez: Online Trol Davranış Ölçeği Geliştirme ve Trol Davranışının İncelenmesi
+        </div>
+      </div>
+      <div class="edu-card secondary" style="--c: var(--accent-2);">
+        <div class="edu-degree">Lisans — BÖTE</div>
+        <div class="edu-uni">Hacettepe Üniversitesi · Ankara, TR</div>
+        <div class="edu-meta">
+          <span>2007–2011</span>
+          <span class="badge warm">MEB Bursu</span>
+        </div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-degree">Uzmanlık Tezi</div>
+        <div class="edu-uni">Millî Eğitim Bakanlığı · Ankara, TR</div>
+        <div class="edu-meta">
+          <span>2016</span>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 11px; color: var(--ink-muted);">
+          BT Öğretmenlerinin Hizmet Öncesi Eğitiminin Müfredatla Uyumunun İncelenmesi
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PUBLICATIONS -->
+<div class="site-wrap" id="publications">
+  <section>
+    <div class="section-header reveal">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Yayınlar & Çalışmalar</h2>
+    </div>
+    <div class="pub-list reveal">
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Makale</span>
+        <div>
+          <div class="pub-title">A Systematic Review of Feedback Mechanisms in Distance Education: Exploring Sources, Types, Aims, Forms, and Outcomes</div>
+          <div class="pub-meta">Kiziltepe, F., Tavasli, B., Cicikler, B., Karatas, S. — Turkish Online Journal of Distance Education, 27(1), 257–274 · 2026</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Rapor</span>
+        <div>
+          <div class="pub-title">21. Yüzyıl Becerileri ve Değerlere Yönelik Araştırma Raporu</div>
+          <div class="pub-meta">Türel, Y.K., Simsek, A., Şengül Vautier, C.G., Şimşek, E., Kızıltepe, F. — Talim ve Terbiye Kurulu Başkanlığı · 2023</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Rapor</span>
+        <div>
+          <div class="pub-title">A Research Report on 21st Century Skills and Values</div>
+          <div class="pub-meta">Türel, Y., Simsek, A., Vautier, C., Simsek, E., Kızıltepe, F. — Board of Education of Türkiye, Ankara · 2023</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Makale</span>
+        <div>
+          <div class="pub-title">Çevrimiçi Trol Davranış Ölçeğinin Geliştirilmesi</div>
+          <div class="pub-meta">Kızıltepe, F., Seferoğlu, S.S. — Mehmet Akif Ersoy Üniversitesi Eğitim Fakültesi Dergisi, s. 658–682 · 2023</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Rehber</span>
+        <div>
+          <div class="pub-title">Elektronik Eğitim İçerikleri Rehberi</div>
+          <div class="pub-meta">
+            Şimşek, E., Kızıltepe, F. — MEB TTKB · 2022 ·
+            <a href="https://ttkb.meb.gov.tr/yayinlarimiz/elektronikegitimiceriklerirehberi.pdf" target="_blank">PDF ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Rapor</span>
+        <div>
+          <div class="pub-title">Elektronik Eğitim İçerikleri: Genel Bakış</div>
+          <div class="pub-meta">
+            Şimşek, E., Kızıltepe, F., Öztürk Çalık, E., Özdemir, F., Gür Arslan, Ö., Eroğlu — MEB TTKB · 2022 ·
+            <a href="https://ttkb.meb.gov.tr/meb_iys_dosyalar/202212/07160301elektronikegitimiceriklerigenelbakis.pdf" target="_blank">PDF ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Tez</span>
+        <div>
+          <div class="pub-title">Çevrimiçi Trol Davranış Ölçeğinin Geliştirilmesi ve Trol Davranışlarına Yönelik Farkındalığın İncelenmesi</div>
+          <div class="pub-meta">Kızıltepe, F. — Yüksek Lisans Tezi, Hacettepe Üniversitesi Eğitim Bilimleri Enstitüsü · 2019</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Bildiri</span>
+        <div>
+          <div class="pub-title">Alanyazında FATİH Projesi: "Öğretmenlerin Hizmetiçi Eğitimi" Bileşeniyle İlgili Bir İnceleme</div>
+          <div class="pub-meta">Gölpek Sarı, S.S., Kızıltepe, F., Dönmez, G. — 26. Uluslararası Eğitim Bilimleri Kongresi (ICES/UEBK-2017), Tam Metin Kitabı · 2017</div>
+        </div>
+      </div>
+
+      <div class="pub-item">
+        <span class="pub-type-tag">Tez</span>
+        <div>
+          <div class="pub-title">Bilişim Teknolojileri Öğretmenlerinin Meslek Öncesi Eğitimiyle Bilişim Teknolojileri ve Yazılım Dersi Öğretim Programının Uyumunun İncelenmesi</div>
+          <div class="pub-meta">Kızıltepe, F. — Uzmanlık Tezi, Millî Eğitim Bakanlığı · 2016</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- SKILLS -->
+<div class="site-wrap">
+  <section>
+    <div class="section-header reveal">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Beceriler & Araçlar</h2>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="skill-group">
+        <h4>Veri & Analiz</h4>
+        <div class="skill-tags">
+          <span class="skill-tag">SPSS</span>
+          <span class="skill-tag">NVivo</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">Excel</span>
+          <span class="skill-tag">SQL</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Geliştirme</h4>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">PHP</span>
+          <span class="skill-tag">HTML / CSS</span>
+          <span class="skill-tag">Visual Basic</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>İçerik Tasarımı</h4>
+        <div class="skill-tags">
+          <span class="skill-tag">Adobe Captivate</span>
+          <span class="skill-tag">Articulate Storyline</span>
+          <span class="skill-tag">Photoshop</span>
+          <span class="skill-tag">Illustrator</span>
+          <span class="skill-tag">Animate</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Yapay Zeka Araçları</h4>
+        <div class="skill-tags">
+          <span class="skill-tag">LLM Prompting</span>
+          <span class="skill-tag">Teachable Machine</span>
+          <span class="skill-tag">ML4Kids</span>
+          <span class="skill-tag">RAG sistemleri</span>
+          <span class="skill-tag">Vibe Coding</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<div class="site-wrap" id="contact">
+  <footer>
+    <div>
+      <span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 1rem; color: var(--ink-muted);">Fırat Kızıltepe</span>
+    </div>
+    <div style="text-align: right;">
+      <div>Ankara, Türkiye</div>
+      <div style="margin-top: 0.25rem; color: var(--ink-faint);">© 2026</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
