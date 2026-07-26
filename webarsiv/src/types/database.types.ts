@@ -20,6 +20,9 @@ export type Database = {
           is_favorite: boolean
           original_text: string
           personal_note: string
+          screenshot_file_id: string
+          screenshot_mime_type: string
+          screenshot_path: string
           source: string
           summary: string
           tags: string[]
@@ -36,6 +39,9 @@ export type Database = {
           is_favorite?: boolean
           original_text?: string
           personal_note?: string
+          screenshot_file_id?: string
+          screenshot_mime_type?: string
+          screenshot_path?: string
           source?: string
           summary?: string
           tags?: string[]
@@ -52,6 +58,9 @@ export type Database = {
           is_favorite?: boolean
           original_text?: string
           personal_note?: string
+          screenshot_file_id?: string
+          screenshot_mime_type?: string
+          screenshot_path?: string
           source?: string
           summary?: string
           tags?: string[]
@@ -82,6 +91,9 @@ export type Database = {
           is_favorite: boolean
           original_text: string
           personal_note: string
+          screenshot_file_id: string
+          screenshot_mime_type: string
+          screenshot_path: string
           source: string
           summary: string
           tags: string[]

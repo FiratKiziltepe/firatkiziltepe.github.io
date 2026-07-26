@@ -413,6 +413,22 @@ function App() {
                 </button>
               </div>
 
+              {item.screenshot_url && (
+                <a
+                  className="screenshot-preview"
+                  href={item.screenshot_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${item.title} ekran görüntüsünü aç`}
+                >
+                  <img
+                    src={item.screenshot_url}
+                    alt={`${item.title} ekran görüntüsü`}
+                    loading="lazy"
+                  />
+                </a>
+              )}
+
               <p className="summary">{item.summary || item.original_text}</p>
 
               <div className="meta-row">

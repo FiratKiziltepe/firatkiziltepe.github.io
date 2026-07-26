@@ -316,6 +316,22 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.screenshot-preview {
+  aspect-ratio: 16 / 10;
+  background: #f3f6f1;
+  border: 1px solid #d9e0d6;
+  border-radius: 8px;
+  display: block;
+  overflow: hidden;
+}
+
+.screenshot-preview img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
 .summary {
   color: #4b5565;
   overflow-wrap: anywhere;

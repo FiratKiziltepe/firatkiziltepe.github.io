@@ -24,3 +24,5 @@
 3. GitHub Pages kaynağını repository settings içinde Actions olarak ayarla ve `Deploy Webarşivi to GitHub Pages` workflow'unu çalıştır.
 
 4. Web arayüzünde `WEB_ACCESS_TOKEN` olarak belirlediğin kişisel erişim anahtarını gir.
+
+5. Ekran görüntüsü eklemek istersen Telegram'da görseli fotoğraf olarak seç ve linki aynı mesajın açıklama/caption alanına yaz. Görsel eklemezsen kayıt yine normal oluşturulur.

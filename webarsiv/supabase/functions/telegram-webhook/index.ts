@@ -10,12 +10,21 @@ type TelegramMessage = {
   caption?: string
   entities?: TelegramEntity[]
   caption_entities?: TelegramEntity[]
+  document?: TelegramDocument
   from?: {
     id: number
   }
+  photo?: TelegramPhotoSize[]
   chat: {
     id: number
   }
+}
+
+type TelegramDocument = {
+  file_id: string
+  file_name?: string
+  file_size?: number
+  mime_type?: string
 }
 
 type TelegramEntity = {
@@ -23,6 +32,19 @@ type TelegramEntity = {
   offset: number
   length: number
   url?: string
+}
+
+type TelegramFile = {
+  file_id: string
+  file_path?: string
+  file_size?: number
+}
+
+type TelegramPhotoSize = {
+  file_id: string
+  file_size?: number
+  height: number
+  width: number
 }
 
 type GeminiAnalysis = {
@@ -40,6 +62,7 @@ type UrlMetadata = {
 }
 
 type SavedItemPayload = {
+  id?: string
   telegram_user_id?: number | null
   telegram_message_id?: number | null
   title: string
@@ -51,9 +74,19 @@ type SavedItemPayload = {
   tags: string[]
   source: string
   is_favorite: boolean
+  screenshot_file_id?: string
+  screenshot_mime_type?: string
+  screenshot_path?: string
+  screenshot_url?: string
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
+
+type ScreenshotUpload = {
+  fileId: string
+  mimeType: string
+  path: string
+}
 
 class HttpError extends Error {
   status: number
@@ -72,6 +105,9 @@ const corsHeaders = {
 }
 
 const GEMINI_DEFAULT_MODEL = 'gemini-3.5-flash-lite'
+const SCREENSHOT_BUCKET = 'webarsivi-screenshots'
+const SCREENSHOT_SIGNED_URL_SECONDS = 60 * 60 * 24
+const SCREENSHOT_MAX_BYTES = 10 * 1024 * 1024
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
@@ -115,7 +151,7 @@ async function handleWebApi(request: Request, url: URL): Promise<Response> {
     )
 
     return json({
-      items,
+      items: await withScreenshotUrls(items),
       filters: {
         categories: uniqueSorted(filterRows.map((row) => row.category)),
         sources: uniqueSorted(filterRows.map((row) => row.source)),
@@ -134,7 +170,7 @@ async function handleWebApi(request: Request, url: URL): Promise<Response> {
       },
     )
 
-    return json({ item }, 201)
+    return json({ item: await withScreenshotUrl(item) }, 201)
   }
 
   if (action === 'update' && method === 'PATCH') {
@@ -153,7 +189,7 @@ async function handleWebApi(request: Request, url: URL): Promise<Response> {
       throw new HttpError(404, 'Kayit bulunamadi.')
     }
 
-    return json({ item })
+    return json({ item: await withScreenshotUrl(item) })
   }
 
   if (action === 'delete' && method === 'DELETE') {
@@ -269,7 +305,14 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
     source,
     url,
   })
+  const itemId = crypto.randomUUID()
+  const screenshot = await saveTelegramScreenshot(
+    message,
+    allowedUserId,
+    itemId,
+  )
   const payload: SavedItemPayload = {
+    id: itemId,
     telegram_user_id: allowedUserId,
     telegram_message_id: message.message_id,
     title: analysis.title,
@@ -281,6 +324,9 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
     tags: analysis.tags,
     source: analysis.source,
     is_favorite: false,
+    screenshot_file_id: screenshot?.fileId ?? '',
+    screenshot_mime_type: screenshot?.mimeType ?? '',
+    screenshot_path: screenshot?.path ?? '',
   }
 
   try {
@@ -301,8 +347,8 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
   await sendTelegramMessage(
     message.chat.id,
     analysis.usedFallback
-      ? `Kaydedildi (Gemini kullanilamadi): ${analysis.title}`
-      : `Kaydedildi: ${analysis.title}`,
+      ? `Kaydedildi (Gemini kullanilamadi): ${analysis.title}${screenshot ? ' + ekran goruntusu' : ''}`
+      : `Kaydedildi: ${analysis.title}${screenshot ? ' + ekran goruntusu' : ''}`,
   )
 
   return json({ ok: true })
@@ -552,6 +598,245 @@ function parseJson(value: unknown): Record<string, unknown> {
 
 function safeString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
+}
+
+async function saveTelegramScreenshot(
+  message: TelegramMessage,
+  telegramUserId: number,
+  itemId: string,
+): Promise<ScreenshotUpload | null> {
+  const candidate = screenshotCandidate(message)
+  if (!candidate) {
+    return null
+  }
+
+  try {
+    const file = await getTelegramFile(candidate.fileId)
+    if (!file.file_path) {
+      return null
+    }
+
+    const bytes = await downloadTelegramFile(file.file_path)
+    if (bytes.byteLength > SCREENSHOT_MAX_BYTES) {
+      console.warn('Telegram screenshot skipped because it is too large')
+      return null
+    }
+
+    const mimeType = normalizeImageMimeType(candidate.mimeType) ||
+      mimeTypeFromPath(file.file_path)
+    if (!mimeType) {
+      console.warn('Telegram screenshot skipped because MIME type is not allowed')
+      return null
+    }
+
+    const path = [
+      String(telegramUserId),
+      `${itemId}.${extensionFromMimeType(mimeType)}`,
+    ].join('/')
+
+    await uploadStorageObject(path, bytes, mimeType)
+    return {
+      fileId: candidate.fileId,
+      mimeType,
+      path,
+    }
+  } catch (error) {
+    console.warn('Telegram screenshot upload failed', {
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return null
+  }
+}
+
+function screenshotCandidate(
+  message: TelegramMessage,
+): { fileId: string; mimeType: string } | null {
+  const photo = largestPhoto(message.photo ?? [])
+  if (photo) {
+    return { fileId: photo.file_id, mimeType: 'image/jpeg' }
+  }
+
+  const documentMimeType = normalizeImageMimeType(message.document?.mime_type)
+  if (message.document?.file_id && documentMimeType) {
+    return {
+      fileId: message.document.file_id,
+      mimeType: documentMimeType,
+    }
+  }
+
+  return null
+}
+
+function largestPhoto(photos: TelegramPhotoSize[]): TelegramPhotoSize | null {
+  return photos.reduce<TelegramPhotoSize | null>((best, photo) => {
+    if (!best) {
+      return photo
+    }
+
+    const bestScore = best.file_size ?? best.width * best.height
+    const photoScore = photo.file_size ?? photo.width * photo.height
+    return photoScore > bestScore ? photo : best
+  }, null)
+}
+
+async function getTelegramFile(fileId: string): Promise<TelegramFile> {
+  const token = requireEnv('TELEGRAM_BOT_TOKEN')
+  const response = await fetch(
+    `https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(fileId)}`,
+  )
+
+  if (!response.ok) {
+    throw new Error('Telegram getFile failed')
+  }
+
+  const payload = asRecord(await response.json())
+  if (payload.ok !== true) {
+    throw new Error('Telegram getFile returned an error')
+  }
+
+  return asRecord(payload.result) as TelegramFile
+}
+
+async function downloadTelegramFile(filePath: string): Promise<Uint8Array> {
+  const token = requireEnv('TELEGRAM_BOT_TOKEN')
+  const response = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`)
+
+  if (!response.ok) {
+    throw new Error('Telegram file download failed')
+  }
+
+  return new Uint8Array(await response.arrayBuffer())
+}
+
+async function uploadStorageObject(
+  path: string,
+  bytes: Uint8Array,
+  mimeType: string,
+) {
+  const serviceRoleKey = requireEnv('SUPABASE_SERVICE_ROLE_KEY')
+  const baseUrl = requireEnv('SUPABASE_URL')
+  const response = await fetch(
+    `${baseUrl}/storage/v1/object/${SCREENSHOT_BUCKET}/${encodeStoragePath(path)}`,
+    {
+      body: bytes,
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Cache-Control': '31536000',
+        'Content-Type': mimeType,
+        'x-upsert': 'true',
+      },
+      method: 'POST',
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error('Supabase Storage upload failed')
+  }
+}
+
+async function withScreenshotUrls(
+  items: SavedItemPayload[],
+): Promise<SavedItemPayload[]> {
+  return await Promise.all(items.map((item) => withScreenshotUrl(item)))
+}
+
+async function withScreenshotUrl(
+  item: SavedItemPayload,
+): Promise<SavedItemPayload> {
+  const path = safeString(item.screenshot_path)
+  if (!path) {
+    return { ...item, screenshot_url: '' }
+  }
+
+  return {
+    ...item,
+    screenshot_url: await createStorageSignedUrl(path),
+  }
+}
+
+async function createStorageSignedUrl(path: string): Promise<string> {
+  const serviceRoleKey = requireEnv('SUPABASE_SERVICE_ROLE_KEY')
+  const baseUrl = requireEnv('SUPABASE_URL')
+  const response = await fetch(
+    `${baseUrl}/storage/v1/object/sign/${SCREENSHOT_BUCKET}/${encodeStoragePath(path)}`,
+    {
+      body: JSON.stringify({ expiresIn: SCREENSHOT_SIGNED_URL_SECONDS }),
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    },
+  )
+
+  if (!response.ok) {
+    console.warn('Supabase Storage signed URL failed', { status: response.status })
+    return ''
+  }
+
+  const payload = asRecord(await response.json())
+  const signedPath =
+    safeString(payload.signedURL) ||
+    safeString(payload.signedUrl) ||
+    safeString(payload.signed_url)
+
+  if (!signedPath) {
+    return ''
+  }
+
+  if (signedPath.startsWith('http')) {
+    return signedPath
+  }
+
+  if (signedPath.startsWith('/storage/v1/')) {
+    return `${baseUrl}${signedPath}`
+  }
+
+  return `${baseUrl}/storage/v1${signedPath.startsWith('/') ? '' : '/'}${signedPath}`
+}
+
+function encodeStoragePath(path: string): string {
+  return path.split('/').map(encodeURIComponent).join('/')
+}
+
+function normalizeImageMimeType(value: string | undefined): string {
+  const mimeType = value?.toLocaleLowerCase('en-US') ?? ''
+  if (['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)) {
+    return mimeType
+  }
+
+  return ''
+}
+
+function mimeTypeFromPath(path: string): string {
+  const lowerPath = path.toLocaleLowerCase('en-US')
+  if (lowerPath.endsWith('.png')) {
+    return 'image/png'
+  }
+
+  if (lowerPath.endsWith('.webp')) {
+    return 'image/webp'
+  }
+
+  if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) {
+    return 'image/jpeg'
+  }
+
+  return ''
+}
+
+function extensionFromMimeType(mimeType: string): string {
+  if (mimeType === 'image/png') {
+    return 'png'
+  }
+
+  if (mimeType === 'image/webp') {
+    return 'webp'
+  }
+
+  return 'jpg'
 }
 
 function textFromGeminiInteraction(value: unknown): string {

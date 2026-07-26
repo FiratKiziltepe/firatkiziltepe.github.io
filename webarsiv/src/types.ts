@@ -11,6 +11,10 @@ export type SavedItem = {
   tags: string[]
   source: string
   is_favorite: boolean
+  screenshot_file_id: string
+  screenshot_mime_type: string
+  screenshot_path: string
+  screenshot_url: string
   created_at: string
   updated_at: string | null
 }
@@ -32,6 +36,10 @@ export type SavedItemInput = Omit<
   | 'telegram_user_id'
   | 'telegram_message_id'
   | 'tags'
+  | 'screenshot_file_id'
+  | 'screenshot_mime_type'
+  | 'screenshot_path'
+  | 'screenshot_url'
   | 'created_at'
   | 'updated_at'
 > & {
