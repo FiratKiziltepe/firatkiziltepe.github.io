@@ -10,7 +10,7 @@ const functionName = 'telegram-webhook'
 
 function functionUrl(): string {
   const supabaseUrl =
-    import.meta.env.VITE_SUPABASE_URL ??
+    import.meta.env.VITE_SUPABASE_URL ||
     'https://knqfsmpglknckrojwefo.supabase.co'
 
   if (!supabaseUrl) {
