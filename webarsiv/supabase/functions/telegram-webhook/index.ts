@@ -34,6 +34,11 @@ type GeminiAnalysis = {
   usedFallback: boolean
 }
 
+type UrlMetadata = {
+  title: string
+  description: string
+}
+
 type SavedItemPayload = {
   telegram_user_id?: number | null
   telegram_message_id?: number | null
@@ -65,6 +70,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Origin': '*',
 }
+
+const GEMINI_DEFAULT_MODEL = 'gemini-3.5-flash-lite'
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
@@ -403,34 +410,39 @@ async function analyzeWithGemini(input: {
   }
 
   const models = geminiModelCandidates(configuredModel)
+  const metadata = await fetchUrlMetadata(input.url)
   const prompt = [
-    'Gonderilen sosyal medya icerigini Turkce analiz et.',
-    'Sadece gecerli JSON dondur.',
+    'URL context aracini kullanarak URL icindeki asil gonderi veya sayfa metnini oku.',
+    'Baslik, ozet, kategori ve etiketleri gonderinin icerigine gore Turkce yaz.',
+    'Sadece domain adini, sosyal medya marka adini veya link onizleme basligini ozetleme.',
+    'Eger URL icerigi erisilemiyorsa Telegram metni ve sayfa meta bilgisinden en iyi ozeti uret.',
+    'Sadece gecerli JSON dondur. Markdown, aciklama veya kod blogu ekleme.',
     'JSON alanlari: title, summary, category, tags, source.',
+    'title 6-12 kelimeyi gecmesin.',
+    'summary 2-4 cumle olsun ve gonderide anlatilan somut bilgiyi icersin.',
+    'category kisa Turkce kategori olsun.',
     'tags kisa Turkce etiketlerden olusan dizi olmali.',
     `Kaynak: ${input.source}`,
     `URL: ${input.url}`,
-    `Metin: ${input.originalText}`,
-  ].join('\n')
+    metadata.title ? `Sayfa basligi: ${metadata.title}` : '',
+    metadata.description ? `Sayfa aciklamasi: ${metadata.description}` : '',
+    `Telegram metni: ${input.originalText}`,
+  ].filter(Boolean).join('\n')
 
   for (const model of models) {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+        body: JSON.stringify({
+          input: prompt,
           model,
-        )}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: 'application/json',
-              temperature: 0.2,
-            },
-          }),
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
+          tools: [{ type: 'url_context' }],
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
         },
-      )
+        method: 'POST',
+      })
 
       if (!response.ok) {
         console.warn('Gemini request failed', {
@@ -441,10 +453,12 @@ async function analyzeWithGemini(input: {
       }
 
       const result = await response.json()
-      const text = result?.candidates?.[0]?.content?.parts
-        ?.map((part: { text?: string }) => part.text ?? '')
-        .join('')
+      const text = textFromGeminiInteraction(result)
       const parsed = parseJson(text)
+      if (Object.keys(parsed).length === 0) {
+        console.warn('Gemini response could not be parsed', { model })
+        continue
+      }
 
       return {
         title: safeString(parsed.title) || fallbackTitle(input.url),
@@ -467,9 +481,9 @@ async function analyzeWithGemini(input: {
 
 function geminiModelCandidates(configuredModel: string | undefined): string[] {
   return uniqueInOrder([
+    GEMINI_DEFAULT_MODEL,
     normalizeGeminiModel(configuredModel),
     'gemini-3.1-flash-lite',
-    'gemini-3.5-flash-lite',
     'gemini-2.5-flash-lite',
   ])
 }
@@ -481,7 +495,7 @@ function normalizeGeminiModel(value: string | undefined): string {
     .replace(/[_\s]+/g, '-')
     .toLocaleLowerCase('en-US')
 
-  return model || 'gemini-3.1-flash-lite'
+  return model || GEMINI_DEFAULT_MODEL
 }
 
 function uniqueInOrder(values: string[]): string[] {
@@ -538,6 +552,154 @@ function parseJson(value: unknown): Record<string, unknown> {
 
 function safeString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
+}
+
+function textFromGeminiInteraction(value: unknown): string {
+  const root = asRecord(value)
+  const directText = safeString(root.output_text) || safeString(root.outputText)
+  if (directText) {
+    return directText
+  }
+
+  const textParts: string[] = []
+  const steps = Array.isArray(root.steps) ? root.steps : []
+  for (const step of steps) {
+    const stepRecord = asRecord(step)
+    const content = Array.isArray(stepRecord.content) ? stepRecord.content : []
+
+    for (const block of content) {
+      const blockRecord = asRecord(block)
+      const text = safeString(blockRecord.text)
+      if (text) {
+        textParts.push(text)
+      }
+    }
+  }
+
+  return textParts.join('\n').trim()
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {}
+  }
+
+  return value as Record<string, unknown>
+}
+
+async function fetchUrlMetadata(url: string): Promise<UrlMetadata> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (compatible; WebarsiviBot/1.0)',
+      },
+      redirect: 'follow',
+    })
+
+    if (!response.ok) {
+      return emptyMetadata()
+    }
+
+    const contentType = response.headers.get('content-type')?.toLocaleLowerCase('en-US') ?? ''
+    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml+xml')) {
+      return emptyMetadata()
+    }
+
+    const html = (await response.text()).slice(0, 200_000)
+    return {
+      description: decodeHtmlEntities(metaContent(html, [
+        'og:description',
+        'twitter:description',
+        'description',
+      ])),
+      title: decodeHtmlEntities(metaContent(html, [
+        'og:title',
+        'twitter:title',
+      ]) || titleTag(html)),
+    }
+  } catch {
+    return emptyMetadata()
+  }
+}
+
+function emptyMetadata(): UrlMetadata {
+  return { description: '', title: '' }
+}
+
+function metaContent(html: string, keys: string[]): string {
+  const wanted = new Set(keys.map((key) => key.toLocaleLowerCase('en-US')))
+
+  for (const match of html.matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = match[0]
+    const key = (
+      attributeValue(tag, 'property') ||
+      attributeValue(tag, 'name')
+    ).toLocaleLowerCase('en-US')
+
+    if (!wanted.has(key)) {
+      continue
+    }
+
+    const content = attributeValue(tag, 'content')
+    if (content) {
+      return content
+    }
+  }
+
+  return ''
+}
+
+function titleTag(html: string): string {
+  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)
+  return stripHtml(match?.[1] ?? '')
+}
+
+function attributeValue(tag: string, name: string): string {
+  const match = tag.match(
+    new RegExp(`${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i'),
+  )
+
+  return match?.[2] ?? match?.[3] ?? match?.[4] ?? ''
+}
+
+function stripHtml(value: string): string {
+  return value.replace(/<[^>]+>/g, ' ')
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (_match, entity: string) => {
+      const lower = entity.toLocaleLowerCase('en-US')
+      if (lower.startsWith('#x')) {
+        return codePointToString(Number.parseInt(lower.slice(2), 16))
+      }
+
+      if (lower.startsWith('#')) {
+        return codePointToString(Number.parseInt(lower.slice(1), 10))
+      }
+
+      const named: Record<string, string> = {
+        amp: '&',
+        apos: "'",
+        gt: '>',
+        lt: '<',
+        nbsp: ' ',
+        quot: '"',
+      }
+
+      return named[lower] ?? `&${entity};`
+    })
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function codePointToString(codePoint: number): string {
+  if (!Number.isFinite(codePoint) || codePoint <= 0 || codePoint > 0x10ffff) {
+    return ''
+  }
+
+  return String.fromCodePoint(codePoint)
 }
 
 function normalizeTags(value: unknown): string[] {
