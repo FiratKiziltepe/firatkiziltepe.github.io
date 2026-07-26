@@ -203,7 +203,7 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
       message.chat.id,
       [
         'Webarsivi hazir.',
-        'LinkedIn, X/Twitter veya Instagram baglantisi gonder.',
+        'Kaydetmek istedigin herhangi bir web baglantisini gonder.',
         `Telegram ID: ${senderId ?? 'bilinmiyor'}`,
       ].join('\n'),
     )
@@ -242,20 +242,12 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
   if (!url) {
     await sendTelegramMessage(
       message.chat.id,
-      'Baglanti bulunamadi. LinkedIn, X/Twitter veya Instagram URL gonder.',
+      'Baglanti bulunamadi. Kaydetmek istedigin web URL adresini gonder.',
     )
     return json({ ok: true, ignored: 'missing_url' })
   }
 
   const source = detectSource(url)
-  if (!['instagram', 'linkedin', 'x'].includes(source)) {
-    await sendTelegramMessage(
-      message.chat.id,
-      'Bu baglanti desteklenmiyor. LinkedIn, X/Twitter veya Instagram URL gonder.',
-    )
-    return json({ ok: true, ignored: 'unsupported_source' })
-  }
-
   const duplicate = await findTelegramDuplicate(
     allowedUserId,
     message.message_id,
@@ -404,12 +396,13 @@ async function analyzeWithGemini(input: {
   url: string
 }): Promise<GeminiAnalysis> {
   const apiKey = Deno.env.get('GEMINI_API_KEY')?.trim()
-  const model = Deno.env.get('GEMINI_MODEL')?.trim()
+  const configuredModel = Deno.env.get('GEMINI_MODEL')?.trim()
 
-  if (!apiKey || !model) {
+  if (!apiKey) {
     return fallbackAnalysis(input)
   }
 
+  const models = geminiModelCandidates(configuredModel)
   const prompt = [
     'Gonderilen sosyal medya icerigini Turkce analiz et.',
     'Sadece gecerli JSON dondur.',
@@ -420,45 +413,88 @@ async function analyzeWithGemini(input: {
     `Metin: ${input.originalText}`,
   ].join('\n')
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+  for (const model of models) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model,
+        )}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.2,
+            },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        },
+      )
+
+      if (!response.ok) {
+        console.warn('Gemini request failed', {
+          model,
+          status: response.status,
+        })
+        continue
+      }
+
+      const result = await response.json()
+      const text = result?.candidates?.[0]?.content?.parts
+        ?.map((part: { text?: string }) => part.text ?? '')
+        .join('')
+      const parsed = parseJson(text)
+
+      return {
+        title: safeString(parsed.title) || fallbackTitle(input.url),
+        summary: safeString(parsed.summary) || input.originalText.slice(0, 280),
+        category: safeString(parsed.category) || 'Genel',
+        tags: normalizeTags(parsed.tags).slice(0, 12),
+        source: detectSource(input.url, safeString(parsed.source)),
+        usedFallback: false,
+      }
+    } catch (error) {
+      console.warn('Gemini request errored', {
+        message: error instanceof Error ? error.message : 'unknown',
         model,
-      )}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.2,
-          },
-        }),
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-      },
-    )
-
-    if (!response.ok) {
-      return fallbackAnalysis(input)
+      })
     }
-
-    const result = await response.json()
-    const text = result?.candidates?.[0]?.content?.parts
-      ?.map((part: { text?: string }) => part.text ?? '')
-      .join('')
-    const parsed = parseJson(text)
-
-    return {
-      title: safeString(parsed.title) || fallbackTitle(input.url),
-      summary: safeString(parsed.summary) || input.originalText.slice(0, 280),
-      category: safeString(parsed.category) || 'Genel',
-      tags: normalizeTags(parsed.tags).slice(0, 12),
-      source: detectSource(input.url, safeString(parsed.source)),
-      usedFallback: false,
-    }
-  } catch {
-    return fallbackAnalysis(input)
   }
+
+  return fallbackAnalysis(input)
+}
+
+function geminiModelCandidates(configuredModel: string | undefined): string[] {
+  return uniqueInOrder([
+    normalizeGeminiModel(configuredModel),
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini-2.5-flash-lite',
+  ])
+}
+
+function normalizeGeminiModel(value: string | undefined): string {
+  const model = value
+    ?.trim()
+    .replace(/^models\//i, '')
+    .replace(/[_\s]+/g, '-')
+    .toLocaleLowerCase('en-US')
+
+  return model || 'gemini-3.1-flash-lite'
+}
+
+function uniqueInOrder(values: string[]): string[] {
+  const seen = new Set<string>()
+
+  return values.filter((value) => {
+    if (!value || seen.has(value)) {
+      return false
+    }
+
+    seen.add(value)
+    return true
+  })
 }
 
 function fallbackAnalysis(input: {
@@ -555,11 +591,10 @@ function detectSource(url: string, explicitSource = ''): string {
     if (hostname.includes('twitter.com')) {
       return 'x'
     }
+    return hostname
   } catch {
     return explicitSource || 'web'
   }
-
-  return explicitSource || 'web'
 }
 
 function fallbackTitle(url: string): string {
