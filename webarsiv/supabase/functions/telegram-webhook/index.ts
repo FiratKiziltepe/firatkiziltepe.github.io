@@ -31,6 +31,7 @@ type GeminiAnalysis = {
   category: string
   tags: string[]
   source: string
+  usedFallback: boolean
 }
 
 type SavedItemPayload = {
@@ -82,7 +83,7 @@ Deno.serve(async (request) => {
   } catch (error) {
     const status = error instanceof HttpError ? error.status : 500
     const message =
-      error instanceof Error ? error.message : 'Beklenmeyen hata oluştu.'
+      error instanceof Error ? error.message : 'Beklenmeyen hata olustu.'
 
     return json({ error: message }, status)
   }
@@ -142,7 +143,7 @@ async function handleWebApi(request: Request, url: URL): Promise<Response> {
     )
 
     if (!item) {
-      throw new HttpError(404, 'Kayıt bulunamadı.')
+      throw new HttpError(404, 'Kayit bulunamadi.')
     }
 
     return json({ item })
@@ -158,7 +159,7 @@ async function handleWebApi(request: Request, url: URL): Promise<Response> {
     return json({ ok: true })
   }
 
-  throw new HttpError(404, 'Geçersiz işlem.')
+  throw new HttpError(404, 'Gecersiz islem.')
 }
 
 async function handleTelegramWebhook(request: Request): Promise<Response> {
@@ -179,15 +180,60 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
     return json({ ok: true, ignored: 'unsupported_update' })
   }
 
-  const allowedUserId = Number(requireEnv('ALLOWED_TELEGRAM_USER_ID'))
-  if (message.from?.id !== allowedUserId) {
-    return json({ ok: true, ignored: 'unauthorized_user' })
-  }
-
   const originalText = [message.text, message.caption]
     .filter((part): part is string => Boolean(part?.trim()))
     .join('\n\n')
     .trim()
+  const senderId = message.from?.id
+  const command = originalText.split(/\s+/)[0]?.toLocaleLowerCase('tr-TR')
+
+  if (command === '/whoami' || command?.startsWith('/whoami@')) {
+    await sendTelegramMessage(
+      message.chat.id,
+      [
+        `Telegram ID: ${senderId ?? 'bilinmiyor'}`,
+        'Supabase ALLOWED_TELEGRAM_USER_ID secret degerine sadece bu sayiyi yaz.',
+      ].join('\n'),
+    )
+    return json({ ok: true, command: 'whoami' })
+  }
+
+  if (command === '/start' || command?.startsWith('/start@')) {
+    await sendTelegramMessage(
+      message.chat.id,
+      [
+        'Webarsivi hazir.',
+        'LinkedIn, X/Twitter veya Instagram baglantisi gonder.',
+        `Telegram ID: ${senderId ?? 'bilinmiyor'}`,
+      ].join('\n'),
+    )
+    return json({ ok: true, command: 'start' })
+  }
+
+  const allowedUserId = Number(requireEnv('ALLOWED_TELEGRAM_USER_ID').trim())
+  if (!Number.isFinite(allowedUserId)) {
+    await sendTelegramMessage(
+      message.chat.id,
+      [
+        'ALLOWED_TELEGRAM_USER_ID Supabase secret degeri sadece sayi olmali.',
+        '/whoami komutunda gorunen Telegram ID degerini gir.',
+      ].join('\n'),
+    )
+    return json({ ok: true, ignored: 'invalid_allowed_user_id_secret' })
+  }
+
+  if (senderId !== allowedUserId) {
+    await sendTelegramMessage(
+      message.chat.id,
+      [
+        'Bu Telegram hesabi yetkili degil.',
+        `Telegram ID: ${senderId ?? 'bilinmiyor'}`,
+        'Supabase ALLOWED_TELEGRAM_USER_ID secret degerine sadece bu sayiyi yaz.',
+      ].join('\n'),
+    )
+    return json({ ok: true, ignored: 'unauthorized_user' })
+  }
+
   const url = extractUrl(originalText, [
     ...(message.entities ?? []),
     ...(message.caption_entities ?? []),
@@ -196,7 +242,7 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
   if (!url) {
     await sendTelegramMessage(
       message.chat.id,
-      'Bağlantı bulunamadı. LinkedIn, X/Twitter veya Instagram URL’si gönder.',
+      'Baglanti bulunamadi. LinkedIn, X/Twitter veya Instagram URL gonder.',
     )
     return json({ ok: true, ignored: 'missing_url' })
   }
@@ -205,7 +251,7 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
   if (!['instagram', 'linkedin', 'x'].includes(source)) {
     await sendTelegramMessage(
       message.chat.id,
-      'Bu bağlantı desteklenmiyor. LinkedIn, X/Twitter veya Instagram URL’si gönder.',
+      'Bu baglanti desteklenmiyor. LinkedIn, X/Twitter veya Instagram URL gonder.',
     )
     return json({ ok: true, ignored: 'unsupported_source' })
   }
@@ -215,7 +261,7 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
     message.message_id,
   )
   if (duplicate) {
-    await sendTelegramMessage(message.chat.id, 'Bu mesaj zaten arşivde.')
+    await sendTelegramMessage(message.chat.id, 'Bu mesaj zaten arsivde.')
     return json({ ok: true, duplicate: true })
   }
 
@@ -246,7 +292,7 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
     })
   } catch (error) {
     if (isDuplicateError(error)) {
-      await sendTelegramMessage(message.chat.id, 'Bu mesaj zaten arşivde.')
+      await sendTelegramMessage(message.chat.id, 'Bu mesaj zaten arsivde.')
       return json({ ok: true, duplicate: true })
     }
 
@@ -255,7 +301,9 @@ async function handleTelegramWebhook(request: Request): Promise<Response> {
 
   await sendTelegramMessage(
     message.chat.id,
-    `Kaydedildi: ${analysis.title}`,
+    analysis.usedFallback
+      ? `Kaydedildi (Gemini kullanilamadi): ${analysis.title}`
+      : `Kaydedildi: ${analysis.title}`,
   )
 
   return json({ ok: true })
@@ -267,14 +315,14 @@ function requireWebAccess(request: Request) {
   const token = authHeader.replace(/^Bearer\s+/i, '').trim()
 
   if (!token || token !== expectedToken) {
-    throw new HttpError(401, 'Geçersiz erişim anahtarı.')
+    throw new HttpError(401, 'Gecersiz erisim anahtari.')
   }
 }
 
 function requireId(url: URL): string {
   const id = url.searchParams.get('id')?.trim()
   if (!id) {
-    throw new HttpError(400, 'Kayıt kimliği gerekli.')
+    throw new HttpError(400, 'Kayit kimligi gerekli.')
   }
 
   return id
@@ -283,7 +331,7 @@ function requireId(url: URL): string {
 function requireEnv(name: string): string {
   const value = Deno.env.get(name)
   if (!value) {
-    throw new HttpError(500, `${name} tanımlı değil.`)
+    throw new HttpError(500, `${name} tanimli degil.`)
   }
 
   return value
@@ -294,7 +342,7 @@ function normalizeWebPayload(
   partial = false,
 ): Partial<SavedItemPayload> {
   if (!value || typeof value !== 'object') {
-    throw new HttpError(400, 'Geçersiz kayıt.')
+    throw new HttpError(400, 'Gecersiz kayit.')
   }
 
   const record = value as Record<string, unknown>
@@ -319,7 +367,7 @@ function normalizeWebPayload(
   if (!partial) {
     payload.title = String(payload.title ?? '').trim()
     if (!payload.title) {
-      throw new HttpError(400, 'Başlık gerekli.')
+      throw new HttpError(400, 'Baslik gerekli.')
     }
 
     payload.original_text = String(payload.original_text ?? '')
@@ -355,51 +403,79 @@ async function analyzeWithGemini(input: {
   source: string
   url: string
 }): Promise<GeminiAnalysis> {
-  const apiKey = requireEnv('GEMINI_API_KEY')
-  const model = requireEnv('GEMINI_MODEL')
+  const apiKey = Deno.env.get('GEMINI_API_KEY')?.trim()
+  const model = Deno.env.get('GEMINI_MODEL')?.trim()
+
+  if (!apiKey || !model) {
+    return fallbackAnalysis(input)
+  }
+
   const prompt = [
-    'Gönderilen sosyal medya içeriğini Türkçe analiz et.',
-    'Sadece geçerli JSON döndür.',
-    'JSON alanları: title, summary, category, tags, source.',
-    'tags kısa Türkçe etiketlerden oluşan dizi olmalı.',
+    'Gonderilen sosyal medya icerigini Turkce analiz et.',
+    'Sadece gecerli JSON dondur.',
+    'JSON alanlari: title, summary, category, tags, source.',
+    'tags kisa Turkce etiketlerden olusan dizi olmali.',
     `Kaynak: ${input.source}`,
     `URL: ${input.url}`,
     `Metin: ${input.originalText}`,
   ].join('\n')
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      model,
-    )}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-        },
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-    },
-  )
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        model,
+      )}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      {
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      },
+    )
 
-  if (!response.ok) {
-    throw new HttpError(502, 'Gemini analizi başarısız.')
+    if (!response.ok) {
+      return fallbackAnalysis(input)
+    }
+
+    const result = await response.json()
+    const text = result?.candidates?.[0]?.content?.parts
+      ?.map((part: { text?: string }) => part.text ?? '')
+      .join('')
+    const parsed = parseJson(text)
+
+    return {
+      title: safeString(parsed.title) || fallbackTitle(input.url),
+      summary: safeString(parsed.summary) || input.originalText.slice(0, 280),
+      category: safeString(parsed.category) || 'Genel',
+      tags: normalizeTags(parsed.tags).slice(0, 12),
+      source: detectSource(input.url, safeString(parsed.source)),
+      usedFallback: false,
+    }
+  } catch {
+    return fallbackAnalysis(input)
   }
+}
 
-  const result = await response.json()
-  const text = result?.candidates?.[0]?.content?.parts
-    ?.map((part: { text?: string }) => part.text ?? '')
-    .join('')
-  const parsed = parseJson(text)
+function fallbackAnalysis(input: {
+  originalText: string
+  source: string
+  url: string
+}): GeminiAnalysis {
+  const title = fallbackTitle(input.url)
+  const summary = input.originalText.slice(0, 280)
 
   return {
-    title: safeString(parsed.title) || fallbackTitle(input.url),
-    summary: safeString(parsed.summary) || input.originalText.slice(0, 280),
-    category: safeString(parsed.category) || 'Genel',
-    tags: normalizeTags(parsed.tags).slice(0, 12),
-    source: detectSource(input.url, safeString(parsed.source)),
+    title,
+    summary,
+    category: 'Genel',
+    tags: [input.source].filter(Boolean),
+    source: detectSource(input.url, input.source),
+    usedFallback: true,
   }
 }
 
@@ -452,7 +528,8 @@ function extractUrl(text: string, entities: TelegramEntity[]): string | null {
     return entityUrl
   }
 
-  return text.match(/https?:\/\/[^\s<>"')]+/i)?.[0] ?? null
+  const match = text.match(/https?:\/\/\S+/i)?.[0]
+  return match?.replace(/[).,;!?]+$/, '') ?? null
 }
 
 function detectSource(url: string, explicitSource = ''): string {
@@ -489,7 +566,7 @@ function fallbackTitle(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '')
   } catch {
-    return 'Başlıksız'
+    return 'Basliksiz'
   }
 }
 
@@ -507,7 +584,7 @@ async function findTelegramDuplicate(
 
 async function sendTelegramMessage(chatId: number, text: string) {
   const token = requireEnv('TELEGRAM_BOT_TOKEN')
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     body: JSON.stringify({
       chat_id: chatId,
       disable_web_page_preview: true,
@@ -516,6 +593,10 @@ async function sendTelegramMessage(chatId: number, text: string) {
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
   })
+
+  if (!response.ok) {
+    throw new HttpError(502, 'Telegram mesaji gonderilemedi.')
+  }
 }
 
 async function supabaseRpc<T>(
@@ -549,8 +630,8 @@ async function supabaseRest<T = unknown>(
     throw new HttpError(
       response.status,
       detail.includes('23505')
-        ? 'Bu Telegram mesajı zaten arşivde.'
-        : 'Veritabanı isteği başarısız.',
+        ? 'Bu Telegram mesaji zaten arsivde.'
+        : 'Veritabani istegi basarisiz.',
     )
   }
 
@@ -573,7 +654,7 @@ function uniqueSorted(values: string[]): string[] {
 }
 
 function isDuplicateError(error: unknown): boolean {
-  return error instanceof Error && error.message.includes('zaten arşivde')
+  return error instanceof Error && error.message.includes('zaten arsivde')
 }
 
 function json(body: unknown, status = 200): Response {
