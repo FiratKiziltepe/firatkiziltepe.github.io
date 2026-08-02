@@ -1,8 +1,10 @@
 import type {
   AddConsumptionInput,
+  AddConsumptionResult,
   AppRole,
   Category,
   CreateUserInput,
+  OfflineSyncState,
   Product,
   Profile,
   UpdateConsumptionInput,
@@ -14,7 +16,10 @@ export interface KantinRepository {
   signIn(username: string, password: string): Promise<Profile>
   signOut(): Promise<void>
   loadWeek(weekStart: string): Promise<WeekData>
-  addConsumption(input: AddConsumptionInput): Promise<void>
+  addConsumption(input: AddConsumptionInput): Promise<AddConsumptionResult>
+  getOfflineSyncState(): OfflineSyncState
+  subscribeOfflineSync(listener: (state: OfflineSyncState) => void): () => void
+  syncPendingConsumptions(): Promise<void>
   updateConsumption(entryId: number, input: UpdateConsumptionInput): Promise<void>
   setWeekPaid(customerId: string, weekStart: string, isPaid: boolean): Promise<void>
   saveCategory(category: Pick<Category, 'name' | 'sortOrder' | 'isActive'> & { id?: number }): Promise<void>

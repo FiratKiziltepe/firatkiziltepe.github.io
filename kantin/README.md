@@ -11,6 +11,9 @@ Kantin Defteri; müşterilerin yalnızca kendi yiyip içtiklerini, kantincilerin
 - Müşteri son iki gündeki kaydı zorunlu gerekçeyle düzeltebilir; eski ve yeni değer revizyon geçmişinde saklanır.
 - Kantinci tüm kayıtları ekleyebilir/düzeltebilir, kategori ve ürün/fiyat listesini yönetebilir.
 - Fiyat değişikliği eski hesapları etkilemez; tüketim anındaki birim fiyat kayda sabitlenir.
+- Müşteri kendi hesabına, kantinci seçtiği müşteriye internet yokken de tüketim ekleyebilir.
+- Bekleyen kayıtlar cihazda IndexedDB kuyruğunda tutulur ve bağlantı gelince çift kayıt oluşturmadan senkronize edilir.
+- PWA önbelleği sayesinde uygulama, daha önce bu cihazda açıldıysa bağlantı yokken de başlatılabilir.
 - Ödendi yapılan hafta kilitlenir; kantinci gerekirse yeniden açabilir.
 - Mobil, tablet ve masaüstüne uyumlu React arayüzü.
 - Supabase Row Level Security (RLS), veritabanı doğrulamaları ve denetim kayıtları.
@@ -18,6 +21,7 @@ Kantin Defteri; müşterilerin yalnızca kendi yiyip içtiklerini, kantincilerin
 ## Teknoloji
 
 - React 19 + TypeScript + Vite
+- Progressive Web App, Workbox ve IndexedDB
 - Supabase Auth, PostgreSQL, Row Level Security ve Edge Functions
 - GitHub Pages
 
@@ -44,6 +48,14 @@ Demo hesapları:
 | Müşteri | `ayse` | `Kantin123` |
 
 Demo modu yalnızca tarayıcı belleğini kullanır; üretimde açık bırakılmamalıdır.
+
+## Çevrimdışı çalışma
+
+Çevrimdışı kullanım için kullanıcı, ilgili cihazda en az bir kez internet bağlantısıyla giriş yapmalı ve haftayı açmalıdır. Son ürün, kategori, fiyat ve yetkili müşteri listesi cihazda saklanır. Çevrimdışı eklenen hareketler **Bekliyor** durumuyla görünür; bağlantı geldiğinde otomatik olarak veya **Şimdi gönder** düğmesiyle senkronize edilir.
+
+Her harekette tarayıcıda benzersiz bir işlem kimliği üretilir. Sunucu bu kimliği tekil tuttuğundan bağlantı kesintisi sırasında aynı isteğin yeniden gönderilmesi çift borç oluşturmaz. Senkronizasyon sırasında RLS, kullanıcı rolü, tarih sınırı, ürün fiyatı ve ödenmiş hafta kontrolleri tekrar uygulanır. Reddedilen kayıtlar **Gönderilemedi** olarak gerekçesiyle gösterilir.
+
+Çevrimdışı destek yeni tüketim ekleme içindir. Kullanıcı, ürün/fiyat yönetimi, ödeme durumu ve mevcut tüketimi düzeltme işlemleri internet bağlantısı gerektirir.
 
 ## Supabase kurulumu
 

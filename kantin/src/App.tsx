@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, LoaderCircle, XCircle } from 'lucide-react'
+import { CheckCircle2, CloudUpload, LoaderCircle, RefreshCw, WifiOff, XCircle } from 'lucide-react'
 import { appConfig, hasSupabaseConfig } from './lib/config'
 import { getWeekStart } from './lib/date'
-import type { Profile, WeekData } from './types'
+import type { OfflineSyncState, Profile, WeekData } from './types'
 import type { KantinRepository } from './services/repository'
 import { DemoRepository } from './services/demoRepository'
 import { SupabaseRepository } from './services/supabaseRepository'
@@ -24,6 +24,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [toast, setToast] = useState<Toast | null>(null)
+  const [syncState, setSyncState] = useState<OfflineSyncState>(() => repository.getOfflineSyncState())
 
   const notify = useCallback((message: string, tone: 'success' | 'error' = 'success') => {
     setToast({ message, tone })
@@ -35,11 +36,35 @@ export default function App() {
     return () => window.clearTimeout(timer)
   }, [toast])
 
+  useEffect(() => repository.subscribeOfflineSync(setSyncState), [repository])
+
   const refresh = useCallback(async () => {
     if (!profile) return
     const nextData = await repository.loadWeek(weekStart)
     setData(nextData)
   }, [profile, repository, weekStart])
+
+  useEffect(() => {
+    if (!profile) return
+    const syncWhenOnline = () => {
+      void repository.syncPendingConsumptions()
+        .then(refresh)
+        .catch(() => undefined)
+    }
+    window.addEventListener('online', syncWhenOnline)
+    return () => window.removeEventListener('online', syncWhenOnline)
+  }, [profile, refresh, repository])
+
+  const syncNow = async () => {
+    try {
+      await repository.syncPendingConsumptions()
+      await refresh()
+      const next = repository.getOfflineSyncState()
+      notify(next.failedCount ? `${next.failedCount} kayıt sunucu kontrolünden geçemedi.` : 'Bekleyen kayıtlar senkronize edildi.', next.failedCount ? 'error' : 'success')
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Senkronizasyon tamamlanamadı.', 'error')
+    }
+  }
 
   useEffect(() => {
     if (!appConfig.demoMode && !hasSupabaseConfig) {
@@ -127,6 +152,18 @@ export default function App() {
         <CustomerApp profile={profile} data={data} weekStart={weekStart} onWeekChange={setWeekStart} repository={repository} onRefresh={refresh} onSignOut={signOut} notify={notify} />
       ) : (
         <CanteenApp profile={profile} data={data} weekStart={weekStart} onWeekChange={setWeekStart} repository={repository} onRefresh={refresh} onSignOut={signOut} notify={notify} />
+      )}
+      {(!syncState.isOnline || syncState.pendingCount > 0 || syncState.isSyncing) && (
+        <div className={`offline-status ${!syncState.isOnline ? 'is-offline' : ''} ${syncState.failedCount ? 'has-error' : ''}`} role="status">
+          <span className="offline-status__icon">{syncState.isOnline ? <CloudUpload size={19} /> : <WifiOff size={19} />}</span>
+          <span className="offline-status__copy">
+            <strong>{syncState.isSyncing ? 'Kayıtlar gönderiliyor…' : !syncState.isOnline ? 'Çevrimdışı çalışıyorsunuz' : syncState.failedCount ? 'Bazı kayıtlar gönderilemedi' : 'Senkronizasyon bekleniyor'}</strong>
+            <small>{syncState.pendingCount ? `${syncState.pendingCount} kayıt bu cihazda bekliyor.` : 'Son indirilen veriler gösteriliyor.'}</small>
+          </span>
+          {syncState.pendingCount > 0 && (
+            <button type="button" onClick={syncNow} disabled={syncState.isSyncing}><RefreshCw className={syncState.isSyncing ? 'spin' : ''} size={17} /> Şimdi gönder</button>
+          )}
+        </div>
       )}
       {toast && (
         <div className={`toast toast--${toast.tone}`} role="status">

@@ -12,6 +12,7 @@ import type {
   ConsumptionEntry,
   ConsumptionRevision,
   CreateUserInput,
+  OfflineSyncState,
   Product,
   Profile,
   UpdateConsumptionInput,
@@ -51,6 +52,12 @@ const products: Product[] = [
   { id: 9, categoryId: 4, name: 'Kaşarlı Tost', currentPrice: 70, isActive: true },
   { id: 10, categoryId: 4, name: 'Karışık Tost', currentPrice: 85, isActive: true },
 ]
+
+const productPrices = products.map((product) => ({
+  productId: product.id,
+  price: product.currentPrice,
+  effectiveOn: '2020-01-01',
+}))
 
 let entries: ConsumptionEntry[] = []
 let revisions: ConsumptionRevision[] = []
@@ -101,6 +108,17 @@ export class DemoRepository implements KantinRepository {
   ]
   private currentUser: Profile | null = null
 
+  getOfflineSyncState(): OfflineSyncState {
+    return { isOnline: true, isSyncing: false, pendingCount: 0, failedCount: 0, lastSyncedAt: null, lastError: null }
+  }
+
+  subscribeOfflineSync(listener: (state: OfflineSyncState) => void) {
+    listener(this.getOfflineSyncState())
+    return () => undefined
+  }
+
+  async syncPendingConsumptions() {}
+
   async getCurrentProfile() {
     return this.currentUser ? clone(this.currentUser) : null
   }
@@ -129,7 +147,7 @@ export class DemoRepository implements KantinRepository {
     )
     const visibleRevisions = revisions.filter((item) => isCanteen || item.customerId === this.currentUser?.id)
     const visibleAccounts = weeklyAccounts.filter((item) => item.weekStart === weekStart && (isCanteen || item.customerId === this.currentUser?.id))
-    return clone({ profiles: visibleProfiles, categories, products, entries: visibleEntries, revisions: visibleRevisions, weeklyAccounts: visibleAccounts })
+    return clone({ profiles: visibleProfiles, categories, products, productPrices, entries: visibleEntries, revisions: visibleRevisions, weeklyAccounts: visibleAccounts })
   }
 
   async addConsumption(input: AddConsumptionInput) {
@@ -149,6 +167,7 @@ export class DemoRepository implements KantinRepository {
       createdBy: actor.id, createdAt: now, updatedBy: null, updatedAt: now,
       editReason: null, revisionCount: 0, isCancelled: false,
     })
+    return { queued: false }
   }
 
   async updateConsumption(entryId: number, input: UpdateConsumptionInput) {

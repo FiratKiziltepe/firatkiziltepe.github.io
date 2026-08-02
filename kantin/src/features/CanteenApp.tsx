@@ -53,7 +53,7 @@ export function CanteenApp({
 
   const customers = data.profiles.filter((item) => item.role === 'customer')
   const canteens = data.profiles.filter((item) => item.role === 'canteen')
-  const validEntries = data.entries.filter((entry) => !entry.isCancelled)
+  const validEntries = data.entries.filter((entry) => !entry.isCancelled && entry.syncStatus !== 'failed')
   const total = validEntries.reduce((sum, entry) => sum + entry.totalPrice, 0)
   const selectedCustomer = customers.find((item) => item.id === selectedCustomerId) ?? null
   const selectedEntries = data.entries.filter((item) => item.customerId === selectedCustomerId)
@@ -64,11 +64,11 @@ export function CanteenApp({
   const filteredCustomers = useMemo(() => customers.filter((customer) => `${customer.displayName} ${customer.username}`.toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR'))), [customers, search])
   const paidCount = customers.filter((customer) => accountFor(customer.id)?.isPaid).length
 
-  const run = async (action: () => Promise<void>, success: string) => {
+  const run = async <T,>(action: () => Promise<T>, success: string | ((result: T) => string)) => {
     setSaving(true)
     try {
-      await action()
-      notify(success)
+      const result = await action()
+      notify(typeof success === 'function' ? success(result) : success)
       await onRefresh()
       return true
     } catch (error) {
@@ -88,7 +88,10 @@ export function CanteenApp({
   const submitConsumption = async (input: { customerId: string; productId: number; quantity: number; consumedOn: string; reason?: string; isCancelled?: boolean }) => {
     const ok = editingEntry
       ? await run(() => repository.updateConsumption(editingEntry.id, toUpdateInput(input)), 'Düzeltme kaydedildi ve geçmişe eklendi.')
-      : await run(() => repository.addConsumption(input), 'Ürün müşteri hesabına eklendi.')
+      : await run(
+          () => repository.addConsumption(input),
+          (result) => result.queued ? 'İnternet yok; kayıt cihazda senkronizasyon bekliyor.' : 'Ürün müşteri hesabına eklendi.',
+        )
     if (ok) {
       setConsumptionOpen(false)
       setEditingEntry(null)
@@ -188,6 +191,7 @@ export function CanteenApp({
         open={consumptionOpen}
         onClose={() => { setConsumptionOpen(false); setEditingEntry(null) }}
         products={data.products}
+        productPrices={data.productPrices}
         categories={data.categories}
         customers={customers}
         currentProfile={profile}

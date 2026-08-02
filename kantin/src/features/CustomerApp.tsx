@@ -38,7 +38,7 @@ export function CustomerApp({
   const [initialProductId, setInitialProductId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const entries = data.entries.filter((entry) => entry.customerId === profile.id)
-  const validEntries = entries.filter((entry) => !entry.isCancelled)
+  const validEntries = entries.filter((entry) => !entry.isCancelled && entry.syncStatus !== 'failed')
   const total = validEntries.reduce((sum, entry) => sum + entry.totalPrice, 0)
   const account = data.weeklyAccounts.find((item) => item.customerId === profile.id)
   const isPaid = Boolean(account?.isPaid)
@@ -69,8 +69,8 @@ export function CustomerApp({
         await repository.updateConsumption(editingEntry.id, toUpdateInput(input))
         notify('Değişiklik gerekçesiyle kaydedildi.')
       } else {
-        await repository.addConsumption(input)
-        notify('Ürün hesabına eklendi.')
+        const result = await repository.addConsumption(input)
+        notify(result.queued ? 'İnternet yok; ürün cihazda güvenle bekliyor.' : 'Ürün hesabına eklendi.')
       }
       setModalOpen(false)
       setEditingEntry(null)
@@ -129,6 +129,7 @@ export function CustomerApp({
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditingEntry(null) }}
         products={data.products}
+        productPrices={data.productPrices}
         categories={data.categories}
         customers={[profile]}
         currentProfile={profile}

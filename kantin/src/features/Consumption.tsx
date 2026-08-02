@@ -2,7 +2,8 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { AlertCircle, CalendarDays, Check, Coffee, Edit3, History, Minus, PackageOpen, Plus, Search, ShoppingBasket, UserRound, XCircle } from 'lucide-react'
 import { Badge, Button, EmptyState, Field, Modal } from '../components/ui'
 import { addDays, defaultConsumptionDate, formatDate, formatMoney, formatShortDate, todayInIstanbul } from '../lib/date'
-import type { Category, ConsumptionEntry, Product, Profile, UpdateConsumptionInput } from '../types'
+import { effectivePriceFor } from '../lib/price'
+import type { Category, ConsumptionEntry, Product, ProductPrice, Profile, UpdateConsumptionInput } from '../types'
 
 export function SummaryCard({ icon, label, value, detail, tone = 'default' }: { icon: ReactNode; label: string; value: string; detail: string; tone?: 'default' | 'accent' | 'warning' }) {
   return (
@@ -17,6 +18,7 @@ export function ConsumptionModal({
   open,
   onClose,
   products,
+  productPrices,
   categories,
   customers,
   currentProfile,
@@ -30,6 +32,7 @@ export function ConsumptionModal({
   open: boolean
   onClose: () => void
   products: Product[]
+  productPrices: ProductPrice[]
   categories: Category[]
   customers: Profile[]
   currentProfile: Profile
@@ -56,6 +59,7 @@ export function ConsumptionModal({
     return matchesCategory && matchesSearch
   })
   const selectedProduct = products.find((item) => item.id === productId)
+  const selectedPrice = selectedProduct ? effectivePriceFor(productPrices, selectedProduct.id, consumedOn) : null
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -86,11 +90,12 @@ export function ConsumptionModal({
           <div className="product-grid product-grid--modal">
             {filteredProducts.map((product) => {
               const category = categories.find((item) => item.id === product.categoryId)
+              const effectivePrice = effectivePriceFor(productPrices, product.id, consumedOn)
               return (
-                <button key={product.id} type="button" className={productId === product.id ? 'product-option is-selected' : 'product-option'} onClick={() => setProductId(product.id)}>
+                <button key={product.id} type="button" disabled={effectivePrice === null} className={`${productId === product.id ? 'product-option is-selected' : 'product-option'}${effectivePrice === null ? ' is-unavailable' : ''}`} onClick={() => setProductId(product.id)}>
                   <span className="product-option__icon">{product.categoryId === 1 ? <Coffee size={20} /> : <ShoppingBasket size={20} />}</span>
                   <span><strong>{product.name}</strong><small>{category?.name}</small></span>
-                  <b>{formatMoney(product.currentPrice)}</b>
+                  <b>{effectivePrice === null ? 'Bu tarihte fiyat yok' : formatMoney(effectivePrice)}</b>
                   {productId === product.id && <i><Check size={14} /></i>}
                 </button>
               )
@@ -111,9 +116,13 @@ export function ConsumptionModal({
           </Field>
           <div className="selected-total">
             <span>Toplam</span>
-            <strong>{formatMoney((selectedProduct?.currentPrice ?? 0) * quantity)}</strong>
+            <strong>{selectedPrice === null ? '—' : formatMoney(selectedPrice * quantity)}</strong>
           </div>
         </div>
+
+        {selectedProduct && selectedPrice === null && (
+          <Notice tone="warning">Seçilen tüketim tarihinde bu ürün için geçerli fiyat bulunmuyor.</Notice>
+        )}
 
         {entry && (
           <div className="edit-fields">
@@ -129,7 +138,7 @@ export function ConsumptionModal({
 
         <footer className="modal-actions">
           <Button type="button" variant="secondary" onClick={onClose}>Vazgeç</Button>
-          <Button type="submit" loading={loading} disabled={!selectedProduct || !customerId}>{entry ? 'Değişikliği kaydet' : 'Hesaba ekle'}</Button>
+          <Button type="submit" loading={loading} disabled={!selectedProduct || selectedPrice === null || !customerId}>{entry ? 'Değişikliği kaydet' : 'Hesaba ekle'}</Button>
         </footer>
       </form>
     </Modal>
@@ -156,19 +165,20 @@ export function EntryList({
       {entries.map((entry) => {
         const creator = profiles.find((item) => item.id === entry.createdBy)
         return (
-          <article className={`entry-row ${entry.isCancelled ? 'is-cancelled' : ''}`} key={entry.id}>
+          <article className={`entry-row ${entry.isCancelled ? 'is-cancelled' : ''} ${entry.syncStatus ? `is-${entry.syncStatus}` : ''}`} key={entry.id}>
             <div className="entry-row__date"><CalendarDays size={17} /><span>{formatShortDate(entry.consumedOn)}</span></div>
             <div className="entry-row__main">
               <strong>{entry.productName}</strong>
               <span>{entry.categoryName} · {creator?.id === entry.customerId ? 'Kendisi ekledi' : `${creator?.displayName ?? 'Kantinci'} ekledi`}</span>
               {entry.editReason && <small><History size={13} /> Son gerekçe: {entry.editReason}</small>}
+              {entry.syncStatus === 'failed' && entry.syncError && <small className="sync-error"><AlertCircle size={13} /> {entry.syncError}</small>}
             </div>
             <div className="entry-row__quantity">{entry.quantity} adet</div>
             <div className="entry-row__price"><strong>{formatMoney(entry.totalPrice)}</strong><span>{formatMoney(entry.unitPrice)} / adet</span></div>
             <div className="entry-row__status">
-              {entry.isCancelled ? <Badge tone="danger">İptal</Badge> : entry.revisionCount > 0 ? <Badge tone="warning">{entry.revisionCount} düzeltme</Badge> : <Badge tone="success">Geçerli</Badge>}
+              {entry.syncStatus === 'pending' ? <Badge tone="warning">Bekliyor</Badge> : entry.syncStatus === 'failed' ? <Badge tone="danger">Gönderilemedi</Badge> : entry.isCancelled ? <Badge tone="danger">İptal</Badge> : entry.revisionCount > 0 ? <Badge tone="warning">{entry.revisionCount} düzeltme</Badge> : <Badge tone="success">Geçerli</Badge>}
             </div>
-            {onEdit && canEdit?.(entry) && <button className="icon-button entry-row__edit" type="button" onClick={() => onEdit(entry)} aria-label={`${entry.productName} kaydını düzenle`}><Edit3 size={17} /></button>}
+            {onEdit && !entry.syncStatus && canEdit?.(entry) && <button className="icon-button entry-row__edit" type="button" onClick={() => onEdit(entry)} aria-label={`${entry.productName} kaydını düzenle`}><Edit3 size={17} /></button>}
           </article>
         )
       })}

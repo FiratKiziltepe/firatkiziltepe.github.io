@@ -25,8 +25,15 @@ export interface Product {
   isActive: boolean
 }
 
+export interface ProductPrice {
+  productId: number
+  price: number
+  effectiveOn: string
+}
+
 export interface ConsumptionEntry {
   id: number
+  clientMutationId?: string
   customerId: string
   productId: number
   productName: string
@@ -42,6 +49,8 @@ export interface ConsumptionEntry {
   editReason: string | null
   revisionCount: number
   isCancelled: boolean
+  syncStatus?: 'pending' | 'failed'
+  syncError?: string | null
 }
 
 export interface ConsumptionRevision {
@@ -68,6 +77,7 @@ export interface WeekData {
   profiles: Profile[]
   categories: Category[]
   products: Product[]
+  productPrices: ProductPrice[]
   entries: ConsumptionEntry[]
   revisions: ConsumptionRevision[]
   weeklyAccounts: WeeklyAccount[]
@@ -78,6 +88,19 @@ export interface AddConsumptionInput {
   productId: number
   quantity: number
   consumedOn: string
+}
+
+export interface AddConsumptionResult {
+  queued: boolean
+}
+
+export interface OfflineSyncState {
+  isOnline: boolean
+  isSyncing: boolean
+  pendingCount: number
+  failedCount: number
+  lastSyncedAt: string | null
+  lastError: string | null
 }
 
 export interface UpdateConsumptionInput {

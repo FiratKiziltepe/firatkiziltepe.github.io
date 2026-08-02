@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kantin Defteri">
+  <rect width="512" height="512" rx="112" fill="#123b3a"/>
+  <path d="M144 160h220v128a96 96 0 0 1-96 96h-28a96 96 0 0 1-96-96V160Z" fill="#f7faf7"/>
+  <path d="M364 198h24a58 58 0 0 1 0 116h-31" fill="none" stroke="#f7faf7" stroke-width="34" stroke-linecap="round"/>
+  <path d="M196 112v-28M256 112V72M316 112V84" fill="none" stroke="#ff8264" stroke-width="22" stroke-linecap="round"/>
+  <path d="M170 412h208" fill="none" stroke="#ff8264" stroke-width="22" stroke-linecap="round"/>
+</svg>
