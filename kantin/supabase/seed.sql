@@ -1,0 +1,2 @@
+-- Üretim verisi uygulamadaki kantinci ekranından oluşturulur.
+-- Yerel arayüz önizlemesi VITE_DEMO_MODE=true ile örnek verileri kullanır.

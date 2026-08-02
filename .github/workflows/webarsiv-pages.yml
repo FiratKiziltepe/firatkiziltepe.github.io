@@ -1,4 +1,4 @@
-name: Deploy Webarsivi to GitHub Pages
+name: Deploy Site Apps to GitHub Pages
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'webarsiv/**'
+      - 'kantin/**'
       - '.github/workflows/webarsiv-pages.yml'
   workflow_dispatch:
 
@@ -30,7 +31,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: webarsiv/package-lock.json
+          cache-dependency-path: |
+            webarsiv/package-lock.json
+            kantin/package-lock.json
 
       - name: Install dependencies
         working-directory: webarsiv
@@ -46,6 +49,31 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
         run: npm run build
 
+      - name: Install Kantin dependencies
+        working-directory: kantin
+        run: npm ci
+
+      - name: Test Kantin
+        working-directory: kantin
+        run: npm test
+
+      - name: Validate Kantin configuration
+        env:
+          VITE_SUPABASE_URL: ${{ vars.KANTIN_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KANTIN_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$VITE_SUPABASE_URL"
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+
+      - name: Build Kantin
+        working-directory: kantin
+        env:
+          VITE_SUPABASE_URL: ${{ vars.KANTIN_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KANTIN_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_AUTH_EMAIL_DOMAIN: ${{ vars.KANTIN_AUTH_EMAIL_DOMAIN }}
+          VITE_DEMO_MODE: 'false'
+        run: npm run build
+
       - name: Prepare Pages artifact
         run: |
           mkdir site
@@ -53,9 +81,12 @@ jobs:
             --exclude '.git' \
             --exclude '.github' \
             --exclude 'webarsiv' \
+            --exclude 'kantin' \
             ./ site/
           mkdir -p site/webarsiv
           cp -R webarsiv/dist/. site/webarsiv/
+          mkdir -p site/kantin
+          cp -R kantin/dist/. site/kantin/
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
