@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Literatür Tarama Aracı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <header>
+        <header style="position: relative;">
             <h1>📚 Gemini Literatür Tarama Aracı</h1>
             <p>AI-assisted title/abstract screening workspace · Sistematik tarama için</p>
+            <button id="themeToggleBtn" class="theme-toggle-btn" title="Temayı Değiştir">🌙 Gece Modu</button>
         </header>
 
         <div id="resumeBanner" class="resume-banner" style="display: none;">
@@ -26,24 +30,86 @@
         </div>
 
         <div class="config-section">
-            <div class="card">
-                <h2>⚙️ Ayarlar</h2>
+            <div class="card animate-fade-in">
+                <h2>⚙️ Yapılandırma & Modeller</h2>
 
-                <div class="form-group">
-                    <label for="apiKey">Gemini API Key:</label>
-                    <input type="password" id="apiKey" placeholder="API anahtarınızı buraya girin">
-                    <small>🔒 API anahtarınız sadece sekme oturumunda saklanır, sekme kapanınca silinir.</small>
+                <!-- API Keys Manager -->
+                <div class="api-keys-manager">
+                    <h3>🔑 API Anahtarları</h3>
+                    <div class="form-group" id="geminiKeyGroup">
+                        <label for="apiKey">Gemini API Key:</label>
+                        <input type="password" id="apiKey" placeholder="AI Studio API anahtarınızı girin">
+                    </div>
+                    <div class="form-group" id="openaiKeyGroup" style="display: none;">
+                        <label for="openaiApiKey">OpenAI (ChatGPT) API Key:</label>
+                        <input type="password" id="openaiApiKey" placeholder="OpenAI API anahtarınızı girin">
+                    </div>
+                    <div class="form-group" id="deepseekKeyGroup" style="display: none;">
+                        <label for="deepseekApiKey">DeepSeek API Key:</label>
+                        <input type="password" id="deepseekApiKey" placeholder="DeepSeek API anahtarınızı girin">
+                    </div>
+                    <div class="form-group" id="customKeyGroup" style="display: none;">
+                        <label for="customApiKey">Özel Model API Key:</label>
+                        <input type="password" id="customApiKey" placeholder="Özel API anahtarınızı girin">
+                    </div>
+                    <small style="margin-top: -10px; margin-bottom: 15px; display: block; color: var(--text-muted);">🔒 API anahtarlarınız sadece tarayıcı oturumunda saklanır.</small>
                 </div>
 
-                <div class="form-group">
-                    <label for="modelSelect">Model:</label>
-                    <select id="modelSelect">
-                        <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Preview) — Önerilen</option>
-                        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Preview) — En güçlü, paid</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-                    </select>
-                    <small id="modelInfo"></small>
+                <!-- Model Slots Container -->
+                <div class="model-selection-group" style="margin-top: 20px;">
+                    <h3>🤖 Model Seçimi (En fazla 3 model)</h3>
+                    <div id="modelSlotsContainer">
+                        <div class="model-slot-row" id="modelSlotRow1" style="margin-bottom: 12px;">
+                            <span class="slot-label" style="font-weight: 500; display: block; margin-bottom: 4px; font-size: 0.9rem;">Model 1 (Zorunlu):</span>
+                            <select class="model-select-control" id="modelSelect1" style="padding: 10px; width: 100%; border-radius: 8px;">
+                                <option value="gemini-3.5-flash">Gemini 3.5 Flash — En yeni hızlı model (Önerilen)</option>
+                                <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Preview)</option>
+                                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Preview) — En güçlü Gemini</option>
+                                <option value="gemini-3-flash">Gemini 3 Flash</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                                <option value="gpt-4o-mini">ChatGPT GPT-4o mini — Hızlı ve ekonomik</option>
+                                <option value="gpt-4o">ChatGPT GPT-4o — Güçlü ve yetenekli</option>
+                                <option value="deepseekv4pro">DeepSeek v4 Pro — Gelişmiş akıl yürütme</option>
+                                <option value="custom">Kendi Modelini Tanımla...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" id="addModelSlotBtn" class="btn-outline-small" style="margin-bottom: 15px;">+ Başka Model Ekle</button>
+                </div>
+
+                <!-- Custom Model Config Section (Dynamic) -->
+                <div id="customModelConfig" class="custom-model-config-panel" style="display: none; border: 1px dashed var(--glass-border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>⚙️ Özel Model Yapılandırması</h3>
+                    <div class="custom-model-grid" style="display: grid; gap: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="customModelId">Model Kimliği (Model ID):</label>
+                            <input type="text" id="customModelId" placeholder="Örn: claude-3-5-sonnet">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="customModelProvider">API Sağlayıcı Tipi:</label>
+                            <select id="customModelProvider">
+                                <option value="openai">OpenAI Uyumlu (ChatGPT, OpenRouter, Ollama vs.)</option>
+                                <option value="gemini">Google Gemini Uyumlu</option>
+                                <option value="deepseek">DeepSeek Uyumlu</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="customModelBaseUrl">Özel Endpoint Base URL (Opsiyonel):</label>
+                            <input type="text" id="customModelBaseUrl" placeholder="Örn: https://openrouter.ai/api/v1">
+                            <small style="color: var(--text-muted);">Boş bırakılırsa sağlayıcının varsayılan adresi kullanılır.</small>
+                        </div>
+                        <div class="custom-pricing-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="customModelInputPrice">1M Giriş Ücreti ($):</label>
+                                <input type="number" id="customModelInputPrice" value="0.15" min="0" step="0.01">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="customModelOutputPrice">1M Çıkış Ücreti ($):</label>
+                                <input type="number" id="customModelOutputPrice" value="0.60" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -60,7 +126,7 @@
                             <input type="radio" name="mode" value="async">
                             <div class="mode-card">
                                 <strong>🌙 Async Batch API <span class="badge-discount">-%50</span></strong>
-                                <small>24sa içinde sonuç. RPD/RPM yok. 20K+ makale için ideal.</small>
+                                <small>24sa içinde sonuç. Sadece Gemini modelleri içindir. RPD/RPM sınırı yok.</small>
                             </div>
                         </label>
                     </div>
@@ -78,9 +144,9 @@
                     <small>Sync mod için rate limit koruması.</small>
                 </div>
 
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--glass-border);">
 
-                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 15px;" id="modelLimitsTitle">⚡ Model Limitleri</h3>
+                <h3 style="color: var(--h3-color); font-size: 1.1rem; margin-bottom: 15px;" id="modelLimitsTitle">⚡ Model Limitleri</h3>
                 <div class="rate-stats">
                     <div class="rate-stat-item">
                         <span class="rate-label">RPM:</span>
@@ -105,22 +171,57 @@
                 <h2>📝 Tarama Talimatı</h2>
 
                 <div class="form-group">
+                    <label for="userResearchTopic">🎯 Kendi Çalışma Konunuz ve Özetiniz (Opsiyonel):</label>
+                    <textarea id="userResearchTopic" rows="4" placeholder="Kendi araştırmanızın konusunu ve kapsamını kısaca buraya yazın. AI, makaleleri analiz ederken bu konuya yakınlık skorlarını (0.0 - 1.0) ve gerekçelerini de hesaplar."></textarea>
+                    <small>Bu konuya benzerlik analizi için ekstra token tüketilir.</small>
+                </div>
+
+                <div class="form-group">
                     <label>Sistem Promptu (Sabit):</label>
-                    <textarea id="systemPrompt" rows="10" readonly style="background-color: #f5f5f5; cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**.
+                    <textarea id="systemPrompt" rows="10" readonly style="cursor: not-allowed;">Sen bir **sistematik literatür tarama inceleme asistanısın**. Görevin titiz, katı ve kanıta dayalı tarama yapmaktır.
 
 Kullanıcı sana her çalışma için Başlık, Yıl ve Özet verecek. Görevin bu çalışmaları önceden belirlenmiş **dahil etme (IC)** ve **hariç tutma (EC)** ölçütlerine göre incelemek ve sonucu **JSON array formatında** sunmaktır.
+
+## 🔴 KATI DEĞERLENDİRME MANTIĞI VE KURALLARI (ZORUNLU - İHLAL KABUL EDİLMEZ):
+
+### KURAL 1 — KRİTER AYRIŞTIRILMASI (Criterion Decomposition):
+Her IC/EC kriterini değerlendirmeden önce, kriterin TÜM BİLEŞENLERİNİ (koşullarını) ayrıştır. Bir kriter birden fazla koşul içerebilir.
+**ÖRNEK**: IC1 = "Eğitim ortamlarında öneri sistemlerinin geliştirilmesine odaklanan çalışmalar" → Bu kriter iki ayrı koşul içerir:
+  (a) Çalışma bir EĞİTİM ORTAMINDA (K-12, yükseköğretim, çevrimiçi öğrenme platformu) olmalıdır.
+  (b) Çalışma bir ÖNERİ SİSTEMİ ile ilgili olmalıdır.
+→ Her iki koşulun da ÖZETTE AÇIKÇA geçmesi gerekir. Sadece (b) koşulunu karşılayan genel amaçlı bir öneri sistemi çalışması (ör: e-ticaret, film, müzik için) bu kriteri KARŞILAMAZ. Bu tür makaleler için IC1 eşleşmez.
+
+### KURAL 2 — TÜM IC'LERE TAM UYUM ŞARTI (Strict AND Logic):
+Bir çalışmaya "Include" diyebilmen için TÜM dahil etme kriterlerinin (IC1 AND IC2 AND IC3...) eksiksiz karşılanması gerekir. **Herhangi BİR IC bile karşılanmıyorsa → Exclude veya Uncertain** (kesinlikle Include OLAMAZ).
+
+### KURAL 3 — TEK EC YETERLİ (Strict OR Logic):
+Hariç Tutma Kriterlerinden (EC) **HERHANGİ BİRİ bile eşleşiyorsa → KESİN Exclude** (tüm IC'ler karşılansa bile).
+
+### KURAL 4 — YALNIZCA AÇIK METİNSEL KANIT (Zero Inference Policy):
+- Özette açıkça belirtilmeyen şeyleri VARSAYMA veya çıkarım yapma.
+- Genel bir konu alanından spesifik bir alt alana genelleme YAPMA.
+- "Bu çalışma muhtemelen eğitimde de uygulanabilir" gibi dolaylı yorumlar GEÇERLİ KANIT DEĞİLDİR.
+- Bir kelime örtüşmesi varsa bile (ör: "recommendation"), kriterin TÜM koşullarının açıkça karşılandığını doğrula.
+
+### KURAL 5 — ŞÜPHE DURUMUNDA:
+Eğer kriterin karşılanıp karşılanmadığı metin yetersizliği nedeniyle belirsizse: KESİNLİKLE "Include" deme → "Uncertain" (needs_human_review=true) olarak işaretle.
+
+### KURAL 6 — İÇ TUTARLILIK:
+- decision="Include" ise → matched_inclusion_criteria TÜM IC kodlarını içermeli; matched_exclusion_criteria BOŞ olmalıdır.
+- decision="Exclude" ise → matched_exclusion_criteria en az bir EC kodu içermeli VEYA en az bir IC'nin karşılanmadığı rationale'de belirtilmelidir.
+- Exclude edilen bir çalışma yüksek güven puanı alabilir (kesinlikle uymadığı nettir).
 
 KRİTİK: Title, Abstract, Authors, Year alanlarını YANITINDA ASLA tekrarlama. Sadece türetilmiş alanları döndür (token tasarrufu için).
 
 Her çalışma için döndüreceğin alanlar:
 1. id: Sana verilen makale id'si (aynen geri ver)
 2. summary_tr: Çalışmanın kısa, anlaşılır Türkçe özeti
-3. decision: "Include", "Exclude" veya "Uncertain" (Maybe yerine Uncertain kullan)
-4. confidence: 0.0 - 1.0 arası karar güveni
+3. decision: "Include", "Exclude" veya "Uncertain"
+4. confidence: 0.0 - 1.0 arası karar güveni (Tereddütlü kararlarda düşük güven puanı ver)
 5. matched_inclusion_criteria: Eşleşen IC kodları array (örn: ["IC1", "IC2"])
 6. matched_exclusion_criteria: Eşleşen EC kodları array (örn: ["EC3"])
-7. needs_human_review: confidence < 0.7 veya kararsız ise true
-8. rationale: Kararın kısa, açık gerekçesi (kriter kodlarına atıf yap)</textarea>
+7. needs_human_review: confidence < 0.7 veya kararsız ise ya da modeller arası çelişki riski varsa true
+8. rationale: Kararın kısa, açık gerekçesi — her IC/EC kriteri için ayrı ayrı neden eşleştiğini veya eşleşmediğini açıkla. Kriter kodlarına atıf yap.</textarea>
                 </div>
 
                 <div class="form-group">
@@ -195,7 +296,8 @@ Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler
         <div id="resultsSection" class="results-section" style="display: none;">
             <div class="results-header">
                 <h2>📊 Sonuçlar</h2>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="relevanceReportBtn" class="btn-primary" style="display: none; width: auto; background: var(--accent-teal-gradient);">🔍 En Yakın Çalışmaları Raporla</button>
                     <button id="downloadCsvBtn" class="btn-secondary">💾 CSV İndir</button>
                     <button id="downloadExcelBtn" class="btn-secondary">📊 Excel İndir</button>
                 </div>
@@ -233,6 +335,7 @@ Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler
                     <option value="review">İnsan İncelemesi Gerekli</option>
                 </select>
                 <input type="text" id="filterSearch" placeholder="🔍 Başlık, gerekçe veya özette ara...">
+                <button id="toggleAllAbstractsBtn" class="btn-tertiary" style="padding: 10px 14px; font-size: 0.9rem; font-weight: 600; width: auto; display: none;">↕️ Tüm Özetleri Aç</button>
                 <span id="filterCount" class="filter-count"></span>
             </div>
 
@@ -246,10 +349,12 @@ Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler
                             <th>Yıl</th>
                             <th>Abstract (Orijinal)</th>
                             <th>Türkçe Özet</th>
-                            <th>Karar</th>
+                            <th>Model Kararları</th>
+                            <th>Nihai Karar</th>
                             <th>Güven</th>
                             <th>IC</th>
                             <th>EC</th>
+                            <th>Konu İlgisi</th>
                             <th>İnceleme</th>
                             <th>Gerekçe</th>
                         </tr>
@@ -279,6 +384,38 @@ Gri literatür, sistematik derlemeler, literatür incelemeleri, teorik makaleler
                     <h3>📚 Toplam</h3>
                     <p id="totalCount">0</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Closest Papers Report Modal -->
+    <div id="reportModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 1.5rem; color: var(--accent-teal);">🔍 Konunuza En Yakın Çalışmalar (Top 10)</h2>
+                <button type="button" class="close-modal-btn" id="closeModalBtn" style="background: none; border: none; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro" style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.95rem;">Girdiğiniz çalışma konusuna göre yapay zeka tarafından yapılan benzerlik analizinde en yüksek skor alan makaleler:</p>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table id="modalReportTable" style="min-width: 1000px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">Sıra</th>
+                                <th style="width: 80px;">ID</th>
+                                <th>Başlık</th>
+                                <th style="width: 80px;">Yıl</th>
+                                <th style="width: 120px;">İlgi Skoru</th>
+                                <th style="width: 140px;">Model Kararı</th>
+                                <th>İlişki Gerekçesi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalReportBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 15px;">
+                <button type="button" class="btn-tertiary" id="closeModalBtn2" style="padding: 8px 20px;">Kapat</button>
             </div>
         </div>
     </div>
