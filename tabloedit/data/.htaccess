@@ -1,0 +1,3 @@
+# Veritabanı dosyasına doğrudan erişimi engelle
+Deny from all
+

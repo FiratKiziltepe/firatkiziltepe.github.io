@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Space Explorer - Immersive 3D Space Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-content">
+            <h1>DEEP SPACE EXPLORER</h1>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loading-progress"></div>
+            </div>
+            <p id="loading-text">Initializing quantum drive...</p>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- HUD Overlay -->
+        <div id="hud">
+            <!-- Ship Status -->
+            <div class="hud-panel top-left">
+                <h3>SHIP STATUS</h3>
+                <div class="status-item">
+                    <span>Hull:</span>
+                    <div class="bar"><div class="bar-fill" id="hull-bar"></div></div>
+                    <span id="hull-value">100%</span>
+                </div>
+                <div class="status-item">
+                    <span>Shield:</span>
+                    <div class="bar"><div class="bar-fill shield" id="shield-bar"></div></div>
+                    <span id="shield-value">100%</span>
+                </div>
+                <div class="status-item">
+                    <span>Energy:</span>
+                    <div class="bar"><div class="bar-fill energy" id="energy-bar"></div></div>
+                    <span id="energy-value">100%</span>
+                </div>
+                <div class="status-item">
+                    <span>Fuel:</span>
+                    <div class="bar"><div class="bar-fill fuel" id="fuel-bar"></div></div>
+                    <span id="fuel-value">100%</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="hud-panel top-right">
+                <h3>NAVIGATION</h3>
+                <div class="nav-info">
+                    <p>Speed: <span id="speed">0</span> m/s</p>
+                    <p>Altitude: <span id="altitude">N/A</span></p>
+                    <p>Sector: <span id="sector">Unknown</span></p>
+                    <p>Target: <span id="target">None</span></p>
+                </div>
+                <div class="radar" id="radar">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-center"></div>
+                </div>
+            </div>
+
+            <!-- Cargo & Resources -->
+            <div class="hud-panel bottom-left">
+                <h3>CARGO BAY</h3>
+                <div class="cargo-info">
+                    <p>Capacity: <span id="cargo-current">0</span>/<span id="cargo-max">100</span> units</p>
+                    <div id="cargo-list"></div>
+                </div>
+                <div class="resources">
+                    <p>Credits: <span id="credits">1000</span></p>
+                </div>
+            </div>
+
+            <!-- Controls Info -->
+            <div class="hud-panel bottom-right">
+                <h3>CONTROLS</h3>
+                <div class="controls-info">
+                    <p><kbd>W/S</kbd> Thrust Forward/Back</p>
+                    <p><kbd>A/D</kbd> Rotate Left/Right</p>
+                    <p><kbd>Q/E</kbd> Roll</p>
+                    <p><kbd>↑/↓</kbd> Pitch Up/Down</p>
+                    <p><kbd>Space</kbd> Fire Weapons</p>
+                    <p><kbd>F</kbd> Mining Laser</p>
+                    <p><kbd>T</kbd> Target Lock</p>
+                    <p><kbd>I</kbd> Inventory</p>
+                    <p><kbd>M</kbd> Mission Log</p>
+                    <p><kbd>U</kbd> Upgrade Ship</p>
+                </div>
+            </div>
+
+            <!-- Center Crosshair -->
+            <div class="crosshair">
+                <div class="crosshair-h"></div>
+                <div class="crosshair-v"></div>
+            </div>
+
+            <!-- Messages -->
+            <div id="message-log"></div>
+        </div>
+
+        <!-- Menus -->
+        <div id="inventory-menu" class="menu hidden">
+            <div class="menu-content">
+                <h2>INVENTORY & CARGO</h2>
+                <div class="menu-grid">
+                    <div class="inventory-section">
+                        <h3>Ship Equipment</h3>
+                        <div id="equipment-list"></div>
+                    </div>
+                    <div class="inventory-section">
+                        <h3>Cargo Hold</h3>
+                        <div id="inventory-cargo-list"></div>
+                    </div>
+                </div>
+                <button class="close-btn" onclick="game.ui.closeInventory()">Close</button>
+            </div>
+        </div>
+
+        <div id="mission-menu" class="menu hidden">
+            <div class="menu-content">
+                <h2>MISSION LOG</h2>
+                <div id="mission-list"></div>
+                <button class="close-btn" onclick="game.ui.closeMissions()">Close</button>
+            </div>
+        </div>
+
+        <div id="upgrade-menu" class="menu hidden">
+            <div class="menu-content">
+                <h2>SHIP UPGRADES</h2>
+                <div class="upgrade-grid" id="upgrade-list"></div>
+                <button class="close-btn" onclick="game.ui.closeUpgrades()">Close</button>
+            </div>
+        </div>
+
+        <div id="station-menu" class="menu hidden">
+            <div class="menu-content">
+                <h2 id="station-name">SPACE STATION</h2>
+                <div class="station-tabs">
+                    <button class="tab-btn active" onclick="game.ui.showStationTab('trade')">Trade</button>
+                    <button class="tab-btn" onclick="game.ui.showStationTab('missions')">Missions</button>
+                    <button class="tab-btn" onclick="game.ui.showStationTab('repair')">Repair</button>
+                </div>
+                <div id="station-content"></div>
+                <button class="close-btn" onclick="game.ui.closeStation()">Undock</button>
+            </div>
+        </div>
+
+        <div id="interaction-menu" class="menu hidden">
+            <div class="menu-content interaction-content">
+                <h2 id="interaction-title">INTERACTION</h2>
+                <div id="interaction-text"></div>
+                <div id="interaction-options"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Game Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/procedural.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/ship.js"></script>
+    <script src="js/planets.js"></script>
+    <script src="js/stations.js"></script>
+    <script src="js/aliens.js"></script>
+    <script src="js/wormholes.js"></script>
+    <script src="js/resources.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/missions.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

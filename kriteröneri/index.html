@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriter Öneri Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kriter Öneri Sistemi</h1>
+            <p class="subtitle">Tespit ettiğiniz hatayı yazın, Gemini AI size uygun kriterleri önersin</p>
+        </header>
+
+        <main>
+            <!-- API Key Bölümü -->
+            <div class="api-section" id="apiSection">
+                <div class="api-header" id="apiHeader">
+                    <span class="api-icon">🔑</span>
+                    <span class="api-title">Gemini API Anahtarı</span>
+                    <span class="api-status" id="apiStatus">Ayarlanmadı</span>
+                    <button class="api-toggle" id="apiToggle">▼</button>
+                </div>
+                <div class="api-content" id="apiContent">
+                    <input type="password" id="apiKeyInput" placeholder="Gemini API anahtarınızı girin...">
+                    <div class="api-actions">
+                        <button id="saveApiKey" class="btn-primary">Kaydet</button>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">API anahtarı al →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arama Bölümü -->
+            <div class="search-section">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="searchInput" 
+                        placeholder="Örnek: Formül yanlış yazılmış, cevap anahtarında hata var, görselin alt yazısı metinle uyuşmuyor..."
+                        rows="3"
+                    ></textarea>
+                    <button id="searchBtn" class="search-btn" disabled>
+                        <span class="search-icon">🤖</span>
+                        <span>AI ile Öner</span>
+                    </button>
+                </div>
+                <div class="input-hint">
+                    <span class="hint-icon">💡</span>
+                    Yazarken anlık öneriler • Butona tıklayınca AI analizi
+                </div>
+            </div>
+
+            <!-- Sonuçlar Bölümü -->
+            <div class="results-section" id="resultsSection">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">✍️</div>
+                    <p>Yazmaya başlayın, öneriler hemen gelecek</p>
+                </div>
+                <div class="loading-state" id="loadingState" style="display: none;">
+                    <div class="loader"></div>
+                    <p>Gemini AI analiz ediyor...</p>
+                </div>
+                <div class="results-list" id="resultsList"></div>
+                <button id="showMoreBtn" class="show-more-btn" style="display: none;">
+                    <span>Daha Fazla Göster</span>
+                    <span class="more-count" id="moreCount"></span>
+                </button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Ders Kitabı İnceleme Kriter Öneri Sistemi • Gemini AI Destekli</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
