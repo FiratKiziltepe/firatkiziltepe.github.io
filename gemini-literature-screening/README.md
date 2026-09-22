@@ -184,6 +184,8 @@ Aynı prompt + aynı kriterler = aynı hash. Hash farklıysa karşılaştırıla
 
 | Model | Standard ($/1M token) | Batch ($/1M, %50 indirim) | Free Tier RPD | TPM |
 |-------|----------------------|---------------------------|---------------|-----|
+| Gemini 3.5 Flash | $0.075 in / $0.30 out | $0.0375 / $0.15 | 1.500 | 1.000.000 |
+| Gemini 3.5 Flash Lite | $0.05 in / $0.20 out | $0.025 / $0.10 | 1.500 | 1.000.000 |
 | Gemini 3.1 Pro (Preview) | $2.00 in / $12.00 out | $1.00 / $6.00 | — (paid only) | — |
 | Gemini 3.1 Flash Lite | $0.25 / $1.50 | $0.125 / $0.75 | 500 | 250.000 |
 | Gemini 2.5 Flash | $0.30 / $2.50 | $0.15 / $1.25 | 20 (free) | 250.000 |
