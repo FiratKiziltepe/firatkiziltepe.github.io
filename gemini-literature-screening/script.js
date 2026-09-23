@@ -18,7 +18,7 @@ const MODELS = {
   'gemini-3.5-flash-lite': {
     label: 'Gemini 3.5 Flash Lite', provider: 'gemini', apiModelId: 'gemini-3.5-flash-lite',
     standard: { inputPrice: 0.05, outputPrice: 0.20 }, batch: { inputPrice: 0.025, outputPrice: 0.10 },
-    freeTierAvailable: true, rpm: 15, rpd: 1500, tpm: 1000000
+    freeTierAvailable: true, rpm: 15, rpd: 500, tpm: 250000
   },
   'gemini-3.1-flash-lite-preview': {
     label: 'Gemini 3.1 Flash Lite (Preview)', provider: 'gemini', apiModelId: 'gemini-3.1-flash-lite-preview',
