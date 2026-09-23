@@ -1876,3 +1876,34 @@ mark.ev-mark.ev-inc { background: var(--ev-inc-bg); }
 mark.ev-mark.ev-exc { background: var(--ev-exc-bg); }
 mark.ev-mark.ev-may { background: var(--ev-may-bg); }
 .ev-legend { display: inline-flex; gap: 4px; margin-left: 6px; font-weight: 600; font-size: 0.72rem; }
+
+/* v13.6 — lighter vote colours (tinted fill + coloured border), final decision as icon toggles */
+.dp .vote-btn.active { transform: none; box-shadow: inset 0 0 0 1px currentColor; }
+.dp .vote-btn.inc.active { background: var(--vote-inc-bg); color: var(--vote-inc-fg); border-color: var(--vote-inc-on); }
+.dp .vote-btn.may.active { background: var(--vote-may-bg); color: var(--vote-may-fg); border-color: var(--vote-may-on); }
+.dp .vote-btn.exc.active { background: var(--vote-exc-bg); color: var(--vote-exc-fg); border-color: var(--vote-exc-on); }
+.dp .vote-buttons.has-vote .vote-btn:not(.active) { opacity: 0.6; }
+.my-include { background: var(--vote-inc-bg); color: var(--vote-inc-fg); box-shadow: inset 0 0 0 1px var(--vote-inc-bd); }
+.my-uncertain { background: var(--vote-may-bg); color: var(--vote-may-fg); box-shadow: inset 0 0 0 1px var(--vote-may-bd); }
+.my-exclude { background: var(--vote-exc-bg); color: var(--vote-exc-fg); box-shadow: inset 0 0 0 1px var(--vote-exc-bd); }
+.dp-voted-include { box-shadow: inset 0 3px 0 var(--vote-inc-bd); border-color: var(--vote-inc-bd); }
+.dp-voted-uncertain { box-shadow: inset 0 3px 0 var(--vote-may-bd); border-color: var(--vote-may-bd); }
+.dp-voted-exclude { box-shadow: inset 0 3px 0 var(--vote-exc-bd); border-color: var(--vote-exc-bd); }
+
+.row-mark-include { background: var(--vote-inc-bg); color: var(--vote-inc-fg); box-shadow: inset 0 0 0 1px var(--vote-inc-bd); }
+.row-mark-uncertain { background: var(--vote-may-bg); color: var(--vote-may-fg); box-shadow: inset 0 0 0 1px var(--vote-may-bd); }
+.row-mark-exclude { background: var(--vote-exc-bg); color: var(--vote-exc-fg); box-shadow: inset 0 0 0 1px var(--vote-exc-bd); }
+/* the final decision gets a double ring so it reads differently from a plain vote */
+.row-mark-final { width: 24px; height: 24px; box-shadow: 0 0 0 2px var(--table-bg), 0 0 0 3.5px currentColor; }
+
+.final-btns { display: inline-flex; gap: 4px; }
+.final-btn {
+  width: 28px; height: 26px; border-radius: 7px; border: 1px solid var(--glass-border); background: var(--glass-bg-subtle);
+  color: var(--text-muted); font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: all 0.12s ease; line-height: 1;
+}
+.final-btn.inc:hover { color: var(--vote-inc-fg); border-color: var(--vote-inc-on); }
+.final-btn.may:hover { color: var(--vote-may-fg); border-color: var(--vote-may-on); }
+.final-btn.exc:hover { color: var(--vote-exc-fg); border-color: var(--vote-exc-on); }
+.final-btn.inc.active { background: var(--vote-inc-bg); color: var(--vote-inc-fg); border-color: var(--vote-inc-on); box-shadow: inset 0 0 0 1px var(--vote-inc-on); }
+.final-btn.may.active { background: var(--vote-may-bg); color: var(--vote-may-fg); border-color: var(--vote-may-on); box-shadow: inset 0 0 0 1px var(--vote-may-on); }
+.final-btn.exc.active { background: var(--vote-exc-bg); color: var(--vote-exc-fg); border-color: var(--vote-exc-on); box-shadow: inset 0 0 0 1px var(--vote-exc-on); }

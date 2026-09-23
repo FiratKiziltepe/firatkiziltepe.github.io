@@ -160,12 +160,12 @@ async function setFinalDecision(rid, decision) {
   const rec = WS.recByRid(rid);
   const prev = rec.finalDecision;
   rec.finalDecision = decision || '';
-  refreshRow(rid); updateWsStats();
+  afterVoteView(rid, false);
   try {
     await Cloud.patchRecords(WS.project.id, [{ rid, final_decision: decision || null, final_by: decision ? Cloud.user.id : null }]);
   } catch (e) {
     rec.finalDecision = prev;
-    refreshRow(rid);
+    renderWorkspace();
     showError('Nihai karar kaydedilemedi: ' + e.message);
   }
 }
@@ -489,6 +489,7 @@ function evidenceFor(ai) {
 // Five bands, read left to right in the order a reviewer decides:
 // [select] · publication · abstract with evidence · criteria + short rationale · decision panel
 const DEC_TR = { Include: 'Dahil', Uncertain: 'Belirsiz', Exclude: 'Hariç' };
+const DEC_ICON = { Include: '✓', Uncertain: '?', Exclude: '✕' };
 
 function sourceIdLink(id) {
   const v = String(id || '').trim();
@@ -555,9 +556,11 @@ function buildWsRow(rec) {
     updateSelectionBar();
   });
   cS.append(cb, text('div', `#${rec.order + 1}`, 'row-no'));
-  const mark = text('div', mv && mv.decision ? { Include: '✓', Uncertain: '?', Exclude: '✕' }[mv.decision] : '○',
-    `row-mark ${mv && mv.decision ? `row-mark-${mv.decision.toLowerCase()}` : 'row-mark-wait'}`);
-  mark.title = mv && mv.decision ? `Oyunuz: ${DEC_TR[mv.decision]}` : 'Oyunuzu bekliyor';
+  const fin = WS.isCloud && rec.finalDecision && !WS.blindForMe ? rec.finalDecision : null;
+  const shown = fin || (mv && mv.decision) || null;
+  const mark = text('div', shown ? DEC_ICON[shown] : '○',
+    `row-mark ${shown ? `row-mark-${shown.toLowerCase()}` : 'row-mark-wait'}${fin ? ' row-mark-final' : ''}`);
+  mark.title = fin ? `Nihai karar: ${DEC_TR[fin]}` : shown ? `Oyunuz: ${DEC_TR[shown]}` : 'Oyunuzu bekliyor';
   cS.appendChild(mark);
 
   // 1. publication: title · authors · year/type/row · DOI + source id
@@ -716,7 +719,7 @@ function decisionPanel(rec, ai, mv) {
     head.className = 'dp-sec-head';
     head.appendChild(text('span', 'Yapay zekâ önerisi', 'dp-sec-title'));
     const aiDec = ai.error ? null : ai.ai_decision || ai.decision;
-    if (mine && aiDec) head.appendChild(text('span', mine === aiDec ? 'sizinle aynı' : 'sizden farklı', `dp-agree-tag ${mine === aiDec ? 'same' : 'diff'}`));
+    if (mine && aiDec && !(WS.isCloud && hasConflict(rec.rid))) head.appendChild(text('span', mine === aiDec ? 'sizinle aynı' : 'sizden farklı', `dp-agree-tag ${mine === aiDec ? 'same' : 'diff'}`));
     sec.appendChild(head);
     const thr = WS.isCloud ? ((WS.project.protocol.options || {}).reviewThreshold) : (run && run.options.reviewThreshold);
     mds.forEach(([mId, m]) => {
@@ -747,15 +750,18 @@ function decisionPanel(rec, ai, mv) {
   if (WS.isCloud && Cloud.isAdmin) {
     const sec = document.createElement('div');
     sec.className = 'dp-sec dp-sec-final';
-    const lab = text('label', 'Nihai karar', 'dp-sec-title');
-    const sel = document.createElement('select');
-    sel.className = `dp-final-select select-${String(rec.finalDecision || 'none').toLowerCase()}`;
-    sel.title = 'Yöneticinin nihai kararı (çatışmaları çözmek için)';
-    [['', '— verilmedi'], ['Include', 'Dahil'], ['Uncertain', 'Belirsiz'], ['Exclude', 'Hariç']].forEach(([v, t]) => {
-      const o = document.createElement('option'); o.value = v; o.textContent = t; o.selected = (rec.finalDecision || '') === v; sel.appendChild(o);
+    const lab = text('span', 'Nihai karar', 'dp-sec-title');
+    const group = document.createElement('div');
+    group.className = 'final-btns';
+    VOTE_BUTTONS.forEach(b => {
+      const on = rec.finalDecision === b.d;
+      const fb = button(DEC_ICON[b.d], `final-btn ${b.cls}${on ? ' active' : ''}`,
+        () => setFinalDecision(rec.rid, on ? '' : b.d),
+        on ? `Nihai: ${DEC_TR[b.d]} (kaldırmak için tekrar tıklayın)` : `Nihai kararı ${DEC_TR[b.d]} yap`);
+      fb.setAttribute('aria-pressed', on ? 'true' : 'false');
+      group.appendChild(fb);
     });
-    sel.addEventListener('change', () => setFinalDecision(rec.rid, sel.value));
-    sec.append(lab, sel);
+    sec.append(lab, group);
     panel.appendChild(sec);
   }
 
