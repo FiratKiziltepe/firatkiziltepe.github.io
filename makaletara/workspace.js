@@ -96,7 +96,12 @@ function personName(uid) {
   return p ? (p.display_name || p.email) : 'Kullanıcı';
 }
 
-async function setMyVote(rid, patch) {
+/**
+ * opts.advance: 'scroll' (keyboard) | 'focus' (click) | false
+ * With a filter such as "karar vermediklerim" the voted row leaves the
+ * table immediately and the next row takes the focus — no full re-render.
+ */
+async function setMyVote(rid, patch, opts = {}) {
   const rec = WS.recByRid(rid);
   if (!rec) return;
   const prev = myVote(rid);
@@ -105,20 +110,50 @@ async function setMyVote(rid, patch) {
     run.human = run.human || {};
     run.human[rid] = { decision: next.decision, labels: next.labels, note: next.note };
     scheduleSave();
-    refreshRow(rid); updateWsStats();
+    afterVoteView(rid, opts.advance);
     return;
   }
   let m = WS.votes.get(rid);
   if (!m) { m = new Map(); WS.votes.set(rid, m); }
   m.set(WS.meId, next);
-  refreshRow(rid); updateWsStats();
+  afterVoteView(rid, opts.advance);
   try {
     await Cloud.upsertVote({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note });
   } catch (e) {
     if (prev) m.set(WS.meId, prev); else m.delete(WS.meId);
-    refreshRow(rid); updateWsStats();
-    showError('Karar kaydedilemedi: ' + e.message);
+    renderWorkspace();
+    showError('Karar kaydedilemedi, geri alındı: ' + e.message);
   }
+}
+
+function afterVoteView(rid, advance) {
+  const rec = WS.recByRid(rid);
+  const tr = el.resultsBody.querySelector(`tr[data-rid="${rid}"]`);
+  updateWsStats();
+  if (!tr || !rec) return;
+  if (matchesWs(rec, wsFilterState())) {
+    tr.replaceWith(buildWsRow(rec));
+    if (advance) moveFocusFrom(rid, advance === 'scroll');
+    return;
+  }
+  // leaves the current filter
+  const nextTr = tr.nextElementSibling || tr.previousElementSibling;
+  if (WS._lastFiltered) WS._lastFiltered = WS._lastFiltered.filter(r => r.rid !== rid);
+  tr.classList.add('row-leaving');
+  setTimeout(() => {
+    tr.remove();
+    const left = (WS._lastFiltered || []).length;
+    el.filterCount.textContent = `${left.toLocaleString('tr-TR')} eşleşen · ${WS.records.length.toLocaleString('tr-TR')} toplam`;
+    updateSelectionBar();
+    if (!el.resultsBody.querySelector('tr[data-rid]')) { renderWorkspace(); return; }
+    if (nextTr && nextTr.dataset.rid) setFocusRow(nextTr.dataset.rid, true);
+  }, 160);
+}
+
+function moveFocusFrom(rid, scroll) {
+  const rows = [...el.resultsBody.querySelectorAll('tr[data-rid]')];
+  const i = rows.findIndex(t => t.dataset.rid === rid);
+  if (i !== -1 && rows[i + 1]) setFocusRow(rows[i + 1].dataset.rid, scroll);
 }
 
 async function setFinalDecision(rid, decision) {
@@ -393,10 +428,13 @@ function modelName(id) {
 }
 
 /** Appends text to parent, wrapping evidence ranges in <mark>. */
-function appendHighlighted(parent, value, evidence, criteria) {
+/** ev = { quotes: {code: quote}, kind: {code: 'inc'|'exc'|'may'} } — see evidenceFor() */
+function appendHighlighted(parent, value, ev, criteria) {
   const src = String(value || '');
-  const ranges = C.evidenceRanges(src, evidence);
-  const ecCodes = new Set((criteria.exclusion || []).map(c => c.code));
+  const ranges = C.evidenceRanges(src, ev.quotes);
+  const KIND_TR = { inc: 'dahil etme kanıtı', exc: 'hariç tutma kanıtı', may: 'belirsiz' };
+  // a passage behind several criteria takes the most decisive colour
+  const kindOf = codes => ['exc', 'inc', 'may'].find(k => codes.some(c => ev.kind[c] === k)) || 'may';
   const textOf = code => {
     const c = [...(criteria.inclusion || []), ...(criteria.exclusion || [])].find(x => x.code === code);
     return c ? `${code}: ${c.text}` : code;
@@ -405,9 +443,10 @@ function appendHighlighted(parent, value, evidence, criteria) {
   ranges.forEach(r => {
     if (r.start > pos) parent.appendChild(document.createTextNode(src.slice(pos, r.start)));
     const m = document.createElement('mark');
-    m.className = r.codes.every(c => ecCodes.has(c)) ? 'ev-mark ev-ec' : 'ev-mark';
+    const kind = kindOf(r.codes);
+    m.className = `ev-mark ev-${kind}`;
     m.textContent = src.slice(r.start, r.end);
-    m.title = r.codes.map(textOf).join('\n');
+    m.title = `${KIND_TR[kind]}\n` + r.codes.map(textOf).join('\n');
     parent.appendChild(m);
     pos = r.end;
   });
@@ -426,13 +465,22 @@ function doiHref(doi) {
   return d ? `https://doi.org/${d}` : '';
 }
 
+/**
+ * Quotes to highlight and their colour, matching the criterion chips:
+ *   IC met → green (inc) · IC not met or EC met → red (exc) · unclear → yellow (may)
+ * An EC that does not apply is not highlighted (it would flood the abstract).
+ */
 function evidenceFor(ai) {
-  if (!ai) return {};
-  // Only quotes behind a positive IC or a met EC are highlighted
-  const out = {};
+  const out = { quotes: {}, kind: {} };
+  if (!ai || WS.aiHidden) return out;
   Object.entries(ai.evidence || {}).forEach(([code, q]) => {
-    const v = (ai.assessment || {})[code];
-    if (v === 'yes' || (code.startsWith('IC') && v !== 'no')) out[code] = q;
+    if (!q) return;
+    const v = (ai.assessment || {})[code] || 'unclear';
+    let kind = null;
+    if (v === 'unclear') kind = 'may';
+    else if (code.startsWith('IC')) kind = v === 'yes' ? 'inc' : 'exc';
+    else if (v === 'yes') kind = 'exc';
+    if (kind) { out.quotes[code] = q; out.kind[code] = kind; }
   });
   return out;
 }
@@ -507,6 +555,10 @@ function buildWsRow(rec) {
     updateSelectionBar();
   });
   cS.append(cb, text('div', `#${rec.order + 1}`, 'row-no'));
+  const mark = text('div', mv && mv.decision ? { Include: '✓', Uncertain: '?', Exclude: '✕' }[mv.decision] : '○',
+    `row-mark ${mv && mv.decision ? `row-mark-${mv.decision.toLowerCase()}` : 'row-mark-wait'}`);
+  mark.title = mv && mv.decision ? `Oyunuz: ${DEC_TR[mv.decision]}` : 'Oyunuzu bekliyor';
+  cS.appendChild(mark);
 
   // 1. publication: title · authors · year/type/row · DOI + source id
   const cP = td('cell-pub');
@@ -594,51 +646,54 @@ function buildWsRow(rec) {
 
 function decisionPanel(rec, ai, mv) {
   const panel = document.createElement('div');
-  const info = consensusInfo(rec, ai);
-  panel.className = `dp dp-${info.kind}`;
+  const mine = (mv && mv.decision) || null;
+  panel.className = `dp ${mine ? `dp-voted dp-voted-${mine.toLowerCase()}` : 'dp-waiting'}`;
 
-  // ① where the record stands
+  // ① my task: have I voted, and what?
   const st = document.createElement('div');
-  st.className = 'dp-status';
-  if (info.decision) st.appendChild(decisionBadge(info.decision, false, info.kind === 'ai' ? 'ai' : 'person'));
-  else if (info.kind === 'conflict') st.appendChild(text('span', '⚡', 'dp-status-ico'));
-  st.appendChild(text('span', info.text, 'dp-status-text'));
-  if (WS.isCloud && Cloud.isAdmin) {
-    const sel = document.createElement('select');
-    sel.className = `dp-final-select select-${String(rec.finalDecision || 'none').toLowerCase()}`;
-    sel.title = 'Yöneticinin nihai kararı';
-    [['', 'Nihai: —'], ['Include', 'Nihai: Dahil'], ['Uncertain', 'Nihai: Belirsiz'], ['Exclude', 'Nihai: Hariç']].forEach(([v, t]) => {
-      const o = document.createElement('option'); o.value = v; o.textContent = t; o.selected = (rec.finalDecision || '') === v; sel.appendChild(o);
-    });
-    sel.addEventListener('change', () => setFinalDecision(rec.rid, sel.value));
-    st.appendChild(sel);
+  st.className = 'dp-my';
+  if (mine) {
+    const b = text('span', '', `my-badge my-${mine.toLowerCase()}`);
+    b.append(text('span', { Include: '✓', Uncertain: '?', Exclude: '✕' }[mine], 'my-ico'), document.createTextNode(`Oyunuz: ${DEC_TR[mine]}`));
+    st.append(b, text('span', 'kaydedildi', 'my-saved'));
+  } else {
+    const b = text('span', '', 'my-badge my-pending');
+    b.append(text('span', '○', 'my-ico'), document.createTextNode('Oyunuz bekleniyor'));
+    st.appendChild(b);
   }
+  if (WS.isCloud) st.appendChild(text('span', Cloud.displayName, 'my-who'));
   panel.appendChild(st);
 
-  // ② my vote
-  const head = document.createElement('div');
-  head.className = 'dp-head';
-  head.append(text('span', WS.isCloud ? `Sizin oyunuz · ${Cloud.displayName}` : 'Sizin oyunuz', 'dp-label'), text('span', '1 · 2 · 3', 'dp-keys'));
-  head.lastChild.title = 'Satırı seçip klavyeden 1 = Dahil, 2 = Belirsiz, 3 = Hariç; J / K ile satırlar arasında gezinin';
-  panel.appendChild(head);
   const vb = document.createElement('div');
-  vb.className = 'vote-buttons';
-  VOTE_BUTTONS.forEach(b => {
-    const on = mv && mv.decision === b.d;
-    const btn = button('', `vote-btn ${b.cls}${on ? ' active' : ''}`, () => setMyVote(rec.rid, { decision: on ? null : b.d }), b.title + (on ? ' (tekrar tıklayınca kaldırılır)' : ''));
-    btn.append(text('span', b.icon, 'vb-ico'), text('span', DEC_TR[b.d], 'vb-txt'));
+  vb.className = `vote-buttons${mine ? ' has-vote' : ''}`;
+  VOTE_BUTTONS.forEach((b, i) => {
+    const on = mine === b.d;
+    const btn = button('', `vote-btn ${b.cls}${on ? ' active' : ''}`,
+      () => setMyVote(rec.rid, { decision: on ? null : b.d }, { advance: on ? false : 'focus' }),
+      `${b.title} — kısayol ${i + 1}${on ? ' (tekrar tıklayınca oyunuz kaldırılır)' : ''}`);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.append(text('span', b.icon, 'vb-ico'), text('span', DEC_TR[b.d], 'vb-txt'), text('span', String(i + 1), 'vb-key'));
     vb.appendChild(btn);
   });
   panel.appendChild(vb);
 
-  // ③ who said what
-  const src = document.createElement('div');
-  src.className = 'dp-sources';
+  // ② the team (cloud only)
   if (WS.isCloud) {
-    if (WS.blindForMe) src.appendChild(text('div', '🙈 Diğer hakemler gizli (kör mod)', 'dp-src-muted'));
-    else {
+    const sec = document.createElement('div');
+    sec.className = 'dp-sec';
+    const head = document.createElement('div');
+    head.className = 'dp-sec-head';
+    head.appendChild(text('span', 'Ekip', 'dp-sec-title'));
+    const info = consensusInfo(rec, ai);
+    if (info.kind === 'conflict') head.appendChild(pill('⚡ Çatışma', 'pill-danger'));
+    else if (info.kind === 'agree') head.appendChild(pill(`✓ Uzlaşı: ${DEC_TR[info.decision]}`, 'pill-ok'));
+    else if (info.kind === 'final') head.appendChild(pill(`⚖ Nihai: ${DEC_TR[info.decision]}`, 'pill-info'));
+    sec.appendChild(head);
+    if (WS.blindForMe) {
+      sec.appendChild(text('div', '🙈 Kör mod: diğer hakemlerin oyları gizli, bağımsız oy veriyorsunuz.', 'dp-note'));
+    } else {
       const others = otherVotes(rec.rid).filter(v => v.decision);
-      if (!others.length) src.appendChild(text('div', 'Diğer hakemler henüz oy vermedi', 'dp-src-muted'));
+      if (!others.length) sec.appendChild(text('div', 'Diğer hakemler henüz oy vermedi.', 'dp-note'));
       others.forEach(v => {
         const row = document.createElement('div');
         row.className = 'dp-src';
@@ -646,20 +701,31 @@ function decisionPanel(rec, ai, mv) {
         who.className = 'dp-src-who';
         who.append(icon('person'), document.createTextNode(personName(v.user_id)));
         row.append(who, decisionBadge(v.decision, true));
-        src.appendChild(row);
+        sec.appendChild(row);
       });
     }
+    panel.appendChild(sec);
   }
+
+  // ③ AI suggestion — reference only, below my own decision
   const mds = Object.entries((ai && ai.modelDecisions) || {});
-  if (mds.length && !WS.aiHidden) {
+  if (ai && !WS.aiHidden && (mds.length || ai.error)) {
+    const sec = document.createElement('div');
+    sec.className = 'dp-sec dp-sec-ai';
+    const head = document.createElement('div');
+    head.className = 'dp-sec-head';
+    head.appendChild(text('span', 'Yapay zekâ önerisi', 'dp-sec-title'));
+    const aiDec = ai.error ? null : ai.ai_decision || ai.decision;
+    if (mine && aiDec) head.appendChild(text('span', mine === aiDec ? 'sizinle aynı' : 'sizden farklı', `dp-agree-tag ${mine === aiDec ? 'same' : 'diff'}`));
+    sec.appendChild(head);
     const thr = WS.isCloud ? ((WS.project.protocol.options || {}).reviewThreshold) : (run && run.options.reviewThreshold);
     mds.forEach(([mId, m]) => {
       const row = document.createElement('div');
       row.className = 'dp-src dp-src-ai';
+      row.title = m.error || C.splitRationale(m).text;
       const who = document.createElement('span');
       who.className = 'dp-src-who';
       who.append(icon('ai'), document.createTextNode(modelName(mId)));
-      row.title = m.error || C.splitRationale(m).text;
       const right = document.createElement('span');
       right.className = 'dp-src-right';
       if (!m.error && typeof m.confidence === 'number') {
@@ -670,14 +736,30 @@ function decisionPanel(rec, ai, mv) {
       }
       right.appendChild(decisionBadge(m.error ? 'Hata' : m.decision, true));
       row.append(who, right);
-      src.appendChild(row);
+      sec.appendChild(row);
     });
     const valid = mds.filter(([, m]) => !m.error);
-    if (valid.length > 1) src.appendChild(text('div', `Model uyumu ${valid.filter(([, m]) => m.decision === ai.decision).length}/${valid.length}`, 'dp-src-muted'));
+    if (valid.length > 1) sec.appendChild(text('div', `Model uyumu ${valid.filter(([, m]) => m.decision === ai.decision).length}/${valid.length} · ortak öneri: ${DEC_TR[ai.decision] || ai.decision}`, 'dp-note'));
+    panel.appendChild(sec);
   }
-  if (src.childNodes.length) panel.appendChild(src);
 
-  // ④ labels & note
+  // ④ admin's final decision
+  if (WS.isCloud && Cloud.isAdmin) {
+    const sec = document.createElement('div');
+    sec.className = 'dp-sec dp-sec-final';
+    const lab = text('label', 'Nihai karar', 'dp-sec-title');
+    const sel = document.createElement('select');
+    sel.className = `dp-final-select select-${String(rec.finalDecision || 'none').toLowerCase()}`;
+    sel.title = 'Yöneticinin nihai kararı (çatışmaları çözmek için)';
+    [['', '— verilmedi'], ['Include', 'Dahil'], ['Uncertain', 'Belirsiz'], ['Exclude', 'Hariç']].forEach(([v, t]) => {
+      const o = document.createElement('option'); o.value = v; o.textContent = t; o.selected = (rec.finalDecision || '') === v; sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => setFinalDecision(rec.rid, sel.value));
+    sec.append(lab, sel);
+    panel.appendChild(sec);
+  }
+
+  // ⑤ labels & note
   const tools = document.createElement('div');
   tools.className = 'dp-tools';
   cellLabels(tools, rec, mv);
@@ -794,8 +876,7 @@ function onScreenKey(e) {
     e.preventDefault();
     const rid = WS.focusRid;
     const cur = (myVote(rid) || {}).decision;
-    setMyVote(rid, { decision: cur === vote ? null : vote });
-    if (cur !== vote) setTimeout(() => moveFocus(1), 120);
+    setMyVote(rid, { decision: cur === vote ? null : vote }, { advance: cur === vote ? false : 'scroll' });
   }
 }
 

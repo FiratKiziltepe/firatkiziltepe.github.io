@@ -15,7 +15,7 @@ Arayüz dört sekmeye ayrıldı: **⚙️ Analiz · 📊 Tarama · ♻️ Tekrar
 
 ### Tarama tablosu
 - Sütunlar: *Yazar / yıl* (DOI bağlantısı yazarların altında, yeni sekmede açılır) · *Başlık* (seçim kutusu, **Excel satırı**) · *Özet · sarı kanıtlar* · *Karar* · *Güven* · *Ölçütler* (IC/EC çipleri) · *Kısa gerekçe* · *Etiketler / not*.
-- **Sarı kanıtlar:** modelin ölçüt başına verdiği birebir alıntılar özette ve başlıkta sarıyla işaretlenir; karşılanan EC alıntıları turuncudur. Üzerine gelince ilgili ölçüt görünür. Büyük/küçük harf, tire ve "…" boşlukları tolere edilir.
+- **Renkli kanıtlar:** modelin ölçüt başına verdiği birebir alıntılar özette ve başlıkta ölçüt çipleriyle aynı renkte işaretlenir: dahil etme kanıtı (IC karşılandı) yeşil, hariç tutma kanıtı (EC karşılandı ya da IC karşılanmadı) kırmızı, belirsiz sarı. Üzerine gelince ilgili ölçüt görünür. Büyük/küçük harf, tire ve "…" boşlukları tolere edilir.
 - **Kısa gerekçe:** özet ve gerekçe tek bir Türkçe metinde birleşti (dil Analiz sekmesinden değiştirilebilir). Sistem denetimi notları gerekçeye karışmaz; ayrı bir "⚠️ Sistem denetimi" kutusunda durur.
 - **Karar:** her kullanıcı ✓ / ? / ✕ (Include / Maybe / Exclude) düğmeleriyle kendi kararını verir; aynı düğmeye tekrar basınca karar kalkar. Altında AI kararı ve model bazında kararlar görünür.
 - **Sayfalama:** sayfa başına 50 / 100 / 150 / 200 kayıt. Filtreler: AI kararı, kendi kararınız (karar vermediklerim, AI'dan farklı düşündüklerim…), durum (inceleme önerilen, modeller ayrıştı, çatışma, nihai karar…), etiket, arama. Sıralama: dosya sırası, güven, konu ilgisi, yıl.

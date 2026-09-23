@@ -1796,3 +1796,83 @@ body.light-theme .id-chip-link .id-chip-v { color: #1d4ed8; }
 /* keep the vote panel in view while reading a long abstract */
 .ws-table td.cell-decision .dp { position: sticky; top: 78px; }
 @media (min-width: 1100px) { .ws-table-container { overflow: visible; } }
+
+/* ============================================================
+   v13.4 — decision panel: my vote first, then team, AI, final
+   ============================================================ */
+.dp { padding: 12px; border-width: 1px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.dp-waiting { border-style: dashed; }
+.dp-voted-include { border-color: var(--vote-inc-on); box-shadow: inset 0 3px 0 var(--vote-inc-on); }
+.dp-voted-uncertain { border-color: var(--vote-may-on); box-shadow: inset 0 3px 0 var(--vote-may-on); }
+.dp-voted-exclude { border-color: var(--vote-exc-on); box-shadow: inset 0 3px 0 var(--vote-exc-on); }
+
+/* status of my own vote */
+.dp-my { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; min-height: 24px; }
+.my-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 0.74rem; font-weight: 800; white-space: nowrap; }
+.my-ico { font-size: 0.8rem; line-height: 1; }
+.my-pending { color: var(--text-muted); border: 1px dashed var(--glass-border); background: transparent; font-weight: 700; }
+.my-include { background: var(--vote-inc-on); color: #fff; }
+.my-uncertain { background: var(--vote-may-on); color: #fff; }
+.my-exclude { background: var(--vote-exc-on); color: #fff; }
+.my-saved { font-size: 0.68rem; color: var(--text-muted); }
+.my-who { margin-left: auto; font-size: 0.68rem; color: var(--text-muted); max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* vote buttons: grey until chosen, only the chosen one is coloured */
+.dp .vote-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dp .vote-btn {
+  position: relative; height: 36px; background: var(--glass-bg-subtle); color: var(--text-muted);
+  border: 1px solid var(--glass-border); box-shadow: none; transition: all 0.12s ease;
+}
+.dp .vote-btn .vb-ico { opacity: 0.8; }
+.dp .vote-btn.inc:hover { color: var(--vote-inc-fg); border-color: var(--vote-inc-on); background: var(--vote-inc-bg); }
+.dp .vote-btn.may:hover { color: var(--vote-may-fg); border-color: var(--vote-may-on); background: var(--vote-may-bg); }
+.dp .vote-btn.exc:hover { color: var(--vote-exc-fg); border-color: var(--vote-exc-on); background: var(--vote-exc-bg); }
+.dp .vote-btn.active { color: #fff; transform: none; box-shadow: 0 2px 8px var(--card-shadow); }
+.dp .vote-btn.active .vb-ico { opacity: 1; }
+.dp .vote-btn.inc.active { background: var(--vote-inc-on); border-color: var(--vote-inc-on); }
+.dp .vote-btn.may.active { background: var(--vote-may-on); border-color: var(--vote-may-on); }
+.dp .vote-btn.exc.active { background: var(--vote-exc-on); border-color: var(--vote-exc-on); }
+.dp .vote-buttons.has-vote .vote-btn:not(.active) { opacity: 0.55; }
+.dp .vote-buttons.has-vote .vote-btn:not(.active):hover { opacity: 1; }
+.vb-key {
+  position: absolute; top: 2px; right: 4px; font-size: 0.56rem; font-weight: 700; opacity: 0.55;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* reference sections below my vote */
+.dp-sec { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--glass-border-soft); display: flex; flex-direction: column; gap: 5px; }
+.dp-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.dp-sec-title { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.dp-sec-head .pill { font-size: 0.66rem; padding: 1px 8px; }
+.dp-note { font-size: 0.7rem; color: var(--text-muted); line-height: 1.45; }
+.dp-agree-tag { font-size: 0.64rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.dp-agree-tag.same { color: var(--success-text); background: var(--success-bg); }
+.dp-agree-tag.diff { color: var(--warning-text); background: var(--warning-bg); }
+.dp-sec-ai .dp-src { opacity: 0.9; }
+.dp-sec-final { flex-direction: row; align-items: center; justify-content: space-between; }
+.dp-sec-final .dp-final-select { margin-left: 0; }
+.dp-final-select.select-include { border-color: var(--vote-inc-on); color: var(--vote-inc-fg); }
+.dp-final-select.select-exclude { border-color: var(--vote-exc-on); color: var(--vote-exc-fg); }
+.dp-final-select.select-uncertain { border-color: var(--vote-may-on); color: var(--vote-may-fg); }
+.dp-tools { border-top-style: solid; border-top-color: var(--glass-border-soft); }
+
+/* row marker: waiting vs done */
+.row-mark {
+  width: 22px; height: 22px; margin: 8px auto 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800;
+}
+.row-mark-wait { border: 1.5px dashed var(--glass-border); color: var(--text-muted); }
+.row-mark-include { background: var(--vote-inc-on); color: #fff; }
+.row-mark-uncertain { background: var(--vote-may-on); color: #fff; }
+.row-mark-exclude { background: var(--vote-exc-on); color: #fff; }
+
+/* a voted row leaving the "undecided" filter */
+.ws-table tr.row-leaving { opacity: 0; transform: translateX(24px); transition: opacity 0.15s ease, transform 0.15s ease; }
+
+/* evidence colours match the criterion chips: include green · exclude red · unclear yellow */
+:root { --ev-inc-bg: rgba(16, 185, 129, 0.3); --ev-exc-bg: rgba(239, 68, 68, 0.32); --ev-may-bg: rgba(250, 204, 21, 0.32); }
+body.light-theme { --ev-inc-bg: #c6f0d8; --ev-exc-bg: #fcd0d0; --ev-may-bg: #fde68a; }
+mark.ev-mark.ev-inc { background: var(--ev-inc-bg); }
+mark.ev-mark.ev-exc { background: var(--ev-exc-bg); }
+mark.ev-mark.ev-may { background: var(--ev-may-bg); }
+.ev-legend { display: inline-flex; gap: 4px; margin-left: 6px; font-weight: 600; font-size: 0.72rem; }
