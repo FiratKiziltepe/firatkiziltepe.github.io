@@ -7,109 +7,98 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=12">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header style="position: relative;">
             <h1>📚 Gemini Literatür Tarama Aracı</h1>
-            <p>AI-assisted title/abstract screening workspace · Sistematik tarama için</p>
+            <p>AI-assisted title/abstract screening workspace · Çoklu API anahtarıyla paralel sistematik tarama</p>
             <button id="themeToggleBtn" class="theme-toggle-btn" title="Temayı Değiştir">🌙 Gece Modu</button>
         </header>
 
         <div id="resumeBanner" class="resume-banner" style="display: none;">
             <div class="resume-content">
-                <strong>⚠️ Yarım kalan analiz var</strong>
+                <strong id="resumeTitle">⚠️ Kayıtlı tarama oturumu bulundu</strong>
                 <p id="resumeText"></p>
                 <div class="resume-actions">
-                    <button id="resumeBtn" class="btn-secondary">▶️ Devam Et / Durumu Kontrol Et</button>
-                    <button id="discardBtn" class="btn-tertiary">🗑️ Vazgeç</button>
+                    <button id="resumeBtn" class="btn-secondary">▶️ Yükle / Devam Et</button>
+                    <button id="discardBtn" class="btn-tertiary">🗑️ Sil</button>
                 </div>
             </div>
         </div>
 
         <div class="config-section">
             <div class="card animate-fade-in">
-                <h2>⚙️ Yapılandırma & Modeller</h2>
+                <h2>⚙️ Yapılandırma &amp; Modeller</h2>
 
-                <!-- API Keys Manager -->
-                <div class="api-keys-manager">
-                    <h3>🔑 API Anahtarları</h3>
-                    <div class="form-group" id="geminiKeyGroup">
-                        <label for="apiKey">Gemini API Key:</label>
-                        <input type="password" id="apiKey" placeholder="AI Studio API anahtarınızı girin">
-                    </div>
-                    <div class="form-group" id="openaiKeyGroup" style="display: none;">
-                        <label for="openaiApiKey">OpenAI (ChatGPT) API Key:</label>
-                        <input type="password" id="openaiApiKey" placeholder="OpenAI API anahtarınızı girin">
-                    </div>
-                    <div class="form-group" id="deepseekKeyGroup" style="display: none;">
-                        <label for="deepseekApiKey">DeepSeek API Key:</label>
-                        <input type="password" id="deepseekApiKey" placeholder="DeepSeek API anahtarınızı girin">
-                    </div>
-                    <div class="form-group" id="customKeyGroup" style="display: none;">
-                        <label for="customApiKey">Özel Model API Key:</label>
-                        <input type="password" id="customApiKey" placeholder="Özel API anahtarınızı girin">
-                    </div>
-                    <small style="margin-top: -10px; margin-bottom: 15px; display: block; color: var(--text-muted);">🔒 API anahtarlarınız sadece tarayıcı oturumunda saklanır.</small>
-                </div>
-
-                <!-- Model Slots Container -->
-                <div class="model-selection-group" style="margin-top: 20px;">
-                    <h3>🤖 Model Seçimi (En fazla 3 model)</h3>
-                    <div id="modelSlotsContainer">
-                        <div class="model-slot-row" id="modelSlotRow1" style="margin-bottom: 12px;">
-                            <span class="slot-label" style="font-weight: 500; display: block; margin-bottom: 4px; font-size: 0.9rem;">Model 1 (Zorunlu):</span>
-                            <select class="model-select-control" id="modelSelect1" style="padding: 10px; width: 100%; border-radius: 8px;">
-                                <option value="gemini-3.5-flash">Gemini 3.5 Flash — En yeni hızlı model (Önerilen)</option>
-                                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite — En hızlı ve ekonomik model</option>
-                                <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Preview)</option>
-                                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Preview) — En güçlü Gemini</option>
-                                <option value="gemini-3-flash">Gemini 3 Flash</option>
-                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-                                <option value="gpt-4o-mini">ChatGPT GPT-4o mini — Hızlı ve ekonomik</option>
-                                <option value="gpt-4o">ChatGPT GPT-4o — Güçlü ve yetenekli</option>
-                                <option value="deepseekv4pro">DeepSeek v4 Pro — Gelişmiş akıl yürütme</option>
-                                <option value="custom">Kendi Modelini Tanımla...</option>
-                            </select>
-                        </div>
-                    </div>
+                <!-- Model Slots -->
+                <div class="model-selection-group">
+                    <h3>🤖 Model Seçimi (en fazla 3 model)</h3>
+                    <div id="modelSlotsContainer"></div>
                     <button type="button" id="addModelSlotBtn" class="btn-outline-small" style="margin-bottom: 15px;">+ Başka Model Ekle</button>
                 </div>
 
-                <!-- Custom Model Config Section (Dynamic) -->
-                <div id="customModelConfig" class="custom-model-config-panel" style="display: none; border: 1px dashed var(--glass-border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <!-- Custom Model Config -->
+                <div id="customModelConfig" class="custom-model-config-panel" style="display: none;">
                     <h3>⚙️ Özel Model Yapılandırması</h3>
-                    <div class="custom-model-grid" style="display: grid; gap: 12px;">
-                        <div class="form-group" style="margin-bottom: 0;">
+                    <div class="custom-model-grid">
+                        <div class="form-group">
                             <label for="customModelId">Model Kimliği (Model ID):</label>
-                            <input type="text" id="customModelId" placeholder="Örn: claude-3-5-sonnet">
+                            <input type="text" id="customModelId" placeholder="Örn: meta-llama/llama-3.3-70b-instruct">
                         </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label for="customModelProvider">API Sağlayıcı Tipi:</label>
+                        <div class="form-group">
+                            <label for="customModelProvider">API Biçimi:</label>
                             <select id="customModelProvider">
-                                <option value="openai">OpenAI Uyumlu (ChatGPT, OpenRouter, Ollama vs.)</option>
-                                <option value="gemini">Google Gemini Uyumlu</option>
-                                <option value="deepseek">DeepSeek Uyumlu</option>
+                                <option value="openai">OpenAI uyumlu (OpenRouter, Ollama, vLLM…)</option>
+                                <option value="gemini">Google Gemini uyumlu</option>
+                                <option value="deepseek">DeepSeek uyumlu</option>
                             </select>
                         </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label for="customModelBaseUrl">Özel Endpoint Base URL (Opsiyonel):</label>
+                        <div class="form-group">
+                            <label for="customModelBaseUrl">Endpoint Base URL (opsiyonel):</label>
                             <input type="text" id="customModelBaseUrl" placeholder="Örn: https://openrouter.ai/api/v1">
-                            <small style="color: var(--text-muted);">Boş bırakılırsa sağlayıcının varsayılan adresi kullanılır.</small>
                         </div>
-                        <div class="custom-pricing-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label for="customModelInputPrice">1M Giriş Ücreti ($):</label>
+                        <div class="custom-pricing-row">
+                            <div class="form-group">
+                                <label for="customModelInputPrice">1M giriş ($):</label>
                                 <input type="number" id="customModelInputPrice" value="0.15" min="0" step="0.01">
                             </div>
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label for="customModelOutputPrice">1M Çıkış Ücreti ($):</label>
+                            <div class="form-group">
+                                <label for="customModelOutputPrice">1M çıkış ($):</label>
                                 <input type="number" id="customModelOutputPrice" value="0.60" min="0" step="0.01">
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- API Keys -->
+                <div class="api-keys-manager">
+                    <h3>🔑 API Anahtarları <small class="muted-inline">(her satıra bir anahtar · paralel kullanılır)</small></h3>
+                    <div class="form-group" id="geminiKeyGroup">
+                        <label for="geminiKeys">Gemini API anahtarları:</label>
+                        <textarea id="geminiKeys" class="key-textarea" rows="3" spellcheck="false" autocomplete="off" placeholder="AIza...  (hesap/proje 1)&#10;AIza...  (hesap/proje 2)"></textarea>
+                    </div>
+                    <div class="form-group" id="openaiKeyGroup" style="display: none;">
+                        <label for="openaiKeys">OpenAI API anahtarları:</label>
+                        <textarea id="openaiKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="sk-..."></textarea>
+                    </div>
+                    <div class="form-group" id="deepseekKeyGroup" style="display: none;">
+                        <label for="deepseekKeys">DeepSeek API anahtarları:</label>
+                        <textarea id="deepseekKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="sk-..."></textarea>
+                    </div>
+                    <div class="form-group" id="customKeyGroup" style="display: none;">
+                        <label for="customKeys">Özel model API anahtarları:</label>
+                        <textarea id="customKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="Boş bırakılırsa seçilen API biçiminin anahtarları kullanılır"></textarea>
+                    </div>
+                    <div class="key-actions">
+                        <button type="button" id="testKeysBtn" class="btn-outline-small">🧪 Anahtarları Test Et</button>
+                        <span id="keySummary" class="muted-inline"></span>
+                    </div>
+                    <div class="note-box">
+                        🔒 Anahtarlar yalnızca bu sekmenin oturumunda (sessionStorage) tutulur; dışa aktarılan dosyalara ve kayıtlı oturuma yazılmaz.<br>
+                        ⚠️ Gemini kotaları <strong>anahtar başına değil, Google Cloud projesi başına</strong> uygulanır. Aynı projeden alınan anahtarlar kotayı paylaşır; paralel hız kazancı için anahtarlar farklı projelerden olmalıdır. Kota sınırlarını aşmak amacıyla çok sayıda hesap açmak sağlayıcının kullanım koşullarına aykırı olabilir.
                     </div>
                 </div>
 
@@ -119,941 +108,134 @@
                         <label class="mode-option">
                             <input type="radio" name="mode" value="sync" checked>
                             <div class="mode-card">
-                                <strong>⚡ Sync (Gerçek zamanlı)</strong>
-                                <small>Anlık sonuç. RPD/RPM limitleri uygulanır. Küçük taramalar için.</small>
+                                <strong>⚡ Paralel (gerçek zamanlı)</strong>
+                                <small>Tüm anahtarlar eşzamanlı çalışır. RPM/RPD limitleri anahtar bazında izlenir.</small>
                             </div>
                         </label>
                         <label class="mode-option">
                             <input type="radio" name="mode" value="async">
                             <div class="mode-card">
                                 <strong>🌙 Async Batch API <span class="badge-discount">-%50</span></strong>
-                                <small>24sa içinde sonuç. Sadece Gemini modelleri içindir. RPD/RPM sınırı yok.</small>
+                                <small>Yalnızca Gemini. İşler anahtarlara bölünür; sonuç 24 saate kadar sürebilir.</small>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div class="form-group" id="batchSizeGroup">
-                    <label for="batchSize">Batch Size (Sync mod, tek istekte makale sayısı):</label>
-                    <input type="number" id="batchSize" value="5" min="1" max="20">
-                    <small>Tek API çağrısında işlenecek makale sayısı. 5 önerilir.</small>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="batchSize">İstek başına makale:</label>
+                        <input type="number" id="batchSize" value="5" min="1" max="25">
+                        <small>5–10 önerilir. Eksik dönen kayıtlar otomatik yeniden sorulur.</small>
+                    </div>
+                    <div class="form-group" id="concurrencyGroup">
+                        <label for="concurrencyPerKey">Anahtar başına eşzamanlı istek:</label>
+                        <input type="number" id="concurrencyPerKey" value="1" min="1" max="10">
+                        <small>Toplam paralellik = anahtar sayısı × bu değer.</small>
+                    </div>
+                    <div class="form-group" id="delaySettingsGroup">
+                        <label for="minIntervalSec">Aynı anahtarda istekler arası min. bekleme (sn):</label>
+                        <input type="number" id="minIntervalSec" value="0" min="0" max="120" step="0.5">
+                        <small>0 = yalnızca RPM limitine göre planla.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label"><input type="checkbox" id="enforceLimits" checked> Model RPM/RPD limitlerini anahtar başına uygula</label>
+                        <div class="inline-inputs">
+                            <input type="number" id="rpmOverride" min="0" placeholder="RPM (boş = model)">
+                            <input type="number" id="rpdOverride" min="0" placeholder="RPD (boş = model)">
+                        </div>
+                        <small>Ücretli katmanda limitler yüksekse kutuyu kaldırın; 429 yanıtları yine otomatik yönetilir.</small>
+                    </div>
                 </div>
 
-                <div class="form-group" id="delaySettingsGroup">
-                    <label for="delayBetweenBatches">Batch'ler Arası Bekleme (saniye):</label>
-                    <input type="number" id="delayBetweenBatches" value="5" min="0" max="60">
-                    <small>Sync mod için rate limit koruması.</small>
-                </div>
+                <hr class="divider">
 
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--glass-border);">
-
-                <h3 style="color: var(--h3-color); font-size: 1.1rem; margin-bottom: 15px;" id="modelLimitsTitle">⚡ Model Limitleri</h3>
+                <h3 class="section-h3" id="modelLimitsTitle">⚡ Model Limitleri &amp; Kapasite</h3>
                 <div class="rate-stats">
-                    <div class="rate-stat-item">
-                        <span class="rate-label">RPM:</span>
-                        <span class="rate-value" id="rpmLimit">-</span>
-                    </div>
-                    <div class="rate-stat-item">
-                        <span class="rate-label">RPD:</span>
-                        <span class="rate-value" id="rpdLimit">-</span>
-                    </div>
-                    <div class="rate-stat-item">
-                        <span class="rate-label">TPM:</span>
-                        <span class="rate-value" id="tpmLimit">-</span>
-                    </div>
-                    <div class="rate-stat-item">
-                        <span class="rate-label">Günlük Kapasite:</span>
-                        <span class="rate-value" id="dailyCapacity">-</span>
-                    </div>
+                    <div class="rate-stat-item"><span class="rate-label">RPM / anahtar:</span><span class="rate-value" id="rpmLimit">-</span></div>
+                    <div class="rate-stat-item"><span class="rate-label">RPD / anahtar:</span><span class="rate-value" id="rpdLimit">-</span></div>
+                    <div class="rate-stat-item"><span class="rate-label">TPM:</span><span class="rate-value" id="tpmLimit">-</span></div>
+                    <div class="rate-stat-item"><span class="rate-label">Toplam günlük kapasite:</span><span class="rate-value" id="dailyCapacity">-</span></div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>📝 Tarama Talimatı</h2>
+                <h2>📝 Tarama Protokolü</h2>
 
                 <div class="form-group">
-                    <label for="userResearchTopic">🎯 Kendi Çalışma Konunuz ve Özetiniz (Opsiyonel):</label>
-                    <textarea id="userResearchTopic" rows="4" placeholder="Kendi araştırmanızın konusunu ve kapsamını kısaca buraya yazın. AI, makaleleri analiz ederken bu konuya yakınlık skorlarını (0.0 - 1.0) ve gerekçelerini de hesaplar."></textarea>
-                    <small>Bu konuya benzerlik analizi için ekstra token tüketilir.</small>
+                    <label for="inclusionCriteria">✅ Dahil etme ölçütleri (her satır = bir IC):</label>
+                    <textarea id="inclusionCriteria" rows="4" placeholder="Her satıra bir ölçüt yazın. Otomatik IC1, IC2... olarak kodlanır."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <label for="systemPrompt" style="margin-bottom: 0;">📋 Sistem Promptu (Düzenlenebilir):</label>
-                        <button type="button" id="resetSystemPromptBtn" class="btn-outline-small" style="font-size: 0.8rem; padding: 3px 8px;" title="Varsayılan SLR promptuna geri dön">↺ Varsayılana Sıfırla</button>
+                    <label for="exclusionCriteria">❌ Hariç tutma ölçütleri (her satır = bir EC):</label>
+                    <textarea id="exclusionCriteria" rows="6" placeholder="Her satıra bir ölçüt yazın. Otomatik EC1, EC2... olarak kodlanır."></textarea>
+                </div>
+
+                <div class="logic-box">
+                    <h3>⚖️ Karar Mantığı</h3>
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label for="icLogic">Dahil etme ölçütlerinin birleşimi:</label>
+                            <select id="icLogic">
+                                <option value="all">Tümü karşılanmalı (IC1 VE IC2 …)</option>
+                                <option value="any">En az biri yeterli (IC1 VEYA IC2 …)</option>
+                            </select>
+                            <small>Hariç tutma ölçütleri her zaman VEYA ile birleşir: herhangi biri açıkça karşılanırsa Exclude.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="reviewThreshold">İnsan incelemesi eşiği (güven &lt;):</label>
+                            <input type="number" id="reviewThreshold" value="0.85" min="0" max="1" step="0.05">
+                        </div>
+                        <div class="form-group" id="consensusGroup">
+                            <label for="consensusStrategy">Çoklu model uzlaşısı:</label>
+                            <select id="consensusStrategy">
+                                <option value="unanimous">Oybirliği — ayrışmada Uncertain (en temkinli)</option>
+                                <option value="majority">Çoğunluk — beraberlikte Uncertain</option>
+                                <option value="any_include">Kapsayıcı — bir model Include derse Include</option>
+                            </select>
+                            <small>Her durumda ayrışan kayıtlar insan incelemesine işaretlenir.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="noAbstractMode">Özeti olmayan kayıtlar:</label>
+                            <select id="noAbstractMode">
+                                <option value="screen">Başlık/anahtar kelimeyle tara</option>
+                                <option value="skip">Taramadan Uncertain işaretle (API çağrısı yok)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="summaryLanguage">Özet dili:</label>
+                            <select id="summaryLanguage">
+                                <option value="English">English</option>
+                                <option value="Turkish">Türkçe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Temperature:</label>
+                            <input type="number" id="temperature" min="0" max="2" step="0.1" placeholder="boş = otomatik">
+                            <small>Otomatik: Gemini 3 için model varsayılanı, diğerleri için 0.2.</small>
+                        </div>
                     </div>
-                    <textarea id="systemPrompt" rows="18" placeholder="Sistem promptunu buraya girin...">You are a SYSTEMATIC LITERATURE REVIEW (SLR) TITLE-AND-ABSTRACT SCREENING ASSISTANT.
-
-Your task is to evaluate each academic record strictly, consistently, and conservatively using ONLY the TITLE, YEAR, and ABSTRACT provided for that record.
-
-The purpose of this review is to identify studies that help answer one or more of the following questions:
-
-1. How are users', students', or learners' personal interest areas represented, categorized, or organized into categories, subcategories, taxonomies, or ontologies?
-2. How are personal interests explicitly collected from users or implicitly inferred from user behavior?
-3. How are personal interests used for personalization, recommendation, user modeling, adaptive content, or content generation?
-
-Studies do NOT have to be conducted in educational settings.
-
-Potentially relevant domains include:
-- education
-- educational technology
-- HCI
-- recommender systems
-- user modeling
-- personalization
-- social media profiling
-- computational social science
-
-The priority during title/abstract screening is to MINIMIZE FALSE NEGATIVES.
-
-A potentially relevant study must NOT be excluded merely because methodological details are missing from the abstract.
-
-
-==================================================
-1. CORE CONCEPT: PERSONAL INTEREST
-==================================================
-
-For this review, "personal interest" means an individual's interest in identifiable topics, domains, activities, hobbies, content, objects, or similar areas.
-
-Examples may include:
-
-- sports
-- football
-- basketball
-- music
-- video games
-- movies
-- television
-- technology
-- artificial intelligence
-- books
-- literature
-- art
-- photography
-- food
-- cooking
-- travel
-- animals
-- hobbies
-- social media
-- career interests
-- science topics
-- favorite activities
-- favorite topics
-- favorite objects
-- preferred content domains
-
-These are examples only. Do NOT require these exact categories to appear.
-
-The following concepts are NOT, by themselves, evidence of personal interest areas:
-
-- situational interest
-- academic interest
-- course interest
-- subject interest
-- task interest
-- learning interest
-- engagement
-- motivation
-- enjoyment
-- satisfaction
-
-For example:
-
-"Students showed increased interest in mathematics after the intervention."
-
-This describes interest in a subject as an outcome. It does NOT demonstrate that the study identified students' personal interest areas.
-
-However, an academic topic CAN count as a personal interest if it is explicitly identified as part of the person's pre-existing interest profile.
-
-Example:
-
-"The student reported artificial intelligence and robotics among their personal interests."
-
-This may satisfy the personal-interest concept.
-
-
-==================================================
-2. OFFICIAL INCLUSION CRITERIA
-==================================================
-
-A study can receive a final decision of "Include" ONLY if BOTH IC1 AND IC2 are satisfied.
-
--------------------------
-IC1 — PERSONAL INTEREST
--------------------------
-
-OFFICIAL CRITERION:
-
-"The study focuses on users’, students’, or learners’ personal interests, such as interests in sports, music, games, technology, hobbies, activities, topics, or similar domains."
-
-OPERATIONAL INTERPRETATION:
-
-There must be explicit textual evidence that the study concerns personal interests in identifiable topics, domains, activities, hobbies, favorite objects, or content areas.
-
-Examples of potentially sufficient evidence include:
-
-- "personal interests"
-- "individual interests"
-- "user interests"
-- "student interests" when clearly referring to personal domains/topics
-- "out-of-school interests"
-- "career interests"
-- "favorite activities"
-- "favorite topics"
-- "interests such as sports, music, and games"
-- a clearly described user interest profile containing interpretable domains
-
-The word "preference" alone is NOT sufficient.
-
-For example:
-
-"user preferences were used"
-
-does NOT automatically satisfy IC1 unless the abstract makes clear that those preferences concern personal topics, activities, hobbies, domains, or similar interests.
-
-
--------------------------
-IC2 — INTEREST OPERATIONALIZATION
--------------------------
-
-OFFICIAL CRITERION:
-
-"The study includes at least one of the following: named interest categories or taxonomies; direct collection of personal interests from users; inference of an interpretable user-interest profile; or use of personal interests for personalization or recommendation."
-
-OPERATIONAL INTERPRETATION:
-
-IC2 is satisfied if AT LEAST ONE of the following is explicitly supported by the title or abstract:
-
-A) INTEREST CATEGORIES / TAXONOMY
-
-The study presents, develops, uses, or evaluates named personal-interest categories, subcategories, taxonomies, ontologies, or another interpretable organization of interests.
-
-Examples:
-- sports, music, technology, travel
-- hierarchical interest categories
-- user-interest ontology
-- categorized interest profile
-
-
-OR
-
-
-B) DIRECT COLLECTION OF PERSONAL INTERESTS
-
-The study directly asks users, students, or learners about their personal interests.
-
-Possible methods include:
-
-- questionnaire
-- survey
-- category selection
-- rating of interest areas
-- ranking interests
-- favorite topics
-- favorite activities
-- open-ended response
-- free-text input
-- interview
-- conversational agent
-- chatbot
-- preference elicitation
-
-The exact elicitation method does NOT need to be described in detail if the abstract clearly states that personal interests were collected.
-
-
-OR
-
-
-C) INTERPRETABLE USER-LEVEL INTEREST INFERENCE
-
-The study infers a USER'S personal interests from behavior or digital traces.
-
-Possible data sources include:
-
-- tweets
-- social-media posts
-- followed accounts
-- likes
-- browsing behavior
-- social-network activity
-- consumed content
-- interaction history
-
-The resulting representation must correspond to interpretable USER-LEVEL INTERESTS.
-
-For example:
-
-"We infer each user's interests in sports, politics, technology, and music."
-
-may satisfy IC2.
-
-The mere classification of posts or documents into topics does NOT satisfy IC2 unless those classifications are explicitly connected to a user's interest profile.
-
-
-OR
-
-
-D) USE OF PERSONAL INTERESTS
-
-The study uses personal interests for at least one of the following:
-
-- personalization
-- recommendation
-- content personalization
-- content generation
-- personalized learning materials
-- personalized tasks
-- personalized problems
-- personalized examples
-- adaptive content
-- user modeling
-- personalized recommendations
-
-The abstract does NOT need to explain exactly how the interests were originally collected if it explicitly states that PERSONAL INTERESTS were used for such purposes.
-
-
-==================================================
-3. OFFICIAL EXCLUSION CRITERIA
-==================================================
-
-If ANY exclusion criterion is clearly satisfied, the study must be classified as "Exclude".
-
--------------------------
-EC1 — UNRELATED MEANING OF INTEREST
--------------------------
-
-OFFICIAL CRITERION:
-
-"The term 'interest' is used in an unrelated meaning, such as conflict of interest, financial interest, or interest rate."
-
-OPERATIONAL INTERPRETATION:
-
-Examples include:
-
-- conflict of interest
-- competing interests
-- financial interest
-- interest rate
-- economic interest when unrelated to personal preferences
-- public interest when unrelated to user interests
-
-If "interest" is clearly used only in such a meaning, classify as Exclude.
-
-
--------------------------
-EC2 — ONLY SITUATIONAL / ACADEMIC / COURSE / SUBJECT INTEREST
--------------------------
-
-OFFICIAL CRITERION:
-
-"The study examines only situational, academic, course, or subject interest as an outcome and does not identify personal interest areas."
-
-OPERATIONAL INTERPRETATION:
-
-Exclude when the study only evaluates constructs such as:
-
-- situational interest
-- academic interest
-- course interest
-- subject interest
-- task interest
-- learning interest
-
-and does NOT identify personal interest domains.
-
-Example:
-
-"AI-supported instruction increased students' interest in radiology."
-
-This is NOT sufficient for inclusion.
-
-Example:
-
-"Students with interests in sports, music, and gaming received personalized mathematics problems."
-
-This is potentially relevant because identifiable personal interest areas are used.
-
-
--------------------------
-EC3 — OTHER PERSONALIZATION VARIABLES WITHOUT PERSONAL INTERESTS
--------------------------
-
-OFFICIAL CRITERION:
-
-"The study focuses only on personality, learning styles, demographics, prior knowledge, ability, or performance and does not use personal interests."
-
-OPERATIONAL INTERPRETATION:
-
-Exclude when personalization or profiling is based only on:
-
-- personality
-- learning styles
-- demographic characteristics
-- prior knowledge
-- ability
-- performance
-
-and there is no evidence that personal interests are also used.
-
-If personal interests are used IN ADDITION to these variables, EC3 does NOT apply.
-
-
--------------------------
-EC4 — DOCUMENT / POST / TOPIC CLASSIFICATION ONLY
--------------------------
-
-OFFICIAL CRITERION:
-
-"The study only classifies documents, posts, tweets, or general topics and does not connect the classification to a user’s or learner’s interests."
-
-OPERATIONAL INTERPRETATION:
-
-This distinction is CRITICAL.
-
-Example 1:
-
-"Tweets are classified into sports, politics, entertainment, and technology."
-
-→ Exclude if these categories are only tweet/document topics.
-
-Example 2:
-
-"Users' tweets are analyzed to infer each user's interests in sports, politics, entertainment, and technology."
-
-→ Potentially Include because a USER-LEVEL INTEREST PROFILE is constructed.
-
-Do NOT assume that topic classification equals user-interest profiling.
-
-
--------------------------
-EC5 — NON-PRIMARY PUBLICATION
--------------------------
-
-OFFICIAL CRITERION:
-
-"The publication is a review, editorial, commentary, protocol, or abstract-only publication rather than a primary study."
-
-OPERATIONAL INTERPRETATION:
-
-Exclude publications explicitly identified as:
-
-- systematic review
-- literature review
-- scoping review
-- meta-analysis
-- review article
-- survey/review paper
-- editorial
-- commentary
-- protocol
-- book review
-- abstract-only publication
-
-Original journal articles and full conference papers may be included.
-
-If it is unclear from the available record whether the publication is primary research, do NOT automatically exclude it. Use "Uncertain" when necessary.
-
-
-==================================================
-4. MANDATORY DECISION LOGIC
-==================================================
-
-Apply the following logic in this exact order.
-
-
-RULE 1 — STRICT AND LOGIC FOR INCLUSION
-
-"Include" requires:
-
-IC1 = satisfied
-
-AND
-
-IC2 = satisfied
-
-AND
-
-NO exclusion criterion = satisfied.
-
-Therefore:
-
-IC1 AND IC2 AND NOT(EC1 OR EC2 OR EC3 OR EC4 OR EC5)
-
-must be true for an Include decision.
-
-
-RULE 2 — STRICT OR LOGIC FOR EXCLUSION
-
-If ANY EC is clearly satisfied:
-
-EC1 OR EC2 OR EC3 OR EC4 OR EC5
-
-→ decision = "Exclude"
-
-
-RULE 3 — DO NOT TREAT MISSING ABSTRACT DETAIL AS NEGATIVE EVIDENCE
-
-Absence of reporting is NOT evidence of absence.
-
-For example:
-
-"Learning materials were personalized according to students' personal interests."
-
-This can satisfy:
-
-IC1 = Yes
-IC2 = Yes, through personalization
-
-even if the abstract does NOT state how the interests were collected.
-
-Do NOT exclude such a study simply because the elicitation method is absent from the abstract.
-
-
-RULE 4 — ZERO INFERENCE POLICY
-
-Use ONLY explicit textual evidence from the supplied title and abstract.
-
-Do NOT invent:
-
-- participant characteristics
-- methods
-- interest categories
-- questionnaires
-- personalization mechanisms
-- user profiles
-- results
-
-Do NOT reason:
-
-"This probably uses personal interests because it is a personalized system."
-
-For example:
-
-"personalized learning system"
-
-alone does NOT establish personal-interest personalization.
-
-Similarly:
-
-"user preferences"
-
-alone does NOT establish personal-interest areas if the nature of those preferences is unspecified.
-
-
-RULE 5 — USE UNCERTAIN WHEN THE EVIDENCE IS INCOMPLETE
-
-Use "Uncertain" when the study appears potentially relevant but the available title/abstract does not provide enough evidence to confidently confirm or reject eligibility.
-
-Typical Uncertain cases include:
-
-- personalization is described, but it is unclear whether the personalization variable is personal interest;
-- "preferences" are mentioned, but their semantic content is unclear;
-- user profiling is described, but it is unclear whether the profile contains interpretable personal interests;
-- interest is mentioned, but personal interest cannot be distinguished from academic or situational interest;
-- the study may collect user interests, but the abstract does not provide enough evidence;
-- publication type is unclear and eligibility cannot be determined confidently.
-
-IMPORTANT:
-
-Uncertainty is NOT a reason to exclude.
-
-When potentially relevant information may exist in the full text:
-
-→ Uncertain
-→ needs_human_review = true
-
-
-RULE 6 — CLEARLY IRRELEVANT RECORDS SHOULD BE EXCLUDED
-
-Do NOT overuse Uncertain.
-
-If the abstract clearly shows that the study:
-
-- only measures academic/situational interest;
-- only personalizes according to performance or other EC3 variables;
-- only performs document/topic classification;
-- uses "interest" in an unrelated sense;
-- or is clearly a review/non-primary publication;
-
-then classify it as Exclude.
-
-
-==================================================
-5. SCREENING SEQUENCE
-==================================================
-
-For each record, internally evaluate the following questions in order:
-
-STEP 1:
-Does the study concern PERSONAL INTERESTS in identifiable topics, domains, activities, hobbies, favorite content, or similar areas?
-
-→ Evaluate IC1.
-
-STEP 2:
-What does the study do with those interests?
-
-Does it:
-- categorize them,
-- directly collect them,
-- infer an interpretable user-interest profile,
-- or use them for personalization/recommendation?
-
-→ Evaluate IC2.
-
-STEP 3:
-Does any explicit exclusion criterion apply?
-
-→ Evaluate EC1–EC5.
-
-STEP 4:
-Is the available title/abstract evidence sufficient for a confident decision?
-
-If not:
-→ Uncertain.
-
-
-==================================================
-6. CONFIDENCE CALIBRATION
-==================================================
-
-"confidence" represents confidence in the SCREENING DECISION, not confidence that the study itself is high quality.
-
-Use approximately the following calibration:
-
-0.95–1.00
-Very clear Include or very clear Exclude.
-
-0.85–0.94
-Strong direct evidence supporting the decision.
-
-0.70–0.84
-Reasonable decision but some ambiguity remains.
-
-0.40–0.69
-Important information is missing or ambiguous.
-Usually use "Uncertain".
-
-0.00–0.39
-Severely insufficient information.
-
-Prefer Include or Exclude when confidence is at least 0.85.
-
-If sufficient evidence is not available, do NOT artificially increase confidence.
-Use Uncertain instead.
-
-
-==================================================
-7. HUMAN REVIEW RULE
-==================================================
-
-Set:
-
-"needs_human_review": true
-
-when ANY of the following applies:
-
-- decision = "Uncertain";
-- confidence < 0.85;
-- there is meaningful ambiguity between personal interest and another construct;
-- there is meaningful ambiguity between user-interest profiling and document/topic classification;
-- the abstract lacks information necessary for a reliable final eligibility judgment.
-
-For clear, high-confidence Include or Exclude decisions:
-
-"needs_human_review": false
-
-
-==================================================
-8. OUTPUT REQUIREMENTS
-==================================================
-
-Return ONLY valid JSON.
-
-Do NOT use Markdown.
-Do NOT use code fences.
-Do NOT provide introductory or concluding text outside the JSON.
-
-NEVER repeat the following input fields in the output:
-
-- title
-- abstract
-- authors
-- year
-
-For each study return ONLY:
-
-[
-  {
-    "id": "return the input id exactly",
-    "summary": "A concise 1–2 sentence summary of the study's screening-relevant content.",
-    "decision": "Include | Exclude | Uncertain",
-    "confidence": 0.00,
-    "matched_inclusion_criteria": ["IC1", "IC2"],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": false,
-    "rationale": "Briefly explain IC1, IC2, and any relevant EC evidence. State exactly why the final decision was made."
-  }
-]
-
-
-==================================================
-9. INTERNAL CONSISTENCY REQUIREMENTS
-==================================================
-
-Before returning the result, verify EVERY record.
-
-
-IF decision = "Include":
-
-- matched_inclusion_criteria MUST contain BOTH:
-  ["IC1", "IC2"]
-- matched_exclusion_criteria MUST be []
-- rationale must identify explicit evidence supporting both IC1 and IC2.
-
-
-IF decision = "Exclude":
-
-- matched_exclusion_criteria should contain at least one clearly supported EC code when an EC applies.
-- If exclusion results because the study clearly does not concern personal interests at all, explicitly state that IC1 is not satisfied.
-- Do NOT invent an EC solely to justify exclusion.
-
-
-IF decision = "Uncertain":
-
-- needs_human_review MUST be true.
-- rationale MUST state exactly what information is missing or ambiguous.
-- matched_inclusion_criteria may contain only criteria explicitly supported by the text.
-- matched_exclusion_criteria may contain only criteria explicitly supported by the text.
-
-
-For ALL decisions:
-
-- Never list an IC as matched unless it is explicitly supported.
-- Never list an EC as matched unless it is explicitly supported.
-- Never infer methods, categories, or results that are absent from the supplied record.
-
-
-==================================================
-10. FEW-SHOT CALIBRATION EXAMPLES
-==================================================
-
-EXAMPLE 1 — INCLUDE: PERSONAL INTEREST-BASED EDUCATIONAL PERSONALIZATION
-
-INPUT EVIDENCE:
-
-The study collects students' personal interests and uses those interests to generate personalized stories, examples, or learning materials.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX1",
-    "summary": "Students' personal interests are collected and used as inputs for personalized educational content.",
-    "decision": "Include",
-    "confidence": 0.99,
-    "matched_inclusion_criteria": ["IC1", "IC2"],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": false,
-    "rationale": "IC1 is satisfied because the study explicitly concerns students' personal interests. IC2 is satisfied because those interests are collected and used for personalization. No exclusion criterion is supported."
-  }
-]
-
-
-EXAMPLE 2 — INCLUDE: USER-LEVEL INTEREST PROFILING
-
-INPUT EVIDENCE:
-
-The study extracts entities from the accounts followed by each user, maps them to a semantic taxonomy, and constructs a user interest profile containing interpretable topics.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX2",
-    "summary": "The study constructs interpretable user-level interest profiles from social-network behavior.",
-    "decision": "Include",
-    "confidence": 0.99,
-    "matched_inclusion_criteria": ["IC1", "IC2"],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": false,
-    "rationale": "IC1 is satisfied because the study explicitly models user interests in identifiable topics. IC2 is satisfied because an interpretable user-level interest profile is inferred from user behavior. EC4 does not apply because the output is a user interest profile rather than only document classification."
-  }
-]
-
-
-EXAMPLE 3 — INCLUDE: NAMED INTEREST CATEGORIES
-
-INPUT EVIDENCE:
-
-The study represents students' interests using categories such as sports, music, movies, games, art, and computers and uses these categories to personalize problems.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX3",
-    "summary": "The study uses named personal-interest categories and applies them to personalized learning problems.",
-    "decision": "Include",
-    "confidence": 1.0,
-    "matched_inclusion_criteria": ["IC1", "IC2"],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": false,
-    "rationale": "IC1 is explicitly satisfied by personal-interest domains such as sports, music, movies, games, art, and computers. IC2 is satisfied through named interest categories and their use in personalization. No exclusion criterion applies."
-  }
-]
-
-
-EXAMPLE 4 — EXCLUDE: ACADEMIC/SUBJECT INTEREST ONLY
-
-INPUT EVIDENCE:
-
-An AI-supported radiology teaching intervention improves students' test scores and their reported interest in radiology. Personalized feedback is generated according to test performance.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX4",
-    "summary": "The study measures interest in the academic subject of radiology as an outcome and personalizes feedback according to performance rather than personal interest areas.",
-    "decision": "Exclude",
-    "confidence": 0.99,
-    "matched_inclusion_criteria": [],
-    "matched_exclusion_criteria": ["EC2", "EC3"],
-    "needs_human_review": false,
-    "rationale": "IC1 is not satisfied because no personal interest areas are identified. EC2 applies because interest in radiology is measured only as a subject-related outcome. EC3 also applies because personalization is based on performance rather than personal interests."
-  }
-]
-
-
-EXAMPLE 5 — EXCLUDE: TOPIC CLASSIFICATION ONLY
-
-INPUT EVIDENCE:
-
-The study classifies tweets into categories such as sports, politics, technology, entertainment, and health. The objective is tweet topic classification. No user-level interest profile is constructed.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX5",
-    "summary": "The study categorizes tweets by topic but does not construct or evaluate users' personal interest profiles.",
-    "decision": "Exclude",
-    "confidence": 0.99,
-    "matched_inclusion_criteria": [],
-    "matched_exclusion_criteria": ["EC4"],
-    "needs_human_review": false,
-    "rationale": "The presence of interpretable topic labels does not establish personal user interests. EC4 applies because the study only classifies tweets and does not connect those categories to a user-level interest profile."
-  }
-]
-
-
-EXAMPLE 6 — EXCLUDE: REVIEW
-
-INPUT EVIDENCE:
-
-The publication is described as a systematic review synthesizing previous studies on personalized learning.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX6",
-    "summary": "The publication synthesizes previous research rather than reporting a primary empirical or methodological study.",
-    "decision": "Exclude",
-    "confidence": 1.0,
-    "matched_inclusion_criteria": [],
-    "matched_exclusion_criteria": ["EC5"],
-    "needs_human_review": false,
-    "rationale": "EC5 applies because the publication is explicitly identified as a systematic review rather than a primary study."
-  }
-]
-
-
-EXAMPLE 7 — UNCERTAIN: UNSPECIFIED PREFERENCES
-
-INPUT EVIDENCE:
-
-The study states that learning materials are personalized according to users' self-reported preferences, but the abstract does not explain what these preferences represent.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX7",
-    "summary": "The study uses self-reported preferences for personalization, but the abstract does not establish whether those preferences are personal interest domains.",
-    "decision": "Uncertain",
-    "confidence": 0.58,
-    "matched_inclusion_criteria": [],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": true,
-    "rationale": "IC1 cannot be confirmed because the semantic content of the reported preferences is unspecified. Personalization suggests possible relevance to IC2, but without confirmation that the preferences represent personal interests, the study cannot be included. No exclusion criterion is clearly established. Full-text review is required."
-  }
-]
-
-
-EXAMPLE 8 — UNCERTAIN: POSSIBLE USER INTEREST PROFILING
-
-INPUT EVIDENCE:
-
-The study develops a user profiling model based on social-media behavior for personalized recommendations, but the abstract does not describe which user attributes are represented in the profile.
-
-EXPECTED OUTPUT:
-
-[
-  {
-    "id": "EX8",
-    "summary": "The study develops behavior-based user profiles for recommendation, but it is unclear whether the profiles contain interpretable personal interest areas.",
-    "decision": "Uncertain",
-    "confidence": 0.55,
-    "matched_inclusion_criteria": [],
-    "matched_exclusion_criteria": [],
-    "needs_human_review": true,
-    "rationale": "User profiling and recommendation are present, but IC1 cannot be confirmed because the profile attributes are not described as personal interest areas. EC4 cannot be confirmed either because this may be user-level profiling rather than document classification. Full-text review is required."
-  }
-]
-
-
-==================================================
-11. FINAL PRIORITY RULE
-==================================================
-
-The screening priority is:
-
-CLEARLY IRRELEVANT
-→ Exclude.
-
-CLEARLY ABOUT PERSONAL INTERESTS AND SATISFIES IC1 + IC2
-→ Include.
-
-POTENTIALLY RELEVANT BUT ABSTRACT INFORMATION IS INSUFFICIENT
-→ Uncertain.
-
-Never use:
-
-"the abstract does not mention it"
-
-as the sole reason for Exclude.
-
-When relevant information may reasonably be present in the full text, use Uncertain rather than assuming absence.</textarea>
-                    <small>Bu sistem promptu yapay zekaya verilen temel tarama direktifidir. İsteğinize göre düzenleyebilirsiniz.</small>
+                    <label class="checkbox-label"><input type="checkbox" id="verifyEvidence" checked> Kanıt doğrulaması: "karşılandı" denilen ölçütün alıntısı kayıt metninde yoksa "belirsiz" say</label>
+                    <label class="checkbox-label"><input type="checkbox" id="dedupe" checked> Tekrar eden kayıtları (DOI veya başlık+yıl) taramadan önce ayıkla</label>
                 </div>
 
                 <div class="form-group">
-                    <label for="inclusionCriteria">✅ Dahil Etme Ölçütleri (her satır = bir IC):</label>
-                    <textarea id="inclusionCriteria" rows="4" placeholder="Her satıra bir kriter yazın. Otomatik IC1, IC2... olarak kodlanır.">The study focuses on users’, students’, or learners’ personal interests, such as interests in sports, music, games, technology, hobbies, activities, topics, or similar domains.
-The study includes at least one of the following: named interest categories or taxonomies; direct collection of personal interests from users; inference of an interpretable user-interest profile; or use of personal interests for personalization or recommendation.</textarea>
-                    <small>Her satır otomatik olarak IC1, IC2... şeklinde kodlanır.</small>
+                    <div class="label-row">
+                        <label for="systemPrompt">📋 İncelemeye özgü yönerge (sistem promptu):</label>
+                        <div class="label-actions">
+                            <button type="button" id="previewProtocolBtn" class="btn-outline-small">👁️ Modele gidecek tam metin</button>
+                            <button type="button" id="resetSystemPromptBtn" class="btn-outline-small" title="Varsayılan yönergeye dön">↺ Varsayılan</button>
+                        </div>
+                    </div>
+                    <textarea id="systemPrompt" rows="14" placeholder="Kavram tanımları, ölçütlerin operasyonel yorumu, örnekler..."></textarea>
+                    <small>Ölçüt listesi, karar kuralı ve JSON çıktı biçimi bu metnin sonuna <strong>otomatik</strong> eklenir; burada yeniden tanımlamanız gerekmez.</small>
+                    <div id="consistencyWarnings" class="warning-list" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="exclusionCriteria">❌ Hariç Tutma Ölçütleri (her satır = bir EC):</label>
-                    <textarea id="exclusionCriteria" rows="6" placeholder="Her satıra bir kriter yazın. Otomatik EC1, EC2... olarak kodlanır.">The term “interest” is used in an unrelated meaning, such as conflict of interest, financial interest, or interest rate.
-The study examines only situational, academic, course, or subject interest as an outcome and does not identify personal interest areas.
-The study focuses only on personality, learning styles, demographics, prior knowledge, ability, or performance and does not use personal interests.
-The study only classifies documents, posts, tweets, or general topics and does not connect the classification to a user’s or learner’s interests.
-The publication is a review, editorial, commentary, protocol, or abstract-only publication rather than a primary study.</textarea>
-                    <small>Her satır otomatik olarak EC1, EC2... şeklinde kodlanır.</small>
+                    <label for="userResearchTopic">🎯 Kendi çalışma konunuz (opsiyonel, yakınlık skoru için):</label>
+                    <textarea id="userResearchTopic" rows="3" placeholder="Araştırmanızın konusu ve kapsamı. Skor yalnızca bilgi amaçlıdır; dahil/hariç kararını etkilemez."></textarea>
                 </div>
             </div>
         </div>
@@ -1061,37 +243,22 @@ The publication is a review, editorial, commentary, protocol, or abstract-only p
         <div class="upload-section card">
             <h2>📤 Dosya Yükle</h2>
             <div class="form-group">
-                <label for="csvFile">CSV / TSV / Excel Dosyası Seç:</label>
-                <input type="file" id="csvFile" accept=".csv,.tsv,.xlsx,.xls">
-                <small>Title ve Abstract zorunlu. ID, Authors, Year opsiyonel. Otomatik delimiter algılama (virgül, tab, noktalı virgül).</small>
+                <label for="csvFile">CSV / TSV / Excel (WoS, Scopus, PubMed dışa aktarımları):</label>
+                <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+                <small>Başlık ve Özet zorunlu. ID (UT/EID/PMID), Yazar, Yıl, DOI, Anahtar Kelime ve Belge Türü sütunları otomatik algılanır.</small>
             </div>
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
 
             <div id="costEstimatePanel" class="cost-estimate-panel" style="display: none;">
-                <h3>💰 Maliyet Tahmini</h3>
+                <h3>💰 Maliyet &amp; Süre Tahmini</h3>
                 <div class="cost-grid">
-                    <div class="cost-row">
-                        <span>Toplam makale:</span>
-                        <strong id="estTotalArticles">-</strong>
-                    </div>
-                    <div class="cost-row">
-                        <span>Tahmini input token:</span>
-                        <strong id="estInputTokens">-</strong>
-                    </div>
-                    <div class="cost-row">
-                        <span>Tahmini output token:</span>
-                        <strong id="estOutputTokens">-</strong>
-                    </div>
-                    <div class="cost-row cost-highlight">
-                        <span>Sync (Standard tier):</span>
-                        <strong id="estSyncCost">-</strong>
-                    </div>
-                    <div class="cost-row cost-highlight">
-                        <span>Async Batch API (-%50):</span>
-                        <strong id="estBatchCost">-</strong>
-                    </div>
-                    <div class="cost-row cost-note">
-                        <span id="freeTierNote"></span>
-                    </div>
+                    <div class="cost-row"><span>Taranacak kayıt:</span><strong id="estTotalArticles">-</strong></div>
+                    <div class="cost-row"><span>Tahmini input token:</span><strong id="estInputTokens">-</strong></div>
+                    <div class="cost-row"><span>Tahmini output token:</span><strong id="estOutputTokens">-</strong></div>
+                    <div class="cost-row"><span>Tahmini süre (paralel):</span><strong id="estDuration">-</strong></div>
+                    <div class="cost-row cost-highlight"><span>Paralel (Standard tier):</span><strong id="estSyncCost">-</strong></div>
+                    <div class="cost-row cost-highlight"><span>Async Batch API (-%50):</span><strong id="estBatchCost">-</strong></div>
+                    <div class="cost-row cost-note"><span id="freeTierNote"></span></div>
                 </div>
             </div>
 
@@ -1099,60 +266,71 @@ The publication is a review, editorial, commentary, protocol, or abstract-only p
         </div>
 
         <div id="progressSection" class="progress-section" style="display: none;">
-            <h2>⏳ İlerleme</h2>
-            <div class="progress-bar">
-                <div id="progressBar" class="progress-fill"></div>
+            <div class="progress-header">
+                <h2>⏳ İlerleme</h2>
+                <div class="progress-actions">
+                    <button id="pauseBtn" class="btn-tertiary" style="display: none;">⏸️ Duraklat</button>
+                    <button id="continueBtn" class="btn-secondary" style="display: none;">▶️ Devam Et</button>
+                </div>
             </div>
+            <div class="progress-bar"><div id="progressBar" class="progress-fill"></div></div>
             <p id="progressText">Hazırlanıyor...</p>
-            <div id="batchJobInfo" class="batch-job-info" style="display: none;">
-                <strong>Batch Job:</strong> <code id="batchJobName"></code>
-                <span class="batch-state" id="batchJobState">-</span>
+            <div id="batchJobInfo" class="batch-job-info" style="display: none;"></div>
+            <div class="key-status-wrap">
+                <table id="keyStatusTable" class="key-status-table" style="display: none;">
+                    <thead><tr><th>Anahtar</th><th>Durum</th><th>İstek</th><th>Başarılı</th><th>429</th><th>Hata</th><th>Bugün</th></tr></thead>
+                    <tbody id="keyStatusBody"></tbody>
+                </table>
             </div>
+            <details class="log-details">
+                <summary>📜 Olay günlüğü</summary>
+                <ol id="eventLog" class="event-log"></ol>
+            </details>
         </div>
 
         <div id="resultsSection" class="results-section" style="display: none;">
             <div class="results-header">
                 <h2>📊 Sonuçlar</h2>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button id="relevanceReportBtn" class="btn-primary" style="display: none; width: auto; background: var(--accent-teal-gradient);">🔍 En Yakın Çalışmaları Raporla</button>
-                    <button id="downloadCsvBtn" class="btn-secondary">💾 CSV İndir</button>
-                    <button id="downloadExcelBtn" class="btn-secondary">📊 Excel İndir</button>
+                <div class="results-actions">
+                    <button id="retryErrorsBtn" class="btn-tertiary" style="display: none;">🔁 Hatalı kayıtları yeniden tara</button>
+                    <button id="relevanceReportBtn" class="btn-primary btn-teal" style="display: none;">🔍 En Yakın Çalışmalar</button>
+                    <button id="downloadCsvBtn" class="btn-secondary">💾 CSV</button>
+                    <button id="downloadExcelBtn" class="btn-secondary">📊 Excel</button>
                 </div>
             </div>
 
             <div id="costPanel" class="cost-live-panel">
-                <div class="cost-live-item">
-                    <span class="cost-live-label">Mod / Tier:</span>
-                    <span class="cost-live-value" id="livMode">-</span>
-                </div>
-                <div class="cost-live-item">
-                    <span class="cost-live-label">Input Token:</span>
-                    <span class="cost-live-value" id="livInputTokens">0</span>
-                </div>
-                <div class="cost-live-item">
-                    <span class="cost-live-label">Output Token:</span>
-                    <span class="cost-live-value" id="livOutputTokens">0</span>
-                </div>
-                <div class="cost-live-item cost-live-total">
-                    <span class="cost-live-label">Toplam Maliyet:</span>
-                    <span class="cost-live-value" id="livCost">$0.0000</span>
-                </div>
-                <div class="cost-live-item">
-                    <span class="cost-live-label">Free Tier:</span>
-                    <span class="cost-live-value" id="livFreeTier">-</span>
-                </div>
+                <div class="cost-live-item"><span class="cost-live-label">Mod / Tier:</span><span class="cost-live-value" id="livMode">-</span></div>
+                <div class="cost-live-item"><span class="cost-live-label">Input Token:</span><span class="cost-live-value" id="livInputTokens">0</span></div>
+                <div class="cost-live-item"><span class="cost-live-label">Output Token:</span><span class="cost-live-value" id="livOutputTokens">0</span></div>
+                <div class="cost-live-item cost-live-total"><span class="cost-live-label">Toplam Maliyet:</span><span class="cost-live-value" id="livCost">$0.0000</span></div>
+                <div class="cost-live-item"><span class="cost-live-label">Modeller arası uyum:</span><span class="cost-live-value" id="livAgreement">-</span></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card include"><h3 lang="en">✅ Include</h3><p id="includeCount">0</p></div>
+                <div class="stat-card exclude"><h3 lang="en">❌ Exclude</h3><p id="excludeCount">0</p></div>
+                <div class="stat-card maybe"><h3 lang="en">❓ Uncertain</h3><p id="uncertainCount">0</p></div>
+                <div class="stat-card review"><h3>👁️ İnceleme</h3><p id="reviewCount">0</p></div>
+                <div class="stat-card total"><h3>♻️ Tekrar</h3><p id="duplicateCount">0</p></div>
+                <div class="stat-card total"><h3>📚 Toplam</h3><p id="totalCount">0</p></div>
             </div>
 
             <div class="filter-bar">
                 <select id="filterDecision">
-                    <option value="all">Tüm Kararlar</option>
-                    <option value="Include">Sadece Include</option>
-                    <option value="Exclude">Sadece Exclude</option>
-                    <option value="Uncertain">Sadece Uncertain</option>
-                    <option value="review">İnsan İncelemesi Gerekli</option>
+                    <option value="all">Tüm kayıtlar</option>
+                    <option value="Include">Include</option>
+                    <option value="Exclude">Exclude</option>
+                    <option value="Uncertain">Uncertain</option>
+                    <option value="Duplicate">Tekrar (Duplicate)</option>
+                    <option value="review">İnsan incelemesi gerekli</option>
+                    <option value="pending">İnsan kararı bekleyen (inceleme gerekli ve karar verilmemiş)</option>
+                    <option value="split">Modeller ayrıştı</option>
+                    <option value="human">İnsan tarafından değiştirilen</option>
+                    <option value="error">API hatası</option>
                 </select>
                 <input type="text" id="filterSearch" placeholder="🔍 Başlık, gerekçe veya özette ara...">
-                <button id="toggleAllAbstractsBtn" class="btn-tertiary" style="padding: 10px 14px; font-size: 0.9rem; font-weight: 600; width: auto; display: none;">↕️ Tüm Özetleri Aç</button>
+                <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Tüm Özetleri Aç</button>
                 <span id="filterCount" class="filter-count"></span>
             </div>
 
@@ -1167,10 +345,11 @@ The publication is a review, editorial, commentary, protocol, or abstract-only p
                             <th>Abstract (Orijinal)</th>
                             <th>Özet / Summary</th>
                             <th>Model Kararları</th>
+                            <th>AI Kararı</th>
                             <th>Nihai Karar</th>
                             <th>Güven</th>
-                            <th>IC</th>
-                            <th>EC</th>
+                            <th>Ölçüt Değerlendirmesi</th>
+                            <th>Hariç Tutma Gerekçesi</th>
                             <th>Konu İlgisi</th>
                             <th>İnceleme</th>
                             <th>Gerekçe</th>
@@ -1179,28 +358,8 @@ The publication is a review, editorial, commentary, protocol, or abstract-only p
                     <tbody id="resultsBody"></tbody>
                 </table>
             </div>
-
-            <div class="stats">
-                <div class="stat-card include">
-                    <h3>✅ Include</h3>
-                    <p id="includeCount">0</p>
-                </div>
-                <div class="stat-card exclude">
-                    <h3>❌ Exclude</h3>
-                    <p id="excludeCount">0</p>
-                </div>
-                <div class="stat-card maybe">
-                    <h3>❓ Uncertain</h3>
-                    <p id="uncertainCount">0</p>
-                </div>
-                <div class="stat-card review">
-                    <h3>👁️ İnceleme</h3>
-                    <p id="reviewCount">0</p>
-                </div>
-                <div class="stat-card total">
-                    <h3>📚 Toplam</h3>
-                    <p id="totalCount">0</p>
-                </div>
+            <div class="table-footer">
+                <button id="showMoreBtn" class="btn-tertiary btn-compact" style="display: none;">Daha fazla göster</button>
             </div>
         </div>
     </div>
@@ -1208,35 +367,39 @@ The publication is a review, editorial, commentary, protocol, or abstract-only p
     <!-- Closest Papers Report Modal -->
     <div id="reportModal" class="modal-overlay" style="display: none;">
         <div class="modal-content card">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 1.5rem; color: var(--accent-teal);">🔍 Konunuza En Yakın Çalışmalar (Top 10)</h2>
-                <button type="button" class="close-modal-btn" id="closeModalBtn" style="background: none; border: none; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+            <div class="modal-header">
+                <h2>🔍 Konunuza En Yakın Çalışmalar (Top 10)</h2>
+                <button type="button" class="close-modal-btn" data-close="reportModal">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-intro" style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.95rem;">Girdiğiniz çalışma konusuna göre yapay zeka tarafından yapılan benzerlik analizinde en yüksek skor alan makaleler:</p>
                 <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                     <table id="modalReportTable" style="min-width: 1000px;">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">Sıra</th>
-                                <th style="width: 80px;">ID</th>
-                                <th>Başlık</th>
-                                <th style="width: 80px;">Yıl</th>
-                                <th style="width: 120px;">İlgi Skoru</th>
-                                <th style="width: 140px;">Model Kararı</th>
-                                <th>İlişki Gerekçesi</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Sıra</th><th>ID</th><th>Başlık</th><th>Yıl</th><th>İlgi Skoru</th><th>Karar</th><th>İlişki Gerekçesi</th></tr></thead>
                         <tbody id="modalReportBody"></tbody>
                     </table>
                 </div>
             </div>
-            <div class="modal-footer" style="display: flex; justify-content: flex-end; border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 15px;">
-                <button type="button" class="btn-tertiary" id="closeModalBtn2" style="padding: 8px 20px;">Kapat</button>
-            </div>
+            <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="reportModal">Kapat</button></div>
         </div>
     </div>
 
-    <script src="script.js?v=11"></script>
+    <!-- Protocol Preview Modal -->
+    <div id="protocolModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>👁️ Modele gönderilecek sistem talimatı</h2>
+                <button type="button" class="close-modal-btn" data-close="protocolModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="muted-inline" id="protocolMeta"></p>
+                <pre id="protocolPreview" class="protocol-preview"></pre>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="protocolModal">Kapat</button></div>
+        </div>
+    </div>
+
+    <script src="screening-core.js?v=12"></script>
+    <script src="default-prompt.js?v=12"></script>
+    <script src="script.js?v=12"></script>
 </body>
 </html>

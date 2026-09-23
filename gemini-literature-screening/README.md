@@ -1,267 +1,169 @@
-# Gemini Literatür Tarama Aracı
+# Gemini Literatür Tarama Aracı (v12)
 
-Sistematik literatür taraması için Google Gemini API destekli, akademik çalışmalara uygun otomatik tarama platformu. Hem **web arayüzü** (`index.html`) hem **terminal/CLI** (`cli.py`) sürümleri ile gelir; her ikisi de aynı motoru ve aynı çıktı formatını kullanır.
+Sistematik literatür taramalarında **başlık/özet aşamasındaki dahil etme–hariç tutma kararlarını** destekleyen, yapay zekâ destekli bir tarama çalışma alanıdır. Araç nihai karar verici değildir; ölçüt bazlı, gerekçeli ve denetlenebilir **ön kararlar** üretir, insan incelemesi gereken kayıtları işaretler ve PRISMA raporlamasına uygun çıktı verir.
 
-20.000+ makaleli sistematik tarama projeleri için optimize edilmiştir.
-
----
-
-## Öne Çıkan Özellikler
-
-- **Çoklu model seçimi**: Gemini 3.1 Pro / 3.1 Flash Lite / 2.5 Flash / 2.5 Flash Lite
-- **Gerçek batch işleme**: Tek API isteğinde N makale (token tasarrufu, kotayı verimli kullanma)
-- **Async Batch API desteği**: %50 indirim, rate limit yok, 24 saate kadar çalışan büyük işler
-- **Maliyet hesaplama**: Analiz öncesi tahmini USD maliyet, analiz sırasında canlı token/maliyet paneli
-- **Zenginleştirilmiş JSON şeması**: `decision`, `confidence`, eşleşen `IC/EC` kodları, `needs_human_review`, `rationale`
-- **Token tasarrufu**: Title/Abstract/Authors/Year API'den dönmez, dosyadan korunur
-- **Prompt versiyonlama**: Sistem promptunun SHA-256 hash'i çıktıya gömülür → reproducibility
-- **Devam ettirme (resume)**: Sync veya async modda yarım kalan analiz state dosyasından devam eder
-- **Sağlam CSV/TSV/Excel parser**: Otomatik delimiter (tab/virgül/noktalı virgül) tespiti, RFC 4180 uyumlu
-- **Filtreleme**: Web arayüzünde karara göre + serbest metin arama
-- **Güvenlik**: API key sadece `sessionStorage`'da, çıktılar `textContent` ile XSS-safe render edilir
-- **Çıktı**: CSV (UTF-8 BOM) + Excel (Screening + Metadata sheet'leri ile)
+- **Web arayüzü** (`index.html`): kurulum gerektirmez, tarayıcıda çalışır.
+- **Komut satırı** (`cli.mjs`, Node ≥ 18): uzun süren (ör. 20.000+ kayıtlık) taramalar için.
+- Her ikisi de aynı motoru (`screening-core.js`) kullanır; aynı girdi ve protokolle aynı karar mantığını uygular.
 
 ---
 
-## Kurulum
+## v12'de neler değişti?
 
-### Web sürümü
-Hiçbir kurulum gerekmez. `index.html` dosyasını modern bir tarayıcıda açın.
+### 1. Çoklu API anahtarıyla paralel tarama
+- Her sağlayıcı (Gemini, OpenAI, DeepSeek, özel uç nokta) için **birden fazla anahtar** girilebilir (her satıra bir anahtar).
+- Anahtar havuzu her anahtar ve model için **RPM (60 sn kayan pencere)** ve **RPD (Pasifik saatine göre gün)** sayaçlarını ayrı ayrı tutar. İstekleri o an kapasitesi olan anahtara yönlendirir.
+- Toplam paralellik = *anahtar sayısı × anahtar başına eşzamanlı istek*.
+- **429 (hız sınırı)** yanıtında anahtar, API'nin bildirdiği `retryDelay` süresi kadar beklemeye alınır; iş başka bir anahtara devredilir.
+- **Günlük kota** dolduğunda o anahtar o gün için devre dışı kalır. Tüm anahtarların kotası dolarsa tarama hata üretmeden **duraklatılır** ve ertesi gün devam ettirilebilir.
+- **Geçersiz anahtar** (400/401/403) otomatik olarak devre dışı bırakılır.
+- Canlı **anahtar durum tablosu**: istek, başarılı, 429, hata ve günlük kullanım sayıları.
+- Async **Batch API** modunda işler anahtarlara bölünür. Her anahtar kendi batch job'unu gönderir ve 20 MB satır içi (inline) sınırına göre otomatik parçalar.
 
-### CLI sürümü
+> ⚠️ **Kota notu:** Gemini kotaları anahtar başına değil, **Google Cloud projesi başına** uygulanır. Aynı projeden alınan birden fazla anahtar aynı kotayı paylaşır. Paralel hız kazancı için anahtarlar farklı projelerden olmalıdır. Kota sınırlarını aşmak amacıyla çok sayıda hesap açmak sağlayıcının kullanım koşullarına aykırı olabilir. Önerilen kullanım: farklı projelerdeki ücretli anahtarlar ya da ekip üyelerinin kendi anahtarları.
+
+### 2. Dahil etme / hariç tutma mantığının yeniden kurgulanması
+Önceki sürümdeki metodolojik sorunlar ve çözümleri:
+
+| Sorun (v11) | Çözüm (v12) |
+|---|---|
+| Sistem promptunda IC1–IC2 / EC1–EC5 sabit yazılıydı; ölçüt kutuları değişince prompt ile çelişiyordu. | Ölçüt listesi, karar kuralı ve JSON biçimi, ölçüt kutularından **otomatik üretilen protokol** olarak eklenir. Yönerge metnindeki kod atıfları ile ölçüt listesi karşılaştırılır ve tutarsızlıkta **uyarı** verilir. |
+| Model yalnızca "eşleşen" kodları döndürüyordu. "Karşılanmadı" ile "bilgi yok" ayrımı yapılamıyordu. | Her ölçüt için **üç değerli değerlendirme**: `yes` / `no` / `unclear`. Özette bilginin bulunmaması "hayır" sayılmaz. |
+| Karar yalnızca "Include" için denetleniyordu. | **Deterministik karar kuralı** tüm kararlara uygulanır (aşağıda). |
+| Model "Include" deyip EC işaretlediğinde kayıt otomatik olarak "Exclude"a çevriliyordu (yanlış negatif riski). | Model kararı kendi ölçüt değerlendirmesiyle çelişirse kayıt **Uncertain + insan incelemesi** olarak işaretlenir. Otomatik dahil etme ya da dışlama yapılmaz. |
+| Modelin verdiği gerekçe doğrulanmıyordu. | **Kanıt doğrulaması:** "karşılandı" denilen her ölçüt için özetten birebir alıntı istenir. Alıntı kayıt metninde bulunamazsa ölçüt "belirsiz" sayılır (sıfır çıkarım ilkesi). |
+| IC'ler yalnızca VE ile birleşebiliyordu. | IC birleşimi seçilebilir: **tümü (VE)** / **en az biri (VEYA)**. EC'ler her zaman VEYA ile birleşir. |
+| Çoklu modelde birincil modelin ham (doğrulanmamış) çıktısı gösteriliyordu. Hata veren model "Uncertain oyu" sayılıyordu. | Uzlaşı yalnızca doğrulanmış kararlar üzerinden yapılır: **oybirliği / çoğunluk / kapsayıcı**. Hata veren model oylamaya katılmaz, kayıt incelemeye işaretlenir. Modeller arası **Cohen κ** raporlanır. |
+| Tekrar eden kayıtlar ayıklanmıyordu. | **DOI veya başlık+yıl** ile tekrar ayıklama yapılır (PRISMA'da "taramadan önce çıkarılan kayıtlar"). |
+| İnsan kararı, AI kararının üzerine yazılıyordu. | **AI Kararı** ve **İnsan Kararı** ayrı tutulur. "AI kararı insan tarafından değiştirilen" sayısı raporlanır. |
+| Yazar adları modele gönderiliyordu. | **Kör tarama:** modele yalnızca başlık, yıl, belge türü, anahtar kelimeler ve özet gönderilir (daha az yanlılık ve token). |
+
+**Karar kuralı** (her model çıktısına istemci tarafında uygulanır):
+
+```
+1. Herhangi bir EC = yes                          → Exclude
+2. IC koşulu başarısız (VE: herhangi IC = no;
+                         VEYA: tüm IC = no)        → Exclude
+3. IC koşulu sağlandı ve tüm EC = no               → Include
+4. Diğer tüm durumlar (belirsiz IC ya da dışlanamayan EC) → Uncertain
++  Model kararı ≠ kural kararı                     → Uncertain + insan incelemesi
++  güven < eşik, Uncertain, model uyuşmazlığı, kanıt bulunamaması → insan incelemesi
+```
+
+### 3. Hata düzeltmeleri
+- **ID eşleme hatası:** WoS dosyalarında ID sütunu yanlışlıkla `Authors` sütununa eşleniyordu (bulanık eşleştirmede "ut" → "A**ut**hors"). Artık `UT (Unique WOS ID)`, `EID`, `PMID` gibi sütunlar doğru eşlenir. Modele kısa iç kimlikler (`R00001`) gönderilir; kaynak ID dışa aktarımda korunur.
+- **Async Batch API:** Durum kontrolü `JOB_STATE_*` ve `BATCH_STATE_*` değerlerinin hepsini tanır (önceki sürüm bazı durumlarda sonsuza kadar yokluyordu). Sonuç dosyası indirme adresi düzeltildi. Satır içi yanıtlar anahtar içermese de sıra üzerinden eşlenir. Sayfa yeniden yüklendikten sonra devam ederken anahtar kaybolma sorunu giderildi.
+- **Ölçeklenebilirlik:** Durum `sessionStorage` (~5 MB) yerine **IndexedDB**'de tutulur; 20.000+ kayıt ve sekme kapansa bile devam etme desteklenir. Tablo sayfalı olarak çizilir (önceden her satırda tüm tablo yeniden filtreleniyordu).
+- Kesilen (MAX_TOKENS) ya da eksik dönen yanıtlarda **eksik kayıtlar otomatik yeniden sorulur**, gerekirse istek ikiye bölünür.
+- `responseSchema` desteklenmezse şemasız JSON moduna otomatik geçilir. Gemini 3 modellerinde sıcaklık model varsayılanında bırakılır.
+- Düşünme (thinking) tokenları maliyete dahil edilir. API anahtarı URL yerine `x-goog-api-key` başlığıyla gönderilir.
+
+---
+
+## Web arayüzü kullanımı
+
+1. `index.html` dosyasını tarayıcıda açın (GitHub Pages üzerinden de çalışır).
+2. Modelleri seçin (en fazla 3). Her sağlayıcı için anahtarları **her satıra bir tane** olacak şekilde girin, ardından **🧪 Anahtarları Test Et** düğmesine basın.
+3. Paralellik ayarları: *istek başına kayıt* (5–10 önerilir), *anahtar başına eşzamanlı istek*, RPM/RPD limitleri (ücretli katmanda kutuyu kaldırabilir ya da değer girebilirsiniz).
+4. **Tarama Protokolü**: IC ve EC ölçütlerini her satıra bir tane yazın. Ardından karar mantığını ayarlayın: IC birleşimi, inceleme eşiği, uzlaşı stratejisi, özetsiz kayıtlar, kanıt doğrulaması, tekrar ayıklama.
+5. *İncelemeye özgü yönerge* alanına kavram tanımlarını, operasyonel yorumları ve örnekleri yazın. **👁️ Modele gidecek tam metin** düğmesi, otomatik eklenen protokolle birlikte modele giden talimatın tamamını gösterir.
+6. Dosyayı yükleyin (WoS `.xls`/`.txt`, Scopus/PubMed `.csv`, `.xlsx`). Algılanan sütunları, tekrarları ve maliyet/süre tahminini kontrol edin.
+7. **🚀 Analizi Başlat**. Tarama sırasında **⏸️ Duraklat** ile durdurup **▶️ Devam Et** ile sürdürebilirsiniz. Tarayıcı kapansa da oturum kayıtlıdır.
+8. Sonuçlarda filtreler: *insan kararı bekleyen*, *modeller ayrıştı*, *API hatası* vb. **Nihai Karar** sütunundan insan kararını girin. Ölçüt çiplerinin üzerine gelince model alıntısı görünür.
+9. **🔁 Hatalı kayıtları yeniden tara** ile yalnızca API hatası alan kayıtlar yeniden taranır.
+10. CSV/Excel olarak dışa aktarın. Excel dosyası `Screening`, `Metadata` (protokol, PRISMA sayıları, κ, prompt sürümü) ve `Log` sayfalarını içerir.
+
+---
+
+## Komut satırı (CLI)
+
 ```bash
-# Python 3.9+ gerekli
-pip install -r requirements.txt
+cd gemini-literature-screening
+npm install            # yalnızca .xlsx/.xls okuma-yazma için gerekli
+node cli.mjs --help
 ```
 
-`requirements.txt` içeriği:
-- `requests>=2.31.0` — HTTP istekleri
-- `pandas>=2.0.0` — CSV/Excel okuma/yazma
-- `openpyxl>=3.1.0` — Excel motoru
+Örnek — üç Gemini anahtarıyla paralel tarama:
 
-### Gemini API Key
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) → "Create API Key"
-2. Web: arayüzdeki **"Gemini API Key"** alanına yapıştır (sessionStorage)
-3. CLI: `--api-key` parametresi **veya** ortam değişkeni:
-   ```bash
-   # Linux / macOS
-   export GEMINI_API_KEY="AIza..."
-
-   # Windows PowerShell
-   $env:GEMINI_API_KEY = "AIza..."
-   ```
-
----
-
-## Web Arayüzü Kullanımı
-
-1. `index.html` dosyasını tarayıcıda aç
-2. API key'i gir
-3. Modeli ve modu seç (sync = anlık | async = batch API, %50 indirimli)
-4. IC ve EC kriterlerini her satıra bir tane gelecek şekilde yaz
-5. CSV/TSV/XLSX dosyanı yükle
-6. **Maliyet tahmini** panelinden Standard ve Batch tier maliyetlerini gör
-7. **Analizi Başlat** → canlı ilerleme + token/maliyet paneli
-8. CSV / Excel olarak indir (her ikisi de prompt versiyonu ve metadata içerir)
-
----
-
-## CLI Kullanımı
-
-### En basit kullanım (sync)
 ```bash
-python cli.py \
-    --input articles.xlsx \
-    --output results.xlsx \
-    --inclusion ic.txt \
-    --exclusion ec.txt \
-    --model gemini-3.1-flash-lite-preview \
-    --mode sync
+# keys.txt: her satıra bir anahtar ("#" ile başlayan satırlar yok sayılır)
+node cli.mjs -i savedrecs.xls -o sonuc.xlsx \
+  --inclusion ic.txt --exclusion ec.txt --guidance yonerge.txt \
+  --models gemini:gemini-2.5-flash \
+  --gemini-keys keys.txt --batch-size 8 --concurrency 2 --rpm 10 --rpd 250
 ```
 
-### Async Batch API (önerilen, büyük veri setleri için)
+İki model ve uzlaşı:
+
 ```bash
-python cli.py \
-    --input articles.xlsx \
-    --output results.xlsx \
-    --inclusion ic.txt \
-    --exclusion ec.txt \
-    --mode async
-# Job submit edilir, polling başlar. Ctrl+C ile durdurabilirsin (state kaydedilir).
+export GEMINI_API_KEYS="AIza...,AIza..."
+export OPENAI_API_KEYS="sk-..."
+node cli.mjs -i kayitlar.csv -o sonuc.csv \
+  --models gemini:gemini-2.5-flash,openai:gpt-4o-mini --consensus unanimous
 ```
 
-### Yarım kalan analizi devam ettir
-```bash
-python cli.py --resume \
-    --input articles.xlsx \
-    --output results.xlsx \
-    --inclusion ic.txt \
-    --exclusion ec.txt
-```
-
-### Sadece maliyet tahmini (analiz başlatmadan)
-```bash
-python cli.py \
-    --input articles.xlsx \
-    --inclusion ic.txt \
-    --exclusion ec.txt \
-    --estimate-only
-```
-
-### Tüm CLI parametreleri
-| Parametre | Varsayılan | Açıklama |
-|-----------|-----------|----------|
-| `-i, --input` | — | CSV/TSV/XLSX girdi dosyası |
-| `-o, --output` | — | Sonuç dosyası (CSV veya XLSX) |
-| `--inclusion` | — | IC kriterleri (her satır = 1 kriter, otomatik IC1, IC2... numaralanır) |
-| `--exclusion` | — | EC kriterleri (otomatik EC1, EC2... numaralanır) |
-| `--model` | `gemini-3.1-flash-lite-preview` | Bkz. [Modeller](#modeller) |
-| `--mode` | `sync` | `sync` veya `async` |
-| `--batch-size` | `5` | Sync modda tek istekte makale sayısı |
-| `--delay` | `2.0` | Sync modda batch'ler arası bekleme (saniye) |
-| `--api-key` | `$GEMINI_API_KEY` | API key |
-| `--state-file` | `.screening_state.json` | Resume için state dosyası |
-| `--resume` | — | State dosyasından devam et |
-| `--estimate-only` | — | Sadece maliyet tahmini yap |
-| `--poll-interval` | `60` | Async polling aralığı (saniye) |
-
-### Kriter dosyası örneği
-`ic.txt`:
-```
-Çalışma randomize kontrollü deneme (RCT) olmalı
-İnsan katılımcılarla yapılmış olmalı
-2015 sonrası yayınlanmış olmalı
-```
-→ Otomatik olarak `IC1`, `IC2`, `IC3` olarak kodlanır.
+- `Ctrl+C` ile durdurun; durum `<çıktı>.state.json` dosyasına yazılır. Devam etmek için aynı komutu `--resume` ile çalıştırın. Hatalı kayıtları yeniden taramak için `--resume --retry-errors` kullanın.
+- Devam ederken **prompt sürümü ve girdi dosyası doğrulanır**; farklıysa çalışma reddedilir (tekrarlanabilirlik).
+- `--estimate-only`: istek ve token tahmini verir.
+- `--base-url openai=https://openrouter.ai/api/v1` gibi özel uç noktalar desteklenir.
 
 ---
 
-## Girdi Dosyası Formatı
+## Girdi biçimi
 
-CSV / TSV / XLSX desteklenir. Delimiter (tab, virgül, noktalı virgül) **otomatik algılanır**.
+| Rol | Tanınan sütun adları (örnekler) | Zorunlu |
+|---|---|---|
+| Başlık | `Article Title`, `Title`, `TI`, `Başlık` | ✔ (başlık veya özet) |
+| Özet | `Abstract`, `AB`, `Özet` | ✔ |
+| ID | `UT (Unique WOS ID)`, `UT`, `EID`, `PMID`, `ID` | – (yoksa sıra no) |
+| Yazar | `Authors`, `AU`, `Yazar` | – (modele gönderilmez) |
+| Yıl | `Publication Year`, `PY`, `Year` | – |
+| DOI | `DOI`, `DI` | – (tekrar ayıklama) |
+| Anahtar kelime | `Author Keywords`, `DE` | – |
+| Belge türü | `Document Type`, `DT` | – (EC "derleme" vb. için yararlı) |
 
-**Zorunlu sütunlar:** `Title`, `Abstract`
-**Opsiyonel sütunlar:** `ID`, `Authors`, `Year` (case-insensitive)
+CSV/TSV ayırıcıları (virgül, sekme, noktalı virgül) otomatik algılanır. RFC 4180 tırnaklama ve çok satırlı hücreler desteklenir.
 
-CSV örneği:
-```csv
-ID,Title,Abstract,Authors,Year
-1,"Article title here","Abstract text...","Smith J, Doe A",2023
-2,"Another article","Another abstract...","Lee K",2024
+---
+
+## Çıktı sütunları
+
+`Sıra, ID, İç ID, DOI, Yazar(lar), Başlık, Yıl, Abstract, Özet`, her model için `Karar: <model>`, `AI Kararı, İnsan Kararı, Nihai Karar, Güven, Model Uyumu`, **her ölçüt için bir sütun** (`IC1 … ECn` = yes/no/unclear), `Karşılanan IC, Karşılanan EC, Hariç Tutma Gerekçesi, Kanıt Alıntıları, Konu İlgisi, İlişki Gerekçesi, İnceleme Gerekli, Gerekçe, Hata, Prompt Versiyon`.
+
+**Metadata** sayfası: araç sürümü, modeller, mod, prompt özeti (SHA-256[0:8]), karar mantığı ayarları, PRISMA sayıları (tanımlanan, tekrar, taranan, Include/Exclude/Uncertain, insan incelemesi, insan tarafından değiştirilen), modeller arası Cohen κ, token ve maliyet, ölçütlerin tam metni ve modele gönderilen sistem talimatının tamamı.
+
+---
+
+## Akademik kullanım önerileri
+
+- Aracı **ikinci/yardımcı değerlendirici** olarak konumlandırın. Include ve Uncertain kayıtlar tam metin aşamasına geçer; *insan incelemesi gerekli* kayıtlar mutlaka insan tarafından değerlendirilmelidir.
+- Yöntem bölümünde şunları raporlayın: model adı ve sürümü, tarih, prompt sürüm özeti, karar kuralı, eşik değer ve uzlaşı stratejisi (hepsi Metadata sayfasındadır).
+- Protokolü pilot bir alt örneklem (ör. 100 kayıt) üzerinde insan kararlarıyla karşılaştırın. Duyarlılığı (sensitivity) ve κ değerini raporlayın. Gerekirse yönergeyi iyileştirip **yeni bir prompt sürümü** ile tüm taramayı yeniden çalıştırın.
+- Başlık/özet aşamasında yanlış negatifleri en aza indirmek için varsayılan ayarlar temkinlidir: oybirliği uzlaşısı, 0.85 inceleme eşiği ve açık kanıt doğrulaması.
+
+---
+
+## Proje yapısı
+
+```
+index.html          Web arayüzü
+style.css           Stil (gece/gündüz teması)
+script.js           Arayüz mantığı (IndexedDB, anahtar tablosu, dışa aktarım)
+screening-core.js   Ortak motor: protokol, karar kuralı, doğrulama, uzlaşı,
+                    anahtar havuzu, paralel zamanlayıcı, Batch API yardımcıları
+default-prompt.js   Varsayılan yönerge ve ölçütler ("kişisel ilgi alanları" incelemesi)
+cli.mjs             Node CLI
+tests/              node:test birim ve uçtan uca testler (sahte API ile)
+savedrecs.xls       Örnek WoS dışa aktarımı
 ```
 
----
-
-## Çıktı Formatı
-
-### Veri sütunları
-| Sütun | Kaynak | Açıklama |
-|-------|--------|----------|
-| ID | Dosyadan | Makale ID'si |
-| Yazar(lar) | Dosyadan | — |
-| Başlık | Dosyadan | — |
-| Yıl | Dosyadan | — |
-| Abstract (Orijinal) | Dosyadan | Token tasarrufu için API'den gelmez |
-| Türkçe Özet | API'den | `summary_tr` |
-| Karar | API'den | `Include` / `Exclude` / `Uncertain` |
-| Güven | API'den | 0.00 – 1.00 |
-| IC | API'den | Eşleşen dahil etme kodları (IC1; IC3) |
-| EC | API'den | Eşleşen hariç tutma kodları (EC2) |
-| İnceleme | API'den | İnsan incelemesi gerekli mi (Yes/No) |
-| Gerekçe | API'den | `rationale` |
-| Prompt Versiyon | Hesaplanır | Sistem promptunun SHA-256[0:8] hash'i |
-
-### Reproducibility — Metadata
-Her çıktı dosyasında prompt versiyonu ve tüm parametreler gömülüdür:
-- **Excel**: ayrı `Metadata` sheet'i (model, mod, tier, prompt hash, IC/EC kriterleri, tam sistem promptu, token kullanımı, maliyet)
-- **CSV**: dosyanın başına `#` ile başlayan yorum satırları olarak
-
-Aynı prompt + aynı kriterler = aynı hash. Hash farklıysa karşılaştırılan iki tarama farklı promptla çalıştırılmıştır.
-
----
-
-## Modeller
-
-| Model | Standard ($/1M token) | Batch ($/1M, %50 indirim) | Free Tier RPD | TPM |
-|-------|----------------------|---------------------------|---------------|-----|
-| Gemini 3.5 Flash | $0.075 in / $0.30 out | $0.0375 / $0.15 | 1.500 | 1.000.000 |
-| Gemini 3.5 Flash Lite | $0.05 in / $0.20 out | $0.025 / $0.10 | 1.500 | 1.000.000 |
-| Gemini 3.1 Pro (Preview) | $2.00 in / $12.00 out | $1.00 / $6.00 | — (paid only) | — |
-| Gemini 3.1 Flash Lite | $0.25 / $1.50 | $0.125 / $0.75 | 500 | 250.000 |
-| Gemini 2.5 Flash | $0.30 / $2.50 | $0.15 / $1.25 | 20 (free) | 250.000 |
-| Gemini 2.5 Flash Lite | $0.10 / $0.40 | $0.05 / $0.20 | 20 (free) | 250.000 |
-
-> Fiyatlar [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing) sayfasındaki resmi değerlerdir. Free Tier kotanızdaysanız maliyet $0'dır.
-
-### Mod karşılaştırması
-
-| Özellik | Sync | Async (Batch API) |
-|---------|------|-------------------|
-| Hız | Anlık (saniyeler) | 1–24 saat |
-| Fiyat | Standard | %50 indirim |
-| Rate limit | RPM/RPD'ye tabi | Yok |
-| 20K makale için | Önerilmez | Önerilir |
-| Devam ettirme | Batch index'ten | Job ID'den polling |
-
----
-
-## Akademik Kullanım Notları
-
-Bu araç tamamen otomatik karar verici değil, **AI-assisted title/abstract screening workspace** olarak konumlandırılmıştır:
-
-- Her sonuçta `confidence` ve `needs_human_review` flag'i bulunur
-- `Uncertain` kararları + düşük `confidence` skorları manuel inceleme için işaretlenir
-- IC/EC kodları gerekçeyle birlikte kayıt edilir → PRISMA raporlamasında kullanılabilir
-- Prompt hash ile reproducibility sağlanır → makale yöntem bölümünde belirtilebilir
-- Önerilen iş akışı: Model ön karar verir → Include + Uncertain kayıtları insan doğrular
-
----
+Testler: `npm test` (Node ≥ 18).
 
 ## Güvenlik
 
-- **API key**: Web'de `sessionStorage` (tarayıcı kapanınca silinir), CLI'da env veya parametre
-- **Veri**: Doğrudan tarayıcıdan/terminalden Google'a gider, üçüncü partiye gönderilmez
-- **XSS**: Tüm dinamik içerik `textContent` ile render edilir
-
----
-
-## Sorun Giderme
-
-### "Rate limit (429)" hatası
-- Sync modda `--batch-size`'ı küçült (5 → 3) veya `--delay`'i artır (2 → 5)
-- En iyi çözüm: `--mode async` kullan (rate limit yok)
-
-### JSON parse hatası
-- Modelin `responseMimeType: application/json` ile çağrılması zorunlu kılınmıştır; nadiren olur
-- Olursa o batch atlanır, sonuçlar boş bırakılır → tekrar `--resume` ile çalıştır
-
-### Async job çok uzun sürüyor
-- Normal — Google SLA 24 saate kadar olabilir
-- `Ctrl+C` ile polling durdur, `--resume` ile geri dön (job arka planda çalışmaya devam eder)
-
-### Sonuçlar beklediğim gibi değil
-- IC/EC kriterlerini daha spesifik ve örneklerle yaz
-- Sistem promptuna özel domain bilgisi ekle (`index.html`'de `systemPrompt` textarea'sı)
-
----
-
-## Teknik Detaylar
-
-### Web stack
-- HTML5 + CSS3 (vanilla, framework yok)
-- ES6+ JavaScript
-- SheetJS (Excel okuma)
-
-### CLI stack
-- Python 3.9+ • `requests` • `pandas` • `openpyxl`
-
-### API
-- Endpoint: `generativelanguage.googleapis.com/v1beta`
-- Sync: `:generateContent`
-- Async: `:batchGenerateContent` (inline requests)
-- Yapılandırma: `temperature=0.2`, `responseMimeType=application/json`
-
----
+- Anahtarlar yalnızca tarayıcı sekmesinin `sessionStorage` alanında tutulur. Kayıtlı oturuma ve dışa aktarılan dosyalara yazılmaz; günlük kullanım sayaçları anahtarın kendisi yerine parmak izine (hash) göre tutulur.
+- İstekler doğrudan tarayıcıdan veya terminalden sağlayıcıya gider; üçüncü taraf sunucu kullanılmaz.
+- Model çıktıları `textContent` ile görüntülenir (XSS'e karşı güvenli).
 
 ## Lisans
 
