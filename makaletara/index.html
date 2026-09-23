@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literatür Tarama Çalışma Alanı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+    <div id="toastHost" class="toast-host" aria-live="polite"></div>
+    <div class="container">
+        <div class="topbar">
+            <div id="authArea" class="auth-area"></div>
+            <button id="themeToggleBtn" class="theme-toggle-btn" title="Temayı Değiştir">🌙 Gece Modu</button>
+        </div>
+        <header>
+            <h1>📚 Literatür Tarama Çalışma Alanı</h1>
+            <p>Yapay zekâ destekli başlık/özet taraması · ekip halinde Include / Maybe / Exclude kararı · kör mod</p>
+        </header>
+
+        <nav class="tabs" role="tablist">
+            <button type="button" class="tab active" data-tab="analysis">⚙️ Analiz</button>
+            <button type="button" class="tab" data-tab="screen">📊 Tarama <span id="tabBadgeScreen" class="tab-badge"></span></button>
+            <button type="button" class="tab" data-tab="dups">♻️ Tekrarlar <span id="tabBadgeDups" class="tab-badge tab-badge-warn"></span></button>
+            <button type="button" class="tab" data-tab="projects">☁️ Projeler</button>
+        </nav>
+
+        <div id="progressSection" class="progress-section" style="display: none;">
+            <div class="progress-header">
+                <h2>⏳ İlerleme</h2>
+                <div class="progress-actions">
+                    <button id="pauseBtn" class="btn-tertiary" style="display: none;">⏸️ Duraklat</button>
+                    <button id="continueBtn" class="btn-secondary" style="display: none;">▶️ Devam Et</button>
+                </div>
+            </div>
+            <div class="progress-bar"><div id="progressBar" class="progress-fill"></div></div>
+            <p id="progressText">Hazırlanıyor...</p>
+            <div id="batchJobInfo" class="batch-job-info" style="display: none;"></div>
+            <div class="key-status-wrap">
+                <table id="keyStatusTable" class="key-status-table" style="display: none;">
+                    <thead><tr><th>Anahtar</th><th>Durum</th><th>İstek</th><th>Başarılı</th><th>429</th><th>Hata</th><th>Bugün</th></tr></thead>
+                    <tbody id="keyStatusBody"></tbody>
+                </table>
+            </div>
+            <details class="log-details">
+                <summary>📜 Olay günlüğü</summary>
+                <ol id="eventLog" class="event-log"></ol>
+            </details>
+        </div>
+
+
+        <!-- ============ TAB: ANALYSIS ============ -->
+        <section id="tab-analysis" class="tab-panel">
+            <div id="resumeBanner" class="resume-banner" style="display: none;">
+                <div class="resume-content">
+                    <strong id="resumeTitle">⚠️ Kayıtlı tarama oturumu bulundu</strong>
+                    <p id="resumeText"></p>
+                    <div class="resume-actions">
+                        <button id="resumeBtn" class="btn-secondary">▶️ Yükle / Devam Et</button>
+                        <button id="discardBtn" class="btn-tertiary">🗑️ Sil</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <div class="card animate-fade-in">
+                    <h2>⚙️ Yapılandırma &amp; Modeller</h2>
+
+                    <!-- Model Slots -->
+                    <div class="model-selection-group">
+                        <h3>🤖 Model Seçimi (en fazla 3 model)</h3>
+                        <div id="modelSlotsContainer"></div>
+                        <button type="button" id="addModelSlotBtn" class="btn-outline-small" style="margin-bottom: 15px;">+ Başka Model Ekle</button>
+                    </div>
+
+                    <!-- Custom Model Config -->
+                    <div id="customModelConfig" class="custom-model-config-panel" style="display: none;">
+                        <h3>⚙️ Özel Model Yapılandırması</h3>
+                        <div class="custom-model-grid">
+                            <div class="form-group">
+                                <label for="customModelId">Model Kimliği (Model ID):</label>
+                                <input type="text" id="customModelId" placeholder="Örn: meta-llama/llama-3.3-70b-instruct">
+                            </div>
+                            <div class="form-group">
+                                <label for="customModelProvider">API Biçimi:</label>
+                                <select id="customModelProvider">
+                                    <option value="openai">OpenAI uyumlu (OpenRouter, Ollama, vLLM…)</option>
+                                    <option value="gemini">Google Gemini uyumlu</option>
+                                    <option value="deepseek">DeepSeek uyumlu</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="customModelBaseUrl">Endpoint Base URL (opsiyonel):</label>
+                                <input type="text" id="customModelBaseUrl" placeholder="Örn: https://openrouter.ai/api/v1">
+                            </div>
+                            <div class="custom-pricing-row">
+                                <div class="form-group">
+                                    <label for="customModelInputPrice">1M giriş ($):</label>
+                                    <input type="number" id="customModelInputPrice" value="0.15" min="0" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customModelOutputPrice">1M çıkış ($):</label>
+                                    <input type="number" id="customModelOutputPrice" value="0.60" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Keys -->
+                    <div class="api-keys-manager">
+                        <h3>🔑 API Anahtarları <small class="muted-inline">(her satıra bir anahtar · paralel kullanılır)</small></h3>
+                        <div class="form-group" id="geminiKeyGroup">
+                            <label for="geminiKeys">Gemini API anahtarları:</label>
+                            <textarea id="geminiKeys" class="key-textarea" rows="3" spellcheck="false" autocomplete="off" placeholder="AIza...  (hesap/proje 1)&#10;AIza...  (hesap/proje 2)"></textarea>
+                        </div>
+                        <div class="form-group" id="openaiKeyGroup" style="display: none;">
+                            <label for="openaiKeys">OpenAI API anahtarları:</label>
+                            <textarea id="openaiKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="sk-..."></textarea>
+                        </div>
+                        <div class="form-group" id="deepseekKeyGroup" style="display: none;">
+                            <label for="deepseekKeys">DeepSeek API anahtarları:</label>
+                            <textarea id="deepseekKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="sk-..."></textarea>
+                        </div>
+                        <div class="form-group" id="customKeyGroup" style="display: none;">
+                            <label for="customKeys">Özel model API anahtarları:</label>
+                            <textarea id="customKeys" class="key-textarea" rows="2" spellcheck="false" autocomplete="off" placeholder="Boş bırakılırsa seçilen API biçiminin anahtarları kullanılır"></textarea>
+                        </div>
+                        <div class="key-actions">
+                            <button type="button" id="testKeysBtn" class="btn-outline-small">🧪 Anahtarları Test Et</button>
+                            <span id="keySummary" class="muted-inline"></span>
+                        </div>
+                        <div class="note-box">
+                            🔒 Anahtarlar yalnızca bu sekmenin oturumunda (sessionStorage) tutulur; dışa aktarılan dosyalara ve kayıtlı oturuma yazılmaz.<br>
+                            ⚠️ Gemini kotaları <strong>anahtar başına değil, Google Cloud projesi başına</strong> uygulanır. Aynı projeden alınan anahtarlar kotayı paylaşır; paralel hız kazancı için anahtarlar farklı projelerden olmalıdır. Kota sınırlarını aşmak amacıyla çok sayıda hesap açmak sağlayıcının kullanım koşullarına aykırı olabilir.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Çalışma Modu:</label>
+                        <div class="mode-toggle">
+                            <label class="mode-option">
+                                <input type="radio" name="mode" value="sync" checked>
+                                <div class="mode-card">
+                                    <strong>⚡ Paralel (gerçek zamanlı)</strong>
+                                    <small>Tüm anahtarlar eşzamanlı çalışır. RPM/RPD limitleri anahtar bazında izlenir.</small>
+                                </div>
+                            </label>
+                            <label class="mode-option">
+                                <input type="radio" name="mode" value="async">
+                                <div class="mode-card">
+                                    <strong>🌙 Async Batch API <span class="badge-discount">-%50</span></strong>
+                                    <small>Yalnızca Gemini. İşler anahtarlara bölünür; sonuç 24 saate kadar sürebilir.</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label for="batchSize">İstek başına makale:</label>
+                            <input type="number" id="batchSize" value="5" min="1" max="25">
+                            <small>5–10 önerilir. Eksik dönen kayıtlar otomatik yeniden sorulur.</small>
+                        </div>
+                        <div class="form-group" id="concurrencyGroup">
+                            <label for="concurrencyPerKey">Anahtar başına eşzamanlı istek:</label>
+                            <input type="number" id="concurrencyPerKey" value="1" min="1" max="10">
+                            <small>Toplam paralellik = anahtar sayısı × bu değer.</small>
+                        </div>
+                        <div class="form-group" id="delaySettingsGroup">
+                            <label for="minIntervalSec">Aynı anahtarda istekler arası min. bekleme (sn):</label>
+                            <input type="number" id="minIntervalSec" value="0" min="0" max="120" step="0.5">
+                            <small>0 = yalnızca RPM limitine göre planla.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label"><input type="checkbox" id="enforceLimits" checked> Model RPM/RPD limitlerini anahtar başına uygula</label>
+                            <div class="inline-inputs">
+                                <input type="number" id="rpmOverride" min="0" placeholder="RPM (boş = model)">
+                                <input type="number" id="rpdOverride" min="0" placeholder="RPD (boş = model)">
+                            </div>
+                            <small>Ücretli katmanda limitler yüksekse kutuyu kaldırın; 429 yanıtları yine otomatik yönetilir.</small>
+                        </div>
+                    </div>
+
+                    <hr class="divider">
+
+                    <h3 class="section-h3" id="modelLimitsTitle">⚡ Model Limitleri &amp; Kapasite</h3>
+                    <div class="rate-stats">
+                        <div class="rate-stat-item"><span class="rate-label">RPM / anahtar:</span><span class="rate-value" id="rpmLimit">-</span></div>
+                        <div class="rate-stat-item"><span class="rate-label">RPD / anahtar:</span><span class="rate-value" id="rpdLimit">-</span></div>
+                        <div class="rate-stat-item"><span class="rate-label">TPM:</span><span class="rate-value" id="tpmLimit">-</span></div>
+                        <div class="rate-stat-item"><span class="rate-label">Toplam günlük kapasite:</span><span class="rate-value" id="dailyCapacity">-</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📝 Tarama Protokolü</h2>
+
+                    <div class="form-group">
+                        <label for="inclusionCriteria">✅ Dahil etme ölçütleri (her satır = bir IC):</label>
+                        <textarea id="inclusionCriteria" rows="4" placeholder="Her satıra bir ölçüt yazın. Otomatik IC1, IC2... olarak kodlanır."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exclusionCriteria">❌ Hariç tutma ölçütleri (her satır = bir EC):</label>
+                        <textarea id="exclusionCriteria" rows="6" placeholder="Her satıra bir ölçüt yazın. Otomatik EC1, EC2... olarak kodlanır."></textarea>
+                    </div>
+
+                    <div class="logic-box">
+                        <h3>⚖️ Karar Mantığı</h3>
+                        <div class="settings-grid">
+                            <div class="form-group">
+                                <label for="icLogic">Dahil etme ölçütlerinin birleşimi:</label>
+                                <select id="icLogic">
+                                    <option value="all">Tümü karşılanmalı (IC1 VE IC2 …)</option>
+                                    <option value="any">En az biri yeterli (IC1 VEYA IC2 …)</option>
+                                </select>
+                                <small>Hariç tutma ölçütleri her zaman VEYA ile birleşir: herhangi biri açıkça karşılanırsa Exclude.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewThreshold">İnsan incelemesi eşiği (güven &lt;):</label>
+                                <input type="number" id="reviewThreshold" value="0.85" min="0" max="1" step="0.05">
+                            </div>
+                            <div class="form-group" id="consensusGroup">
+                                <label for="consensusStrategy">Çoklu model uzlaşısı:</label>
+                                <select id="consensusStrategy">
+                                    <option value="unanimous">Oybirliği — ayrışmada Uncertain (en temkinli)</option>
+                                    <option value="majority">Çoğunluk — beraberlikte Uncertain</option>
+                                    <option value="any_include">Kapsayıcı — bir model Include derse Include</option>
+                                </select>
+                                <small>Her durumda ayrışan kayıtlar insan incelemesine işaretlenir.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="noAbstractMode">Özeti olmayan kayıtlar:</label>
+                                <select id="noAbstractMode">
+                                    <option value="screen">Başlık/anahtar kelimeyle tara</option>
+                                    <option value="skip">Taramadan Uncertain işaretle (API çağrısı yok)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="summaryLanguage">Kısa gerekçe dili:</label>
+                                <select id="summaryLanguage">
+                                    <option value="Turkish">Türkçe</option>
+                                    <option value="English">English</option>
+                                </select>
+                                <small>Özet ve karar gerekçesi tek bir kısa metinde birleştirilir.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature">Temperature:</label>
+                                <input type="number" id="temperature" min="0" max="2" step="0.1" placeholder="boş = otomatik">
+                                <small>Otomatik: Gemini 3 için model varsayılanı, diğerleri için 0.2.</small>
+                            </div>
+                        </div>
+                        <label class="checkbox-label"><input type="checkbox" id="verifyEvidence" checked> Kanıt doğrulaması: "karşılandı" denilen ölçütün alıntısı kayıt metninde yoksa "belirsiz" say</label>
+                        <label class="checkbox-label"><input type="checkbox" id="dedupe" checked> Tekrar eden kayıtları (DOI veya başlık+yıl) taramadan önce ayıkla</label>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="systemPrompt">📋 İncelemeye özgü yönerge (sistem promptu):</label>
+                            <div class="label-actions">
+                                <button type="button" id="previewProtocolBtn" class="btn-outline-small">👁️ Modele gidecek tam metin</button>
+                                <button type="button" id="resetSystemPromptBtn" class="btn-outline-small" title="Varsayılan yönergeye dön">↺ Varsayılan</button>
+                            </div>
+                        </div>
+                        <textarea id="systemPrompt" rows="14" placeholder="Kavram tanımları, ölçütlerin operasyonel yorumu, örnekler..."></textarea>
+                        <small>Ölçüt listesi, karar kuralı ve JSON çıktı biçimi bu metnin sonuna <strong>otomatik</strong> eklenir; burada yeniden tanımlamanız gerekmez.</small>
+                        <div id="consistencyWarnings" class="warning-list" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userResearchTopic">🎯 Kendi çalışma konunuz (opsiyonel, yakınlık skoru için):</label>
+                        <textarea id="userResearchTopic" rows="3" placeholder="Araştırmanızın konusu ve kapsamı. Skor yalnızca bilgi amaçlıdır; dahil/hariç kararını etkilemez."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-section card">
+                <h2>📤 Dosya Yükle</h2>
+                <div class="form-group">
+                    <label for="csvFile">CSV / TSV / Excel (WoS, Scopus, PubMed dışa aktarımları):</label>
+                    <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+                    <small>Başlık ve Özet zorunlu. ID (UT/EID/PMID), Yazar, Yıl, DOI, Anahtar Kelime ve Belge Türü sütunları otomatik algılanır.</small>
+                </div>
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+
+                <div id="costEstimatePanel" class="cost-estimate-panel" style="display: none;">
+                    <h3>💰 Maliyet &amp; Süre Tahmini</h3>
+                    <div class="cost-grid">
+                        <div class="cost-row"><span>Taranacak kayıt:</span><strong id="estTotalArticles">-</strong></div>
+                        <div class="cost-row"><span>Tahmini input token:</span><strong id="estInputTokens">-</strong></div>
+                        <div class="cost-row"><span>Tahmini output token:</span><strong id="estOutputTokens">-</strong></div>
+                        <div class="cost-row"><span>Tahmini süre (paralel):</span><strong id="estDuration">-</strong></div>
+                        <div class="cost-row cost-highlight"><span>Paralel (Standard tier):</span><strong id="estSyncCost">-</strong></div>
+                        <div class="cost-row cost-highlight"><span>Async Batch API (-%50):</span><strong id="estBatchCost">-</strong></div>
+                        <div class="cost-row cost-note"><span id="freeTierNote"></span></div>
+                    </div>
+                </div>
+
+                <button id="analyzeBtn" class="btn-primary" disabled>🚀 Analizi Başlat</button>
+            </div>
+        </section>
+
+        <!-- ============ TAB: SCREENING ============ -->
+        <section id="tab-screen" class="tab-panel" hidden>
+            <div id="wsLoading" class="card ws-loading" style="display: none;"></div>
+            <div id="wsEmpty" class="card empty-state">
+                <h2>📊 Henüz gösterilecek sonuç yok</h2>
+                <p>Analiz sekmesinden dosya yükleyip analizi başlatın, kayıtlı bir oturumu yükleyin ya da Projeler sekmesinden sizinle paylaşılan bir projeyi açın.</p>
+            </div>
+            <div id="resultsSection" class="results-section" style="display: none;">
+                <div id="wsSourceBar" class="ws-source-bar"></div>
+                <div class="results-header">
+                    <h2>📊 Tarama</h2>
+                    <div class="results-actions">
+                        <button id="saveToCloudBtn" class="btn-primary btn-teal btn-compact" style="display: none;">☁️ Veritabanına kaydet</button>
+                        <button id="loadProtocolBtn" class="btn-tertiary btn-compact" style="display: none;" title="Projenin ölçüt ve yönergesini Analiz formuna yükler">📋 Protokolü forma yükle</button>
+                        <button id="relevanceReportBtn" class="btn-tertiary btn-compact" style="display: none;">🔍 En yakın çalışmalar</button>
+                        <button id="downloadCsvBtn" class="btn-secondary btn-compact">💾 CSV</button>
+                        <button id="downloadExcelBtn" class="btn-secondary btn-compact">📊 Excel</button>
+                    </div>
+                </div>
+
+                <div id="costPanel" class="cost-live-panel">
+                    <div class="cost-live-item"><span class="cost-live-label">Mod / Tier:</span><span class="cost-live-value" id="livMode">-</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Input Token:</span><span class="cost-live-value" id="livInputTokens">0</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Output Token:</span><span class="cost-live-value" id="livOutputTokens">0</span></div>
+                    <div class="cost-live-item cost-live-total"><span class="cost-live-label">Toplam Maliyet:</span><span class="cost-live-value" id="livCost">$0.0000</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Modeller arası uyum:</span><span class="cost-live-value" id="livAgreement">-</span></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card include"><h3 lang="en">🤖 Include</h3><p id="includeCount">0</p></div>
+                    <div class="stat-card exclude"><h3 lang="en">🤖 Exclude</h3><p id="excludeCount">0</p></div>
+                    <div class="stat-card maybe"><h3 lang="en">🤖 Maybe</h3><p id="uncertainCount">0</p></div>
+                    <div class="stat-card review"><h3>👁️ İnceleme önerilen</h3><p id="reviewCount">0</p></div>
+                    <div class="stat-card mine"><h3>🧑‍⚖️ Sizin kararınız</h3><p id="myProgressCount">0/0</p><div class="mini-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div></div>
+                    <div class="stat-card conflict" id="statConflictCard" style="display: none;"><h3>⚡ Çatışma</h3><p id="conflictCount">0</p></div>
+                    <div class="stat-card total"><h3>♻️ Tekrar</h3><p id="duplicateCount">0</p></div>
+                    <div class="stat-card total"><h3>📚 Taranacak</h3><p id="totalCount">0</p></div>
+                </div>
+
+                <div class="filter-bar">
+                    <input type="text" id="filterSearch" placeholder="🔍 Başlık, yazar, DOI, özet, gerekçe veya notta ara…">
+                    <select id="filterAi" title="AI kararı">
+                        <option value="all">🤖 AI: tümü</option>
+                        <option value="Include">🤖 AI: Include</option>
+                        <option value="Uncertain">🤖 AI: Maybe</option>
+                        <option value="Exclude">🤖 AI: Exclude</option>
+                        <option value="none">🤖 Analiz edilmemiş</option>
+                        <option value="error">🤖 API hatası</option>
+                    </select>
+                    <select id="filterMine" title="Sizin kararınız">
+                        <option value="all">🧑‍⚖️ Ben: tümü</option>
+                        <option value="undecided">🧑‍⚖️ Karar vermediklerim</option>
+                        <option value="decided">🧑‍⚖️ Karar verdiklerim</option>
+                        <option value="Include">🧑‍⚖️ Include dediklerim</option>
+                        <option value="Uncertain">🧑‍⚖️ Maybe dediklerim</option>
+                        <option value="Exclude">🧑‍⚖️ Exclude dediklerim</option>
+                        <option value="disagree_ai">🧑‍⚖️ AI'dan farklı düşündüklerim</option>
+                    </select>
+                    <select id="filterStatus" title="Durum">
+                        <option value="all">📌 Durum: tümü</option>
+                        <option value="review">👁️ İnceleme önerilen</option>
+                        <option value="split">🤖 Modeller ayrıştı</option>
+                        <option value="noabstract">📄 Özeti olmayan</option>
+                        <option value="conflict" class="cloud-only">⚡ Hakemler çatışıyor</option>
+                        <option value="nofinal" class="cloud-only">⚖️ Nihai karar verilmemiş</option>
+                        <option value="final" class="cloud-only">⚖️ Nihai karar verilmiş</option>
+                        <option value="dups">♻️ Tekrar adayları</option>
+                        <option value="removed">🗑️ Kaldırılanlar</option>
+                    </select>
+                    <select id="filterLabel" title="Etiket"><option value="">Tüm etiketler</option></select>
+                    <select id="sortBy" title="Sıralama">
+                        <option value="order">↕ Dosya sırası</option>
+                        <option value="conf_asc">↕ Güven (düşükten)</option>
+                        <option value="conf_desc">↕ Güven (yüksekten)</option>
+                        <option value="rel_desc">↕ Konu ilgisi</option>
+                        <option value="year_desc">↕ Yıl (yeni→eski)</option>
+                    </select>
+                    <label class="page-size-label">Sayfa başına
+                        <select id="pageSize">
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="150">150</option>
+                            <option value="200">200</option>
+                        </select>
+                    </label>
+                    <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Özetleri genişlet</button>
+                    <span id="filterCount" class="filter-count"></span>
+                </div>
+
+                <div id="selectionBar" class="selection-bar">
+                    <span id="selCount" class="sel-count">Seçim yok</span>
+                    <button id="reanalyzeSelectedBtn" class="btn-secondary btn-compact" disabled>🔁 Seçilileri yeniden analiz et</button>
+                    <button id="reanalyzeAllBtn" class="btn-tertiary btn-compact" title="Geçerli filtreye uyan tüm kayıtlar">🔁 Filtredeki tümünü yeniden analiz et</button>
+                    <button id="retryErrorsBtn" class="btn-tertiary btn-compact" style="display: none;">🔁 Hatalıları yeniden tara</button>
+                    <button id="clearSelectionBtn" class="btn-ghost" disabled>Seçimi temizle</button>
+                    <span class="muted-small">Yeniden analiz, Analiz sekmesindeki model, API anahtarı ve protokolü kullanır.</span>
+                </div>
+
+                <div id="pagerTop" class="pager"></div>
+                <div class="table-container ws-table-container">
+                    <table id="resultsTable" class="ws-table">
+                        <thead>
+                            <tr>
+                                <th class="col-authors">Yazar / yıl</th>
+                                <th class="col-title"><label class="th-check"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç"> Başlık</label></th>
+                                <th class="col-abstract">Özet · <mark class="ev-mark">sarı kanıtlar</mark></th>
+                                <th class="col-decision">Karar</th>
+                                <th class="col-conf">Güven</th>
+                                <th class="col-criteria">Ölçütler</th>
+                                <th class="col-rationale">Kısa gerekçe</th>
+                                <th class="col-labels">Etiketler / not</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody"></tbody>
+                    </table>
+                </div>
+                <div id="pagerBottom" class="pager"></div>
+                <datalist id="labelSuggestions"></datalist>
+            </div>
+        </section>
+
+        <!-- ============ TAB: DUPLICATES ============ -->
+        <section id="tab-dups" class="tab-panel" hidden>
+            <div class="card">
+                <div class="results-header">
+                    <h2>♻️ Tekrar Eden Kayıtlar</h2>
+                    <div class="results-actions">
+                        <button id="dupScanBtn" class="btn-tertiary btn-compact" title="Aynı DOI veya çok benzer başlığa sahip kayıtları bulur">🔍 Benzer başlıkları tara</button>
+                        <button id="dupRemoveAllBtn" class="btn-secondary btn-compact">Tüm çiftlerde B'yi kaldır</button>
+                    </div>
+                </div>
+                <p class="muted-inline">Her çift yan yana gösterilir; farklı olan alanlar vurgulanır. Kaldırılan kayıtlar taramadan çıkarılır ve PRISMA'da "tekrar olarak çıkarılan" sayılır. Kaldırma geri alınabilir.</p>
+                <div id="dupSummary" class="dup-summary"></div>
+                <div id="dupList"></div>
+                <div id="dupPager" class="pager"></div>
+                <details class="removed-details">
+                    <summary id="removedSummary">🗑️ Kaldırılan kayıtlar (0)</summary>
+                    <div id="removedList"></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ============ TAB: PROJECTS ============ -->
+        <section id="tab-projects" class="tab-panel" hidden>
+            <div class="card">
+                <div class="results-header">
+                    <h2>☁️ Projeler</h2>
+                    <div class="results-actions"><button id="refreshProjectsBtn" class="btn-tertiary btn-compact">↻ Yenile</button></div>
+                </div>
+                <p id="projectsNote" class="muted-inline"></p>
+                <div id="projectList" class="project-list"></div>
+            </div>
+            <div id="projectAdminCard" class="card" style="display: none;"></div>
+        </section>
+    </div>
+
+    <!-- Closest Papers Report Modal -->
+    <div id="reportModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>🔍 Konunuza En Yakın Çalışmalar (Top 10)</h2>
+                <button type="button" class="close-modal-btn" data-close="reportModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table id="modalReportTable" style="min-width: 1000px;">
+                        <thead><tr><th>Sıra</th><th>ID</th><th>Başlık</th><th>Yıl</th><th>İlgi Skoru</th><th>Karar</th><th>İlişki Gerekçesi</th></tr></thead>
+                        <tbody id="modalReportBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="reportModal">Kapat</button></div>
+        </div>
+    </div>
+
+    <!-- Protocol Preview Modal -->
+    <div id="protocolModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>👁️ Modele gönderilecek sistem talimatı</h2>
+                <button type="button" class="close-modal-btn" data-close="protocolModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="muted-inline" id="protocolMeta"></p>
+                <pre id="protocolPreview" class="protocol-preview"></pre>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="protocolModal">Kapat</button></div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card modal-narrow">
+            <div class="modal-header">
+                <h2>🔐 Hesap</h2>
+                <button type="button" class="close-modal-btn" data-close="authModal">&times;</button>
+            </div>
+            <form id="authForm" class="modal-body auth-form">
+                <div class="auth-tabs">
+                    <button type="button" id="authTabSignin" class="auth-tab active">Giriş yap</button>
+                    <button type="button" id="authTabSignup" class="auth-tab">Kayıt ol</button>
+                </div>
+                <div class="form-group" id="authNameGroup" style="display: none;">
+                    <label for="authName">Ad Soyad (diğer hakemler görür):</label>
+                    <input type="text" id="authName" class="text-input" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="authEmail">E-posta:</label>
+                    <input type="email" id="authEmail" class="text-input" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Şifre:</label>
+                    <input type="password" id="authPassword" class="text-input" autocomplete="current-password" required>
+                </div>
+                <div id="authMessage" class="auth-message"></div>
+                <div class="auth-actions">
+                    <button type="button" id="authForgotBtn" class="btn-ghost">Şifremi unuttum</button>
+                    <button type="submit" id="authSubmitBtn" class="btn-primary btn-compact">Giriş yap</button>
+                </div>
+                <p class="muted-small">Giriş yapmadan da analiz yapabilirsiniz; hesap yalnızca ekip taraması (paylaşılan projeler) için gereklidir.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Save-to-cloud Modal -->
+    <div id="saveCloudModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card modal-narrow">
+            <div class="modal-header">
+                <h2>☁️ Analizi veritabanına kaydet</h2>
+                <button type="button" class="close-modal-btn" data-close="saveCloudModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="saveExistingGroup" class="form-group" style="display: none;">
+                    <label class="checkbox-label"><input type="radio" name="saveMode" id="saveModeUpdate"> Bağlı projeyi güncelle (hakem kararları korunur, AI sonuçları ve kayıtlar yenilenir)</label>
+                    <label class="checkbox-label"><input type="radio" name="saveMode" id="saveModeNew"> Yeni proje olarak kaydet</label>
+                </div>
+                <div class="form-group">
+                    <label for="saveName">Proje adı:</label>
+                    <input type="text" id="saveName" class="text-input" maxlength="120">
+                </div>
+                <div class="form-group">
+                    <label for="saveDescription">Açıklama (opsiyonel):</label>
+                    <input type="text" id="saveDescription" class="text-input" maxlength="300">
+                </div>
+                <label class="checkbox-label"><input type="checkbox" id="saveBlind" checked> 🙈 Kör mod açık: hakemler birbirlerinin kararlarını görmez</label>
+                <label class="checkbox-label"><input type="checkbox" id="saveHideAi"> 🤖 AI kararlarını hakemlerden gizle</label>
+                <p id="saveProgress" class="muted-inline save-progress"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-tertiary" data-close="saveCloudModal">Vazgeç</button>
+                <button type="button" id="saveCloudConfirmBtn" class="btn-primary btn-compact">☁️ Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase-config.js?v=13"></script>
+    <script src="screening-core.js?v=13"></script>
+    <script src="default-prompt.js?v=13"></script>
+    <script src="cloud.js?v=13"></script>
+    <script src="script.js?v=13"></script>
+    <script src="workspace.js?v=13"></script>
+</body>
+</html>

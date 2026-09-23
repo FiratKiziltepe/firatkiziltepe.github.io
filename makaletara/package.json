@@ -1,0 +1,15 @@
+{
+  "name": "gemini-literature-screening",
+  "version": "12.0.0",
+  "description": "AI-assisted title/abstract screening for systematic reviews — parallel multi-key Gemini/OpenAI/DeepSeek, criterion-level decision rule, consensus, PRISMA-ready exports.",
+  "bin": { "gls": "cli.mjs" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "screen": "node cli.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "optionalDependencies": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz"
+  },
+  "license": "MIT"
+}
