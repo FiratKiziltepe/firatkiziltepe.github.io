@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13.1">
+    <link rel="stylesheet" href="style.css?v=13.3">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -422,7 +422,7 @@
                             <option value="200">200</option>
                         </select>
                     </label>
-                    <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Özetleri genişlet</button>
+                    <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Özetleri daralt</button>
                     <span id="filterCount" class="filter-count"></span>
                 </div>
 
@@ -440,14 +440,11 @@
                     <table id="resultsTable" class="ws-table">
                         <thead>
                             <tr>
-                                <th class="col-authors">Yazar / yıl</th>
-                                <th class="col-title"><label class="th-check"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç"> Başlık</label></th>
+                                <th class="col-sel"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç"></th>
+                                <th class="col-pub">Yayın · yazarlar · DOI</th>
                                 <th class="col-abstract">Özet · <mark class="ev-mark">sarı kanıtlar</mark></th>
-                                <th class="col-decision">Karar</th>
-                                <th class="col-conf">Güven</th>
-                                <th class="col-criteria">Ölçütler</th>
-                                <th class="col-rationale">Kısa gerekçe</th>
-                                <th class="col-labels">Etiketler / not</th>
+                                <th class="col-reason">Ölçütler · kısa gerekçe</th>
+                                <th class="col-decision">Karar <span class="th-hint">klavye: J/K gez · 1 Dahil · 2 Belirsiz · 3 Hariç</span></th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody"></tbody>
@@ -592,11 +589,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13.1"></script>
-    <script src="screening-core.js?v=13.1"></script>
-    <script src="default-prompt.js?v=13.1"></script>
-    <script src="cloud.js?v=13.1"></script>
-    <script src="script.js?v=13.1"></script>
-    <script src="workspace.js?v=13.1"></script>
+    <script src="supabase-config.js?v=13.3"></script>
+    <script src="screening-core.js?v=13.3"></script>
+    <script src="default-prompt.js?v=13.3"></script>
+    <script src="cloud.js?v=13.3"></script>
+    <script src="script.js?v=13.3"></script>
+    <script src="workspace.js?v=13.3"></script>
 </body>
 </html>

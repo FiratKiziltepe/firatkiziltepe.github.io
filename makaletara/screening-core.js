@@ -700,6 +700,9 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
       throw err;
     }
     const get = (v, i) => (i === -1 || v[i] === undefined || v[i] === null) ? '' : String(v[i]).trim();
+    // WoS keeps some DOIs only in "Book DOI" / "DOI Link"
+    const extraDoi = ['book doi', 'doi link'].map(a => findColumn(headers, [a])).filter(i => i !== -1 && i !== col.doi);
+    const doiIn = s => { const m = String(s || '').match(/10\.\d{4,9}\/[^\s"<>]+/); return m ? m[0] : ''; };
 
     const records = [];
     const seenTitle = new Map();
@@ -723,6 +726,7 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
         noAbstract: false
       };
       if (!r.Title && !r.Abstract) return;
+      if (!r.DOI) r.DOI = extraDoi.map(i => doiIn(get(v, i))).find(Boolean) || '';
       r.rid = `R${String(records.length + 1).padStart(5, '0')}`;
       if (!r.ID) r.ID = String(i + 1);
       // Source IDs must be unique for exports
