@@ -43,7 +43,7 @@ Arayüz dört sekmeye ayrıldı: **⚙️ Analiz · 📊 Tarama · ♻️ Tekrar
 
 **Kurulum notları**
 - Bağlantı ayarı `supabase-config.js` içindedir (yayımlanabilir anahtar; güvenlik RLS ile sağlanır). Şema `supabase/schema.sql` dosyasındadır.
-- İlk yönetici `admin_emails` tablosundaki e-posta ile kayıt olan kişidir. Başka birini yönetici yapmak için Supabase SQL Editor'de:
+- İlk yönetici `admin_emails` tablosundaki e-posta (şu an firatkiziltepe36@gmail.com) ile kayıt olan kişidir; şifreyi kayıt olurken siz belirlersiniz. Başka birini yönetici yapmak için Supabase SQL Editor'de:
   `update public.profiles set role = 'admin' where email = 'kisi@ornek.com';`
 - Supabase panelinde **Authentication → URL Configuration → Site URL** alanına sitenin adresini (ör. `https://firatkiziltepe.github.io/makaletara/`) yazın. Böylece e-posta onay ve şifre sıfırlama bağlantıları doğru sayfaya döner.
 

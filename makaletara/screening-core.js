@@ -248,7 +248,7 @@ ${[...ic, ...ec].map(c => `      {"code": "${c.code}", "verdict": "yes|no|unclea
   }
 ]}
 Return exactly one result object per input record, in input order, and do NOT repeat title, abstract, authors or year.
-`;
+${languageRule(o.summaryLanguage)}`;
 
     if (o.userTopic) {
       p += `
@@ -265,6 +265,25 @@ The relevance score is informational and MUST NOT change the criteria-based deci
     return p;
   }
 
+  const TURKISH_EXAMPLE = 'Bu çalışma, K-12 sınıf ortamlarında yapay zeka teknolojilerinin kullanımıyla ilgili öğretmenlerin karşılaştığı etik yükümlülükleri kavramsal ve posthumanist bir yaklaşımla ele almakta olup, ampirik insan veri toplama yöntemi (öğretmenler veya öğrenciler üzerinde anket, ölçek, görüşme vb.) bildirmemektedir.';
+
+  function isTurkish(lang) { return /^(turkish|türkçe|turkce|tr)$/i.test(String(lang || '').trim()); }
+
+  // Records and instructions are English; without a firm rule models answer in English.
+  function languageRule(lang) {
+    if (isTurkish(lang)) {
+      return `
+LANGUAGE OF "rationale" (MANDATORY)
+Write "rationale" in TURKISH (Türkçe), even though the records and these instructions are in English. Never write English sentences in "rationale". Only "evidence" quotes stay verbatim in the record's own language.
+Style: one or two formal academic Turkish sentences that start with "Bu çalışma," — say what the study does (population/setting, AI focus, design/method) and then why the decision follows (which criterion is met or not met). Example:
+"${TURKISH_EXAMPLE}"
+`;
+    }
+    return `
+LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" quotes stay verbatim in the record's own language.
+`;
+  }
+
   function buildSystemInstructions(guidance, criteria, opts = {}) {
     const g = String(guidance || '').trim();
     const protocol = buildProtocol(criteria, opts);
@@ -276,7 +295,7 @@ The relevance score is informational and MUST NOT change the criteria-based deci
    * reproduce reliably; the source ID (e.g. WoS UT) is kept locally.
    * Authors are intentionally NOT sent (blinded screening, fewer tokens).
    */
-  function buildUserPrompt(records) {
+  function buildUserPrompt(records, opts = {}) {
     let p = `Screen the following ${records.length} record(s). Return {"results": [...]} with one object per record.\n\n`;
     records.forEach(r => {
       p += `<record id="${r.rid}">\n`;
@@ -287,6 +306,7 @@ The relevance score is informational and MUST NOT change the criteria-based deci
       p += `ABSTRACT: ${r.Abstract || '[no abstract available — judge only from the fields above; do not treat missing information as evidence]'}\n`;
       p += `</record>\n\n`;
     });
+    if (isTurkish(opts.summaryLanguage)) p += 'Reminder: every "rationale" must be written in Turkish and start with "Bu çalışma,".\n';
     return p;
   }
 
@@ -1136,7 +1156,7 @@ The relevance score is informational and MUST NOT change the criteria-based deci
       const m = task.model;
       if (fatalModels.has(m.id)) { failTask(task, fatalModels.get(m.id)); return; }
       const recs = task.rids.map(r => byRid.get(r));
-      const user = buildUserPrompt(recs);
+      const user = buildUserPrompt(recs, { summaryLanguage: cfg.validation.summaryLanguage });
       const slot = await pool.acquire(m.apiModel, signal);
       inflight++; progress();
       let resp;
@@ -1295,7 +1315,7 @@ The relevance score is informational and MUST NOT change the criteria-based deci
    * under the inline size limit, distributing jobs across keys.
    * Returns [{ keyIndex, modelId, apiModel, requests:[{request, metadata:{key}}], rids:[] }]
    */
-  function planBatchJobs({ records, models, keyCount, batchSize, system, userTopic, useSchema, temperature, maxOutputTokens }) {
+  function planBatchJobs({ records, models, keyCount, batchSize, system, userTopic, useSchema, temperature, maxOutputTokens, summaryLanguage }) {
     const jobs = [];
     const groups = [];
     for (let i = 0; i < records.length; i += batchSize) groups.push(records.slice(i, i + batchSize));
@@ -1313,7 +1333,7 @@ The relevance score is informational and MUST NOT change the criteria-based deci
           const req = {
             request: {
               systemInstruction: { parts: [{ text: system }] },
-              contents: [{ role: 'user', parts: [{ text: buildUserPrompt(g) }] }],
+              contents: [{ role: 'user', parts: [{ text: buildUserPrompt(g, { summaryLanguage }) }] }],
               generationConfig
             },
             metadata: { key: `${m.id}::${g.map(r => r.rid).join(',')}` }

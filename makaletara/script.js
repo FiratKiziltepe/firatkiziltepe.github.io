@@ -284,6 +284,13 @@ function initListeners() {
   el.analyzeBtn.addEventListener('click', startNewAnalysis);
   el.pauseBtn.addEventListener('click', pauseRun);
   el.continueBtn.addEventListener('click', continueRun);
+  el.nextSampleBtn.addEventListener('click', runNextSample);
+  ['sampleMode', 'sampleN', 'sampleFrom', 'sampleTo'].forEach(id => el[id].addEventListener('input', () => { updateSampleUI(); updateCostEstimate(); }));
+  document.querySelectorAll('.sample-chip').forEach(b => b.addEventListener('click', () => {
+    el.sampleMode.value = b.dataset.mode;
+    if (b.dataset.n) el.sampleN.value = b.dataset.n;
+    updateSampleUI(); updateCostEstimate();
+  }));
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { $(b.dataset.close).style.display = 'none'; }));
 
   el.themeToggleBtn.addEventListener('click', () => {
@@ -596,7 +603,51 @@ async function prepareFile() {
   lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; el.fileInfo.appendChild(d); });
   showSuccess(`${prepared.records.length} kayıt yüklendi.`);
   el.analyzeBtn.disabled = false;
+  el.sampleGroup.style.display = 'block';
+  el.sampleTo.value = Math.min(parseInt(el.sampleTo.value, 10) || 50, prepared.records.length);
+  updateSampleUI();
   updateCostEstimate();
+}
+
+// ------------------------------------------------------------
+// Sample selection (analyse the first N / a random N / a range first)
+// ------------------------------------------------------------
+function screenable(records, options) {
+  return records.filter(r => !r.duplicateOf && !(r.noAbstract && options.noAbstractMode === 'skip'));
+}
+
+function sampleSpec() {
+  const mode = el.sampleMode.value;
+  const n = Math.max(1, parseInt(el.sampleN.value, 10) || 1);
+  const from = Math.max(1, parseInt(el.sampleFrom.value, 10) || 1);
+  const to = Math.max(from, parseInt(el.sampleTo.value, 10) || from);
+  return { mode, n, from, to };
+}
+
+/** Applies the picker to candidate records (already free of duplicates/presets). */
+function applySample(list, spec = sampleSpec()) {
+  if (spec.mode === 'first') return list.slice(0, spec.n);
+  if (spec.mode === 'random') {
+    const a = [...list];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a.slice(0, spec.n).sort((x, y) => x.order - y.order);
+  }
+  if (spec.mode === 'range') return list.filter(r => r.order + 1 >= spec.from && r.order + 1 <= spec.to);
+  return list;
+}
+
+function updateSampleUI() {
+  const { mode } = sampleSpec();
+  el.sampleNField.style.display = mode === 'first' || mode === 'random' ? 'inline-flex' : 'none';
+  el.sampleRangeField.style.display = mode === 'range' ? 'inline-flex' : 'none';
+  document.querySelectorAll('.sample-chip').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode && (!b.dataset.n || b.dataset.n === String(sampleSpec().n)));
+  });
+  if (!file.records.length) return;
+  const cands = screenable(file.records, currentOptions());
+  const n = applySample(cands).length;
+  el.sampleInfo.textContent = `${n.toLocaleString('tr-TR')} / ${cands.length.toLocaleString('tr-TR')} kayıt analiz edilecek`;
+  el.analyzeBtn.textContent = n < cands.length ? `🚀 Analizi Başlat (${n.toLocaleString('tr-TR')} kayıt)` : '🚀 Analizi Başlat';
 }
 
 // ------------------------------------------------------------
@@ -605,7 +656,7 @@ async function prepareFile() {
 function updateCostEstimate() {
   if (!file.records.length) { el.costEstimatePanel.style.display = 'none'; return; }
   const { system, criteria, options } = currentProtocolConfig();
-  const toScreen = file.records.filter(r => !r.duplicateOf && !(r.noAbstract && options.noAbstractMode === 'skip'));
+  const toScreen = applySample(screenable(file.records, options));
   const n = toScreen.length;
   const bs = parseInt(el.batchSize.value, 10) || 5;
   const requests = Math.ceil(n / bs);
@@ -700,11 +751,28 @@ async function startNewAnalysis() {
     else if (r.noAbstract && run.options.noAbstractMode === 'skip') upsert(C.presetResult(r, 'Uncertain', 'Özet yok — tam metin/insan incelemesi gerekli.'));
   });
 
+  run.sample = sampleSpec();
+  const todo = applySample(pendingRecords(), run.sample);
   showRunUI();
-  logEvent(`Yeni analiz: ${run.records.length} kayıt, modeller: ${run.activeModels.join(', ')}, mod: ${run.mode}, prompt v${run.promptHash}`);
+  logEvent(`Yeni analiz: ${run.records.length} kayıt, analiz edilecek ${todo.length}, modeller: ${run.activeModels.join(', ')}, mod: ${run.mode}, prompt v${run.promptHash}`);
   await saveStateNow();
-  if (run.mode === 'async') await startAsync();
-  else await runSync();
+  if (run.mode === 'async') await startAsync(todo);
+  else await runSync(todo);
+}
+
+// After a sample: the next N (first/random) of the records that are still waiting
+async function runNextSample() {
+  if (!run || isScreeningRunning()) return;
+  const spec = Object.assign({}, run.sample || sampleSpec());
+  if (spec.mode === 'range') { spec.mode = 'first'; spec.n = spec.to - spec.from + 1; }
+  if (spec.mode === 'all') { await runSync(); return; }
+  el.nextSampleBtn.style.display = 'none';
+  await runSync(applySample(pendingRecords(), spec));
+}
+
+function sampleSize(spec) {
+  if (!spec || spec.mode === 'all') return 0;
+  return spec.mode === 'range' ? spec.to - spec.from + 1 : spec.n;
 }
 
 function pendingRecords() {
@@ -723,6 +791,7 @@ async function executeScreening(job) {
   el.progressSection.style.display = 'block';
   el.pauseBtn.style.display = 'inline-flex';
   el.continueBtn.style.display = 'none';
+  el.nextSampleBtn.style.display = 'none';
   el.analyzeBtn.disabled = true;
   el.keyStatusTable.style.display = 'table';
   renderKeyTable();
@@ -770,6 +839,8 @@ function isScreeningRunning() {
 }
 
 function showPaused(res, remaining) {
+  el.continueBtn.textContent = '▶️ Devam Et';
+  el.nextSampleBtn.style.display = 'none';
   el.progressText.textContent = res && res.fatal
     ? `⛔ Durduruldu: ${res.fatal.message}`
     : `⏸️ Duraklatıldı: ${remaining} kayıt kaldı. "Devam Et" ile sürdürebilirsiniz.`;
@@ -792,9 +863,9 @@ async function runSync(recordsOverride) {
     promptHash: run.promptHash,
     onRow: row => { upsert(row); scheduleSave(); },
     onUsage: (modelId, u) => accumulateCost(modelId, u, 'standard', run.usage),
-    progress: p => ({
-      pct: results.size / run.records.length * 100,
-      text: `${results.size.toLocaleString('tr-TR')} / ${run.records.length.toLocaleString('tr-TR')} kayıt · uçuşta ${p.inflight} istek · kuyrukta ${p.queued} iş`
+    progress: (p, got) => ({
+      pct: got / todo.length * 100,
+      text: `${got.toLocaleString('tr-TR')} / ${todo.length.toLocaleString('tr-TR')} kayıt · toplam ${results.size.toLocaleString('tr-TR')} / ${run.records.length.toLocaleString('tr-TR')} · uçuşta ${p.inflight} istek · kuyrukta ${p.queued} iş`
     })
   });
   if (res.completed) finishRun();
@@ -952,14 +1023,31 @@ async function continueRun() {
 }
 
 function finishRun() {
-  run.status = 'done';
+  const remaining = pendingRecords().length;
+  run.status = remaining ? 'paused' : 'done';
   el.progressBar.style.width = '100%';
   const errs = [...results.values()].filter(r => r.error).length;
-  el.progressText.textContent = `✅ Tamamlandı: ${results.size} kayıt${errs ? ` · ${errs} kayıtta API hatası (yeniden taranabilir)` : ''}.`;
+  const errTxt = errs ? ` · ${errs} kayıtta API hatası (yeniden taranabilir)` : '';
   el.pauseBtn.style.display = 'none';
-  el.continueBtn.style.display = 'none';
-  logEvent('Analiz tamamlandı.');
-  resumeAction = null;
+  if (remaining) {
+    const next = Math.min(sampleSize(run.sample) || remaining, remaining);
+    el.progressText.textContent = `✅ ${results.size.toLocaleString('tr-TR')} kayıt analiz edildi${errTxt} · ${remaining.toLocaleString('tr-TR')} kayıt bekliyor.`;
+    el.nextSampleBtn.textContent = `▶️ Sonraki ${next.toLocaleString('tr-TR')} kayıt`;
+    el.nextSampleBtn.style.display = next < remaining ? 'inline-flex' : 'none';
+    el.continueBtn.textContent = `⏩ Kalanların tümü (${remaining.toLocaleString('tr-TR')})`;
+    el.continueBtn.style.display = 'inline-flex';
+    resumeAction = () => runSync();
+    // show what was analysed instead of hundreds of empty rows
+    if (el.filterAi.value === 'all') { el.filterAi.value = 'analyzed'; WS.page = 1; }
+    logEvent(`Örneklem tamamlandı; ${remaining} kayıt bekliyor.`);
+  } else {
+    el.progressText.textContent = `✅ Tamamlandı: ${results.size.toLocaleString('tr-TR')} kayıt${errTxt}.`;
+    el.continueBtn.style.display = 'none';
+    el.nextSampleBtn.style.display = 'none';
+    resumeAction = null;
+    if (el.filterAi.value === 'analyzed') el.filterAi.value = 'all';
+    logEvent('Analiz tamamlandı.');
+  }
   renderWorkspace();
   saveStateNow();
 }
@@ -993,13 +1081,13 @@ const scheduleLiveCost = debounce(() => updateLiveCost(), 300);
 // ------------------------------------------------------------
 function geminiBase(m) { return (m.baseUrl || PROVIDER_BASE.gemini).replace(/\/+$/, ''); }
 
-async function startAsync() {
+async function startAsync(todo = pendingRecords()) {
   pools = buildPools(run.models);
   const pool = pools[run.models[0].pool];
-  const todo = pendingRecords();
   let jobs = C.planBatchJobs({
     records: todo, models: run.models, keyCount: pool.size, batchSize: run.batchSize,
-    system: run.system, userTopic: run.options.userTopic, useSchema: true, temperature: run.options.temperature
+    system: run.system, userTopic: run.options.userTopic, useSchema: true, temperature: run.options.temperature,
+    summaryLanguage: run.options.summaryLanguage
   });
   logEvent(`${jobs.length} batch job, ${pool.size} anahtara dağıtılıyor…`);
   el.batchJobInfo.style.display = 'block';
@@ -1276,7 +1364,9 @@ function restoreSession(s) {
   showRunUI();
   renderJobInfo();
   const remaining = run.records.length - results.size;
-  if (run.status === 'done' && !remaining) {
+  if (remaining && !(run.mode === 'async' && run.jobs.some(j => !j.done))) {
+    finishRun();
+  } else if (run.status === 'done' && !remaining) {
     el.progressBar.style.width = '100%';
     el.progressText.textContent = `✅ Kayıtlı sonuçlar yüklendi (${results.size} kayıt). Tarama sekmesinde kararlarınızı vermeye devam edebilirsiniz.`;
   } else {

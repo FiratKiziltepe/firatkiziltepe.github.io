@@ -304,6 +304,8 @@ test('v13: source row, merged Turkish rationale and audit flags kept apart', () 
   const p = C.buildProtocol(criteria, { summaryLanguage: 'Turkish' });
   assert.ok(p.includes('written in Turkish'));
   assert.ok(!p.includes('"summary"'));
+  assert.ok(p.includes('LANGUAGE OF "rationale" (MANDATORY)'));
+  assert.ok(C.buildUserPrompt([{ rid: 'R1', Title: 't', Abstract: 'a' }], { summaryLanguage: 'Turkish' }).includes('Bu çalışma,'));
   const raw = { decision: 'Include', confidence: 0.9, rationale: 'Bu çalışma öğrencileri inceler.', criteria_assessment: [{ code: 'IC9', verdict: 'yes' }] };
   const v = C.validateModelRecord(raw, { ...ctx, verifyEvidence: false });
   assert.equal(v.rationale, 'Bu çalışma öğrencileri inceler.');

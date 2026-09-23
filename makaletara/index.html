@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css?v=13.1">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -35,6 +35,7 @@
                 <h2>⏳ İlerleme</h2>
                 <div class="progress-actions">
                     <button id="pauseBtn" class="btn-tertiary" style="display: none;">⏸️ Duraklat</button>
+                    <button id="nextSampleBtn" class="btn-secondary" style="display: none;">▶️ Sonraki örneklem</button>
                     <button id="continueBtn" class="btn-secondary" style="display: none;">▶️ Devam Et</button>
                 </div>
             </div>
@@ -288,6 +289,36 @@
                 </div>
                 <div id="fileInfo" class="file-info" style="display: none;"></div>
 
+            <div id="sampleGroup" class="sample-box" style="display: none;">
+                <div class="sample-head">
+                    <strong>🧪 Kaç kayıt analiz edilsin?</strong>
+                    <div class="sample-quick">
+                        <button type="button" class="sample-chip" data-mode="first" data-n="10">İlk 10</button>
+                        <button type="button" class="sample-chip" data-mode="first" data-n="50">İlk 50</button>
+                        <button type="button" class="sample-chip" data-mode="first" data-n="100">İlk 100</button>
+                        <button type="button" class="sample-chip" data-mode="random" data-n="50">Rastgele 50</button>
+                        <button type="button" class="sample-chip" data-mode="all">Tümü</button>
+                    </div>
+                </div>
+                <div class="sample-row">
+                    <select id="sampleMode">
+                        <option value="all">Tümü</option>
+                        <option value="first">İlk N kayıt</option>
+                        <option value="random">Rastgele N kayıt</option>
+                        <option value="range">Kayıt aralığı</option>
+                    </select>
+                    <label class="sample-field" id="sampleNField">N =
+                        <input type="number" id="sampleN" value="10" min="1">
+                    </label>
+                    <label class="sample-field" id="sampleRangeField">
+                        <input type="number" id="sampleFrom" value="1" min="1"> –
+                        <input type="number" id="sampleTo" value="50" min="1">. kayıt
+                    </label>
+                    <span id="sampleInfo" class="muted-inline"></span>
+                </div>
+                <small>Deneme için küçük bir örneklemle başlayın. Analiz bitince kalan kayıtları "Sonraki örneklem" ya da "Kalanların tümü" ile sürdürebilirsiniz; aynı kayıt iki kez analiz edilmez.</small>
+            </div>
+
                 <div id="costEstimatePanel" class="cost-estimate-panel" style="display: none;">
                     <h3>💰 Maliyet &amp; Süre Tahmini</h3>
                     <div class="cost-grid">
@@ -334,9 +365,9 @@
                 </div>
 
                 <div class="stats">
-                    <div class="stat-card include"><h3 lang="en">🤖 Include</h3><p id="includeCount">0</p></div>
-                    <div class="stat-card exclude"><h3 lang="en">🤖 Exclude</h3><p id="excludeCount">0</p></div>
-                    <div class="stat-card maybe"><h3 lang="en">🤖 Maybe</h3><p id="uncertainCount">0</p></div>
+                    <div class="stat-card include"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">✓ Include</h3><p id="includeCount">0</p></div>
+                    <div class="stat-card exclude"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">✕ Exclude</h3><p id="excludeCount">0</p></div>
+                    <div class="stat-card maybe"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">? Maybe</h3><p id="uncertainCount">0</p></div>
                     <div class="stat-card review"><h3>👁️ İnceleme önerilen</h3><p id="reviewCount">0</p></div>
                     <div class="stat-card mine"><h3>🧑‍⚖️ Sizin kararınız</h3><p id="myProgressCount">0/0</p><div class="mini-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div></div>
                     <div class="stat-card conflict" id="statConflictCard" style="display: none;"><h3>⚡ Çatışma</h3><p id="conflictCount">0</p></div>
@@ -348,6 +379,7 @@
                     <input type="text" id="filterSearch" placeholder="🔍 Başlık, yazar, DOI, özet, gerekçe veya notta ara…">
                     <select id="filterAi" title="AI kararı">
                         <option value="all">🤖 AI: tümü</option>
+                        <option value="analyzed">🤖 Analiz edilenler</option>
                         <option value="Include">🤖 AI: Include</option>
                         <option value="Uncertain">🤖 AI: Maybe</option>
                         <option value="Exclude">🤖 AI: Exclude</option>
@@ -560,11 +592,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13"></script>
-    <script src="screening-core.js?v=13"></script>
-    <script src="default-prompt.js?v=13"></script>
-    <script src="cloud.js?v=13"></script>
-    <script src="script.js?v=13"></script>
-    <script src="workspace.js?v=13"></script>
+    <script src="supabase-config.js?v=13.1"></script>
+    <script src="screening-core.js?v=13.1"></script>
+    <script src="default-prompt.js?v=13.1"></script>
+    <script src="cloud.js?v=13.1"></script>
+    <script src="script.js?v=13.1"></script>
+    <script src="workspace.js?v=13.1"></script>
 </body>
 </html>

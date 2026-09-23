@@ -158,6 +158,7 @@ function matchesWs(rec, f) {
 
   const aiDec = ai ? ai.ai_decision || ai.decision : '';
   if (f.ai === 'none' && ai) return false;
+  if (f.ai === 'analyzed' && !ai) return false;
   if (f.ai === 'error' && !(ai && ai.error)) return false;
   if (['Include', 'Exclude', 'Uncertain'].includes(f.ai) && aiDec !== f.ai) return false;
 
@@ -342,13 +343,52 @@ function button(label, cls, onClick, title) {
   b.addEventListener('click', onClick);
   return b;
 }
-function decisionBadge(decision, small) {
+const SVG_NS = 'http://www.w3.org/2000/svg';
+// Small line icons (robot = machine decision, person = human decision)
+function icon(kind) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('class', `ico ico-${kind}`);
+  svg.setAttribute('aria-hidden', 'true');
+  const add = (tag, attrs) => { const n = document.createElementNS(SVG_NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); svg.appendChild(n); };
+  if (kind === 'ai') {
+    add('rect', { x: '2.2', y: '4.6', width: '11.6', height: '9', rx: '3', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6' });
+    add('path', { d: 'M8 1.8v2.8', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linecap': 'round' });
+    add('circle', { cx: '5.9', cy: '9.1', r: '1.1', fill: 'currentColor' });
+    add('circle', { cx: '10.1', cy: '9.1', r: '1.1', fill: 'currentColor' });
+  } else {
+    add('circle', { cx: '8', cy: '5.2', r: '2.9', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6' });
+    add('path', { d: 'M2.6 14.2c.6-3 2.8-4.6 5.4-4.6s4.8 1.6 5.4 4.6', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linecap': 'round' });
+  }
+  return svg;
+}
+
+function decisionBadge(decision, small, source) {
   const s = document.createElement('span');
   const key = String(decision || 'uncertain').toLowerCase();
   s.className = `decision-badge decision-${key}${small ? ' badge-sm' : ''}`;
   s.lang = 'en';
-  s.textContent = DECISION_LABEL[decision] || decision;
+  if (source) s.appendChild(icon(source));
+  s.appendChild(document.createTextNode(DECISION_LABEL[decision] || decision));
   return s;
+}
+
+/**
+ * The decision that currently counts for this viewer:
+ * admin's final decision (cloud) > my vote > AI decision.
+ */
+function effectiveDecision(rec) {
+  const ai = WS.ai.get(rec.rid);
+  if (WS.isCloud && rec.finalDecision && !WS.blindForMe) return { decision: rec.finalDecision, source: 'final' };
+  const mv = myVote(rec.rid);
+  if (mv && mv.decision) return { decision: mv.decision, source: 'me' };
+  if (ai && !ai.error && !WS.aiHidden) return { decision: ai.ai_decision || ai.decision, source: 'ai' };
+  return { decision: ai && ai.error && !WS.aiHidden ? 'Hata' : null, source: 'ai' };
+}
+
+function modelName(id) {
+  if (id === 'custom') return (typeof settings !== 'undefined' && settings.customSpecs && settings.customSpecs.modelId) || 'custom';
+  return MODELS[id] ? MODELS[id].apiModelId : id;
 }
 
 /** Appends text to parent, wrapping evidence ranges in <mark>. */
@@ -468,14 +508,20 @@ function buildWsRow(rec) {
 
   // 4. decision
   const cD = td('cell-decision');
-  if (!WS.aiHidden) {
-    const aiLine = document.createElement('div');
-    aiLine.className = 'ai-line';
-    aiLine.appendChild(text('span', '🤖 AI', 'mini-label'));
-    aiLine.appendChild(ai ? decisionBadge(ai.error ? 'Hata' : ai.ai_decision || ai.decision) : text('span', '—', 'muted-inline'));
-    cD.appendChild(aiLine);
-  }
-  cD.appendChild(text('div', WS.isCloud ? `Kararınız (${Cloud.displayName})` : 'Kararınız', 'mini-label'));
+  const eff = effectiveDecision(rec);
+  const top = document.createElement('div');
+  top.className = 'decision-top';
+  if (eff.decision) {
+    const b = decisionBadge(eff.decision, false, eff.source === 'ai' ? 'ai' : 'person');
+    const aiDec = ai && !ai.error ? DECISION_LABEL[ai.ai_decision || ai.decision] : '';
+    b.title = eff.source === 'ai' ? 'Karar yapay zekâ tarafından verildi'
+      : eff.source === 'final' ? `Yöneticinin nihai kararı${aiDec && !WS.aiHidden ? ` (AI: ${aiDec})` : ''}`
+      : `Sizin kararınız${aiDec && !WS.aiHidden ? ` (AI: ${aiDec})` : ''}`;
+    top.appendChild(b);
+    if (eff.source === 'final') top.appendChild(text('span', 'nihai', 'muted-small'));
+  } else top.appendChild(text('span', ai ? '—' : 'analiz edilmedi', 'muted-inline'));
+  cD.appendChild(top);
+  cD.appendChild(text('div', WS.isCloud ? Cloud.displayName : 'Kararınız', 'vote-label'));
   const vb = document.createElement('div');
   vb.className = 'vote-buttons';
   VOTE_BUTTONS.forEach(b => {
@@ -524,7 +570,7 @@ function buildWsRow(rec) {
     mds.forEach(([mId, info]) => {
       const row = document.createElement('div');
       row.className = 'model-row';
-      row.append(text('span', modelShort(mId), 'model-name'), decisionBadge(info.error ? 'Hata' : info.decision, true));
+      row.append(text('span', modelName(mId), 'model-name'), decisionBadge(info.error ? 'Hata' : info.decision, true, 'ai'));
       row.title = info.error || C.splitRationale(info).text;
       list.appendChild(row);
     });
@@ -542,7 +588,7 @@ function buildWsRow(rec) {
     if (valid.length) {
       const agree = valid.filter(([, i]) => i.decision === ai.decision).length;
       cC.appendChild(text('div', `Uyum ${agree}/${valid.length}`, 'muted-small'));
-      valid.forEach(([mId, i]) => cC.appendChild(text('div', `${modelShort(mId)}: ${Math.round((i.confidence || 0) * 100)}%`, 'muted-small')));
+      valid.forEach(([mId, i]) => cC.appendChild(text('div', `${modelName(mId)}: ${Math.round((i.confidence || 0) * 100)}%`, 'muted-small conf-model')));
     }
   } else cC.appendChild(text('span', '—', 'muted-inline'));
 
@@ -585,7 +631,6 @@ function buildWsRow(rec) {
       d.appendChild(ul);
       cR.appendChild(d);
     }
-    if (ai.promptHash) cR.appendChild(text('div', `prompt v${ai.promptHash}`, 'muted-small mono'));
   } else cR.appendChild(text('span', WS.aiHidden ? 'AI gerekçesi gizli' : '—', 'muted-inline'));
 
   // 8. labels & note
@@ -680,11 +725,11 @@ function updateWsStats() {
     if (rec.removed || isPendingDup(rec)) { dup++; return; }
     active++;
     const ai = WS.ai.get(rec.rid);
-    const d = ai ? ai.ai_decision || ai.decision : null;
-    if (!ai) none++;
+    const d = effectiveDecision(rec).decision;
+    if (!ai && !d) none++;
     else if (d === 'Include') inc++;
     else if (d === 'Exclude') exc++;
-    else unc++;
+    else if (d) unc++;
     if (ai && ai.error) err++;
     if (ai && ai.needs_human_review) rev++;
     const mv = myVote(rec.rid);
