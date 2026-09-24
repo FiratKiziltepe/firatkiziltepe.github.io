@@ -198,11 +198,11 @@ window.Cloud = (() => {
 
     // ---------- votes ----------
     async fetchVotes(pid) {
-      return fetchAll(() => client.from('votes').select('record_id,user_id,decision,labels,note,updated_at').eq('project_id', pid).order('record_id'));
+      return fetchAll(() => client.from('votes').select('record_id,user_id,decision,labels,note,reasons,updated_at').eq('project_id', pid).order('record_id'));
     },
     async upsertVote(v) {
       return check(await client.from('votes').upsert(Object.assign({ user_id: user.id }, v), { onConflict: 'record_id,user_id' })
-        .select('record_id,user_id,decision,labels,note,updated_at').single());
+        .select('record_id,user_id,decision,labels,note,reasons,updated_at').single());
     },
     async upsertVotes(votes) {
       for (let i = 0; i < votes.length; i += CHUNK) {
@@ -212,7 +212,7 @@ window.Cloud = (() => {
     },
     /** Delta sync: rows changed at or after `since` (ISO). Used next to realtime as a safety net. */
     async fetchVotesSince(pid, since) {
-      return check(await client.from('votes').select('record_id,user_id,decision,labels,note,updated_at')
+      return check(await client.from('votes').select('record_id,user_id,decision,labels,note,reasons,updated_at')
         .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
     },
     async fetchRecordsSince(pid, since) {
@@ -220,8 +220,21 @@ window.Cloud = (() => {
         .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
     },
     /** Live votes and record changes (final decisions, duplicates, AI results) of one project. */
-    subscribeProject(pid, { onVote, onRecord, onStatus }) {
+    // ---------- shared vocabulary (labels, exclusion reasons) ----------
+    async fetchTerms(pid) {
+      return check(await client.from('project_terms').select('kind,term').eq('project_id', pid).order('term'));
+    },
+    async addTerm(pid, kind, term) {
+      const { error } = await client.from('project_terms').upsert({ project_id: pid, kind, term }, { onConflict: 'project_id,kind,term', ignoreDuplicates: true });
+      if (error) throw new Error(error.message);
+    },
+    async removeTerm(pid, kind, term) {
+      check(await client.from('project_terms').delete().eq('project_id', pid).eq('kind', kind).eq('term', term));
+    },
+    subscribeProject(pid, { onVote, onRecord, onTerm, onStatus }) {
       const ch = client.channel(`project-${pid}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'project_terms', filter: `project_id=eq.${pid}` },
+          payload => { if (payload.new && onTerm) onTerm(payload.new); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'votes', filter: `project_id=eq.${pid}` },
           payload => { if (payload.new && payload.new.record_id) onVote(payload.new); })
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'records', filter: `project_id=eq.${pid}` },

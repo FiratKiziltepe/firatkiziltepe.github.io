@@ -109,10 +109,12 @@ async function setMyVote(rid, patch, opts = {}) {
   const rec = WS.recByRid(rid);
   if (!rec) return;
   const prev = myVote(rid);
-  const next = Object.assign({ decision: null, labels: [], note: '' }, prev || {}, patch);
+  const next = Object.assign({ decision: null, labels: [], note: '', reasons: [] }, prev || {}, patch);
+  // exclusion reasons only belong to an Exclude vote
+  if (next.decision !== 'Exclude') next.reasons = [];
   if (!WS.isCloud) {
     run.human = run.human || {};
-    run.human[rid] = { decision: next.decision, labels: next.labels, note: next.note };
+    run.human[rid] = { decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons };
     scheduleSave();
     afterVoteView(rid, opts.advance);
     return;
@@ -122,7 +124,7 @@ async function setMyVote(rid, patch, opts = {}) {
   m.set(WS.meId, next);
   afterVoteView(rid, opts.advance);
   try {
-    await Cloud.upsertVote({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note });
+    await Cloud.upsertVote({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons });
   } catch (e) {
     if (prev) m.set(WS.meId, prev); else m.delete(WS.meId);
     renderWorkspace();
@@ -248,8 +250,9 @@ function matchesWs(rec, f) {
     if (isFinite(f.yearTo) && y > f.yearTo) return false;
   }
   if (f.label) {
-    const labs = [...((mv && mv.labels) || []), ...otherVotes(rec.rid).flatMap(v => v.labels || [])];
-    if (!labs.includes(f.label)) return false;
+    const [kind, term] = f.label.startsWith('r:') ? ['reasons', f.label.slice(2)] : ['labels', f.label.replace(/^l:/, '')];
+    const terms = [...((mv && mv[kind]) || []), ...otherVotes(rec.rid).flatMap(v => v[kind] || [])];
+    if (!terms.includes(term)) return false;
   }
   if (f.q) {
     const hay = `${rec.ID} ${rec.Title} ${rec.Authors} ${rec.DOI} ${rec.Abstract} ${ai ? C.splitRationale(ai).text : ''} ${(mv && mv.note) || ''}`.toLowerCase();
@@ -507,24 +510,210 @@ function renderPeopleFilter() {
   el.filterPeople.value = [...el.filterPeople.options].some(o => o.value === cur) ? cur : '';
 }
 
-function renderLabelFilter() {
-  const labels = new Set();
+/** Terms used on visible votes: { labels: Map(term→count), reasons: Map(term→count) } */
+function usedTerms() {
+  const out = { labels: new Map(), reasons: new Map() };
+  const add = (kind, list) => (list || []).forEach(t => out[kind].set(t, (out[kind].get(t) || 0) + 1));
   WS.records.forEach(r => {
     const mv = myVote(r.rid);
-    ((mv && mv.labels) || []).forEach(l => labels.add(l));
-    otherVotes(r.rid).forEach(v => (v.labels || []).forEach(l => labels.add(l)));
+    if (mv) { add('labels', mv.labels); add('reasons', mv.reasons); }
+    otherVotes(r.rid).forEach(v => { add('labels', v.labels); add('reasons', v.reasons); });
   });
+  return out;
+}
+
+function renderLabelFilter() {
+  const used = usedTerms();
+  const byCount = m => [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
+  const labels = byCount(used.labels), reasons = byCount(used.reasons);
   const cur = el.filterLabel.value;
-  const sorted = [...labels].sort((a, b) => a.localeCompare(b, 'tr'));
-  const sig = sorted.join('\u0001');
+  const sig = labels.map(x => x.join('=')).join('|') + '#' + reasons.map(x => x.join('=')).join('|');
   if (el.filterLabel.dataset.sig === sig) return;
   el.filterLabel.dataset.sig = sig;
   el.filterLabel.textContent = '';
-  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Tüm etiketler'; el.filterLabel.appendChild(o0);
-  sorted.forEach(l => { const o = document.createElement('option'); o.value = l; o.textContent = `🏷️ ${l}`; el.filterLabel.appendChild(o); });
-  el.filterLabel.value = sorted.includes(cur) ? cur : '';
-  el.labelSuggestions.textContent = '';
-  sorted.forEach(l => { const o = document.createElement('option'); o.value = l; el.labelSuggestions.appendChild(o); });
+  const opt = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.appendChild(o); };
+  opt(el.filterLabel, '', '🏷️ Etiket / gerekçe: tümü');
+  if (labels.length) {
+    const g = document.createElement('optgroup'); g.label = 'Etiketler';
+    labels.forEach(([t, n]) => opt(g, `l:${t}`, `🏷️ ${t} (${n})`));
+    el.filterLabel.appendChild(g);
+  }
+  if (reasons.length) {
+    const g = document.createElement('optgroup'); g.label = 'Hariç tutma gerekçeleri';
+    reasons.forEach(([t, n]) => opt(g, `r:${t}`, `✕ ${t} (${n})`));
+    el.filterLabel.appendChild(g);
+  }
+  el.filterLabel.value = [...el.filterLabel.options].some(o => o.value === cur) ? cur : '';
+}
+
+// ------------------------------------------------------------
+// Vocabulary: labels and exclusion reasons (Rayyan-style picker)
+// ------------------------------------------------------------
+const DEFAULT_REASONS = [
+  'Konu dışı',
+  'Yanlış popülasyon / katılımcılar',
+  'Yanlış çalışma deseni',
+  'Yanlış yayın türü',
+  'Birincil çalışma değil (derleme, kavramsal)',
+  'Ampirik veri yok',
+  'Yanlış sonuç / değişken',
+  'Arka plan makalesi',
+  'Yabancı dil',
+  'Tam metne erişilemiyor',
+  'Tekrar kayıt'
+];
+
+function criteriaReasons() {
+  const crit = WS.criteria || { inclusion: [], exclusion: [] };
+  const short = t => (t.length > 70 ? t.slice(0, 67) + '…' : t);
+  return [
+    ...(crit.exclusion || []).map(c => `${c.code}: ${short(c.text)}`),
+    ...(crit.inclusion || []).map(c => `${c.code} karşılanmıyor`)
+  ];
+}
+
+function projectTerms(kind) {
+  if (!WS.isCloud) return ((run && run.terms) || {})[kind] || [];
+  return (WS.terms && WS.terms[kind]) || [];
+}
+
+async function addTerm(kind, term) {
+  term = String(term || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+  if (!term) return '';
+  if (!WS.isCloud) {
+    if (!run) return term;
+    run.terms = run.terms || { label: [], reason: [] };
+    if (!run.terms[kind].includes(term)) { run.terms[kind].push(term); scheduleSave(); }
+    return term;
+  }
+  WS.terms = WS.terms || { label: [], reason: [] };
+  if (!WS.terms[kind].includes(term)) WS.terms[kind].push(term);
+  try { await Cloud.addTerm(WS.project.id, kind, term); } catch (e) { showError('Terim kaydedilemedi: ' + e.message); }
+  return term;
+}
+
+/** Groups offered by the picker: [[title, [terms]], …] */
+function termGroups(kind) {
+  const used = usedTerms()[kind === 'label' ? 'labels' : 'reasons'];
+  const custom = [...new Set([...projectTerms(kind), ...used.keys()])];
+  if (kind === 'label') return [['Projedeki etiketler', custom.sort((a, b) => (used.get(b) || 0) - (used.get(a) || 0) || a.localeCompare(b, 'tr'))]];
+  const fixed = new Set([...DEFAULT_REASONS, ...criteriaReasons()]);
+  return [
+    ['Protokol ölçütleri', criteriaReasons()],
+    ['Sık kullanılan gerekçeler', DEFAULT_REASONS],
+    ['Projeye eklenen gerekçeler', custom.filter(t => !fixed.has(t)).sort((a, b) => a.localeCompare(b, 'tr'))]
+  ];
+}
+
+let openPicker = null;
+function closeTermPicker() { if (openPicker) { openPicker.remove(); openPicker = null; } }
+
+/**
+ * Floating checklist with search/add. kind: 'label' | 'reason'.
+ * onApply(selectedTerms) runs on the apply button (or Ctrl+Enter).
+ */
+function openTermPicker({ kind, anchor, selected, title, hint, applyLabel, onApply }) {
+  closeTermPicker();
+  const chosen = new Set(selected || []);
+  const pop = document.createElement('div');
+  pop.className = `term-pop term-pop-${kind}`;
+  pop.setAttribute('role', 'dialog');
+  const head = document.createElement('div');
+  head.className = 'term-head';
+  const ht = document.createElement('div');
+  ht.append(text('div', title, 'term-title'), text('div', hint || '', 'term-hint'));
+  head.append(ht, button('×', 'term-close', closeTermPicker, 'Kapat (Esc)'));
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'term-input';
+  input.placeholder = kind === 'label' ? 'Etiket ara ya da yeni etiket yazıp Enter…' : 'Gerekçe ara ya da kendi gerekçenizi yazıp Enter…';
+  const list = document.createElement('div');
+  list.className = 'term-list';
+  const foot = document.createElement('div');
+  foot.className = 'term-foot';
+  const count = text('span', '', 'term-count');
+  const apply = button(applyLabel, `term-apply term-apply-${kind}`, () => { const v = [...chosen]; closeTermPicker(); onApply(v); });
+  foot.append(count, apply);
+
+  const draw = () => {
+    const q = input.value.trim().toLocaleLowerCase('tr');
+    list.textContent = '';
+    let shown = 0;
+    termGroups(kind).forEach(([gt, terms]) => {
+      const items = terms.filter(t => !q || t.toLocaleLowerCase('tr').includes(q));
+      if (!items.length) return;
+      list.appendChild(text('div', gt, 'term-group'));
+      items.forEach(t => {
+        const lab = document.createElement('label');
+        lab.className = 'term-item' + (chosen.has(t) ? ' on' : '');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = chosen.has(t);
+        cb.addEventListener('change', () => { if (cb.checked) chosen.add(t); else chosen.delete(t); lab.classList.toggle('on', cb.checked); drawCount(); });
+        lab.append(cb, text('span', t, 'term-text'));
+        list.appendChild(lab);
+        shown++;
+      });
+    });
+    // chosen terms that are not in any group (e.g. typed just now)
+    [...chosen].filter(t => !termGroups(kind).some(([, ts]) => ts.includes(t))).forEach(t => {
+      const lab = document.createElement('label');
+      lab.className = 'term-item on';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = true;
+      cb.addEventListener('change', () => { chosen.delete(t); draw(); });
+      lab.append(cb, text('span', t, 'term-text'));
+      list.appendChild(lab);
+    });
+    const exact = q && termGroups(kind).some(([, ts]) => ts.some(t => t.toLocaleLowerCase('tr') === q));
+    if (q && !exact) {
+      const add = button(`＋ "${input.value.trim()}" ${kind === 'label' ? 'etiketini' : 'gerekçesini'} ekle`, 'term-add', addTyped);
+      list.appendChild(add);
+    } else if (!shown) list.appendChild(text('div', 'Henüz kayıtlı terim yok. Yazıp Enter\'a basın.', 'term-empty'));
+    drawCount();
+  };
+  const drawCount = () => { count.textContent = chosen.size ? `${chosen.size} seçili` : (kind === 'reason' ? 'Gerekçesiz de hariç tutabilirsiniz' : 'Seçim yok'); };
+  async function addTyped() {
+    const t = await addTerm(kind, input.value);
+    if (t) chosen.add(t);
+    input.value = '';
+    draw();
+    input.focus({ preventScroll: true });
+  }
+  input.addEventListener('input', draw);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); apply.click(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); if (input.value.trim()) addTyped(); else apply.click(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeTermPicker(); }
+  });
+  pop.append(head, input, list, foot);
+  document.body.appendChild(pop);
+  openPicker = pop;
+  draw();
+  // place next to the anchor, inside the viewport
+  const r = anchor.getBoundingClientRect();
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  let left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w));
+  let top = r.bottom + 6;
+  if (top + h > window.innerHeight - 12) top = Math.max(12, r.top - h - 6);
+  pop.style.left = `${left}px`;
+  pop.style.top = `${top}px`;
+  input.focus({ preventScroll: true });
+}
+
+document.addEventListener('mousedown', e => { if (openPicker && !openPicker.contains(e.target)) closeTermPicker(); });
+window.addEventListener('scroll', () => closeTermPicker(), { passive: true });
+
+function openReasonPicker(rec, anchor) {
+  const mv = myVote(rec.rid) || {};
+  openTermPicker({
+    kind: 'reason', anchor,
+    selected: mv.decision === 'Exclude' ? mv.reasons || [] : [],
+    title: 'Gerekçeyle hariç tut',
+    hint: 'Gerekçe seçmek oyu "Hariç" yapar. Gerekçesiz hariç için ✕ düğmesini kullanın.',
+    applyLabel: '✕ Hariç tut',
+    onApply: reasons => setMyVote(rec.rid, { decision: 'Exclude', reasons }, { advance: 'focus' })
+  });
 }
 
 function refreshRow(rid) {
@@ -845,6 +1034,21 @@ function decisionPanel(rec, ai, mv) {
   });
   panel.appendChild(vb);
 
+  // exclusion reasons (Rayyan-style): picking a reason makes the vote Exclude
+  const rs = mine === 'Exclude' ? (mv.reasons || []) : [];
+  const rrow = document.createElement('div');
+  rrow.className = 'dp-reasons';
+  rs.forEach(t => {
+    const chip = text('span', t, 'reason-chip');
+    chip.title = t;
+    chip.appendChild(button('×', 'chip-x', () => setMyVote(rec.rid, { reasons: rs.filter(x => x !== t) }), 'Gerekçeyi kaldır'));
+    rrow.appendChild(chip);
+  });
+  const rb = button(rs.length ? '✎ Gerekçe' : '✕ Gerekçeyle hariç…', 'btn-ghost btn-ghost-sm reason-btn', e => openReasonPicker(rec, e.currentTarget),
+    'Hariç tutma gerekçesi seç ya da ekle (kısayol R)');
+  rrow.appendChild(rb);
+  panel.appendChild(rrow);
+
   // ② the team (cloud only)
   if (WS.isCloud) {
     const sec = document.createElement('div');
@@ -870,6 +1074,7 @@ function decisionPanel(rec, ai, mv) {
         who.append(icon('person'), document.createTextNode(personName(v.user_id)));
         row.append(who, decisionBadge(v.decision, true));
         sec.appendChild(row);
+        if (v.decision === 'Exclude' && v.reasons && v.reasons.length) sec.appendChild(text('div', `gerekçe: ${v.reasons.join(', ')}`, 'dp-other-reasons'));
       });
     }
     panel.appendChild(sec);
@@ -953,26 +1158,13 @@ function cellLabels(cell, rec, mv) {
     chip.appendChild(button('×', 'chip-x', () => setMyVote(rec.rid, { labels: labels.filter(y => y !== l) }), 'Etiketi kaldır'));
     row.appendChild(chip);
   });
-  const addBtn = button('+ Etiket', 'btn-ghost btn-ghost-sm', () => {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'label-input';
-    input.placeholder = 'etiket, Enter';
-    input.setAttribute('list', 'labelSuggestions');
-    let done = false;
-    const commit = () => {
-      if (done) return; done = true;
-      const v = input.value.trim().replace(/\s+/g, ' ').slice(0, 40);
-      if (v && !labels.includes(v)) setMyVote(rec.rid, { labels: [...labels, v] });
-      else refreshRow(rec.rid);
-    };
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); commit(); }
-      if (e.key === 'Escape') { done = true; refreshRow(rec.rid); }
+  const addBtn = button('+ Etiket', 'btn-ghost btn-ghost-sm', e => {
+    openTermPicker({
+      kind: 'label', anchor: e.currentTarget, selected: labels,
+      title: 'Etiketler', hint: 'Projedeki tüm etiketler; yeni etiket yazıp Enter ile ekleyin.',
+      applyLabel: 'Kaydet',
+      onApply: next => setMyVote(rec.rid, { labels: next })
     });
-    input.addEventListener('blur', commit);
-    addBtn.replaceWith(input);
-    input.focus();
   });
   row.appendChild(addBtn);
   const noteBox = document.createElement('div');
@@ -1047,6 +1239,11 @@ function onScreenKey(e) {
   const k = e.key.toLowerCase();
   if (k === 'j' || e.key === 'ArrowDown' && e.shiftKey) { e.preventDefault(); moveFocus(1); return; }
   if (k === 'k' || e.key === 'ArrowUp' && e.shiftKey) { e.preventDefault(); moveFocus(-1); return; }
+  if (k === 'r' && WS.focusRid) {
+    const btn = el.resultsBody.querySelector(`tr[data-rid="${WS.focusRid}"] .reason-btn`);
+    if (btn) { e.preventDefault(); openReasonPicker(WS.recByRid(WS.focusRid), btn); }
+    return;
+  }
   const vote = { 1: 'Include', 2: 'Uncertain', 3: 'Exclude' }[e.key];
   if (vote && WS.focusRid) {
     e.preventDefault();
@@ -1148,14 +1345,15 @@ async function setArchived(recs, archived) {
 }
 
 /** My vote on every selected record (decision null removes it). Labels and notes are kept. */
-async function bulkVote(decision) {
+async function bulkVote(decision, reasons) {
   const recs = selectedRecords();
   if (!recs.length) return;
-  const what = decision ? `"${DEC_TR[decision]}" oyunuz` : 'oyunuz kaldırılacak';
+  const what = decision ? `"${DEC_TR[decision]}" oyunuz${reasons && reasons.length ? ` (gerekçe: ${reasons.join(', ')})` : ''}` : 'oyunuz kaldırılacak';
   if (!confirm(`${recs.length} seçili kayıt için ${decision ? `${what} işlenecek` : what}. Devam edilsin mi?`)) return;
   const rows = recs.map(rec => {
     const prev = myVote(rec.rid) || {};
-    return { rec, next: { decision, labels: prev.labels || [], note: prev.note || '' } };
+    const rs = decision !== 'Exclude' ? [] : reasons || prev.reasons || [];
+    return { rec, next: { decision, labels: prev.labels || [], note: prev.note || '', reasons: rs } };
   });
   if (!WS.isCloud) {
     run.human = run.human || {};
@@ -1169,7 +1367,7 @@ async function bulkVote(decision) {
       m.set(WS.meId, next);
     });
     try {
-      await Cloud.upsertVotes(rows.map(({ rec, next }) => ({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note })));
+      await Cloud.upsertVotes(rows.map(({ rec, next }) => ({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons })));
     } catch (e) {
       backup.forEach(([rid, v]) => { const m = WS.votes.get(rid); if (v) m.set(WS.meId, v); else m.delete(WS.meId); });
       renderWorkspace();
@@ -1488,6 +1686,7 @@ function wsExportRows() {
       reviewers.forEach((name, uid) => {
         const v = m.get(uid);
         row[`Hakem: ${name}`] = v && v.decision ? DECISION_LABEL[v.decision] : '';
+        row[`Gerekçe: ${name}`] = v ? (v.reasons || []).join('; ') : '';
         row[`Etiket/Not: ${name}`] = v ? [(v.labels || []).join(', '), v.note].filter(Boolean).join(' · ') : '';
       });
       const ds = [...m.values()].map(v => v.decision).filter(Boolean);
@@ -1495,6 +1694,7 @@ function wsExportRows() {
       row['Nihai (yönetici)'] = rec.finalDecision || '';
     } else {
       const v = myVote(rec.rid) || {};
+      row['Hariç Gerekçeleri'] = (v.reasons || []).join('; ');
       row['Etiketler'] = (v.labels || []).join(', ');
       row['Not'] = v.note || '';
     }
@@ -1621,6 +1821,8 @@ async function openCloudProject(id) {
     WS.selected.clear();
     WS.page = 1; WS.dupPage = 1; WS.showAllVotes = false;
     WS.invalidateIndex();
+    const terms = await Cloud.fetchTerms(id).catch(() => []);
+    WS.terms = { label: terms.filter(t => t.kind === 'label').map(t => t.term), reason: terms.filter(t => t.kind === 'reason').map(t => t.term) };
     const members = await Cloud.listMembers(id).catch(() => []);
     WS.members = members.map(m => m.user_id);
     members.forEach(m => { if (m.profiles && !WS.profiles.has(m.user_id)) WS.profiles.set(m.user_id, m.profiles); });
@@ -1640,7 +1842,7 @@ function addVote(v) {
   if (!rid) return;
   let m = WS.votes.get(rid);
   if (!m) { m = new Map(); WS.votes.set(rid, m); }
-  m.set(v.user_id, { decision: v.decision, labels: v.labels || [], note: v.note || '', updated_at: v.updated_at });
+  m.set(v.user_id, { decision: v.decision, labels: v.labels || [], note: v.note || '', reasons: v.reasons || [], updated_at: v.updated_at });
 }
 
 // ------------------------------------------------------------
@@ -1661,6 +1863,7 @@ function startLiveSync(pid, rows, votes) {
   WS.unsubscribe = Cloud.subscribeProject(pid, {
     onVote: v => { applyRemoteVote(v); },
     onRecord: row => { applyRemoteRecord(row); },
+    onTerm: t => { WS.terms = WS.terms || { label: [], reason: [] }; if (!WS.terms[t.kind].includes(t.term)) WS.terms[t.kind].push(t.term); },
     onStatus: st => {
       if (!WS.sync) return;
       WS.sync.status = st === 'SUBSCRIBED' ? 'live' : (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' || st === 'CLOSED') ? 'poll' : WS.sync.status;
@@ -1760,7 +1963,7 @@ function closeCloudProject() {
   stopLiveSync();
   WS.source = 'local';
   WS.project = null;
-  WS.cloudRecords = []; WS.cloudAi = new Map(); WS.votes = new Map();
+  WS.cloudRecords = []; WS.cloudAi = new Map(); WS.votes = new Map(); WS.terms = null;
   WS.selected.clear(); WS.page = 1;
   WS.invalidateIndex();
   renderWorkspace(); renderDuplicates();
@@ -1818,7 +2021,11 @@ async function saveToCloud() {
     const idOf = new Map(ids.map(x => [x.rid, x.id]));
     const myVotes = Object.entries(run.human || {})
       .filter(([rid, h]) => idOf.has(rid) && (h.decision || (h.labels && h.labels.length) || h.note))
-      .map(([rid, h]) => ({ record_id: idOf.get(rid), decision: h.decision || null, labels: h.labels || [], note: h.note || '' }));
+      .map(([rid, h]) => ({ record_id: idOf.get(rid), decision: h.decision || null, labels: h.labels || [], note: h.note || '', reasons: h.reasons || [] }));
+    // project vocabulary (labels / custom reasons created locally)
+    for (const kind of ['label', 'reason']) {
+      for (const t of ((run.terms || {})[kind] || [])) await Cloud.addTerm(project.id, kind, t).catch(() => {});
+    }
     if (myVotes.length) {
       el.saveProgress.textContent = `Kararlarınız yükleniyor (${myVotes.length})…`;
       await Cloud.upsertVotes(myVotes);
@@ -2136,6 +2343,16 @@ function initWorkspace() {
     const d = b.dataset.decision === 'none' ? null : b.dataset.decision;
     if (b.dataset.target === 'final') bulkFinal(d || ''); else bulkVote(d);
   }));
+  el.bulkReasonBtn.addEventListener('click', e => {
+    if (!WS.selected.size) return;
+    openTermPicker({
+      kind: 'reason', anchor: e.currentTarget, selected: [],
+      title: `Seçili ${WS.selected.size} kayda gerekçeyle hariç`,
+      hint: 'Seçtiğiniz gerekçeler her kayıttaki oyunuzun yerine geçer.',
+      applyLabel: '✕ Hepsini hariç tut',
+      onApply: reasons => bulkVote('Exclude', reasons)
+    });
+  });
   el.filterPeople.addEventListener('change', () => { WS.page = 1; renderWorkspace(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pollChanges(); });
   window.addEventListener('online', () => pollChanges());

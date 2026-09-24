@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13.9">
+    <link rel="stylesheet" href="style.css?v=14.0">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -475,6 +475,7 @@
                             <button type="button" class="bulk-btn inc" data-target="vote" data-decision="Include" disabled>✓ Dahil</button>
                             <button type="button" class="bulk-btn may" data-target="vote" data-decision="Uncertain" disabled>? Belirsiz</button>
                             <button type="button" class="bulk-btn exc" data-target="vote" data-decision="Exclude" disabled>✕ Hariç</button>
+                            <button type="button" id="bulkReasonBtn" class="bulk-btn exc" disabled title="Seçili kayıtlara gerekçeyle hariç oyu">✕ + gerekçe…</button>
                             <button type="button" class="bulk-btn clr" data-target="vote" data-decision="none" disabled title="Seçili kayıtlardaki oyunuzu kaldır">⌫</button>
                         </span>
                         <span class="bulk-group" id="bulkFinalGroup" title="Seçili kayıtların nihai kararı" style="display: none;">
@@ -506,14 +507,13 @@
                                 <th class="col-pub">Yayın <span class="th-sorts"><button type="button" class="th-sort" data-sort="title">Başlık</button><button type="button" class="th-sort" data-sort="author">Yazar</button><button type="button" class="th-sort" data-sort="year">Yıl</button></span></th>
                                 <th class="col-abstract">Özet · kanıtlar <span class="ev-legend"><mark class="ev-mark ev-inc">dahil</mark><mark class="ev-mark ev-exc">hariç</mark><mark class="ev-mark ev-may">belirsiz</mark></span></th>
                                 <th class="col-reason">Ölçütler · kısa gerekçe</th>
-                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-hint">satıra tıklayın · 1 Dahil · 2 Belirsiz · 3 Hariç · J/K gez</span></th>
+                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-hint">satıra tıklayın · 1 Dahil · 2 Belirsiz · 3 Hariç · R gerekçe · J/K gez</span></th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody"></tbody>
                     </table>
                 </div>
                 <div id="pagerBottom" class="pager"></div>
-                <datalist id="labelSuggestions"></datalist>
             </div>
         </section>
 
@@ -655,11 +655,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13.9"></script>
-    <script src="screening-core.js?v=13.9"></script>
-    <script src="default-prompt.js?v=13.9"></script>
-    <script src="cloud.js?v=13.9"></script>
-    <script src="script.js?v=13.9"></script>
-    <script src="workspace.js?v=13.9"></script>
+    <script src="supabase-config.js?v=14.0"></script>
+    <script src="screening-core.js?v=14.0"></script>
+    <script src="default-prompt.js?v=14.0"></script>
+    <script src="cloud.js?v=14.0"></script>
+    <script src="script.js?v=14.0"></script>
+    <script src="workspace.js?v=14.0"></script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 -- ============================================================
 -- Literatür Tarama — collaborative screening schema (Supabase)
 -- Applied to project "makaletara" (mgrjdyfjstmpvedunipb) as the
--- migrations screening_schema, move_helpers_to_private, members_can_curate and records_archive.
+-- migrations screening_schema, move_helpers_to_private, members_can_curate, records_archive
+-- and vote_reasons_and_terms.
 -- Run this file once on an empty project to recreate everything.
 --
 -- Roles
@@ -92,6 +93,7 @@ create table public.votes (
   decision text check (decision in ('Include', 'Exclude', 'Uncertain')),
   labels text[] not null default '{}',
   note text not null default '',
+  reasons text[] not null default '{}',             -- exclusion reasons (Rayyan-style), only with decision = 'Exclude'
   updated_at timestamptz not null default now(),
   primary key (record_id, user_id)
 );
@@ -249,3 +251,22 @@ alter publication supabase_realtime add table public.records;
 -- delta sync ("what changed since t")
 create index votes_project_updated_idx on public.votes(project_id, updated_at);
 create index records_project_updated_idx on public.records(project_id, updated_at);
+
+-- ------------------------------------------------------------
+-- Shared vocabulary per project (labels, custom exclusion reasons)
+-- ------------------------------------------------------------
+create table public.project_terms (
+  project_id uuid not null references public.projects(id) on delete cascade,
+  kind text not null check (kind in ('label', 'reason')),
+  term text not null check (char_length(term) between 1 and 80),
+  created_by uuid default auth.uid() references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  primary key (project_id, kind, term)
+);
+create index project_terms_created_by_idx on public.project_terms(created_by);
+alter table public.project_terms enable row level security;
+create policy terms_select on public.project_terms for select to authenticated using (private.is_member(project_id));
+create policy terms_insert on public.project_terms for insert to authenticated with check (private.is_member(project_id));
+create policy terms_delete on public.project_terms for delete to authenticated using (private.is_member(project_id));
+revoke all on public.project_terms from anon;
+alter publication supabase_realtime add table public.project_terms;
