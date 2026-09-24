@@ -102,7 +102,8 @@ window.Cloud = (() => {
       removed: row.removed,
       removedReason: row.removed_reason,
       finalDecision: row.final_decision || '',
-      finalBy: row.final_by || null
+      finalBy: row.final_by || null,
+      updatedAt: row.updated_at || ''
     };
   }
 
@@ -207,11 +208,23 @@ window.Cloud = (() => {
         check(await client.from('votes').upsert(rows, { onConflict: 'record_id,user_id' }));
       }
     },
-    subscribeVotes(pid, onVote) {
-      const ch = client.channel(`votes-${pid}`)
+    /** Delta sync: rows changed at or after `since` (ISO). Used next to realtime as a safety net. */
+    async fetchVotesSince(pid, since) {
+      return check(await client.from('votes').select('record_id,user_id,decision,labels,note,updated_at')
+        .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
+    },
+    async fetchRecordsSince(pid, since) {
+      return check(await client.from('records').select('*')
+        .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
+    },
+    /** Live votes and record changes (final decisions, duplicates, AI results) of one project. */
+    subscribeProject(pid, { onVote, onRecord, onStatus }) {
+      const ch = client.channel(`project-${pid}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'votes', filter: `project_id=eq.${pid}` },
           payload => { if (payload.new && payload.new.record_id) onVote(payload.new); })
-        .subscribe();
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'records', filter: `project_id=eq.${pid}` },
+          payload => { if (payload.new && payload.new.rid) onRecord(payload.new); })
+        .subscribe(status => { if (onStatus) onStatus(status); });
       return () => { client.removeChannel(ch); };
     }
   };

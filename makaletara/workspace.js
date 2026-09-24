@@ -42,7 +42,9 @@ const WS = {
     return (this.project && this.project.protocol && this.project.protocol.criteria) || { inclusion: [], exclusion: [] };
   },
   get isCloud() { return this.source === 'cloud'; },
-  get canCurate() { return this.source === 'local' || Cloud.isAdmin; },
+  // members work with the same rights as the admin (final decisions, duplicates,
+  // re-analysis, settings); creating/deleting projects and members stay admin-only
+  get canCurate() { return this.source === 'local' || !!(this.isCloud && Cloud.user); },
   get meId() { return this.isCloud ? Cloud.user.id : 'local'; },
   get blindForMe() {
     return this.isCloud && this.project.blind && !(Cloud.isAdmin && this.showAllVotes);
@@ -182,6 +184,7 @@ function wsFilterState() {
     mine: el.filterMine.value,
     status: el.filterStatus.value,
     label: el.filterLabel.value,
+    people: WS.isCloud ? el.filterPeople.value : '',
     sort: el.sortBy.value
   };
 }
@@ -211,6 +214,22 @@ function matchesWs(rec, f) {
   if (f.status === 'nofinal' && rec.finalDecision) return false;
   if (f.status === 'final' && !rec.finalDecision) return false;
   if (f.status === 'noabstract' && !rec.noAbstract) return false;
+  if (f.status === 'flags' && !(ai && aiFlags(ai).length)) return false;
+  if (f.status.startsWith('incons')) {
+    const said = ai ? inconsistencies(ai) : [];
+    if (!said.length) return false;
+    if (f.status !== 'incons' && !said.includes(f.status.slice(7))) return false;
+  }
+  if (f.people) {
+    const [kind, who, want] = f.people.split('|');
+    if (kind === 'f') {
+      if (want === 'none' ? !!rec.finalDecision : rec.finalDecision !== want) return false;
+    } else {
+      const v = who === WS.meId ? myVote(rec.rid) : ((WS.votes.get(rec.rid) || new Map()).get(who) || null);
+      const d = v && v.decision;
+      if (want === 'none' ? !!d : want === 'any' ? !d : d !== want) return false;
+    }
+  }
 
   if (f.label) {
     const labs = [...((mv && mv.labels) || []), ...otherVotes(rec.rid).flatMap(v => v.labels || [])];
@@ -252,6 +271,7 @@ function renderWorkspace() {
   if (!has) return;
   renderSourceBar();
   renderLabelFilter();
+  renderPeopleFilter();
   const list = filteredRecords();
   const ps = pageSize();
   const pages = Math.max(1, Math.ceil(list.length / ps));
@@ -317,6 +337,9 @@ function renderSourceBar() {
     left.append(pill(p.blind ? '🙈 Kör mod açık' : '👁️ Kör mod kapalı', p.blind ? 'pill-warn' : 'pill-ok'));
     if (p.hide_ai) left.append(pill('🤖 AI kararları hakemlerden gizli', 'pill-muted'));
     left.append(pill(Cloud.isAdmin ? '🛡️ Yönetici' : '🧑‍⚖️ Hakem', 'pill-muted'));
+    const live = text('span', '', 'live-status');
+    live.id = 'liveStatus';
+    left.appendChild(live);
     if (Cloud.isAdmin && p.blind) {
       const lab = document.createElement('label');
       lab.className = 'checkbox-label inline-check';
@@ -337,10 +360,58 @@ function renderSourceBar() {
   }
   bar.append(left, right);
   el.saveToCloudBtn.style.display = !WS.isCloud && Cloud.available && Cloud.isAdmin ? 'inline-flex' : 'none';
-  el.loadProtocolBtn.style.display = WS.isCloud && Cloud.isAdmin ? 'inline-flex' : 'none';
+  el.loadProtocolBtn.style.display = WS.isCloud && WS.canCurate ? 'inline-flex' : 'none';
+  el.filterPeople.style.display = WS.isCloud ? '' : 'none';
+  el.bulkFinalGroup.style.display = WS.isCloud ? 'inline-flex' : 'none';
+  renderLiveStatus();
   el.costPanel.style.display = WS.isCloud ? 'none' : 'grid';
   el.statConflictCard.style.display = WS.isCloud && !WS.blindForMe ? 'block' : 'none';
   el.filterStatus.querySelectorAll('.cloud-only').forEach(o => { o.hidden = !WS.isCloud; });
+}
+
+// audit notes of the consensus row and of every model
+function aiFlags(ai) {
+  const out = new Set(C.splitRationale(ai).flags);
+  Object.values(ai.modelDecisions || {}).forEach(m => (m.flags || []).forEach(f => out.add(f)));
+  return [...out];
+}
+
+/** Decisions a model gave that contradicted its own criterion verdicts, e.g. ["Include"]. */
+function inconsistencies(ai) {
+  const said = new Set();
+  aiFlags(ai).forEach(f => { const m = f.match(/tutarsızlık: model "(\w+)" dedi/); if (m) said.add(m[1]); });
+  Object.values(ai.modelDecisions || {}).forEach(m => { if (m.inconsistent && m.model_decision) said.add(m.model_decision); });
+  return [...said];
+}
+
+/** Reviewer / final-decision filter (cloud): one option group per visible reviewer. */
+function renderPeopleFilter() {
+  if (!WS.isCloud) return;
+  const people = new Map();
+  people.set(WS.meId, `${Cloud.displayName} (siz)`);
+  if (!WS.blindForMe) {
+    (WS.members || []).forEach(uid => { if (!people.has(uid)) people.set(uid, personName(uid)); });
+    WS.votes.forEach(m => m.forEach((v, uid) => { if (!people.has(uid)) people.set(uid, personName(uid)); }));
+  }
+  const sig = [...people.entries()].map(e => e.join(':')).join('|') + WS.blindForMe;
+  if (el.filterPeople.dataset.sig === sig) return;
+  el.filterPeople.dataset.sig = sig;
+  const cur = el.filterPeople.value;
+  el.filterPeople.textContent = '';
+  const opt = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.appendChild(o); };
+  opt(el.filterPeople, '', '👥 Hakem / nihai: tümü');
+  const fg = document.createElement('optgroup');
+  fg.label = '⚖ Nihai karar';
+  [['Include', 'Dahil'], ['Uncertain', 'Belirsiz'], ['Exclude', 'Hariç'], ['none', 'verilmemiş']].forEach(([v, t]) => opt(fg, `f||${v}`, `Nihai: ${t}`));
+  el.filterPeople.appendChild(fg);
+  people.forEach((name, uid) => {
+    const g = document.createElement('optgroup');
+    g.label = `👤 ${name}`;
+    [['Include', 'Dahil dedikleri'], ['Uncertain', 'Belirsiz dedikleri'], ['Exclude', 'Hariç dedikleri'], ['any', 'oy verdikleri'], ['none', 'oy vermedikleri']]
+      .forEach(([v, t]) => opt(g, `u|${uid}|${v}`, `${name}: ${t}`));
+    el.filterPeople.appendChild(g);
+  });
+  el.filterPeople.value = [...el.filterPeople.options].some(o => o.value === cur) ? cur : '';
 }
 
 function renderLabelFilter() {
@@ -415,7 +486,7 @@ function decisionBadge(decision, small, source) {
  */
 function effectiveDecision(rec) {
   const ai = WS.ai.get(rec.rid);
-  if (WS.isCloud && rec.finalDecision && !WS.blindForMe) return { decision: rec.finalDecision, source: 'final' };
+  if (WS.isCloud && rec.finalDecision) return { decision: rec.finalDecision, source: 'final' };
   const mv = myVote(rec.rid);
   if (mv && mv.decision) return { decision: mv.decision, source: 'me' };
   if (ai && !ai.error && !WS.aiHidden) return { decision: ai.ai_decision || ai.decision, source: 'ai' };
@@ -513,7 +584,7 @@ function consensusInfo(rec, ai) {
   const aiDec = ai && !ai.error && !WS.aiHidden ? ai.ai_decision || ai.decision : null;
   const mine = (myVote(rec.rid) || {}).decision || null;
   if (WS.isCloud) {
-    if (rec.finalDecision && !WS.blindForMe) return { kind: 'final', decision: rec.finalDecision, text: 'Nihai karar' };
+    if (rec.finalDecision) return { kind: 'final', decision: rec.finalDecision, text: 'Nihai karar' };
     const ds = allVisibleDecisions(rec.rid);
     if (new Set(ds).size > 1) {
       const c = ds.reduce((a, d) => (a[d] = (a[d] || 0) + 1, a), {});
@@ -556,7 +627,7 @@ function buildWsRow(rec) {
     updateSelectionBar();
   });
   cS.append(cb, text('div', `#${rec.order + 1}`, 'row-no'));
-  const fin = WS.isCloud && rec.finalDecision && !WS.blindForMe ? rec.finalDecision : null;
+  const fin = WS.isCloud && rec.finalDecision ? rec.finalDecision : null;
   const shown = fin || (mv && mv.decision) || null;
   const mark = text('div', shown ? DEC_ICON[shown] : '○',
     `row-mark ${shown ? `row-mark-${shown.toLowerCase()}` : 'row-mark-wait'}${fin ? ' row-mark-final' : ''}`);
@@ -624,6 +695,7 @@ function buildWsRow(rec) {
     if (sr.flags.length) {
       const d = document.createElement('details');
       d.className = 'audit-flags';
+      d.open = true;
       d.appendChild(text('summary', `⚠️ Sistem denetimi (${sr.flags.length})`));
       const ul = document.createElement('ul');
       sr.flags.forEach(f => ul.appendChild(text('li', f)));
@@ -746,8 +818,8 @@ function decisionPanel(rec, ai, mv) {
     panel.appendChild(sec);
   }
 
-  // ④ admin's final decision
-  if (WS.isCloud && Cloud.isAdmin) {
+  // ④ final decision (any project member)
+  if (WS.isCloud) {
     const sec = document.createElement('div');
     sec.className = 'dp-sec dp-sec-final';
     const lab = text('span', 'Nihai karar', 'dp-sec-title');
@@ -922,6 +994,63 @@ function updateWsStats() {
   updateTabBadges();
 }
 
+function selectedRecords() {
+  return [...WS.selected].map(rid => WS.recByRid(rid)).filter(r => r && !r.removed);
+}
+
+/** My vote on every selected record (decision null removes it). Labels and notes are kept. */
+async function bulkVote(decision) {
+  const recs = selectedRecords();
+  if (!recs.length) return;
+  const what = decision ? `"${DEC_TR[decision]}" oyunuz` : 'oyunuz kaldırılacak';
+  if (!confirm(`${recs.length} seçili kayıt için ${decision ? `${what} işlenecek` : what}. Devam edilsin mi?`)) return;
+  const rows = recs.map(rec => {
+    const prev = myVote(rec.rid) || {};
+    return { rec, next: { decision, labels: prev.labels || [], note: prev.note || '' } };
+  });
+  if (!WS.isCloud) {
+    run.human = run.human || {};
+    rows.forEach(({ rec, next }) => { run.human[rec.rid] = next; });
+    scheduleSave();
+  } else {
+    const backup = rows.map(({ rec }) => [rec.rid, myVote(rec.rid)]);
+    rows.forEach(({ rec, next }) => {
+      let m = WS.votes.get(rec.rid);
+      if (!m) { m = new Map(); WS.votes.set(rec.rid, m); }
+      m.set(WS.meId, next);
+    });
+    try {
+      await Cloud.upsertVotes(rows.map(({ rec, next }) => ({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note })));
+    } catch (e) {
+      backup.forEach(([rid, v]) => { const m = WS.votes.get(rid); if (v) m.set(WS.meId, v); else m.delete(WS.meId); });
+      renderWorkspace();
+      return showError('Toplu oy kaydedilemedi, geri alındı: ' + e.message);
+    }
+  }
+  WS.selected.clear();
+  renderWorkspace();
+  showSuccess(`${rows.length} kayda ${decision ? `"${DEC_TR[decision]}" oyunuz işlendi` : 'ait oyunuz kaldırıldı'}.`);
+}
+
+/** Final decision on every selected record (cloud; decision '' removes it). */
+async function bulkFinal(decision) {
+  const recs = selectedRecords();
+  if (!recs.length || !WS.isCloud) return;
+  if (!confirm(`${recs.length} seçili kaydın nihai kararı ${decision ? `"${DEC_TR[decision]}" yapılacak` : 'kaldırılacak'}. Devam edilsin mi?`)) return;
+  const backup = recs.map(r => [r, r.finalDecision]);
+  recs.forEach(r => { r.finalDecision = decision || ''; });
+  try {
+    await Cloud.patchRecords(WS.project.id, recs.map(r => ({ rid: r.rid, final_decision: decision || null, final_by: decision ? Cloud.user.id : null })));
+  } catch (e) {
+    backup.forEach(([r, v]) => { r.finalDecision = v; });
+    renderWorkspace();
+    return showError('Toplu nihai karar kaydedilemedi, geri alındı: ' + e.message);
+  }
+  WS.selected.clear();
+  renderWorkspace();
+  showSuccess(`${recs.length} kaydın nihai kararı ${decision ? `"${DEC_TR[decision]}" olarak işlendi` : 'kaldırıldı'}.`);
+}
+
 function updateSelectionBar() {
   const n = WS.selected.size;
   const canRun = WS.canCurate;
@@ -929,6 +1058,10 @@ function updateSelectionBar() {
   el.selCount.textContent = n ? `${n} kayıt seçili` : 'Seçim yok';
   el.reanalyzeSelectedBtn.disabled = !n;
   el.clearSelectionBtn.disabled = !n;
+  document.querySelectorAll('.bulk-btn').forEach(b => { b.disabled = !n; });
+  const nf = (WS._lastFiltered || []).length;
+  el.selectFilteredBtn.textContent = `☑ Filtredekilerin tümünü seç (${nf.toLocaleString('tr-TR')})`;
+  el.selectFilteredBtn.disabled = !nf || (WS._lastFiltered || []).every(r => WS.selected.has(r.rid));
   const total = (WS._lastFiltered || []).length;
   el.reanalyzeAllBtn.textContent = `🔁 Filtredeki tümünü yeniden analiz et (${total.toLocaleString('tr-TR')})`;
   el.reanalyzeAllBtn.disabled = !total;
@@ -1303,13 +1436,10 @@ async function openCloudProject(id) {
     WS.selected.clear();
     WS.page = 1; WS.dupPage = 1; WS.showAllVotes = false;
     WS.invalidateIndex();
-    WS.unsubscribe = Cloud.subscribeVotes(id, v => {
-      if (v.user_id === WS.meId) return;
-      addVote(v);
-      const rid = WS.byDbId.get(v.record_id);
-      if (rid) refreshRow(rid);
-      updateWsStats();
-    });
+    const members = await Cloud.listMembers(id).catch(() => []);
+    WS.members = members.map(m => m.user_id);
+    members.forEach(m => { if (m.profiles && !WS.profiles.has(m.user_id)) WS.profiles.set(m.user_id, m.profiles); });
+    startLiveSync(id, rows, votes);
     renderWorkspace(); renderDuplicates();
     showSuccess(`"${project.name}" açıldı: ${rows.length} kayıt, ${votes.length} karar.`);
   } catch (e) {
@@ -1320,6 +1450,7 @@ async function openCloudProject(id) {
 }
 
 function addVote(v) {
+  // (remote or initial load)
   const rid = WS.byDbId.get(v.record_id);
   if (!rid) return;
   let m = WS.votes.get(rid);
@@ -1327,9 +1458,121 @@ function addVote(v) {
   m.set(v.user_id, { decision: v.decision, labels: v.labels || [], note: v.note || '', updated_at: v.updated_at });
 }
 
+// ------------------------------------------------------------
+// Live sync between reviewers
+//  1. Supabase Realtime pushes votes and record changes (final decisions,
+//     duplicates, AI results) the moment they are written.
+//  2. A light delta poll every 15 s ("rows changed since t") repairs anything
+//     a sleeping laptop or a dropped websocket missed; it also runs when the
+//     tab becomes visible again or the network comes back.
+// RLS applies to both: in blind mode other reviewers' votes never arrive.
+// ------------------------------------------------------------
+const SYNC_MS = 15000;
+
+function startLiveSync(pid, rows, votes) {
+  stopLiveSync();
+  const maxTs = list => list.reduce((m, r) => (r.updated_at && r.updated_at > m ? r.updated_at : m), '1970-01-01T00:00:00Z');
+  WS.sync = { pid, voteTs: maxTs(votes), recTs: maxTs(rows), status: 'connecting', last: Date.now(), busy: false };
+  WS.unsubscribe = Cloud.subscribeProject(pid, {
+    onVote: v => { applyRemoteVote(v); },
+    onRecord: row => { applyRemoteRecord(row); },
+    onStatus: st => {
+      if (!WS.sync) return;
+      WS.sync.status = st === 'SUBSCRIBED' ? 'live' : (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' || st === 'CLOSED') ? 'poll' : WS.sync.status;
+      if (st === 'SUBSCRIBED') pollChanges();   // catch up on anything written while connecting
+      renderLiveStatus();
+    }
+  });
+  WS.sync.timer = setInterval(() => { if (!document.hidden) pollChanges(); }, SYNC_MS);
+  WS.sync.tick = setInterval(renderLiveStatus, 5000);
+}
+
+function stopLiveSync() {
+  if (WS.unsubscribe) { WS.unsubscribe(); WS.unsubscribe = null; }
+  if (WS.sync) { clearInterval(WS.sync.timer); clearInterval(WS.sync.tick); }
+  WS.sync = null;
+}
+
+// 5 s overlap: now() is the transaction start, a slow commit can carry an older timestamp
+const sinceWithOverlap = ts => new Date(new Date(ts).getTime() - 5000).toISOString();
+
+async function pollChanges() {
+  const sy = WS.sync;
+  if (!sy || sy.busy || !WS.isCloud || WS.project.id !== sy.pid) return;
+  sy.busy = true;
+  try {
+    const [votes, rows] = await Promise.all([
+      Cloud.fetchVotesSince(sy.pid, sinceWithOverlap(sy.voteTs)),
+      Cloud.fetchRecordsSince(sy.pid, sinceWithOverlap(sy.recTs))
+    ]);
+    votes.forEach(applyRemoteVote);
+    rows.forEach(applyRemoteRecord);
+    sy.last = Date.now();
+    if (sy.status !== 'live') sy.status = 'poll';
+  } catch (e) {
+    sy.status = 'offline';
+  } finally {
+    sy.busy = false;
+    renderLiveStatus();
+  }
+}
+
+let remoteStatsTimer = null;
+function afterRemoteChange(rid) {
+  const tr = rid && el.resultsBody.querySelector(`tr[data-rid="${rid}"]`);
+  // never rebuild a row the user is typing in
+  if (tr && !tr.contains(document.activeElement)) tr.replaceWith(buildWsRow(WS.recByRid(rid)));
+  if (!remoteStatsTimer) remoteStatsTimer = setTimeout(() => { remoteStatsTimer = null; updateWsStats(); renderPeopleFilter(); }, 400);
+}
+
+function applyRemoteVote(v) {
+  const sy = WS.sync;
+  if (sy && v.updated_at > sy.voteTs) sy.voteTs = v.updated_at;
+  if (v.user_id === WS.meId) return;          // my own echo; the local state is already newer
+  const rid = WS.byDbId.get(v.record_id);
+  if (!rid) return;
+  const prev = (WS.votes.get(rid) || new Map()).get(v.user_id);
+  if (prev && prev.updated_at && v.updated_at && prev.updated_at >= v.updated_at) return;
+  addVote(v);
+  afterRemoteChange(rid);
+}
+
+function applyRemoteRecord(row) {
+  const sy = WS.sync;
+  if (sy && row.updated_at > sy.recTs) sy.recTs = row.updated_at;
+  const rec = WS.recByRid(row.rid);
+  if (!rec) return;
+  if (rec.updatedAt && row.updated_at && rec.updatedAt >= row.updated_at) return;
+  const fresh = Cloud.rowToRecord(row);
+  ['finalDecision', 'finalBy', 'removed', 'removedReason', 'duplicateOf', 'dupKind', 'dupScore', 'notDupOf'].forEach(k => { rec[k] = fresh[k]; });
+  rec.updatedAt = row.updated_at;
+  if ('ai' in row) {
+    const ai = Cloud.aiFromRow(row, rec);
+    if (ai) WS.cloudAi.set(rec.rid, ai); else WS.cloudAi.delete(rec.rid);
+  }
+  afterRemoteChange(rec.rid);
+  if (!el['tab-dups'].hidden) renderDuplicates();
+}
+
+function renderLiveStatus() {
+  const n = document.getElementById('liveStatus');
+  if (!n || !WS.sync) return;
+  const secs = Math.round((Date.now() - WS.sync.last) / 1000);
+  const map = {
+    live: ['● Canlı', 'live-on', 'Diğer hakemlerin kararları anında görünür.'],
+    connecting: ['◌ Bağlanıyor…', 'live-wait', 'Canlı kanal açılıyor.'],
+    poll: ['◐ Eşitleniyor', 'live-wait', `Canlı kanal yok; değişiklikler ${SYNC_MS / 1000} sn'de bir alınıyor.`],
+    offline: ['○ Bağlantı yok', 'live-off', 'Sunucuya ulaşılamıyor; bağlantı gelince otomatik eşitlenir.']
+  };
+  const [label, cls, tip] = map[WS.sync.status] || map.poll;
+  n.className = `live-status ${cls}`;
+  n.textContent = label;
+  n.title = `${tip} Son eşitleme: ${secs} sn önce.`;
+}
+
 function closeCloudProject() {
   flushCloudAi();
-  if (WS.unsubscribe) { WS.unsubscribe(); WS.unsubscribe = null; }
+  stopLiveSync();
   WS.source = 'local';
   WS.project = null;
   WS.cloudRecords = []; WS.cloudAi = new Map(); WS.votes = new Map();
@@ -1463,7 +1706,7 @@ async function refreshProjects() {
     const act = document.createElement('div');
     act.className = 'project-actions';
     act.appendChild(button('📂 Aç', 'btn-secondary btn-compact', () => openCloudProject(p.id)));
-    if (Cloud.isAdmin) act.appendChild(button('⚙️ Yönet', 'btn-tertiary btn-compact', () => showProjectAdmin(p.id)));
+    act.appendChild(button(Cloud.isAdmin ? '⚙️ Yönet' : '⚙️ Ayarlar', 'btn-tertiary btn-compact', () => showProjectAdmin(p.id)));
     card.append(info, act);
     el.projectList.appendChild(card);
   });
@@ -1511,7 +1754,7 @@ async function showProjectAdmin(pid) {
     } catch (e) { showError(e.message); }
   }));
   saveRow.appendChild(button('📋 Protokolü Analiz formuna yükle', 'btn-tertiary btn-compact', () => { loadProtocolIntoForm(project.protocol); switchTab('analysis'); }));
-  saveRow.appendChild(button('🗑️ Projeyi sil', 'btn-danger btn-compact', async () => {
+  if (Cloud.isAdmin) saveRow.appendChild(button('🗑️ Projeyi sil', 'btn-danger btn-compact', async () => {
     const typed = prompt(`"${project.name}" projesi, tüm kayıtları ve hakem kararlarıyla birlikte kalıcı olarak silinecek.\nOnaylamak için proje adını yazın:`);
     if (typed !== project.name) { if (typed !== null) showError('Proje adı eşleşmedi, silinmedi.'); return; }
     try {
@@ -1548,7 +1791,7 @@ async function showProjectAdmin(pid) {
     [`${p.display_name}${p.role === 'admin' ? ' (yönetici)' : ''}`, p.email, s.Include, s.Uncertain, s.Exclude, s.Include + s.Uncertain + s.Exclude]
       .forEach(v => tr.appendChild(text('td', String(v))));
     const tdA = document.createElement('td');
-    if (memberIds.has(uid)) tdA.appendChild(button('Çıkar', 'btn-ghost', async () => {
+    if (memberIds.has(uid) && Cloud.isAdmin) tdA.appendChild(button('Çıkar', 'btn-ghost', async () => {
       if (!confirm(`${p.display_name} projeden çıkarılsın mı? (Verdiği kararlar silinmez.)`)) return;
       try { await Cloud.removeMember(pid, uid); showProjectAdmin(pid); refreshProjects(); } catch (e) { showError(e.message); }
     }));
@@ -1571,8 +1814,8 @@ async function showProjectAdmin(pid) {
     if (!sel.value) return;
     try { await Cloud.addMember(pid, sel.value); showSuccess('Hakem eklendi.'); showProjectAdmin(pid); refreshProjects(); } catch (e) { showError(e.message); }
   }));
-  card.appendChild(add);
-  card.appendChild(text('p', 'Hakemler önce bu sayfadan "Kayıt ol" ile hesap açmalıdır; ardından listede görünürler. Hakemler yalnızca eklendikleri projeleri görür, yalnızca kendi kararlarını, etiketlerini ve notlarını değiştirebilir.', 'muted-small'));
+  if (Cloud.isAdmin) card.appendChild(add);
+  if (Cloud.isAdmin) card.appendChild(text('p', 'Hakemler önce bu sayfadan "Kayıt ol" ile hesap açmalıdır; ardından listede görünürler. Hakemler yalnızca eklendikleri projeleri görür, yalnızca kendi kararlarını, etiketlerini ve notlarını değiştirebilir.', 'muted-small'));
 
   // conflicts summary
   const byRec = new Map();
@@ -1702,6 +1945,14 @@ function initWorkspace() {
     renderWorkspace();
   });
   el.clearSelectionBtn.addEventListener('click', () => { WS.selected.clear(); renderWorkspace(); });
+  el.selectFilteredBtn.addEventListener('click', () => { (WS._lastFiltered || []).forEach(r => WS.selected.add(r.rid)); renderWorkspace(); });
+  document.querySelectorAll('.bulk-btn').forEach(b => b.addEventListener('click', () => {
+    const d = b.dataset.decision === 'none' ? null : b.dataset.decision;
+    if (b.dataset.target === 'final') bulkFinal(d || ''); else bulkVote(d);
+  }));
+  el.filterPeople.addEventListener('change', () => { WS.page = 1; renderWorkspace(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollChanges(); });
+  window.addEventListener('online', () => pollChanges());
   el.reanalyzeSelectedBtn.addEventListener('click', () => reanalyzeRids([...WS.selected]));
   el.reanalyzeAllBtn.addEventListener('click', () => reanalyzeRids((WS._lastFiltered || []).map(r => r.rid)));
   el.retryErrorsBtn.addEventListener('click', () => reanalyzeRids(WS.records.filter(r => { const a = WS.ai.get(r.rid); return a && a.error && !r.removed; }).map(r => r.rid)));

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13.6">
+    <link rel="stylesheet" href="style.css?v=13.7">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -400,12 +400,18 @@
                         <option value="review">👁️ İnceleme önerilen</option>
                         <option value="split">🤖 Modeller ayrıştı</option>
                         <option value="noabstract">📄 Özeti olmayan</option>
+                        <option value="flags">⚠️ Sistem denetimi uyarısı olan</option>
+                        <option value="incons">⚠️ Model–kural tutarsızlığı (tümü)</option>
+                        <option value="incons_Include">⚠️ Tutarsız: model "Include" dedi</option>
+                        <option value="incons_Exclude">⚠️ Tutarsız: model "Exclude" dedi</option>
+                        <option value="incons_Uncertain">⚠️ Tutarsız: model "Uncertain" dedi</option>
                         <option value="conflict" class="cloud-only">⚡ Hakemler çatışıyor</option>
                         <option value="nofinal" class="cloud-only">⚖️ Nihai karar verilmemiş</option>
                         <option value="final" class="cloud-only">⚖️ Nihai karar verilmiş</option>
                         <option value="dups">♻️ Tekrar adayları</option>
                         <option value="removed">🗑️ Kaldırılanlar</option>
                     </select>
+                    <select id="filterPeople" title="Hakem kararlarına ya da nihai karara göre" style="display: none;"><option value="">👥 Hakem / nihai: tümü</option></select>
                     <select id="filterLabel" title="Etiket"><option value="">Tüm etiketler</option></select>
                     <select id="sortBy" title="Sıralama">
                         <option value="order">↕ Dosya sırası</option>
@@ -427,12 +433,33 @@
                 </div>
 
                 <div id="selectionBar" class="selection-bar">
-                    <span id="selCount" class="sel-count">Seçim yok</span>
-                    <button id="reanalyzeSelectedBtn" class="btn-secondary btn-compact" disabled>🔁 Seçilileri yeniden analiz et</button>
-                    <button id="reanalyzeAllBtn" class="btn-tertiary btn-compact" title="Geçerli filtreye uyan tüm kayıtlar">🔁 Filtredeki tümünü yeniden analiz et</button>
-                    <button id="retryErrorsBtn" class="btn-tertiary btn-compact" style="display: none;">🔁 Hatalıları yeniden tara</button>
-                    <button id="clearSelectionBtn" class="btn-ghost" disabled>Seçimi temizle</button>
-                    <span class="muted-small">Yeniden analiz, Analiz sekmesindeki model, API anahtarı ve protokolü kullanır.</span>
+                    <div class="sel-row">
+                        <span id="selCount" class="sel-count">Seçim yok</span>
+                        <button id="selectFilteredBtn" class="btn-tertiary btn-compact">☑ Filtredekilerin tümünü seç</button>
+                        <button id="clearSelectionBtn" class="btn-ghost" disabled>Seçimi temizle</button>
+                    </div>
+                    <div class="sel-row">
+                        <span class="bulk-group" title="Seçili kayıtlara sizin oyunuz">
+                            <span class="bulk-label">Oyum</span>
+                            <button type="button" class="bulk-btn inc" data-target="vote" data-decision="Include" disabled>✓ Dahil</button>
+                            <button type="button" class="bulk-btn may" data-target="vote" data-decision="Uncertain" disabled>? Belirsiz</button>
+                            <button type="button" class="bulk-btn exc" data-target="vote" data-decision="Exclude" disabled>✕ Hariç</button>
+                            <button type="button" class="bulk-btn clr" data-target="vote" data-decision="none" disabled title="Seçili kayıtlardaki oyunuzu kaldır">⌫</button>
+                        </span>
+                        <span class="bulk-group" id="bulkFinalGroup" title="Seçili kayıtların nihai kararı" style="display: none;">
+                            <span class="bulk-label">Nihai</span>
+                            <button type="button" class="bulk-btn inc" data-target="final" data-decision="Include" disabled>✓ Dahil</button>
+                            <button type="button" class="bulk-btn may" data-target="final" data-decision="Uncertain" disabled>? Belirsiz</button>
+                            <button type="button" class="bulk-btn exc" data-target="final" data-decision="Exclude" disabled>✕ Hariç</button>
+                            <button type="button" class="bulk-btn clr" data-target="final" data-decision="none" disabled title="Seçili kayıtların nihai kararını kaldır">⌫</button>
+                        </span>
+                    </div>
+                    <div class="sel-row">
+                        <button id="reanalyzeSelectedBtn" class="btn-secondary btn-compact" disabled>🔁 Seçilileri yeniden analiz et</button>
+                        <button id="reanalyzeAllBtn" class="btn-tertiary btn-compact" title="Geçerli filtreye uyan tüm kayıtlar">🔁 Filtredeki tümünü yeniden analiz et</button>
+                        <button id="retryErrorsBtn" class="btn-tertiary btn-compact" style="display: none;">🔁 Hatalıları yeniden tara</button>
+                        <span class="muted-small">Yeniden analiz, Analiz sekmesindeki model, API anahtarı ve protokolü kullanır.</span>
+                    </div>
                 </div>
 
                 <div id="pagerTop" class="pager"></div>
@@ -589,11 +616,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13.6"></script>
-    <script src="screening-core.js?v=13.6"></script>
-    <script src="default-prompt.js?v=13.6"></script>
-    <script src="cloud.js?v=13.6"></script>
-    <script src="script.js?v=13.6"></script>
-    <script src="workspace.js?v=13.6"></script>
+    <script src="supabase-config.js?v=13.7"></script>
+    <script src="screening-core.js?v=13.7"></script>
+    <script src="default-prompt.js?v=13.7"></script>
+    <script src="cloud.js?v=13.7"></script>
+    <script src="script.js?v=13.7"></script>
+    <script src="workspace.js?v=13.7"></script>
 </body>
 </html>

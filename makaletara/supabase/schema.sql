@@ -1,14 +1,14 @@
 -- ============================================================
 -- Literatür Tarama — collaborative screening schema (Supabase)
 -- Applied to project "makaletara" (mgrjdyfjstmpvedunipb) as the
--- migrations screening_schema + move_helpers_to_private.
+-- migrations screening_schema, move_helpers_to_private and members_can_curate.
 -- Run this file once on an empty project to recreate everything.
 --
 -- Roles
---   admin    : creates projects, uploads AI results, manages members,
---              removes duplicates, sets final decisions, re-analyses
---   reviewer : sees only projects shared with them; can only change
---              their own vote (decision, labels, note)
+--   admin    : creates/deletes projects, manages members, sees every project
+--   reviewer : sees only projects shared with them; inside those projects
+--              works like the admin (final decisions, duplicates, re-analysis,
+--              project settings) and changes only their own vote
 -- Blind mode : reviewers see only their own votes (enforced by RLS,
 --              also for realtime)
 -- Make someone admin:  insert into public.admin_emails values ('x@y.com');
@@ -180,7 +180,7 @@ create policy profiles_update on public.profiles for update to authenticated
 
 create policy projects_select on public.projects for select to authenticated using (private.is_member(id));
 create policy projects_insert on public.projects for insert to authenticated with check (private.is_admin());
-create policy projects_update on public.projects for update to authenticated using (private.is_admin()) with check (private.is_admin());
+create policy projects_update on public.projects for update to authenticated using (private.is_member(id)) with check (private.is_member(id));
 create policy projects_delete on public.projects for delete to authenticated using (private.is_admin());
 
 create policy members_select on public.project_members for select to authenticated using (private.is_member(project_id));
@@ -188,8 +188,8 @@ create policy members_insert on public.project_members for insert to authenticat
 create policy members_delete on public.project_members for delete to authenticated using (private.is_admin());
 
 create policy records_select on public.records for select to authenticated using (private.is_member(project_id));
-create policy records_insert on public.records for insert to authenticated with check (private.is_admin());
-create policy records_update on public.records for update to authenticated using (private.is_admin()) with check (private.is_admin());
+create policy records_insert on public.records for insert to authenticated with check (private.is_member(project_id));
+create policy records_update on public.records for update to authenticated using (private.is_member(project_id)) with check (private.is_member(project_id));
 create policy records_delete on public.records for delete to authenticated using (private.is_admin());
 
 create policy votes_select on public.votes for select to authenticated
@@ -224,5 +224,22 @@ language sql stable security invoker set search_path = '' as $$
 $$;
 grant execute on function public.project_overview() to authenticated;
 
--- live vote updates (RLS applies to realtime too)
+-- a reviewer must not be able to hand a project to someone else
+create or replace function private.projects_guard() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if new.owner_id is distinct from old.owner_id and not private.is_admin() then
+    raise exception 'only an admin can change the project owner';
+  end if;
+  return new;
+end $$;
+create trigger projects_guard before update on public.projects for each row execute function private.projects_guard();
+revoke execute on function private.projects_guard() from public, anon, authenticated;
+
+-- live updates of votes and records (RLS applies to realtime too)
 alter publication supabase_realtime add table public.votes;
+alter publication supabase_realtime add table public.records;
+
+-- delta sync ("what changed since t")
+create index votes_project_updated_idx on public.votes(project_id, updated_at);
+create index records_project_updated_idx on public.records(project_id, updated_at);

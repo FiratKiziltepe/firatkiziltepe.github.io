@@ -30,11 +30,14 @@ Arayüz dört sekmeye ayrıldı: **⚙️ Analiz · 📊 Tarama · ♻️ Tekrar
 |---|---|---|
 | Analiz (giriş yapmadan da) | ✔ | ✔ |
 | Analizi veritabanına kaydetme, proje oluşturma/silme | ✔ | – |
-| Hakem ekleme/çıkarma, kör mod, AI'yı gizleme | ✔ | – |
-| Tekrar kaldırma, yeniden analiz, nihai karar | ✔ | – |
+| Hakem ekleme/çıkarma | ✔ | – |
+| Nihai karar, toplu işlem, tekrar kaldırma, yeniden analiz, proje ayarları | ✔ | ✔ (eklendiği projelerde) |
 | Paylaşılan projeyi görme | tümü | yalnızca eklendiği projeler |
 | Include / Maybe / Exclude, etiket, not | ✔ (kendi) | ✔ (yalnızca kendi) |
 
+- **Toplu işlem:** "Filtredekilerin tümünü seç" ile (ör. AI Maybe dedikleri, model–kural tutarsızlıkları) seçip tek tıkla *oyunuzu* ya da *nihai kararı* işleyebilir veya kaldırabilirsiniz.
+- **Hakem filtresi:** "👥 Hakem / nihai" menüsünden her hakemin Dahil / Belirsiz / Hariç dediği, oy verdiği ya da vermediği kayıtlar ve nihai karara göre süzme yapılır.
+- **Canlı eşitleme:** Oylar, nihai kararlar, tekrar ve AI değişiklikleri Supabase Realtime ile anında gelir. Bağlantı koparsa 15 sn'de bir yalnızca değişen satırlar çekilir; sekmeye dönünce ve internet gelince hemen eşitlenir. Durum rozeti: ● Canlı / ◐ Eşitleniyor / ○ Bağlantı yok.
 - **Kör mod (varsayılan açık):** hakemler yalnızca kendi kararlarını, etiketlerini ve notlarını görür. Kural veritabanında (RLS) uygulanır; API'den ya da canlı güncellemelerden başkasının oyu okunamaz. Yönetici tüm kararları görebilir ve isterse "Tüm hakem kararlarını göster" ile tabloda açabilir.
 - Kör mod kapalıyken her satırda **kimin hangi kararı verdiği** görünür, çatışmalar "⚡" ile işaretlenir, yönetici **nihai kararı** verir. Kararlar diğer kullanıcılara sayfa yenilemeden (realtime) ulaşır.
 - Excel/CSV dışa aktarımı her hakem için ayrı karar ve etiket/not sütunları, hakem uyumu ve nihai karar içerir.
