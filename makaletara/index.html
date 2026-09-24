@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13.7">
+    <link rel="stylesheet" href="style.css?v=13.8">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -413,12 +413,32 @@
                     </select>
                     <select id="filterPeople" title="Hakem kararlarına ya da nihai karara göre" style="display: none;"><option value="">👥 Hakem / nihai: tümü</option></select>
                     <select id="filterLabel" title="Etiket"><option value="">Tüm etiketler</option></select>
+                    <details id="docTypeFilter" class="dd-filter">
+                        <summary id="docTypeSummary" title="Belge türüne göre (birden çok seçilebilir)">📄 Belge türü: tümü</summary>
+                        <div class="dd-panel">
+                            <div class="dd-actions">
+                                <button type="button" id="docTypeAll" class="btn-ghost btn-ghost-sm">Tümünü seç</button>
+                                <button type="button" id="docTypeNone" class="btn-ghost btn-ghost-sm">Seçimi kaldır</button>
+                            </div>
+                            <div id="docTypeList" class="dd-list"></div>
+                        </div>
+                    </details>
+                    <span class="year-range" title="Yayın yılı aralığı (boş bırakılan uç sınırsız)">📅
+                        <input type="number" id="yearFrom" placeholder="yıl ≥" min="1900" max="2100">
+                        –
+                        <input type="number" id="yearTo" placeholder="yıl ≤" min="1900" max="2100">
+                    </span>
                     <select id="sortBy" title="Sıralama">
                         <option value="order">↕ Dosya sırası</option>
+                        <option value="title_asc">↕ Başlık (A→Z)</option>
+                        <option value="title_desc">↕ Başlık (Z→A)</option>
+                        <option value="author_asc">↕ Yazar (A→Z)</option>
+                        <option value="author_desc">↕ Yazar (Z→A)</option>
+                        <option value="year_desc">↕ Yıl (yeni→eski)</option>
+                        <option value="year_asc">↕ Yıl (eski→yeni)</option>
                         <option value="conf_asc">↕ Güven (düşükten)</option>
                         <option value="conf_desc">↕ Güven (yüksekten)</option>
                         <option value="rel_desc">↕ Konu ilgisi</option>
-                        <option value="year_desc">↕ Yıl (yeni→eski)</option>
                     </select>
                     <label class="page-size-label">Sayfa başına
                         <select id="pageSize">
@@ -428,6 +448,7 @@
                             <option value="200">200</option>
                         </select>
                     </label>
+                    <button id="clearFiltersBtn" class="btn-ghost" title="Arama, filtreler ve sıralama varsayılana döner">✕ Filtreleri temizle</button>
                     <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Özetleri daralt</button>
                     <span id="filterCount" class="filter-count"></span>
                 </div>
@@ -468,10 +489,10 @@
                         <thead>
                             <tr>
                                 <th class="col-sel"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç"></th>
-                                <th class="col-pub">Yayın · yazarlar · DOI</th>
+                                <th class="col-pub">Yayın <span class="th-sorts"><button type="button" class="th-sort" data-sort="title">Başlık</button><button type="button" class="th-sort" data-sort="author">Yazar</button><button type="button" class="th-sort" data-sort="year">Yıl</button></span></th>
                                 <th class="col-abstract">Özet · kanıtlar <span class="ev-legend"><mark class="ev-mark ev-inc">dahil</mark><mark class="ev-mark ev-exc">hariç</mark><mark class="ev-mark ev-may">belirsiz</mark></span></th>
                                 <th class="col-reason">Ölçütler · kısa gerekçe</th>
-                                <th class="col-decision">Karar <span class="th-hint">satıra tıklayın · 1 Dahil · 2 Belirsiz · 3 Hariç · J/K gez</span></th>
+                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-hint">satıra tıklayın · 1 Dahil · 2 Belirsiz · 3 Hariç · J/K gez</span></th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody"></tbody>
@@ -521,11 +542,20 @@
     <div id="reportModal" class="modal-overlay" style="display: none;">
         <div class="modal-content card">
             <div class="modal-header">
-                <h2>🔍 Konunuza En Yakın Çalışmalar (Top 10)</h2>
+                <h2 id="relTitle">🔍 Konunuza En Yakın Çalışmalar</h2>
+                <label class="rel-top">Göster
+                    <select id="relTopN">
+                        <option value="10">İlk 10</option>
+                        <option value="25">İlk 25</option>
+                        <option value="50">İlk 50</option>
+                        <option value="100">İlk 100</option>
+                        <option value="all">Tümü</option>
+                    </select>
+                </label>
                 <button type="button" class="close-modal-btn" data-close="reportModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <div class="table-container" style="max-height: 62vh; overflow-y: auto;">
                     <table id="modalReportTable" style="min-width: 1000px;">
                         <thead><tr><th>Sıra</th><th>ID</th><th>Başlık</th><th>Yıl</th><th>İlgi Skoru</th><th>Karar</th><th>İlişki Gerekçesi</th></tr></thead>
                         <tbody id="modalReportBody"></tbody>
@@ -616,11 +646,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13.7"></script>
-    <script src="screening-core.js?v=13.7"></script>
-    <script src="default-prompt.js?v=13.7"></script>
-    <script src="cloud.js?v=13.7"></script>
-    <script src="script.js?v=13.7"></script>
-    <script src="workspace.js?v=13.7"></script>
+    <script src="supabase-config.js?v=13.8"></script>
+    <script src="screening-core.js?v=13.8"></script>
+    <script src="default-prompt.js?v=13.8"></script>
+    <script src="cloud.js?v=13.8"></script>
+    <script src="script.js?v=13.8"></script>
+    <script src="workspace.js?v=13.8"></script>
 </body>
 </html>

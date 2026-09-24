@@ -30,6 +30,7 @@ const WS = {
   selected: new Set(),
   showAllVotes: false,
   compactAbs: false,
+  docTypes: new Set(),
   focusRid: null,
   aiQueue: [],
   aiFlushTimer: null,
@@ -185,9 +186,15 @@ function wsFilterState() {
     status: el.filterStatus.value,
     label: el.filterLabel.value,
     people: WS.isCloud ? el.filterPeople.value : '',
+    docTypes: WS.docTypes,
+    yearFrom: parseInt(el.yearFrom.value, 10),
+    yearTo: parseInt(el.yearTo.value, 10),
     sort: el.sortBy.value
   };
 }
+
+const NO_DOCTYPE = '(belge türü yok)';
+const docTypeOf = rec => String(rec.DocType || '').trim() || NO_DOCTYPE;
 
 function matchesWs(rec, f) {
   const ai = WS.ai.get(rec.rid);
@@ -231,6 +238,13 @@ function matchesWs(rec, f) {
     }
   }
 
+  if (f.docTypes.size && !f.docTypes.has(docTypeOf(rec))) return false;
+  if (isFinite(f.yearFrom) || isFinite(f.yearTo)) {
+    const y = parseInt(rec.Year, 10);
+    if (!isFinite(y)) return false;
+    if (isFinite(f.yearFrom) && y < f.yearFrom) return false;
+    if (isFinite(f.yearTo) && y > f.yearTo) return false;
+  }
   if (f.label) {
     const labs = [...((mv && mv.labels) || []), ...otherVotes(rec.rid).flatMap(v => v.labels || [])];
     if (!labs.includes(f.label)) return false;
@@ -250,9 +264,84 @@ function filteredRecords() {
   if (f.sort === 'conf_asc') list.sort((a, b) => conf(a) - conf(b) || a.order - b.order);
   else if (f.sort === 'conf_desc') list.sort((a, b) => conf(b) - conf(a) || a.order - b.order);
   else if (f.sort === 'rel_desc') list.sort((a, b) => rel(b) - rel(a) || a.order - b.order);
-  else if (f.sort === 'year_desc') list.sort((a, b) => (parseInt(b.Year, 10) || 0) - (parseInt(a.Year, 10) || 0) || a.order - b.order);
-  else list.sort((a, b) => a.order - b.order);
+  else if (f.sort.startsWith('year_')) {
+    const dir = f.sort === 'year_asc' ? 1 : -1;
+    const y = r => parseInt(r.Year, 10);
+    // records without a year always go last
+    list.sort((a, b) => (isFinite(y(a)) ? 0 : 1) - (isFinite(y(b)) ? 0 : 1) || dir * ((y(a) || 0) - (y(b) || 0)) || a.order - b.order);
+  } else if (f.sort.startsWith('title_') || f.sort.startsWith('author_')) {
+    const dir = f.sort.endsWith('_desc') ? -1 : 1;
+    const key = f.sort.startsWith('title_')
+      ? r => String(r.Title || '').replace(/^[^\p{L}\p{N}]+/u, '')
+      : r => String(r.Authors || '').split(/\s*;\s*/)[0];
+    list.sort((a, b) => {
+      const ka = key(a), kb = key(b);
+      if (!ka !== !kb) return ka ? -1 : 1;
+      return dir * ka.localeCompare(kb, 'tr', { sensitivity: 'base' }) || a.order - b.order;
+    });
+  } else list.sort((a, b) => a.order - b.order);
   return list;
+}
+
+// ---------- document type filter (multi-select) ----------
+function renderDocTypeFilter() {
+  const counts = new Map();
+  WS.records.forEach(r => { if (!r.removed) counts.set(docTypeOf(r), (counts.get(docTypeOf(r)) || 0) + 1); });
+  // drop selections that no longer exist (e.g. after switching project)
+  [...WS.docTypes].forEach(t => { if (!counts.has(t)) WS.docTypes.delete(t); });
+  const types = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
+  const sig = types.map(t => t.join('=')).join('|') + '#' + [...WS.docTypes].join('|');
+  el.docTypeSummary.textContent = !WS.docTypes.size ? '📄 Belge türü: tümü'
+    : WS.docTypes.size === 1 ? `📄 ${[...WS.docTypes][0]}` : `📄 Belge türü: ${WS.docTypes.size} tür`;
+  el.docTypeFilter.classList.toggle('dd-active', WS.docTypes.size > 0);
+  if (el.docTypeList.dataset.sig === sig) return;
+  el.docTypeList.dataset.sig = sig;
+  el.docTypeList.textContent = '';
+  types.forEach(([t, n]) => {
+    const lab = document.createElement('label');
+    lab.className = 'dd-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = WS.docTypes.has(t);
+    cb.addEventListener('change', () => {
+      if (cb.checked) WS.docTypes.add(t); else WS.docTypes.delete(t);
+      WS.page = 1; renderWorkspace();
+    });
+    lab.append(cb, text('span', t, 'dd-name'), text('span', n.toLocaleString('tr-TR'), 'dd-count'));
+    el.docTypeList.appendChild(lab);
+  });
+}
+
+// ---------- sortable column headers ----------
+const SORT_FIRST = { title: 'asc', author: 'asc', year: 'desc', conf: 'asc' };
+function onHeaderSort(key) {
+  const cur = el.sortBy.value;
+  const next = cur === `${key}_${SORT_FIRST[key]}` ? `${key}_${SORT_FIRST[key] === 'asc' ? 'desc' : 'asc'}` : `${key}_${SORT_FIRST[key]}`;
+  el.sortBy.value = next;
+  WS.page = 1;
+  renderWorkspace();
+}
+function renderHeaderSort() {
+  const [key, dir] = el.sortBy.value.split('_');
+  document.querySelectorAll('.th-sort').forEach(b => {
+    const on = b.dataset.sort === key;
+    b.classList.toggle('active', on);
+    b.dataset.dir = on ? dir : '';
+  });
+}
+
+function clearFilters() {
+  el.filterSearch.value = '';
+  ['filterAi', 'filterMine', 'filterStatus'].forEach(id => { el[id].value = 'all'; });
+  el.filterPeople.value = '';
+  el.filterLabel.value = '';
+  WS.docTypes.clear();
+  el.yearFrom.value = '';
+  el.yearTo.value = '';
+  el.sortBy.value = 'order';
+  el.docTypeFilter.open = false;
+  WS.page = 1;
+  renderWorkspace();
 }
 
 function pageSize() { return parseInt(el.pageSize.value, 10) || 50; }
@@ -272,6 +361,8 @@ function renderWorkspace() {
   renderSourceBar();
   renderLabelFilter();
   renderPeopleFilter();
+  renderDocTypeFilter();
+  renderHeaderSort();
   const list = filteredRecords();
   const ps = pageSize();
   const pages = Math.max(1, Math.ceil(list.length / ps));
@@ -1391,8 +1482,10 @@ function wsRelevanceReport() {
   tbody.textContent = '';
   const top = WS.records.filter(r => !r.removed).map(r => ({ r, a: WS.ai.get(r.rid) }))
     .filter(x => x.a && typeof x.a.relevance_score === 'number')
-    .sort((x, y) => y.a.relevance_score - x.a.relevance_score).slice(0, 10);
-  top.forEach(({ r, a }, i) => {
+    .sort((x, y) => y.a.relevance_score - x.a.relevance_score);
+  const n = el.relTopN.value === 'all' ? top.length : parseInt(el.relTopN.value, 10);
+  el.relTitle.textContent = `🔍 Konunuza En Yakın Çalışmalar (${Math.min(n, top.length)} / ${top.length})`;
+  top.slice(0, n).forEach(({ r, a }, i) => {
     const tr = document.createElement('tr');
     [String(i + 1), r.ID, r.Title, r.Year || '-', `${Math.round(a.relevance_score * 100)}%`, DECISION_LABEL[a.decision] || a.decision, a.relevance_rationale || '-']
       .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
@@ -1959,6 +2052,17 @@ function initWorkspace() {
   el.downloadCsvBtn.addEventListener('click', wsDownloadCsv);
   el.downloadExcelBtn.addEventListener('click', wsDownloadExcel);
   el.relevanceReportBtn.addEventListener('click', wsRelevanceReport);
+  el.relTopN.addEventListener('change', wsRelevanceReport);
+  el.clearFiltersBtn.addEventListener('click', clearFilters);
+  el.docTypeAll.addEventListener('click', () => {
+    WS.records.forEach(r => { if (!r.removed) WS.docTypes.add(docTypeOf(r)); });
+    WS.page = 1; renderWorkspace();
+  });
+  el.docTypeNone.addEventListener('click', () => { WS.docTypes.clear(); WS.page = 1; renderWorkspace(); });
+  ['yearFrom', 'yearTo'].forEach(id => el[id].addEventListener('input', debounce(() => { WS.page = 1; renderWorkspace(); }, 300)));
+  document.querySelectorAll('.th-sort').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); onHeaderSort(b.dataset.sort); }));
+  // close the document type panel when clicking elsewhere
+  document.addEventListener('click', e => { if (el.docTypeFilter.open && !el.docTypeFilter.contains(e.target)) el.docTypeFilter.open = false; });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
   el.saveCloudConfirmBtn.addEventListener('click', saveToCloud);
   el.loadProtocolBtn.addEventListener('click', () => { loadProtocolIntoForm(WS.project.protocol); switchTab('analysis'); });
