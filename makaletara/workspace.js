@@ -31,6 +31,7 @@ const WS = {
   showAllVotes: false,
   compactAbs: false,
   docTypes: new Set(),
+  statsScope: 'all',
   focusRid: null,
   aiQueue: [],
   aiFlushTimer: null,
@@ -200,7 +201,8 @@ function matchesWs(rec, f) {
   const ai = WS.ai.get(rec.rid);
   if (f.status === 'removed') { if (!rec.removed) return false; }
   else if (f.status === 'dups') { if (!isPendingDup(rec)) return false; }
-  else if (rec.removed || isPendingDup(rec)) return false;
+  else if (f.status === 'archived') { if (!rec.archived || rec.removed) return false; }
+  else if (rec.removed || isPendingDup(rec) || rec.archived) return false;
 
   const aiDec = ai ? ai.ai_decision || ai.decision : '';
   if (f.ai === 'none' && ai) return false;
@@ -286,7 +288,7 @@ function filteredRecords() {
 // ---------- document type filter (multi-select) ----------
 function renderDocTypeFilter() {
   const counts = new Map();
-  WS.records.forEach(r => { if (!r.removed) counts.set(docTypeOf(r), (counts.get(docTypeOf(r)) || 0) + 1); });
+  WS.records.forEach(r => { if (!r.removed && !r.archived) counts.set(docTypeOf(r), (counts.get(docTypeOf(r)) || 0) + 1); });
   // drop selections that no longer exist (e.g. after switching project)
   [...WS.docTypes].forEach(t => { if (!counts.has(t)) WS.docTypes.delete(t); });
   const types = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
@@ -932,6 +934,11 @@ function decisionPanel(rec, ai, mv) {
   const tools = document.createElement('div');
   tools.className = 'dp-tools';
   cellLabels(tools, rec, mv);
+  if (WS.canCurate && !rec.removed) {
+    const row = tools.querySelector('.label-chips');
+    row.appendChild(button(rec.archived ? '↩ Arşivden çıkar' : '🗄️ Arşiv', 'btn-ghost btn-ghost-sm dp-archive',
+      () => setArchived([rec], !rec.archived), rec.archived ? 'Kaydı çalışma listesine geri al' : 'Listeden ve sayılardan çıkar (silinmez, geri alınabilir)'));
+  }
   panel.appendChild(tools);
   return panel;
 }
@@ -1052,32 +1059,57 @@ function onScreenKey(e) {
 // ------------------------------------------------------------
 // Stats, selection, tab badges
 // ------------------------------------------------------------
+function isActive(rec) { return !rec.removed && !rec.archived && !isPendingDup(rec); }
+
+/**
+ * Dashboard. Each decision card shows the decision that currently counts
+ * (final decision, or my vote locally; otherwise the AI decision) and below
+ * it how many of those come from the final/my vote and how many the AI said.
+ * Scope: all active records, or the current filter result.
+ */
 function updateWsStats() {
-  let inc = 0, exc = 0, unc = 0, rev = 0, dup = 0, none = 0, err = 0, mine = 0, active = 0, conflict = 0;
-  WS.records.forEach(rec => {
-    if (rec.removed || isPendingDup(rec)) { dup++; return; }
-    active++;
+  const scope = WS.statsScope === 'filter' && WS._lastFiltered ? WS._lastFiltered : WS.records.filter(isActive);
+  const c = { Include: 0, Exclude: 0, Uncertain: 0 };
+  const human = { Include: 0, Exclude: 0, Uncertain: 0 };
+  const aiC = { Include: 0, Exclude: 0, Uncertain: 0 };
+  let rev = 0, err = 0, mine = 0, conflict = 0, fin = 0;
+  scope.forEach(rec => {
     const ai = WS.ai.get(rec.rid);
-    const d = effectiveDecision(rec).decision;
-    if (!ai && !d) none++;
-    else if (d === 'Include') inc++;
-    else if (d === 'Exclude') exc++;
-    else if (d) unc++;
+    const aiDec = ai && !ai.error ? ai.ai_decision || ai.decision : null;
+    const h = WS.isCloud ? rec.finalDecision : ((myVote(rec.rid) || {}).decision || '');
+    const d = h || (WS.aiHidden ? null : aiDec);
+    if (c[d] !== undefined) c[d]++;
+    if (h && human[h] !== undefined) human[h]++;
+    if (aiDec && aiC[aiDec] !== undefined && !WS.aiHidden) aiC[aiDec]++;
     if (ai && ai.error) err++;
     if (ai && ai.needs_human_review) rev++;
     const mv = myVote(rec.rid);
     if (mv && mv.decision) mine++;
+    if (rec.finalDecision) fin++;
     if (WS.isCloud && hasConflict(rec.rid)) conflict++;
   });
-  el.includeCount.textContent = inc;
-  el.excludeCount.textContent = exc;
-  el.uncertainCount.textContent = unc;
+  const n = scope.length;
+  const who = WS.isCloud ? 'nihai' : 'oyunuz';
+  [['Include', 'include'], ['Exclude', 'exclude'], ['Uncertain', 'uncertain']].forEach(([d, k]) => {
+    el[`${k}Count`].textContent = c[d].toLocaleString('tr-TR');
+    el[`${k}Sub`].textContent = WS.aiHidden ? `${who} ${human[d]}` : `${who} ${human[d]} · AI ${aiC[d]}`;
+    el[`${k}Sub`].title = WS.isCloud
+      ? `Nihai kararı ${DEC_TR[d]} olan ${human[d]} kayıt + nihai kararı olmayıp AI'nın ${d} dediği ${c[d] - human[d]} kayıt. AI toplamda ${aiC[d]} kayda ${d} dedi.`
+      : `Sizin ${DEC_TR[d]} dediğiniz ${human[d]} kayıt + oy vermediğiniz ve AI'nın ${d} dediği ${c[d] - human[d]} kayıt.`;
+  });
   el.reviewCount.textContent = rev;
-  el.duplicateCount.textContent = dup;
-  el.totalCount.textContent = active;
-  el.myProgressCount.textContent = `${mine}/${active}`;
+  el.duplicateCount.textContent = WS.records.filter(r => r.removed || isPendingDup(r)).length;
+  el.archiveCount.textContent = WS.records.filter(r => r.archived && !r.removed).length;
+  el.totalCount.textContent = n.toLocaleString('tr-TR');
+  el.myProgressCount.textContent = `${mine}/${n}`;
+  el.myProgressBar.style.width = n ? `${mine / n * 100}%` : '0%';
+  el.statFinalCard.style.display = WS.isCloud ? 'block' : 'none';
+  el.finalProgressCount.textContent = `${fin}/${n}`;
+  el.finalProgressBar.style.width = n ? `${fin / n * 100}%` : '0%';
   el.conflictCount.textContent = conflict;
-  el.myProgressBar.style.width = active ? `${mine / active * 100}%` : '0%';
+  el.statsScopeInfo.textContent = WS.statsScope === 'filter'
+    ? `Sayılar geçerli filtredeki ${n.toLocaleString('tr-TR')} kayda göre.`
+    : `Sayılar tüm aktif kayıtlara göre (tekrar ve arşiv hariç). ${WS.isCloud ? 'Nihai karar varsa o, yoksa AI kararı sayılır.' : 'Oyunuz varsa o, yoksa AI kararı sayılır.'}`;
   el.retryErrorsBtn.style.display = err && WS.canCurate ? 'inline-flex' : 'none';
   el.retryErrorsBtn.textContent = `🔁 Hatalı ${err} kaydı yeniden tara`;
   el.relevanceReportBtn.style.display = !WS.aiHidden && [...WS.ai.values()].some(r => typeof r.relevance_score === 'number') ? 'inline-flex' : 'none';
@@ -1087,6 +1119,32 @@ function updateWsStats() {
 
 function selectedRecords() {
   return [...WS.selected].map(rid => WS.recByRid(rid)).filter(r => r && !r.removed);
+}
+
+/** Archive = out of the working list and every count, but kept and restorable. */
+async function setArchived(recs, archived) {
+  if (!recs.length) return showError('Önce kayıt seçin.');
+  recs = recs.filter(r => !!r.archived !== archived);
+  if (!recs.length) return showSuccess(archived ? 'Seçili kayıtlar zaten arşivde.' : 'Seçili kayıtlar arşivde değil.');
+  if (recs.length > 1 && !confirm(`${recs.length} kayıt ${archived ? 'arşive kaldırılacak (listeden ve sayılardan çıkar, silinmez)' : 'arşivden çıkarılıp listeye geri alınacak'}. Devam edilsin mi?`)) return;
+  const backup = recs.map(r => [r, r.archived]);
+  recs.forEach(r => { r.archived = archived; });
+  if (WS.isCloud) {
+    try {
+      await Cloud.patchRecords(WS.project.id, recs.map(r => ({
+        rid: r.rid, archived, archived_at: archived ? new Date().toISOString() : null, archived_by: archived ? Cloud.user.id : null
+      })));
+    } catch (e) {
+      backup.forEach(([r, v]) => { r.archived = v; });
+      renderWorkspace();
+      return showError('Arşiv kaydedilemedi, geri alındı: ' + e.message);
+    }
+  } else scheduleSave();
+  recs.forEach(r => WS.selected.delete(r.rid));
+  renderWorkspace();
+  showSuccess(archived
+    ? `${recs.length} kayıt arşive kaldırıldı. Görmek ya da geri almak için Durum → "🗄️ Arşivdekiler".`
+    : `${recs.length} kayıt arşivden çıkarıldı.`);
 }
 
 /** My vote on every selected record (decision null removes it). Labels and notes are kept. */
@@ -1150,6 +1208,8 @@ function updateSelectionBar() {
   el.reanalyzeSelectedBtn.disabled = !n;
   el.clearSelectionBtn.disabled = !n;
   document.querySelectorAll('.bulk-btn').forEach(b => { b.disabled = !n; });
+  el.archiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? 'none' : '';
+  el.unarchiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? '' : 'none';
   const nf = (WS._lastFiltered || []).length;
   el.selectFilteredBtn.textContent = `☑ Filtredekilerin tümünü seç (${nf.toLocaleString('tr-TR')})`;
   el.selectFilteredBtn.disabled = !nf || (WS._lastFiltered || []).every(r => WS.selected.has(r.rid));
@@ -1162,7 +1222,7 @@ function updateTabBadges() {
   const pend = WS.records.filter(isPendingDup).length;
   el.tabBadgeDups.textContent = pend ? String(pend) : '';
   el.tabBadgeDups.style.display = pend ? 'inline-block' : 'none';
-  const active = WS.records.filter(r => !r.removed && !isPendingDup(r)).length;
+  const active = WS.records.filter(isActive).length;
   el.tabBadgeScreen.textContent = active ? active.toLocaleString('tr-TR') : '';
   el.tabBadgeScreen.style.display = active ? 'inline-block' : 'none';
 }
@@ -1203,7 +1263,7 @@ async function flushCloudAi() {
 // Duplicates (side by side)
 // ------------------------------------------------------------
 function dupPairs() {
-  return WS.records.filter(isPendingDup).map(b => ({ a: WS.recByRid(b.duplicateOf), b })).filter(p => p.a);
+  return WS.records.filter(r => isPendingDup(r) && !r.archived).map(b => ({ a: WS.recByRid(b.duplicateOf), b })).filter(p => p.a);
 }
 
 const DUP_KIND = { doi: 'Aynı DOI', title: 'Aynı başlık + yıl', fuzzy: 'Benzer başlık' };
@@ -1422,7 +1482,7 @@ function wsExportRows() {
   }
   rows.forEach((row, i) => {
     const rec = recs[i];
-    row['Durum'] = rec.removed ? `Kaldırıldı (${rec.removedReason})` : isPendingDup(rec) ? `Tekrar adayı (${rec.duplicateOf})` : '';
+    row['Durum'] = rec.removed ? `Kaldırıldı (${rec.removedReason})` : isPendingDup(rec) ? `Tekrar adayı (${rec.duplicateOf})` : rec.archived ? 'Arşivde' : '';
     if (WS.isCloud) {
       const m = WS.votes.get(rec.rid) || new Map();
       reviewers.forEach((name, uid) => {
@@ -1478,19 +1538,51 @@ function wsDownloadExcel() {
 }
 
 function wsRelevanceReport() {
-  const tbody = el.modalReportBody;
-  tbody.textContent = '';
-  const top = WS.records.filter(r => !r.removed).map(r => ({ r, a: WS.ai.get(r.rid) }))
+  const list = el.relList;
+  list.textContent = '';
+  const top = WS.records.filter(isActive).map(r => ({ r, a: WS.ai.get(r.rid) }))
     .filter(x => x.a && typeof x.a.relevance_score === 'number')
     .sort((x, y) => y.a.relevance_score - x.a.relevance_score);
   const n = el.relTopN.value === 'all' ? top.length : parseInt(el.relTopN.value, 10);
   el.relTitle.textContent = `🔍 Konunuza En Yakın Çalışmalar (${Math.min(n, top.length)} / ${top.length})`;
   top.slice(0, n).forEach(({ r, a }, i) => {
-    const tr = document.createElement('tr');
-    [String(i + 1), r.ID, r.Title, r.Year || '-', `${Math.round(a.relevance_score * 100)}%`, DECISION_LABEL[a.decision] || a.decision, a.relevance_rationale || '-']
-      .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
-    tbody.appendChild(tr);
+    const card = document.createElement('article');
+    card.className = 'rel-card';
+    const side = document.createElement('div');
+    side.className = 'rel-side';
+    const pct = Math.round(a.relevance_score * 100);
+    side.append(text('div', `#${i + 1}`, 'rel-rank'), text('div', `%${pct}`, 'rel-score'));
+    const bar = document.createElement('div'); bar.className = 'relevance-bar-bg';
+    const fill = document.createElement('div'); fill.className = 'relevance-bar-fill'; fill.style.width = `${pct}%`;
+    bar.appendChild(fill); side.appendChild(bar);
+
+    const body = document.createElement('div');
+    body.className = 'rel-body';
+    const doi = C.normalizeDoi(r.DOI);
+    const title = document.createElement(doi ? 'a' : 'div');
+    title.className = 'rel-title';
+    title.textContent = r.Title || '[başlık yok]';
+    if (doi) { title.href = `https://doi.org/${doi}`; title.target = '_blank'; title.rel = 'noopener noreferrer'; title.title = 'Çalışmanın sayfasını yeni sekmede aç'; }
+    body.appendChild(title);
+    body.appendChild(text('div', [shortAuthors(r.Authors), r.Year, r.DocType].filter(Boolean).join(' · '), 'rel-meta'));
+    const links = document.createElement('div');
+    links.className = 'pub-links';
+    if (doi) links.appendChild(linkChip('DOI', doi, `https://doi.org/${doi}`, 'Yayıncı sayfası'));
+    const sid = sourceIdLink(r.ID);
+    if (sid) links.appendChild(linkChip(sid.label, sid.value, sid.href, 'Kaynak kaydı'));
+    const eff = effectiveDecision(r);
+    if (eff.decision) links.appendChild(decisionBadge(eff.decision, true, eff.source === 'ai' ? 'ai' : 'person'));
+    body.appendChild(links);
+    if (a.relevance_rationale) body.appendChild(text('div', `İlişki: ${a.relevance_rationale}`, 'rel-why'));
+    const abs = document.createElement('details');
+    abs.className = 'rel-abs';
+    abs.appendChild(text('summary', 'Özet'));
+    abs.appendChild(text('div', r.Abstract || 'Özet yok.', 'rel-abs-text'));
+    body.appendChild(abs);
+    card.append(side, body);
+    list.appendChild(card);
   });
+  if (!top.length) list.appendChild(text('div', 'Konu ilgisi puanı olan kayıt yok. Analiz sekmesinde "Kendi çalışma konunuz" alanını doldurup analiz edin.', 'empty-note'));
   el.reportModal.style.display = 'flex';
 }
 
@@ -1637,7 +1729,7 @@ function applyRemoteRecord(row) {
   if (!rec) return;
   if (rec.updatedAt && row.updated_at && rec.updatedAt >= row.updated_at) return;
   const fresh = Cloud.rowToRecord(row);
-  ['finalDecision', 'finalBy', 'removed', 'removedReason', 'duplicateOf', 'dupKind', 'dupScore', 'notDupOf'].forEach(k => { rec[k] = fresh[k]; });
+  ['finalDecision', 'finalBy', 'removed', 'removedReason', 'duplicateOf', 'dupKind', 'dupScore', 'notDupOf', 'archived'].forEach(k => { rec[k] = fresh[k]; });
   rec.updatedAt = row.updated_at;
   if ('ai' in row) {
     const ai = Cloud.aiFromRow(row, rec);
@@ -1786,6 +1878,7 @@ async function refreshProjects() {
       pill(p.blind ? '🙈 Kör mod' : '👁️ Açık mod', p.blind ? 'pill-warn' : 'pill-ok'),
       text('span', `${p.total.toLocaleString('tr-TR')} kayıt`, 'muted-small'),
       text('span', `${p.removed} tekrar kaldırıldı`, 'muted-small'),
+      text('span', `${p.archived || 0} arşivde`, 'muted-small'),
       text('span', `${p.members} hakem`, 'muted-small'),
       text('span', `güncelleme: ${new Date(p.updated_at).toLocaleString('tr-TR')}`, 'muted-small')
     );
@@ -2039,7 +2132,7 @@ function initWorkspace() {
   });
   el.clearSelectionBtn.addEventListener('click', () => { WS.selected.clear(); renderWorkspace(); });
   el.selectFilteredBtn.addEventListener('click', () => { (WS._lastFiltered || []).forEach(r => WS.selected.add(r.rid)); renderWorkspace(); });
-  document.querySelectorAll('.bulk-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.bulk-btn[data-target]').forEach(b => b.addEventListener('click', () => {
     const d = b.dataset.decision === 'none' ? null : b.dataset.decision;
     if (b.dataset.target === 'final') bulkFinal(d || ''); else bulkVote(d);
   }));
@@ -2054,6 +2147,18 @@ function initWorkspace() {
   el.relevanceReportBtn.addEventListener('click', wsRelevanceReport);
   el.relTopN.addEventListener('change', wsRelevanceReport);
   el.clearFiltersBtn.addEventListener('click', clearFilters);
+  el.archiveSelectedBtn.addEventListener('click', () => setArchived(selectedRecords(), true));
+  el.unarchiveSelectedBtn.addEventListener('click', () => setArchived(selectedRecords(), false));
+  document.querySelectorAll('.seg-btn[data-scope]').forEach(b => b.addEventListener('click', () => {
+    WS.statsScope = b.dataset.scope;
+    document.querySelectorAll('.seg-btn[data-scope]').forEach(x => x.classList.toggle('active', x === b));
+    try { localStorage.setItem('gls_stats_scope', WS.statsScope); } catch (e) { /* ignore */ }
+    updateWsStats();
+  }));
+  try {
+    const sc = localStorage.getItem('gls_stats_scope');
+    if (sc) { WS.statsScope = sc; document.querySelectorAll('.seg-btn[data-scope]').forEach(x => x.classList.toggle('active', x.dataset.scope === sc)); }
+  } catch (e) { /* ignore */ }
   el.docTypeAll.addEventListener('click', () => {
     WS.records.forEach(r => { if (!r.removed) WS.docTypes.add(docTypeOf(r)); });
     WS.page = 1; renderWorkspace();

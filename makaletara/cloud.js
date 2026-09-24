@@ -75,6 +75,7 @@ window.Cloud = (() => {
       not_dup_of: rec.notDupOf || [],
       removed: !!rec.removed,
       removed_reason: rec.removedReason || '',
+      archived: !!rec.archived,
       ai: stripAi(ai),
       ai_decision: ai ? ai.ai_decision || ai.decision || null : null
     };
@@ -103,6 +104,7 @@ window.Cloud = (() => {
       removedReason: row.removed_reason,
       finalDecision: row.final_decision || '',
       finalBy: row.final_by || null,
+      archived: !!row.archived,
       updatedAt: row.updated_at || ''
     };
   }

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13.8">
+    <link rel="stylesheet" href="style.css?v=13.9">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -364,15 +364,24 @@
                     <div class="cost-live-item"><span class="cost-live-label">Modeller arası uyum:</span><span class="cost-live-value" id="livAgreement">-</span></div>
                 </div>
 
+                <div class="stats-head">
+                    <span id="statsScopeInfo" class="muted-inline"></span>
+                    <div class="seg" role="group" aria-label="Sayıların kapsamı">
+                        <button type="button" class="seg-btn active" data-scope="all">Tüm aktif kayıtlar</button>
+                        <button type="button" class="seg-btn" data-scope="filter">Geçerli filtre</button>
+                    </div>
+                </div>
                 <div class="stats">
-                    <div class="stat-card include"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">✓ Include</h3><p id="includeCount">0</p></div>
-                    <div class="stat-card exclude"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">✕ Exclude</h3><p id="excludeCount">0</p></div>
-                    <div class="stat-card maybe"><h3 lang="en" title="Sizin kararınız varsa o, yoksa AI kararı">? Maybe</h3><p id="uncertainCount">0</p></div>
+                    <div class="stat-card include"><h3 lang="en" class="stat-title-inc">✓ Include</h3><p id="includeCount">0</p><div class="stat-sub" id="includeSub"></div></div>
+                    <div class="stat-card exclude"><h3 lang="en" class="stat-title-exc">✕ Exclude</h3><p id="excludeCount">0</p><div class="stat-sub" id="excludeSub"></div></div>
+                    <div class="stat-card maybe"><h3 lang="en" class="stat-title-may">? Maybe</h3><p id="uncertainCount">0</p><div class="stat-sub" id="uncertainSub"></div></div>
+                    <div class="stat-card final" id="statFinalCard" style="display: none;"><h3>⚖️ Nihai verilen</h3><p id="finalProgressCount">0/0</p><div class="mini-progress"><div id="finalProgressBar" class="mini-progress-fill"></div></div></div>
+                    <div class="stat-card mine"><h3>🧑‍⚖️ Sizin oyunuz</h3><p id="myProgressCount">0/0</p><div class="mini-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div></div>
                     <div class="stat-card review"><h3>👁️ İnceleme önerilen</h3><p id="reviewCount">0</p></div>
-                    <div class="stat-card mine"><h3>🧑‍⚖️ Sizin kararınız</h3><p id="myProgressCount">0/0</p><div class="mini-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div></div>
                     <div class="stat-card conflict" id="statConflictCard" style="display: none;"><h3>⚡ Çatışma</h3><p id="conflictCount">0</p></div>
                     <div class="stat-card total"><h3>♻️ Tekrar</h3><p id="duplicateCount">0</p></div>
-                    <div class="stat-card total"><h3>📚 Taranacak</h3><p id="totalCount">0</p></div>
+                    <div class="stat-card total archive"><h3>🗄️ Arşiv</h3><p id="archiveCount">0</p></div>
+                    <div class="stat-card total"><h3>📚 Aktif kayıt</h3><p id="totalCount">0</p></div>
                 </div>
 
                 <div class="filter-bar">
@@ -410,6 +419,7 @@
                         <option value="final" class="cloud-only">⚖️ Nihai karar verilmiş</option>
                         <option value="dups">♻️ Tekrar adayları</option>
                         <option value="removed">🗑️ Kaldırılanlar</option>
+                        <option value="archived">🗄️ Arşivdekiler</option>
                     </select>
                     <select id="filterPeople" title="Hakem kararlarına ya da nihai karara göre" style="display: none;"><option value="">👥 Hakem / nihai: tümü</option></select>
                     <select id="filterLabel" title="Etiket"><option value="">Tüm etiketler</option></select>
@@ -473,6 +483,10 @@
                             <button type="button" class="bulk-btn may" data-target="final" data-decision="Uncertain" disabled>? Belirsiz</button>
                             <button type="button" class="bulk-btn exc" data-target="final" data-decision="Exclude" disabled>✕ Hariç</button>
                             <button type="button" class="bulk-btn clr" data-target="final" data-decision="none" disabled title="Seçili kayıtların nihai kararını kaldır">⌫</button>
+                        </span>
+                        <span class="bulk-group" title="Seçili kayıtları listeden ve tüm sayılardan çıkarır; silinmez, geri alınabilir">
+                            <button type="button" id="archiveSelectedBtn" class="bulk-btn arc" disabled>🗄️ Arşive kaldır</button>
+                            <button type="button" id="unarchiveSelectedBtn" class="bulk-btn arc" disabled>↩ Arşivden çıkar</button>
                         </span>
                     </div>
                     <div class="sel-row">
@@ -555,12 +569,7 @@
                 <button type="button" class="close-modal-btn" data-close="reportModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="table-container" style="max-height: 62vh; overflow-y: auto;">
-                    <table id="modalReportTable" style="min-width: 1000px;">
-                        <thead><tr><th>Sıra</th><th>ID</th><th>Başlık</th><th>Yıl</th><th>İlgi Skoru</th><th>Karar</th><th>İlişki Gerekçesi</th></tr></thead>
-                        <tbody id="modalReportBody"></tbody>
-                    </table>
-                </div>
+                <div id="relList" class="rel-list"></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="reportModal">Kapat</button></div>
         </div>
@@ -646,11 +655,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=13.8"></script>
-    <script src="screening-core.js?v=13.8"></script>
-    <script src="default-prompt.js?v=13.8"></script>
-    <script src="cloud.js?v=13.8"></script>
-    <script src="script.js?v=13.8"></script>
-    <script src="workspace.js?v=13.8"></script>
+    <script src="supabase-config.js?v=13.9"></script>
+    <script src="screening-core.js?v=13.9"></script>
+    <script src="default-prompt.js?v=13.9"></script>
+    <script src="cloud.js?v=13.9"></script>
+    <script src="script.js?v=13.9"></script>
+    <script src="workspace.js?v=13.9"></script>
 </body>
 </html>

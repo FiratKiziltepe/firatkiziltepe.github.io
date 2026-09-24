@@ -1,7 +1,7 @@
 -- ============================================================
 -- Literatür Tarama — collaborative screening schema (Supabase)
 -- Applied to project "makaletara" (mgrjdyfjstmpvedunipb) as the
--- migrations screening_schema, move_helpers_to_private and members_can_curate.
+-- migrations screening_schema, move_helpers_to_private, members_can_curate and records_archive.
 -- Run this file once on an empty project to recreate everything.
 --
 -- Roles
@@ -71,6 +71,9 @@ create table public.records (
   not_dup_of text[] not null default '{}',
   removed boolean not null default false,
   removed_reason text not null default '',
+  archived boolean not null default false,          -- out of the working list and counts, restorable
+  archived_at timestamptz,
+  archived_by uuid references public.profiles(id) on delete set null,
   ai jsonb,
   ai_decision text,
   final_decision text check (final_decision in ('Include', 'Exclude', 'Uncertain')),
@@ -80,6 +83,7 @@ create table public.records (
 );
 create index records_project_ord_idx on public.records(project_id, ord);
 create index records_final_by_idx on public.records(final_by);
+create index records_archived_by_idx on public.records(archived_by);
 
 create table public.votes (
   record_id bigint not null references public.records(id) on delete cascade,
@@ -212,13 +216,15 @@ grant update (display_name) on public.profiles to authenticated;
 create or replace function public.project_overview()
 returns table (id uuid, name text, description text, blind boolean, hide_ai boolean, file_name text,
                created_at timestamptz, updated_at timestamptz, total integer, removed integer,
-               my_votes integer, members integer)
+               my_votes integer, members integer, archived integer)
 language sql stable security invoker set search_path = '' as $$
   select p.id, p.name, p.description, p.blind, p.hide_ai, p.file_name, p.created_at, p.updated_at,
-    (select count(*) from public.records r where r.project_id = p.id and not r.removed)::int,
+    (select count(*) from public.records r where r.project_id = p.id and not r.removed and not r.archived)::int,
     (select count(*) from public.records r where r.project_id = p.id and r.removed)::int,
-    (select count(*) from public.votes v where v.project_id = p.id and v.user_id = (select auth.uid()) and v.decision is not null)::int,
-    (select count(*) from public.project_members m where m.project_id = p.id)::int
+    (select count(*) from public.votes v join public.records r on r.id = v.record_id
+      where v.project_id = p.id and v.user_id = (select auth.uid()) and v.decision is not null and not r.removed and not r.archived)::int,
+    (select count(*) from public.project_members m where m.project_id = p.id)::int,
+    (select count(*) from public.records r where r.project_id = p.id and r.archived)::int
   from public.projects p
   order by p.updated_at desc;
 $$;
