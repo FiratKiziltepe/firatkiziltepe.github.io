@@ -7,9 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=14.0">
+    <link rel="stylesheet" href="style.css?v=15.0">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
     <div id="toastHost" class="toast-host" aria-live="polite"></div>
@@ -24,10 +25,10 @@
         </header>
 
         <nav class="tabs" role="tablist">
-            <button type="button" class="tab active" data-tab="analysis">⚙️ Analiz</button>
-            <button type="button" class="tab" data-tab="screen">📊 Tarama <span id="tabBadgeScreen" class="tab-badge"></span></button>
-            <button type="button" class="tab" data-tab="dups">♻️ Tekrarlar <span id="tabBadgeDups" class="tab-badge tab-badge-warn"></span></button>
-            <button type="button" class="tab" data-tab="projects">☁️ Projeler</button>
+            <button type="button" class="tab active" data-tab="analysis"><i data-lucide="sliders-horizontal"></i><span>Analiz</span></button>
+            <button type="button" class="tab" data-tab="screen"><i data-lucide="list-checks"></i><span>Tarama</span> <span id="tabBadgeScreen" class="tab-badge"></span></button>
+            <button type="button" class="tab" data-tab="dups"><i data-lucide="copy"></i><span>Tekrarlar</span> <span id="tabBadgeDups" class="tab-badge tab-badge-warn"></span></button>
+            <button type="button" class="tab" data-tab="projects"><i data-lucide="folder-kanban"></i><span>Projeler</span></button>
         </nav>
 
         <div id="progressSection" class="progress-section" style="display: none;">
@@ -343,171 +344,270 @@
                 <h2>📊 Henüz gösterilecek sonuç yok</h2>
                 <p>Analiz sekmesinden dosya yükleyip analizi başlatın, kayıtlı bir oturumu yükleyin ya da Projeler sekmesinden sizinle paylaşılan bir projeyi açın.</p>
             </div>
-            <div id="resultsSection" class="results-section" style="display: none;">
+            <div id="resultsSection" class="results-section ws" style="display: none;">
+                <!-- project / source context (rendered by renderSourceBar) -->
                 <div id="wsSourceBar" class="ws-source-bar"></div>
-                <div class="results-header">
-                    <h2>📊 Tarama</h2>
-                    <div class="results-actions">
-                        <button id="saveToCloudBtn" class="btn-primary btn-teal btn-compact" style="display: none;">☁️ Veritabanına kaydet</button>
-                        <button id="loadProtocolBtn" class="btn-tertiary btn-compact" style="display: none;" title="Projenin ölçüt ve yönergesini Analiz formuna yükler">📋 Protokolü forma yükle</button>
-                        <button id="relevanceReportBtn" class="btn-tertiary btn-compact" style="display: none;">🔍 En yakın çalışmalar</button>
-                        <button id="downloadCsvBtn" class="btn-secondary btn-compact">💾 CSV</button>
-                        <button id="downloadExcelBtn" class="btn-secondary btn-compact">📊 Excel</button>
+
+                <!-- page header -->
+                <div class="ws-head">
+                    <div class="ws-head-text">
+                        <h2 class="ws-title">Başlık / özet taraması</h2>
+                        <p id="statsScopeInfo" class="ws-subtitle"></p>
                     </div>
-                </div>
-
-                <div id="costPanel" class="cost-live-panel">
-                    <div class="cost-live-item"><span class="cost-live-label">Mod / Tier:</span><span class="cost-live-value" id="livMode">-</span></div>
-                    <div class="cost-live-item"><span class="cost-live-label">Input Token:</span><span class="cost-live-value" id="livInputTokens">0</span></div>
-                    <div class="cost-live-item"><span class="cost-live-label">Output Token:</span><span class="cost-live-value" id="livOutputTokens">0</span></div>
-                    <div class="cost-live-item cost-live-total"><span class="cost-live-label">Toplam Maliyet:</span><span class="cost-live-value" id="livCost">$0.0000</span></div>
-                    <div class="cost-live-item"><span class="cost-live-label">Modeller arası uyum:</span><span class="cost-live-value" id="livAgreement">-</span></div>
-                </div>
-
-                <div class="stats-head">
-                    <span id="statsScopeInfo" class="muted-inline"></span>
-                    <div class="seg" role="group" aria-label="Sayıların kapsamı">
-                        <button type="button" class="seg-btn active" data-scope="all">Tüm aktif kayıtlar</button>
-                        <button type="button" class="seg-btn" data-scope="filter">Geçerli filtre</button>
-                    </div>
-                </div>
-                <div class="stats">
-                    <div class="stat-card include"><h3 lang="en" class="stat-title-inc">✓ Include</h3><p id="includeCount">0</p><div class="stat-sub" id="includeSub"></div></div>
-                    <div class="stat-card exclude"><h3 lang="en" class="stat-title-exc">✕ Exclude</h3><p id="excludeCount">0</p><div class="stat-sub" id="excludeSub"></div></div>
-                    <div class="stat-card maybe"><h3 lang="en" class="stat-title-may">? Maybe</h3><p id="uncertainCount">0</p><div class="stat-sub" id="uncertainSub"></div></div>
-                    <div class="stat-card final" id="statFinalCard" style="display: none;"><h3>⚖️ Nihai verilen</h3><p id="finalProgressCount">0/0</p><div class="mini-progress"><div id="finalProgressBar" class="mini-progress-fill"></div></div></div>
-                    <div class="stat-card mine"><h3>🧑‍⚖️ Sizin oyunuz</h3><p id="myProgressCount">0/0</p><div class="mini-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div></div>
-                    <div class="stat-card review"><h3>👁️ İnceleme önerilen</h3><p id="reviewCount">0</p></div>
-                    <div class="stat-card conflict" id="statConflictCard" style="display: none;"><h3>⚡ Çatışma</h3><p id="conflictCount">0</p></div>
-                    <div class="stat-card total"><h3>♻️ Tekrar</h3><p id="duplicateCount">0</p></div>
-                    <div class="stat-card total archive"><h3>🗄️ Arşiv</h3><p id="archiveCount">0</p></div>
-                    <div class="stat-card total"><h3>📚 Aktif kayıt</h3><p id="totalCount">0</p></div>
-                </div>
-
-                <div class="filter-bar">
-                    <input type="text" id="filterSearch" placeholder="🔍 Başlık, yazar, DOI, özet, gerekçe veya notta ara…">
-                    <select id="filterAi" title="AI kararı">
-                        <option value="all">🤖 AI: tümü</option>
-                        <option value="analyzed">🤖 Analiz edilenler</option>
-                        <option value="Include">🤖 AI: Include</option>
-                        <option value="Uncertain">🤖 AI: Maybe</option>
-                        <option value="Exclude">🤖 AI: Exclude</option>
-                        <option value="none">🤖 Analiz edilmemiş</option>
-                        <option value="error">🤖 API hatası</option>
-                    </select>
-                    <select id="filterMine" title="Sizin kararınız">
-                        <option value="all">🧑‍⚖️ Ben: tümü</option>
-                        <option value="undecided">🧑‍⚖️ Karar vermediklerim</option>
-                        <option value="decided">🧑‍⚖️ Karar verdiklerim</option>
-                        <option value="Include">🧑‍⚖️ Include dediklerim</option>
-                        <option value="Uncertain">🧑‍⚖️ Maybe dediklerim</option>
-                        <option value="Exclude">🧑‍⚖️ Exclude dediklerim</option>
-                        <option value="disagree_ai">🧑‍⚖️ AI'dan farklı düşündüklerim</option>
-                    </select>
-                    <select id="filterStatus" title="Durum">
-                        <option value="all">📌 Durum: tümü</option>
-                        <option value="review">👁️ İnceleme önerilen</option>
-                        <option value="split">🤖 Modeller ayrıştı</option>
-                        <option value="noabstract">📄 Özeti olmayan</option>
-                        <option value="flags">⚠️ Sistem denetimi uyarısı olan</option>
-                        <option value="incons">⚠️ Model–kural tutarsızlığı (tümü)</option>
-                        <option value="incons_Include">⚠️ Tutarsız: model "Include" dedi</option>
-                        <option value="incons_Exclude">⚠️ Tutarsız: model "Exclude" dedi</option>
-                        <option value="incons_Uncertain">⚠️ Tutarsız: model "Uncertain" dedi</option>
-                        <option value="conflict" class="cloud-only">⚡ Hakemler çatışıyor</option>
-                        <option value="nofinal" class="cloud-only">⚖️ Nihai karar verilmemiş</option>
-                        <option value="final" class="cloud-only">⚖️ Nihai karar verilmiş</option>
-                        <option value="dups">♻️ Tekrar adayları</option>
-                        <option value="removed">🗑️ Kaldırılanlar</option>
-                        <option value="archived">🗄️ Arşivdekiler</option>
-                    </select>
-                    <select id="filterPeople" title="Hakem kararlarına ya da nihai karara göre" style="display: none;"><option value="">👥 Hakem / nihai: tümü</option></select>
-                    <select id="filterLabel" title="Etiket"><option value="">Tüm etiketler</option></select>
-                    <details id="docTypeFilter" class="dd-filter">
-                        <summary id="docTypeSummary" title="Belge türüne göre (birden çok seçilebilir)">📄 Belge türü: tümü</summary>
-                        <div class="dd-panel">
-                            <div class="dd-actions">
-                                <button type="button" id="docTypeAll" class="btn-ghost btn-ghost-sm">Tümünü seç</button>
-                                <button type="button" id="docTypeNone" class="btn-ghost btn-ghost-sm">Seçimi kaldır</button>
+                    <div class="ws-head-actions results-actions">
+                        <button id="saveToCloudBtn" class="ui-btn ui-btn-default" style="display: none;"><i data-lucide="cloud-upload"></i><span>Veritabanına kaydet</span></button>
+                        <button id="loadProtocolBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Projenin ölçüt ve yönergesini Analiz formuna yükler"><i data-lucide="clipboard-list"></i><span>Protokolü forma yükle</span></button>
+                        <button id="relevanceReportBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Çalışma konunuza göre AI'nın verdiği yakınlık skoruna göre sıralı liste"><i data-lucide="target"></i><span>En yakın çalışmalar</span></button>
+                        <details id="exportMenu" class="ui-menu">
+                            <summary class="ui-btn ui-btn-outline" title="Sonuçları CSV veya Excel olarak indir"><i data-lucide="download"></i><span>Dışa aktar</span><i data-lucide="chevron-down" class="ui-chevron"></i></summary>
+                            <div class="ui-menu-panel ui-menu-right" role="menu">
+                                <div class="ui-menu-label">Kapsam</div>
+                                <label class="ui-menu-radio">
+                                    <input type="radio" name="exportScope" value="filter" checked>
+                                    <span class="ui-menu-radio-text"><span>Geçerli filtre</span><small id="exportScopeFilterInfo"></small></span>
+                                </label>
+                                <label class="ui-menu-radio">
+                                    <input type="radio" name="exportScope" value="all">
+                                    <span class="ui-menu-radio-text"><span>Tüm kayıtlar</span><small id="exportScopeAllInfo"></small></span>
+                                </label>
+                                <div class="ui-menu-sep"></div>
+                                <button id="downloadExcelBtn" type="button" class="ui-menu-item"><i data-lucide="file-spreadsheet"></i><span>Excel (.xlsx)</span></button>
+                                <button id="downloadCsvBtn" type="button" class="ui-menu-item"><i data-lucide="file-text"></i><span>CSV (.csv)</span></button>
+                                <p class="ui-menu-note">Uygulanan filtreler ve sıralama Metadata sayfasına yazılır; PRISMA sayıları her zaman tüm kayıtlardan hesaplanır.</p>
                             </div>
-                            <div id="docTypeList" class="dd-list"></div>
-                        </div>
-                    </details>
-                    <span class="year-range" title="Yayın yılı aralığı (boş bırakılan uç sınırsız)">📅
-                        <input type="number" id="yearFrom" placeholder="yıl ≥" min="1900" max="2100">
-                        –
-                        <input type="number" id="yearTo" placeholder="yıl ≤" min="1900" max="2100">
-                    </span>
-                    <select id="sortBy" title="Sıralama">
-                        <option value="order">↕ Dosya sırası</option>
-                        <option value="title_asc">↕ Başlık (A→Z)</option>
-                        <option value="title_desc">↕ Başlık (Z→A)</option>
-                        <option value="author_asc">↕ Yazar (A→Z)</option>
-                        <option value="author_desc">↕ Yazar (Z→A)</option>
-                        <option value="year_desc">↕ Yıl (yeni→eski)</option>
-                        <option value="year_asc">↕ Yıl (eski→yeni)</option>
-                        <option value="conf_asc">↕ Güven (düşükten)</option>
-                        <option value="conf_desc">↕ Güven (yüksekten)</option>
-                        <option value="rel_desc">↕ Konu ilgisi</option>
-                    </select>
-                    <label class="page-size-label">Sayfa başına
-                        <select id="pageSize">
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="150">150</option>
-                            <option value="200">200</option>
-                        </select>
-                    </label>
-                    <button id="clearFiltersBtn" class="btn-ghost" title="Arama, filtreler ve sıralama varsayılana döner">✕ Filtreleri temizle</button>
-                    <button id="toggleAllAbstractsBtn" class="btn-tertiary btn-compact">↕️ Özetleri daralt</button>
-                    <span id="filterCount" class="filter-count"></span>
+                        </details>
+                    </div>
                 </div>
 
-                <div id="selectionBar" class="selection-bar">
-                    <div class="sel-row">
-                        <span id="selCount" class="sel-count">Seçim yok</span>
-                        <button id="selectFilteredBtn" class="btn-tertiary btn-compact">☑ Filtredekilerin tümünü seç</button>
-                        <button id="clearSelectionBtn" class="btn-ghost" disabled>Seçimi temizle</button>
+                <!-- local run cost (hidden for cloud projects) -->
+                <div id="costPanel" class="cost-live-panel ws-cost">
+                    <div class="cost-live-item"><span class="cost-live-label">Mod</span><span class="cost-live-value" id="livMode">-</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Input token</span><span class="cost-live-value" id="livInputTokens">0</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Output token</span><span class="cost-live-value" id="livOutputTokens">0</span></div>
+                    <div class="cost-live-item cost-live-total"><span class="cost-live-label">Maliyet</span><span class="cost-live-value" id="livCost">$0.0000</span></div>
+                    <div class="cost-live-item"><span class="cost-live-label">Modeller arası uyum</span><span class="cost-live-value" id="livAgreement">-</span></div>
+                </div>
+
+                <!-- dashboard -->
+                <div class="ws-stats">
+                    <section class="ui-card ws-stat-dist" aria-labelledby="distTitle">
+                        <header class="ui-card-head">
+                            <h3 id="distTitle" class="ui-card-title">Karar dağılımı</h3>
+                            <div class="seg ui-seg" role="group" aria-label="Sayıların kapsamı">
+                                <button type="button" class="seg-btn active" data-scope="all">Tüm aktif kayıtlar</button>
+                                <button type="button" class="seg-btn" data-scope="filter">Geçerli filtre</button>
+                            </div>
+                        </header>
+                        <div class="ws-dist">
+                            <div class="ws-dist-item inc">
+                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Include</span>
+                                <span class="ws-dist-num" id="includeCount">0</span>
+                                <span class="ws-dist-sub" id="includeSub"></span>
+                            </div>
+                            <div class="ws-dist-item may">
+                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Maybe</span>
+                                <span class="ws-dist-num" id="uncertainCount">0</span>
+                                <span class="ws-dist-sub" id="uncertainSub"></span>
+                            </div>
+                            <div class="ws-dist-item exc">
+                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Exclude</span>
+                                <span class="ws-dist-num" id="excludeCount">0</span>
+                                <span class="ws-dist-sub" id="excludeSub"></span>
+                            </div>
+                        </div>
+                        <div class="ws-dist-bar" aria-hidden="true">
+                            <span id="distBarInc" class="inc"></span><span id="distBarMay" class="may"></span><span id="distBarExc" class="exc"></span>
+                        </div>
+                    </section>
+
+                    <section class="ui-card ws-stat-progress" aria-labelledby="progTitle">
+                        <header class="ui-card-head"><h3 id="progTitle" class="ui-card-title">İlerleme</h3></header>
+                        <div class="ws-prog" id="statFinalCard" style="display: none;">
+                            <div class="ws-prog-row"><span class="ws-prog-label"><i data-lucide="gavel"></i>Nihai karar</span><span class="ws-prog-num" id="finalProgressCount">0/0</span></div>
+                            <div class="mini-progress ui-progress"><div id="finalProgressBar" class="mini-progress-fill"></div></div>
+                        </div>
+                        <div class="ws-prog">
+                            <div class="ws-prog-row"><span class="ws-prog-label"><i data-lucide="user-check"></i>Sizin oyunuz</span><span class="ws-prog-num" id="myProgressCount">0/0</span></div>
+                            <div class="mini-progress ui-progress"><div id="myProgressBar" class="mini-progress-fill"></div></div>
+                        </div>
+                    </section>
+
+                    <section class="ui-card ws-stat-queue" aria-labelledby="queueTitle">
+                        <header class="ui-card-head"><h3 id="queueTitle" class="ui-card-title">Kayıt havuzu</h3></header>
+                        <ul class="ws-queue">
+                            <li><button type="button" class="ws-queue-row" data-jump="review" title="İnceleme önerilen kayıtları listele"><span class="ws-queue-label"><i data-lucide="eye"></i>İnceleme önerilen</span><span class="ws-queue-num" id="reviewCount">0</span></button></li>
+                            <li id="statConflictCard" style="display: none;"><button type="button" class="ws-queue-row is-danger" data-jump="conflict" title="Hakemlerin çatıştığı kayıtları listele"><span class="ws-queue-label"><i data-lucide="git-compare-arrows"></i>Çatışma</span><span class="ws-queue-num" id="conflictCount">0</span></button></li>
+                            <li><button type="button" class="ws-queue-row" data-jump="dups" title="Tekrarlar sekmesini aç"><span class="ws-queue-label"><i data-lucide="copy"></i>Tekrar</span><span class="ws-queue-num" id="duplicateCount">0</span></button></li>
+                            <li><button type="button" class="ws-queue-row" data-jump="archived" title="Arşivdeki kayıtları listele"><span class="ws-queue-label"><i data-lucide="archive"></i>Arşiv</span><span class="ws-queue-num" id="archiveCount">0</span></button></li>
+                            <li class="ws-queue-total"><span class="ws-queue-row"><span class="ws-queue-label"><i data-lucide="library"></i>Aktif kayıt</span><span class="ws-queue-num" id="totalCount">0</span></span></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <!-- filters -->
+                <section class="ui-card ws-filters" aria-label="Filtreler">
+                    <div class="ws-filters-top">
+                        <div class="ui-input-wrap ws-search">
+                            <i data-lucide="search" class="ui-input-icon"></i>
+                            <input type="search" id="filterSearch" class="ui-input" placeholder="Başlık, yazar, DOI, özet, gerekçe veya notta ara…" autocomplete="off">
+                        </div>
+                        <span id="filterCount" class="filter-count ws-count"></span>
                     </div>
-                    <div class="sel-row">
+                    <div class="ws-filter-grid">
+                        <label class="ui-field"><span class="ui-label">AI kararı</span>
+                            <select id="filterAi" class="ui-select">
+                                <option value="all">Tümü</option>
+                                <option value="analyzed">Analiz edilenler</option>
+                                <option value="Include">Include</option>
+                                <option value="Uncertain">Maybe</option>
+                                <option value="Exclude">Exclude</option>
+                                <option value="none">Analiz edilmemiş</option>
+                                <option value="error">API hatası</option>
+                            </select>
+                        </label>
+                        <label class="ui-field"><span class="ui-label">Benim kararım</span>
+                            <select id="filterMine" class="ui-select">
+                                <option value="all">Tümü</option>
+                                <option value="undecided">Karar vermediklerim</option>
+                                <option value="decided">Karar verdiklerim</option>
+                                <option value="Include">Include dediklerim</option>
+                                <option value="Uncertain">Maybe dediklerim</option>
+                                <option value="Exclude">Exclude dediklerim</option>
+                                <option value="disagree_ai">AI'dan farklı düşündüklerim</option>
+                            </select>
+                        </label>
+                        <label class="ui-field"><span class="ui-label">Durum</span>
+                            <select id="filterStatus" class="ui-select">
+                                <option value="all">Tümü</option>
+                                <optgroup label="İnceleme">
+                                    <option value="review">İnceleme önerilen</option>
+                                    <option value="split">Modeller ayrıştı</option>
+                                    <option value="noabstract">Özeti olmayan</option>
+                                    <option value="flags">Sistem denetimi uyarısı olan</option>
+                                </optgroup>
+                                <optgroup label="Model–kural tutarsızlığı">
+                                    <option value="incons">Tüm tutarsızlıklar</option>
+                                    <option value="incons_Include">Model "Include" dedi</option>
+                                    <option value="incons_Exclude">Model "Exclude" dedi</option>
+                                    <option value="incons_Uncertain">Model "Uncertain" dedi</option>
+                                </optgroup>
+                                <optgroup label="Ekip" class="cloud-only">
+                                    <option value="conflict" class="cloud-only">Hakemler çatışıyor</option>
+                                    <option value="nofinal" class="cloud-only">Nihai karar verilmemiş</option>
+                                    <option value="final" class="cloud-only">Nihai karar verilmiş</option>
+                                </optgroup>
+                                <optgroup label="Havuz dışı">
+                                    <option value="dups">Tekrar adayları</option>
+                                    <option value="removed">Kaldırılanlar</option>
+                                    <option value="archived">Arşivdekiler</option>
+                                </optgroup>
+                            </select>
+                        </label>
+                        <label class="ui-field" id="filterPeopleField" style="display: none;"><span class="ui-label">Hakem / nihai</span>
+                            <select id="filterPeople" class="ui-select" title="Hakem kararlarına ya da nihai karara göre"><option value="">Tümü</option></select>
+                        </label>
+                        <label class="ui-field"><span class="ui-label">Etiket / gerekçe</span>
+                            <select id="filterLabel" class="ui-select"><option value="">Tümü</option></select>
+                        </label>
+                        <div class="ui-field"><span class="ui-label">Belge türü</span>
+                            <details id="docTypeFilter" class="dd-filter">
+                                <summary id="docTypeSummary" class="ui-select" title="Belge türüne göre (birden çok seçilebilir)">Tümü</summary>
+                                <div class="dd-panel">
+                                    <div class="dd-actions">
+                                        <button type="button" id="docTypeAll" class="ui-btn ui-btn-ghost ui-btn-xs">Tümünü seç</button>
+                                        <button type="button" id="docTypeNone" class="ui-btn ui-btn-ghost ui-btn-xs">Seçimi kaldır</button>
+                                    </div>
+                                    <div id="docTypeList" class="dd-list"></div>
+                                </div>
+                            </details>
+                        </div>
+                        <div class="ui-field"><span class="ui-label">Yayın yılı</span>
+                            <span class="year-range" title="Yayın yılı aralığı (boş bırakılan uç sınırsız)">
+                                <input type="number" id="yearFrom" class="ui-input" placeholder="en erken" min="1900" max="2100" aria-label="En erken yıl">
+                                <span class="year-sep">–</span>
+                                <input type="number" id="yearTo" class="ui-input" placeholder="en geç" min="1900" max="2100" aria-label="En geç yıl">
+                            </span>
+                        </div>
+                    </div>
+                    <div class="ws-filters-foot" id="activeFiltersRow" hidden>
+                        <div id="activeFilters" class="ws-chips" aria-label="Uygulanan filtreler"></div>
+                        <button id="clearFiltersBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm" title="Arama, filtreler ve sıralama varsayılana döner"><i data-lucide="x"></i><span>Filtreleri temizle</span></button>
+                    </div>
+                </section>
+
+                <!-- selection & bulk actions -->
+                <div id="selectionBar" class="selection-bar ws-bulk">
+                    <div class="sel-row ws-bulk-main">
+                        <span class="ws-sel"><i data-lucide="square-check"></i><span id="selCount" class="sel-count">Seçim yok</span></span>
+                        <button id="selectFilteredBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><span class="btn-text">Filtredekilerin tümünü seç</span></button>
+                        <button id="clearSelectionBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm" disabled>Seçimi temizle</button>
+                        <span class="ws-bulk-spacer"></span>
+                        <button id="reanalyzeSelectedBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" disabled title="Analiz sekmesindeki model, API anahtarı ve protokolle yeniden analiz eder"><i data-lucide="refresh-cw"></i><span>Seçilileri yeniden analiz et</span></button>
+                        <button id="reanalyzeAllBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" title="Geçerli filtreye uyan tüm kayıtlar; Analiz sekmesindeki model, API anahtarı ve protokol kullanılır"><i data-lucide="refresh-cw"></i><span class="btn-text">Filtredeki tümünü yeniden analiz et</span></button>
+                        <button id="retryErrorsBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm is-danger" style="display: none;"><i data-lucide="rotate-ccw"></i><span class="btn-text">Hatalıları yeniden tara</span></button>
+                    </div>
+                    <div class="sel-row ws-bulk-actions">
                         <span class="bulk-group" title="Seçili kayıtlara sizin oyunuz">
                             <span class="bulk-label">Oyum</span>
                             <button type="button" class="bulk-btn inc" data-target="vote" data-decision="Include" disabled>✓ Dahil</button>
                             <button type="button" class="bulk-btn may" data-target="vote" data-decision="Uncertain" disabled>? Belirsiz</button>
                             <button type="button" class="bulk-btn exc" data-target="vote" data-decision="Exclude" disabled>✕ Hariç</button>
-                            <button type="button" id="bulkReasonBtn" class="bulk-btn exc" disabled title="Seçili kayıtlara gerekçeyle hariç oyu">✕ + gerekçe…</button>
-                            <button type="button" class="bulk-btn clr" data-target="vote" data-decision="none" disabled title="Seçili kayıtlardaki oyunuzu kaldır">⌫</button>
+                            <button type="button" id="bulkReasonBtn" class="bulk-btn exc" disabled title="Seçili kayıtlara gerekçeyle hariç oyu">✕ Gerekçeyle…</button>
+                            <button type="button" class="bulk-btn clr" data-target="vote" data-decision="none" disabled title="Seçili kayıtlardaki oyunuzu kaldır" aria-label="Oyu kaldır"><i data-lucide="eraser"></i></button>
                         </span>
                         <span class="bulk-group" id="bulkFinalGroup" title="Seçili kayıtların nihai kararı" style="display: none;">
                             <span class="bulk-label">Nihai</span>
                             <button type="button" class="bulk-btn inc" data-target="final" data-decision="Include" disabled>✓ Dahil</button>
                             <button type="button" class="bulk-btn may" data-target="final" data-decision="Uncertain" disabled>? Belirsiz</button>
                             <button type="button" class="bulk-btn exc" data-target="final" data-decision="Exclude" disabled>✕ Hariç</button>
-                            <button type="button" class="bulk-btn clr" data-target="final" data-decision="none" disabled title="Seçili kayıtların nihai kararını kaldır">⌫</button>
+                            <button type="button" class="bulk-btn clr" data-target="final" data-decision="none" disabled title="Seçili kayıtların nihai kararını kaldır" aria-label="Nihai kararı kaldır"><i data-lucide="eraser"></i></button>
                         </span>
                         <span class="bulk-group" title="Seçili kayıtları listeden ve tüm sayılardan çıkarır; silinmez, geri alınabilir">
-                            <button type="button" id="archiveSelectedBtn" class="bulk-btn arc" disabled>🗄️ Arşive kaldır</button>
-                            <button type="button" id="unarchiveSelectedBtn" class="bulk-btn arc" disabled>↩ Arşivden çıkar</button>
+                            <button type="button" id="archiveSelectedBtn" class="bulk-btn arc" disabled><i data-lucide="archive"></i> Arşive kaldır</button>
+                            <button type="button" id="unarchiveSelectedBtn" class="bulk-btn arc" disabled><i data-lucide="archive-restore"></i> Arşivden çıkar</button>
                         </span>
-                    </div>
-                    <div class="sel-row">
-                        <button id="reanalyzeSelectedBtn" class="btn-secondary btn-compact" disabled>🔁 Seçilileri yeniden analiz et</button>
-                        <button id="reanalyzeAllBtn" class="btn-tertiary btn-compact" title="Geçerli filtreye uyan tüm kayıtlar">🔁 Filtredeki tümünü yeniden analiz et</button>
-                        <button id="retryErrorsBtn" class="btn-tertiary btn-compact" style="display: none;">🔁 Hatalıları yeniden tara</button>
-                        <span class="muted-small">Yeniden analiz, Analiz sekmesindeki model, API anahtarı ve protokolü kullanır.</span>
                     </div>
                 </div>
 
-                <div id="pagerTop" class="pager"></div>
+                <!-- list toolbar: paging + view -->
+                <div class="ws-list-bar">
+                    <div id="pagerTop" class="pager"></div>
+                    <div class="ws-view">
+                        <label class="ui-inline" title="Sıralama">
+                            <i data-lucide="arrow-down-up"></i>
+                            <select id="sortBy" class="ui-select ui-select-sm" aria-label="Sıralama">
+                                <option value="order">Dosya sırası</option>
+                                <option value="title_asc">Başlık (A→Z)</option>
+                                <option value="title_desc">Başlık (Z→A)</option>
+                                <option value="author_asc">Yazar (A→Z)</option>
+                                <option value="author_desc">Yazar (Z→A)</option>
+                                <option value="year_desc">Yıl (yeni→eski)</option>
+                                <option value="year_asc">Yıl (eski→yeni)</option>
+                                <option value="conf_asc">Güven (düşükten)</option>
+                                <option value="conf_desc">Güven (yüksekten)</option>
+                                <option value="rel_desc">Konu ilgisi</option>
+                            </select>
+                        </label>
+                        <label class="ui-inline page-size-label">Sayfa
+                            <select id="pageSize" class="ui-select ui-select-sm" aria-label="Sayfa başına kayıt">
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="150">150</option>
+                                <option value="200">200</option>
+                            </select>
+                        </label>
+                        <button id="toggleAllAbstractsBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="fold-vertical"></i><span class="btn-text">Özetleri daralt</span></button>
+                    </div>
+                </div>
                 <div class="table-container ws-table-container">
                     <table id="resultsTable" class="ws-table">
                         <thead>
                             <tr>
-                                <th class="col-sel"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç"></th>
+                                <th class="col-sel"><input type="checkbox" id="selectPage" title="Bu sayfadakilerin tümünü seç" aria-label="Bu sayfadakilerin tümünü seç"></th>
                                 <th class="col-pub">Yayın <span class="th-sorts"><button type="button" class="th-sort" data-sort="title">Başlık</button><button type="button" class="th-sort" data-sort="author">Yazar</button><button type="button" class="th-sort" data-sort="year">Yıl</button></span></th>
                                 <th class="col-abstract">Özet · kanıtlar <span class="ev-legend"><mark class="ev-mark ev-inc">dahil</mark><mark class="ev-mark ev-exc">hariç</mark><mark class="ev-mark ev-may">belirsiz</mark></span></th>
                                 <th class="col-reason">Ölçütler · kısa gerekçe</th>
-                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-hint">satıra tıklayın · 1 Dahil · 2 Belirsiz · 3 Hariç · R gerekçe · J/K gez</span></th>
+                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-hint">Satıra tıklayın, sonra <kbd>1</kbd> Dahil <kbd>2</kbd> Belirsiz <kbd>3</kbd> Hariç <kbd>R</kbd> gerekçe <kbd>J</kbd>/<kbd>K</kbd> gez</span></th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody"></tbody>
@@ -655,11 +755,11 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=14.0"></script>
-    <script src="screening-core.js?v=14.0"></script>
-    <script src="default-prompt.js?v=14.0"></script>
-    <script src="cloud.js?v=14.0"></script>
-    <script src="script.js?v=14.0"></script>
-    <script src="workspace.js?v=14.0"></script>
+    <script src="supabase-config.js?v=15.0"></script>
+    <script src="screening-core.js?v=15.0"></script>
+    <script src="default-prompt.js?v=15.0"></script>
+    <script src="cloud.js?v=15.0"></script>
+    <script src="script.js?v=15.0"></script>
+    <script src="workspace.js?v=15.0"></script>
 </body>
 </html>

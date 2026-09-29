@@ -296,8 +296,8 @@ function renderDocTypeFilter() {
   [...WS.docTypes].forEach(t => { if (!counts.has(t)) WS.docTypes.delete(t); });
   const types = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
   const sig = types.map(t => t.join('=')).join('|') + '#' + [...WS.docTypes].join('|');
-  el.docTypeSummary.textContent = !WS.docTypes.size ? '📄 Belge türü: tümü'
-    : WS.docTypes.size === 1 ? `📄 ${[...WS.docTypes][0]}` : `📄 Belge türü: ${WS.docTypes.size} tür`;
+  el.docTypeSummary.textContent = !WS.docTypes.size ? 'Tümü'
+    : WS.docTypes.size === 1 ? [...WS.docTypes][0] : `${WS.docTypes.size} tür seçili`;
   el.docTypeFilter.classList.toggle('dd-active', WS.docTypes.size > 0);
   if (el.docTypeList.dataset.sig === sig) return;
   el.docTypeList.dataset.sig = sig;
@@ -383,8 +383,10 @@ function renderWorkspace() {
   renderPager(el.pagerBottom, list.length, pages);
   el.selectPage.checked = slice.length > 0 && slice.every(r => WS.selected.has(r.rid));
   WS._lastFiltered = list;
+  renderActiveFilters();
   updateSelectionBar();
   updateWsStats();
+  refreshIcons();
 }
 
 function renderPager(host, total, pages) {
@@ -427,42 +429,93 @@ function renderSourceBar() {
   left.className = 'source-info';
   const right = document.createElement('div');
   right.className = 'source-actions';
+  const kind = document.createElement('span');
+  kind.className = 'source-kind';
+  const name = document.createElement('div');
+  name.className = 'source-name';
+  const meta = document.createElement('div');
+  meta.className = 'source-meta';
   if (WS.isCloud) {
     const p = WS.project;
-    left.append(pill('☁️ Proje', 'pill-cloud'), text('strong', p.name));
-    left.append(pill(p.blind ? '🙈 Kör mod açık' : '👁️ Kör mod kapalı', p.blind ? 'pill-warn' : 'pill-ok'));
-    if (p.hide_ai) left.append(pill('🤖 AI kararları hakemlerden gizli', 'pill-muted'));
-    left.append(pill(Cloud.isAdmin ? '🛡️ Yönetici' : '🧑‍⚖️ Hakem', 'pill-muted'));
+    kind.append(uiIcon('folder-kanban'), document.createTextNode('Ekip projesi'));
+    name.appendChild(text('strong', p.name));
+    meta.append(
+      badge(p.blind ? 'eye-off' : 'eye', p.blind ? 'Kör mod açık' : 'Kör mod kapalı', p.blind ? 'warn' : ''),
+      badge(Cloud.isAdmin ? 'shield' : 'user', Cloud.isAdmin ? 'Yönetici' : 'Hakem'));
+    if (p.hide_ai) meta.append(badge('bot-off', 'AI kararları hakemlerden gizli'));
     const live = text('span', '', 'live-status');
     live.id = 'liveStatus';
-    left.appendChild(live);
+    meta.appendChild(live);
     if (Cloud.isAdmin && p.blind) {
       const lab = document.createElement('label');
-      lab.className = 'checkbox-label inline-check';
+      lab.className = 'ui-check';
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = WS.showAllVotes;
       cb.addEventListener('change', () => { WS.showAllVotes = cb.checked; renderWorkspace(); });
-      lab.append(cb, document.createTextNode(' Tüm hakem kararlarını göster (yalnızca siz)'));
-      left.appendChild(lab);
+      lab.append(cb, document.createTextNode('Tüm hakem kararlarını göster (yalnızca siz)'));
+      meta.appendChild(lab);
     }
-    const back = button('💻 Yerel sonuçlara dön', 'btn-tertiary btn-compact', () => { closeCloudProject(); });
+    const back = uiButton('monitor', 'Yerel sonuçlara dön', 'ui-btn ui-btn-ghost ui-btn-sm', () => { closeCloudProject(); });
     back.disabled = !(run && run.records && run.records.length);
-    right.append(button('↻ Yenile', 'btn-tertiary btn-compact', () => openCloudProject(p.id)), back);
+    right.append(uiButton('refresh-cw', 'Yenile', 'ui-btn ui-btn-outline ui-btn-sm', () => openCloudProject(p.id)), back);
   } else {
-    left.append(pill('💻 Yerel analiz', 'pill-muted'), text('strong', run ? run.fileName : ''));
-    if (run && run.cloudProjectId) left.append(pill('☁️ Veritabanına kaydedildi', 'pill-ok'));
-    left.append(text('span', 'Kararlarınız bu tarayıcıda saklanır.', 'muted-inline'));
+    kind.append(uiIcon('monitor'), document.createTextNode('Yerel analiz'));
+    name.appendChild(text('strong', run ? run.fileName : ''));
+    if (run && run.cloudProjectId) meta.append(badge('cloud-check', 'Veritabanına kaydedildi', 'ok'));
+    meta.append(text('span', 'Kararlarınız bu tarayıcıda saklanır.', 'source-note'));
   }
+  left.append(kind, name, meta);
   bar.append(left, right);
   el.saveToCloudBtn.style.display = !WS.isCloud && Cloud.available && Cloud.isAdmin ? 'inline-flex' : 'none';
   el.loadProtocolBtn.style.display = WS.isCloud && WS.canCurate ? 'inline-flex' : 'none';
-  el.filterPeople.style.display = WS.isCloud ? '' : 'none';
+  el.filterPeopleField.style.display = WS.isCloud ? '' : 'none';
   el.bulkFinalGroup.style.display = WS.isCloud ? 'inline-flex' : 'none';
   renderLiveStatus();
-  el.costPanel.style.display = WS.isCloud ? 'none' : 'grid';
-  el.statConflictCard.style.display = WS.isCloud && !WS.blindForMe ? 'block' : 'none';
+  el.costPanel.style.display = WS.isCloud ? 'none' : '';
+  el.statConflictCard.style.display = WS.isCloud && !WS.blindForMe ? '' : 'none';
   el.filterStatus.querySelectorAll('.cloud-only').forEach(o => { o.hidden = !WS.isCloud; });
+}
+
+// ---------- active filter chips (also written to the export metadata) ----------
+function selectedText(sel) { const o = sel.options[sel.selectedIndex]; return o ? o.textContent : ''; }
+
+/** Every filter that currently narrows the list: { label, value, clear } */
+function activeFilterList() {
+  const out = [];
+  const q = el.filterSearch.value.trim();
+  if (q) out.push({ label: 'Arama', value: `"${q}"`, clear: () => { el.filterSearch.value = ''; } });
+  [['filterAi', 'AI kararı'], ['filterMine', 'Benim kararım'], ['filterStatus', 'Durum']].forEach(([id, label]) => {
+    if (el[id].value !== 'all') out.push({ label, value: selectedText(el[id]), clear: () => { el[id].value = 'all'; } });
+  });
+  if (WS.isCloud && el.filterPeople.value) out.push({ label: 'Hakem / nihai', value: selectedText(el.filterPeople), clear: () => { el.filterPeople.value = ''; } });
+  if (el.filterLabel.value) {
+    out.push({ label: el.filterLabel.value.startsWith('r:') ? 'Hariç gerekçesi' : 'Etiket', value: el.filterLabel.value.replace(/^[lr]:/, ''), clear: () => { el.filterLabel.value = ''; } });
+  }
+  if (WS.docTypes.size) out.push({ label: 'Belge türü', value: [...WS.docTypes].join(', '), clear: () => { WS.docTypes.clear(); } });
+  const yf = el.yearFrom.value.trim(), yt = el.yearTo.value.trim();
+  if (yf || yt) {
+    out.push({ label: 'Yıl', value: yf && yt ? `${yf}–${yt}` : yf ? `≥ ${yf}` : `≤ ${yt}`, clear: () => { el.yearFrom.value = ''; el.yearTo.value = ''; } });
+  }
+  return out;
+}
+
+function renderActiveFilters() {
+  const list = activeFilterList();
+  ['filterAi', 'filterMine', 'filterStatus'].forEach(id => el[id].classList.toggle('is-set', el[id].value !== 'all'));
+  ['filterPeople', 'filterLabel', 'yearFrom', 'yearTo'].forEach(id => el[id].classList.toggle('is-set', !!el[id].value));
+  el.docTypeSummary.classList.toggle('is-set', WS.docTypes.size > 0);
+  el.activeFiltersRow.hidden = !list.length;
+  el.activeFilters.textContent = '';
+  list.forEach(f => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'ws-chip';
+    chip.title = 'Bu filtreyi kaldır';
+    chip.append(text('span', f.label, 'ws-chip-k'), text('span', f.value, 'ws-chip-v'), uiIcon('x'));
+    chip.addEventListener('click', () => { f.clear(); WS.page = 1; renderWorkspace(); });
+    el.activeFilters.appendChild(chip);
+  });
 }
 
 // audit notes of the consensus row and of every model
@@ -495,14 +548,14 @@ function renderPeopleFilter() {
   const cur = el.filterPeople.value;
   el.filterPeople.textContent = '';
   const opt = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.appendChild(o); };
-  opt(el.filterPeople, '', '👥 Hakem / nihai: tümü');
+  opt(el.filterPeople, '', 'Tümü');
   const fg = document.createElement('optgroup');
-  fg.label = '⚖ Nihai karar';
+  fg.label = 'Nihai karar';
   [['Include', 'Dahil'], ['Uncertain', 'Belirsiz'], ['Exclude', 'Hariç'], ['none', 'verilmemiş']].forEach(([v, t]) => opt(fg, `f||${v}`, `Nihai: ${t}`));
   el.filterPeople.appendChild(fg);
   people.forEach((name, uid) => {
     const g = document.createElement('optgroup');
-    g.label = `👤 ${name}`;
+    g.label = name;
     [['Include', 'Dahil dedikleri'], ['Uncertain', 'Belirsiz dedikleri'], ['Exclude', 'Hariç dedikleri'], ['any', 'oy verdikleri'], ['none', 'oy vermedikleri']]
       .forEach(([v, t]) => opt(g, `u|${uid}|${v}`, `${name}: ${t}`));
     el.filterPeople.appendChild(g);
@@ -532,15 +585,15 @@ function renderLabelFilter() {
   el.filterLabel.dataset.sig = sig;
   el.filterLabel.textContent = '';
   const opt = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.appendChild(o); };
-  opt(el.filterLabel, '', '🏷️ Etiket / gerekçe: tümü');
+  opt(el.filterLabel, '', 'Tümü');
   if (labels.length) {
     const g = document.createElement('optgroup'); g.label = 'Etiketler';
-    labels.forEach(([t, n]) => opt(g, `l:${t}`, `🏷️ ${t} (${n})`));
+    labels.forEach(([t, n]) => opt(g, `l:${t}`, `${t} (${n})`));
     el.filterLabel.appendChild(g);
   }
   if (reasons.length) {
     const g = document.createElement('optgroup'); g.label = 'Hariç tutma gerekçeleri';
-    reasons.forEach(([t, n]) => opt(g, `r:${t}`, `✕ ${t} (${n})`));
+    reasons.forEach(([t, n]) => opt(g, `r:${t}`, `${t} (${n})`));
     el.filterLabel.appendChild(g);
   }
   el.filterLabel.value = [...el.filterLabel.options].some(o => o.value === cur) ? cur : '';
@@ -732,6 +785,28 @@ function button(label, cls, onClick, title) {
   b.addEventListener('click', onClick);
   return b;
 }
+
+// ---------- shadcn-style building blocks (Lucide icons) ----------
+/** Placeholder that refreshIcons() turns into a Lucide SVG. */
+function uiIcon(name) { const i = document.createElement('i'); i.dataset.lucide = name; return i; }
+function refreshIcons() {
+  if (!window.lucide || !document.querySelector('i[data-lucide]')) return;
+  try { window.lucide.createIcons({ attrs: { 'stroke-width': 2, 'aria-hidden': 'true' } }); } catch (e) { /* icons are decorative */ }
+}
+function uiButton(iconName, label, cls, onClick, title) {
+  const b = button('', cls, onClick, title);
+  b.append(uiIcon(iconName), text('span', label));
+  return b;
+}
+function badge(iconName, label, tone) {
+  const s = document.createElement('span');
+  s.className = `ui-badge${tone ? ` ui-badge-${tone}` : ''}`;
+  if (iconName) s.appendChild(uiIcon(iconName));
+  s.appendChild(document.createTextNode(label));
+  return s;
+}
+/** Change a button's label without wiping its icon. */
+function setBtnText(b, value) { (b.querySelector('.btn-text') || b).textContent = value; }
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Small line icons (robot = machine decision, person = human decision)
 function icon(kind) {
@@ -1294,21 +1369,28 @@ function updateWsStats() {
       ? `Nihai kararı ${DEC_TR[d]} olan ${human[d]} kayıt + nihai kararı olmayıp AI'nın ${d} dediği ${c[d] - human[d]} kayıt. AI toplamda ${aiC[d]} kayda ${d} dedi.`
       : `Sizin ${DEC_TR[d]} dediğiniz ${human[d]} kayıt + oy vermediğiniz ve AI'nın ${d} dediği ${c[d] - human[d]} kayıt.`;
   });
-  el.reviewCount.textContent = rev;
-  el.duplicateCount.textContent = WS.records.filter(r => r.removed || isPendingDup(r)).length;
-  el.archiveCount.textContent = WS.records.filter(r => r.archived && !r.removed).length;
-  el.totalCount.textContent = n.toLocaleString('tr-TR');
-  el.myProgressCount.textContent = `${mine}/${n}`;
+  const decided = c.Include + c.Uncertain + c.Exclude;
+  [['distBarInc', 'Include'], ['distBarMay', 'Uncertain'], ['distBarExc', 'Exclude']].forEach(([id, d]) => {
+    el[id].style.width = decided ? `${c[d] / decided * 100}%` : '0%';
+    el[id].title = `${DECISION_LABEL[d]}: ${c[d].toLocaleString('tr-TR')} (%${decided ? Math.round(c[d] / decided * 100) : 0})`;
+  });
+  const fmt = v => v.toLocaleString('tr-TR');
+  const pct = v => (n ? `%${Math.round(v / n * 100)}` : '%0');
+  el.reviewCount.textContent = fmt(rev);
+  el.duplicateCount.textContent = fmt(WS.records.filter(r => r.removed || isPendingDup(r)).length);
+  el.archiveCount.textContent = fmt(WS.records.filter(r => r.archived && !r.removed).length);
+  el.totalCount.textContent = fmt(n);
+  el.myProgressCount.textContent = `${fmt(mine)} / ${fmt(n)} · ${pct(mine)}`;
   el.myProgressBar.style.width = n ? `${mine / n * 100}%` : '0%';
-  el.statFinalCard.style.display = WS.isCloud ? 'block' : 'none';
-  el.finalProgressCount.textContent = `${fin}/${n}`;
+  el.statFinalCard.style.display = WS.isCloud ? '' : 'none';
+  el.finalProgressCount.textContent = `${fmt(fin)} / ${fmt(n)} · ${pct(fin)}`;
   el.finalProgressBar.style.width = n ? `${fin / n * 100}%` : '0%';
-  el.conflictCount.textContent = conflict;
+  el.conflictCount.textContent = fmt(conflict);
   el.statsScopeInfo.textContent = WS.statsScope === 'filter'
     ? `Sayılar geçerli filtredeki ${n.toLocaleString('tr-TR')} kayda göre.`
     : `Sayılar tüm aktif kayıtlara göre (tekrar ve arşiv hariç). ${WS.isCloud ? 'Nihai karar varsa o, yoksa AI kararı sayılır.' : 'Oyunuz varsa o, yoksa AI kararı sayılır.'}`;
   el.retryErrorsBtn.style.display = err && WS.canCurate ? 'inline-flex' : 'none';
-  el.retryErrorsBtn.textContent = `🔁 Hatalı ${err} kaydı yeniden tara`;
+  setBtnText(el.retryErrorsBtn, `Hatalı ${err} kaydı yeniden tara`);
   el.relevanceReportBtn.style.display = !WS.aiHidden && [...WS.ai.values()].some(r => typeof r.relevance_score === 'number') ? 'inline-flex' : 'none';
   if (!WS.isCloud && typeof updateAgreement === 'function') updateAgreement();
   updateTabBadges();
@@ -1402,17 +1484,18 @@ function updateSelectionBar() {
   const n = WS.selected.size;
   const canRun = WS.canCurate;
   el.selectionBar.style.display = canRun ? 'flex' : 'none';
-  el.selCount.textContent = n ? `${n} kayıt seçili` : 'Seçim yok';
+  el.selCount.textContent = n ? `${n.toLocaleString('tr-TR')} kayıt seçili` : 'Seçim yok';
+  el.selectionBar.classList.toggle('has-selection', n > 0);
   el.reanalyzeSelectedBtn.disabled = !n;
   el.clearSelectionBtn.disabled = !n;
   document.querySelectorAll('.bulk-btn').forEach(b => { b.disabled = !n; });
   el.archiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? 'none' : '';
   el.unarchiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? '' : 'none';
   const nf = (WS._lastFiltered || []).length;
-  el.selectFilteredBtn.textContent = `☑ Filtredekilerin tümünü seç (${nf.toLocaleString('tr-TR')})`;
+  setBtnText(el.selectFilteredBtn, `Filtredekilerin tümünü seç (${nf.toLocaleString('tr-TR')})`);
   el.selectFilteredBtn.disabled = !nf || (WS._lastFiltered || []).every(r => WS.selected.has(r.rid));
   const total = (WS._lastFiltered || []).length;
-  el.reanalyzeAllBtn.textContent = `🔁 Filtredeki tümünü yeniden analiz et (${total.toLocaleString('tr-TR')})`;
+  setBtnText(el.reanalyzeAllBtn, `Filtredekileri yeniden analiz et (${total.toLocaleString('tr-TR')})`);
   el.reanalyzeAllBtn.disabled = !total;
 }
 
@@ -1670,9 +1753,37 @@ function mergedRow(rec) {
   return base;
 }
 
-function wsExportRows() {
+/**
+ * What an export contains. 'filter': the records of the current filter in the
+ * current sort order (what the table shows). 'all': every record in file order,
+ * including duplicates, removed and archived ones (marked in the Durum column).
+ */
+function wsExportScope() {
+  const r = document.querySelector('input[name="exportScope"]:checked');
+  return r ? r.value : 'filter';
+}
+function wsExportRecords(scope) {
+  return scope === 'all' ? [...WS.records].sort((a, b) => a.order - b.order) : filteredRecords();
+}
+/** Metadata rows describing the scope, so a filtered file stays reproducible. */
+function wsScopeMetaRows(scope, n) {
+  const filters = activeFilterList();
+  return [
+    ['Dışa aktarım kapsamı', scope === 'all'
+      ? `Tüm kayıtlar (${n}; tekrar, kaldırılan ve arşivdekiler dahil)`
+      : `Geçerli filtre (${n} / ${WS.records.length} kayıt)`],
+    ['Uygulanan filtreler', scope === 'all' ? '—' : filters.length ? filters.map(f => `${f.label}: ${f.value}`).join('; ') : 'yok (tüm aktif kayıtlar)'],
+    ['Sıralama', scope === 'all' ? 'Dosya sırası' : selectedText(el.sortBy)]
+  ];
+}
+function updateExportMenu() {
+  const nf = filteredRecords().length, na = WS.records.length;
+  el.exportScopeFilterInfo.textContent = `${nf.toLocaleString('tr-TR')} kayıt${activeFilterList().length ? ' · filtreler uygulanmış' : ' · tüm aktif kayıtlar'}`;
+  el.exportScopeAllInfo.textContent = `${na.toLocaleString('tr-TR')} kayıt · tekrar ve arşiv dahil`;
+}
+
+function wsExportRows(recs) {
   const runLike = wsRunLike();
-  const recs = [...WS.records].sort((a, b) => a.order - b.order);
   const rows = C.buildExportRows(runLike, recs.map(mergedRow), modelShort);
   const reviewers = new Map();
   if (WS.isCloud) {
@@ -1702,39 +1813,55 @@ function wsExportRows() {
   return rows;
 }
 
-function wsExportName(ext) {
+function wsExportName(ext, scope, n) {
   const rl = wsRunLike();
   const base = WS.isCloud ? WS.project.name.replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 40) : 'screening';
-  return `${base}_${new Date().toISOString().slice(0, 10)}_v${rl.promptHash || 'x'}.${ext}`;
+  const tag = scope === 'filter' ? `_filtre-${n}kayit` : '';
+  return `${base}_${new Date().toISOString().slice(0, 10)}_v${rl.promptHash || 'x'}${tag}.${ext}`;
+}
+
+/** Records to export for the chosen scope, or null (with a message) when there are none. */
+function wsExportSelection() {
+  if (!WS.hasData()) { showError('İndirilecek sonuç yok.'); return null; }
+  const scope = wsExportScope();
+  const recs = wsExportRecords(scope);
+  if (!recs.length) { showError('Geçerli filtrede kayıt yok; filtreleri değiştirin ya da "Tüm kayıtlar"ı seçin.'); return null; }
+  el.exportMenu.open = false;
+  return { scope, recs };
 }
 
 function wsDownloadCsv() {
-  if (!WS.hasData()) return showError('İndirilecek sonuç yok.');
-  const rows = wsExportRows();
+  const sel = wsExportSelection();
+  if (!sel) return;
+  const rows = wsExportRows(sel.recs);
   const headers = Object.keys(rows[0]);
   const esc = v => `"${String(v === undefined || v === null ? '' : v).replace(/"/g, '""')}"`;
-  const meta = C.buildMetadataRows(wsRunLike(), WS.records.map(mergedRow)).slice(1).filter(([k]) => k !== 'Sistem talimatı (tam metin)')
-    .map(([k, v]) => `# ${String(k).replace(/[\r\n]+/g, ' ')}: ${String(v).replace(/[\r\n]+/g, ' ')}`).join('\n');
+  const metaRows = C.buildMetadataRows(wsRunLike(), WS.records.map(mergedRow)).slice(1).filter(([k]) => k !== 'Sistem talimatı (tam metin)');
+  metaRows.splice(2, 0, ...wsScopeMetaRows(sel.scope, rows.length));
+  const meta = metaRows.map(([k, v]) => `# ${String(k).replace(/[\r\n]+/g, ' ')}: ${String(v).replace(/[\r\n]+/g, ' ')}`).join('\n');
   const csv = [headers.map(esc).join(','), ...rows.map(r => headers.map(h => esc(r[h])).join(','))].join('\n');
-  triggerDownload(new Blob(['﻿' + meta + '\n' + csv], { type: 'text/csv;charset=utf-8' }), wsExportName('csv'));
+  triggerDownload(new Blob(['﻿' + meta + '\n' + csv], { type: 'text/csv;charset=utf-8' }), wsExportName('csv', sel.scope, rows.length));
 }
 
 function wsDownloadExcel() {
-  if (!WS.hasData()) return showError('İndirilecek sonuç yok.');
-  const rows = wsExportRows();
+  const sel = wsExportSelection();
+  if (!sel) return;
+  const rows = wsExportRows(sel.recs);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = Object.keys(rows[0] || {}).map(h => ({ wch: /Abstract|Gerekçe|Kanıt|Başlık|Denetim|Not/.test(h) ? 50 : 14 }));
   ws['!autofilter'] = { ref: ws['!ref'] };
   XLSX.utils.book_append_sheet(wb, ws, 'Screening');
+  // PRISMA counts stay computed over every record, whatever the export scope
   const metaRows = C.buildMetadataRows(wsRunLike(), WS.records.map(mergedRow));
   if (WS.isCloud) metaRows.splice(4, 0, ['Proje', `${WS.project.name} (${WS.project.id})`], ['Kör mod', WS.project.blind ? 'Açık' : 'Kapalı']);
+  metaRows.splice(3, 0, ...wsScopeMetaRows(sel.scope, rows.length));
   const meta = XLSX.utils.aoa_to_sheet(metaRows.map(([k, v]) => [k, typeof v === 'string' && v.length > 32000 ? v.slice(0, 32000) + ' …[kısaltıldı]' : v]));
   meta['!cols'] = [{ wch: 40 }, { wch: 120 }];
   XLSX.utils.book_append_sheet(wb, meta, 'Metadata');
   const log = XLSX.utils.aoa_to_sheet([['Olay'], ...((wsRunLike().log) || []).map(l => [l])]);
   XLSX.utils.book_append_sheet(wb, log, 'Log');
-  XLSX.writeFile(wb, wsExportName('xlsx'));
+  XLSX.writeFile(wb, wsExportName('xlsx', sel.scope, rows.length));
 }
 
 function wsRelevanceReport() {
@@ -2321,7 +2448,7 @@ function initWorkspace() {
   el.filterSearch.addEventListener('input', debounce(rerender, 250));
   el.toggleAllAbstractsBtn.addEventListener('click', () => {
     WS.compactAbs = !WS.compactAbs;
-    el.toggleAllAbstractsBtn.textContent = WS.compactAbs ? '↕️ Özetleri tam göster' : '↕️ Özetleri daralt';
+    setBtnText(el.toggleAllAbstractsBtn, WS.compactAbs ? 'Özetleri tam göster' : 'Özetleri daralt');
     el.resultsTable.classList.toggle('compact-abs', WS.compactAbs);
   });
   // click a row to make it the keyboard target
@@ -2361,6 +2488,15 @@ function initWorkspace() {
   el.retryErrorsBtn.addEventListener('click', () => reanalyzeRids(WS.records.filter(r => { const a = WS.ai.get(r.rid); return a && a.error && !r.removed; }).map(r => r.rid)));
   el.downloadCsvBtn.addEventListener('click', wsDownloadCsv);
   el.downloadExcelBtn.addEventListener('click', wsDownloadExcel);
+  el.exportMenu.addEventListener('toggle', () => { if (el.exportMenu.open) updateExportMenu(); });
+  // dashboard rows open the matching list (duplicates live in their own tab)
+  document.querySelectorAll('.ws-queue-row[data-jump]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.jump === 'dups') { switchTab('dups'); return; }
+    el.filterStatus.value = b.dataset.jump;
+    WS.page = 1;
+    renderWorkspace();
+    el.filterStatus.closest('.ws-filters').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
   el.relevanceReportBtn.addEventListener('click', wsRelevanceReport);
   el.relTopN.addEventListener('change', wsRelevanceReport);
   el.clearFiltersBtn.addEventListener('click', clearFilters);
@@ -2384,7 +2520,11 @@ function initWorkspace() {
   ['yearFrom', 'yearTo'].forEach(id => el[id].addEventListener('input', debounce(() => { WS.page = 1; renderWorkspace(); }, 300)));
   document.querySelectorAll('.th-sort').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); onHeaderSort(b.dataset.sort); }));
   // close the document type panel when clicking elsewhere
-  document.addEventListener('click', e => { if (el.docTypeFilter.open && !el.docTypeFilter.contains(e.target)) el.docTypeFilter.open = false; });
+  document.addEventListener('click', e => {
+    if (el.docTypeFilter.open && !el.docTypeFilter.contains(e.target)) el.docTypeFilter.open = false;
+    if (el.exportMenu.open && !el.exportMenu.contains(e.target)) el.exportMenu.open = false;
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; } });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
   el.saveCloudConfirmBtn.addEventListener('click', saveToCloud);
   el.loadProtocolBtn.addEventListener('click', () => { loadProtocolIntoForm(WS.project.protocol); switchTab('analysis'); });
@@ -2400,6 +2540,7 @@ function initWorkspace() {
   let tab = 'analysis';
   try { tab = sessionStorage.getItem('gls_tab') || 'analysis'; } catch (e) { /* ignore */ }
   switchTab(tab);
+  refreshIcons();
   renderAuthArea();
   if (Cloud.available) {
     Cloud.onChange(onAuthChanged);
