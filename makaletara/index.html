@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=17.2">
+    <link rel="stylesheet" href="style.css?v=17.3">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -688,6 +688,11 @@
                             <label class="ui-field"><span class="ui-label">Temalar · her satıra bir tema</span>
                                 <textarea id="themeGroups" class="ui-textarea" rows="6" placeholder="AI ile ilgiye göre bağlam kişiselleştirme&#10;Kişisel ilgi toplama ve profil çıkarma&#10;İlgiye dayalı öneri ve kullanıcı modelleme"></textarea>
                                 <small class="ui-help">"Diğer / belirsiz" teması yoksa otomatik eklenir. Tema adını değiştirirseniz önceki sonuçlar "eski ayar" olarak işaretlenir.</small></label>
+                            <div class="theme-new-opt">
+                                <label class="ui-check"><input type="checkbox" id="themeAllowNew"> Listedeki temalara uymayan makaleler için model yeni tema önerebilsin</label>
+                                <label class="ui-inline">en fazla <input type="number" id="themeMaxNew" class="ui-input theme-new-max" min="1" max="10" value="3" disabled aria-label="En fazla yeni tema sayısı"> yeni tema (proje boyunca)</label>
+                                <small class="ui-help">Model önce listedeki ve daha önce önerilmiş temaları kullanmaya yönlendirilir; benzer adlar mevcut temaya eşlenir. Sınır dolunca "Diğer" seçilir. Önerilen temaları Sonuçlar bölümünde yeniden adlandırabilir, birleştirebilir ya da silebilirsiniz.</small>
+                            </div>
                             <details class="ui-collapsible ui-collapsible-inner">
                                 <summary><i data-lucide="chevron-right" class="ui-chevron-r"></i><span>Tematik analiz promptu</span></summary>
                                 <textarea id="themePrompt" class="ui-textarea mono" rows="10"></textarea>
@@ -1041,14 +1046,14 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=17.2"></script>
-    <script src="screening-core.js?v=17.2"></script>
-    <script src="default-prompt.js?v=17.2"></script>
-    <script src="cloud.js?v=17.2"></script>
-    <script src="script.js?v=17.2"></script>
-    <script src="workspace.js?v=17.2"></script>
-    <script src="prisma.js?v=17.2"></script>
-    <script src="assist.js?v=17.2"></script>
-    <script src="report.js?v=17.2"></script>
+    <script src="supabase-config.js?v=17.3"></script>
+    <script src="screening-core.js?v=17.3"></script>
+    <script src="default-prompt.js?v=17.3"></script>
+    <script src="cloud.js?v=17.3"></script>
+    <script src="script.js?v=17.3"></script>
+    <script src="workspace.js?v=17.3"></script>
+    <script src="prisma.js?v=17.3"></script>
+    <script src="assist.js?v=17.3"></script>
+    <script src="report.js?v=17.3"></script>
 </body>
 </html>

@@ -367,7 +367,7 @@ function setupStickyFilters() {
 // ---------- theme filter (multi-select: confirmed themes, else the AI suggestion) ----------
 const NO_THEME = '(tema yok)';
 function renderThemeFilterDd() {
-  const counts = new Map(Assist.themeConfig().groups.map(g => [g, 0]));
+  const counts = new Map(Assist.themeConfig().all.map(g => [g, 0]));
   let none = 0;
   WS.records.forEach(r => {
     if (!isActive(r)) return;
@@ -2848,7 +2848,10 @@ function downloadProtocolText(project, onlyVersion) {
     const th = project ? project.themes : run && run.themeConfig;
     if (th && (th.groups || []).length) {
       parts.push(['TEMATİK ANALİZ AYARLARI', '='.repeat(72), `Araştırma amacı: ${th.goal || '-'}`, `Yakın referans: ${th.reference || '-'}`,
-        'Temalar:', ...th.groups.map(g => `  - ${g}`), '', 'Tematik analiz promptu:', th.prompt || '(varsayılan)'].join('\n'));
+        'Temalar:', ...th.groups.map(g => `  - ${g}`),
+        ...(th.proposed && th.proposed.length ? ['YZ\'nin önerdiği yeni temalar:', ...th.proposed.map(g => `  - ${g}`)] : []),
+        `Yeni tema önerisi: ${th.allowNew ? `açık (en fazla ${th.maxNew || 3})` : 'kapalı'}`,
+        '', 'Tematik analiz promptu:', th.prompt || '(varsayılan)'].join('\n'));
     }
   }
   const safe = String(name).replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 40);

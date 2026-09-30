@@ -173,11 +173,21 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     let saved = {};
     try { saved = JSON.parse(lsGet('gls_theme_defaults', '{}')); } catch (e) { /* ignore */ }
     const base = Object.keys(src).length ? src : saved;
+    const groups = normalizeGroups((base.groups || []).join('\n'));
+    const proposed = [...new Set((base.proposed || []).filter(n => n && !C.matchThemeName(n, groups)))];
     return {
-      goal: base.goal || '', reference: base.reference || '',
-      groups: normalizeGroups((base.groups || []).join('\n')), prompt: base.prompt || DEFAULT_THEME_PROMPT
+      goal: base.goal || '', reference: base.reference || '', groups, prompt: base.prompt || DEFAULT_THEME_PROMPT,
+      allowNew: !!base.allowNew, maxNew: Math.max(1, Math.min(10, parseInt(base.maxNew, 10) || 3)), proposed,
+      all: allThemes(groups, proposed)
     };
   }
+
+  /** Listed themes, then the ones the model proposed, then "Diğer" last. */
+  function allThemes(groups, proposed) {
+    const other = otherOf(groups);
+    return [...groups.filter(g => g !== other), ...(proposed || []), other];
+  }
+  const isProposed = (cfg, name) => cfg.proposed.includes(name);
   const themeSignature = cfg => C.fingerprint(JSON.stringify(['theme-v1', cfg.goal, cfg.reference, cfg.groups, cfg.prompt]));
 
   function themeOf(rec) {
@@ -197,24 +207,35 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
   const cloudThemesReady = () => !WS.isCloud || Cloud.v15;
 
   function formToConfig() {
+    const groups = normalizeGroups(el.themeGroups.value);
     return {
       goal: el.themeGoal.value.trim(), reference: el.themeReference.value.trim(),
-      groups: normalizeGroups(el.themeGroups.value), prompt: el.themePrompt.value.trim() || DEFAULT_THEME_PROMPT
+      groups, prompt: el.themePrompt.value.trim() || DEFAULT_THEME_PROMPT,
+      allowNew: el.themeAllowNew.checked, maxNew: Math.max(1, Math.min(10, parseInt(el.themeMaxNew.value, 10) || 3)),
+      // a proposal the user typed into the list is now a listed theme
+      proposed: themeConfig().proposed.filter(n => !C.matchThemeName(n, groups))
     };
+  }
+
+  /** Stores the config as it is (e.g. after the model proposed themes); returns true on success. */
+  async function storeThemeConfig(cfg) {
+    const out = { goal: cfg.goal, reference: cfg.reference, groups: cfg.groups, prompt: cfg.prompt, allowNew: cfg.allowNew, maxNew: cfg.maxNew, proposed: cfg.proposed };
+    if (WS.isCloud) {
+      if (!Cloud.v15) { showError('Tematik ayarları projeye kaydetmek için veritabanı güncellemesi gerekiyor.'); return false; }
+      try { const upd = await Cloud.updateProject(WS.project.id, { themes: out }); WS.project.themes = upd.themes; }
+      catch (e) { showError('Kaydedilemedi: ' + e.message); return false; }
+    } else if (run) {
+      run.themeConfig = out;
+      scheduleSave();
+    }
+    return true;
   }
 
   async function saveThemeConfig(silent) {
     const cfg = formToConfig();
     if (cfg.groups.length < 2) { showError('En az bir tema yazın (her satıra bir tema).'); return null; }
-    lsSet('gls_theme_defaults', JSON.stringify(cfg));
-    if (WS.isCloud) {
-      if (!Cloud.v15) { showError('Tematik ayarları projeye kaydetmek için veritabanı güncellemesi gerekiyor.'); return null; }
-      try { const upd = await Cloud.updateProject(WS.project.id, { themes: cfg }); WS.project.themes = upd.themes; }
-      catch (e) { showError('Kaydedilemedi: ' + e.message); return null; }
-    } else if (run) {
-      run.themeConfig = cfg;
-      scheduleSave();
-    }
+    lsSet('gls_theme_defaults', JSON.stringify(Object.assign({}, cfg, { proposed: [] })));
+    if (!await storeThemeConfig(cfg)) return null;
     el.themeGroups.value = cfg.groups.join('\n');
     if (!silent) showSuccess('Tematik ayarlar kaydedildi.');
     renderThemes();
@@ -227,11 +248,14 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     el.themeReference.value = cfg.reference;
     el.themeGroups.value = cfg.groups.join('\n');
     el.themePrompt.value = cfg.prompt;
+    el.themeAllowNew.checked = cfg.allowNew;
+    el.themeMaxNew.value = cfg.maxNew;
+    el.themeMaxNew.disabled = !cfg.allowNew;
     el.themeSettings.dataset.src = projectKey();
     el.themeSettings.open = !cfg.goal;
   }
 
-  function themeSchema(groups) {
+  function themeSchema(groups, allowNew) {
     return {
       type: 'OBJECT',
       properties: {
@@ -245,7 +269,8 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
               relevance: { type: 'INTEGER' },
               reason: { type: 'STRING' },
               evidence: { type: 'STRING' },
-              limitations: { type: 'STRING' }
+              limitations: { type: 'STRING' },
+              ...(allowNew ? { new_theme: { type: 'STRING' } } : {})
             },
             required: ['article_id', 'themes', 'relevance', 'reason', 'evidence', 'limitations']
           }
@@ -255,26 +280,40 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     };
   }
 
-  function validateTheme(raw, rec, cfg, sig, model) {
+  /**
+   * state (only when new themes are allowed): { proposed: [names], max } —
+   * shared by the whole run so the limit holds across parallel requests.
+   */
+  function validateTheme(raw, rec, cfg, sig, model, state) {
     const norm = s => String(s || '').trim().toLocaleLowerCase('tr');
     const other = otherOf(cfg.groups);
+    const known = state ? allThemes(cfg.groups, state.proposed) : cfg.all || cfg.groups;
     const flags = [];
     const picked = [];
     (Array.isArray(raw.themes) ? raw.themes : [raw.theme || raw.group]).forEach(t => {
-      const g = cfg.groups.find(x => norm(x) === norm(t));
+      const g = known.find(x => norm(x) === norm(t));
       if (g && !picked.includes(g)) picked.push(g);
       else if (t && !g) flags.push(`listede olmayan tema: "${String(t).slice(0, 60)}"`);
     });
     let themes = picked.slice(0, 2);
     if (picked.length > 2) flags.push('2\'den fazla tema önerildi; ilk ikisi alındı');
     if (themes.length === 2 && themes.includes(other)) themes = themes.filter(t => t !== other);
+    // a new theme only when nothing listed fits; near-duplicates reuse an existing name; the limit is enforced here
+    let newTheme = false;
+    const proposal = state ? C.cleanThemeName(raw.new_theme) : '';
+    if (proposal && (!themes.length || (themes.length === 1 && themes[0] === other))) {
+      const same = C.matchThemeName(proposal, allThemes(cfg.groups, state.proposed).filter(x => x !== other));
+      if (same) themes = [same];
+      else if (state.proposed.length < state.max) { state.proposed.push(proposal); themes = [proposal]; newTheme = true; }
+      else { themes = [other]; flags.push(`yeni tema sınırı (${state.max}) doldu; önerilen: "${proposal}"`); }
+    }
     if (!themes.length) themes = [other];
     let relevance = Math.round(Number(raw.relevance));
     relevance = isFinite(relevance) ? Math.max(0, Math.min(100, relevance)) : null;
     let evidence = String(raw.evidence || '').trim();
     if (evidence && !C.evidenceSupported(evidence, recordText(rec))) { flags.push('alıntı metinde bulunamadı'); evidence = ''; }
     return {
-      themes, relevance, evidence, flags,
+      themes, relevance, evidence, flags, ...(newTheme ? { newTheme: true } : {}),
       reason: String(raw.reason || '').trim().slice(0, 1200),
       limitations: String(raw.limitations || '').trim().slice(0, 1200),
       signature: sig, model, created: new Date().toISOString()
@@ -304,6 +343,85 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       showError('Tema sonuçları veritabanına yazılamadı, tekrar denenecek: ' + e.message);
       THEME.flushTimer = setTimeout(flushThemes, 10000);
     }
+  }
+
+  /**
+   * Renames, merges or deletes a model-proposed theme everywhere: in the AI
+   * results and in the themes people confirmed. to = new name, another theme,
+   * or "Diğer" (delete).
+   */
+  async function remapTheme(from, to) {
+    const cfg = themeConfig();
+    const other = otherOf(cfg.groups);
+    const fix = list => {
+      if (!list || !list.includes(from)) return null;
+      let n = [...new Set(list.map(x => (x === from ? to : x)))];
+      if (n.length > 1) n = n.filter(x => x !== other);
+      return n.slice(0, 2);
+    };
+    const changed = [];
+    WS.records.forEach(rec => {
+      const t = themeOf(rec), f = finalThemesOf(rec);
+      const nt = t && fix(t.themes), nf = fix(f);
+      if (nt || nf) changed.push({ rec, theme: nt ? Object.assign({}, t, { themes: nt }) : t, fin: nf || f });
+    });
+    if (WS.isCloud) {
+      const prev = changed.map(c => [c.rec, c.rec.theme, c.rec.themeFinal]);
+      changed.forEach(c => { c.rec.theme = c.theme; c.rec.themeFinal = c.fin; });
+      try { if (changed.length) await Cloud.patchRecords(WS.project.id, changed.map(c => ({ rid: c.rec.rid, theme: c.theme, theme_final: c.fin }))); }
+      catch (e) { prev.forEach(([r, t, f]) => { r.theme = t; r.themeFinal = f; }); showError('Güncellenemedi: ' + e.message); return; }
+    } else {
+      run.themes = run.themes || {};
+      run.themeFinal = run.themeFinal || {};
+      changed.forEach(c => {
+        if (c.theme) run.themes[c.rec.rid] = c.theme;
+        if (c.fin.length) run.themeFinal[c.rec.rid] = c.fin; else delete run.themeFinal[c.rec.rid];
+      });
+      scheduleSave();
+    }
+    const proposed = cfg.proposed.map(x => (x === from ? to : x)).filter((x, i, a) => a.indexOf(x) === i && !cfg.groups.includes(x) && x !== other);
+    await storeThemeConfig(Object.assign({}, cfg, { proposed }));
+    renderThemes();
+    renderWorkspace();
+    showSuccess(`"${from}" → "${to}" · ${changed.length.toLocaleString('tr-TR')} makale güncellendi.`);
+  }
+
+  /** Rows to rename / merge / delete the themes the model proposed. */
+  function proposedBlock(cfg, counts) {
+    const box = document.createElement('div');
+    box.className = 'theme-proposed';
+    box.appendChild(text('div', `YZ'nin önerdiği yeni temalar (${cfg.proposed.length} / ${cfg.maxNew})`, 'ui-label'));
+    cfg.proposed.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'theme-proposed-row';
+      const c = counts.get(name) || { primary: 0, secondary: 0 };
+      row.append(text('span', name, 'theme-proposed-name'), text('span', `${c.primary + c.secondary} makale`, 'theme-bar-n'));
+      const acts = document.createElement('span');
+      acts.className = 'admin-row-actions';
+      acts.appendChild(button('Yeniden adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', () => {
+        const n = C.cleanThemeName(prompt('Yeni ad:', name) || '');
+        if (!n || n === name) return;
+        const same = C.matchThemeName(n, cfg.all.filter(x => x !== name));
+        if (same && !confirm(`"${n}", mevcut "${same}" temasına çok benziyor. Bu temaya birleştirilsin mi?`)) return;
+        remapTheme(name, same || n);
+      }));
+      const sel = document.createElement('select');
+      sel.className = 'ui-select ui-select-sm';
+      sel.setAttribute('aria-label', `${name} temasını birleştir`);
+      const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Birleştir…'; sel.appendChild(o0);
+      cfg.all.filter(x => x !== name).forEach(x => { const o = document.createElement('option'); o.value = x; o.textContent = x; sel.appendChild(o); });
+      sel.addEventListener('change', () => {
+        if (sel.value && confirm(`"${name}" temasındaki makaleler "${sel.value}" temasına taşınsın mı?`)) remapTheme(name, sel.value);
+        else sel.value = '';
+      });
+      acts.appendChild(sel);
+      acts.appendChild(button('Sil', 'ui-btn ui-btn-ghost ui-btn-xs is-danger', () => {
+        if (confirm(`"${name}" silinsin mi? Bu temadaki makaleler "${otherOf(cfg.groups)}" olur.`)) remapTheme(name, otherOf(cfg.groups));
+      }));
+      row.appendChild(acts);
+      box.appendChild(row);
+    });
+    return box;
   }
 
   async function setFinalThemes(rec, list) {
@@ -356,22 +474,26 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     el.themeStopBtn.hidden = false;
     const usage = { input: 0, output: 0, requests: 0 };
     let done = 0, failed = 0;
-    const system = `${cfg.prompt}\n\nReturn {"results":[...]} with exactly one object per article, using its exact article_id. "themes" must contain names exactly as written in the provided list.`;
+    const state = cfg.allowNew ? { proposed: [...cfg.proposed], max: cfg.maxNew } : null;
+    const system = `${cfg.prompt}\n\nReturn {"results":[...]} with exactly one object per article, using its exact article_id. "themes" must contain names exactly as written in the provided list.`
+      + (state ? `\n\nNEW THEMES: If NO provided theme (including those in "proposed_themes") fits an article, you may leave "themes" empty and write a short new theme name in "new_theme" (2-6 words, Turkish, same level of generality as the provided themes). Prefer an existing or already proposed theme whenever it reasonably fits; propose a new name only for a clearly distinct topic that would group several studies, never for one idiosyncratic study. Only ${Math.max(0, state.max - state.proposed.length)} new theme(s) may still be created in this project; when none are left, use the "other" theme. Otherwise leave "new_theme" as an empty string.` : '');
     const progress = () => {
       el.themeRunInfo.textContent = `${done.toLocaleString('tr-TR')} / ${todo.length.toLocaleString('tr-TR')} makale · ${usage.requests} istek · ~${formatTokens(usage.input + usage.output)} token${failed ? ` · ${failed} başarısız` : ''}`;
     };
     progress();
     try {
       await runLimited(batches, parallelism(), async batch => {
-        const user = JSON.stringify({ research_goal: cfg.goal, reference_approach: cfg.reference, themes: cfg.groups, articles: batch.map(articlePayload) });
+        const list = state ? allThemes(cfg.groups, state.proposed) : cfg.all;
+        const user = JSON.stringify(Object.assign({ research_goal: cfg.goal, reference_approach: cfg.reference, themes: list },
+          state ? { proposed_themes: state.proposed, new_themes_left: Math.max(0, state.max - state.proposed.length) } : {}, { articles: batch.map(articlePayload) }));
         let data;
-        try { data = await call({ system, user, schema: themeSchema(cfg.groups), signal, usage }); }
+        try { data = await call({ system, user, schema: themeSchema(list, !!state), signal, usage }); }
         catch (e) { if (e.name === 'AbortError') return; failed += batch.length; progress(); console.warn(e); return; }
         const got = new Map((Array.isArray(data.results) ? data.results : []).map(r => [String(r.article_id || '').trim(), r]));
         batch.forEach(rec => {
           const raw = got.get(rec.rid) || (batch.length === 1 && data.results && data.results.length === 1 ? data.results[0] : null);
           if (!raw) { failed++; return; }
-          storeTheme(rec, validateTheme(raw, rec, cfg, sig, m.apiModel));
+          storeTheme(rec, validateTheme(raw, rec, cfg, sig, m.apiModel, state));
           done++;
         });
         progress();
@@ -379,6 +501,12 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       }, signal);
     } finally {
       await flushThemes();
+      const added = state ? state.proposed.filter(n => !cfg.proposed.includes(n)) : [];
+      if (added.length) {
+        const now = themeConfig();
+        await storeThemeConfig(Object.assign({}, now, { proposed: [...new Set([...now.proposed, ...added])] }));
+        showSuccess(`Model ${added.length} yeni tema önerdi: ${added.join(', ')}. Sonuçlar bölümünden yeniden adlandırabilir, birleştirebilir ya da silebilirsiniz.`);
+      }
       THEME.controller = null;
       el.themeStopBtn.hidden = true;
       renderWorkspace();
@@ -392,7 +520,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
 
   function renderThemeFilter(cfg) {
     const cur = el.themeFilter.value;
-    const sig = cfg.groups.join('|');
+    const sig = cfg.all.join('|');
     if (el.themeFilter.dataset.sig !== sig) {
       el.themeFilter.dataset.sig = sig;
       el.themeFilter.textContent = '';
@@ -402,7 +530,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       add('changed', 'İnsan AI\'dan farklı tema seçti');
       add('stale', 'Eski tema ayarıyla üretilmiş');
       const g = document.createElement('optgroup'); g.label = 'Tema';
-      cfg.groups.forEach(t => add(`t:${t}`, t, g));
+      cfg.all.forEach(t => add(`t:${t}`, isProposed(cfg, t) ? `${t} (YZ önerisi)` : t, g));
       el.themeFilter.appendChild(g);
     }
     el.themeFilter.value = [...el.themeFilter.options].some(o => o.value === cur) ? cur : '';
@@ -418,12 +546,12 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     const sig = themeSignature(cfg);
     if (!cloudThemesReady()) el.themeRunInfo.textContent = 'Ekip projesinde tematik analiz için veritabanı güncellemesi gerekiyor (supabase/migrations/20260930_…sql).';
     else if (!THEME.controller) updateThemeRunInfo();
-    el.themeSettingsInfo.textContent = `${cfg.groups.length} tema${cfg.goal ? '' : ' · araştırma amacı boş'}`;
+    el.themeSettingsInfo.textContent = `${cfg.groups.length} tema${cfg.proposed.length ? ` + ${cfg.proposed.length} YZ önerisi` : ''}${cfg.allowNew ? ` · yeni tema açık (en fazla ${cfg.maxNew})` : ''}${cfg.goal ? '' : ' · araştırma amacı boş'}`;
     renderThemeFilter(cfg);
 
     const all = WS.records.filter(r => isActive(r) && (themeOf(r) || finalThemesOf(r).length));
     // summary: primary (first) theme counts, confirmed if a person set them
-    const counts = new Map(cfg.groups.map(g => [g, { primary: 0, secondary: 0 }]));
+    const counts = new Map(cfg.all.map(g => [g, { primary: 0, secondary: 0 }]));
     all.forEach(r => {
       const t = effectiveThemes(r);
       t.forEach((g, i) => { if (!counts.has(g)) counts.set(g, { primary: 0, secondary: 0 }); counts.get(g)[i ? 'secondary' : 'primary']++; });
@@ -442,10 +570,13 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       const p = document.createElement('span'); p.className = 'theme-bar-p'; p.style.width = `${c.primary / maxN * 100}%`;
       const s = document.createElement('span'); s.className = 'theme-bar-s'; s.style.width = `${c.secondary / maxN * 100}%`;
       bar.append(p, s);
-      row.append(text('span', g, 'theme-bar-name'), bar, text('span', `${c.primary}${c.secondary ? ` + ${c.secondary}` : ''}`, 'theme-bar-n'));
+      const nm = text('span', g, 'theme-bar-name');
+      if (isProposed(cfg, g)) nm.appendChild(text('span', 'YZ önerisi', 'theme-new-tag'));
+      row.append(nm, bar, text('span', `${c.primary}${c.secondary ? ` + ${c.secondary}` : ''}`, 'theme-bar-n'));
       row.addEventListener('click', () => { el.themeFilter.value = el.themeFilter.value === `t:${g}` ? '' : `t:${g}`; THEME.page = 1; renderThemes(); });
       el.themeSummary.appendChild(row);
     });
+    if (cfg.proposed.length) el.themeSummary.appendChild(proposedBlock(cfg, counts));
 
     // list
     const f = el.themeFilter.value;
@@ -514,10 +645,10 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
     right.appendChild(text('div', fin.length ? 'Onaylı tema' : 'Temayı onaylayın (en fazla 2)', 'ui-label'));
     const box = document.createElement('div');
     box.className = 'theme-pick';
-    cfg.groups.forEach(g => {
+    cfg.all.forEach(g => {
       const on = fin.includes(g);
       const other = otherOf(cfg.groups);
-      const b = button(g, `theme-opt${on ? ' on' : ''}`, () => {
+      const b = button(g, `theme-opt${on ? ' on' : ''}${isProposed(cfg, g) ? ' new' : ''}`, () => {
         // "Diğer" stands alone: choosing it replaces the others, choosing a theme drops it
         const next = on ? fin.filter(x => x !== g) : g === other ? [g] : [...fin.filter(x => x !== other), g];
         if (next.length > 2) return showError('Bir makaleye en fazla 2 tema verilebilir; önce birini kaldırın.');
@@ -527,7 +658,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       box.appendChild(b);
     });
     right.appendChild(box);
-    if (t && !fin.length) right.appendChild(button('AI temasını onayla', 'ui-btn ui-btn-outline ui-btn-xs', () => setFinalThemes(rec, t.themes.filter(g => cfg.groups.includes(g)))));
+    if (t && !fin.length) right.appendChild(button('AI temasını onayla', 'ui-btn ui-btn-outline ui-btn-xs', () => setFinalThemes(rec, t.themes.filter(g => cfg.all.includes(g)))));
     if (fin.length) right.appendChild(button('Onayı kaldır', 'ui-btn ui-btn-ghost ui-btn-xs', () => setFinalThemes(rec, [])));
     row.append(left, mid, right);
     return row;
@@ -711,6 +842,7 @@ Do not introduce outside knowledge or uncited studies. If the evidence is insuff
   function init() {
     el.themeSaveBtn.addEventListener('click', () => saveThemeConfig(false));
     el.themePromptReset.addEventListener('click', () => { el.themePrompt.value = DEFAULT_THEME_PROMPT; });
+    el.themeAllowNew.addEventListener('change', () => { el.themeMaxNew.disabled = !el.themeAllowNew.checked; });
     el.themeRunBtn.addEventListener('click', runThemes);
     el.themeStopBtn.addEventListener('click', () => { if (THEME.controller) THEME.controller.abort(); });
     ['themeScope', 'themeRedo'].forEach(id => el[id].addEventListener('change', updateThemeRunInfo));

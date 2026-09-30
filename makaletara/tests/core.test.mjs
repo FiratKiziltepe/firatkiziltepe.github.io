@@ -109,6 +109,16 @@ test('import into a project: ids, exact and similar duplicates', () => {
   assert.deepEqual(stats, { total: 6, fresh: 2, dupExisting: 2, dupWithin: 1, fuzzy: 1, removed: 3 });
 });
 
+test('proposed theme names: tidy and merge near-duplicates', () => {
+  assert.equal(C.cleanThemeName('  "Oyunlaştırma ile ilgi" . '), 'Oyunlaştırma ile ilgi');
+  assert.equal(C.cleanThemeName(' - '), '');
+  const names = ['Kişisel ilgi toplama ve profil çıkarma', 'Oyunlaştırma ile ilgi artırma', 'Diğer / belirsiz'];
+  assert.equal(C.matchThemeName('kişisel İLGİ toplama ve profil çıkarma', names), names[0]);   // case / Turkish letters
+  assert.equal(C.matchThemeName('Oyunlaştırma ile ilgi artırımı', names), names[1]);          // 3 of 4 words shared
+  assert.equal(C.matchThemeName('Öğretmen algıları', names), null);                          // really new
+  assert.equal(C.matchThemeName('', names), null);
+});
+
 test('validation: model decision contradicting its own verdicts goes to human review', () => {
   const raw = {
     id: 'R00001', decision: 'Include', confidence: 0.97, needs_human_review: false,

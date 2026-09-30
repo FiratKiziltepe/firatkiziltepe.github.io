@@ -1807,6 +1807,30 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
     return { records: out, stats };
   }
 
+  /** A model-proposed theme name, tidied (quotes, spaces, length); '' when unusable. */
+  function cleanThemeName(name) {
+    const s = String(name || '').replace(/["'“”‘’`]/g, '').replace(/\s+/g, ' ').replace(/^[\s\-–—:;.,]+|[\s\-–—:;.,]+$/g, '').trim();
+    return s.length >= 3 ? s.slice(0, 60) : '';
+  }
+
+  /**
+   * Maps a proposed theme name onto an existing one — same words, or at least
+   * 60% word overlap (Jaccard) — so near-duplicates never become new themes.
+   * Returns the existing name or null.
+   */
+  function matchThemeName(name, names) {
+    const key = normText(name);
+    if (!key) return null;
+    const tok = s => new Set(normText(s).split(' ').filter(t => t.length > 2));
+    const mine = tok(name);
+    let best = null, score = 0;
+    (names || []).forEach(n => {
+      const s = normText(n) === key ? 1.01 : jaccard(mine, tok(n));
+      if (s > score) { score = s; best = n; }
+    });
+    return score >= 0.6 ? best : null;
+  }
+
   // Cost estimation
   function estimateTokens(text) { return Math.ceil(String(text || '').length / 4); }
 
@@ -1822,6 +1846,7 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
     KeyPool, PoolExhaustedError, ApiError, classifyHttpError, callGemini, callOpenAICompatible,
     runScreening, planBatchJobs, batchJobState, parseBatchResponses, batchResponsesFile,
     estimateTokens, buildExportRows, buildMetadataRows,
-    normalizeDoi, splitRationale, evidenceRanges, findDuplicateCandidates, planImport
+    normalizeDoi, splitRationale, evidenceRanges, findDuplicateCandidates, planImport,
+    cleanThemeName, matchThemeName
   };
 });

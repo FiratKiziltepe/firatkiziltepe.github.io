@@ -2707,3 +2707,14 @@ body.light-theme { --ui-th-bg: #e4e4e7; --ui-th-fg: #27272a; }
 .ws .dd-count { flex-shrink: 0; margin-left: 8px; padding-top: 1px; font-variant-numeric: tabular-nums; }
 /* inside the docked filter panel (scrollable) the list opens in place instead of floating */
 .ws-filters-panel .dd-panel { position: static; min-width: 0; max-width: none; margin-top: 6px; box-shadow: none; }
+
+/* v17.3 — model-proposed themes */
+.theme-new-opt { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 14px; padding: 10px 12px; border: 1px dashed var(--ui-border); border-radius: var(--ui-radius); }
+.theme-new-opt .ui-check { font-size: 0.8125rem; color: var(--ui-fg); }
+.theme-new-max { width: 64px; height: 30px; padding: 0 8px; text-align: center; }
+.theme-new-tag { margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 0.64rem; font-weight: 600; background: var(--ui-may-soft); color: var(--ui-may); border: 1px solid var(--ui-may-line); vertical-align: 1px; }
+.theme-proposed { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--ui-may-line); border-radius: var(--ui-radius); background: var(--ui-may-soft); }
+.theme-proposed-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 0; border-top: 1px solid var(--ui-border); }
+.theme-proposed-row:first-of-type { border-top: 0; }
+.theme-proposed-name { flex: 1 1 200px; font-size: 0.8125rem; font-weight: 600; color: var(--ui-fg); }
+.theme-opt.new { border-color: var(--ui-may-line); }
