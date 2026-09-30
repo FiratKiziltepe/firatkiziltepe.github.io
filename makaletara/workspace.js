@@ -3413,6 +3413,15 @@ function initWorkspace() {
     if (el.exportMenu.open && !el.exportMenu.contains(e.target)) el.exportMenu.open = false;
     if (el.themeFilterDd.open && !el.themeFilterDd.contains(e.target)) el.themeFilterDd.open = false;
   });
+  // multi-select lists open to the left when they would leave the screen on the right
+  document.addEventListener('toggle', e => {
+    const d = e.target;
+    if (!(d instanceof HTMLDetailsElement) || !d.classList.contains('dd-filter')) return;
+    d.classList.remove('dd-right');
+    if (!d.open) return;
+    const panel = d.querySelector('.dd-panel');
+    if (panel && panel.getBoundingClientRect().right > document.documentElement.clientWidth - 8) d.classList.add('dd-right');
+  }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; el.themeFilterDd.open = false; } });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
   el.newProjectBtn.addEventListener('click', () => openImportDialog('new'));

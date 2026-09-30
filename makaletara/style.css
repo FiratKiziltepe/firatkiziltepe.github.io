@@ -2697,3 +2697,13 @@ body.light-theme { --ui-th-bg: #e4e4e7; --ui-th-fg: #27272a; }
 .th-keys { display: inline-flex; align-items: center; margin-left: 6px; vertical-align: middle; color: var(--ui-th-fg); opacity: 0.7; cursor: help; border-radius: 4px; }
 .th-keys:hover, .th-keys:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 2px var(--ui-ring); }
 .th-keys svg.lucide { width: 15px; height: 15px; }
+
+/* v17.2 — multi-select dropdowns stay inside the screen (counts never clipped) */
+.ws .dd-panel { max-width: calc(100vw - 24px); box-sizing: border-box; }
+.ws .dd-filter.dd-right .dd-panel { left: auto; right: 0; }
+.ws .dd-item { align-items: flex-start; }
+.ws .dd-item input { margin-top: 3px; flex-shrink: 0; }
+.ws .dd-name { min-width: 0; overflow-wrap: anywhere; }
+.ws .dd-count { flex-shrink: 0; margin-left: 8px; padding-top: 1px; font-variant-numeric: tabular-nums; }
+/* inside the docked filter panel (scrollable) the list opens in place instead of floating */
+.ws-filters-panel .dd-panel { position: static; min-width: 0; max-width: none; margin-top: 6px; box-shadow: none; }
