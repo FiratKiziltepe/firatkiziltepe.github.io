@@ -9,7 +9,7 @@
 // ============================================================
 /* global WS, C, el, run, settings, Cloud, resolveModels, keysFor, filteredRecords, isActive, myVote, scheduleSave,
           showError, showSuccess, text, button, uiIcon, uiButton, badge, refreshIcons, shortAuthors, switchTab,
-          renderWorkspace, DECISION_LABEL, debounce, formatTokens, doiHref */
+          renderWorkspace, refreshRow, DECISION_LABEL, debounce, formatTokens, doiHref */
 
 const Assist = (() => {
   // ------------------------------------------------------------
@@ -318,6 +318,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       scheduleSave();
     }
     renderThemes();
+    refreshRow(rec.rid);
   }
 
   function themeTargets() {
@@ -380,6 +381,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       await flushThemes();
       THEME.controller = null;
       el.themeStopBtn.hidden = true;
+      renderWorkspace();
       renderThemes();
       el.themeRunInfo.textContent = `${signal.aborted ? 'Durduruldu' : 'Tamamlandı'}: ${done.toLocaleString('tr-TR')} makale · ${usage.requests} istek · ~${formatTokens(usage.input + usage.output)} token${failed ? ` · ${failed} makale alınamadı (yeniden çalıştırabilirsiniz)` : ''}`;
     }
@@ -742,7 +744,8 @@ Do not introduce outside knowledge or uncited studies. If the evidence is insuff
 
   return {
     init, renderThemes, renderChat, onWorkspaceChange, openRecord,
-    themeOf, finalThemesOf, themeConfig, scopeRecords, flushThemes,
+    themeOf, finalThemesOf, effectiveThemes, themeConfig, scopeRecords, flushThemes, humanDecision,
+    call, assistModel, lsGet, lsSet, projectKey,
     // exposed for tests / export
     validateTheme, normalizeGroups, byteBatches, parseJson
   };

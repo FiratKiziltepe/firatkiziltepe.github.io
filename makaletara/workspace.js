@@ -31,6 +31,7 @@ const WS = {
   showAllVotes: false,
   compactAbs: false,
   docTypes: new Set(),
+  themeSel: new Set(),     // theme filter (any of), NO_THEME = records without a theme
   statsScope: 'all',
   focusRid: null,
   aiQueue: [],
@@ -190,6 +191,7 @@ function wsFilterState() {
     label: el.filterLabel.value,
     people: WS.isCloud ? el.filterPeople.value : '',
     docTypes: WS.docTypes,
+    themes: WS.themeSel,
     yearFrom: parseInt(el.yearFrom.value, 10),
     yearTo: parseInt(el.yearTo.value, 10),
     sort: el.sortBy.value
@@ -245,6 +247,10 @@ function matchesWs(rec, f) {
   }
 
   if (f.docTypes.size && !f.docTypes.has(docTypeOf(rec))) return false;
+  if (f.themes.size) {
+    const ts = Assist.effectiveThemes(rec);
+    if (!(ts.length ? ts.some(t => f.themes.has(t)) : f.themes.has(NO_THEME))) return false;
+  }
   if (isFinite(f.yearFrom) || isFinite(f.yearTo)) {
     const y = parseInt(rec.Year, 10);
     if (!isFinite(y)) return false;
@@ -319,6 +325,81 @@ function renderDocTypeFilter() {
   });
 }
 
+// ---------- sticky search bar ----------
+/**
+ * The search bar sticks under the tabs while the list scrolls. The filter fields
+ * live in their own card below it; while the bar is stuck, "Filtreler" moves
+ * them into the bar and back. The home card keeps its height meanwhile, so the
+ * page never jumps. --ws-sticky-top tells the table what is already stuck.
+ */
+function setupStickyFilters() {
+  const root = document.documentElement;
+  const bar = el.filtersCard, home = el.filtersHome, grid = el.filtersGrid;
+  const top = () => { const t = document.querySelector('.tabs'); return t ? Math.round(t.getBoundingClientRect().height) + 16 : 8; };
+  const measure = () => {
+    const t = top();
+    root.style.setProperty('--ws-tabs-h', `${t}px`);
+    root.style.setProperty('--ws-sticky-top', `${t + (bar.classList.contains('is-stuck') ? bar.offsetHeight + 8 : 0)}px`);
+  };
+  const dock = open => {
+    if (open === bar.classList.contains('expanded')) return;
+    if (open) { home.style.minHeight = `${home.offsetHeight}px`; el.filtersPanel.appendChild(grid); }
+    else { home.appendChild(grid); home.style.minHeight = ''; }
+    bar.classList.toggle('expanded', open);
+    el.filtersToggleBtn.setAttribute('aria-expanded', String(open));
+    measure();
+  };
+  const check = () => {
+    if (!bar.offsetParent) return;   // another tab is open
+    const stuck = el.filtersSentinel.getBoundingClientRect().top < top();
+    if (stuck === bar.classList.contains('is-stuck')) return;
+    bar.classList.toggle('is-stuck', stuck);
+    if (!stuck) dock(false);
+    measure();
+  };
+  el.filtersToggleBtn.addEventListener('click', () => dock(!bar.classList.contains('expanded')));
+  window.addEventListener('scroll', check, { passive: true });
+  window.addEventListener('resize', () => { measure(); check(); });
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(bar);
+  measure();
+}
+
+// ---------- theme filter (multi-select: confirmed themes, else the AI suggestion) ----------
+const NO_THEME = '(tema yok)';
+function renderThemeFilterDd() {
+  const counts = new Map(Assist.themeConfig().groups.map(g => [g, 0]));
+  let none = 0;
+  WS.records.forEach(r => {
+    if (!isActive(r)) return;
+    const ts = Assist.effectiveThemes(r);
+    if (!ts.length) none++;
+    ts.forEach(t => counts.set(t, (counts.get(t) || 0) + 1));
+  });
+  const items = [...counts.entries()];
+  if (none) items.push([NO_THEME, none]);
+  [...WS.themeSel].forEach(t => { if (!counts.has(t) && t !== NO_THEME) WS.themeSel.delete(t); });
+  el.themeFilterSummary.textContent = !WS.themeSel.size ? 'Tümü' : WS.themeSel.size === 1 ? [...WS.themeSel][0] : `${WS.themeSel.size} tema seçili`;
+  el.themeFilterDd.classList.toggle('dd-active', WS.themeSel.size > 0);
+  const sig = items.map(t => t.join('=')).join('|') + '#' + [...WS.themeSel].join('|');
+  if (el.themeFilterList.dataset.sig === sig) return;
+  el.themeFilterList.dataset.sig = sig;
+  el.themeFilterList.textContent = '';
+  if (!items.length) { el.themeFilterList.appendChild(text('div', 'Henüz tema yok. Tematik sekmesinden analiz edin.', 'dd-empty')); return; }
+  items.forEach(([t, n]) => {
+    const lab = document.createElement('label');
+    lab.className = 'dd-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = WS.themeSel.has(t);
+    cb.addEventListener('change', () => {
+      if (cb.checked) WS.themeSel.add(t); else WS.themeSel.delete(t);
+      WS.page = 1; renderWorkspace();
+    });
+    lab.append(cb, text('span', t, 'dd-name'), text('span', n.toLocaleString('tr-TR'), 'dd-count'));
+    el.themeFilterList.appendChild(lab);
+  });
+}
+
 // ---------- sortable column headers ----------
 const SORT_FIRST = { title: 'asc', author: 'asc', year: 'desc', conf: 'asc' };
 function onHeaderSort(key) {
@@ -343,6 +424,8 @@ function clearFilters() {
   el.filterPeople.value = '';
   el.filterLabel.value = '';
   WS.docTypes.clear();
+  WS.themeSel.clear();
+  el.themeFilterDd.open = false;
   el.yearFrom.value = '';
   el.yearTo.value = '';
   el.sortBy.value = 'order';
@@ -365,11 +448,13 @@ function renderWorkspace() {
   el.resultsSection.style.display = has ? 'block' : 'none';
   updateTabBadges();
   Assist.onWorkspaceChange();
+  Report.onWorkspaceChange();
   if (!has) return;
   renderSourceBar();
   renderLabelFilter();
   renderPeopleFilter();
   renderDocTypeFilter();
+  renderThemeFilterDd();
   renderVersionFilter();
   renderHeaderSort();
   const list = filteredRecords();
@@ -504,6 +589,7 @@ function activeFilterList() {
     out.push({ label: el.filterLabel.value.startsWith('r:') ? 'Hariç gerekçesi' : 'Etiket', value: el.filterLabel.value.replace(/^[lr]:/, ''), clear: () => { el.filterLabel.value = ''; } });
   }
   if (WS.docTypes.size) out.push({ label: 'Belge türü', value: [...WS.docTypes].join(', '), clear: () => { WS.docTypes.clear(); } });
+  if (WS.themeSel.size) out.push({ label: 'Tema', value: [...WS.themeSel].join(' ya da '), clear: () => { WS.themeSel.clear(); } });
   const yf = el.yearFrom.value.trim(), yt = el.yearTo.value.trim();
   if (yf || yt) {
     out.push({ label: 'Yıl', value: yf && yt ? `${yf}–${yt}` : yf ? `≥ ${yf}` : `≤ ${yt}`, clear: () => { el.yearFrom.value = ''; el.yearTo.value = ''; } });
@@ -516,6 +602,7 @@ function renderActiveFilters() {
   ['filterAi', 'filterMine', 'filterStatus'].forEach(id => el[id].classList.toggle('is-set', el[id].value !== 'all'));
   ['filterPeople', 'filterLabel', 'yearFrom', 'yearTo'].forEach(id => el[id].classList.toggle('is-set', !!el[id].value));
   el.docTypeSummary.classList.toggle('is-set', WS.docTypes.size > 0);
+  el.themeFilterSummary.classList.toggle('is-set', WS.themeSel.size > 0);
   el.activeFiltersRow.hidden = !list.length;
   el.activeFilters.textContent = '';
   list.forEach(f => {
@@ -662,11 +749,121 @@ function termGroups(kind) {
   const custom = [...new Set([...projectTerms(kind), ...used.keys()])];
   if (kind === 'label') return [['Projedeki etiketler', custom.sort((a, b) => (used.get(b) || 0) - (used.get(a) || 0) || a.localeCompare(b, 'tr'))]];
   const fixed = new Set([...DEFAULT_REASONS, ...criteriaReasons()]);
+  const hidden = new Set(reasonConfig().hidden);
   return [
-    ['Protokol ölçütleri', criteriaReasons()],
-    ['Sık kullanılan gerekçeler', DEFAULT_REASONS],
-    ['Projeye eklenen gerekçeler', custom.filter(t => !fixed.has(t)).sort((a, b) => a.localeCompare(b, 'tr'))]
+    ['Protokol ölçütleri', criteriaReasons().filter(t => !hidden.has(t))],
+    ['Sık kullanılan gerekçeler', DEFAULT_REASONS.filter(t => !hidden.has(t))],
+    ['Projeye eklenen gerekçeler', custom.filter(t => !fixed.has(t) && !hidden.has(t)).sort((a, b) => a.localeCompare(b, 'tr'))]
   ];
+}
+
+// ---------- editable exclusion reasons (per project) ----------
+/** { hidden: [terms] } — built-in or criteria reasons a project does not offer. */
+function reasonConfig() {
+  const src = WS.isCloud ? (WS.project.protocol || {}).reasonConfig : run && run.reasonConfig;
+  return { hidden: [...((src && src.hidden) || [])] };
+}
+
+async function saveReasonConfig(cfg) {
+  if (!WS.isCloud) { run.reasonConfig = cfg; scheduleSave(); return true; }
+  const p = Object.assign({}, WS.project.protocol, { reasonConfig: cfg });
+  try { await Cloud.updateProject(WS.project.id, { protocol: p }); WS.project.protocol = p; return true; }
+  catch (e) { showError('Kaydedilemedi: ' + e.message); return false; }
+}
+
+async function removeTerm(kind, term) {
+  if (!WS.isCloud) {
+    if (run && run.terms && run.terms[kind]) { run.terms[kind] = run.terms[kind].filter(t => t !== term); scheduleSave(); }
+    return;
+  }
+  if (WS.terms && WS.terms[kind]) WS.terms[kind] = WS.terms[kind].filter(t => t !== term);
+  try { await Cloud.removeTerm(WS.project.id, kind, term); } catch (e) { showError('Silinemedi: ' + e.message); }
+}
+
+/** Renames a reason in the vocabulary and in my own votes (others' votes keep their wording). */
+async function renameReason(oldT, newT, builtIn) {
+  newT = await addTerm('reason', newT);
+  if (!newT || newT === oldT) return;
+  if (builtIn) { const cfg = reasonConfig(); cfg.hidden = [...new Set([...cfg.hidden, oldT])]; await saveReasonConfig(cfg); }
+  else await removeTerm('reason', oldT);
+  const recs = WS.records.filter(r => ((myVote(r.rid) || {}).reasons || []).includes(oldT));
+  if (recs.length) await writeMyVotes(recs, prev => ({ reasons: [...new Set(prev.reasons.map(t => (t === oldT ? newT : t)))] }));
+  return recs.length;
+}
+
+function openReasonManager() {
+  if (!WS.hasData()) return showError('Önce bir analiz yükleyin ya da proje açın.');
+  closeTermPicker();
+  renderReasonManager();
+  el.reasonsModal.style.display = 'flex';
+}
+
+function renderReasonManager() {
+  const box = el.reasonsBody;
+  box.textContent = '';
+  el.reasonsTitle.textContent = `Hariç tutma gerekçeleri${WS.isCloud ? ` · ${WS.project.name}` : ''}`;
+  const used = usedTerms().reasons;
+  const hidden = new Set(reasonConfig().hidden);
+  const fixed = new Set([...DEFAULT_REASONS, ...criteriaReasons()]);
+  const custom = [...new Set([...projectTerms('reason'), ...used.keys()])].filter(t => !fixed.has(t)).sort((a, b) => a.localeCompare(b, 'tr'));
+  const count = t => (used.get(t) ? text('span', `${used.get(t)} oy`, 'rm-count') : text('span', '', 'rm-count'));
+  const group = (title, hint) => {
+    const s = document.createElement('section');
+    s.className = 'rm-group';
+    s.append(text('h3', title, 'ui-card-title'), text('p', hint, 'admin-hint'));
+    box.appendChild(s);
+    return s;
+  };
+  const toggleRow = (parent, t) => {
+    const row = document.createElement('div');
+    row.className = 'rm-row' + (hidden.has(t) ? ' off' : '');
+    const lab = document.createElement('label');
+    lab.className = 'ui-check rm-text';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !hidden.has(t);
+    cb.addEventListener('change', async () => {
+      const cfg = reasonConfig();
+      cfg.hidden = cb.checked ? cfg.hidden.filter(x => x !== t) : [...new Set([...cfg.hidden, t])];
+      if (await saveReasonConfig(cfg)) renderReasonManager();
+    });
+    lab.append(cb, document.createTextNode(t));
+    row.append(lab, count(t), button('Yeniden adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
+      const n = prompt('Yeni ad (eski ad bu projede gizlenir, sizin oylarınızdaki gerekçe de güncellenir):', t);
+      if (n && n.trim() && n.trim() !== t) { const k = await renameReason(t, n, true); showSuccess(`Gerekçe güncellendi${k ? ` · oylarınızdan ${k} kayıt` : ''}.`); renderReasonManager(); renderWorkspace(); }
+    }));
+    parent.appendChild(row);
+  };
+  const gc = group('Protokol ölçütlerinden', 'Projenin EC ölçütlerinden ve karşılanmayan IC\'lerden otomatik üretilir. İşareti kaldırılan gerekçe seçim listesinde görünmez; verilmiş oylar değişmez.');
+  criteriaReasons().forEach(t => toggleRow(gc, t));
+  if (!criteriaReasons().length) gc.appendChild(text('p', 'Protokolde ölçüt yok.', 'admin-hint'));
+  const gd = group('Sık kullanılan gerekçeler', 'Hazır liste; bu projede kullanmadıklarınızın işaretini kaldırın.');
+  DEFAULT_REASONS.forEach(t => toggleRow(gd, t));
+  const gp = group('Projeye eklenen gerekçeler', 'Yeniden adlandırma sizin oylarınızdaki gerekçeyi de günceller; diğer hakemlerin oyları kendi metinleriyle kalır.');
+  custom.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'rm-row';
+    row.append(text('span', t, 'rm-text'), count(t),
+      button('Yeniden adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
+        const n = prompt('Yeni ad:', t);
+        if (n && n.trim() && n.trim() !== t) { const k = await renameReason(t, n, false); showSuccess(`Gerekçe güncellendi${k ? ` · oylarınızdan ${k} kayıt` : ''}.`); renderReasonManager(); renderWorkspace(); }
+      }),
+      button('Sil', 'ui-btn ui-btn-ghost ui-btn-xs is-danger', async () => {
+        if (!confirm(`"${t}" listeden silinsin mi?${used.get(t) ? `\nBu gerekçe ${used.get(t)} oyda kullanılmış; o oylar değişmez.` : ''}`)) return;
+        await removeTerm('reason', t); renderReasonManager();
+      }));
+    gp.appendChild(row);
+  });
+  if (!custom.length) gp.appendChild(text('p', 'Henüz eklenmiş gerekçe yok.', 'admin-hint'));
+  const add = document.createElement('div');
+  add.className = 'admin-actions';
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'ui-input admin-email'; inp.placeholder = 'Yeni gerekçe (ör. Yetişkin eğitimi)'; inp.maxLength = 80;
+  const doAdd = async () => { if (!inp.value.trim()) return; await addTerm('reason', inp.value); renderReasonManager(); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+  add.append(inp, uiButton('plus', 'Ekle', 'ui-btn ui-btn-default ui-btn-sm', doAdd));
+  gp.appendChild(add);
+  refreshIcons();
 }
 
 let openPicker = null;
@@ -686,7 +883,11 @@ function openTermPicker({ kind, anchor, selected, title, hint, applyLabel, onApp
   head.className = 'term-head';
   const ht = document.createElement('div');
   ht.append(text('div', title, 'term-title'), text('div', hint || '', 'term-hint'));
-  head.append(ht, button('×', 'term-close', closeTermPicker, 'Kapat (Esc)'));
+  const tools = document.createElement('div');
+  tools.className = 'term-tools';
+  if (kind === 'reason') tools.appendChild(button('Düzenle', 'ui-btn ui-btn-ghost ui-btn-xs', openReasonManager, 'Bu projenin gerekçe listesini düzenle'));
+  tools.appendChild(button('×', 'term-close', closeTermPicker, 'Kapat (Esc)'));
+  head.append(ht, tools);
   const input = document.createElement('input');
   input.type = 'text';
   input.className = 'term-input';
@@ -969,6 +1170,31 @@ function consensusInfo(rec, ai) {
   return { kind: 'none', decision: null, text: ai ? 'Henüz karar yok' : 'Analiz edilmedi' };
 }
 
+/**
+ * Themes under the source ids: the confirmed themes when a person set them,
+ * otherwise the AI suggestion (marked as such). Only the themes given to this
+ * record are shown, never the whole theme list.
+ */
+function themeChips(rec) {
+  const box = document.createElement('div');
+  box.className = 'row-themes';
+  const fin = Assist.finalThemesOf(rec);
+  const t = Assist.themeOf(rec);
+  const list = fin.length ? fin : t ? t.themes : [];
+  if (!list.length) return box;
+  const ic = icon(fin.length ? 'person' : 'ai');
+  ic.setAttribute('aria-label', fin.length ? 'Onaylı tema' : 'YZ önerisi');
+  box.appendChild(ic);
+  list.forEach((g, i) => {
+    const c = text('span', g, `row-theme ${fin.length ? 'ok' : 'ai'}${i ? ' sec' : ''}`);
+    c.title = fin.length
+      ? `Onaylı tema${t && t.themes.join('|') !== fin.join('|') ? ` (YZ önerisi: ${t.themes.join(', ')})` : ''}`
+      : `YZ önerisi, henüz onaylanmadı${t && typeof t.relevance === 'number' ? ` · yakınlık ${t.relevance}/100` : ''}${t && t.reason ? ` · ${t.reason}` : ''}`;
+    box.appendChild(c);
+  });
+  return box;
+}
+
 function buildWsRow(rec) {
   const ai = WS.ai.get(rec.rid);
   const crit = WS.criteria;
@@ -1022,6 +1248,7 @@ function buildWsRow(rec) {
   if (sid) links.appendChild(linkChip(sid.label, sid.value, sid.href, sid.href ? 'Veritabanındaki kaydı yeni sekmede aç' : 'Kaynak kimliği'));
   if (!doi) links.appendChild(text('span', 'DOI yok', 'muted-small'));
   cP.appendChild(links);
+  cP.appendChild(themeChips(rec));
   const flagsRow = document.createElement('div');
   flagsRow.className = 'title-flags';
   if (!ai) flagsRow.appendChild(pill('Analiz edilmedi', 'pill-muted'));
@@ -1173,7 +1400,9 @@ function decisionPanel(rec, ai, mv) {
     sec.className = 'dp-sec dp-sec-ai';
     const head = document.createElement('div');
     head.className = 'dp-sec-head';
-    head.appendChild(text('span', 'Yapay zekâ önerisi', 'dp-sec-title'));
+    const aiTitle = text('span', 'Yapay zekâ önerisi', 'dp-sec-title');
+    aiTitle.prepend(icon('ai'));
+    head.appendChild(aiTitle);
     const aiDec = ai.error ? null : ai.ai_decision || ai.decision;
     if (mine && aiDec && !(WS.isCloud && hasConflict(rec.rid))) head.appendChild(text('span', mine === aiDec ? 'sizinle aynı' : 'sizden farklı', `dp-agree-tag ${mine === aiDec ? 'same' : 'diff'}`));
     sec.appendChild(head);
@@ -1443,33 +1672,110 @@ async function bulkVote(decision, reasons) {
   if (!recs.length) return;
   const what = decision ? `"${DEC_TR[decision]}" oyunuz${reasons && reasons.length ? ` (gerekçe: ${reasons.join(', ')})` : ''}` : 'oyunuz kaldırılacak';
   if (!confirm(`${recs.length} seçili kayıt için ${decision ? `${what} işlenecek` : what}. Devam edilsin mi?`)) return;
+  const ok = await writeMyVotes(recs, prev => ({
+    decision, labels: prev.labels || [], note: prev.note || '', reasons: decision !== 'Exclude' ? [] : reasons || prev.reasons || []
+  }));
+  if (!ok) return;
+  WS.selected.clear();
+  renderWorkspace();
+  showSuccess(`${recs.length} kayda ${decision ? `"${DEC_TR[decision]}" oyunuz işlendi` : 'ait oyunuz kaldırıldı'}.`);
+}
+
+/**
+ * Writes my vote on many records at once; next(prevVote) returns the new vote.
+ * Cloud writes are optimistic and rolled back on error. Returns true on success.
+ */
+async function writeMyVotes(recs, next) {
   const rows = recs.map(rec => {
     const prev = myVote(rec.rid) || {};
-    const rs = decision !== 'Exclude' ? [] : reasons || prev.reasons || [];
-    return { rec, next: { decision, labels: prev.labels || [], note: prev.note || '', reasons: rs } };
+    const v = Object.assign({ decision: prev.decision || null, labels: prev.labels || [], note: prev.note || '', reasons: prev.reasons || [] }, next(prev));
+    if (v.decision !== 'Exclude') v.reasons = [];
+    return { rec, next: v };
   });
   if (!WS.isCloud) {
     run.human = run.human || {};
-    rows.forEach(({ rec, next }) => { run.human[rec.rid] = next; });
+    rows.forEach(({ rec, next: v }) => { run.human[rec.rid] = v; });
     scheduleSave();
-  } else {
-    const backup = rows.map(({ rec }) => [rec.rid, myVote(rec.rid)]);
-    rows.forEach(({ rec, next }) => {
-      let m = WS.votes.get(rec.rid);
-      if (!m) { m = new Map(); WS.votes.set(rec.rid, m); }
-      m.set(WS.meId, next);
-    });
-    try {
-      await Cloud.upsertVotes(rows.map(({ rec, next }) => ({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons })));
-    } catch (e) {
-      backup.forEach(([rid, v]) => { const m = WS.votes.get(rid); if (v) m.set(WS.meId, v); else m.delete(WS.meId); });
-      renderWorkspace();
-      return showError('Toplu oy kaydedilemedi, geri alındı: ' + e.message);
-    }
+    return true;
   }
-  WS.selected.clear();
+  const backup = rows.map(({ rec }) => [rec.rid, myVote(rec.rid)]);
+  rows.forEach(({ rec, next: v }) => {
+    let m = WS.votes.get(rec.rid);
+    if (!m) { m = new Map(); WS.votes.set(rec.rid, m); }
+    m.set(WS.meId, v);
+  });
+  try {
+    await Cloud.upsertVotes(rows.map(({ rec, next: v }) => ({ record_id: rec.dbId, decision: v.decision, labels: v.labels, note: v.note, reasons: v.reasons })));
+    return true;
+  } catch (e) {
+    backup.forEach(([rid, v]) => { const m = WS.votes.get(rid); if (v) m.set(WS.meId, v); else m.delete(WS.meId); });
+    renderWorkspace();
+    showError('Kaydedilemedi, geri alındı: ' + e.message);
+    return false;
+  }
+}
+
+/** Adds labels to every selected record; existing labels stay. */
+async function bulkLabels(labels) {
+  const recs = selectedRecords();
+  if (!recs.length || !labels.length) return;
+  const ok = await writeMyVotes(recs, prev => ({ labels: [...new Set([...(prev.labels || []), ...labels])] }));
+  if (!ok) return;
   renderWorkspace();
-  showSuccess(`${rows.length} kayda ${decision ? `"${DEC_TR[decision]}" oyunuz işlendi` : 'ait oyunuz kaldırıldı'}.`);
+  showSuccess(`${recs.length} kayda etiket eklendi: ${labels.join(', ')}. Seçim korundu.`);
+}
+
+/** Adds (or replaces) a note on every selected record. */
+async function bulkNote(note, replace) {
+  const recs = selectedRecords();
+  note = String(note || '').trim().slice(0, 2000);
+  if (!recs.length || (!note && !replace)) return;
+  const ok = await writeMyVotes(recs, prev => ({
+    note: replace || !prev.note ? note : `${prev.note}\n${note}`.slice(0, 2000)
+  }));
+  if (!ok) return;
+  renderWorkspace();
+  showSuccess(`${recs.length} kaydın notu ${replace ? 'değiştirildi' : 'güncellendi'}. Seçim korundu.`);
+}
+
+/** Small popover with a textarea for the bulk note. */
+function openNotePopover(anchor) {
+  closeTermPicker();
+  const n = WS.selected.size;
+  const pop = document.createElement('div');
+  pop.className = 'term-pop note-pop';
+  pop.setAttribute('role', 'dialog');
+  const head = document.createElement('div');
+  head.className = 'term-head';
+  const ht = document.createElement('div');
+  ht.append(text('div', `Seçili ${n} kayda not`, 'term-title'), text('div', 'Not her kayıttaki sizin notunuza eklenir.', 'term-hint'));
+  head.append(ht, button('×', 'term-close', closeTermPicker, 'Kapat (Esc)'));
+  const ta = document.createElement('textarea');
+  ta.className = 'term-input note-pop-input';
+  ta.rows = 4;
+  ta.placeholder = 'ör. Tezimle doğrudan ilgili';
+  const lab = document.createElement('label');
+  lab.className = 'ui-check note-pop-mode';
+  const rep = document.createElement('input');
+  rep.type = 'checkbox';
+  lab.append(rep, document.createTextNode('Mevcut notların yerine yaz (işaretsizse sonuna eklenir)'));
+  const foot = document.createElement('div');
+  foot.className = 'term-foot';
+  const apply = button('Kaydet', 'term-apply', () => { const v = ta.value; const r = rep.checked; closeTermPicker(); bulkNote(v, r); });
+  foot.append(lab, apply);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); apply.click(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeTermPicker(); }
+  });
+  pop.append(head, ta, foot);
+  document.body.appendChild(pop);
+  openPicker = pop;
+  const r = anchor.getBoundingClientRect();
+  pop.style.left = `${Math.min(window.innerWidth - pop.offsetWidth - 12, Math.max(12, r.left))}px`;
+  let top = r.bottom + 6;
+  if (top + pop.offsetHeight > window.innerHeight - 12) top = Math.max(12, r.top - pop.offsetHeight - 6);
+  pop.style.top = `${top}px`;
+  ta.focus({ preventScroll: true });
 }
 
 /** Final decision on every selected record (cloud; decision '' removes it). */
@@ -1852,11 +2158,14 @@ function wsExportRows(recs) {
   return rows;
 }
 
+/** YYYY-MM-DD in the user's time zone (file names). */
+function localDate() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
 function wsExportName(ext, scope, n) {
   const rl = wsRunLike();
   const base = WS.isCloud ? WS.project.name.replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 40) : 'screening';
   const tag = scope === 'filter' ? `_filtre-${n}kayit` : '';
-  return `${base}_${new Date().toISOString().slice(0, 10)}_v${rl.promptHash || 'x'}${tag}.${ext}`;
+  return `${base}_${localDate()}_v${rl.promptHash || 'x'}${tag}.${ext}`;
 }
 
 /** Records to export for the chosen scope, or null (with a message) when there are none. */
@@ -2177,10 +2486,12 @@ async function saveToCloud() {
       const prev = (await Cloud.getProject(run.cloudProjectId)).protocol || {};
       if (prev.versions) protocol.versions = prev.versions;
       if (prev.imports) protocol.imports = prev.imports;
+      if (prev.reasonConfig) protocol.reasonConfig = prev.reasonConfig;
       registerVersion(protocol, run);
       project = await Cloud.updateProject(run.cloudProjectId, { protocol, file_name: run.fileName });
     } else {
       registerVersion(protocol, run);
+      if (run.reasonConfig) protocol.reasonConfig = run.reasonConfig;
       const name = el.saveName.value.trim();
       if (!name) throw new Error('Proje adı girin.');
       el.saveProgress.textContent = 'Proje oluşturuluyor…';
@@ -2405,6 +2716,146 @@ function renderVersionFilter() {
   el.filterStatus.value = [...el.filterStatus.options].some(o => o.value === cur) ? cur : 'all';
 }
 
+function icLogicText(criteria, o) {
+  const f = C.icFormula(criteria || { inclusion: [] }, (o || {}).icLogic, (o || {}).icExpr);
+  return f ? `Formül: ${C.formatIcExpression(f.ast, 'tr')}` : (o || {}).icLogic === 'any' ? 'En az biri yeterli (VEYA)' : 'Tümü karşılanmalı (VE)';
+}
+
+/** One version: its criteria, its results, how it differs from what is active, and a way back. */
+function versionCard(v, r, pid) {
+  r = r || {};
+  const card = document.createElement('article');
+  card.className = 'ver-card' + (v.active ? ' is-active' : '');
+  const head = document.createElement('div');
+  head.className = 'ver-head';
+  const title = document.createElement('div');
+  title.className = 'ver-title';
+  title.append(text('span', `v${v.version}`, 'ver-hash'), text('strong', r.label || 'Adsız sürüm'));
+  if (v.active) title.appendChild(badge('check', v.active === v.total ? 'Etkin' : `Etkin: ${v.active.toLocaleString('tr-TR')} kayıt`, 'ok'));
+  if (r.createdAt) title.appendChild(text('span', new Date(r.createdAt).toLocaleString('tr-TR'), 'ver-date'));
+  const acts = document.createElement('div');
+  acts.className = 'admin-row-actions';
+  if (v.active < v.total) acts.appendChild(uiButton('undo-2', 'Bu taramaya geri dön', 'ui-btn ui-btn-default ui-btn-xs', () => activateVersion(v.version),
+    'Bu sürümün AI kararlarını etkin yapar; hakem oyları ve nihai kararlar değişmez'));
+  acts.appendChild(button('Adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
+    const name = prompt('Bu sürüm için kısa bir ad (ör. "Ölçüt seti A — geniş"):', r.label || '');
+    if (name === null) return;
+    const p = Object.assign({}, WS.project.protocol);
+    p.versions = Object.assign({}, p.versions);
+    p.versions[v.version] = Object.assign({ createdAt: '' }, p.versions[v.version], { label: name.trim() });
+    try { await Cloud.updateProject(pid, { protocol: p }); WS.project.protocol = p; showProjectAdmin(pid); } catch (e) { showError(e.message); }
+  }));
+  if (r.criteria) {
+    acts.appendChild(button('Forma yükle', 'ui-btn ui-btn-ghost ui-btn-xs', () => {
+      loadProtocolIntoForm(Object.assign({}, r, { promptHash: v.version, activeModels: r.models })); switchTab('analysis');
+    }, 'Bu sürümün ölçütlerini Analiz formuna yükler (ör. yeni kayıtları aynı ölçütle analiz etmek için)'));
+    acts.appendChild(button('TXT', 'ui-btn ui-btn-ghost ui-btn-xs', () => downloadProtocolText(WS.project, v.version), 'Bu sürümün ölçüt ve promptlarını indir'));
+  }
+  head.append(title, acts);
+  card.appendChild(head);
+
+  // results: distribution + difference from the active result
+  const m = WS.versions ? WS.versions.byRid : new Map();
+  let differ = 0;
+  if (v.active < v.total) {
+    m.forEach((vm, rid) => {
+      const d = vm.get(v.version);
+      const rec = WS.recByRid(rid);
+      if (!d || !rec || !isActive(rec)) return;
+      const a = WS.ai.get(rid);
+      const cur = a ? a.ai_decision || a.decision : '';
+      if (versionOf(a) !== v.version && cur && cur !== d) differ++;
+    });
+  }
+  const stats = document.createElement('div');
+  stats.className = 'ver-stats';
+  const bar = document.createElement('div');
+  bar.className = 'ws-dist-bar ver-bar';
+  const sum = v.Include + v.Uncertain + v.Exclude || 1;
+  [['Include', 'inc'], ['Uncertain', 'may'], ['Exclude', 'exc']].forEach(([d, c]) => { const s = document.createElement('span'); s.className = c; s.style.width = `${v[d] / sum * 100}%`; bar.appendChild(s); });
+  stats.append(bar, text('div', [
+    `${v.total.toLocaleString('tr-TR')} sonuç`,
+    `Include ${v.Include.toLocaleString('tr-TR')}`, `Maybe ${v.Uncertain.toLocaleString('tr-TR')}`, `Exclude ${v.Exclude.toLocaleString('tr-TR')}`,
+    v.active < v.total ? `etkin sonuçtan farklı karar: ${differ.toLocaleString('tr-TR')}` : ''
+  ].filter(Boolean).join(' · '), 'ver-nums'));
+  card.appendChild(stats);
+
+  // criteria of this version
+  const det = document.createElement('details');
+  det.className = 'ver-crit';
+  if (r.criteria) {
+    const ic = r.criteria.inclusion || [], ec = r.criteria.exclusion || [];
+    det.appendChild(text('summary', `Ölçütler · ${ic.length} IC · ${ec.length} EC · ${icLogicText(r.criteria, r.options)}`));
+    const ul = (items, cls) => { const u = document.createElement('ul'); u.className = `ver-list ${cls}`; items.forEach(c => u.appendChild(text('li', `${c.code}: ${c.text}`))); return u; };
+    det.append(ul(ic, 'ic'), ul(ec, 'ec'));
+    if ((r.models || []).length) det.appendChild(text('p', `Modeller: ${r.models.map(x => modelShort(x)).join(', ')}`, 'admin-hint'));
+  } else {
+    det.appendChild(text('summary', 'Ölçütler kayıtlı değil'));
+    det.appendChild(text('p', 'Bu sürüm, sürüm takibi başlamadan (30.09.2026 öncesi) üretildi; hangi ölçüt metniyle üretildiği veritabanında yok. Sonuçları yine de etkin yapabilirsiniz.', 'admin-hint'));
+  }
+  card.appendChild(det);
+  return card;
+}
+
+/** Plain-text record of a protocol: criteria, decision logic, options, guidance and the full system prompt. */
+function protocolText(p, meta) {
+  const o = p.options || {};
+  const crit = p.criteria || { inclusion: [], exclusion: [] };
+  const hr = '='.repeat(72);
+  const sec = t => ['', hr, t, hr];
+  const out = [
+    `TARAMA PROTOKOLÜ${meta.label ? ` — ${meta.label}` : ''}`,
+    `Proje: ${meta.project || '-'}`,
+    `Sürüm (sistem talimatının SHA-256 özetinin ilk 8 hanesi): v${meta.version || p.promptHash || '?'}`,
+    meta.createdAt ? `Sürüm tarihi: ${new Date(meta.createdAt).toLocaleString('tr-TR')}` : '',
+    `Modeller: ${(p.activeModels || p.models || []).map(x => modelShort(x.id || x)).join(', ') || '-'}`,
+    `Dışa aktarma: ${new Date().toLocaleString('tr-TR')}`,
+    ...sec('DAHİL ETME ÖLÇÜTLERİ (IC)'),
+    ...(crit.inclusion.length ? crit.inclusion.map(c => `${c.code}: ${c.text}`) : ['(yok)']),
+    ...sec('HARİÇ TUTMA ÖLÇÜTLERİ (EC)'),
+    ...(crit.exclusion.length ? crit.exclusion.map(c => `${c.code}: ${c.text}`) : ['(yok)']),
+    ...sec('KARAR MANTIĞI'),
+    `IC birleşimi: ${icLogicText(crit, o)}`,
+    'EC birleşimi: herhangi biri karşılanırsa Exclude',
+    `İnsan incelemesi eşiği (güven <): ${o.reviewThreshold ?? '-'}`,
+    `Çoklu model uzlaşısı: ${o.consensus || '-'}`,
+    `Kanıt doğrulaması: ${o.verifyEvidence === false ? 'kapalı' : 'açık'}`,
+    `Özeti olmayan kayıtlar: ${o.noAbstractMode === 'skip' ? 'taranmadı (Uncertain)' : 'başlık/anahtar kelimeyle tarandı'}`,
+    `Gerekçe dili: ${o.summaryLanguage || '-'}`,
+    `Temperature: ${o.temperature === null || o.temperature === undefined ? 'otomatik' : o.temperature}`,
+    o.userTopic ? `Kendi çalışma konusu (yakınlık skoru): ${o.userTopic}` : '',
+    ...sec('İNCELEMEYE ÖZGÜ YÖNERGE (sistem promptu)'),
+    p.guidance || '(boş)',
+    ...sec('MODELE GÖNDERİLEN TAM SİSTEM TALİMATI (yönerge + otomatik protokol)'),
+    p.system || '(kayıtlı değil)'
+  ];
+  return out.filter(x => x !== '').join('\n');
+}
+
+/** Downloads the protocol(s) of a project (all versions) or of one version, as UTF-8 text. */
+function downloadProtocolText(project, onlyVersion) {
+  const proto = (project && project.protocol) || (run ? run : {});
+  const name = project ? project.name : (run && run.fileName) || 'yerel analiz';
+  const reg = proto.versions || {};
+  const parts = [];
+  if (onlyVersion) {
+    parts.push(protocolText(Object.assign({}, reg[onlyVersion] || proto, { activeModels: (reg[onlyVersion] || {}).models }), { project: name, version: onlyVersion, label: (reg[onlyVersion] || {}).label, createdAt: (reg[onlyVersion] || {}).createdAt }));
+  } else {
+    parts.push(protocolText(proto, { project: name, version: proto.promptHash, label: 'ETKİN PROTOKOL', createdAt: proto.createdAt }));
+    Object.entries(reg).filter(([h]) => h !== proto.promptHash)
+      .sort((a, b) => String(b[1].createdAt || '').localeCompare(String(a[1].createdAt || '')))
+      .forEach(([h, r]) => parts.push(protocolText(Object.assign({}, r, { activeModels: r.models }), { project: name, version: h, label: r.label || 'önceki sürüm', createdAt: r.createdAt })));
+    const th = project ? project.themes : run && run.themeConfig;
+    if (th && (th.groups || []).length) {
+      parts.push(['TEMATİK ANALİZ AYARLARI', '='.repeat(72), `Araştırma amacı: ${th.goal || '-'}`, `Yakın referans: ${th.reference || '-'}`,
+        'Temalar:', ...th.groups.map(g => `  - ${g}`), '', 'Tematik analiz promptu:', th.prompt || '(varsayılan)'].join('\n'));
+    }
+  }
+  const safe = String(name).replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 40);
+  triggerDownload(new Blob(['﻿' + parts.join('\n\n\n')], { type: 'text/plain;charset=utf-8' }),
+    `${safe}_protokol${onlyVersion ? `_v${onlyVersion}` : ''}_${localDate()}.txt`);
+}
+
 /** Makes the stored results of one version the active AI result of the records that have it. */
 async function activateVersion(version) {
   if (!WS.isCloud) return;
@@ -2621,6 +3072,12 @@ async function showProjectAdmin(pid) {
     if (!isOpen) await openCloudProject(pid);
     if (WS.isCloud && WS.project.id === pid) openImportDialog('add');
   }, 'Başka bir veritabanından ya da yeni bir aramadan kayıt ekler; tekrarlar ayıklanır'));
+  acts.appendChild(uiButton('list-x', 'Gerekçeleri düzenle', 'ui-btn ui-btn-outline ui-btn-sm', async () => {
+    if (!isOpen) await openCloudProject(pid);
+    if (WS.isCloud && WS.project.id === pid) openReasonManager();
+  }, 'Bu projede kullanılan hariç tutma gerekçeleri'));
+  acts.appendChild(uiButton('file-down', 'Promptları indir (.txt)', 'ui-btn ui-btn-outline ui-btn-sm', () => downloadProtocolText(project),
+    'Ölçütler, karar mantığı, yönerge ve modele giden tam sistem talimatı; tüm sürümlerle'));
   if (manage) acts.appendChild(uiButton('trash-2', 'Projeyi sil', 'ui-btn ui-btn-outline ui-btn-sm is-danger', async () => {
     const typed = prompt(`"${project.name}" projesi, tüm kayıtları ve hakem kararlarıyla birlikte kalıcı olarak silinecek.\nOnaylamak için proje adını yazın:`);
     if (typed !== project.name) { if (typed !== null) showError('Proje adı eşleşmedi, silinmedi.'); return; }
@@ -2644,47 +3101,33 @@ async function showProjectAdmin(pid) {
     sSrc.appendChild(t.wrap);
   }
 
-  // --- AI versions
-  const sVer = section('AI sürümleri', 'Ölçütleri ya da yönergeyi değiştirip yeniden analiz ettiğinizde yeni bir sürüm oluşur; öncekiler silinmez. Hakem kararları tüm sürümler için ortaktır.');
+  // --- AI versions: which criteria gave which results; go back to any of them
+  const sVer = section('AI sürümleri', 'Ölçütleri ya da yönergeyi değiştirip yeniden analiz ettiğinizde yeni bir sürüm oluşur; öncekiler silinmez. "Bu taramaya geri dön" yalnızca AI kararlarını değiştirir: hakem oyları, nihai kararlar, etiket, not ve gerekçeler olduğu gibi kalır.');
   if (!Cloud.v15) {
-    sVer.appendChild(text('p', 'Sürüm takibi için veritabanı güncellemesi gerekiyor (supabase/migrations/20260930_owners_versions_imports_themes.sql).', 'admin-hint warn'));
+    sVer.appendChild(text('p', 'Sürüm takibi için veritabanı güncellemesi gerekiyor.', 'admin-hint warn'));
   } else if (!isOpen) {
     sVer.appendChild(uiButton('folder-open', 'Sürümleri görmek için projeyi açın', 'ui-btn ui-btn-outline ui-btn-sm', async () => { await openCloudProject(pid); showProjectAdmin(pid); }));
   } else {
+    // the protocol in use is always described in the registry
+    const cur = WS.project.protocol || {};
+    if (cur.promptHash && cur.criteria && !(cur.versions || {})[cur.promptHash]) {
+      const p = Object.assign({}, cur, { versions: Object.assign({}, cur.versions) });
+      registerVersion(p, cur);
+      Cloud.updateProject(pid, { protocol: p }).then(() => { WS.project.protocol = p; }).catch(e => console.warn(e));
+      project.protocol = p;
+    }
     const list = versionSummary();
     const reg = (project.protocol && project.protocol.versions) || {};
     if (!list.length) sVer.appendChild(text('p', 'Henüz AI sonucu yok.', 'admin-hint'));
-    else {
-      const t = miniTable(['Sürüm', 'Ad', 'Tarih', 'Sonuç', 'Include', 'Maybe', 'Exclude', 'Etkin', '']);
-      list.forEach(v => {
-        const r = reg[v.version] || {};
-        const acts2 = document.createElement('span');
-        acts2.className = 'admin-row-actions';
-        if (v.active < v.total) acts2.appendChild(button('Etkin yap', 'ui-btn ui-btn-outline ui-btn-xs', () => activateVersion(v.version), 'Bu sürümün sonuçlarını etkin AI sonucu yapar'));
-        if (r.criteria) acts2.appendChild(button('Forma yükle', 'ui-btn ui-btn-ghost ui-btn-xs', () => {
-          loadProtocolIntoForm(Object.assign({}, r, { promptHash: v.version, activeModels: r.models })); switchTab('analysis');
-        }, 'Bu sürümün ölçütlerini Analiz formuna yükler'));
-        acts2.appendChild(button('Adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
-          const name = prompt('Bu sürüm için kısa bir ad (ör. "Ölçüt seti A — geniş"):', r.label || '');
-          if (name === null) return;
-          const p = Object.assign({}, WS.project.protocol);
-          p.versions = Object.assign({}, p.versions);
-          p.versions[v.version] = Object.assign({ createdAt: '' }, p.versions[v.version], { label: name.trim() });
-          try { await Cloud.updateProject(pid, { protocol: p }); WS.project.protocol = p; showProjectAdmin(pid); } catch (e) { showError(e.message); }
-        }));
-        t.row([`v${v.version}`, r.label || '—', r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '—', v.total.toLocaleString('tr-TR'),
-          v.Include.toLocaleString('tr-TR'), v.Uncertain.toLocaleString('tr-TR'), v.Exclude.toLocaleString('tr-TR'), v.active.toLocaleString('tr-TR'), acts2]);
-      });
-      sVer.appendChild(t.wrap);
+    list.forEach(v => sVer.appendChild(versionCard(v, reg[v.version], pid)));
+    if (list.length > 1) {
       const diff = WS.records.filter(r => isActive(r) && versionsDisagree(r.rid)).length;
-      if (list.length > 1) {
-        const note = document.createElement('p');
-        note.className = 'admin-hint';
-        note.textContent = `${diff.toLocaleString('tr-TR')} aktif kayıtta sürümler farklı karar vermiş. `;
-        note.appendChild(button('Bu kayıtları listele', 'ui-btn ui-btn-ghost ui-btn-xs', () => { switchTab('screen'); el.filterStatus.value = 'vdiff'; WS.page = 1; renderWorkspace(); }));
-        note.appendChild(document.createTextNode(' Excel/CSV dışa aktarımı her sürümün kararını ve birleşik (liberal) kararı ayrı sütunlarda verir.'));
-        sVer.appendChild(note);
-      }
+      const note = document.createElement('p');
+      note.className = 'admin-hint';
+      note.textContent = `${diff.toLocaleString('tr-TR')} aktif kayıtta sürümler farklı karar vermiş. `;
+      note.appendChild(button('Bu kayıtları listele', 'ui-btn ui-btn-ghost ui-btn-xs', () => { switchTab('screen'); el.filterStatus.value = 'vdiff'; WS.page = 1; renderWorkspace(); }));
+      note.appendChild(document.createTextNode(' Excel/CSV dışa aktarımı her sürümün kararını ve birleşik (liberal) kararı ayrı sütunlarda verir.'));
+      sVer.appendChild(note);
     }
   }
 
@@ -2867,6 +3310,7 @@ function switchTab(name) {
   if (name === 'screen') renderWorkspace();
   if (name === 'themes') Assist.renderThemes();
   if (name === 'chat') Assist.renderChat();
+  if (name === 'report') Report.render();
   try { sessionStorage.setItem('gls_tab', name); } catch (e) { /* ignore */ }
 }
 
@@ -2909,6 +3353,19 @@ function initWorkspace() {
       onApply: reasons => bulkVote('Exclude', reasons)
     });
   });
+  el.bulkLabelBtn.addEventListener('click', e => {
+    if (!WS.selected.size) return;
+    openTermPicker({
+      kind: 'label', anchor: e.currentTarget, selected: [],
+      title: `Seçili ${WS.selected.size} kayda etiket`,
+      hint: 'Seçtiğiniz etiketler her kayda eklenir; mevcut etiketler silinmez. Yeni etiket yazıp Enter ile ekleyin.',
+      applyLabel: 'Etiketleri ekle',
+      onApply: labels => bulkLabels(labels)
+    });
+  });
+  el.bulkNoteBtn.addEventListener('click', e => { if (WS.selected.size) openNotePopover(e.currentTarget); });
+  el.themeFilterNone.addEventListener('click', () => { WS.themeSel.clear(); WS.page = 1; renderWorkspace(); });
+  setupStickyFilters();
   el.filterPeople.addEventListener('change', () => { WS.page = 1; renderWorkspace(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pollChanges(); });
   window.addEventListener('online', () => pollChanges());
@@ -2918,6 +3375,8 @@ function initWorkspace() {
   el.downloadCsvBtn.addEventListener('click', wsDownloadCsv);
   el.downloadExcelBtn.addEventListener('click', wsDownloadExcel);
   el.exportMenu.addEventListener('toggle', () => { if (el.exportMenu.open) updateExportMenu(); });
+  el.downloadProtocolBtn.addEventListener('click', () => { el.exportMenu.open = false; downloadProtocolText(WS.isCloud ? WS.project : null); });
+  el.openReportBtn.addEventListener('click', () => { el.exportMenu.open = false; switchTab('report'); });
   // dashboard rows open the matching list (duplicates live in their own tab)
   document.querySelectorAll('.ws-queue-row[data-jump]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.jump === 'dups') { switchTab('dups'); return; }
@@ -2952,8 +3411,9 @@ function initWorkspace() {
   document.addEventListener('click', e => {
     if (el.docTypeFilter.open && !el.docTypeFilter.contains(e.target)) el.docTypeFilter.open = false;
     if (el.exportMenu.open && !el.exportMenu.contains(e.target)) el.exportMenu.open = false;
+    if (el.themeFilterDd.open && !el.themeFilterDd.contains(e.target)) el.themeFilterDd.open = false;
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; el.themeFilterDd.open = false; } });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
   el.newProjectBtn.addEventListener('click', () => openImportDialog('new'));
   el.importFile.addEventListener('change', planImportFromDialog);
@@ -2972,6 +3432,7 @@ function initWorkspace() {
   window.addEventListener('beforeunload', () => { if (WS.aiQueue.length) flushCloudAi(); });
 
   Assist.init();
+  Report.init();
   let tab = 'analysis';
   try { tab = sessionStorage.getItem('gls_tab') || 'analysis'; } catch (e) { /* ignore */ }
   switchTab(tab);

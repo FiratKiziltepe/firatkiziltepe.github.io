@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=16.0">
+    <link rel="stylesheet" href="style.css?v=17.0">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -30,6 +30,7 @@
             <button type="button" class="tab" data-tab="dups"><i data-lucide="copy"></i><span>Tekrarlar</span> <span id="tabBadgeDups" class="tab-badge tab-badge-warn"></span></button>
             <button type="button" class="tab" data-tab="themes"><i data-lucide="shapes"></i><span>Tematik</span></button>
             <button type="button" class="tab" data-tab="chat"><i data-lucide="messages-square"></i><span>Sohbet</span></button>
+            <button type="button" class="tab" data-tab="report"><i data-lucide="file-chart-column"></i><span>Rapor</span></button>
             <button type="button" class="tab" data-tab="projects"><i data-lucide="folder-kanban"></i><span>Projeler</span></button>
         </nav>
 
@@ -380,6 +381,9 @@
                                 <div class="ui-menu-sep"></div>
                                 <button id="downloadExcelBtn" type="button" class="ui-menu-item"><i data-lucide="file-spreadsheet"></i><span>Excel (.xlsx)</span></button>
                                 <button id="downloadCsvBtn" type="button" class="ui-menu-item"><i data-lucide="file-text"></i><span>CSV (.csv)</span></button>
+                                <div class="ui-menu-sep"></div>
+                                <button id="downloadProtocolBtn" type="button" class="ui-menu-item"><i data-lucide="file-down"></i><span>Ölçütler ve promptlar (.txt)</span></button>
+                                <button id="openReportBtn" type="button" class="ui-menu-item"><i data-lucide="file-chart-column"></i><span>PRISMA akış şeması ve rapor</span></button>
                                 <p class="ui-menu-note">Uygulanan filtreler ve sıralama Metadata sayfasına yazılır; PRISMA sayıları her zaman tüm kayıtlardan hesaplanır.</p>
                             </div>
                         </details>
@@ -452,16 +456,25 @@
                 </div>
 
                 <!-- filters -->
-                <section class="ui-card ws-filters" aria-label="Filtreler">
+                <div id="filtersSentinel" class="ws-sentinel" aria-hidden="true"></div>
+                <section class="ui-card ws-filterbar" id="filtersCard" aria-label="Arama ve filtreler">
                     <div class="ws-filters-top">
                         <div class="ui-input-wrap ws-search">
                             <i data-lucide="search" class="ui-input-icon"></i>
                             <input type="search" id="filterSearch" class="ui-input" placeholder="Başlık, yazar, DOI, özet, gerekçe veya notta ara…" autocomplete="off">
                         </div>
                         <span id="filterCount" class="filter-count ws-count"></span>
+                        <button id="filtersToggleBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" aria-expanded="false" title="Filtre alanlarını bu çubukta aç"><i data-lucide="sliders-horizontal"></i><span class="btn-text">Filtreler</span></button>
                     </div>
-                    <div class="ws-filter-grid">
-                        <label class="ui-field"><span class="ui-label">AI kararı</span>
+                    <div id="filtersPanel" class="ws-filters-panel"></div>
+                    <div class="ws-filters-foot" id="activeFiltersRow" hidden>
+                        <div id="activeFilters" class="ws-chips" aria-label="Uygulanan filtreler"></div>
+                        <button id="clearFiltersBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm" title="Arama, filtreler ve sıralama varsayılana döner"><i data-lucide="x"></i><span>Filtreleri temizle</span></button>
+                    </div>
+                </section>
+                <section class="ui-card ws-filters" id="filtersHome" aria-label="Filtreler">
+                    <div class="ws-filter-grid" id="filtersGrid">
+                        <label class="ui-field"><span class="ui-label"><i data-lucide="bot"></i>AI kararı</span>
                             <select id="filterAi" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <option value="analyzed">Analiz edilenler</option>
@@ -472,7 +485,7 @@
                                 <option value="error">API hatası</option>
                             </select>
                         </label>
-                        <label class="ui-field"><span class="ui-label">Benim kararım</span>
+                        <label class="ui-field"><span class="ui-label"><i data-lucide="user-check"></i>Benim kararım</span>
                             <select id="filterMine" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <option value="undecided">Karar vermediklerim</option>
@@ -483,7 +496,7 @@
                                 <option value="disagree_ai">AI'dan farklı düşündüklerim</option>
                             </select>
                         </label>
-                        <label class="ui-field"><span class="ui-label">Durum</span>
+                        <label class="ui-field"><span class="ui-label"><i data-lucide="list-filter"></i>Durum</span>
                             <select id="filterStatus" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <optgroup label="İnceleme">
@@ -510,13 +523,13 @@
                                 </optgroup>
                             </select>
                         </label>
-                        <label class="ui-field" id="filterPeopleField" style="display: none;"><span class="ui-label">Hakem / nihai</span>
+                        <label class="ui-field" id="filterPeopleField" style="display: none;"><span class="ui-label"><i data-lucide="users"></i>Hakem / nihai</span>
                             <select id="filterPeople" class="ui-select" title="Hakem kararlarına ya da nihai karara göre"><option value="">Tümü</option></select>
                         </label>
-                        <label class="ui-field"><span class="ui-label">Etiket / gerekçe</span>
+                        <label class="ui-field"><span class="ui-label"><i data-lucide="tag"></i>Etiket / gerekçe</span>
                             <select id="filterLabel" class="ui-select"><option value="">Tümü</option></select>
                         </label>
-                        <div class="ui-field"><span class="ui-label">Belge türü</span>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="file-text"></i>Belge türü</span>
                             <details id="docTypeFilter" class="dd-filter">
                                 <summary id="docTypeSummary" class="ui-select" title="Belge türüne göre (birden çok seçilebilir)">Tümü</summary>
                                 <div class="dd-panel">
@@ -528,17 +541,24 @@
                                 </div>
                             </details>
                         </div>
-                        <div class="ui-field"><span class="ui-label">Yayın yılı</span>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="shapes"></i>Tema</span>
+                            <details id="themeFilterDd" class="dd-filter">
+                                <summary id="themeFilterSummary" class="ui-select" title="YZ önerisi ya da onaylı temaya göre (birden çok seçilebilir; seçilenlerden herhangi biri)">Tümü</summary>
+                                <div class="dd-panel">
+                                    <div class="dd-actions">
+                                        <button type="button" id="themeFilterNone" class="ui-btn ui-btn-ghost ui-btn-xs">Seçimi kaldır</button>
+                                    </div>
+                                    <div id="themeFilterList" class="dd-list"></div>
+                                </div>
+                            </details>
+                        </div>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="calendar"></i>Yayın yılı</span>
                             <span class="year-range" title="Yayın yılı aralığı (boş bırakılan uç sınırsız)">
                                 <input type="number" id="yearFrom" class="ui-input" placeholder="en erken" min="1900" max="2100" aria-label="En erken yıl">
                                 <span class="year-sep">–</span>
                                 <input type="number" id="yearTo" class="ui-input" placeholder="en geç" min="1900" max="2100" aria-label="En geç yıl">
                             </span>
                         </div>
-                    </div>
-                    <div class="ws-filters-foot" id="activeFiltersRow" hidden>
-                        <div id="activeFilters" class="ws-chips" aria-label="Uygulanan filtreler"></div>
-                        <button id="clearFiltersBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm" title="Arama, filtreler ve sıralama varsayılana döner"><i data-lucide="x"></i><span>Filtreleri temizle</span></button>
                     </div>
                 </section>
 
@@ -560,6 +580,8 @@
                             <button type="button" class="bulk-btn may" data-target="vote" data-decision="Uncertain" disabled>? Belirsiz</button>
                             <button type="button" class="bulk-btn exc" data-target="vote" data-decision="Exclude" disabled>✕ Hariç</button>
                             <button type="button" id="bulkReasonBtn" class="bulk-btn exc" disabled title="Seçili kayıtlara gerekçeyle hariç oyu">✕ Gerekçeyle…</button>
+                            <button type="button" id="bulkLabelBtn" class="bulk-btn" disabled title="Seçili kayıtların hepsine etiket ekler (mevcut etiketler korunur)"><i data-lucide="tag"></i> Etiket</button>
+                            <button type="button" id="bulkNoteBtn" class="bulk-btn" disabled title="Seçili kayıtların hepsine not ekler"><i data-lucide="sticky-note"></i> Not</button>
                             <button type="button" class="bulk-btn clr" data-target="vote" data-decision="none" disabled title="Seçili kayıtlardaki oyunuzu kaldır" aria-label="Oyu kaldır"><i data-lucide="eraser"></i></button>
                         </span>
                         <span class="bulk-group" id="bulkFinalGroup" title="Seçili kayıtların nihai kararı" style="display: none;">
@@ -759,6 +781,80 @@
             </div>
         </section>
 
+        <!-- ============ TAB: REPORT (PRISMA + Word report) ============ -->
+        <section id="tab-report" class="tab-panel ws" hidden>
+            <div class="ws-head">
+                <div class="ws-head-text">
+                    <h2 class="ws-title">PRISMA ve rapor</h2>
+                    <p class="ws-subtitle">PRISMA 2020 akış şeması tarama verinizden hesaplanır; her sayıyı düzenleyebilirsiniz. Rapor, yapay zekâya yalnızca bu sayılar, protokol ve dahil edilen çalışmaların listesiyle yazdırılır; tablolar ve şekil koddan üretilir. Word dosyası tamamen düzenlenebilir.</p>
+                </div>
+                <div class="ws-head-actions">
+                    <button id="reportProtocolBtn" type="button" class="ui-btn ui-btn-outline"><i data-lucide="file-down"></i><span>Ölçütler ve promptlar (.txt)</span></button>
+                </div>
+            </div>
+            <div id="reportEmpty" class="ui-card empty-note">Önce bir analiz yükleyin ya da Projeler sekmesinden bir proje açın.</div>
+            <div id="reportBody" hidden>
+                <section class="ui-card ws-block">
+                    <div class="ui-card-head">
+                        <h3 class="ui-card-title">PRISMA 2020 akış şeması</h3>
+                        <div class="ws-view">
+                            <select id="prismaLang" class="ui-select ui-select-sm" aria-label="Şema dili">
+                                <option value="en">Orijinal (İngilizce)</option>
+                                <option value="tr">Türkçe</option>
+                            </select>
+                            <button id="prismaSvgBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="download"></i><span>SVG</span></button>
+                            <button id="prismaPngBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="image-down"></i><span>PNG</span></button>
+                        </div>
+                    </div>
+                    <div class="prisma-wrap">
+                        <div id="prismaFigure" class="prisma-figure"></div>
+                        <div class="prisma-edit">
+                            <p id="prismaNote" class="ui-help"></p>
+                            <div id="prismaFields" class="prisma-fields"></div>
+                            <div class="admin-actions"><button id="prismaResetBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm"><i data-lucide="rotate-ccw"></i><span>Hesaplanan değerlere dön</span></button></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="ui-card ws-block">
+                    <div class="ui-card-head">
+                        <h3 class="ui-card-title">Rapor (Word)</h3>
+                        <span id="reportSaved" class="ui-help"></span>
+                    </div>
+                    <div class="report-opts">
+                        <label class="ui-field"><span class="ui-label">Dil</span>
+                            <select id="reportLang" class="ui-select"><option value="tr">Türkçe</option><option value="en">English</option></select></label>
+                        <label class="ui-field"><span class="ui-label">Dahil edilen çalışmalar</span>
+                            <select id="reportScope" class="ui-select">
+                                <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
+                                <option value="include_any">Dahil + belirsiz</option>
+                                <option value="include_ai">AI'nın Include dedikleri</option>
+                            </select></label>
+                        <label class="ui-field"><span class="ui-label">Rapor türü</span>
+                            <select id="reportKind" class="ui-select">
+                                <option value="methods_results">Yöntem ve bulgular taslağı</option>
+                                <option value="methods">Yalnızca yöntem</option>
+                                <option value="summary">Kısa proje özeti</option>
+                            </select></label>
+                    </div>
+                    <div class="admin-actions">
+                        <button id="reportGenBtn" type="button" class="ui-btn ui-btn-default ui-btn-sm"><i data-lucide="sparkles"></i><span class="btn-text">Raporu API ile oluştur</span></button>
+                        <button id="reportDocxBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" disabled><i data-lucide="file-type-2"></i><span>Word (.docx) indir</span></button>
+                        <button id="reportClearBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm" disabled><i data-lucide="trash-2"></i><span>Taslağı sil</span></button>
+                        <span id="reportInfo" class="ui-help"></span>
+                    </div>
+                    <div id="reportToolbar" class="report-toolbar" hidden>
+                        <button type="button" data-cmd="bold" class="ui-btn ui-btn-ghost ui-btn-xs" title="Kalın (Ctrl+B)"><b>K</b></button>
+                        <button type="button" data-cmd="italic" class="ui-btn ui-btn-ghost ui-btn-xs" title="İtalik (Ctrl+I)"><i>İ</i></button>
+                        <button type="button" data-block="h2" class="ui-btn ui-btn-ghost ui-btn-xs">Başlık</button>
+                        <button type="button" data-block="h3" class="ui-btn ui-btn-ghost ui-btn-xs">Alt başlık</button>
+                        <button type="button" data-block="p" class="ui-btn ui-btn-ghost ui-btn-xs">Paragraf</button>
+                        <span class="ui-help">Metne tıklayıp doğrudan düzenleyin; değişiklikler bu tarayıcıda saklanır.</span>
+                    </div>
+                    <article id="reportDoc" class="report-doc" hidden></article>
+                </section>
+            </div>
+        </section>
+
         <!-- ============ TAB: PROJECTS ============ -->
         <section id="tab-projects" class="tab-panel" hidden>
             <div class="card">
@@ -848,6 +944,18 @@
         </div>
     </div>
 
+    <!-- Exclusion reasons of a project -->
+    <div id="reasonsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2 id="reasonsTitle" class="rec-title">Hariç tutma gerekçeleri</h2>
+                <button type="button" class="close-modal-btn" data-close="reasonsModal">&times;</button>
+            </div>
+            <div id="reasonsBody" class="modal-body rm-body"></div>
+            <div class="modal-footer"><button type="button" class="btn-tertiary" data-close="reasonsModal">Kapat</button></div>
+        </div>
+    </div>
+
     <!-- Record preview (chat citations, thematic list) -->
     <div id="recordModal" class="modal-overlay" style="display: none;">
         <div class="modal-content card">
@@ -933,12 +1041,14 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=16.0"></script>
-    <script src="screening-core.js?v=16.0"></script>
-    <script src="default-prompt.js?v=16.0"></script>
-    <script src="cloud.js?v=16.0"></script>
-    <script src="script.js?v=16.0"></script>
-    <script src="workspace.js?v=16.0"></script>
-    <script src="assist.js?v=16.0"></script>
+    <script src="supabase-config.js?v=17.0"></script>
+    <script src="screening-core.js?v=17.0"></script>
+    <script src="default-prompt.js?v=17.0"></script>
+    <script src="cloud.js?v=17.0"></script>
+    <script src="script.js?v=17.0"></script>
+    <script src="workspace.js?v=17.0"></script>
+    <script src="prisma.js?v=17.0"></script>
+    <script src="assist.js?v=17.0"></script>
+    <script src="report.js?v=17.0"></script>
 </body>
 </html>
