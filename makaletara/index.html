@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=15.0">
+    <link rel="stylesheet" href="style.css?v=16.0">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -28,6 +28,8 @@
             <button type="button" class="tab active" data-tab="analysis"><i data-lucide="sliders-horizontal"></i><span>Analiz</span></button>
             <button type="button" class="tab" data-tab="screen"><i data-lucide="list-checks"></i><span>Tarama</span> <span id="tabBadgeScreen" class="tab-badge"></span></button>
             <button type="button" class="tab" data-tab="dups"><i data-lucide="copy"></i><span>Tekrarlar</span> <span id="tabBadgeDups" class="tab-badge tab-badge-warn"></span></button>
+            <button type="button" class="tab" data-tab="themes"><i data-lucide="shapes"></i><span>Tematik</span></button>
+            <button type="button" class="tab" data-tab="chat"><i data-lucide="messages-square"></i><span>Sohbet</span></button>
             <button type="button" class="tab" data-tab="projects"><i data-lucide="folder-kanban"></i><span>Projeler</span></button>
         </nav>
 
@@ -220,8 +222,13 @@
                                 <select id="icLogic">
                                     <option value="all">Tümü karşılanmalı (IC1 VE IC2 …)</option>
                                     <option value="any">En az biri yeterli (IC1 VEYA IC2 …)</option>
+                                    <option value="expr">Özel formül (ör. IC1 VE (IC2 VEYA IC3))</option>
                                 </select>
-                                <small>Hariç tutma ölçütleri her zaman VEYA ile birleşir: herhangi biri açıkça karşılanırsa Exclude.</small>
+                                <div id="icExprGroup" class="ic-expr" style="display: none;">
+                                    <input type="text" id="icExpr" placeholder="IC1 VE (IC2 VEYA IC3)" spellcheck="false" autocomplete="off">
+                                    <div id="icExprStatus" class="ic-expr-status"></div>
+                                </div>
+                                <small>Hariç tutma ölçütleri her zaman VEYA ile birleşir: herhangi biri açıkça karşılanırsa Exclude. Formül kodda uygulanır; model yalnızca her ölçüte evet / hayır / belirsiz der.</small>
                             </div>
                             <div class="form-group">
                                 <label for="reviewThreshold">İnsan incelemesi eşiği (güven &lt;):</label>
@@ -638,12 +645,129 @@
             </div>
         </section>
 
+        <!-- ============ TAB: THEMATIC ANALYSIS ============ -->
+        <section id="tab-themes" class="tab-panel ws" hidden>
+            <div class="ws-head">
+                <div class="ws-head-text">
+                    <h2 class="ws-title">Tematik analiz</h2>
+                    <p class="ws-subtitle">Taramadan ayrı bir adımdır: dahil/hariç kararlarını, hakem oylarını ve AI tarama sonucunu değiştirmez. Her makaleye tanımladığınız temalardan 1 ya da en fazla 2 tanesi atanır; uygun tema yoksa "Diğer". 0–100 yakınlık betimsel bir puandır, olasılık değildir.</p>
+                </div>
+            </div>
+            <div id="themeEmpty" class="ui-card empty-note">Önce bir analiz yükleyin ya da Projeler sekmesinden bir proje açın.</div>
+            <div id="themeBody" hidden>
+                <section class="ui-card ws-block">
+                    <details id="themeSettings" class="ui-collapsible">
+                        <summary><i data-lucide="chevron-right" class="ui-chevron-r"></i><span>Araştırma amacı, referans ve temalar</span><span id="themeSettingsInfo" class="ui-collapsible-info"></span></summary>
+                        <div class="theme-settings">
+                            <label class="ui-field"><span class="ui-label">Tematik araştırma amacı</span>
+                                <textarea id="themeGoal" class="ui-textarea" rows="3" placeholder="ör. Öğrencilerin kişisel ilgi alanlarına göre yapay zekâ tarafından öğrenme bağlamının kişiselleştirilmesi."></textarea></label>
+                            <label class="ui-field"><span class="ui-label">Yakın referans / yaklaşım (opsiyonel)</span>
+                                <textarea id="themeReference" class="ui-textarea" rows="3" placeholder="Karşılaştırma için örnek çalışma ve yaklaşımı. Yalnızca bağlam içindir; DOI ya da yazar eşleşmesi puanı yükseltmez."></textarea></label>
+                            <label class="ui-field"><span class="ui-label">Temalar · her satıra bir tema</span>
+                                <textarea id="themeGroups" class="ui-textarea" rows="6" placeholder="AI ile ilgiye göre bağlam kişiselleştirme&#10;Kişisel ilgi toplama ve profil çıkarma&#10;İlgiye dayalı öneri ve kullanıcı modelleme"></textarea>
+                                <small class="ui-help">"Diğer / belirsiz" teması yoksa otomatik eklenir. Tema adını değiştirirseniz önceki sonuçlar "eski ayar" olarak işaretlenir.</small></label>
+                            <details class="ui-collapsible ui-collapsible-inner">
+                                <summary><i data-lucide="chevron-right" class="ui-chevron-r"></i><span>Tematik analiz promptu</span></summary>
+                                <textarea id="themePrompt" class="ui-textarea mono" rows="10"></textarea>
+                                <button id="themePromptReset" type="button" class="ui-btn ui-btn-ghost ui-btn-xs">Varsayılana dön</button>
+                            </details>
+                            <div class="admin-actions"><button id="themeSaveBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="save"></i><span>Tematik ayarları kaydet</span></button></div>
+                        </div>
+                    </details>
+                </section>
+                <section class="ui-card ws-block">
+                    <h3 class="ui-card-title">Çalıştır</h3>
+                    <div class="theme-run">
+                        <label class="ui-field"><span class="ui-label">Kapsam</span>
+                            <select id="themeScope" class="ui-select">
+                                <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
+                                <option value="include_any">Dahil + belirsiz (nihai karar / oyum)</option>
+                                <option value="include_ai">AI'nın Include dedikleri</option>
+                                <option value="filter">Tarama sekmesindeki geçerli filtre</option>
+                                <option value="selected">Tarama sekmesinde seçtiklerim</option>
+                                <option value="all">Tüm aktif kayıtlar</option>
+                            </select>
+                        </label>
+                        <label class="ui-check"><input type="checkbox" id="themeRedo"> Güncel sonucu olan makaleleri de yeniden üret</label>
+                        <div class="admin-actions">
+                            <button id="themeRunBtn" type="button" class="ui-btn ui-btn-default ui-btn-sm"><i data-lucide="play"></i><span class="btn-text">Tematik analizi çalıştır</span></button>
+                            <button id="themeStopBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" hidden><i data-lucide="square"></i><span>Durdur</span></button>
+                            <span id="themeRunInfo" class="ui-help"></span>
+                        </div>
+                        <small class="ui-help">Analiz sekmesindeki ilk model ve API anahtarları kullanılır; 5 makale bir istekte gönderilir.</small>
+                    </div>
+                </section>
+                <section class="ui-card ws-block">
+                    <div class="ui-card-head">
+                        <h3 class="ui-card-title">Sonuçlar</h3>
+                        <div class="ws-view">
+                            <select id="themeFilter" class="ui-select ui-select-sm" aria-label="Temaya göre"></select>
+                            <select id="themeSort" class="ui-select ui-select-sm" aria-label="Sıralama">
+                                <option value="rel_desc">Yakınlık (yüksekten)</option>
+                                <option value="rel_asc">Yakınlık (düşükten)</option>
+                                <option value="order">Dosya sırası</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="themeSummary" class="theme-summary"></div>
+                    <div id="themeList" class="theme-list"></div>
+                    <div id="themePager" class="pager"></div>
+                </section>
+            </div>
+        </section>
+
+        <!-- ============ TAB: CHAT WITH ARTICLES ============ -->
+        <section id="tab-chat" class="tab-panel ws" hidden>
+            <div class="ws-head">
+                <div class="ws-head-text">
+                    <h2 class="ws-title">Makalelerle sohbet</h2>
+                    <p class="ws-subtitle">Sorunuz seçtiğiniz makalelerin başlık ve özetlerinde aranır; yalnızca metinde birebir alıntıyla doğrulanan eşleşmelerden cevap üretilir. Tam metin kullanılmaz.</p>
+                </div>
+            </div>
+            <div id="chatEmpty" class="ui-card empty-note">Önce bir analiz yükleyin ya da Projeler sekmesinden bir proje açın.</div>
+            <div id="chatBody" class="chat" hidden>
+                <section class="ui-card chat-bar">
+                    <label class="ui-field"><span class="ui-label">Hangi makaleler?</span>
+                        <select id="chatScope" class="ui-select">
+                            <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
+                            <option value="include_any">Dahil + belirsiz (nihai karar / oyum)</option>
+                            <option value="include_ai">AI'nın Include dedikleri</option>
+                            <option value="filter">Tarama sekmesindeki geçerli filtre</option>
+                            <option value="selected">Tarama sekmesinde seçtiklerim</option>
+                            <option value="all">Tüm aktif kayıtlar</option>
+                        </select>
+                    </label>
+                    <span id="chatScopeInfo" class="ui-help"></span>
+                    <button id="chatClearBtn" type="button" class="ui-btn ui-btn-ghost ui-btn-sm"><i data-lucide="eraser"></i><span>Sohbeti temizle</span></button>
+                </section>
+                <div id="chatLog" class="chat-log" aria-live="polite"></div>
+                <form id="chatForm" class="ui-card chat-input">
+                    <textarea id="chatQuestion" class="ui-textarea" rows="2" placeholder="ör. Dahil ettiğim çalışmalardan hangileri ilgi alanını anketle ölçmüş?"></textarea>
+                    <div class="chat-input-actions">
+                        <span class="ui-help">Enter gönderir · Shift+Enter yeni satır</span>
+                        <button id="chatStopBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm" hidden><i data-lucide="square"></i><span>Durdur</span></button>
+                        <button id="chatSendBtn" type="submit" class="ui-btn ui-btn-default ui-btn-sm"><i data-lucide="send"></i><span>Sor</span></button>
+                    </div>
+                </form>
+                <details class="ui-card ui-collapsible">
+                    <summary><i data-lucide="chevron-right" class="ui-chevron-r"></i><span>Sohbet promptları</span></summary>
+                    <p class="ui-help">Tarama promptu her makale grubunda soruyla ilişkili kanıtları bulur; yanıt promptu yalnızca doğrulanmış eşleşmelerden cevabı oluşturur.</p>
+                    <label class="ui-field"><span class="ui-label">Makale tarama promptu</span><textarea id="chatScanPrompt" class="ui-textarea mono" rows="7"></textarea></label>
+                    <label class="ui-field"><span class="ui-label">Yanıt oluşturma promptu</span><textarea id="chatAnswerPrompt" class="ui-textarea mono" rows="6"></textarea></label>
+                    <button id="chatPromptReset" type="button" class="ui-btn ui-btn-ghost ui-btn-xs">Varsayılana dön</button>
+                </details>
+            </div>
+        </section>
+
         <!-- ============ TAB: PROJECTS ============ -->
         <section id="tab-projects" class="tab-panel" hidden>
             <div class="card">
                 <div class="results-header">
                     <h2>☁️ Projeler</h2>
-                    <div class="results-actions"><button id="refreshProjectsBtn" class="btn-tertiary btn-compact">↻ Yenile</button></div>
+                    <div class="results-actions">
+                        <button id="newProjectBtn" type="button" class="ui-btn ui-btn-default ui-btn-sm" style="display: none;" title="Bir WoS / Scopus / PubMed dışa aktarımından yeni proje açar; analiz sonra yapılır"><i data-lucide="file-plus-2"></i><span>Excel'den yeni proje</span></button>
+                        <button id="refreshProjectsBtn" type="button" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="refresh-cw"></i><span>Yenile</span></button>
+                    </div>
                 </div>
                 <p id="projectsNote" class="muted-inline"></p>
                 <div id="projectList" class="project-list"></div>
@@ -724,6 +848,60 @@
         </div>
     </div>
 
+    <!-- Record preview (chat citations, thematic list) -->
+    <div id="recordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2 id="recordModalTitle" class="rec-title"></h2>
+                <button type="button" class="close-modal-btn" data-close="recordModal">&times;</button>
+            </div>
+            <div id="recordModalBody" class="modal-body rec-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-tertiary" data-close="recordModal">Kapat</button>
+                <button type="button" id="recordModalOpen" class="btn-primary btn-compact">Tarama tablosunda aç</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import records (new project, or more records into an open one) -->
+    <div id="importModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card modal-narrow">
+            <div class="modal-header">
+                <h2 id="importTitle">Kayıt ekle</h2>
+                <button type="button" class="close-modal-btn" data-close="importModal">&times;</button>
+            </div>
+            <div class="modal-body import-form">
+                <p id="importIntro" class="muted-inline"></p>
+                <div id="importNewGroup">
+                    <div class="form-group">
+                        <label for="importName">Proje adı:</label>
+                        <input type="text" id="importName" class="text-input" maxlength="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="importDescription">Açıklama (opsiyonel):</label>
+                        <input type="text" id="importDescription" class="text-input" maxlength="300">
+                    </div>
+                    <label class="checkbox-label"><input type="checkbox" id="importBlind" checked> Kör mod açık: hakemler birbirlerinin kararlarını görmez</label>
+                </div>
+                <div class="form-group">
+                    <label for="importFile">CSV / TSV / Excel dosyası (WoS, Scopus, PubMed):</label>
+                    <input type="file" id="importFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+                </div>
+                <div class="form-group">
+                    <label for="importLabel">Kaynak adı (PRISMA "tanımlanan kayıtlar" için):</label>
+                    <input type="text" id="importLabel" class="text-input" maxlength="60" placeholder="ör. Scopus 2026-09">
+                </div>
+                <label class="checkbox-label"><input type="checkbox" id="importAutoRemove" checked> Kesin tekrarları (aynı DOI ya da aynı başlık + yıl) otomatik kaldır</label>
+                <label class="checkbox-label"><input type="checkbox" id="importFuzzy" checked> Benzer başlıkları tekrar adayı olarak işaretle (Tekrarlar sekmesinde siz karar verirsiniz)</label>
+                <div id="importSummary" class="import-summary" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-tertiary" data-close="importModal">Vazgeç</button>
+                <button type="button" id="importConfirmBtn" class="btn-primary btn-compact" disabled>İçe aktar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Save-to-cloud Modal -->
     <div id="saveCloudModal" class="modal-overlay" style="display: none;">
         <div class="modal-content card modal-narrow">
@@ -755,11 +933,12 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=15.0"></script>
-    <script src="screening-core.js?v=15.0"></script>
-    <script src="default-prompt.js?v=15.0"></script>
-    <script src="cloud.js?v=15.0"></script>
-    <script src="script.js?v=15.0"></script>
-    <script src="workspace.js?v=15.0"></script>
+    <script src="supabase-config.js?v=16.0"></script>
+    <script src="screening-core.js?v=16.0"></script>
+    <script src="default-prompt.js?v=16.0"></script>
+    <script src="cloud.js?v=16.0"></script>
+    <script src="script.js?v=16.0"></script>
+    <script src="workspace.js?v=16.0"></script>
+    <script src="assist.js?v=16.0"></script>
 </body>
 </html>

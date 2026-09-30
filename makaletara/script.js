@@ -166,7 +166,7 @@ function loadSettings() {
   const f = settings.form || {};
   if (settings.formVersion !== 13) delete f.summaryLanguage; // v13: Turkish short rationale by default
   ['batchSize', 'concurrencyPerKey', 'minIntervalSec', 'rpmOverride', 'rpdOverride', 'reviewThreshold', 'temperature',
-    'icLogic', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage'].forEach(id => { if (f[id] !== undefined) el[id].value = f[id]; });
+    'icLogic', 'icExpr', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage'].forEach(id => { if (f[id] !== undefined) el[id].value = f[id]; });
   ['enforceLimits', 'verifyEvidence', 'dedupe'].forEach(id => { if (f[id] !== undefined) el[id].checked = f[id]; });
 
   const cs = settings.customSpecs;
@@ -189,7 +189,7 @@ function loadSettings() {
 function saveSettings() {
   settings.form = {};
   ['batchSize', 'concurrencyPerKey', 'minIntervalSec', 'rpmOverride', 'rpdOverride', 'reviewThreshold', 'temperature',
-    'icLogic', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage'].forEach(id => { settings.form[id] = el[id].value; });
+    'icLogic', 'icExpr', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage'].forEach(id => { settings.form[id] = el[id].value; });
   ['enforceLimits', 'verifyEvidence', 'dedupe'].forEach(id => { settings.form[id] = el[id].checked; });
   settings.formVersion = 13;
   localStorage.setItem(LS.settings, JSON.stringify(settings));
@@ -252,11 +252,13 @@ function initListeners() {
   }));
 
   ['batchSize', 'concurrencyPerKey', 'minIntervalSec', 'rpmOverride', 'rpdOverride', 'reviewThreshold', 'temperature',
-    'icLogic', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage', 'enforceLimits', 'verifyEvidence', 'dedupe']
+    'icLogic', 'icExpr', 'consensusStrategy', 'noAbstractMode', 'summaryLanguage', 'enforceLimits', 'verifyEvidence', 'dedupe']
     .forEach(id => el[id].addEventListener('change', () => {
       saveSettings(); updateModelInfo(); updateCostEstimate();
+      if (id === 'icLogic' || id === 'icExpr') updateConsistencyWarnings();
       if (id === 'dedupe' && file.rows) prepareFile().catch(e => showError(e.message));
     }));
+  el.icExpr.addEventListener('input', debounce(() => { saveSettings(); updateConsistencyWarnings(); }, 250));
 
   const onCustom = () => {
     Object.assign(settings.customSpecs, {
@@ -512,6 +514,7 @@ function currentOptions() {
   const thr = parseFloat(el.reviewThreshold.value);
   return {
     icLogic: el.icLogic.value,
+    icExpr: el.icLogic.value === 'expr' ? el.icExpr.value.trim() : '',
     reviewThreshold: isFinite(thr) ? Math.max(0, Math.min(1, thr)) : 0.85,
     consensus: el.consensusStrategy.value,
     summaryLanguage: el.summaryLanguage.value,
@@ -531,7 +534,34 @@ function currentProtocolConfig() {
   return { criteria, options, guidance, system: C.buildSystemInstructions(guidance, criteria, options) };
 }
 
+/** Checks the IC formula; returns an error message or '' (also when no formula is used). */
+function icFormulaError() {
+  if (el.icLogic.value !== 'expr') return '';
+  const criteria = C.parseCriteria(el.inclusionCriteria.value, el.exclusionCriteria.value);
+  try { C.parseIcExpression(el.icExpr.value, criteria.inclusion.map(c => c.code)); return ''; } catch (e) { return e.message; }
+}
+
+function updateIcExprUI() {
+  const on = el.icLogic.value === 'expr';
+  el.icExprGroup.style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const criteria = C.parseCriteria(el.inclusionCriteria.value, el.exclusionCriteria.value);
+  const codes = criteria.inclusion.map(c => c.code);
+  const st = el.icExprStatus;
+  st.textContent = '';
+  try {
+    const f = C.parseIcExpression(el.icExpr.value, codes);
+    st.className = 'ic-expr-status ok';
+    st.textContent = `✓ ${C.formatIcExpression(f.ast, 'tr')}`;
+    if (f.unused.length) st.textContent += ` · ${f.unused.join(', ')} formülde yok; bu ölçüt kararı etkilemez (yine değerlendirilir ve raporlanır).`;
+  } catch (e) {
+    st.className = 'ic-expr-status err';
+    st.textContent = `✗ ${e.message}${codes.length && !/tanımlı olanlar/.test(e.message) ? ` Tanımlı: ${codes.join(', ')}.` : ''}`;
+  }
+}
+
 function updateConsistencyWarnings() {
+  updateIcExprUI();
   const criteria = C.parseCriteria(el.inclusionCriteria.value, el.exclusionCriteria.value);
   const w = C.checkGuidanceConsistency(el.systemPrompt.value, criteria);
   el.consistencyWarnings.textContent = '';
@@ -569,17 +599,20 @@ function parseDelimited(text) {
   return rows;
 }
 
+/** Rows (first row = headers) of a CSV / TSV / Excel export. */
+async function readSpreadsheet(f) {
+  if (/\.(xlsx|xls)$/i.test(f.name)) {
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+    return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '', raw: false });
+  }
+  return parseDelimited(await f.text());
+}
+
 async function onFileSelected(e) {
   const f = e.target.files[0];
   if (!f) return;
   try {
-    let rows;
-    if (/\.(xlsx|xls)$/i.test(f.name)) {
-      const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
-      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '', raw: false });
-    } else {
-      rows = parseDelimited(await f.text());
-    }
+    const rows = await readSpreadsheet(f);
     file = { name: f.name, rows, hash: '', records: [], columns: {}, duplicates: 0 };
     await prepareFile();
   } catch (err) {
@@ -733,6 +766,7 @@ async function startNewAnalysis() {
   if (isScreeningRunning()) return showError('Bir analiz zaten çalışıyor.');
   const cfg = currentProtocolConfig();
   if (!cfg.criteria.inclusion.length) return showError('En az bir dahil etme ölçütü (IC) girin.');
+  if (icFormulaError()) return showError(`IC formülü geçersiz: ${icFormulaError()}`);
   const models = resolveModels(settings.activeModels);
   const missing = [...new Set(models.map(m => m.pool))].filter(p => !keysFor(p).length);
   if (missing.length) return showError(`API anahtarı eksik: ${missing.join(', ')}`);
@@ -886,9 +920,13 @@ async function reanalyzeRecords(recs, opts = {}) {
   if (isScreeningRunning()) return showError('Bir analiz zaten çalışıyor.');
   const cloud = WS.isCloud;
   if (!cloud && !run) return showError('Önce bir analiz yükleyin.');
-  const cfg = currentProtocolConfig();
+  // opts.protocol: analyse with a stored protocol (e.g. records added to a project)
+  // instead of the Analysis form, so the results belong to the same version
+  const sp = opts.protocol && opts.protocol.system && opts.protocol.criteria ? opts.protocol : null;
+  const cfg = sp ? { criteria: sp.criteria, options: sp.options || {}, guidance: sp.guidance || '', system: sp.system } : currentProtocolConfig();
   if (!cfg.criteria.inclusion.length) { switchTab('analysis'); return showError('Analiz sekmesinde en az bir dahil etme ölçütü (IC) olmalı.'); }
-  const models = resolveModels(settings.activeModels);
+  if (!sp && icFormulaError()) { switchTab('analysis'); return showError(`IC formülü geçersiz: ${icFormulaError()}`); }
+  const models = sp && (sp.models || []).length ? sp.models : resolveModels(settings.activeModels);
   const missing = [...new Set(models.map(m => m.pool))].filter(p => !keysFor(p).length);
   if (missing.length) { switchTab('analysis'); return showError(`API anahtarı eksik (${missing.join(', ')}). Yeniden analiz için anahtarları Analiz sekmesinde girin.`); }
   const promptHash = await hashString(cfg.system);
@@ -897,22 +935,26 @@ async function reanalyzeRecords(recs, opts = {}) {
     const msg = [
       `${recs.length.toLocaleString('tr-TR')} kayıt yapay zekâ ile yeniden analiz edilecek.`,
       `Modeller: ${models.map(m => modelShort(m.id)).join(', ')}`,
-      `Protokol: Analiz sekmesindeki ölçütler ve yönerge (v${promptHash})${prevHash && prevHash !== promptHash ? ` — mevcut sonuçlar v${prevHash} ile üretilmişti` : ''}`,
-      'Yeni AI kararları eskilerinin yerine yazılır; hakem kararları, etiketler ve notlar korunur.',
+      sp ? `Protokol: projenin kayıtlı ölçütleri ve yönergesi (v${promptHash})`
+        : `Protokol: Analiz sekmesindeki ölçütler ve yönerge (v${promptHash})${prevHash && prevHash !== promptHash ? ` — mevcut sonuçlar v${prevHash} ile üretilmişti` : ''}`,
+      cloud && Cloud.v15
+        ? 'Yeni AI kararları etkin sonuç olur; önceki AI sonuçları "AI sürümleri" altında saklanır. Hakem kararları, etiketler ve notlar korunur.'
+        : 'Yeni AI kararları eskilerinin yerine yazılır; hakem kararları, etiketler ve notlar korunur.',
       settings.mode === 'async' ? 'Not: Yeniden analiz her zaman paralel (gerçek zamanlı) modda yapılır.' : ''
     ].filter(Boolean).join('\n\n');
     if (!confirm(msg + '\n\nDevam edilsin mi?')) return;
   }
-  const batchSize = Math.max(1, parseInt(el.batchSize.value, 10) || 5);
+  const batchSize = sp && sp.batchSize ? sp.batchSize : Math.max(1, parseInt(el.batchSize.value, 10) || 5);
   const adopted = {
     criteria: cfg.criteria, options: cfg.options, guidance: cfg.guidance,
-    icText: el.inclusionCriteria.value, ecText: el.exclusionCriteria.value,
+    icText: sp ? sp.icText : el.inclusionCriteria.value, ecText: sp ? sp.ecText : el.exclusionCriteria.value,
     system: cfg.system, promptHash, models, activeModels: models.map(m => m.id), batchSize
   };
   let usage;
   if (cloud) {
     const prev = WS.project.protocol || {};
     WS.project.protocol = Object.assign({}, prev, adopted, { usage: prev.usage || { input: 0, output: 0, cost: 0, perModel: {} } });
+    registerVersion(WS.project.protocol, adopted);
     try { await Cloud.updateProject(WS.project.id, { protocol: WS.project.protocol }); }
     catch (e) { return showError('Proje protokolü güncellenemedi: ' + e.message); }
     usage = WS.project.protocol.usage;
@@ -985,6 +1027,7 @@ function loadProtocolIntoForm(p) {
   el.exclusionCriteria.value = p.ecText || p.criteria.exclusion.map(c => c.text).join('\n');
   const o = p.options || {};
   if (o.icLogic) el.icLogic.value = o.icLogic;
+  el.icExpr.value = o.icExpr || '';
   if (typeof o.reviewThreshold === 'number') el.reviewThreshold.value = o.reviewThreshold;
   if (o.consensus) el.consensusStrategy.value = o.consensus;
   if (o.summaryLanguage) el.summaryLanguage.value = o.summaryLanguage;
@@ -1354,6 +1397,7 @@ function restoreSession(s) {
   el.exclusionCriteria.value = run.ecText || el.exclusionCriteria.value;
   el.userResearchTopic.value = run.options.userTopic || '';
   el.icLogic.value = run.options.icLogic;
+  el.icExpr.value = run.options.icExpr || '';
   el.reviewThreshold.value = run.options.reviewThreshold;
   el.consensusStrategy.value = run.options.consensus;
   settings.activeModels = run.activeModels.filter(m => MODELS[m]);

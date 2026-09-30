@@ -49,6 +49,7 @@ Paralellik ve limitler
 
 Karar mantığı
       --ic-logic all|any        IC birleşimi: tümü (VE, varsayılan) / en az biri (VEYA)
+      --ic-expr "IC1 VE (IC2 VEYA IC3)"   Özel IC formülü (--ic-logic yerine geçer)
       --consensus <strateji>    unanimous (varsayılan) | majority | any_include
       --review-threshold <x>    Bu güvenin altı insan incelemesine (varsayılan 0.85)
       --summary-language <dil>  Turkish (varsayılan) | English — kısa gerekçe dili
@@ -74,7 +75,7 @@ const { values: a } = parseArgs({
     models: { type: 'string' }, 'gemini-keys': { type: 'string' }, 'openai-keys': { type: 'string' }, 'deepseek-keys': { type: 'string' },
     'base-url': { type: 'string', multiple: true },
     'batch-size': { type: 'string' }, concurrency: { type: 'string' }, rpm: { type: 'string' }, rpd: { type: 'string' }, 'min-interval': { type: 'string' },
-    'ic-logic': { type: 'string' }, consensus: { type: 'string' }, 'review-threshold': { type: 'string' },
+    'ic-logic': { type: 'string' }, 'ic-expr': { type: 'string' }, consensus: { type: 'string' }, 'review-threshold': { type: 'string' },
     'summary-language': { type: 'string' }, temperature: { type: 'string' },
     'no-dedupe': { type: 'boolean' }, 'skip-no-abstract': { type: 'boolean' }, 'no-verify-evidence': { type: 'boolean' }, 'no-schema': { type: 'boolean' },
     state: { type: 'string' }, resume: { type: 'boolean' }, 'retry-errors': { type: 'boolean' }, 'estimate-only': { type: 'boolean' },
@@ -162,7 +163,8 @@ if (!criteria.inclusion.length) die('En az bir dahil etme ölçütü gerekli (--
 
 const temperature = a.temperature === undefined ? null : parseFloat(a.temperature);
 const options = {
-  icLogic: a['ic-logic'] === 'any' ? 'any' : 'all',
+  icLogic: a['ic-expr'] ? 'expr' : a['ic-logic'] === 'any' ? 'any' : 'all',
+  icExpr: a['ic-expr'] || '',
   reviewThreshold: a['review-threshold'] ? parseFloat(a['review-threshold']) : 0.85,
   consensus: a.consensus || 'unanimous',
   summaryLanguage: a['summary-language'] || 'Turkish',
@@ -173,6 +175,9 @@ const options = {
   dedupe: !a['no-dedupe'],
   temperature
 };
+if (options.icExpr) {
+  try { C.parseIcExpression(options.icExpr, criteria.inclusion.map(c => c.code)); } catch (e) { die(`IC formülü geçersiz: ${e.message}`); }
+}
 const system = C.buildSystemInstructions(guidance, criteria, options);
 const promptHash = hash(system);
 C.checkGuidanceConsistency(guidance, criteria).forEach(w => console.warn(`⚠️  ${w}`));
@@ -182,7 +187,7 @@ const prepared = C.prepareRecords(rows, { dedupe: options.dedupe });
 const fileHash = hash(prepared.records.map(r => `${r.ID}|${r.Title}`).join('\n'));
 const batchSize = Math.max(1, parseInt(a['batch-size'] || '5', 10));
 console.log(`📄 ${path.basename(a.input)}: ${prepared.records.length} kayıt, ${prepared.duplicates} tekrar · sütunlar: ${JSON.stringify(prepared.columns)}`);
-console.log(`🧾 Prompt v${promptHash} · ${criteria.inclusion.length} IC / ${criteria.exclusion.length} EC · IC mantığı: ${options.icLogic} · modeller: ${models.map(m => m.id).join(', ')}`);
+console.log(`🧾 Prompt v${promptHash} · ${criteria.inclusion.length} IC / ${criteria.exclusion.length} EC · IC mantığı: ${options.icExpr || options.icLogic} · modeller: ${models.map(m => m.id).join(', ')}`);
 
 const toScreenAll = prepared.records.filter(r => !r.duplicateOf && !(r.noAbstract && options.noAbstractMode === 'skip'));
 if (a['estimate-only']) {

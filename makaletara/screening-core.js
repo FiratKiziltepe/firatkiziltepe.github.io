@@ -135,15 +135,96 @@
   }
 
   // ------------------------------------------------------------
+  // IC formula, e.g. "(IC1 VE IC2) VEYA IC3" — evaluated in code, never by the model
+  // ------------------------------------------------------------
+  function tokenizeIc(src) {
+    const out = [];
+    const re = /\s*(?:(\()|(\))|(&&?|\bAND\b|\bVE\b)|(\|\|?|\bOR\b|\bVEYA\b)|(IC[\s_-]*\d+))/iy;
+    let pos = 0;
+    while (pos < src.length && !/^\s*$/.test(src.slice(pos))) {
+      re.lastIndex = pos;
+      const m = re.exec(src);
+      if (!m) throw new Error(`Formülde anlaşılmayan ifade: "${src.slice(pos).trim().slice(0, 16)}"`);
+      pos = re.lastIndex;
+      if (m[1]) out.push({ t: '(' });
+      else if (m[2]) out.push({ t: ')' });
+      else if (m[3]) out.push({ t: 'AND' });
+      else if (m[4]) out.push({ t: 'OR' });
+      else out.push({ t: 'IC', code: normalizeCode(m[5]) });
+    }
+    return out;
+  }
+
+  /**
+   * Parses an IC formula (VE/AND/&, VEYA/OR/|, parentheses; VE binds tighter).
+   * codes: defined IC codes, or null to skip that check.
+   * Returns { ast, used, unused } or throws an Error with a Turkish message.
+   */
+  function parseIcExpression(expr, codes) {
+    const toks = tokenizeIc(String(expr || ''));
+    if (!toks.length) throw new Error('Formül boş.');
+    const known = new Set(codes || []);
+    const used = new Set();
+    let i = 0;
+    const word = t => (t === 'AND' ? 'VE' : t === 'OR' ? 'VEYA' : t);
+    function primary() {
+      const t = toks[i];
+      if (!t) throw new Error('Formül yarım kalmış: sonunda bir ölçüt eksik.');
+      if (t.t === '(') {
+        i++;
+        const n = orExpr();
+        if (!toks[i] || toks[i].t !== ')') throw new Error('Kapanmayan parantez var.');
+        i++;
+        return n;
+      }
+      if (t.t === 'IC') {
+        i++;
+        if (codes && !known.has(t.code)) throw new Error(`${t.code} tanımlı değil (tanımlı olanlar: ${[...known].join(', ') || 'yok'}).`);
+        used.add(t.code);
+        return { op: 'IC', code: t.code };
+      }
+      throw new Error(`Beklenmeyen "${word(t.t)}": iki bağlaç ya da boş parantez olabilir.`);
+    }
+    function andExpr() { let n = primary(); while (toks[i] && toks[i].t === 'AND') { i++; n = { op: 'AND', a: n, b: primary() }; } return n; }
+    function orExpr() { let n = andExpr(); while (toks[i] && toks[i].t === 'OR') { i++; n = { op: 'OR', a: n, b: andExpr() }; } return n; }
+    const ast = orExpr();
+    if (i < toks.length) throw new Error(toks[i].t === ')' ? 'Fazladan kapanan parantez var.' : 'İki ölçüt arasında VE / VEYA eksik.');
+    return { ast, used: [...used], unused: (codes || []).filter(c => !used.has(c)) };
+  }
+
+  /** Kleene three-valued logic over 'yes' | 'no' | 'unclear'. */
+  function evalIc(ast, v) {
+    if (ast.op === 'IC') return v(ast.code);
+    const a = evalIc(ast.a, v), b = evalIc(ast.b, v);
+    if (ast.op === 'AND') return a === 'no' || b === 'no' ? 'no' : a === 'yes' && b === 'yes' ? 'yes' : 'unclear';
+    return a === 'yes' || b === 'yes' ? 'yes' : a === 'no' && b === 'no' ? 'no' : 'unclear';
+  }
+
+  /** Canonical text of a formula; lang 'tr' uses VE/VEYA, otherwise AND/OR. */
+  function formatIcExpression(ast, lang, parent) {
+    if (ast.op === 'IC') return ast.code;
+    const w = lang === 'tr' ? { AND: 'VE', OR: 'VEYA' } : { AND: 'AND', OR: 'OR' };
+    const s = `${formatIcExpression(ast.a, lang, ast.op)} ${w[ast.op]} ${formatIcExpression(ast.b, lang, ast.op)}`;
+    return parent && parent !== ast.op ? `(${s})` : s;
+  }
+
+  /** The parsed formula of a protocol, or null when IC logic is not 'expr' or the formula is invalid. */
+  function icFormula(criteria, icLogic, icExpr) {
+    if (icLogic !== 'expr') return null;
+    try { return parseIcExpression(icExpr, criteria.inclusion.map(c => c.code)); } catch (e) { return null; }
+  }
+
+  // ------------------------------------------------------------
   // Decision rule (deterministic)
   // ------------------------------------------------------------
   /**
    * @param {Object<string,'yes'|'no'|'unclear'>} assessment
    * @param {{inclusion:Array,exclusion:Array}} criteria
-   * @param {'all'|'any'} icLogic
+   * @param {'all'|'any'|'expr'} icLogic
+   * @param {string} [icExpr] formula for icLogic 'expr' (an invalid one falls back to 'all')
    * @returns {{decision:string, reason:string, failedIC:string[], metEC:string[], unclearEC:string[]}}
    */
-  function deriveDecision(assessment, criteria, icLogic = 'all') {
+  function deriveDecision(assessment, criteria, icLogic = 'all', icExpr = '') {
     const icCodes = criteria.inclusion.map(c => c.code);
     const ecCodes = criteria.exclusion.map(c => c.code);
     const v = code => assessment[code] || 'unclear';
@@ -156,6 +237,20 @@
     // Exclusion criteria are disjunctive: any clearly-met EC excludes.
     if (metEC.length) {
       return { decision: 'Exclude', reason: `EC karşılandı: ${metEC.join(', ')}`, failedIC: icNo, metEC, unclearEC };
+    }
+
+    const formula = icFormula(criteria, icLogic, icExpr);
+    if (formula) {
+      const r = evalIc(formula.ast, v);
+      const text = formatIcExpression(formula.ast, 'tr');
+      const usedNo = formula.used.filter(c => v(c) === 'no');
+      if (r === 'no') return { decision: 'Exclude', reason: `IC formülü karşılanmadı (${text}): ${usedNo.join(', ')} hayır`, failedIC: usedNo, metEC, unclearEC };
+      if (r === 'yes') {
+        if (unclearEC.length) return { decision: 'Uncertain', reason: `IC formülü karşılandı ancak ${unclearEC.join(', ')} dışlanamadı`, failedIC: [], metEC, unclearEC };
+        return { decision: 'Include', reason: `IC formülü karşılandı (${text}), hiçbir EC karşılanmadı`, failedIC: [], metEC, unclearEC };
+      }
+      const unclearIC = formula.used.filter(c => v(c) === 'unclear');
+      return { decision: 'Uncertain', reason: `IC formülü belirsiz (${text}): ${unclearIC.join(', ') || '-'}`, failedIC: usedNo, metEC, unclearEC };
     }
 
     let icStatus; // 'met' | 'failed' | 'unclear'
@@ -185,7 +280,8 @@
   // Prompt construction
   // ------------------------------------------------------------
   const DEFAULT_OPTIONS = {
-    icLogic: 'all',               // 'all' (AND) | 'any' (OR)
+    icLogic: 'all',               // 'all' (AND) | 'any' (OR) | 'expr' (formula in icExpr)
+    icExpr: '',
     reviewThreshold: 0.85,        // confidence below this -> human review
     summaryLanguage: 'Turkish',
     requireEvidence: true,
@@ -198,9 +294,16 @@
     const o = Object.assign({}, DEFAULT_OPTIONS, opts);
     const ic = criteria.inclusion;
     const ec = criteria.exclusion;
-    const icRule = o.icLogic === 'any'
-      ? `AT LEAST ONE of (${ic.map(c => c.code).join(' OR ') || '—'}) is "yes"`
-      : `ALL of (${ic.map(c => c.code).join(' AND ') || '—'}) are "yes"`;
+    const formula = icFormula(criteria, o.icLogic, o.icExpr);
+    const formulaText = formula ? formatIcExpression(formula.ast, 'en') : '';
+    const icRule = formula
+      ? `the IC formula ${formulaText} is TRUE`
+      : o.icLogic === 'any'
+        ? `AT LEAST ONE of (${ic.map(c => c.code).join(' OR ') || '—'}) is "yes"`
+        : `ALL of (${ic.map(c => c.code).join(' AND ') || '—'}) are "yes"`;
+    const icFail = formula
+      ? `the IC formula ${formulaText} is FALSE`
+      : o.icLogic === 'any' ? 'ALL IC are "no"' : 'ANY IC is "no"';
 
     let p = '';
     p += '==================================================\n';
@@ -225,10 +328,11 @@ For an exclusion criterion, "yes" means the exclusion condition applies (the rec
 ${o.requireEvidence ? 'For every "yes" and every "no" verdict, copy a SHORT VERBATIM quote (max 25 words) from the title or abstract as "evidence". Copy ONE contiguous passage exactly as written (same words, same order): never paraphrase and never join separate passages with "...". Use "" for "unclear".\n' : ''}
 STEP B — APPLY THE DECISION RULE (it is deterministic; your decision must follow it)
 1. If ANY EC is "yes" -> "Exclude".
-2. Else, if the inclusion requirement fails (${o.icLogic === 'any' ? 'ALL IC are "no"' : 'ANY IC is "no"'}) -> "Exclude".
+2. Else, if the inclusion requirement fails (${icFail}) -> "Exclude".
 3. Else, if ${icRule} AND every EC is "no" -> "Include".
 4. Otherwise -> "Uncertain" (e.g. an IC is "unclear", or an EC cannot be ruled out).
-
+${formula ? `IC formula logic: AND is TRUE only if both sides are "yes" and FALSE if either side is "no"; OR is TRUE if either side is "yes" and FALSE only if both sides are "no"; every other case is "unclear" and leads to "Uncertain". Still assess EVERY criterion in STEP A, including those not in the formula.
+` : ''}
 STEP C — CONFIDENCE AND HUMAN REVIEW
 - "confidence" (0.00–1.00) is your confidence in the screening decision, not in the study's quality.
 - Set "needs_human_review": true when decision is "Uncertain", when confidence < ${o.reviewThreshold.toFixed(2)}, or when a construct is genuinely ambiguous.
@@ -465,12 +569,12 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
           }
         });
       }
-      derived = deriveDecision(assessment, criteria, ctx.icLogic);
+      derived = deriveDecision(assessment, criteria, ctx.icLogic, ctx.icExpr);
     } else {
       flags.push('ölçüt bazlı değerlendirme yok (eski format)');
       legacyIC.forEach(c => { assessment[c] = 'yes'; });
       legacyEC.forEach(c => { assessment[c] = 'yes'; });
-      derived = deriveDecision(assessment, criteria, ctx.icLogic);
+      derived = deriveDecision(assessment, criteria, ctx.icLogic, ctx.icExpr);
       // Without per-criterion evidence we cannot distinguish "no" from "unclear":
       // accept the model's Exclude only if it cites an EC; otherwise keep the more inclusive outcome.
     }
@@ -1467,7 +1571,10 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
       ['Prompt versiyonu (SHA-256[0:8])', run.promptHash],
       ['', ''],
       ['KARAR MANTIĞI', ''],
-      ['IC birleşimi', o.icLogic === 'any' ? 'En az biri (VEYA)' : 'Tümü (VE)'],
+      ['IC birleşimi', (() => {
+        const f = icFormula(run.criteria, o.icLogic, o.icExpr);
+        return f ? `Formül: ${formatIcExpression(f.ast, 'tr')}` : o.icLogic === 'any' ? 'En az biri (VEYA)' : 'Tümü (VE)';
+      })()],
       ['EC birleşimi', 'Herhangi biri (VEYA)'],
       ['Karar kuralı', 'Herhangi EC=evet → Exclude; IC başarısız → Exclude; IC karşılandı ve tüm EC=hayır → Include; aksi hâlde Uncertain. Model kararı ölçüt değerlendirmesiyle çelişirse → Uncertain + insan incelemesi.'],
       ['İnsan incelemesi eşiği', o.reviewThreshold],
@@ -1631,6 +1738,75 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
     });
   }
 
+  /**
+   * Adds the records of a new export (another database, a later search) to an
+   * existing record set.
+   *  existing: current records [{ rid, order, ID, Title, Year, DOI, duplicateOf, removed, notDupOf }]
+   *  incoming: prepareRecords(...).records (own R00001… ids, within-file duplicates marked)
+   *  opts: { label, importId, autoRemove (exact duplicates), fuzzy (similar titles → review) }
+   * New records get rids and orders after the existing ones. Exact duplicates
+   * (same DOI, or same title + year) of an existing or earlier record point to it
+   * and are removed when autoRemove is set; similar titles are only proposed.
+   * Returns { records, stats }.
+   */
+  function planImport(existing, incoming, opts = {}) {
+    const num = rid => parseInt(String(rid).replace(/\D/g, ''), 10) || 0;
+    let next = existing.reduce((m, r) => Math.max(m, num(r.rid)), 0);
+    let ord = existing.reduce((m, r) => Math.max(m, r.order), -1);
+    const remap = new Map(incoming.map(r => [r.rid, `R${String(++next).padStart(5, '0')}`]));
+    const titleKey = r => { const t = normText(r.Title); return t.length >= 20 ? `${t}|${r.Year}` : ''; };
+    const byDoi = new Map(), byTitle = new Map();
+    const ids = new Set(existing.map(r => r.ID));
+    existing.forEach(r => {
+      if (r.duplicateOf || r.removed) return;   // match only the records that are kept
+      const d = normalizeDoi(r.DOI), t = titleKey(r);
+      if (d && !byDoi.has(d)) byDoi.set(d, r.rid);
+      if (t && !byTitle.has(t)) byTitle.set(t, r.rid);
+    });
+    const tag = String(opts.importId || 'yeni').replace(/^imp-/, '');
+    const stats = { total: incoming.length, fresh: 0, dupExisting: 0, dupWithin: 0, fuzzy: 0, removed: 0 };
+    const out = [];
+    const outByRid = new Map();
+    incoming.forEach(src => {
+      const r = Object.assign({}, src, {
+        rid: remap.get(src.rid), order: ++ord, sourceLabel: opts.label || '', importId: opts.importId || '',
+        duplicateOf: '', dupKind: '', dupScore: null, removed: false, removedReason: '', notDupOf: []
+      });
+      if (ids.has(r.ID)) r.ID = `${r.ID}#${tag}`;
+      ids.add(r.ID);
+      if (src.duplicateOf) {
+        // a within-file copy follows its first occurrence (which may itself duplicate an existing record)
+        const first = outByRid.get(remap.get(src.duplicateOf));
+        r.duplicateOf = first && first.duplicateOf ? first.duplicateOf : remap.get(src.duplicateOf);
+        r.dupKind = src.dupKind || 'title';
+        stats.dupWithin++;
+      } else {
+        const d = normalizeDoi(r.DOI), t = titleKey(r);
+        const hitDoi = d && byDoi.get(d);
+        const hit = hitDoi || (t && byTitle.get(t));
+        if (hit) { r.duplicateOf = hit; r.dupKind = hitDoi ? 'doi' : 'title'; stats.dupExisting++; }
+      }
+      if (r.duplicateOf && opts.autoRemove) {
+        r.removed = true;
+        r.removedReason = `Tekrar: ${r.duplicateOf} (içe aktarma${opts.label ? `: ${opts.label}` : ''})`;
+        stats.removed++;
+      }
+      out.push(r);
+      outByRid.set(r.rid, r);
+    });
+    if (opts.fuzzy !== false) {
+      const fresh = new Set(out.filter(r => !r.duplicateOf).map(r => r.rid));
+      findDuplicateCandidates([...existing, ...out], { threshold: opts.threshold || 0.85 }).forEach(p => {
+        if (!fresh.has(p.b)) return;
+        const r = outByRid.get(p.b);
+        r.duplicateOf = p.a; r.dupKind = 'fuzzy'; r.dupScore = p.score;
+        stats.fuzzy++;
+      });
+    }
+    stats.fresh = out.filter(r => !r.duplicateOf).length;
+    return { records: out, stats };
+  }
+
   // Cost estimation
   function estimateTokens(text) { return Math.ceil(String(text || '').length / 4); }
 
@@ -1638,6 +1814,7 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
     VERSION, DECISIONS, DECISION_RANK, DEFAULT_OPTIONS, COLUMN_ALIASES,
     sleep, fingerprint, maskKey, quotaDay, normText,
     parseCriteria, normalizeCode, codesMentioned, checkGuidanceConsistency,
+    parseIcExpression, evalIc, formatIcExpression, icFormula,
     deriveDecision, buildProtocol, buildSystemInstructions, buildUserPrompt, buildResponseSchema,
     parseModelResponse, normalizeDecision, normalizeVerdict, parseConfidence, evidenceSupported,
     validateModelRecord, errorModelRecord, consensus, cohenKappa, agreementStats,
@@ -1645,6 +1822,6 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
     KeyPool, PoolExhaustedError, ApiError, classifyHttpError, callGemini, callOpenAICompatible,
     runScreening, planBatchJobs, batchJobState, parseBatchResponses, batchResponsesFile,
     estimateTokens, buildExportRows, buildMetadataRows,
-    normalizeDoi, splitRationale, evidenceRanges, findDuplicateCandidates
+    normalizeDoi, splitRationale, evidenceRanges, findDuplicateCandidates, planImport
   };
 });

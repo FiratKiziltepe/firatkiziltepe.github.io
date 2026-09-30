@@ -18,6 +18,9 @@ window.Cloud = (() => {
 
   let user = null;
   let profile = null;
+  // v15 schema (owners, AI versions, imports, themes): detected, so the page keeps
+  // working against a database where the migration has not been applied yet
+  let v15 = false;
   const listeners = new Set();
 
   const check = ({ data, error }) => { if (error) throw new Error(error.message || String(error)); return data; };
@@ -27,6 +30,8 @@ window.Cloud = (() => {
     if (!user) return;
     const { data, error } = await client.from('profiles').select('id,email,display_name,role').eq('id', user.id).maybeSingle();
     if (!error) profile = data;
+    const probe = await client.from('record_ai_versions').select('version').limit(1);
+    v15 = !probe.error;
   }
 
   async function init() {
@@ -105,7 +110,12 @@ window.Cloud = (() => {
       finalDecision: row.final_decision || '',
       finalBy: row.final_by || null,
       archived: !!row.archived,
-      updatedAt: row.updated_at || ''
+      updatedAt: row.updated_at || '',
+      sourceLabel: row.source_label || '',
+      importId: row.import_id || '',
+      theme: row.theme || null,
+      themeFinal: row.theme_final || [],
+      themeBy: row.theme_by || null
     };
   }
 
@@ -132,6 +142,7 @@ window.Cloud = (() => {
     get user() { return user; },
     get profile() { return profile; },
     get isAdmin() { return !!(profile && profile.role === 'admin'); },
+    get v15() { return v15; },
     get displayName() { return profile ? profile.display_name || profile.email : (user ? user.email : ''); },
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     init,
@@ -171,6 +182,8 @@ window.Cloud = (() => {
         .select('user_id, added_at, profiles(id,email,display_name,role)').eq('project_id', pid));
     },
     async addMember(pid, userId) { check(await client.from('project_members').insert({ project_id: pid, user_id: userId })); },
+    /** Owner/admin adds a registered user by exact e-mail (the user list is not exposed). */
+    async addMemberByEmail(pid, email) { return check(await client.rpc('add_member_by_email', { pid, member_email: email })); },
     async removeMember(pid, userId) { check(await client.from('project_members').delete().eq('project_id', pid).eq('user_id', userId)); },
     async listProfiles() { return check(await client.from('profiles').select('id,email,display_name,role').order('display_name')); },
 
@@ -178,11 +191,11 @@ window.Cloud = (() => {
     async fetchRecords(pid) {
       return fetchAll(() => client.from('records').select('*').eq('project_id', pid).order('ord'));
     },
-    /** Upserts full records; returns [{id, rid}] */
-    async upsertRecords(pid, items, onProgress) {
+    /** Upserts full records; returns [{id, rid}]. extra(rec) adds columns (same keys for every row). */
+    async upsertRecords(pid, items, onProgress, extra) {
       const ids = [];
       for (let i = 0; i < items.length; i += CHUNK) {
-        const rows = items.slice(i, i + CHUNK).map(({ rec, ai }) => recordToRow(pid, rec, ai));
+        const rows = items.slice(i, i + CHUNK).map(({ rec, ai }) => Object.assign(recordToRow(pid, rec, ai), extra ? extra(rec) : {}));
         ids.push(...check(await client.from('records').upsert(rows, { onConflict: 'project_id,rid' }).select('id,rid')));
         if (onProgress) onProgress(Math.min(items.length, i + CHUNK), items.length);
       }
@@ -193,6 +206,22 @@ window.Cloud = (() => {
       for (let i = 0; i < patches.length; i += CHUNK) {
         const rows = patches.slice(i, i + CHUNK).map(p => Object.assign({ project_id: pid }, p));
         check(await client.from('records').upsert(rows, { onConflict: 'project_id,rid' }));
+      }
+    },
+
+    // ---------- AI result versions (one row per record and protocol version) ----------
+    /** Light list for comparisons: [{rid, version, ai_decision}] (all versions, or one). */
+    async fetchAiVersionIndex(pid) {
+      return fetchAll(() => client.from('record_ai_versions').select('rid,version,ai_decision').eq('project_id', pid).order('rid'));
+    },
+    async fetchAiVersion(pid, version) {
+      return fetchAll(() => client.from('record_ai_versions').select('rid,version,ai,ai_decision,created_at')
+        .eq('project_id', pid).eq('version', version).order('rid'));
+    },
+    async upsertAiVersions(pid, rows) {
+      for (let i = 0; i < rows.length; i += CHUNK) {
+        const chunk = rows.slice(i, i + CHUNK).map(r => ({ project_id: pid, rid: r.rid, version: r.version, ai: r.ai, ai_decision: r.ai_decision || null }));
+        check(await client.from('record_ai_versions').upsert(chunk, { onConflict: 'project_id,rid,version' }));
       }
     },
 

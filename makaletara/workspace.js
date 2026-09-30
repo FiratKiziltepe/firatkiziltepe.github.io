@@ -225,6 +225,8 @@ function matchesWs(rec, f) {
   if (f.status === 'nofinal' && rec.finalDecision) return false;
   if (f.status === 'final' && !rec.finalDecision) return false;
   if (f.status === 'noabstract' && !rec.noAbstract) return false;
+  if (f.status === 'vdiff' && !versionsDisagree(rec.rid)) return false;
+  if (f.status.startsWith('ver:') && versionOf(ai) !== f.status.slice(4)) return false;
   if (f.status === 'flags' && !(ai && aiFlags(ai).length)) return false;
   if (f.status.startsWith('incons')) {
     const said = ai ? inconsistencies(ai) : [];
@@ -255,7 +257,7 @@ function matchesWs(rec, f) {
     if (!terms.includes(term)) return false;
   }
   if (f.q) {
-    const hay = `${rec.ID} ${rec.Title} ${rec.Authors} ${rec.DOI} ${rec.Abstract} ${ai ? C.splitRationale(ai).text : ''} ${(mv && mv.note) || ''}`.toLowerCase();
+    const hay = `${rec.rid} ${rec.ID} ${rec.Title} ${rec.Authors} ${rec.DOI} ${rec.Abstract} ${ai ? C.splitRationale(ai).text : ''} ${(mv && mv.note) || ''}`.toLowerCase();
     if (!hay.includes(f.q)) return false;
   }
   return true;
@@ -362,11 +364,13 @@ function renderWorkspace() {
   el.wsEmpty.style.display = has ? 'none' : 'block';
   el.resultsSection.style.display = has ? 'block' : 'none';
   updateTabBadges();
+  Assist.onWorkspaceChange();
   if (!has) return;
   renderSourceBar();
   renderLabelFilter();
   renderPeopleFilter();
   renderDocTypeFilter();
+  renderVersionFilter();
   renderHeaderSort();
   const list = filteredRecords();
   const ps = pageSize();
@@ -443,6 +447,13 @@ function renderSourceBar() {
       badge(p.blind ? 'eye-off' : 'eye', p.blind ? 'Kör mod açık' : 'Kör mod kapalı', p.blind ? 'warn' : ''),
       badge(Cloud.isAdmin ? 'shield' : 'user', Cloud.isAdmin ? 'Yönetici' : 'Hakem'));
     if (p.hide_ai) meta.append(badge('bot-off', 'AI kararları hakemlerden gizli'));
+    const mix = new Map();
+    WS.records.forEach(r => { if (isActive(r)) { const v = versionOf(WS.ai.get(r.rid)); if (v) mix.set(v, (mix.get(v) || 0) + 1); } });
+    if (mix.size > 1) {
+      const b = badge('git-branch', `AI sonuçları ${mix.size} sürümden`, 'warn');
+      b.title = `Etkin AI sonuçları farklı protokol sürümleriyle üretilmiş: ${[...mix].map(([v, n]) => `v${v}: ${n}`).join(' · ')}. Proje → Yönet → AI sürümleri.`;
+      meta.append(b);
+    }
     const live = text('span', '', 'live-status');
     live.id = 'liveStatus';
     meta.appendChild(live);
@@ -467,7 +478,7 @@ function renderSourceBar() {
   }
   left.append(kind, name, meta);
   bar.append(left, right);
-  el.saveToCloudBtn.style.display = !WS.isCloud && Cloud.available && Cloud.isAdmin ? 'inline-flex' : 'none';
+  el.saveToCloudBtn.style.display = !WS.isCloud && Cloud.available && canCreateProjects() ? 'inline-flex' : 'none';
   el.loadProtocolBtn.style.display = WS.isCloud && WS.canCurate ? 'inline-flex' : 'none';
   el.filterPeopleField.style.display = WS.isCloud ? '' : 'none';
   el.bulkFinalGroup.style.display = WS.isCloud ? 'inline-flex' : 'none';
@@ -1533,6 +1544,12 @@ async function flushCloudAi() {
   const rows = WS.aiQueue.splice(0);
   try {
     await Cloud.patchRecords(WS.project.id, rows.map(r => ({ rid: r.rid, ai: Cloud.stripAi(r), ai_decision: r.ai_decision || r.decision })));
+    // every result is also kept under its protocol version
+    const versioned = rows.filter(r => r.promptHash);
+    if (Cloud.v15 && versioned.length) {
+      await Cloud.upsertAiVersions(WS.project.id, versioned.map(r => ({ rid: r.rid, version: r.promptHash, ai: Cloud.stripAi(r), ai_decision: r.ai_decision || r.decision })));
+      versioned.forEach(r => noteVersion(r.rid, r.promptHash, r.ai_decision || r.decision));
+    }
   } catch (e) {
     WS.aiQueue.unshift(...rows);
     showError('AI sonuçları veritabanına yazılamadı, tekrar denenecek: ' + e.message);
@@ -1789,9 +1806,31 @@ function wsExportRows(recs) {
   if (WS.isCloud) {
     WS.votes.forEach(m => m.forEach((v, uid) => { if (!reviewers.has(uid)) reviewers.set(uid, personName(uid)); }));
   }
+  // combined view over AI versions: every version's decision + a liberal combined decision
+  // (Include if any version says Include; at title/abstract stage doubt favours inclusion)
+  const versions = WS.isCloud && WS.versions ? versionSummary().map(v => v.version) : [];
+  const hasSources = WS.records.some(r => r.sourceLabel);
+  const hasThemes = WS.records.some(r => Assist.themeOf(r) || Assist.finalThemesOf(r).length);
   rows.forEach((row, i) => {
     const rec = recs[i];
     row['Durum'] = rec.removed ? `Kaldırıldı (${rec.removedReason})` : isPendingDup(rec) ? `Tekrar adayı (${rec.duplicateOf})` : rec.archived ? 'Arşivde' : '';
+    if (hasSources) row['Kaynak'] = rec.sourceLabel || '';
+    if (hasThemes) {
+      const t = Assist.themeOf(rec);
+      row['Tema (AI)'] = t ? t.themes.join('; ') : '';
+      row['Tema yakınlığı (0–100)'] = t && typeof t.relevance === 'number' ? t.relevance : '';
+      row['Tema gerekçesi'] = t ? t.reason : '';
+      row['Tema kanıtı'] = t ? t.evidence : '';
+      row['Tema (onaylı)'] = Assist.finalThemesOf(rec).join('; ');
+    }
+    if (versions.length > 1) {
+      const m = WS.versions.byRid.get(rec.rid) || new Map();
+      row['AI sürümü (etkin)'] = versionOf(WS.ai.get(rec.rid));
+      versions.forEach(v => { row[`AI v${v}`] = m.get(v) ? DECISION_LABEL[m.get(v)] || m.get(v) : ''; });
+      const ds = [...m.values()].filter(Boolean);
+      row['Sürüm uyumu'] = !ds.length ? '' : new Set(ds).size === 1 ? `aynı (${ds.length})` : 'farklı';
+      row['Birleşik AI (liberal)'] = ds.includes('Include') ? 'Include' : ds.includes('Uncertain') ? 'Maybe' : ds.length ? 'Exclude' : '';
+    }
     if (WS.isCloud) {
       const m = WS.votes.get(rec.rid) || new Map();
       reviewers.forEach((name, uid) => {
@@ -1954,7 +1993,9 @@ async function openCloudProject(id) {
     WS.members = members.map(m => m.user_id);
     members.forEach(m => { if (m.profiles && !WS.profiles.has(m.user_id)) WS.profiles.set(m.user_id, m.profiles); });
     startLiveSync(id, rows, votes);
+    WS.versions = null;
     renderWorkspace(); renderDuplicates();
+    loadVersionIndex(id);
     showSuccess(`"${project.name}" açıldı: ${rows.length} kayıt, ${votes.length} karar.`);
   } catch (e) {
     showError('Proje açılamadı: ' + e.message);
@@ -2059,7 +2100,8 @@ function applyRemoteRecord(row) {
   if (!rec) return;
   if (rec.updatedAt && row.updated_at && rec.updatedAt >= row.updated_at) return;
   const fresh = Cloud.rowToRecord(row);
-  ['finalDecision', 'finalBy', 'removed', 'removedReason', 'duplicateOf', 'dupKind', 'dupScore', 'notDupOf', 'archived'].forEach(k => { rec[k] = fresh[k]; });
+  ['finalDecision', 'finalBy', 'removed', 'removedReason', 'duplicateOf', 'dupKind', 'dupScore', 'notDupOf', 'archived',
+    'sourceLabel', 'importId', 'theme', 'themeFinal', 'themeBy'].forEach(k => { if (k in fresh) rec[k] = fresh[k]; });
   rec.updatedAt = row.updated_at;
   if ('ai' in row) {
     const ai = Cloud.aiFromRow(row, rec);
@@ -2090,7 +2132,7 @@ function closeCloudProject() {
   stopLiveSync();
   WS.source = 'local';
   WS.project = null;
-  WS.cloudRecords = []; WS.cloudAi = new Map(); WS.votes = new Map(); WS.terms = null;
+  WS.cloudRecords = []; WS.cloudAi = new Map(); WS.votes = new Map(); WS.terms = null; WS.versions = null;
   WS.selected.clear(); WS.page = 1;
   WS.invalidateIndex();
   renderWorkspace(); renderDuplicates();
@@ -2106,7 +2148,7 @@ function showLocalWorkspace() {
 // Save local analysis to Supabase (admin)
 // ------------------------------------------------------------
 function openSaveDialog() {
-  if (!Cloud.isAdmin) return showError('Veritabanına yalnızca yönetici kaydedebilir.');
+  if (!canCreateProjects()) return showError('Veritabanına kaydetmek için giriş yapın. (Yönetici olmayan kullanıcılar için veritabanı güncellemesi gerekiyor.)');
   if (!run || !run.records.length) return showError('Kaydedilecek analiz yok.');
   if (isScreeningRunning()) return showError('Analiz sürerken kaydedilemez; bitmesini bekleyin veya duraklatın.');
   el.saveName.value = el.saveName.value || (run.fileName || 'Tarama').replace(/\.[^.]+$/, '');
@@ -2131,8 +2173,14 @@ async function saveToCloud() {
     const update = el.saveModeUpdate.checked && run.cloudProjectId;
     if (update) {
       el.saveProgress.textContent = 'Proje güncelleniyor…';
+      // keep the project's history (earlier versions, added sources)
+      const prev = (await Cloud.getProject(run.cloudProjectId)).protocol || {};
+      if (prev.versions) protocol.versions = prev.versions;
+      if (prev.imports) protocol.imports = prev.imports;
+      registerVersion(protocol, run);
       project = await Cloud.updateProject(run.cloudProjectId, { protocol, file_name: run.fileName });
     } else {
+      registerVersion(protocol, run);
       const name = el.saveName.value.trim();
       if (!name) throw new Error('Proje adı girin.');
       el.saveProgress.textContent = 'Proje oluşturuluyor…';
@@ -2146,6 +2194,13 @@ async function saveToCloud() {
       el.saveProgress.textContent = `Kayıtlar yükleniyor: ${done.toLocaleString('tr-TR')} / ${total.toLocaleString('tr-TR')}`;
     });
     const idOf = new Map(ids.map(x => [x.rid, x.id]));
+    const versioned = items.filter(x => x.ai && !x.ai.preset).map(({ rec, ai }) => ({
+      rid: rec.rid, version: ai.promptHash || run.promptHash, ai: Cloud.stripAi(ai), ai_decision: ai.ai_decision || ai.decision
+    }));
+    if (Cloud.v15 && versioned.length) {
+      el.saveProgress.textContent = `AI sonuçları sürüm geçmişine yazılıyor (${versioned.length})…`;
+      await Cloud.upsertAiVersions(project.id, versioned);
+    }
     const myVotes = Object.entries(run.human || {})
       .filter(([rid, h]) => idOf.has(rid) && (h.decision || (h.labels && h.labels.length) || h.note))
       .map(([rid, h]) => ({ record_id: idOf.get(rid), decision: h.decision || null, labels: h.labels || [], note: h.note || '', reasons: h.reasons || [] }));
@@ -2156,6 +2211,15 @@ async function saveToCloud() {
     if (myVotes.length) {
       el.saveProgress.textContent = `Kararlarınız yükleniyor (${myVotes.length})…`;
       await Cloud.upsertVotes(myVotes);
+    }
+    // thematic analysis done locally travels with the project
+    if (Cloud.v15 && (run.themeConfig || run.themes || run.themeFinal)) {
+      el.saveProgress.textContent = 'Tematik analiz sonuçları yükleniyor…';
+      if (run.themeConfig) await Cloud.updateProject(project.id, { themes: run.themeConfig });
+      const rids = [...new Set([...Object.keys(run.themes || {}), ...Object.keys(run.themeFinal || {})])].filter(r => idOf.has(r));
+      await Cloud.patchRecords(project.id, rids.map(rid => ({
+        rid, theme: (run.themes || {})[rid] || null, theme_final: (run.themeFinal || {})[rid] || [], theme_by: (run.themeFinal || {})[rid] ? Cloud.user.id : null
+      })));
     }
     run.cloudProjectId = project.id;
     await saveStateNow();
@@ -2175,8 +2239,12 @@ async function saveToCloud() {
 // Projects tab
 // ------------------------------------------------------------
 let projectsCache = [];
+let projectsSeq = 0;
 
 async function refreshProjects() {
+  // Several callers (start-up, auth events, saves) can overlap; only the newest
+  // call may draw, otherwise each one appends its own copy of the list.
+  const seq = ++projectsSeq;
   el.projectList.textContent = '';
   el.projectAdminCard.style.display = 'none';
   if (!Cloud.available) {
@@ -2190,48 +2258,310 @@ async function refreshProjects() {
     return;
   }
   el.projectsNote.textContent = Cloud.isAdmin
-    ? 'Yönetici olarak tüm projeleri görürsünüz. Yerel bir analizi Tarama sekmesindeki "☁️ Veritabanına kaydet" ile proje yapabilir, "Yönet" ile hakem ekleyebilirsiniz.'
-    : 'Yöneticinin sizinle paylaştığı projeler. Açıp Include / Maybe / Exclude kararlarınızı verebilirsiniz.';
+    ? 'Yönetici olarak tüm projeleri görürsünüz. Yerel bir analizi Tarama sekmesindeki "Veritabanına kaydet" ile ya da "Excel\'den yeni proje" ile proje yapabilir, "Yönet" ile hakem ekleyebilirsiniz.'
+    : Cloud.v15
+      ? 'Kendi projeleriniz ve sizinle paylaşılan projeler. Kendi projenizi "Excel\'den yeni proje" ya da Tarama sekmesindeki "Veritabanına kaydet" ile açıp "Yönet"ten e-postayla hakem ekleyebilirsiniz.'
+      : 'Sizinle paylaşılan projeler. Açıp Include / Maybe / Exclude kararlarınızı verebilirsiniz.';
+  el.newProjectBtn.style.display = canCreateProjects() ? 'inline-flex' : 'none';
+  let list;
   try {
-    projectsCache = await Cloud.listProjects();
-  } catch (e) { showError('Projeler alınamadı: ' + e.message); return; }
+    list = await Cloud.listProjects();
+  } catch (e) { if (seq === projectsSeq) showError('Projeler alınamadı: ' + e.message); return; }
+  if (seq !== projectsSeq) return;   // a newer refresh owns the list
+  projectsCache = list;
+  el.projectList.textContent = '';
   if (!projectsCache.length) {
-    el.projectList.appendChild(text('div', Cloud.isAdmin ? 'Henüz proje yok.' : 'Sizinle paylaşılmış proje yok. Yöneticiden sizi projeye eklemesini isteyin (kayıt olduğunuz e-posta ile).', 'empty-note'));
+    el.projectList.appendChild(text('div', Cloud.isAdmin ? 'Henüz proje yok.'
+      : canCreateProjects() ? 'Henüz projeniz yok. "Excel\'den yeni proje" ile başlayabilir ya da bir yöneticiden sizi projesine eklemesini isteyebilirsiniz.'
+      : 'Sizinle paylaşılmış proje yok. Yöneticiden sizi projeye eklemesini isteyin (kayıt olduğunuz e-posta ile).', 'empty-note'));
+    refreshIcons();
     return;
   }
   projectsCache.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'project-card' + (WS.isCloud && WS.project.id === p.id ? ' project-open' : '');
+    card.className = 'project-card ui-card' + (WS.isCloud && WS.project.id === p.id ? ' project-open' : '');
     const info = document.createElement('div');
     info.className = 'project-info';
     info.appendChild(text('div', p.name, 'project-name'));
-    if (p.description) info.appendChild(text('div', p.description, 'muted-small'));
+    if (p.description) info.appendChild(text('div', p.description, 'project-desc'));
     const meta = document.createElement('div');
     meta.className = 'project-meta';
+    const own = p.is_owner ? badge('crown', 'Sahibi sizsiniz', 'ok') : p.owner_name ? badge('user', `Sahibi: ${p.owner_name}`) : null;
     meta.append(
-      pill(p.blind ? '🙈 Kör mod' : '👁️ Açık mod', p.blind ? 'pill-warn' : 'pill-ok'),
-      text('span', `${p.total.toLocaleString('tr-TR')} kayıt`, 'muted-small'),
-      text('span', `${p.removed} tekrar kaldırıldı`, 'muted-small'),
-      text('span', `${p.archived || 0} arşivde`, 'muted-small'),
-      text('span', `${p.members} hakem`, 'muted-small'),
-      text('span', `güncelleme: ${new Date(p.updated_at).toLocaleString('tr-TR')}`, 'muted-small')
+      badge(p.blind ? 'eye-off' : 'eye', p.blind ? 'Kör mod' : 'Açık mod', p.blind ? 'warn' : ''),
+      ...(own ? [own] : []),
+      text('span', `${p.total.toLocaleString('tr-TR')} kayıt`, 'project-stat'),
+      text('span', `${p.removed} tekrar kaldırıldı`, 'project-stat'),
+      text('span', `${p.archived || 0} arşivde`, 'project-stat'),
+      text('span', `${p.members} hakem`, 'project-stat'),
+      text('span', `güncelleme ${new Date(p.updated_at).toLocaleString('tr-TR')}`, 'project-stat')
     );
     info.appendChild(meta);
     const prog = document.createElement('div');
-    prog.className = 'mini-progress';
+    prog.className = 'mini-progress ui-progress';
     const pct = p.total ? Math.round(p.my_votes / p.total * 100) : 0;
     const bar = document.createElement('div'); bar.className = 'mini-progress-fill'; bar.style.width = `${pct}%`;
     prog.appendChild(bar);
-    info.append(prog, text('div', `Sizin ilerlemeniz: ${p.my_votes}/${p.total} (%${pct})`, 'muted-small'));
+    info.append(prog, text('div', `Sizin ilerlemeniz: ${p.my_votes.toLocaleString('tr-TR')} / ${p.total.toLocaleString('tr-TR')} (%${pct})`, 'project-stat'));
     const act = document.createElement('div');
     act.className = 'project-actions';
-    act.appendChild(button('📂 Aç', 'btn-secondary btn-compact', () => openCloudProject(p.id)));
-    act.appendChild(button(Cloud.isAdmin ? '⚙️ Yönet' : '⚙️ Ayarlar', 'btn-tertiary btn-compact', () => showProjectAdmin(p.id)));
+    act.appendChild(uiButton('folder-open', 'Aç', 'ui-btn ui-btn-default ui-btn-sm', () => openCloudProject(p.id)));
+    act.appendChild(uiButton('settings-2', Cloud.isAdmin || p.is_owner ? 'Yönet' : 'Ayarlar', 'ui-btn ui-btn-outline ui-btn-sm', () => showProjectAdmin(p.id)));
     card.append(info, act);
     el.projectList.appendChild(card);
   });
+  refreshIcons();
 }
 
+/** Project creation: admins always; everyone else once the v15 schema (owners) is live. */
+function canCreateProjects() { return !!(Cloud.user && (Cloud.isAdmin || Cloud.v15)); }
+/** Owner or admin of a project row ({owner_id}). */
+function canManageProject(p) { return !!(Cloud.user && p && (Cloud.isAdmin || p.owner_id === Cloud.user.id)); }
+
+// ------------------------------------------------------------
+// AI result versions
+//  records.ai is the active result; record_ai_versions keeps every result per
+//  protocol version (prompt hash), so criteria can change without losing the
+//  earlier screening. protocol.versions describes what produced each version.
+// ------------------------------------------------------------
+/** Registers the protocol that produced a version (criteria, logic, prompt, models). */
+function registerVersion(protocol, p) {
+  if (!p || !p.promptHash) return;
+  protocol.versions = protocol.versions || {};
+  const prev = protocol.versions[p.promptHash] || {};
+  protocol.versions[p.promptHash] = Object.assign({ createdAt: new Date().toISOString(), label: '' }, prev, {
+    icText: p.icText || '', ecText: p.ecText || '', guidance: p.guidance || '', criteria: p.criteria,
+    options: p.options || {}, system: p.system || '', models: (p.models || []).map(m => m.id || m), batchSize: p.batchSize
+  });
+}
+
+function versionOf(ai) { return (ai && ai.promptHash) || ''; }
+
+/** Light index of every stored version: WS.versions = { byRid: Map(rid → Map(version → decision)), list } */
+async function loadVersionIndex(pid) {
+  WS.versions = null;
+  if (!Cloud.v15) return;
+  try {
+    const rows = await Cloud.fetchAiVersionIndex(pid);
+    if (!WS.isCloud || WS.project.id !== pid) return;
+    WS.versions = { byRid: new Map() };
+    rows.forEach(r => noteVersion(r.rid, r.version, r.ai_decision));
+    renderWorkspace();
+  } catch (e) { console.warn('AI sürümleri alınamadı', e); }
+}
+
+function noteVersion(rid, version, decision) {
+  if (!WS.versions || !version) return;
+  let m = WS.versions.byRid.get(rid);
+  if (!m) { m = new Map(); WS.versions.byRid.set(rid, m); }
+  m.set(version, decision || '');
+}
+
+/** [{ version, total, active, Include, Uncertain, Exclude }] newest registry entries first */
+function versionSummary() {
+  const out = new Map();
+  const get = v => { if (!out.has(v)) out.set(v, { version: v, total: 0, active: 0, Include: 0, Uncertain: 0, Exclude: 0 }); return out.get(v); };
+  if (WS.versions) {
+    WS.versions.byRid.forEach((m, rid) => {
+      const rec = WS.recByRid(rid);
+      if (!rec || !isActive(rec)) return;
+      m.forEach((d, v) => { const s = get(v); s.total++; if (s[d] !== undefined) s[d]++; });
+    });
+  }
+  WS.records.forEach(rec => {
+    if (!isActive(rec)) return;
+    const v = versionOf(WS.ai.get(rec.rid));
+    if (v) get(v).active++;
+  });
+  const reg = (WS.project && WS.project.protocol && WS.project.protocol.versions) || {};
+  return [...out.values()].sort((a, b) => String((reg[b.version] || {}).createdAt || '').localeCompare(String((reg[a.version] || {}).createdAt || '')) || b.total - a.total);
+}
+
+/** True when the stored versions of a record disagree on the decision. */
+function versionsDisagree(rid) {
+  const m = WS.versions && WS.versions.byRid.get(rid);
+  if (!m || m.size < 2) return false;
+  return new Set([...m.values()].filter(Boolean)).size > 1;
+}
+
+/** Status filter options for versions (only when a project has more than one). */
+function renderVersionFilter() {
+  const list = WS.isCloud && WS.versions ? versionSummary() : [];
+  const sig = list.map(v => `${v.version}:${v.active}`).join('|');
+  if (el.filterStatus.dataset.vsig === sig) return;
+  el.filterStatus.dataset.vsig = sig;
+  const cur = el.filterStatus.value;
+  const old = el.filterStatus.querySelector('optgroup[data-versions]');
+  if (old) old.remove();
+  if (list.length > 1) {
+    const g = document.createElement('optgroup');
+    g.label = 'AI sürümleri';
+    g.dataset.versions = '1';
+    const add = (value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; g.appendChild(o); };
+    add('vdiff', 'Sürümler farklı karar vermiş');
+    list.forEach(v => add(`ver:${v.version}`, `Etkin sonuç v${v.version} (${v.active.toLocaleString('tr-TR')})`));
+    el.filterStatus.appendChild(g);
+  }
+  el.filterStatus.value = [...el.filterStatus.options].some(o => o.value === cur) ? cur : 'all';
+}
+
+/** Makes the stored results of one version the active AI result of the records that have it. */
+async function activateVersion(version) {
+  if (!WS.isCloud) return;
+  const pid = WS.project.id;
+  const reg = ((WS.project.protocol || {}).versions || {})[version];
+  let rows;
+  try { rows = await Cloud.fetchAiVersion(pid, version); } catch (e) { return showError('Sürüm alınamadı: ' + e.message); }
+  rows = rows.filter(r => WS.recByRid(r.rid) && r.ai);
+  if (!rows.length) return showError('Bu sürümde etkinleştirilecek sonuç yok.');
+  if (!confirm(`v${version} sürümündeki AI sonuçları ${rows.length.toLocaleString('tr-TR')} kayıtta etkin sonuç olacak.\n\nBu sürümde sonucu olmayan kayıtlar değişmez. Hakem kararları, etiketler ve notlar etkilenmez; şu anki sonuçlar kendi sürümlerinde saklı kalır.${reg ? '\nProjenin protokolü de bu sürümün ölçütlerine döner.' : ''}\n\nDevam edilsin mi?`)) return;
+  try {
+    await Cloud.patchRecords(pid, rows.map(r => ({ rid: r.rid, ai: r.ai, ai_decision: r.ai_decision })));
+    if (reg) {
+      const p = Object.assign({}, WS.project.protocol, {
+        criteria: reg.criteria, options: reg.options, guidance: reg.guidance, icText: reg.icText, ecText: reg.ecText,
+        system: reg.system || WS.project.protocol.system, promptHash: version
+      });
+      await Cloud.updateProject(pid, { protocol: p });
+    }
+    showSuccess(`v${version} etkin sürüm yapıldı (${rows.length} kayıt).`);
+    await openCloudProject(pid);
+    showProjectAdmin(pid);
+  } catch (e) { showError('Sürüm etkinleştirilemedi: ' + e.message); }
+}
+
+// ------------------------------------------------------------
+// Import: a new project from an export, or more records into the open project
+//  (another database or a later search); duplicates against the records that
+//  are already there are detected before anything is analysed.
+// ------------------------------------------------------------
+const IMPORT = { mode: 'add', plan: null, fileName: '', busy: false };
+
+function openImportDialog(mode) {
+  if (!Cloud.user) return showError('Önce giriş yapın.');
+  if (mode === 'new' && !canCreateProjects()) return showError('Proje oluşturma yetkiniz yok.');
+  if (mode === 'add' && !WS.isCloud) return showError('Önce projeyi açın.');
+  if (isScreeningRunning()) return showError('Analiz sürerken kayıt eklenemez.');
+  Object.assign(IMPORT, { mode, plan: null, fileName: '' });
+  el.importFile.value = '';
+  el.importLabel.value = '';
+  el.importSummary.hidden = true;
+  el.importConfirmBtn.disabled = true;
+  el.importNewGroup.style.display = mode === 'new' ? 'block' : 'none';
+  if (mode === 'new') {
+    el.importTitle.textContent = 'Excel\'den yeni proje';
+    el.importName.value = '';
+    el.importDescription.value = '';
+    el.importIntro.textContent = 'Kayıtlar yüklenir, analiz henüz yapılmaz. Projenin protokolü olarak Analiz sekmesindeki ölçütler, karar mantığı ve yönerge kaydedilir; analizi proje açılınca "Filtredekileri yeniden analiz et" ile başlatırsınız.';
+  } else {
+    const p = WS.project.protocol || {};
+    el.importTitle.textContent = `Kayıt ekle · ${WS.project.name}`;
+    el.importIntro.textContent = `Yeni dosyadaki kayıtlar projedeki ${WS.records.length.toLocaleString('tr-TR')} kayıtla karşılaştırılır; tekrarlar ayıklanır. Yeni kayıtları ardından projenin kayıtlı protokolüyle${p.promptHash ? ` (v${p.promptHash})` : ''} analiz edebilirsiniz; sonuçlar mevcut kayıtlarla aynı sürümde olur.`;
+  }
+  el.importModal.style.display = 'flex';
+}
+
+async function planImportFromDialog() {
+  const f = el.importFile.files[0];
+  el.importConfirmBtn.disabled = true;
+  if (!f) { el.importSummary.hidden = true; return; }
+  try {
+    const rows = await readSpreadsheet(f);
+    const prepared = C.prepareRecords(rows, { dedupe: true });
+    if (!prepared.records.length) throw new Error('Dosyada kayıt bulunamadı.');
+    IMPORT.fileName = f.name;
+    if (!el.importLabel.value.trim()) el.importLabel.value = f.name.replace(/\.[^.]+$/, '').slice(0, 60);
+    if (IMPORT.mode === 'new' && !el.importName.value.trim()) el.importName.value = f.name.replace(/\.[^.]+$/, '').slice(0, 120);
+    const existing = IMPORT.mode === 'add' ? WS.records : [];
+    IMPORT.plan = C.planImport(existing, prepared.records, {
+      label: el.importLabel.value.trim(), importId: `imp-${Date.now().toString(36)}`,
+      autoRemove: el.importAutoRemove.checked, fuzzy: el.importFuzzy.checked
+    });
+    const s = IMPORT.plan.stats;
+    const c = prepared.columns;
+    const box = el.importSummary;
+    box.textContent = '';
+    const line = (label, value, cls) => { const d = document.createElement('div'); d.className = `imp-row ${cls || ''}`; d.append(text('span', label), text('strong', value)); box.appendChild(d); };
+    line('Dosyadaki kayıt', s.total.toLocaleString('tr-TR'));
+    if (IMPORT.mode === 'add') line('Projede zaten olan (DOI / başlık + yıl)', s.dupExisting.toLocaleString('tr-TR'), s.dupExisting ? 'warn' : '');
+    line('Dosyanın kendi içindeki tekrar', s.dupWithin.toLocaleString('tr-TR'), s.dupWithin ? 'warn' : '');
+    if (el.importFuzzy.checked) line('Benzer başlık (sizin kararınıza bırakılır)', s.fuzzy.toLocaleString('tr-TR'), s.fuzzy ? 'warn' : '');
+    line(el.importAutoRemove.checked ? 'Otomatik kaldırılacak kesin tekrar' : 'Tekrar adayı olarak işaretlenecek', (el.importAutoRemove.checked ? s.removed : s.dupExisting + s.dupWithin).toLocaleString('tr-TR'));
+    line('Yeni (analiz edilecek) kayıt', s.fresh.toLocaleString('tr-TR'), 'ok');
+    box.appendChild(text('div', `Sütunlar → ID: ${c.id || '(sıra no)'} · Başlık: ${c.title || '-'} · Özet: ${c.abstract || '-'} · Yıl: ${c.year || '-'} · DOI: ${c.doi || '-'} · Belge türü: ${c.doctype || '-'}`, 'muted-small'));
+    if (!Cloud.v15) box.appendChild(text('div', 'Not: veritabanı güncellenmediği için kaynak adı kayıtlara yazılamaz (yalnızca proje geçmişine yazılır).', 'muted-small'));
+    box.hidden = false;
+    el.importConfirmBtn.disabled = false;
+    el.importConfirmBtn.textContent = IMPORT.mode === 'new' ? `Projeyi oluştur (${s.total.toLocaleString('tr-TR')} kayıt)` : `${s.total.toLocaleString('tr-TR')} kaydı ekle`;
+  } catch (e) {
+    IMPORT.plan = null;
+    el.importSummary.hidden = false;
+    el.importSummary.textContent = '✗ ' + e.message;
+  }
+}
+
+async function runImport() {
+  if (!IMPORT.plan || IMPORT.busy) return;
+  IMPORT.busy = true;
+  const btn = el.importConfirmBtn;
+  btn.disabled = true;
+  const { records, stats } = IMPORT.plan;
+  const label = el.importLabel.value.trim();
+  const entry = { importId: records.length ? records[0].importId : '', label, fileName: IMPORT.fileName, date: new Date().toISOString(), ...stats };
+  const extra = Cloud.v15 ? rec => ({ source_label: rec.sourceLabel || label, import_id: rec.importId || '' }) : null;
+  const progress = (done, total) => { btn.textContent = `Yükleniyor ${done.toLocaleString('tr-TR')} / ${total.toLocaleString('tr-TR')}`; };
+  try {
+    let pid;
+    if (IMPORT.mode === 'new') {
+      const name = el.importName.value.trim();
+      if (!name) throw new Error('Proje adı girin.');
+      const cfg = currentProtocolConfig();
+      const models = resolveModels(settings.activeModels);
+      const protocol = {
+        version: C.VERSION, criteria: cfg.criteria, options: cfg.options, guidance: cfg.guidance,
+        icText: el.inclusionCriteria.value, ecText: el.exclusionCriteria.value, system: cfg.system,
+        promptHash: await hashString(cfg.system), models, activeModels: models.map(m => m.id),
+        batchSize: Math.max(1, parseInt(el.batchSize.value, 10) || 5), mode: 'sync', fileName: IMPORT.fileName,
+        usage: { input: 0, output: 0, cost: 0, perModel: {} }, createdAt: new Date().toISOString(),
+        imports: [entry]
+      };
+      const project = await Cloud.createProject({ name, description: el.importDescription.value.trim(), blind: el.importBlind.checked, hide_ai: false, protocol, file_name: IMPORT.fileName });
+      pid = project.id;
+      await Cloud.upsertRecords(pid, records.map(rec => ({ rec, ai: null })), progress, extra);
+    } else {
+      pid = WS.project.id;
+      await Cloud.upsertRecords(pid, records.map(rec => ({ rec, ai: null })), progress, extra);
+      const p = Object.assign({}, WS.project.protocol);
+      const imports = (p.imports || []).slice();
+      if (!imports.length) {
+        const first = WS.records.filter(r => !r.importId).length;
+        imports.push({ importId: '', label: WS.project.file_name || 'İlk dosya', fileName: WS.project.file_name || '', date: WS.project.created_at, total: first });
+      }
+      imports.push(entry);
+      p.imports = imports;
+      await Cloud.updateProject(pid, { protocol: p });
+    }
+    el.importModal.style.display = 'none';
+    showSuccess(`${records.length.toLocaleString('tr-TR')} kayıt eklendi · ${stats.fresh.toLocaleString('tr-TR')} yeni · ${(stats.dupExisting + stats.dupWithin).toLocaleString('tr-TR')} kesin tekrar${stats.fuzzy ? ` · ${stats.fuzzy} benzer başlık Tekrarlar sekmesinde` : ''}.`);
+    refreshProjects();
+    await openCloudProject(pid);
+    const fresh = records.filter(r => !r.duplicateOf).map(r => WS.recByRid(r.rid)).filter(Boolean);
+    if (IMPORT.mode === 'add' && fresh.length && WS.project.protocol && WS.project.protocol.system &&
+        confirm(`${fresh.length.toLocaleString('tr-TR')} yeni kayıt projenin kayıtlı protokolüyle (v${WS.project.protocol.promptHash || '?'}) şimdi analiz edilsin mi?\n\nAnaliz sekmesindeki API anahtarları kullanılır. Daha sonra Durum → "Analiz edilmemiş" filtresiyle de başlatabilirsiniz.`)) {
+      await reanalyzeRecords(fresh, { protocol: WS.project.protocol, resume: true });
+    }
+  } catch (e) {
+    showError('İçe aktarılamadı: ' + e.message);
+  } finally {
+    IMPORT.busy = false;
+    btn.disabled = false;
+    btn.textContent = 'İçe aktar';
+  }
+}
+
+// ------------------------------------------------------------
+// Project management card
+// ------------------------------------------------------------
 async function showProjectAdmin(pid) {
   const card = el.projectAdminCard;
   card.style.display = 'block';
@@ -2241,40 +2571,57 @@ async function showProjectAdmin(pid) {
   let project, members, people, votes;
   try {
     [project, members, people, votes] = await Promise.all([
-      Cloud.getProject(pid), Cloud.listMembers(pid), Cloud.listProfiles(), Cloud.fetchVotes(pid)
+      Cloud.getProject(pid), Cloud.listMembers(pid), Cloud.listProfiles().catch(() => []), Cloud.fetchVotes(pid)
     ]);
   } catch (e) { card.textContent = 'Yüklenemedi: ' + e.message; return; }
+  const manage = canManageProject(project);
+  const isOpen = WS.isCloud && WS.project.id === pid;
   card.textContent = '';
-  const h = text('h2', `⚙️ ${project.name}`);
-  card.appendChild(h);
+  card.classList.add('ws-admin');
+  const head = document.createElement('div');
+  head.className = 'admin-head';
+  head.append(text('h2', project.name, 'ws-title'));
+  const who = pid && project.owner_id === (Cloud.user && Cloud.user.id) ? badge('crown', 'Sahibi sizsiniz', 'ok') : null;
+  if (who) head.appendChild(who);
+  card.appendChild(head);
 
-  // settings
+  // --- settings
+  const section = (title, hint) => {
+    const s = document.createElement('section');
+    s.className = 'admin-sec';
+    s.appendChild(text('h3', title, 'ui-card-title'));
+    if (hint) s.appendChild(text('p', hint, 'admin-hint'));
+    card.appendChild(s);
+    return s;
+  };
+  const sSet = section('Ayarlar');
   const grid = document.createElement('div');
-  grid.className = 'settings-grid';
-  const fg = (label, input) => { const g = document.createElement('div'); g.className = 'form-group'; const l = text('label', label); g.append(l, input); return g; };
-  const nameI = document.createElement('input'); nameI.type = 'text'; nameI.value = project.name; nameI.className = 'text-input';
-  const descI = document.createElement('input'); descI.type = 'text'; descI.value = project.description; descI.className = 'text-input';
-  grid.append(fg('Proje adı', nameI), fg('Açıklama', descI));
-  card.appendChild(grid);
-  const blindL = document.createElement('label'); blindL.className = 'checkbox-label';
-  const blindC = document.createElement('input'); blindC.type = 'checkbox'; blindC.checked = project.blind;
-  blindL.append(blindC, document.createTextNode(' 🙈 Kör mod: hakemler yalnızca kendi kararlarını görür (veritabanı kuralıyla uygulanır)'));
-  const aiL = document.createElement('label'); aiL.className = 'checkbox-label';
-  const aiC = document.createElement('input'); aiC.type = 'checkbox'; aiC.checked = project.hide_ai;
-  aiL.append(aiC, document.createTextNode(' 🤖 AI kararlarını, güveni ve gerekçeyi hakemlerden gizle (kanıt vurguları görünür kalır)'));
-  card.append(blindL, aiL);
-  const saveRow = document.createElement('div');
-  saveRow.className = 'row-actions';
-  saveRow.appendChild(button('💾 Ayarları kaydet', 'btn-secondary btn-compact', async () => {
+  grid.className = 'admin-grid';
+  const field = (label, input) => { const l = document.createElement('label'); l.className = 'ui-field'; l.append(text('span', label, 'ui-label'), input); return l; };
+  const nameI = document.createElement('input'); nameI.type = 'text'; nameI.value = project.name; nameI.className = 'ui-input';
+  const descI = document.createElement('input'); descI.type = 'text'; descI.value = project.description; descI.className = 'ui-input';
+  grid.append(field('Proje adı', nameI), field('Açıklama', descI));
+  sSet.appendChild(grid);
+  const check = (checked, label) => { const l = document.createElement('label'); l.className = 'ui-check admin-check'; const c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(label)); return [l, c]; };
+  const [blindL, blindC] = check(project.blind, 'Kör mod: hakemler yalnızca kendi kararlarını görür (veritabanı kuralıyla uygulanır)');
+  const [aiL, aiC] = check(project.hide_ai, 'AI kararlarını, güveni ve gerekçeyi hakemlerden gizle (kanıt vurguları görünür kalır)');
+  sSet.append(blindL, aiL);
+  const acts = document.createElement('div');
+  acts.className = 'admin-actions';
+  acts.appendChild(uiButton('save', 'Ayarları kaydet', 'ui-btn ui-btn-default ui-btn-sm', async () => {
     try {
       const upd = await Cloud.updateProject(pid, { name: nameI.value.trim() || project.name, description: descI.value.trim(), blind: blindC.checked, hide_ai: aiC.checked });
-      if (WS.isCloud && WS.project.id === pid) { WS.project = Object.assign(WS.project, upd); renderWorkspace(); }
+      if (isOpen) { WS.project = Object.assign(WS.project, upd); renderWorkspace(); }
       showSuccess('Proje ayarları kaydedildi.');
       refreshProjects().then(() => showProjectAdmin(pid));
     } catch (e) { showError(e.message); }
   }));
-  saveRow.appendChild(button('📋 Protokolü Analiz formuna yükle', 'btn-tertiary btn-compact', () => { loadProtocolIntoForm(project.protocol); switchTab('analysis'); }));
-  if (Cloud.isAdmin) saveRow.appendChild(button('🗑️ Projeyi sil', 'btn-danger btn-compact', async () => {
+  acts.appendChild(uiButton('clipboard-list', 'Protokolü Analiz formuna yükle', 'ui-btn ui-btn-outline ui-btn-sm', () => { loadProtocolIntoForm(project.protocol); switchTab('analysis'); }));
+  acts.appendChild(uiButton('file-plus-2', 'Yeni Excel ekle', 'ui-btn ui-btn-outline ui-btn-sm', async () => {
+    if (!isOpen) await openCloudProject(pid);
+    if (WS.isCloud && WS.project.id === pid) openImportDialog('add');
+  }, 'Başka bir veritabanından ya da yeni bir aramadan kayıt ekler; tekrarlar ayıklanır'));
+  if (manage) acts.appendChild(uiButton('trash-2', 'Projeyi sil', 'ui-btn ui-btn-outline ui-btn-sm is-danger', async () => {
     const typed = prompt(`"${project.name}" projesi, tüm kayıtları ve hakem kararlarıyla birlikte kalıcı olarak silinecek.\nOnaylamak için proje adını yazın:`);
     if (typed !== project.name) { if (typed !== null) showError('Proje adı eşleşmedi, silinmedi.'); return; }
     try {
@@ -2284,65 +2631,145 @@ async function showProjectAdmin(pid) {
       refreshProjects();
     } catch (e) { showError(e.message); }
   }));
-  card.appendChild(saveRow);
+  sSet.appendChild(acts);
 
-  // members
-  card.appendChild(text('h3', '👥 Hakemler', 'section-h3'));
+  // --- sources (imports)
+  const imports = (project.protocol && project.protocol.imports) || [];
+  if (imports.length) {
+    const sSrc = section('Kaynaklar', 'Her yükleme ayrı kaynak olarak tutulur (PRISMA: veritabanlarından tanımlanan kayıtlar).');
+    const t = miniTable(['Kaynak', 'Dosya', 'Tarih', 'Kayıt', 'Tekrar', 'Yeni']);
+    imports.forEach(im => t.row([im.label || '—', im.fileName || '', im.date ? new Date(im.date).toLocaleDateString('tr-TR') : '',
+      (im.total || 0).toLocaleString('tr-TR'), im.importId ? ((im.dupExisting || 0) + (im.dupWithin || 0)).toLocaleString('tr-TR') : '—',
+      im.importId ? (im.fresh || 0).toLocaleString('tr-TR') : '—']));
+    sSrc.appendChild(t.wrap);
+  }
+
+  // --- AI versions
+  const sVer = section('AI sürümleri', 'Ölçütleri ya da yönergeyi değiştirip yeniden analiz ettiğinizde yeni bir sürüm oluşur; öncekiler silinmez. Hakem kararları tüm sürümler için ortaktır.');
+  if (!Cloud.v15) {
+    sVer.appendChild(text('p', 'Sürüm takibi için veritabanı güncellemesi gerekiyor (supabase/migrations/20260930_owners_versions_imports_themes.sql).', 'admin-hint warn'));
+  } else if (!isOpen) {
+    sVer.appendChild(uiButton('folder-open', 'Sürümleri görmek için projeyi açın', 'ui-btn ui-btn-outline ui-btn-sm', async () => { await openCloudProject(pid); showProjectAdmin(pid); }));
+  } else {
+    const list = versionSummary();
+    const reg = (project.protocol && project.protocol.versions) || {};
+    if (!list.length) sVer.appendChild(text('p', 'Henüz AI sonucu yok.', 'admin-hint'));
+    else {
+      const t = miniTable(['Sürüm', 'Ad', 'Tarih', 'Sonuç', 'Include', 'Maybe', 'Exclude', 'Etkin', '']);
+      list.forEach(v => {
+        const r = reg[v.version] || {};
+        const acts2 = document.createElement('span');
+        acts2.className = 'admin-row-actions';
+        if (v.active < v.total) acts2.appendChild(button('Etkin yap', 'ui-btn ui-btn-outline ui-btn-xs', () => activateVersion(v.version), 'Bu sürümün sonuçlarını etkin AI sonucu yapar'));
+        if (r.criteria) acts2.appendChild(button('Forma yükle', 'ui-btn ui-btn-ghost ui-btn-xs', () => {
+          loadProtocolIntoForm(Object.assign({}, r, { promptHash: v.version, activeModels: r.models })); switchTab('analysis');
+        }, 'Bu sürümün ölçütlerini Analiz formuna yükler'));
+        acts2.appendChild(button('Adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
+          const name = prompt('Bu sürüm için kısa bir ad (ör. "Ölçüt seti A — geniş"):', r.label || '');
+          if (name === null) return;
+          const p = Object.assign({}, WS.project.protocol);
+          p.versions = Object.assign({}, p.versions);
+          p.versions[v.version] = Object.assign({ createdAt: '' }, p.versions[v.version], { label: name.trim() });
+          try { await Cloud.updateProject(pid, { protocol: p }); WS.project.protocol = p; showProjectAdmin(pid); } catch (e) { showError(e.message); }
+        }));
+        t.row([`v${v.version}`, r.label || '—', r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '—', v.total.toLocaleString('tr-TR'),
+          v.Include.toLocaleString('tr-TR'), v.Uncertain.toLocaleString('tr-TR'), v.Exclude.toLocaleString('tr-TR'), v.active.toLocaleString('tr-TR'), acts2]);
+      });
+      sVer.appendChild(t.wrap);
+      const diff = WS.records.filter(r => isActive(r) && versionsDisagree(r.rid)).length;
+      if (list.length > 1) {
+        const note = document.createElement('p');
+        note.className = 'admin-hint';
+        note.textContent = `${diff.toLocaleString('tr-TR')} aktif kayıtta sürümler farklı karar vermiş. `;
+        note.appendChild(button('Bu kayıtları listele', 'ui-btn ui-btn-ghost ui-btn-xs', () => { switchTab('screen'); el.filterStatus.value = 'vdiff'; WS.page = 1; renderWorkspace(); }));
+        note.appendChild(document.createTextNode(' Excel/CSV dışa aktarımı her sürümün kararını ve birleşik (liberal) kararı ayrı sütunlarda verir.'));
+        sVer.appendChild(note);
+      }
+    }
+  }
+
+  // --- members
+  const sMem = section('Hakemler');
   const memberIds = new Set(members.map(m => m.user_id));
-  const tbl = document.createElement('table');
-  tbl.className = 'compact-table';
-  const thead = document.createElement('thead');
-  const hr = document.createElement('tr');
-  ['Ad', 'E-posta', 'Include', 'Maybe', 'Exclude', 'Toplam', ''].forEach(t => hr.appendChild(text('th', t)));
-  thead.appendChild(hr); tbl.appendChild(thead);
-  const tb = document.createElement('tbody');
   const stats = new Map();
   votes.forEach(v => {
     if (!v.decision) return;
     const s = stats.get(v.user_id) || { Include: 0, Uncertain: 0, Exclude: 0 };
     s[v.decision]++; stats.set(v.user_id, s);
   });
-  const rowsFor = [...new Set([...members.map(m => m.user_id), ...stats.keys()])];
   const pById = new Map(people.map(p => [p.id, p]));
+  members.forEach(m => { if (m.profiles && !pById.has(m.user_id)) pById.set(m.user_id, m.profiles); });
+  const rowsFor = [...new Set([...members.map(m => m.user_id), ...stats.keys()])];
+  const mt = miniTable(['Ad', 'E-posta', 'Include', 'Maybe', 'Exclude', 'Toplam', '']);
   rowsFor.forEach(uid => {
     const p = pById.get(uid) || { display_name: '?', email: '', role: '' };
     const s = stats.get(uid) || { Include: 0, Uncertain: 0, Exclude: 0 };
-    const tr = document.createElement('tr');
-    [`${p.display_name}${p.role === 'admin' ? ' (yönetici)' : ''}`, p.email, s.Include, s.Uncertain, s.Exclude, s.Include + s.Uncertain + s.Exclude]
-      .forEach(v => tr.appendChild(text('td', String(v))));
-    const tdA = document.createElement('td');
-    if (memberIds.has(uid) && Cloud.isAdmin) tdA.appendChild(button('Çıkar', 'btn-ghost', async () => {
+    const tag = uid === project.owner_id ? ' (sahip)' : p.role === 'admin' ? ' (yönetici)' : '';
+    let act = '';
+    if (memberIds.has(uid) && manage) act = button('Çıkar', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
       if (!confirm(`${p.display_name} projeden çıkarılsın mı? (Verdiği kararlar silinmez.)`)) return;
       try { await Cloud.removeMember(pid, uid); showProjectAdmin(pid); refreshProjects(); } catch (e) { showError(e.message); }
-    }));
-    tr.appendChild(tdA);
-    tb.appendChild(tr);
+    });
+    mt.row([`${p.display_name}${tag}`, p.email, s.Include, s.Uncertain, s.Exclude, s.Include + s.Uncertain + s.Exclude, act]);
   });
-  if (!rowsFor.length) { const tr = document.createElement('tr'); const c = text('td', 'Henüz hakem yok.'); c.colSpan = 7; tr.appendChild(c); tb.appendChild(tr); }
-  tbl.appendChild(tb);
-  const wrap = document.createElement('div'); wrap.className = 'key-status-wrap'; wrap.appendChild(tbl);
-  card.appendChild(wrap);
+  if (!rowsFor.length) mt.row(['Henüz hakem yok.', '', '', '', '', '', '']);
+  sMem.appendChild(mt.wrap);
 
-  const add = document.createElement('div');
-  add.className = 'row-actions';
-  const candidates = people.filter(p => !memberIds.has(p.id) && p.role !== 'admin');
-  const sel = document.createElement('select');
-  sel.className = 'text-input';
-  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = candidates.length ? 'Kayıtlı kullanıcı seçin…' : 'Eklenebilecek kayıtlı kullanıcı yok'; sel.appendChild(o0);
-  candidates.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = `${p.display_name} <${p.email}>`; sel.appendChild(o); });
-  add.append(sel, button('➕ Projeye ekle', 'btn-secondary btn-compact', async () => {
-    if (!sel.value) return;
-    try { await Cloud.addMember(pid, sel.value); showSuccess('Hakem eklendi.'); showProjectAdmin(pid); refreshProjects(); } catch (e) { showError(e.message); }
-  }));
-  if (Cloud.isAdmin) card.appendChild(add);
-  if (Cloud.isAdmin) card.appendChild(text('p', 'Hakemler önce bu sayfadan "Kayıt ol" ile hesap açmalıdır; ardından listede görünürler. Hakemler yalnızca eklendikleri projeleri görür, yalnızca kendi kararlarını, etiketlerini ve notlarını değiştirebilir.', 'muted-small'));
+  if (manage) {
+    const add = document.createElement('div');
+    add.className = 'admin-actions';
+    if (Cloud.v15) {
+      const email = document.createElement('input');
+      email.type = 'email'; email.className = 'ui-input admin-email'; email.placeholder = 'hakem@ornek.edu.tr';
+      const doAdd = async () => {
+        const v = email.value.trim();
+        if (!v) return;
+        try { const p = await Cloud.addMemberByEmail(pid, v); showSuccess(`${p.display_name || p.email} projeye eklendi.`); showProjectAdmin(pid); refreshProjects(); }
+        catch (e) { showError(e.message); }
+      };
+      email.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+      add.append(email, uiButton('user-plus', 'E-postayla ekle', 'ui-btn ui-btn-default ui-btn-sm', doAdd));
+    } else if (Cloud.isAdmin) {
+      const candidates = people.filter(p => !memberIds.has(p.id) && p.role !== 'admin');
+      const sel = document.createElement('select');
+      sel.className = 'ui-select admin-email';
+      const o0 = document.createElement('option'); o0.value = ''; o0.textContent = candidates.length ? 'Kayıtlı kullanıcı seçin…' : 'Eklenebilecek kayıtlı kullanıcı yok'; sel.appendChild(o0);
+      candidates.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = `${p.display_name} <${p.email}>`; sel.appendChild(o); });
+      add.append(sel, uiButton('user-plus', 'Projeye ekle', 'ui-btn ui-btn-default ui-btn-sm', async () => {
+        if (!sel.value) return;
+        try { await Cloud.addMember(pid, sel.value); showSuccess('Hakem eklendi.'); showProjectAdmin(pid); refreshProjects(); } catch (e) { showError(e.message); }
+      }));
+    }
+    sMem.appendChild(add);
+    sMem.appendChild(text('p', 'Hakemler önce bu sayfadan "Kayıt ol" ile hesap açmalıdır; kayıtlı e-postalarıyla eklenirler. Hakemler yalnızca eklendikleri projeleri görür ve yalnızca kendi kararlarını, etiketlerini ve notlarını değiştirebilir.', 'admin-hint'));
+  }
 
-  // conflicts summary
   const byRec = new Map();
   votes.forEach(v => { if (v.decision) { const s = byRec.get(v.record_id) || new Set(); s.add(v.decision); byRec.set(v.record_id, s); } });
   const conflicts = [...byRec.values()].filter(s => s.size > 1).length;
-  card.appendChild(text('p', `⚡ Hakemler arası çatışan kayıt: ${conflicts} · En az bir karar almış kayıt: ${byRec.size}`, 'muted-inline'));
+  sMem.appendChild(text('p', `Hakemler arası çatışan kayıt: ${conflicts} · En az bir karar almış kayıt: ${byRec.size}`, 'admin-hint'));
+  refreshIcons();
 }
+
+/** Small shadcn-style table: miniTable(headers).row(cells) — cells may be nodes. */
+function miniTable(headers) {
+  const tbl = document.createElement('table');
+  tbl.className = 'ui-table';
+  const hr = document.createElement('tr');
+  headers.forEach(h => hr.appendChild(text('th', h)));
+  const thead = document.createElement('thead'); thead.appendChild(hr); tbl.appendChild(thead);
+  const tb = document.createElement('tbody'); tbl.appendChild(tb);
+  const wrap = document.createElement('div'); wrap.className = 'ui-table-wrap'; wrap.appendChild(tbl);
+  return {
+    wrap,
+    row(cells) {
+      const tr = document.createElement('tr');
+      cells.forEach(c => { const td = document.createElement('td'); if (c instanceof Node) td.appendChild(c); else td.textContent = String(c); tr.appendChild(td); });
+      tb.appendChild(tr);
+    }
+  };
+}
+
 
 // ------------------------------------------------------------
 // Auth UI
@@ -2438,6 +2865,8 @@ function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => { p.hidden = p.id !== `tab-${name}`; });
   if (name === 'dups') renderDuplicates();
   if (name === 'screen') renderWorkspace();
+  if (name === 'themes') Assist.renderThemes();
+  if (name === 'chat') Assist.renderChat();
   try { sessionStorage.setItem('gls_tab', name); } catch (e) { /* ignore */ }
 }
 
@@ -2526,6 +2955,11 @@ function initWorkspace() {
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; } });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
+  el.newProjectBtn.addEventListener('click', () => openImportDialog('new'));
+  el.importFile.addEventListener('change', planImportFromDialog);
+  ['importAutoRemove', 'importFuzzy'].forEach(id => el[id].addEventListener('change', planImportFromDialog));
+  el.importLabel.addEventListener('change', planImportFromDialog);
+  el.importConfirmBtn.addEventListener('click', runImport);
   el.saveCloudConfirmBtn.addEventListener('click', saveToCloud);
   el.loadProtocolBtn.addEventListener('click', () => { loadProtocolIntoForm(WS.project.protocol); switchTab('analysis'); });
   el.dupScanBtn.addEventListener('click', scanFuzzyDuplicates);
@@ -2537,6 +2971,7 @@ function initWorkspace() {
   el.authForgotBtn.addEventListener('click', forgotPassword);
   window.addEventListener('beforeunload', () => { if (WS.aiQueue.length) flushCloudAi(); });
 
+  Assist.init();
   let tab = 'analysis';
   try { tab = sessionStorage.getItem('gls_tab') || 'analysis'; } catch (e) { /* ignore */ }
   switchTab(tab);

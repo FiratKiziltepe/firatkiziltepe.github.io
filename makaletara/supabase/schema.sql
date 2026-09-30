@@ -3,7 +3,9 @@
 -- Applied to project "makaletara" (mgrjdyfjstmpvedunipb) as the
 -- migrations screening_schema, move_helpers_to_private, members_can_curate, records_archive
 -- and vote_reasons_and_terms.
--- Run this file once on an empty project to recreate everything.
+-- Run this file once on an empty project to recreate everything, then apply
+-- migrations/20260930_owners_versions_imports_themes.sql (project owners,
+-- AI result versions, imports, thematic analysis; applied 2026-09-30).
 --
 -- Roles
 --   admin    : creates/deletes projects, manages members, sees every project

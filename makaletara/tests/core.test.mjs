@@ -42,6 +42,73 @@ test('decision rule: OR logic for inclusion criteria', () => {
   assert.equal(d({ IC1: 'no', IC2: 'unclear', ...allNo }), 'Uncertain');
 });
 
+test('IC formula: parsing, Turkish keywords, precedence and errors', () => {
+  const codes = ['IC1', 'IC2', 'IC3'];
+  const f = C.parseIcExpression('ic1 ve ic2 veya IC3', codes);
+  // VE binds tighter than VEYA
+  assert.equal(C.formatIcExpression(f.ast, 'tr'), '(IC1 VE IC2) VEYA IC3');
+  assert.equal(C.formatIcExpression(C.parseIcExpression('IC1 & (IC2 | IC3)', codes).ast, 'en'), 'IC1 AND (IC2 OR IC3)');
+  assert.deepEqual(C.parseIcExpression('IC1 AND IC2', codes).unused, ['IC3']);
+  assert.throws(() => C.parseIcExpression('IC1 VE IC4', codes), /IC4 tanımlı değil/);
+  assert.throws(() => C.parseIcExpression('(IC1 VE IC2', codes), /Kapanmayan parantez/);
+  assert.throws(() => C.parseIcExpression('IC1 IC2', codes), /VE \/ VEYA eksik/);
+  assert.throws(() => C.parseIcExpression('IC1 VE', codes), /yarım/);
+  assert.throws(() => C.parseIcExpression('IC1 VE EC1', codes), /anlaşılmayan/);
+  assert.throws(() => C.parseIcExpression('', codes), /boş/);
+});
+
+test('IC formula: three-valued decision rule', () => {
+  const c3 = C.parseCriteria('a\nb\nc', 'x');
+  const d = a => C.deriveDecision(Object.assign({ EC1: 'no' }, a), c3, 'expr', '(IC1 VE IC2) VEYA IC3').decision;
+  assert.equal(d({ IC1: 'yes', IC2: 'yes', IC3: 'no' }), 'Include');
+  assert.equal(d({ IC1: 'no', IC2: 'yes', IC3: 'yes' }), 'Include');
+  assert.equal(d({ IC1: 'no', IC2: 'yes', IC3: 'no' }), 'Exclude');
+  // an unknown part of an OR keeps the record open
+  assert.equal(d({ IC1: 'no', IC2: 'yes', IC3: 'unclear' }), 'Uncertain');
+  assert.equal(d({ IC1: 'yes', IC2: 'unclear', IC3: 'no' }), 'Uncertain');
+  // EC still overrides; an unclear EC still blocks Include
+  assert.equal(d({ IC1: 'yes', IC2: 'yes', IC3: 'yes', EC1: 'yes' }), 'Exclude');
+  assert.equal(d({ IC1: 'yes', IC2: 'yes', IC3: 'yes', EC1: 'unclear' }), 'Uncertain');
+  // an invalid formula falls back to "all IC"
+  assert.equal(C.deriveDecision({ IC1: 'yes', IC2: 'no', IC3: 'yes', EC1: 'no' }, c3, 'expr', 'IC1 VE').decision, 'Exclude');
+  // the protocol sent to the model states the formula
+  const sys = C.buildProtocol(c3, { icLogic: 'expr', icExpr: 'IC1 ve (IC2 veya IC3)' });
+  assert.match(sys, /the IC formula IC1 AND \(IC2 OR IC3\) is TRUE/);
+  assert.match(sys, /the IC formula IC1 AND \(IC2 OR IC3\) is FALSE/);
+});
+
+test('import into a project: ids, exact and similar duplicates', () => {
+  const existing = C.prepareRecords([
+    ['UT', 'Title', 'Abstract', 'Year', 'DOI'],
+    ['W1', 'Personal interests in adaptive learning systems', 'abstract one is long enough here', '2020', '10.1/aaa'],
+    ['W2', 'Student interest profiles for recommendation', 'abstract two is long enough here', '2021', ''],
+    ['W3', 'Teacher attitudes toward generative AI in classrooms', 'abstract three is long enough here', '2022', '']
+  ]).records;
+  existing[2].removed = true;   // a removed record is not a match target
+  const incoming = C.prepareRecords([
+    ['EID', 'Title', 'Abstract', 'Year', 'DOI'],
+    ['S1', 'Personal interests in adaptive learning systems (Scopus copy)', 'x is long enough to count as abstract', '2020', 'https://doi.org/10.1/AAA'],
+    ['S2', 'Student interest profiles for recommendation', 'y is long enough to count as abstract', '2021', ''],
+    ['S3', 'A completely new study on context personalization', 'z is long enough to count as abstract', '2023', ''],
+    ['S4', 'A completely new study on context personalization', 'z is long enough to count as abstract', '2023', ''],
+    // same title, one year drift (e.g. online-first vs issue year): only proposed for review
+    ['S5', 'Student interest profiles for recommendation', 'w is long enough to count as abstract', '2022', '10.9/new'],
+    ['W1', 'Teacher attitudes toward generative AI in classrooms', 'q is long enough to count as abstract', '2022', '']
+  ]).records;
+  const { records: out, stats } = C.planImport(existing, incoming, { label: 'Scopus', importId: 'imp-x', autoRemove: true });
+  assert.deepEqual(out.map(r => r.rid), ['R00004', 'R00005', 'R00006', 'R00007', 'R00008', 'R00009']);
+  assert.deepEqual(out.map(r => r.order), [3, 4, 5, 6, 7, 8]);
+  assert.equal(out[0].duplicateOf, 'R00001'); assert.equal(out[0].dupKind, 'doi'); assert.equal(out[0].removed, true);
+  assert.equal(out[1].duplicateOf, 'R00002'); assert.equal(out[1].dupKind, 'title');
+  assert.equal(out[2].duplicateOf, '');                          // new
+  assert.equal(out[3].duplicateOf, 'R00006'); assert.equal(out[3].removed, true);   // copy inside the new file
+  assert.equal(out[4].dupKind, 'fuzzy'); assert.equal(out[4].removed, false);        // similar title: only proposed
+  assert.equal(out[5].duplicateOf, '');                          // matches only a removed record
+  assert.equal(out[5].ID, 'W1#x');                               // source id made unique
+  assert.equal(out[0].sourceLabel, 'Scopus');
+  assert.deepEqual(stats, { total: 6, fresh: 2, dupExisting: 2, dupWithin: 1, fuzzy: 1, removed: 3 });
+});
+
 test('validation: model decision contradicting its own verdicts goes to human review', () => {
   const raw = {
     id: 'R00001', decision: 'Include', confidence: 0.97, needs_human_review: false,
