@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { normalizeContentText } from '../lib/contentTypeAnalysis';
 import { Check, ChevronDown } from 'lucide-react';
 
 interface LessonMultiSelectProps {
@@ -8,6 +9,8 @@ interface LessonMultiSelectProps {
 }
 
 const LessonMultiSelect: React.FC<LessonMultiSelectProps> = ({ lessons, selected, onChange }) => {
+  const [search, setSearch] = useState('');
+  const visibleLessons = lessons.filter(lesson => normalizeContentText(lesson).includes(normalizeContentText(search.trim())));
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -51,10 +54,13 @@ const LessonMultiSelect: React.FC<LessonMultiSelectProps> = ({ lessons, selected
       </button>
       {open && (
         <div role="listbox" aria-multiselectable="true" className="absolute top-full left-0 right-0 z-40 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto p-1">
+          <input aria-label="Ders ara" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Ders ara..." className="w-full border rounded-lg p-2 text-sm" />
+          <button type="button" onClick={() => onChange(Array.from(new Set([...selected, ...visibleLessons])))} className="px-3 py-2 text-xs font-bold text-blue-700">{search ? 'Filtrelenenleri seç' : 'Tümünü seç'}</button>
           <button type="button" onClick={() => onChange([])} className="w-full text-left px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 rounded-lg">
-            Tüm Dersler {selected.length === 0 && <Check size={13} className="inline ml-1" />}
+            Seçimi temizle (tüm dersler) {selected.length === 0 && <Check size={13} className="inline ml-1" />}
           </button>
-          {lessons.map(lesson => (
+          {visibleLessons.length === 0 && <p className="p-3 text-sm text-slate-500">Ders bulunamadı.</p>}
+          {visibleLessons.map(lesson => (
             <button
               key={lesson}
               type="button"

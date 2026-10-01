@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import type { EIcerik } from '../lib/supabase';
-import { BarChart3, Search, X } from 'lucide-react';
+import { summarizeContentTypes } from '../lib/contentTypeReport';
+import LessonMultiSelect from './LessonMultiSelect';
+import { BarChart3 } from 'lucide-react';
 
 interface ReportPanelProps {
   data: EIcerik[];
 }
 
 const ReportPanel: React.FC<ReportPanelProps> = ({ data }) => {
-  const [lessonSearch, setLessonSearch] = useState('');
   const [selectedLessons, setSelectedLessons] = useState<string[]>([]);
 
   // Benzersiz program türleri
@@ -30,16 +31,10 @@ const ReportPanel: React.FC<ReportPanelProps> = ({ data }) => {
       .sort((a, b) => a.localeCompare(b, 'tr'));
   }, [data]);
 
-  // Ders arama sonuçları (dropdown için)
-  const searchResults = useMemo(() => {
-    if (!lessonSearch) return [];
-    return allLessons.filter(l => l.toLowerCase().includes(lessonSearch.toLowerCase()) && !selectedLessons.includes(l));
-  }, [allLessons, lessonSearch, selectedLessons]);
-
   // Gösterilecek dersler: seçili varsa seçili, yoksa hepsi
   const displayLessons = useMemo(() => {
     const lessons = selectedLessons.length > 0 ? selectedLessons : allLessons;
-    return lessons.sort();
+    return [...lessons].sort((a, b) => a.localeCompare(b, 'tr'));
   }, [allLessons, selectedLessons]);
 
   // Rapor verisi
@@ -65,10 +60,8 @@ const ReportPanel: React.FC<ReportPanelProps> = ({ data }) => {
     return { counts, total };
   }, [reportData, programTypes]);
 
-  const toggleLesson = (lesson: string) => {
-    setSelectedLessons(prev => prev.includes(lesson) ? prev.filter(l => l !== lesson) : [...prev, lesson]);
-    setLessonSearch('');
-  };
+  const contentRows = useMemo(() => data.filter(row => displayLessons.includes(row.ders_adi)), [data, displayLessons]);
+  const typeReport = useMemo(() => summarizeContentTypes(contentRows), [contentRows]);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -82,47 +75,19 @@ const ReportPanel: React.FC<ReportPanelProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Ders filtresi */}
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-[250px]">
-            <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Ders ara ve seç..."
-              className="w-full border-2 border-slate-100 rounded-xl pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none font-medium"
-              value={lessonSearch}
-              onChange={e => setLessonSearch(e.target.value)}
-            />
-            {searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto">
-                {searchResults.map(l => (
-                  <button key={l} onClick={() => toggleLesson(l)} className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-indigo-50 transition-colors">
-                    {l}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {selectedLessons.length > 0 && (
-            <button onClick={() => setSelectedLessons([])} className="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all">
-              Tümünü Göster
-            </button>
-          )}
-        </div>
-
-        {selectedLessons.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {selectedLessons.map(l => (
-              <span key={l} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold">
-                {l}
-                <button onClick={() => toggleLesson(l)} className="hover:text-red-500 transition-colors"><X size={12} /></button>
-              </span>
-            ))}
-          </div>
-        )}
+        <label className="text-sm font-bold block mb-2">Ders seçimi</label>
+        <LessonMultiSelect lessons={allLessons} selected={selectedLessons} onChange={setSelectedLessons} />
       </div>
+      <section className="bg-white p-5 rounded-2xl border border-slate-100 space-y-3">
+        <h3 className="text-lg font-black text-slate-800">E-İçerik Türüne Göre Dağılım</h3>
+        <p className="text-xs text-slate-500">Seçili derslerde {contentRows.length} satır. Birden fazla tür içeren satırlar her türde bir kez sayılır; yüzdelerin toplamı %100'ü aşabilir.</p>
+        <table className="w-full text-sm text-left">
+          <thead><tr className="border-b"><th className="py-2">E-İçerik türü</th><th className="text-right">Satır sayısı</th><th className="text-right">Satırların yüzdesi</th></tr></thead>
+          <tbody>{typeReport.map(row => <tr key={row.type} className="border-b border-slate-100"><td className="py-2 font-medium">{row.type}</td><td className="text-right">{row.count}</td><td className="text-right">%{row.percent.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}</td></tr>)}</tbody>
+        </table>
+        {contentRows.length === 0 && <p className="text-sm text-slate-500">Seçilen dersler için kayıt bulunamadı.</p>}
+      </section>
 
       {/* Rapor tablosu */}
       <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">

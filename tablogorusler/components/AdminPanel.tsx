@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import type { Profile, DegisiklikLogu, EIcerik } from '../lib/supabase';
 import { supabase, SUPABASE_URL } from '../lib/supabase';
 import { Users, History, Database, X, Check, UserPlus, Edit2, Trash2, Save, BookOpen, AlertTriangle, Upload, Search, FileJson, FileSpreadsheet, Key, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { normalizeContentText } from '../lib/contentTypeAnalysis';
+import BulkUsers from './BulkUsers';
+import UserStatusControls from './UserStatusControls';
 import * as XLSX from 'xlsx';
 
 interface AdminPanelProps {
@@ -21,7 +24,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
   });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
-  const [allLessons, setAllLessons] = useState<string[]>([]);
+  const [lessonSearch, setLessonSearch] = useState('');
+  const [showBulkUsers, setShowBulkUsers] = useState(false);
   const [assignedLessons, setAssignedLessons] = useState<string[]>([]);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<Partial<Profile>>({});
@@ -54,16 +58,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
     'sira_no', 'ders_adi', 'unite_tema', 'kazanim', 'e_icerik_turu', 'aciklama', 'program_turu',
     'ÜNİTE/TEMA/ ÖĞRENME ALANI', 'KAZANIM/ÖĞRENME ÇIKTISI/BÖLÜM', 'KAZANIM/ÇIKTI'];
 
-  useEffect(() => {
-    supabase.from('e_icerikler').select('ders_adi').then(({ data }) => {
-      if (data) {
-        const unique = Array.from(new Set(data.map((d: any) => d.ders_adi)))
-          .filter(name => name && !HEADER_ROW_VALUES.includes(name))
-          .sort((a, b) => a.localeCompare(b, 'tr')) as string[];
-        setAllLessons(unique);
-      }
-    });
-  }, []);
+  const allLessons = useMemo(() => Array.from(new Set<string>(data.map(row => row.ders_adi)))
+    .filter(name => name && !HEADER_ROW_VALUES.includes(name))
+    .sort((a, b) => a.localeCompare(b, 'tr')), [data]);
+  const visibleLessons = allLessons.filter(lesson => normalizeContentText(lesson).includes(normalizeContentText(lessonSearch.trim())));
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,13 +129,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
 
   const openAssignModal = (user: Profile) => {
     setSelectedUser(user);
+    setLessonSearch('');
     setAssignedLessons([...user.atanan_dersler]);
     setShowAssignModal(true);
   };
 
   const handleSaveAssignment = async () => {
     if (!selectedUser) return;
-    await supabase.from('profiles').update({ atanan_dersler: assignedLessons }).eq('id', selectedUser.id);
+    const { error } = await supabase.from('profiles').update({ atanan_dersler: assignedLessons }).eq('id', selectedUser.id);
+    if (error) { alert('Dersler kaydedilemedi: ' + error.message); return; }
     setShowAssignModal(false);
     await onRefresh();
   };
@@ -397,6 +397,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
         </div>
       </div>
 
+      {showBulkUsers && <BulkUsers users={users} onClose={() => setShowBulkUsers(false)} onRefresh={onRefresh} />}
+      <UserStatusControls users={users} currentUserId={profile.id} />
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Kullanıcı Yönetimi */}
         <div className="space-y-4">
@@ -407,6 +409,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
                 <input type="text" placeholder="Kullanıcı ara..." className="border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-medium w-44 focus:ring-2 focus:ring-blue-400 outline-none" value={userSearch} onChange={e => setUserSearch(e.target.value)} />
                 <Search size={13} className="absolute left-2.5 top-2.5 text-slate-400" />
               </div>
+              <button onClick={() => setShowBulkUsers(true)} className="px-3 py-2 bg-blue-50 text-blue-600 text-xs font-bold rounded-xl border border-blue-200">Toplu kişi ekle</button>
               <button onClick={() => setShowPasswords(!showPasswords)} className={`px-3 py-2 text-xs font-black rounded-xl border flex items-center gap-1.5 transition-all ${showPasswords ? 'bg-amber-500 text-white border-amber-500' : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-500 hover:text-white'}`}>
                 {showPasswords ? <EyeOff size={13} /> : <Eye size={13} />} Şifreler
               </button>
@@ -879,9 +882,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ users, logs, data, onRefresh, p
               <button onClick={() => setShowAssignModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"><X size={24} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-8">
-              <p className="text-xs text-slate-400 mb-4 font-bold uppercase tracking-wider">{assignedLessons.length} ders seçili</p>
+              <input type="search" aria-label="Atanacak dersleri filtrele" placeholder="Ders adına göre filtrele..." value={lessonSearch} onChange={e => setLessonSearch(e.target.value)} className="w-full border rounded-xl px-3 py-2 mb-3" />
+              <div className="flex flex-wrap gap-3 mb-4 text-xs font-bold">
+                <button onClick={() => setAssignedLessons([...allLessons])} className="text-blue-600">Tümünü seç</button>
+                {lessonSearch && <button onClick={() => setAssignedLessons(prev => Array.from(new Set([...prev, ...visibleLessons])))} className="text-blue-600">Filtrelenenleri seç ({visibleLessons.length})</button>}
+                <button onClick={() => setAssignedLessons([])} className="text-slate-600">Seçimi temizle</button>
+              </div>
+              <p className="text-xs text-slate-400 mb-4 font-bold">{assignedLessons.length} ders seçili · {visibleLessons.length} ders gösteriliyor</p>
+              {visibleLessons.length === 0 && <p className="text-sm text-slate-500">Ders bulunamadı.</p>}
               <div className="flex flex-wrap gap-2">
-                {allLessons.map(lesson => (
+                {visibleLessons.map(lesson => (
                   <button
                     key={lesson}
                     onClick={() => toggleLesson(lesson)}

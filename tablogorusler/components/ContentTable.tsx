@@ -134,13 +134,13 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [addForm, setAddForm] = useState<Record<string, string>>({});
   const [selectedLessons, setSelectedLessons] = useState<string[]>([]);
-  const [programFilter, setProgramFilter] = useState('Tümü');
   const [searchTerm, setSearchTerm] = useState('');
   const generalHighlightTerm = searchTerm.trim().length >= 3 ? searchTerm : '';
   const [typeSearchTerm, setTypeSearchTerm] = useState('');
   const [descriptionSearchTerm, setDescriptionSearchTerm] = useState('');
   const [comparisonSelected, setComparisonSelected] = useState(false);
-  const [analysisActive, setAnalysisActive] = useState(false);
+  const [analysisRequested, setAnalysisActive] = useState(false);
+  const analysisActive = profile.rol === 'admin' && analysisRequested;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const PAGE_SIZE_OPTIONS = [50, 100, 150, 500];
@@ -201,15 +201,14 @@ const ContentTable: React.FC<ContentTableProps> = ({
         if (!profile.atanan_dersler.includes(p.ders_adi)) return false;
       }
       const matchLesson = selectedLessons.length === 0 || selectedLessons.includes(p.ders_adi);
-      const matchProgram = programFilter === 'Tümü' || p.program_turu === programFilter;
       // Arama en az 3 karakter girildiğinde aktif olur
       const matchSearch = !searchTerm || searchTerm.length < 3 || [p.ders_adi, p.unite_tema, p.kazanim, p.aciklama, p.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchType = normalizeContentText(p.e_icerik_turu).includes(normalizeContentText(typeSearchTerm.trim()));
       const matchDescription = normalizeContentText(p.aciklama).includes(normalizeContentText(descriptionSearchTerm.trim()));
-      return matchLesson && matchProgram && matchSearch && matchType && matchDescription;
+      return matchLesson && matchSearch && matchType && matchDescription;
     });
-  }, [newRowProposals, selectedLessons, programFilter, searchTerm, typeSearchTerm, descriptionSearchTerm, profile]);
+  }, [newRowProposals, selectedLessons, searchTerm, typeSearchTerm, descriptionSearchTerm, profile]);
 
   // Öneri olan satır ID'leri seti (performans için)
   const rowsWithProposals = useMemo(() => {
@@ -222,16 +221,15 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const baseFilteredData = useMemo(() => {
     return data.filter(row => {
       const matchLesson = selectedLessons.length === 0 || selectedLessons.includes(row.ders_adi);
-      const matchProgram = programFilter === 'Tümü' || row.program_turu === programFilter;
       // Arama en az 3 karakter girildiğinde aktif olur
       const matchSearch = !searchTerm || searchTerm.length < 3 || [row.ders_adi, row.unite_tema, row.kazanim, row.aciklama, row.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchProposals = !onlyProposals || rowsWithProposals.has(row.id);
       const matchType = normalizeContentText(row.e_icerik_turu).includes(normalizeContentText(typeSearchTerm.trim()));
       const matchDescription = normalizeContentText(row.aciklama).includes(normalizeContentText(descriptionSearchTerm.trim()));
-      return matchLesson && matchProgram && matchSearch && matchType && matchDescription && matchProposals;
+      return matchLesson && matchSearch && matchType && matchDescription && matchProposals;
     });
-  }, [data, selectedLessons, programFilter, searchTerm, typeSearchTerm, descriptionSearchTerm, onlyProposals, rowsWithProposals]);
+  }, [data, selectedLessons, searchTerm, typeSearchTerm, descriptionSearchTerm, onlyProposals, rowsWithProposals]);
 
   const analysisByRow = useMemo(() => {
     const result = new Map<number, ContentTypeIssue[]>();
@@ -551,21 +549,13 @@ const ContentTable: React.FC<ContentTableProps> = ({
           <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">DERS SEÇİMİ</label>
           <LessonMultiSelect lessons={allLessons} selected={selectedLessons} onChange={value => { setSelectedLessons(value); setCurrentPage(1); }} />
         </div>
-        <div>
-          <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">PROGRAM TÜRÜ</label>
-          <select className="w-full border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={programFilter} onChange={e => { setProgramFilter(e.target.value); setCurrentPage(1); }}>
-            <option value="Tümü">Tümü</option>
-            <option value="TYMM">TYMM</option>
-            <option value="DİĞER">DİĞER</option>
-          </select>
-        </div>
         <div className="relative">
           <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">GENEL ARAMA</label>
           <input type="text" placeholder="Kazanım, ünite ara..." className="w-full border-2 border-slate-100 rounded-xl pl-3 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }} />
           <Search className="absolute right-3 top-9 text-slate-400" size={18} />
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setShowChanges(!showChanges)}
               className={`flex-1 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider ${
@@ -573,9 +563,9 @@ const ContentTable: React.FC<ContentTableProps> = ({
               }`}
             >
               {showChanges ? <EyeOff size={13} /> : <Eye size={13} />}
-              {showChanges ? 'GİZLE' : 'DEĞİŞİKLİKLER'}
+              {showChanges ? 'Değişiklikleri gizle' : 'Değişiklikleri göster'}
             </button>
-            <button onClick={() => { setSearchTerm(''); setTypeSearchTerm(''); setDescriptionSearchTerm(''); setSelectedLessons([]); setProgramFilter('Tümü'); setOnlyProposals(false); setComparisonSelected(false); setAnalysisActive(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
+            <button onClick={() => { setSearchTerm(''); setTypeSearchTerm(''); setDescriptionSearchTerm(''); setSelectedLessons([]); setOnlyProposals(false); setComparisonSelected(false); setAnalysisActive(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
               <RotateCcw size={13} /> TEMİZLE
             </button>
             <button
@@ -604,7 +594,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
           <label htmlFor="description-search" className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">AÇIKLAMADA ARA</label>
           <input id="description-search" type="search" placeholder="Açıklamadaki ifadeyi ara..." className="w-full border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={descriptionSearchTerm} onChange={e => { setDescriptionSearchTerm(e.target.value); setCurrentPage(1); }} />
         </div>
-        <div className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5">
+        {profile.rol === 'admin' && <div className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5">
           <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer flex-1">
             <input type="checkbox" checked={comparisonSelected} onChange={e => { setComparisonSelected(e.target.checked); if (!e.target.checked) setAnalysisActive(false); setCurrentPage(1); }} className="w-4 h-4 accent-blue-600" />
             E-İçerik Türü / Açıklama karşılaştır
@@ -612,7 +602,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
           <button type="button" disabled={!comparisonSelected} onClick={() => { setAnalysisActive(true); setCurrentPage(1); }} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-black flex items-center justify-center gap-2 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed">
             <ScanSearch size={15} /> ANALİZ ET
           </button>
-        </div>
+        </div>}
       </div>
 
       {analysisActive && (

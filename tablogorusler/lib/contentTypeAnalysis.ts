@@ -18,11 +18,19 @@ export const analyzeContentType = (description: string | null | undefined, conte
   const type = normalizeContentText(contentType);
   const issues: ContentTypeIssue[] = [];
 
-  const videoInDescription = contains(explanation, /\bvideo(?!suz)[a-z]*\b/);
+  // Etkileşimli video, bağımsız Video değil Etkileşimli İçerik olarak sınıflanır.
+  const standaloneVideoText = explanation.replace(/\betkilesimli\s+(?:(?:bir|sesli|kisa)\s+)*video[a-z]*\b/g, '');
+  const videoInDescription = contains(standaloneVideoText, /\bvideo(?!suz)[a-z]*\b/);
   const interactiveInDescription = contains(explanation, /\betkilesimli\b/);
   const interactiveVideoInDescription = contains(explanation, /\betkilesimli\s+video[a-z]*\b/);
   const infographicInDescription = contains(explanation, /\binfo\s*grafi(?:k|g)[a-z]*\b/);
-  const audioInDescription = contains(explanation, /\bses(?!siz)[a-z]*\b/);
+  // Videonun sesli olması, seslendirme ve ses efektleri ayrı Ses içeriği değildir.
+  // Bağımsız ses kaydı/dosyası/podcast isteklerini video ile aynı cümlede de koru.
+  const explicitAudio = /\b(?:ses\s+(?:kay[di][a-z]*|dosya[a-z]*|icerik[a-z]*)|podcast[a-z]*)\b/;
+  const audioInDescription = explanation.split(/[.!?;\n]+/).some(sentence =>
+    explicitAudio.test(sentence) ||
+    (!/\bvideo[a-z]*\b/.test(sentence) && /\b(?:ses|sesli|sesin|sesi|sesler[a-z]*)\b/.test(sentence))
+  );
 
   if (videoInDescription && !contains(type, /\bvideo[a-z]*\b/)) {
     issues.push({ kind: 'video', message: 'Açıklamada video var; E-İçerik Türü’nde Video yok.' });
