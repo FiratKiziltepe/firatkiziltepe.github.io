@@ -1,5 +1,8 @@
 # Kullanıcı durum yönetimi
 
+> Eski Edge Function seçeneği. Güncel arayüz SQL RPC kullanır.
+> Yeni kurulum için `../../install-user-status.sql` dosyasını SQL Editor'da çalıştırın.
+
 Bu işlev mevcut `profiles` ve Supabase Auth hesaplarını kullanır; şema değişikliği gerektirmez.
 Sunucuda doğrulanmış kullanıcının profil rolünü kontrol eder. Yalnızca aktif admin erişebilir.
 Toplu işlem yalnızca `profiles` kaydı bulunan hesaplara uygulanır; çağıranın kendi hesabı korunur.

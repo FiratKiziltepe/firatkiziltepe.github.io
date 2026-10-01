@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { Profile } from '../lib/supabase';
-import { callAdminFunction } from '../lib/adminApi';
+import { manageUserStatus } from '../lib/userStatusApi';
 
 export default function UserStatusControls({ users, currentUserId }: { users: Profile[]; currentUserId: string }) {
   const [statuses, setStatuses] = useState<Record<string, boolean>>({});
@@ -10,11 +10,14 @@ export default function UserStatusControls({ users, currentUserId }: { users: Pr
   const [search, setSearch] = useState('');
   const load = async () => {
     try {
-      const result = await callAdminFunction('manage-user-status', { action: 'list' });
+      const result = await manageUserStatus('list');
+      if (!result.statuses) throw new Error('Kullanıcı durumları alınamadı.');
       setStatuses(result.statuses); setReady(true); setMessage('');
+      return true;
     } catch (error) {
       setReady(false);
-      setMessage('Hesap durumları alınamadı. Kullanıcı erişim hizmeti şu anda kullanılamıyor.');
+      setMessage(error instanceof Error ? error.message : 'Hesap durumları alınamadı. Lütfen tekrar deneyin.');
+      return false;
     }
   };
   useEffect(() => { void load(); }, [users]);
@@ -23,9 +26,8 @@ export default function UserStatusControls({ users, currentUserId }: { users: Pr
     if (!window.confirm(`${label} ${active ? 'aktif' : 'pasif'} yapılacak. Devam edilsin mi?`)) return;
     setBusy(true); setMessage('');
     try {
-      const result = await callAdminFunction('manage-user-status', { action: 'set', active, ...(userId ? { user_id: userId } : {}) });
-      await load();
-      setMessage(`${result.updated} hesap güncellendi.${result.errors?.length ? ' Başarısız: ' + result.errors.join('; ') : ''}`);
+      const result = await manageUserStatus('set', active, userId);
+      if (await load()) setMessage(`${result.updated} hesap güncellendi.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'İşlem başarısız.'); }
     finally { setBusy(false); }
   };
