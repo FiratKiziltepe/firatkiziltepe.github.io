@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.build-verify/
+.npm-cache/
 *.local
 
 # Editor directories and files

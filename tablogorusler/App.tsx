@@ -13,7 +13,7 @@ import ChangeHistory from './components/ChangeHistory';
 import ReportPanel from './components/ReportPanel';
 
 /** Eşzamanlı kullanım için retry mekanizması (70+ kullanıcı desteği) */
-async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 500): Promise<T> {
+async function withRetry<T>(fn: () => PromiseLike<T>, maxRetries = 3, delayMs = 500): Promise<T> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();

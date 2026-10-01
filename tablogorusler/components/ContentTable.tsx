@@ -1,7 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import type { EIcerik, DegisiklikOnerisi, YeniSatirOnerisi, SilmeTalebi, Profile } from '../lib/supabase';
-import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, RotateCcw, Clock, Check, Undo, MessageSquare, PenLine, FileEdit, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff, CheckCircle2, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Download, ScanSearch } from 'lucide-react';
 import EIcerikTuruInput from './EIcerikTuruInput';
+import LessonMultiSelect from './LessonMultiSelect';
+import { analyzeContentType, normalizeContentText } from '../lib/contentTypeAnalysis';
+import type { ContentTypeIssue } from '../lib/contentTypeAnalysis';
 import * as XLSX from 'xlsx';
 
 interface ContentTableProps {
@@ -96,19 +99,25 @@ const DiffSpan: React.FC<{ oldStr?: string; newStr?: string }> = ({ oldStr = "",
   );
 };
 
-/** Arama terimini sarı highlight ile gösterir – sadece tam arama terimi eşleşirse highlight eder */
+/** Türkçe karakter farklarını da dikkate alarak arama eşleşmelerini vurgular. */
 const HighlightText: React.FC<{ text: string; term: string; className?: string }> = ({ text, term, className }) => {
-  if (!term || !text || term.length < 3) return <span className={className}>{text}</span>;
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+  if (!term.trim() || !text) return <span className={className}>{text}</span>;
+  const normalizedText = normalizeContentText(text);
+  const normalizedTerm = normalizeContentText(term.trim());
+  if (!normalizedTerm || normalizedText.length !== text.length) return <span className={className}>{text}</span>;
+
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  let index = normalizedText.indexOf(normalizedTerm, cursor);
+  while (index !== -1) {
+    parts.push(text.slice(cursor, index));
+    parts.push(<mark key={index} className="bg-yellow-200 text-yellow-900 rounded px-0.5 font-bold">{text.slice(index, index + normalizedTerm.length)}</mark>);
+    cursor = index + normalizedTerm.length;
+    index = normalizedText.indexOf(normalizedTerm, cursor);
+  }
+  parts.push(text.slice(cursor));
   return (
-    <span className={className}>
-      {parts.map((part, i) =>
-        part.toLowerCase() === term.toLowerCase()
-          ? <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5 font-bold">{part}</mark>
-          : <React.Fragment key={i}>{part}</React.Fragment>
-      )}
-    </span>
+    <span className={className}>{parts}</span>
   );
 };
 
@@ -124,9 +133,14 @@ const ContentTable: React.FC<ContentTableProps> = ({
   const [editingFromProposal, setEditingFromProposal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [addForm, setAddForm] = useState<Record<string, string>>({});
-  const [lessonFilter, setLessonFilter] = useState('');
+  const [selectedLessons, setSelectedLessons] = useState<string[]>([]);
   const [programFilter, setProgramFilter] = useState('Tümü');
   const [searchTerm, setSearchTerm] = useState('');
+  const generalHighlightTerm = searchTerm.trim().length >= 3 ? searchTerm : '';
+  const [typeSearchTerm, setTypeSearchTerm] = useState('');
+  const [descriptionSearchTerm, setDescriptionSearchTerm] = useState('');
+  const [comparisonSelected, setComparisonSelected] = useState(false);
+  const [analysisActive, setAnalysisActive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const PAGE_SIZE_OPTIONS = [50, 100, 150, 500];
@@ -186,14 +200,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
       if (profile.rol !== 'admin' && profile.atanan_dersler.length > 0) {
         if (!profile.atanan_dersler.includes(p.ders_adi)) return false;
       }
-      const matchLesson = !lessonFilter || p.ders_adi === lessonFilter;
+      const matchLesson = selectedLessons.length === 0 || selectedLessons.includes(p.ders_adi);
       const matchProgram = programFilter === 'Tümü' || p.program_turu === programFilter;
       // Arama en az 3 karakter girildiğinde aktif olur
       const matchSearch = !searchTerm || searchTerm.length < 3 || [p.ders_adi, p.unite_tema, p.kazanim, p.aciklama, p.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchLesson && matchProgram && matchSearch;
+      const matchType = normalizeContentText(p.e_icerik_turu).includes(normalizeContentText(typeSearchTerm.trim()));
+      const matchDescription = normalizeContentText(p.aciklama).includes(normalizeContentText(descriptionSearchTerm.trim()));
+      return matchLesson && matchProgram && matchSearch && matchType && matchDescription;
     });
-  }, [newRowProposals, lessonFilter, programFilter, searchTerm, profile]);
+  }, [newRowProposals, selectedLessons, programFilter, searchTerm, typeSearchTerm, descriptionSearchTerm, profile]);
 
   // Öneri olan satır ID'leri seti (performans için)
   const rowsWithProposals = useMemo(() => {
@@ -203,17 +219,37 @@ const ContentTable: React.FC<ContentTableProps> = ({
     return ids;
   }, [proposals, deleteProposals]);
 
-  const filteredData = useMemo(() => {
+  const baseFilteredData = useMemo(() => {
     return data.filter(row => {
-      const matchLesson = !lessonFilter || row.ders_adi === lessonFilter;
+      const matchLesson = selectedLessons.length === 0 || selectedLessons.includes(row.ders_adi);
       const matchProgram = programFilter === 'Tümü' || row.program_turu === programFilter;
       // Arama en az 3 karakter girildiğinde aktif olur
       const matchSearch = !searchTerm || searchTerm.length < 3 || [row.ders_adi, row.unite_tema, row.kazanim, row.aciklama, row.e_icerik_turu]
         .some(v => v && v.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchProposals = !onlyProposals || rowsWithProposals.has(row.id);
-      return matchLesson && matchProgram && matchSearch && matchProposals;
+      const matchType = normalizeContentText(row.e_icerik_turu).includes(normalizeContentText(typeSearchTerm.trim()));
+      const matchDescription = normalizeContentText(row.aciklama).includes(normalizeContentText(descriptionSearchTerm.trim()));
+      return matchLesson && matchProgram && matchSearch && matchType && matchDescription && matchProposals;
     });
-  }, [data, lessonFilter, programFilter, searchTerm, onlyProposals, rowsWithProposals]);
+  }, [data, selectedLessons, programFilter, searchTerm, typeSearchTerm, descriptionSearchTerm, onlyProposals, rowsWithProposals]);
+
+  const analysisByRow = useMemo(() => {
+    const result = new Map<number, ContentTypeIssue[]>();
+    if (analysisActive) {
+      baseFilteredData.forEach(row => result.set(row.id, analyzeContentType(row.aciklama, row.e_icerik_turu)));
+    }
+    return result;
+  }, [analysisActive, baseFilteredData]);
+
+  const filteredData = useMemo(() => analysisActive
+    ? baseFilteredData.filter(row => (analysisByRow.get(row.id)?.length || 0) > 0)
+    : baseFilteredData, [analysisActive, analysisByRow, baseFilteredData]);
+
+  const analysisCounts = useMemo(() => {
+    const counts: Record<ContentTypeIssue['kind'], number> = { video: 0, interactive: 0, infographic: 0, audio: 0 };
+    analysisByRow.forEach(issues => issues.forEach(issue => { counts[issue.kind] += 1; }));
+    return counts;
+  }, [analysisByRow]);
 
   // Türkçe sıralama için Intl.Collator (performanslı ve doğru Türkçe harf sıralaması)
   const trCollator = useMemo(() => new Intl.Collator('tr', { numeric: true, sensitivity: 'variant' }), []);
@@ -427,16 +463,18 @@ const ContentTable: React.FC<ContentTableProps> = ({
       'E-İÇERİK TÜRÜ': row.e_icerik_turu || '',
       'AÇIKLAMA': row.aciklama || '',
       'PROGRAM TÜRÜ': row.program_turu || '',
+      ...(analysisActive ? { 'KARŞILAŞTIRMA SONUCU': (analysisByRow.get(row.id) || []).map(issue => issue.message).join(' ') } : {}),
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     ws['!cols'] = [
       { wch: 8 }, { wch: 30 }, { wch: 25 }, { wch: 50 }, { wch: 20 }, { wch: 50 }, { wch: 14 },
+      ...(analysisActive ? [{ wch: 80 }] : []),
     ];
-    XLSX.utils.book_append_sheet(wb, ws, 'E-İçerikler');
+    XLSX.utils.book_append_sheet(wb, ws, analysisActive ? 'Tür Karşılaştırma' : 'E-İçerikler');
 
     // Sheet 2: Bekleyen değişiklik önerileri
     const filteredIds = new Set(sortedData.map(r => r.id));
-    const pendingChanges = proposals
+    const pendingChanges = (analysisActive ? [] : proposals)
       .filter(p => p.durum === 'pending' && filteredIds.has(p.e_icerik_id))
       .map(p => {
         const row = data.find(d => d.id === p.e_icerik_id);
@@ -460,7 +498,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
     }
 
     // Sheet 3: Bekleyen yeni satır önerileri
-    const pendingNewRowsAll = newRowProposals.filter(p => p.durum === 'pending');
+    const pendingNewRowsAll = analysisActive ? [] : newRowProposals.filter(p => p.durum === 'pending');
     if (pendingNewRowsAll.length > 0) {
       const newRowSheet = pendingNewRowsAll.map(p => ({
         'DERS ADI': p.ders_adi,
@@ -481,7 +519,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
     }
 
     // Sheet 4: Bekleyen silme talepleri
-    const pendingDeletes = deleteProposals.filter(p => p.durum === 'pending');
+    const pendingDeletes = analysisActive ? [] : deleteProposals.filter(p => p.durum === 'pending');
     if (pendingDeletes.length > 0) {
       const delSheet = pendingDeletes.map(p => {
         const row = data.find(d => d.id === p.e_icerik_id);
@@ -501,20 +539,17 @@ const ContentTable: React.FC<ContentTableProps> = ({
       XLSX.utils.book_append_sheet(wb, ws4, 'Silme Talepleri');
     }
 
-    const suffix = lessonFilter ? `_${lessonFilter.replace(/\s+/g, '_')}` : '';
-    XLSX.writeFile(wb, `e_icerikler${suffix}_${new Date().toISOString().slice(0, 10)}.xlsx`);
-  }, [sortedData, lessonFilter, proposals, newRowProposals, deleteProposals, data, users]);
+    const suffix = selectedLessons.length === 1 ? `_${selectedLessons[0].replace(/\s+/g, '_')}` : selectedLessons.length > 1 ? `_${selectedLessons.length}_ders` : '';
+    XLSX.writeFile(wb, `e_icerikler${suffix}${analysisActive ? '_analiz' : ''}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }, [sortedData, selectedLessons, analysisActive, analysisByRow, proposals, newRowProposals, deleteProposals, data, users]);
 
   return (
     <div className="space-y-6">
       {/* Filtre Paneli */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end">
         <div>
           <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">DERS SEÇİMİ</label>
-          <select className="w-full border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={lessonFilter} onChange={e => { setLessonFilter(e.target.value); setCurrentPage(1); }}>
-            <option value="">Tüm Dersler</option>
-            {allLessons.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
+          <LessonMultiSelect lessons={allLessons} selected={selectedLessons} onChange={value => { setSelectedLessons(value); setCurrentPage(1); }} />
         </div>
         <div>
           <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">PROGRAM TÜRÜ</label>
@@ -540,7 +575,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
               {showChanges ? <EyeOff size={13} /> : <Eye size={13} />}
               {showChanges ? 'GİZLE' : 'DEĞİŞİKLİKLER'}
             </button>
-            <button onClick={() => { setSearchTerm(''); setLessonFilter(''); setProgramFilter('Tümü'); setOnlyProposals(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
+            <button onClick={() => { setSearchTerm(''); setTypeSearchTerm(''); setDescriptionSearchTerm(''); setSelectedLessons([]); setProgramFilter('Tümü'); setOnlyProposals(false); setComparisonSelected(false); setAnalysisActive(false); setCurrentPage(1); }} className="flex-1 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-all uppercase tracking-wider">
               <RotateCcw size={13} /> TEMİZLE
             </button>
             <button
@@ -561,7 +596,37 @@ const ContentTable: React.FC<ContentTableProps> = ({
             {onlyProposals ? 'TÜM SATIRLAR' : 'ÖNERİLİ SATIRLAR'}
           </button>
         </div>
+        <div className="relative">
+          <label htmlFor="type-search" className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">E-İÇERİK TÜRÜNDE ARA</label>
+          <input id="type-search" type="search" placeholder="Video, Ses, İnfografik..." className="w-full border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={typeSearchTerm} onChange={e => { setTypeSearchTerm(e.target.value); setCurrentPage(1); }} />
+        </div>
+        <div className="relative">
+          <label htmlFor="description-search" className="text-[11px] font-bold text-gray-400 uppercase mb-2 block tracking-widest">AÇIKLAMADA ARA</label>
+          <input id="description-search" type="search" placeholder="Açıklamadaki ifadeyi ara..." className="w-full border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium" value={descriptionSearchTerm} onChange={e => { setDescriptionSearchTerm(e.target.value); setCurrentPage(1); }} />
+        </div>
+        <div className="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5">
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer flex-1">
+            <input type="checkbox" checked={comparisonSelected} onChange={e => { setComparisonSelected(e.target.checked); if (!e.target.checked) setAnalysisActive(false); setCurrentPage(1); }} className="w-4 h-4 accent-blue-600" />
+            E-İçerik Türü / Açıklama karşılaştır
+          </label>
+          <button type="button" disabled={!comparisonSelected} onClick={() => { setAnalysisActive(true); setCurrentPage(1); }} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-black flex items-center justify-center gap-2 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            <ScanSearch size={15} /> ANALİZ ET
+          </button>
+        </div>
       </div>
+
+      {analysisActive && (
+        <div role="status" className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-900">
+          <p className="font-bold">{baseFilteredData.length} kayıt karşılaştırıldı; {filteredData.length} kayıtta tür eksikliği olasılığı bulundu.</p>
+          <div className="flex flex-wrap gap-2 mt-2 text-xs font-semibold">
+            {analysisCounts.video > 0 && <span className="bg-white border border-amber-200 rounded-lg px-2 py-1">Video: {analysisCounts.video}</span>}
+            {analysisCounts.interactive > 0 && <span className="bg-white border border-amber-200 rounded-lg px-2 py-1">Etkileşimli İçerik: {analysisCounts.interactive}</span>}
+            {analysisCounts.infographic > 0 && <span className="bg-white border border-amber-200 rounded-lg px-2 py-1">İnfografik: {analysisCounts.infographic}</span>}
+            {analysisCounts.audio > 0 && <span className="bg-white border border-amber-200 rounded-lg px-2 py-1">Ses: {analysisCounts.audio}</span>}
+          </div>
+          <p className="text-xs mt-1">Yalnızca eşleşmeyen kayıtlar gösteriliyor. Açıklamadaki anahtar kelimeler taranır; sonuçları inceleyerek doğrulayın.</p>
+        </div>
+      )}
 
       {/* Tablo */}
       <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
@@ -621,6 +686,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
               )}
 
               {pagedData.map(row => {
+                const rowIssues = analysisByRow.get(row.id) || [];
                 const rowProposals = getRowProposals(row.id);
                 const delProposalsList = getDeleteProposals(row.id);
                 const isEditing = editingId === row.id;
@@ -631,16 +697,17 @@ const ContentTable: React.FC<ContentTableProps> = ({
                 // showChanges OFF → bekleyen öneriler DiffSpan ile gösterilir
                 // showChanges ON  → tüm öneriler (bekleyen+onaylanan+reddedilen) durum badge'li gösterilir
                 const renderFieldCell = (fieldName: string, originalValue: string, cellClass?: string) => {
+                  const fieldTerm = fieldName === 'aciklama' ? descriptionSearchTerm || generalHighlightTerm : fieldName === 'e_icerik_turu' ? typeSearchTerm || generalHighlightTerm : generalHighlightTerm;
                   if (showChanges) {
                     // Tüm öneriler (bekleyen + onaylanan + reddedilen) durum badge'leriyle
                     const allFps = proposals.filter(p => p.e_icerik_id === row.id && p.alan === fieldName);
-                    if (allFps.length === 0) return <HighlightText text={originalValue} term={searchTerm} className={cellClass} />;
+                    if (allFps.length === 0) return <HighlightText text={originalValue} term={fieldTerm} className={cellClass} />;
                     return (
                       <div className="space-y-1.5">
                         {/* Güncel (son) değer */}
                         <div className="pb-1.5 mb-1 border-b border-slate-200">
                           <span className="text-[8px] font-bold text-emerald-600 uppercase block mb-0.5">📌 Son Hal:</span>
-                          <HighlightText text={originalValue} term={searchTerm} className={cellClass} />
+                          <HighlightText text={originalValue} term={fieldTerm} className={cellClass} />
                         </div>
                         {/* Değişiklik geçmişi */}
                         {allFps.map(fp => (
@@ -669,7 +736,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   }
                   // Normal mod: sadece bekleyen öneriler DiffSpan ile gösterilir
                   const fps = getFieldProposals(row.id, fieldName);
-                  if (fps.length === 0) return <HighlightText text={originalValue} term={searchTerm} className={cellClass} />;
+                  if (fps.length === 0) return <HighlightText text={originalValue} term={fieldTerm} className={cellClass} />;
                   if (fps.length === 1) {
                     return (
                       <div>
@@ -681,7 +748,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                   }
                   return (
                     <div className="space-y-2">
-                      <HighlightText text={originalValue} term={searchTerm} className={`${cellClass} block mb-1`} />
+                      <HighlightText text={originalValue} term={fieldTerm} className={`${cellClass} block mb-1`} />
                       {fps.map(fp => (
                         <div key={fp.id} className="border-l-3 border-amber-300 pl-2 py-1 bg-amber-50/50 rounded-r-lg">
                           <p className="text-[9px] font-bold text-amber-700 mb-0.5">📝 {getUserName(fp.user_id)}</p>
@@ -745,7 +812,7 @@ const ContentTable: React.FC<ContentTableProps> = ({
                         {(() => {
                           const cleanTags = (row.e_icerik_turu || '').split('/').filter(s => s.trim()).map((ec, i) => (
                             <span key={i} className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-[9px] font-black text-slate-500 rounded-md uppercase">
-                              <HighlightText text={ec.trim()} term={searchTerm} />
+                              <HighlightText text={ec.trim()} term={typeSearchTerm || generalHighlightTerm} />
                             </span>
                           ));
 
@@ -818,7 +885,16 @@ const ContentTable: React.FC<ContentTableProps> = ({
                     <td className="px-3 py-3">
                       <div className="text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line">
                         {renderFieldCell('aciklama', row.aciklama || '', 'text-[11px] leading-relaxed italic text-slate-500 whitespace-pre-line')}
+                      </div>
+                      {rowIssues.length > 0 && (
+                        <div className="mt-2 space-y-1" aria-label="Karşılaştırma sonuçları">
+                          {rowIssues.map(issue => (
+                            <p key={issue.kind} className="text-[10px] font-semibold text-amber-900 bg-amber-100 border border-amber-200 rounded-lg px-2 py-1 not-italic">
+                              {issue.message}
+                            </p>
+                          ))}
                         </div>
+                      )}
                     </td>
 
                     {/* İŞLEMLER */}
@@ -952,8 +1028,14 @@ const ContentTable: React.FC<ContentTableProps> = ({
                 );
               })}
 
+              {filteredData.length === 0 && (analysisActive || pendingNewRows.length === 0) && (
+                <tr><td colSpan={7} className="py-10 text-center text-sm text-slate-500">
+                  {analysisActive ? 'Karşılaştırmada tür eksikliği bulunmadı.' : 'Filtrelere uygun kayıt bulunamadı.'}
+                </td></tr>
+              )}
+
               {/* YENİ SATIR ÖNERİLERİ - tablonun içinde */}
-              {pendingNewRows.map(proposal => (
+              {!analysisActive && pendingNewRows.map(proposal => (
                 <tr key={`new-${proposal.id}`} className="bg-emerald-50/70 border-l-8 border-emerald-500 transition-all duration-300">
                   <td className="px-3 py-3 text-center">
                     <span className="text-xs font-black text-emerald-600 italic">+</span>

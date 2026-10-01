@@ -5,6 +5,7 @@ const E_ICERIK_TURLERI = [
   'Video',
   'Ses',
   'Etkileşimli İçerik',
+  'İnfografik',
 ];
 
 interface EIcerikTuruInputProps {
