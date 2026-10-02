@@ -5,7 +5,9 @@
 -- and vote_reasons_and_terms.
 -- Run this file once on an empty project to recreate everything, then apply
 -- migrations/20260930_owners_versions_imports_themes.sql (project owners,
--- AI result versions, imports, thematic analysis; applied 2026-09-30).
+-- AI result versions, imports, thematic analysis; applied 2026-09-30) and
+-- migrations/20261002_note_images.sql (screenshots in notes: votes.images +
+-- private Storage bucket "note-images"; applied 2026-10-02).
 --
 -- Roles
 --   admin    : creates/deletes projects, manages members, sees every project

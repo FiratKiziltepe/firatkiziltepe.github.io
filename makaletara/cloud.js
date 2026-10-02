@@ -21,6 +21,10 @@ window.Cloud = (() => {
   // v15 schema (owners, AI versions, imports, themes): detected, so the page keeps
   // working against a database where the migration has not been applied yet
   let v15 = false;
+  // v18: screenshots in notes (votes.images + Storage bucket "note-images")
+  let noteImages = false;
+  const IMG_BUCKET = 'note-images';
+  const signed = new Map();   // path -> { url, exp }
   const listeners = new Set();
 
   const check = ({ data, error }) => { if (error) throw new Error(error.message || String(error)); return data; };
@@ -32,6 +36,8 @@ window.Cloud = (() => {
     if (!error) profile = data;
     const probe = await client.from('record_ai_versions').select('version').limit(1);
     v15 = !probe.error;
+    const probeImg = await client.from('votes').select('images').limit(1);
+    noteImages = !probeImg.error;
   }
 
   async function init() {
@@ -127,6 +133,14 @@ window.Cloud = (() => {
     });
   }
 
+  const voteCols = () => 'record_id,user_id,decision,labels,note,reasons,updated_at' + (noteImages ? ',images' : '');
+  /** Drops `images` from a vote row while the database has no such column. */
+  const voteRow = v => {
+    const row = Object.assign({ user_id: user.id }, v);
+    if (!noteImages) delete row.images;
+    return row;
+  };
+
   async function fetchAll(build) {
     const out = [];
     for (let from = 0; ; from += PAGE) {
@@ -143,6 +157,7 @@ window.Cloud = (() => {
     get profile() { return profile; },
     get isAdmin() { return !!(profile && profile.role === 'admin'); },
     get v15() { return v15; },
+    get noteImages() { return noteImages; },
     get displayName() { return profile ? profile.display_name || profile.email : (user ? user.email : ''); },
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     init,
@@ -227,21 +242,21 @@ window.Cloud = (() => {
 
     // ---------- votes ----------
     async fetchVotes(pid) {
-      return fetchAll(() => client.from('votes').select('record_id,user_id,decision,labels,note,reasons,updated_at').eq('project_id', pid).order('record_id'));
+      return fetchAll(() => client.from('votes').select(voteCols()).eq('project_id', pid).order('record_id'));
     },
     async upsertVote(v) {
-      return check(await client.from('votes').upsert(Object.assign({ user_id: user.id }, v), { onConflict: 'record_id,user_id' })
-        .select('record_id,user_id,decision,labels,note,reasons,updated_at').single());
+      return check(await client.from('votes').upsert(voteRow(v), { onConflict: 'record_id,user_id' })
+        .select(voteCols()).single());
     },
     async upsertVotes(votes) {
       for (let i = 0; i < votes.length; i += CHUNK) {
-        const rows = votes.slice(i, i + CHUNK).map(v => Object.assign({ user_id: user.id }, v));
+        const rows = votes.slice(i, i + CHUNK).map(voteRow);
         check(await client.from('votes').upsert(rows, { onConflict: 'record_id,user_id' }));
       }
     },
     /** Delta sync: rows changed at or after `since` (ISO). Used next to realtime as a safety net. */
     async fetchVotesSince(pid, since) {
-      return check(await client.from('votes').select('record_id,user_id,decision,labels,note,reasons,updated_at')
+      return check(await client.from('votes').select(voteCols())
         .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
     },
     async fetchRecordsSince(pid, since) {
@@ -249,6 +264,32 @@ window.Cloud = (() => {
         .eq('project_id', pid).gte('updated_at', since).order('updated_at').limit(5000));
     },
     /** Live votes and record changes (final decisions, duplicates, AI results) of one project. */
+    // ---------- note images (private bucket, signed URLs) ----------
+    /** Uploads one image of my note; returns its storage path. */
+    async uploadNoteImage(pid, blob) {
+      const ext = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' }[blob.type] || 'png';
+      const rnd = window.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const path = `${pid}/${user.id}/${rnd}.${ext}`;
+      const { error } = await client.storage.from(IMG_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+      if (error) throw new Error(error.message || String(error));
+      return path;
+    },
+    async removeNoteImages(paths) {
+      if (!paths.length) return;
+      paths.forEach(p => signed.delete(p));
+      const { error } = await client.storage.from(IMG_BUCKET).remove(paths);
+      if (error) throw new Error(error.message || String(error));
+    },
+    /** Short-lived URL of a note image (cached until shortly before it expires). */
+    async noteImageUrl(path) {
+      const hit = signed.get(path);
+      if (hit && hit.exp > Date.now()) return hit.url;
+      const { data, error } = await client.storage.from(IMG_BUCKET).createSignedUrl(path, 3600);
+      if (error) throw new Error(error.message || String(error));
+      signed.set(path, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
+      return data.signedUrl;
+    },
+
     // ---------- shared vocabulary (labels, exclusion reasons) ----------
     async fetchTerms(pid) {
       return check(await client.from('project_terms').select('kind,term').eq('project_id', pid).order('term'));

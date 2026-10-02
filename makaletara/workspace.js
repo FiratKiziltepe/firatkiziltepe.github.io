@@ -108,28 +108,30 @@ function personName(uid) {
  */
 async function setMyVote(rid, patch, opts = {}) {
   const rec = WS.recByRid(rid);
-  if (!rec) return;
+  if (!rec) return false;
   const prev = myVote(rid);
-  const next = Object.assign({ decision: null, labels: [], note: '', reasons: [] }, prev || {}, patch);
+  const next = Object.assign({ decision: null, labels: [], note: '', reasons: [], images: [] }, prev || {}, patch);
   // exclusion reasons only belong to an Exclude vote
   if (next.decision !== 'Exclude') next.reasons = [];
   if (!WS.isCloud) {
     run.human = run.human || {};
-    run.human[rid] = { decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons };
+    run.human[rid] = { decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons, images: next.images };
     scheduleSave();
     afterVoteView(rid, opts.advance);
-    return;
+    return true;
   }
   let m = WS.votes.get(rid);
   if (!m) { m = new Map(); WS.votes.set(rid, m); }
   m.set(WS.meId, next);
   afterVoteView(rid, opts.advance);
   try {
-    await Cloud.upsertVote({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons });
+    await Cloud.upsertVote({ record_id: rec.dbId, decision: next.decision, labels: next.labels, note: next.note, reasons: next.reasons, images: next.images });
+    return true;
   } catch (e) {
     if (prev) m.set(WS.meId, prev); else m.delete(WS.meId);
     renderWorkspace();
     showError('Karar kaydedilemedi, geri alındı: ' + e.message);
+    return false;
   }
 }
 
@@ -998,6 +1000,152 @@ function button(label, cls, onClick, title) {
   return b;
 }
 
+// ---------- screenshots in notes ----------
+// A pasted image is downscaled and re-encoded (WebP, else JPEG). In a cloud
+// project it goes to the private Storage bucket and the vote keeps its path;
+// locally the vote keeps a data: URL (saved in IndexedDB with the session).
+const NOTE_IMG_MAX = 12;
+const NoteImg = {
+  /** Image files of a paste / drop event. */
+  filesFrom(dt) {
+    if (!dt) return [];
+    const fromItems = [...(dt.items || [])].filter(i => i.kind === 'file' && /^image\//.test(i.type)).map(i => i.getAsFile()).filter(Boolean);
+    return fromItems.length ? fromItems : [...(dt.files || [])].filter(f => /^image\//.test(f.type));
+  },
+  async compress(file) {
+    const MAX_SIDE = 2400;
+    let bmp;
+    try { bmp = await createImageBitmap(file); } catch (e) { throw new Error('görsel okunamadı'); }
+    const k = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(bmp, 0, 0, c.width, c.height);
+    if (bmp.close) bmp.close();
+    const toBlob = (type, q) => new Promise(r => c.toBlob(r, type, q));
+    let out = await toBlob('image/webp', 0.9);
+    if (!out || out.type !== 'image/webp') out = await toBlob('image/jpeg', 0.9);
+    if (k === 1 && /^image\/(png|jpeg|webp)$/.test(file.type) && file.size <= out.size) out = file;
+    if (out.size > 3 * 1024 * 1024) throw new Error('görsel çok büyük (en fazla 3 MB)');
+    return out;
+  },
+  /** Stores one image; returns the reference kept in the vote. */
+  async store(file) {
+    if (WS.isCloud && !Cloud.noteImages) throw new Error('veritabanında görsel desteği yok (supabase/migrations/20261002_note_images.sql uygulanmalı)');
+    const blob = await this.compress(file);
+    if (WS.isCloud) return Cloud.uploadNoteImage(WS.project.id, blob);
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  },
+  isLocal(ref) { return ref.startsWith('data:'); },
+  url(ref) { return this.isLocal(ref) ? Promise.resolve(ref) : Cloud.noteImageUrl(ref); },
+  /** Deletes uploaded files no vote points to any more (best effort). */
+  discard(refs) {
+    const paths = refs.filter(r => !this.isLocal(r));
+    if (paths.length && Cloud.available) Cloud.removeNoteImages(paths).catch(e => console.warn('Görsel silinemedi', e));
+  }
+};
+
+/** "[2 görsel]" for exports (the images themselves stay in the app). */
+function imgCount(v) { return v.images && v.images.length ? `[${v.images.length} görsel]` : ''; }
+
+/** Thumbnails of note images; a click opens the lightbox. opts: { onRemove(i), pending, keepFocus } */
+function noteThumbs(refs, opts = {}) {
+  const box = document.createElement('div');
+  box.className = 'note-imgs';
+  // inside an open note editor a click must not blur (and so save) the textarea
+  const hold = n => { if (opts.keepFocus) n.addEventListener('mousedown', e => e.preventDefault()); return n; };
+  refs.forEach((ref, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'note-thumb-wrap';
+    const t = hold(button('', 'note-thumb', () => openLightbox(refs, i), 'Büyütmek için tıklayın'));
+    const img = document.createElement('img');
+    img.alt = `Not görseli ${i + 1}`;
+    img.decoding = 'async';
+    NoteImg.url(ref).then(u => { img.src = u; }).catch(() => { t.classList.add('broken'); t.title = 'Görsel yüklenemedi'; });
+    t.appendChild(img);
+    wrap.appendChild(t);
+    if (opts.onRemove) wrap.appendChild(hold(button('×', 'note-thumb-x', () => opts.onRemove(i), 'Görseli kaldır')));
+    box.appendChild(wrap);
+  });
+  for (let i = 0; i < (opts.pending || 0); i++) box.appendChild(text('div', 'yükleniyor…', 'note-thumb note-thumb-loading'));
+  return box;
+}
+
+let lightbox = null;
+function closeLightbox() {
+  if (!lightbox) return;
+  document.removeEventListener('keydown', lightbox.onKey, true);
+  lightbox.node.remove();
+  lightbox = null;
+}
+
+/** Full-screen view of note images (← → browse, click zooms, Esc closes). */
+function openLightbox(refs, start) {
+  closeLightbox();
+  let i = start;
+  const ov = document.createElement('div');
+  ov.className = 'lightbox';
+  ov.setAttribute('role', 'dialog');
+  ov.setAttribute('aria-modal', 'true');
+  ov.setAttribute('aria-label', 'Not görseli');
+  // keep the focus where it was (e.g. a note editor) so closing does not save it
+  ov.addEventListener('mousedown', e => e.preventDefault());
+  const stage = document.createElement('div');
+  stage.className = 'lightbox-stage';
+  const img = document.createElement('img');
+  img.className = 'lightbox-img';
+  img.alt = 'Not görseli';
+  img.title = 'Gerçek boyut / sığdır';
+  img.addEventListener('click', e => { e.stopPropagation(); img.classList.toggle('zoom'); });
+  stage.appendChild(img);
+  stage.addEventListener('click', e => { if (e.target === stage) closeLightbox(); });
+  const bar = document.createElement('div');
+  bar.className = 'lightbox-bar';
+  const count = text('span', '', 'lightbox-count');
+  const openTab = document.createElement('a');
+  openTab.className = 'lightbox-link';
+  openTab.target = '_blank';
+  openTab.rel = 'noopener';
+  openTab.textContent = 'Yeni sekmede aç';
+  bar.append(count, openTab, button('×', 'lightbox-btn lightbox-close', closeLightbox, 'Kapat (Esc)'));
+  const show = n => {
+    i = (n + refs.length) % refs.length;
+    const ref = refs[i];
+    img.classList.remove('zoom');
+    img.removeAttribute('src');
+    count.textContent = refs.length > 1 ? `${i + 1} / ${refs.length}` : '';
+    openTab.hidden = true;
+    NoteImg.url(ref).then(u => {
+      if (refs[i] !== ref) return;
+      img.src = u;
+      // browsers refuse to open data: URLs in a new tab
+      if (!NoteImg.isLocal(ref)) { openTab.href = u; openTab.hidden = false; }
+    }).catch(e => { count.textContent = 'Görsel yüklenemedi: ' + e.message; });
+  };
+  ov.append(bar, stage);
+  if (refs.length > 1) {
+    ov.append(button('‹', 'lightbox-btn lightbox-prev', () => show(i - 1), 'Önceki (←)'),
+      button('›', 'lightbox-btn lightbox-next', () => show(i + 1), 'Sonraki (→)'));
+  }
+  const onKey = e => {
+    // capture phase: screening shortcuts and the note editor's Esc must not fire underneath
+    e.stopPropagation();
+    if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
+    else if (e.key === 'ArrowLeft' && refs.length > 1) { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'ArrowRight' && refs.length > 1) { e.preventDefault(); show(i + 1); }
+  };
+  document.addEventListener('keydown', onKey, true);
+  document.body.appendChild(ov);
+  lightbox = { node: ov, onKey };
+  show(i);
+}
+
 // ---------- shadcn-style building blocks (Lucide icons) ----------
 /** Placeholder that refreshIcons() turns into a Lucide SVG. */
 function uiIcon(name) { const i = document.createElement('i'); i.dataset.lucide = name; return i; }
@@ -1482,46 +1630,89 @@ function cellLabels(cell, rec, mv) {
     });
   });
   row.appendChild(addBtn);
+  const images = (mv && mv.images) || [];
   const noteBox = document.createElement('div');
   noteBox.className = 'note-box-cell';
   const openEditor = () => {
+    if (noteBox.querySelector('.note-input')) return;
     const ta = document.createElement('textarea');
     ta.className = 'note-input';
     ta.rows = 3;
     ta.value = note;
-    ta.placeholder = 'Notunuz… (Ctrl+Enter kaydeder)';
+    ta.placeholder = 'Notunuz… Ekran görüntüsünü buraya yapıştırabilirsiniz (Ctrl+V). Ctrl+Enter kaydeder, Esc vazgeçer.';
+    const imgs = images.slice();
+    const added = [];          // uploaded while this editor is open
+    const pending = new Set();
+    const strip = document.createElement('div');
+    const drawStrip = () => {
+      strip.replaceChildren();
+      if (imgs.length || pending.size) {
+        strip.appendChild(noteThumbs(imgs, { keepFocus: true, pending: pending.size, onRemove: i => { imgs.splice(i, 1); drawStrip(); } }));
+      }
+    };
+    const addFiles = files => {
+      files.forEach(f => {
+        if (imgs.length + pending.size >= NOTE_IMG_MAX) { showError(`Bir nota en fazla ${NOTE_IMG_MAX} görsel eklenebilir.`); return; }
+        const job = NoteImg.store(f)
+          .then(ref => { if (done) NoteImg.discard([ref]); else { imgs.push(ref); added.push(ref); } })
+          .catch(e => showError('Görsel eklenemedi: ' + e.message))
+          .finally(() => { pending.delete(job); drawStrip(); });
+        pending.add(job);
+      });
+      drawStrip();
+    };
     let done = false;
-    const commit = () => {
-      if (done) return; done = true;
+    const commit = async () => {
+      if (done || ta.readOnly) return;
+      ta.readOnly = true;
+      if (pending.size) await Promise.allSettled([...pending]);
+      done = true;
       const v = ta.value.trim().slice(0, 2000);
-      if (v !== note) setMyVote(rec.rid, { note: v }); else refreshRow(rec.rid);
+      const changed = v !== note || imgs.length !== images.length || imgs.some((r, k) => r !== images[k]);
+      if (!changed) { refreshRow(rec.rid); return; }
+      const ok = await setMyVote(rec.rid, { note: v, images: imgs.slice() });
+      NoteImg.discard(ok ? images.filter(r => !imgs.includes(r)) : added);
     };
     ta.addEventListener('keydown', e => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); }
-      if (e.key === 'Escape') { done = true; refreshRow(rec.rid); }
+      if (e.key === 'Escape' && !done) { done = true; NoteImg.discard(added); refreshRow(rec.rid); }
     });
-    ta.addEventListener('blur', commit);
-    noteBox.textContent = '';
-    noteBox.appendChild(ta);
+    ta.addEventListener('paste', e => {
+      const files = NoteImg.filesFrom(e.clipboardData);
+      if (!files.length) return;
+      if (!e.clipboardData.types.includes('text/plain')) e.preventDefault();
+      addFiles(files);
+    });
+    ta.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
+    ta.addEventListener('drop', e => {
+      const files = NoteImg.filesFrom(e.dataTransfer);
+      if (files.length) { e.preventDefault(); addFiles(files); }
+    });
+    // switching to the snipping tool blurs the page: keep the editor open, save only on a real blur
+    ta.addEventListener('blur', () => { if (document.hasFocus()) commit(); });
+    noteBox.replaceChildren(ta, strip);
+    drawStrip();
     ta.focus();
   };
-  if (!note) row.appendChild(button('+ Not', 'btn-ghost btn-ghost-sm', openEditor));
+  if (!note) row.appendChild(button(images.length ? '✎ Not' : '+ Not', 'btn-ghost btn-ghost-sm', openEditor, 'Not ekleyin; ekran görüntüsü de yapıştırabilirsiniz'));
   cell.appendChild(row);
   if (note) {
     const n = text('div', note, 'note-text');
     n.title = 'Düzenlemek için tıklayın';
     n.addEventListener('click', openEditor);
     noteBox.appendChild(n);
-    cell.appendChild(noteBox);
-  } else cell.appendChild(noteBox);
+  }
+  if (images.length) noteBox.appendChild(noteThumbs(images));
+  cell.appendChild(noteBox);
 
   // other reviewers' labels / notes (hidden in blind mode)
-  otherVotes(rec.rid).filter(v => (v.labels && v.labels.length) || v.note).forEach(v => {
+  otherVotes(rec.rid).filter(v => (v.labels && v.labels.length) || v.note || (v.images && v.images.length)).forEach(v => {
     const o = document.createElement('div');
     o.className = 'other-note';
     o.appendChild(text('strong', `${personName(v.user_id)}: `));
     (v.labels || []).forEach(l => o.appendChild(text('span', l, 'label-chip label-chip-other')));
     if (v.note) o.appendChild(text('span', ` ${v.note}`));
+    if (v.images && v.images.length) o.appendChild(noteThumbs(v.images));
     cell.appendChild(o);
   });
 }
@@ -1673,7 +1864,7 @@ async function bulkVote(decision, reasons) {
   const what = decision ? `"${DEC_TR[decision]}" oyunuz${reasons && reasons.length ? ` (gerekçe: ${reasons.join(', ')})` : ''}` : 'oyunuz kaldırılacak';
   if (!confirm(`${recs.length} seçili kayıt için ${decision ? `${what} işlenecek` : what}. Devam edilsin mi?`)) return;
   const ok = await writeMyVotes(recs, prev => ({
-    decision, labels: prev.labels || [], note: prev.note || '', reasons: decision !== 'Exclude' ? [] : reasons || prev.reasons || []
+    decision, labels: prev.labels || [], note: prev.note || '', images: prev.images || [], reasons: decision !== 'Exclude' ? [] : reasons || prev.reasons || []
   }));
   if (!ok) return;
   WS.selected.clear();
@@ -1688,7 +1879,7 @@ async function bulkVote(decision, reasons) {
 async function writeMyVotes(recs, next) {
   const rows = recs.map(rec => {
     const prev = myVote(rec.rid) || {};
-    const v = Object.assign({ decision: prev.decision || null, labels: prev.labels || [], note: prev.note || '', reasons: prev.reasons || [] }, next(prev));
+    const v = Object.assign({ decision: prev.decision || null, labels: prev.labels || [], note: prev.note || '', reasons: prev.reasons || [], images: prev.images || [] }, next(prev));
     if (v.decision !== 'Exclude') v.reasons = [];
     return { rec, next: v };
   });
@@ -1705,7 +1896,7 @@ async function writeMyVotes(recs, next) {
     m.set(WS.meId, v);
   });
   try {
-    await Cloud.upsertVotes(rows.map(({ rec, next: v }) => ({ record_id: rec.dbId, decision: v.decision, labels: v.labels, note: v.note, reasons: v.reasons })));
+    await Cloud.upsertVotes(rows.map(({ rec, next: v }) => ({ record_id: rec.dbId, decision: v.decision, labels: v.labels, note: v.note, reasons: v.reasons, images: v.images })));
     return true;
   } catch (e) {
     backup.forEach(([rid, v]) => { const m = WS.votes.get(rid); if (v) m.set(WS.meId, v); else m.delete(WS.meId); });
@@ -2143,7 +2334,7 @@ function wsExportRows(recs) {
         const v = m.get(uid);
         row[`Hakem: ${name}`] = v && v.decision ? DECISION_LABEL[v.decision] : '';
         row[`Gerekçe: ${name}`] = v ? (v.reasons || []).join('; ') : '';
-        row[`Etiket/Not: ${name}`] = v ? [(v.labels || []).join(', '), v.note].filter(Boolean).join(' · ') : '';
+        row[`Etiket/Not: ${name}`] = v ? [(v.labels || []).join(', '), v.note, imgCount(v)].filter(Boolean).join(' · ') : '';
       });
       const ds = [...m.values()].map(v => v.decision).filter(Boolean);
       row['Hakem Uyumu'] = !ds.length ? '' : new Set(ds).size === 1 ? `oybirliği (${ds.length})` : 'çatışma';
@@ -2152,7 +2343,7 @@ function wsExportRows(recs) {
       const v = myVote(rec.rid) || {};
       row['Hariç Gerekçeleri'] = (v.reasons || []).join('; ');
       row['Etiketler'] = (v.labels || []).join(', ');
-      row['Not'] = v.note || '';
+      row['Not'] = [v.note, imgCount(v)].filter(Boolean).join(' · ');
     }
   });
   return rows;
@@ -2319,7 +2510,7 @@ function addVote(v) {
   if (!rid) return;
   let m = WS.votes.get(rid);
   if (!m) { m = new Map(); WS.votes.set(rid, m); }
-  m.set(v.user_id, { decision: v.decision, labels: v.labels || [], note: v.note || '', reasons: v.reasons || [], updated_at: v.updated_at });
+  m.set(v.user_id, { decision: v.decision, labels: v.labels || [], note: v.note || '', reasons: v.reasons || [], images: v.images || [], updated_at: v.updated_at });
 }
 
 // ------------------------------------------------------------
@@ -2513,8 +2704,17 @@ async function saveToCloud() {
       await Cloud.upsertAiVersions(project.id, versioned);
     }
     const myVotes = Object.entries(run.human || {})
-      .filter(([rid, h]) => idOf.has(rid) && (h.decision || (h.labels && h.labels.length) || h.note))
-      .map(([rid, h]) => ({ record_id: idOf.get(rid), decision: h.decision || null, labels: h.labels || [], note: h.note || '', reasons: h.reasons || [] }));
+      .filter(([rid, h]) => idOf.has(rid) && (h.decision || (h.labels && h.labels.length) || h.note || (h.images && h.images.length)))
+      .map(([rid, h]) => ({ record_id: idOf.get(rid), decision: h.decision || null, labels: h.labels || [], note: h.note || '', reasons: h.reasons || [], images: h.images || [] }));
+    // note screenshots kept in the browser move to the project's storage
+    const localImgs = myVotes.filter(v => v.images.some(NoteImg.isLocal.bind(NoteImg)));
+    if (localImgs.length && Cloud.noteImages) {
+      el.saveProgress.textContent = 'Not görselleri yükleniyor…';
+      for (const v of localImgs) {
+        v.images = await Promise.all(v.images.map(async r => NoteImg.isLocal(r)
+          ? Cloud.uploadNoteImage(project.id, await (await fetch(r)).blob()) : r));
+      }
+    } else localImgs.forEach(v => { v.images = v.images.filter(r => !NoteImg.isLocal(r)); });
     // project vocabulary (labels / custom reasons created locally)
     for (const kind of ['label', 'reason']) {
       for (const t of ((run.terms || {})[kind] || [])) await Cloud.addTerm(project.id, kind, t).catch(() => {});
