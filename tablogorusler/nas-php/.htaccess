@@ -1,0 +1,8 @@
+# Only public/ should be exposed by the NAS web server.
+# Defense in depth for Apache when the project folder is also reachable.
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(server|database|frontend|tools|tests|node_modules|\.runtime|release)(/|$) - [F,L]
+RewriteRule ^(package.*\.json|.*\.zip|.*\.log|README\.md|KURULUM\.md|docker-compose.*)$ - [F,L]
+</IfModule>
