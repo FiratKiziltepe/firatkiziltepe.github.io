@@ -184,14 +184,217 @@ async function setFinalDecision(rid, decision) {
 // ------------------------------------------------------------
 function isPendingDup(rec) { return !!rec.duplicateOf && !rec.removed; }
 
+// ---------- multi-select filter dropdowns ----------
+/**
+ * Turns a filter <select> into a checkbox dropdown. The <select> stays in the
+ * DOM, hidden, as the source of the options (option groups included), so the
+ * code that builds options keeps working. Options of the same group combine
+ * with "ya da"; different groups with "ve" — or with "ya da" when the
+ * dropdown has the any/all switch and it is set to "herhangi biri".
+ *   test(rec, value) → does the record match this one option
+ *   counts: show how many active records match each option (computed when opened)
+ *   modeSwitch: show the "hepsi / herhangi biri" switch between groups
+ */
+class MultiFilter {
+  constructor(select, { test, counts = true, modeSwitch = false, hint = '' } = {}) {
+    this.select = select;
+    this.test = test;
+    this.counts = counts;
+    this.sel = new Set();
+    this.any = false;
+    this.onChange = () => {};
+    select.hidden = true;
+    select.style.display = 'none';
+    const dd = this.dd = document.createElement('details');
+    dd.className = 'dd-filter';
+    this.summary = document.createElement('summary');
+    this.summary.className = 'ui-select';
+    this.summary.title = select.title || 'Birden çok seçilebilir';
+    const panel = document.createElement('div');
+    panel.className = 'dd-panel';
+    const acts = document.createElement('div');
+    acts.className = 'dd-actions';
+    const none = button('Seçimi kaldır', 'ui-btn ui-btn-ghost ui-btn-xs', () => { this.clear(); this.onChange(); });
+    acts.appendChild(none);
+    if (modeSwitch) {
+      const seg = document.createElement('div');
+      seg.className = 'seg ui-seg dd-mode';
+      seg.title = 'Farklı gruplardan (ör. nihai karar ve hakemler) seçim yaptığınızda nasıl birleşsin';
+      this.modeBtns = [['all', 'Hepsi (ve)'], ['any', 'Herhangi biri (ya da)']].map(([m, label]) => {
+        const b = button(label, 'seg-btn', () => { this.any = m === 'any'; this.syncMode(); if (this.sel.size) this.onChange(); });
+        b.dataset.mode = m;
+        seg.appendChild(b);
+        return b;
+      });
+      acts.appendChild(seg);
+      this.syncMode();
+    }
+    this.list = document.createElement('div');
+    this.list.className = 'dd-list';
+    panel.appendChild(acts);
+    if (hint) panel.appendChild(text('p', hint, 'dd-hint'));
+    panel.appendChild(this.list);
+    dd.append(this.summary, panel);
+    select.after(dd);
+    dd.addEventListener('toggle', () => { if (dd.open) this.renderCounts(); });
+  }
+
+  syncMode() { (this.modeBtns || []).forEach(b => b.classList.toggle('active', (b.dataset.mode === 'any') === this.any)); }
+
+  /** [{ value, label, group }] from the hidden <select>, without "Tümü" and hidden options. */
+  options() {
+    return [...this.select.options]
+      .filter(o => o.value && o.value !== 'all' && !o.hidden && !(o.parentElement.tagName === 'OPTGROUP' && o.parentElement.hidden))
+      .map(o => ({ value: o.value, label: o.textContent, group: o.parentElement.tagName === 'OPTGROUP' ? o.parentElement.label : '' }));
+  }
+
+  get size() { return this.sel.size; }
+  has(v) { return this.sel.has(v); }
+  values() { return [...this.sel]; }
+  set(values) { this.sel = new Set(values); }
+  clear() { this.sel.clear(); }
+
+  /** Selection as groups of values: { groups: [[v, v], [v]], any } (kept stable for one render). */
+  spec() {
+    const byGroup = new Map();
+    this.options().forEach(o => { if (this.sel.has(o.value)) { if (!byGroup.has(o.group)) byGroup.set(o.group, []); byGroup.get(o.group).push(o.value); } });
+    return { groups: [...byGroup.values()], any: this.any };
+  }
+
+  /** Human-readable selection for the chips and the export metadata. */
+  describe() {
+    const labels = new Map(this.options().map(o => [o.value, o]));
+    const parts = this.spec().groups.map(g => g.map(v => labels.get(v).label).join(' ya da '));
+    return parts.join(this.any ? ' · ya da · ' : ' · ve · ');
+  }
+
+  render() {
+    const opts = this.options();
+    const known = new Set(opts.map(o => o.value));
+    [...this.sel].forEach(v => { if (!known.has(v)) this.sel.delete(v); });   // e.g. after switching project
+    const n = this.sel.size;
+    this.summary.textContent = !n ? 'Tümü' : n === 1 ? opts.find(o => o.value === [...this.sel][0]).label : `${n} seçim`;
+    this.summary.classList.toggle('is-set', n > 0);
+    this.dd.classList.toggle('dd-active', n > 0);
+    const sig = opts.map(o => `${o.group}>${o.value}=${o.label}`).join('|');
+    if (this.list.dataset.sig !== sig) {
+      this.list.dataset.sig = sig;
+      this.list.textContent = '';
+      let group = null;
+      opts.forEach(o => {
+        if (o.group !== group) { group = o.group; if (group) this.list.appendChild(text('div', group, 'dd-group')); }
+        const lab = document.createElement('label');
+        lab.className = 'dd-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = o.value;
+        cb.addEventListener('change', () => {
+          if (cb.checked) this.sel.add(o.value); else this.sel.delete(o.value);
+          this.onChange();
+        });
+        const count = text('span', '', 'dd-count');
+        count.dataset.value = o.value;
+        lab.append(cb, text('span', o.label, 'dd-name'), count);
+        this.list.appendChild(lab);
+      });
+    }
+    this.list.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = this.sel.has(cb.value); });
+    if (this.dd.open) this.renderCounts();
+  }
+
+  /** Number of records each option alone would give (active records; pool options count their pool). */
+  renderCounts() {
+    if (!this.counts || !this.test) return;
+    const pool = WS.records;
+    this.list.querySelectorAll('.dd-count').forEach(c => {
+      const v = c.dataset.value;
+      let n = 0;
+      pool.forEach(rec => { if (inPoolFor(rec, v) && this.test(rec, v)) n++; });
+      c.textContent = n.toLocaleString('tr-TR');
+    });
+  }
+}
+
+/** Registry of the multi-select filters (created in initWorkspace). */
+const MS = {};
+
+// "Durum" options that choose the record pool instead of narrowing it
+const POOL_OPTIONS = ['dups', 'removed', 'archived'];
+function poolTest(rec, v) {
+  if (v === 'removed') return rec.removed;
+  if (v === 'dups') return isPendingDup(rec);
+  if (v === 'archived') return rec.archived && !rec.removed;
+  return false;
+}
+function inPoolFor(rec, v) { return POOL_OPTIONS.includes(v) ? true : isActive(rec); }
+
+/** True when the record passes a selection spec: OR inside a group, AND (or OR) across groups. */
+function passesSpec(spec, test) {
+  if (!spec.groups.length) return true;
+  const ok = g => g.some(test);
+  return spec.any ? spec.groups.some(ok) : spec.groups.every(ok);
+}
+
+const aiDecisionOf = ai => (ai ? ai.ai_decision || ai.decision : '');
+
+function testAi(rec, v) {
+  const ai = WS.ai.get(rec.rid);
+  if (v === 'none') return !ai;
+  if (v === 'analyzed') return !!ai;
+  if (v === 'error') return !!(ai && ai.error);
+  return aiDecisionOf(ai) === v;
+}
+
+function testMine(rec, v) {
+  const mv = myVote(rec.rid);
+  const md = mv && mv.decision;
+  if (v === 'undecided') return !md;
+  if (v === 'decided') return !!md;
+  if (v === 'disagree_ai') { const a = aiDecisionOf(WS.ai.get(rec.rid)); return !!(md && a && md !== a); }
+  return md === v;
+}
+
+function testStatus(rec, v) {
+  if (POOL_OPTIONS.includes(v)) return poolTest(rec, v);
+  const ai = WS.ai.get(rec.rid);
+  if (v === 'review') return !!(ai && ai.needs_human_review);
+  if (v === 'split') return !!(ai && ai.agreement === 'split');
+  if (v === 'conflict') return hasConflict(rec.rid);
+  if (v === 'nofinal') return !rec.finalDecision;
+  if (v === 'final') return !!rec.finalDecision;
+  if (v === 'noabstract') return !!rec.noAbstract;
+  if (v === 'vdiff') return versionsDisagree(rec.rid);
+  if (v.startsWith('ver:')) return versionOf(ai) === v.slice(4);
+  if (v === 'flags') return !!(ai && aiFlags(ai).length);
+  if (v.startsWith('incons')) {
+    const said = ai ? inconsistencies(ai) : [];
+    return v === 'incons' ? said.length > 0 : said.includes(v.slice(7));
+  }
+  return true;
+}
+
+function testPeople(rec, v) {
+  const [kind, who, want] = v.split('|');
+  if (kind === 'f') return want === 'none' ? !rec.finalDecision : rec.finalDecision === want;
+  const vote = who === WS.meId ? myVote(rec.rid) : ((WS.votes.get(rec.rid) || new Map()).get(who) || null);
+  const d = vote && vote.decision;
+  return want === 'none' ? !d : want === 'any' ? !!d : d === want;
+}
+
+function testLabel(rec, v) {
+  const [kind, term] = v.startsWith('r:') ? ['reasons', v.slice(2)] : ['labels', v.replace(/^l:/, '')];
+  const mv = myVote(rec.rid);
+  return [...((mv && mv[kind]) || []), ...otherVotes(rec.rid).flatMap(o => o[kind] || [])].includes(term);
+}
+
 function wsFilterState() {
   return {
     q: el.filterSearch.value.toLowerCase().trim(),
-    ai: el.filterAi.value,
-    mine: el.filterMine.value,
-    status: el.filterStatus.value,
-    label: el.filterLabel.value,
-    people: WS.isCloud ? el.filterPeople.value : '',
+    ai: MS.ai.spec(),
+    mine: MS.mine.spec(),
+    status: MS.status.spec(),
+    label: MS.label.spec(),
+    people: WS.isCloud ? MS.people.spec() : { groups: [], any: false },
     docTypes: WS.docTypes,
     themes: WS.themeSel,
     yearFrom: parseInt(el.yearFrom.value, 10),
@@ -205,48 +408,17 @@ const docTypeOf = rec => String(rec.DocType || '').trim() || NO_DOCTYPE;
 
 function matchesWs(rec, f) {
   const ai = WS.ai.get(rec.rid);
-  if (f.status === 'removed') { if (!rec.removed) return false; }
-  else if (f.status === 'dups') { if (!isPendingDup(rec)) return false; }
-  else if (f.status === 'archived') { if (!rec.archived || rec.removed) return false; }
+  // pool: active records, or the chosen out-of-pool lists (any of them)
+  const pools = f.status.groups.flat().filter(v => POOL_OPTIONS.includes(v));
+  if (pools.length) { if (!pools.some(v => poolTest(rec, v))) return false; }
   else if (rec.removed || isPendingDup(rec) || rec.archived) return false;
+  const statusRest = { groups: f.status.groups.map(g => g.filter(v => !POOL_OPTIONS.includes(v))).filter(g => g.length), any: f.status.any };
 
-  const aiDec = ai ? ai.ai_decision || ai.decision : '';
-  if (f.ai === 'none' && ai) return false;
-  if (f.ai === 'analyzed' && !ai) return false;
-  if (f.ai === 'error' && !(ai && ai.error)) return false;
-  if (['Include', 'Exclude', 'Uncertain'].includes(f.ai) && aiDec !== f.ai) return false;
-
+  if (!passesSpec(f.ai, v => testAi(rec, v))) return false;
+  if (!passesSpec(f.mine, v => testMine(rec, v))) return false;
+  if (!passesSpec(statusRest, v => testStatus(rec, v))) return false;
+  if (!passesSpec(f.people, v => testPeople(rec, v))) return false;
   const mv = myVote(rec.rid);
-  const md = mv && mv.decision;
-  if (f.mine === 'undecided' && md) return false;
-  if (f.mine === 'decided' && !md) return false;
-  if (['Include', 'Exclude', 'Uncertain'].includes(f.mine) && md !== f.mine) return false;
-  if (f.mine === 'disagree_ai' && !(md && aiDec && md !== aiDec)) return false;
-
-  if (f.status === 'review' && !(ai && ai.needs_human_review)) return false;
-  if (f.status === 'split' && !(ai && ai.agreement === 'split')) return false;
-  if (f.status === 'conflict' && !hasConflict(rec.rid)) return false;
-  if (f.status === 'nofinal' && rec.finalDecision) return false;
-  if (f.status === 'final' && !rec.finalDecision) return false;
-  if (f.status === 'noabstract' && !rec.noAbstract) return false;
-  if (f.status === 'vdiff' && !versionsDisagree(rec.rid)) return false;
-  if (f.status.startsWith('ver:') && versionOf(ai) !== f.status.slice(4)) return false;
-  if (f.status === 'flags' && !(ai && aiFlags(ai).length)) return false;
-  if (f.status.startsWith('incons')) {
-    const said = ai ? inconsistencies(ai) : [];
-    if (!said.length) return false;
-    if (f.status !== 'incons' && !said.includes(f.status.slice(7))) return false;
-  }
-  if (f.people) {
-    const [kind, who, want] = f.people.split('|');
-    if (kind === 'f') {
-      if (want === 'none' ? !!rec.finalDecision : rec.finalDecision !== want) return false;
-    } else {
-      const v = who === WS.meId ? myVote(rec.rid) : ((WS.votes.get(rec.rid) || new Map()).get(who) || null);
-      const d = v && v.decision;
-      if (want === 'none' ? !!d : want === 'any' ? !d : d !== want) return false;
-    }
-  }
 
   if (f.docTypes.size && !f.docTypes.has(docTypeOf(rec))) return false;
   if (f.themes.size) {
@@ -259,11 +431,7 @@ function matchesWs(rec, f) {
     if (isFinite(f.yearFrom) && y < f.yearFrom) return false;
     if (isFinite(f.yearTo) && y > f.yearTo) return false;
   }
-  if (f.label) {
-    const [kind, term] = f.label.startsWith('r:') ? ['reasons', f.label.slice(2)] : ['labels', f.label.replace(/^l:/, '')];
-    const terms = [...((mv && mv[kind]) || []), ...otherVotes(rec.rid).flatMap(v => v[kind] || [])];
-    if (!terms.includes(term)) return false;
-  }
+  if (!passesSpec(f.label, v => testLabel(rec, v))) return false;
   if (f.q) {
     const hay = `${rec.rid} ${rec.ID} ${rec.Title} ${rec.Authors} ${rec.DOI} ${rec.Abstract} ${ai ? C.splitRationale(ai).text : ''} ${(mv && mv.note) || ''}`.toLowerCase();
     if (!hay.includes(f.q)) return false;
@@ -422,9 +590,7 @@ function renderHeaderSort() {
 
 function clearFilters() {
   el.filterSearch.value = '';
-  ['filterAi', 'filterMine', 'filterStatus'].forEach(id => { el[id].value = 'all'; });
-  el.filterPeople.value = '';
-  el.filterLabel.value = '';
+  Object.values(MS).forEach(m => { m.clear(); m.dd.open = false; });
   WS.docTypes.clear();
   WS.themeSel.clear();
   el.themeFilterDd.open = false;
@@ -458,6 +624,7 @@ function renderWorkspace() {
   renderDocTypeFilter();
   renderThemeFilterDd();
   renderVersionFilter();
+  Object.values(MS).forEach(m => m.render());
   renderHeaderSort();
   const list = filteredRecords();
   const ps = pageSize();
@@ -583,13 +750,10 @@ function activeFilterList() {
   const out = [];
   const q = el.filterSearch.value.trim();
   if (q) out.push({ label: 'Arama', value: `"${q}"`, clear: () => { el.filterSearch.value = ''; } });
-  [['filterAi', 'AI kararı'], ['filterMine', 'Benim kararım'], ['filterStatus', 'Durum']].forEach(([id, label]) => {
-    if (el[id].value !== 'all') out.push({ label, value: selectedText(el[id]), clear: () => { el[id].value = 'all'; } });
+  [['ai', 'AI kararı'], ['mine', 'Benim kararım'], ['status', 'Durum'], ['people', 'Hakem / nihai'], ['label', 'Etiket / gerekçe']].forEach(([k, label]) => {
+    if (k === 'people' && !WS.isCloud) return;
+    if (MS[k].size) out.push({ label, value: MS[k].describe(), clear: () => { MS[k].clear(); } });
   });
-  if (WS.isCloud && el.filterPeople.value) out.push({ label: 'Hakem / nihai', value: selectedText(el.filterPeople), clear: () => { el.filterPeople.value = ''; } });
-  if (el.filterLabel.value) {
-    out.push({ label: el.filterLabel.value.startsWith('r:') ? 'Hariç gerekçesi' : 'Etiket', value: el.filterLabel.value.replace(/^[lr]:/, ''), clear: () => { el.filterLabel.value = ''; } });
-  }
   if (WS.docTypes.size) out.push({ label: 'Belge türü', value: [...WS.docTypes].join(', '), clear: () => { WS.docTypes.clear(); } });
   if (WS.themeSel.size) out.push({ label: 'Tema', value: [...WS.themeSel].join(' ya da '), clear: () => { WS.themeSel.clear(); } });
   const yf = el.yearFrom.value.trim(), yt = el.yearTo.value.trim();
@@ -601,8 +765,7 @@ function activeFilterList() {
 
 function renderActiveFilters() {
   const list = activeFilterList();
-  ['filterAi', 'filterMine', 'filterStatus'].forEach(id => el[id].classList.toggle('is-set', el[id].value !== 'all'));
-  ['filterPeople', 'filterLabel', 'yearFrom', 'yearTo'].forEach(id => el[id].classList.toggle('is-set', !!el[id].value));
+  ['yearFrom', 'yearTo'].forEach(id => el[id].classList.toggle('is-set', !!el[id].value));
   el.docTypeSummary.classList.toggle('is-set', WS.docTypes.size > 0);
   el.themeFilterSummary.classList.toggle('is-set', WS.themeSel.size > 0);
   el.activeFiltersRow.hidden = !list.length;
@@ -645,7 +808,6 @@ function renderPeopleFilter() {
   const sig = [...people.entries()].map(e => e.join(':')).join('|') + WS.blindForMe;
   if (el.filterPeople.dataset.sig === sig) return;
   el.filterPeople.dataset.sig = sig;
-  const cur = el.filterPeople.value;
   el.filterPeople.textContent = '';
   const opt = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.appendChild(o); };
   opt(el.filterPeople, '', 'Tümü');
@@ -660,7 +822,6 @@ function renderPeopleFilter() {
       .forEach(([v, t]) => opt(g, `u|${uid}|${v}`, `${name}: ${t}`));
     el.filterPeople.appendChild(g);
   });
-  el.filterPeople.value = [...el.filterPeople.options].some(o => o.value === cur) ? cur : '';
 }
 
 /** Terms used on visible votes: { labels: Map(term→count), reasons: Map(term→count) } */
@@ -679,7 +840,6 @@ function renderLabelFilter() {
   const used = usedTerms();
   const byCount = m => [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
   const labels = byCount(used.labels), reasons = byCount(used.reasons);
-  const cur = el.filterLabel.value;
   const sig = labels.map(x => x.join('=')).join('|') + '#' + reasons.map(x => x.join('=')).join('|');
   if (el.filterLabel.dataset.sig === sig) return;
   el.filterLabel.dataset.sig = sig;
@@ -696,7 +856,6 @@ function renderLabelFilter() {
     reasons.forEach(([t, n]) => opt(g, `r:${t}`, `${t} (${n})`));
     el.filterLabel.appendChild(g);
   }
-  el.filterLabel.value = [...el.filterLabel.options].some(o => o.value === cur) ? cur : '';
 }
 
 // ------------------------------------------------------------
@@ -1997,8 +2156,9 @@ function updateSelectionBar() {
   el.reanalyzeSelectedBtn.disabled = !n;
   el.clearSelectionBtn.disabled = !n;
   document.querySelectorAll('.bulk-btn').forEach(b => { b.disabled = !n; });
-  el.archiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? 'none' : '';
-  el.unarchiveSelectedBtn.style.display = el.filterStatus.value === 'archived' ? '' : 'none';
+  const archivedView = MS.status.has('archived');
+  el.archiveSelectedBtn.style.display = archivedView ? 'none' : '';
+  el.unarchiveSelectedBtn.style.display = archivedView ? '' : 'none';
   const nf = (WS._lastFiltered || []).length;
   setBtnText(el.selectFilteredBtn, `Filtredekilerin tümünü seç (${nf.toLocaleString('tr-TR')})`);
   el.selectFilteredBtn.disabled = !nf || (WS._lastFiltered || []).every(r => WS.selected.has(r.rid));
@@ -2901,7 +3061,6 @@ function renderVersionFilter() {
   const sig = list.map(v => `${v.version}:${v.active}`).join('|');
   if (el.filterStatus.dataset.vsig === sig) return;
   el.filterStatus.dataset.vsig = sig;
-  const cur = el.filterStatus.value;
   const old = el.filterStatus.querySelector('optgroup[data-versions]');
   if (old) old.remove();
   if (list.length > 1) {
@@ -2913,7 +3072,6 @@ function renderVersionFilter() {
     list.forEach(v => add(`ver:${v.version}`, `Etkin sonuç v${v.version} (${v.active.toLocaleString('tr-TR')})`));
     el.filterStatus.appendChild(g);
   }
-  el.filterStatus.value = [...el.filterStatus.options].some(o => o.value === cur) ? cur : 'all';
 }
 
 function icLogicText(criteria, o) {
@@ -3082,6 +3240,214 @@ async function activateVersion(version) {
     await openCloudProject(pid);
     showProjectAdmin(pid);
   } catch (e) { showError('Sürüm etkinleştirilemedi: ' + e.message); }
+}
+
+// ------------------------------------------------------------
+// Statistics summary (modal): every number of the dashboard, explained, so
+// the whole team reads them the same way. Always all records, never a filter.
+// ------------------------------------------------------------
+const KAPPA_BANDS = [[0.81, 'çok iyi'], [0.61, 'iyi'], [0.41, 'orta'], [0.21, 'düşük'], [0, 'çok düşük'], [-Infinity, 'şans düzeyinin altında']];
+
+/** Cohen's kappa of two raters over the records both rated: { n, same, kappa } (kappa null when undefined). */
+function cohenKappa(a, b) {
+  const cats = ['Include', 'Uncertain', 'Exclude'];
+  const ca = Object.fromEntries(cats.map(c => [c, 0])), cb = Object.fromEntries(cats.map(c => [c, 0]));
+  let n = 0, same = 0;
+  a.forEach((da, rid) => {
+    const db = b.get(rid);
+    if (!db || ca[da] === undefined || cb[db] === undefined) return;
+    n++; ca[da]++; cb[db]++;
+    if (da === db) same++;
+  });
+  if (!n) return { n, same, kappa: null };
+  const po = same / n;
+  const pe = cats.reduce((s, c) => s + (ca[c] / n) * (cb[c] / n), 0);
+  return { n, same, kappa: pe >= 1 ? null : (po - pe) / (1 - pe) };
+}
+
+function openStatsSummary() {
+  if (!WS.hasData()) return;
+  const body = el.statsBody;
+  body.textContent = '';
+  const fmt = v => v.toLocaleString('tr-TR');
+  const pct = (a, b) => (b ? `%${(a / b * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}` : '—');
+  const strong = v => text('strong', typeof v === 'number' ? fmt(v) : v);
+  const sec = (title, intro) => {
+    const s = document.createElement('section');
+    s.className = 'stats-sec';
+    s.appendChild(text('h3', title));
+    if (intro) s.appendChild(text('p', intro, 'stats-intro'));
+    body.appendChild(s);
+    return s;
+  };
+  const note = (parent, value) => parent.appendChild(text('p', value, 'stats-note'));
+  const defs = (parent, items) => {
+    const dl = document.createElement('dl');
+    dl.className = 'stats-defs';
+    items.forEach(([k, v]) => dl.append(text('dt', k), text('dd', v)));
+    parent.appendChild(dl);
+  };
+  const cloud = WS.isCloud;
+  const showAi = !WS.aiHidden;
+  const D = ['Include', 'Uncertain', 'Exclude'];
+  const recs = WS.records;
+  const active = recs.filter(isActive);
+  const n = active.length;
+
+  body.appendChild(text('p', `${cloud ? WS.project.name : (run && run.fileName) || 'Yerel analiz'} · ${new Date().toLocaleString('tr-TR')} · Sayılar o anki veriden hesaplanır; Tarama sekmesindeki filtreler dikkate alınmaz.`, 'stats-meta'));
+
+  // 1. sources -------------------------------------------------------------
+  const src = sourceBreakdown(cloud ? WS.project : null, recs, run && run.fileName);
+  const T = { total: 0, removed: 0, pending: 0, archived: 0, active: 0 };
+  src.forEach(s => Object.keys(T).forEach(k => { T[k] += s[k]; }));
+  const s1 = sec('1. Kayıtlar nereden geldi', 'Her yükleme (bir veritabanı araması) ayrı bir kaynaktır. Her kayıt aşağıdaki dört durumdan yalnızca birindedir; dördünün toplamı yüklenen kayıt sayısıdır.');
+  const t1 = miniTable(['Kaynak', 'Kayıt', 'Tekrar (kaldırıldı)', 'Tekrar adayı', 'Arşiv', 'Aktif']);
+  src.forEach(s => t1.row([s.label, fmt(s.total), fmt(s.removed), fmt(s.pending), fmt(s.archived), strong(s.active)]));
+  if (src.length > 1) t1.row([strong('Toplam'), strong(T.total), strong(T.removed), strong(T.pending), strong(T.archived), strong(T.active)]);
+  s1.appendChild(t1.wrap);
+  note(s1, `Aktif kayıt = ${fmt(T.total)} − ${fmt(T.removed)} tekrar − ${fmt(T.pending)} tekrar adayı − ${fmt(T.archived)} arşiv = ${fmt(T.active)}. Tarama sekmesindeki ve aşağıdaki bütün karar sayıları bu ${fmt(T.active)} kayıttan hesaplanır.`);
+  defs(s1, [
+    ['Tekrar', 'Başka bir kaydın kopyası olduğu için kaldırılan kayıt. Aynı DOI ya da aynı başlık + yıl yüklemede otomatik kaldırılır; benzer başlıklar Tekrarlar sekmesinde onaylanınca kaldırılır. Silinmez, Tekrarlar sekmesinden geri alınabilir.'],
+    ['Tekrar adayı', 'Benzer başlığı olan ve kararınızı bekleyen kayıt. Karar verilene kadar taramaya girmez.'],
+    ['Arşiv', 'Elle havuz dışına alınmış kayıt. Sayılmaz, geri alınabilir.']
+  ]);
+
+  // 2. decisions -----------------------------------------------------------
+  const human = {}, fill = {}, eff = {}, aiAll = {}, moveOut = {}, moveIn = {};
+  D.forEach(d => { human[d] = 0; fill[d] = 0; eff[d] = 0; aiAll[d] = 0; moveOut[d] = 0; moveIn[d] = 0; });
+  let undecided = 0, noAi = 0, aiErr = 0, rev = 0, revOpen = 0, fin = 0, mine = 0, conflicts = 0, conflictsOpen = 0;
+  const pendingByAi = {}; D.forEach(d => { pendingByAi[d] = 0; });
+  const matrix = {}; D.forEach(a => { matrix[a] = {}; D.forEach(h => { matrix[a][h] = 0; }); });
+  active.forEach(rec => {
+    const ai = WS.ai.get(rec.rid);
+    const aiDec = ai && !ai.error ? aiDecisionOf(ai) : '';
+    const h = cloud ? rec.finalDecision : ((myVote(rec.rid) || {}).decision || '');
+    if (D.includes(h)) { human[h]++; eff[h]++; }
+    else if (showAi && D.includes(aiDec)) { fill[aiDec]++; eff[aiDec]++; }
+    else undecided++;
+    if (D.includes(aiDec)) aiAll[aiDec]++;
+    // a human decision moves the record out of the AI's row into its own
+    if (showAi && D.includes(h) && h !== aiDec) { moveIn[h]++; if (D.includes(aiDec)) moveOut[aiDec]++; }
+    if (!ai) noAi++;
+    if (ai && ai.error) aiErr++;
+    if (ai && ai.needs_human_review) { rev++; if (!h) revOpen++; }
+    if (rec.finalDecision) fin++;
+    const mv = myVote(rec.rid);
+    if (mv && mv.decision) mine++;
+    if (cloud && hasConflict(rec.rid)) { conflicts++; if (!rec.finalDecision) conflictsOpen++; }
+    if (!h && D.includes(aiDec)) pendingByAi[aiDec]++;
+    if (D.includes(h) && D.includes(aiDec)) matrix[aiDec][h]++;
+  });
+  const who = cloud ? 'Nihai karar' : 'Sizin kararınız';
+  const s2 = sec('2. Karar dağılımı', `Tarama sekmesindeki büyük sayılar "geçerli karar"dır: ${cloud ? 'nihai karar verilmişse o' : 'siz karar verdiyseniz sizinki'}, verilmemişse AI'nın kararı sayılır.`);
+  const t2 = miniTable(showAi ? ['', 'Geçerli karar', `= ${who}`, '+ AI (insan kararı yokken)', 'AI\'nın toplamda dediği'] : ['', who]);
+  D.forEach(d => t2.row(showAi
+    ? [DECISION_LABEL[d], strong(eff[d]), fmt(human[d]), fmt(fill[d]), fmt(aiAll[d])]
+    : [DECISION_LABEL[d], strong(human[d])]));
+  const sum = o => D.reduce((a, d) => a + o[d], 0);
+  t2.row(showAi
+    ? [strong('Toplam'), strong(sum(eff)), strong(sum(human)), strong(sum(fill)), strong(sum(aiAll))]
+    : [strong('Toplam'), strong(sum(human))]);
+  s2.appendChild(t2.wrap);
+  if (showAi) {
+    const whoLow = cloud ? 'nihai karar' : 'sizin kararınız';
+    const lines = D.filter(d => moveOut[d] || moveIn[d]).map(d =>
+      `${DECISION_LABEL[d]}: AI ${fmt(aiAll[d])} − ${fmt(moveOut[d])} (AI ${DECISION_LABEL[d]} dedi, ${whoLow} farklı) + ${fmt(moveIn[d])} (${whoLow} ${DECISION_LABEL[d]}, AI farklı ya da sonuç yok) = ${fmt(eff[d])}`);
+    note(s2, `Son sütun AI'nın bu kayıtlara verdiği kararların tamamıdır. ${who} AI'dan farklıysa kayıt AI'nın satırından çıkıp ${whoLow} satırına geçer; bu yüzden son sütun "Geçerli karar" sütununu tutmaz.` +
+      (lines.length ? ` Hesap: ${lines.join(' · ')}.` : ''));
+  }
+  if (undecided) note(s2, `${fmt(undecided)} aktif kaydın geçerli kararı yok (${showAi ? 'ne insan kararı ne de kullanılabilir AI sonucu var' : 'henüz karar verilmemiş'}).`);
+
+  // 3. progress ------------------------------------------------------------
+  const s3 = sec('3. İlerleme');
+  const kv = document.createElement('div');
+  kv.className = 'stats-kv';
+  const kvRow = (label, value, hint) => {
+    const r = document.createElement('div');
+    r.className = 'stats-kv-row';
+    r.append(text('span', label, 'stats-kv-k'), text('strong', value, 'stats-kv-v'));
+    if (hint) r.appendChild(text('span', hint, 'stats-kv-h'));
+    kv.appendChild(r);
+  };
+  if (cloud) kvRow('Nihai karar verilen', `${fmt(fin)} / ${fmt(n)} · ${pct(fin, n)}`, `Kalan ${fmt(n - fin)} kayıtta geçerli karar AI'dan geliyor${showAi ? ` (AI: ${fmt(pendingByAi.Include)} Include, ${fmt(pendingByAi.Uncertain)} Maybe, ${fmt(pendingByAi.Exclude)} Exclude)` : ''}.`);
+  kvRow('Sizin oyunuz', `${fmt(mine)} / ${fmt(n)} · ${pct(mine, n)}`, 'Sizin Include / Maybe / Exclude oy verdiğiniz aktif kayıtlar.');
+  if (showAi) {
+    kvRow('İnceleme önerilen', fmt(rev), `AI'nın "bir insan baksın" dediği kayıtlar (Maybe kararları, düşük güven ya da belirsiz ölçüt). Bunlardan ${fmt(rev - revOpen)} tanesine ${cloud ? 'nihai karar' : 'karar'} verildi; bekleyen ${fmt(revOpen)}.`);
+    if (noAi) kvRow('AI analizi yapılmamış', fmt(noAi), 'AI kararı olmayan aktif kayıtlar; Tarama → "Filtredekileri yeniden analiz et" ile analiz edilebilir.');
+    if (aiErr) kvRow('AI hatası', fmt(aiErr), 'API hatası nedeniyle sonucu olmayan kayıtlar; yeniden taranabilir.');
+  }
+  if (cloud && !WS.blindForMe) kvRow('Çatışma', fmt(conflicts), `En az iki hakemin farklı karar verdiği kayıt. ${fmt(conflicts - conflictsOpen)} tanesi nihai kararla çözüldü, ${fmt(conflictsOpen)} tanesi bekliyor.`);
+  s3.appendChild(kv);
+
+  // 4. AI vs human ---------------------------------------------------------
+  const both = D.reduce((a, x) => a + D.reduce((b, y) => b + matrix[x][y], 0), 0);
+  if (showAi && both) {
+    const agree = D.reduce((a, d) => a + matrix[d][d], 0);
+    const s4 = sec(`4. AI ile ${cloud ? 'nihai karar' : 'sizin kararınız'} ne kadar örtüşüyor`,
+      `Hem AI kararı hem ${cloud ? 'nihai karar' : 'sizin kararınız'} olan ${fmt(both)} kayıt. Satır AI'nın, sütun ${cloud ? 'nihai kararın' : 'sizin'} dediğidir; köşegen aynı kararlardır.`);
+    const t4 = miniTable([`AI ↓ / ${cloud ? 'Nihai' : 'Siz'} →`, ...D.map(d => DECISION_LABEL[d]), 'Toplam']);
+    D.forEach(a => t4.row([DECISION_LABEL[a], ...D.map(h => (a === h ? strong(matrix[a][h]) : fmt(matrix[a][h]))), fmt(D.reduce((s, h) => s + matrix[a][h], 0))]));
+    s4.appendChild(t4.wrap);
+    note(s4, `Aynı karar: ${fmt(agree)} / ${fmt(both)} · ${pct(agree, both)}. AI'nın Exclude deyip ${cloud ? 'nihai kararın' : 'sizin'} Include dediği ${fmt(matrix.Exclude.Include)} kayıt, AI'nın kaçırabileceği çalışmaların göstergesidir; AI'nın Include deyip Exclude edilen ${fmt(matrix.Include.Exclude)} kayıt ise AI'nın fazladan aldıklarıdır.`);
+  }
+
+  // 5–6. reviewers ---------------------------------------------------------
+  if (cloud) {
+    const byUser = new Map();
+    const add = (uid, rid, v) => {
+      if (!byUser.has(uid)) byUser.set(uid, new Map());
+      if (v && D.includes(v.decision)) byUser.get(uid).set(rid, v.decision);
+    };
+    add(WS.meId, null, null);
+    if (!WS.blindForMe) (WS.members || []).forEach(uid => add(uid, null, null));
+    active.forEach(rec => {
+      add(WS.meId, rec.rid, myVote(rec.rid));
+      otherVotes(rec.rid).forEach(v => add(v.user_id, rec.rid, v));
+    });
+    const nameOf = uid => (uid === WS.meId ? `${Cloud.displayName} (siz)` : personName(uid));
+    const users = [...byUser.keys()].sort((a, b) => (a === WS.meId ? -1 : b === WS.meId ? 1 : nameOf(a).localeCompare(nameOf(b), 'tr')));
+    const s5 = sec('5. Hakemler', WS.blindForMe
+      ? 'Kör mod açık: yalnızca kendi oylarınızı görüyorsunuz.'
+      : 'Her hakemin aktif kayıtlara verdiği oylar. Kapsama = oy verilen aktif kayıt / bütün aktif kayıtlar.');
+    const t5 = miniTable(['Hakem', 'Include', 'Maybe', 'Exclude', 'Toplam', 'Kapsama']);
+    users.forEach(uid => {
+      const m = byUser.get(uid);
+      const c = { Include: 0, Uncertain: 0, Exclude: 0 };
+      m.forEach(d => { c[d]++; });
+      t5.row([nameOf(uid), fmt(c.Include), fmt(c.Uncertain), fmt(c.Exclude), strong(m.size), pct(m.size, n)]);
+    });
+    s5.appendChild(t5.wrap);
+
+    const pairs = [];
+    for (let i = 0; i < users.length; i++) {
+      for (let j = i + 1; j < users.length; j++) {
+        const k = cohenKappa(byUser.get(users[i]), byUser.get(users[j]));
+        if (k.n) pairs.push([users[i], users[j], k]);
+      }
+    }
+    if (pairs.length) {
+      const s6 = sec('6. Hakemler arası uyum', 'İki hakemin birlikte oy verdiği kayıtlarda aynı kararı verme oranı ve Cohen\'in kappa (κ) katsayısı. κ şans eseri uyumu düzeltir: 1 tam uyum, 0 şans düzeyi demektir.');
+      const t6 = miniTable(['Hakem çifti', 'Ortak kayıt', 'Aynı karar', 'Uyum', 'Cohen κ', 'Yorum']);
+      pairs.forEach(([a, b, k]) => {
+        const band = k.kappa == null ? '—' : KAPPA_BANDS.find(([min]) => k.kappa >= min)[1];
+        t6.row([`${nameOf(a)} · ${nameOf(b)}`, fmt(k.n), fmt(k.same), pct(k.same, k.n),
+          k.kappa == null ? '—' : strong(k.kappa.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })), band]);
+      });
+      s6.appendChild(t6.wrap);
+      note(s6, 'Yorum (Landis ve Koch, 1977): 0,81–1,00 çok iyi · 0,61–0,80 iyi · 0,41–0,60 orta · 0,21–0,40 düşük · 0–0,20 çok düşük. Kararların neredeyse hepsi aynı kategorideyse (ör. çoğu Exclude) κ, uyum yüksek olsa bile düşük çıkabilir.');
+    }
+  }
+
+  el.statsModal.style.display = 'flex';
+  refreshIcons();
+}
+
+async function copyStatsSummary() {
+  try {
+    await navigator.clipboard.writeText(el.statsBody.innerText);
+    setBtnText(el.statsCopyBtn, 'Kopyalandı');
+    setTimeout(() => setBtnText(el.statsCopyBtn, 'Metin olarak kopyala'), 1600);
+  } catch (e) { showError('Kopyalanamadı: ' + e.message); }
 }
 
 // ------------------------------------------------------------
@@ -3293,15 +3659,43 @@ async function showProjectAdmin(pid) {
   }));
   sSet.appendChild(acts);
 
-  // --- sources (imports)
-  const imports = (project.protocol && project.protocol.imports) || [];
-  if (imports.length) {
-    const sSrc = section('Kaynaklar', 'Her yükleme ayrı kaynak olarak tutulur (PRISMA: veritabanlarından tanımlanan kayıtlar).');
-    const t = miniTable(['Kaynak', 'Dosya', 'Tarih', 'Kayıt', 'Tekrar', 'Yeni']);
-    imports.forEach(im => t.row([im.label || '—', im.fileName || '', im.date ? new Date(im.date).toLocaleDateString('tr-TR') : '',
-      (im.total || 0).toLocaleString('tr-TR'), im.importId ? ((im.dupExisting || 0) + (im.dupWithin || 0)).toLocaleString('tr-TR') : '—',
-      im.importId ? (im.fresh || 0).toLocaleString('tr-TR') : '—']));
-    sSrc.appendChild(t.wrap);
+  // --- sources (imports): counted live from the records, not from the import-time summary
+  const sSrc = section('Kaynaklar', 'Her yükleme ayrı kaynak olarak tutulur (PRISMA: veritabanlarından tanımlanan kayıtlar). Sayılar veritabanından anlık hesaplanır.');
+  try {
+    const recRows = Cloud.v15 ? await Cloud.fetchRecordStats(pid) : null;
+    if (!recRows) {
+      sSrc.appendChild(text('p', 'Kaynak bazında sayım için veritabanı güncellemesi gerekiyor.', 'admin-hint warn'));
+    } else {
+      const sources = sourceBreakdown(project, recRows.map(r => ({
+        rid: r.rid, importId: r.import_id || '', removed: r.removed, archived: r.archived, duplicateOf: r.duplicate_of || ''
+      })));
+      const t = miniTable(['Kaynak', 'Dosya', 'Tarih', 'Kayıt', 'Tekrar (kaldırıldı)', 'Tekrar adayı', 'Arşiv', 'Aktif', '']);
+      const fmt = n => n.toLocaleString('tr-TR');
+      sources.forEach(s => {
+        const recCell = text('span', fmt(s.total));
+        if (s.fileTotal != null && s.fileTotal !== s.total) recCell.title = `Yükleme sırasında dosyada ${fmt(s.fileTotal)} kayıt vardı.`;
+        const dupCell = text('span', fmt(s.removed));
+        if (s.im && s.im.importId) dupCell.title = `Yükleme sırasında otomatik kaldırılan: ${fmt(s.im.removed || 0)} · sonradan Tekrarlar sekmesinde onaylanan: ${fmt(Math.max(0, s.removed - (s.im.removed || 0)))}`;
+        let act = '';
+        if (manage && s.importId && s.total) {
+          act = uiButton('trash-2', 'Kaynağı sil', 'ui-btn ui-btn-ghost ui-btn-xs is-danger',
+            () => deleteImportSource(project, s, recRows, votes), 'Bu yüklemenin bütün kayıtlarını projeden kaldırır');
+        }
+        t.row([s.label, s.fileName, s.date ? new Date(s.date).toLocaleDateString('tr-TR') : '', recCell, dupCell,
+          fmt(s.pending), fmt(s.archived), text('strong', fmt(s.active)), act]);
+      });
+      if (sources.length > 1) {
+        const sum = k => fmt(sources.reduce((a, s) => a + s[k], 0));
+        t.row([text('strong', 'Toplam'), '', '', text('strong', sum('total')), text('strong', sum('removed')),
+          text('strong', sum('pending')), text('strong', sum('archived')), text('strong', sum('active')), '']);
+      }
+      t.wrap.classList.add('src-table');
+      sSrc.appendChild(t.wrap);
+      sSrc.appendChild(text('p', 'Kayıt: bu kaynaktan projede duran kayıt. Tekrar: başka bir kaydın kopyası olduğu için kaldırılan (yüklemede otomatik ya da Tekrarlar sekmesinde onaylanan). Tekrar adayı: kararınızı bekleyen benzer başlık. Aktif = Kayıt − Tekrar − Tekrar adayı − Arşiv; Tarama sekmesindeki sayılar aktif kayıtlardan hesaplanır.' +
+        (manage ? ' "Kaynağı sil" bir yüklemeyi bütün kayıtları, oyları ve AI sonuçlarıyla birlikte geri alır; yeni bir aramayı deneyip beğenmezseniz kaldırabilirsiniz.' : ''), 'admin-hint'));
+    }
+  } catch (e) {
+    sSrc.appendChild(text('p', 'Kaynak sayıları alınamadı: ' + e.message, 'admin-hint warn'));
   }
 
   // --- AI versions: which criteria gave which results; go back to any of them
@@ -3328,7 +3722,7 @@ async function showProjectAdmin(pid) {
       const note = document.createElement('p');
       note.className = 'admin-hint';
       note.textContent = `${diff.toLocaleString('tr-TR')} aktif kayıtta sürümler farklı karar vermiş. `;
-      note.appendChild(button('Bu kayıtları listele', 'ui-btn ui-btn-ghost ui-btn-xs', () => { switchTab('screen'); el.filterStatus.value = 'vdiff'; WS.page = 1; renderWorkspace(); }));
+      note.appendChild(button('Bu kayıtları listele', 'ui-btn ui-btn-ghost ui-btn-xs', () => { switchTab('screen'); MS.status.set(['vdiff']); WS.page = 1; renderWorkspace(); }));
       note.appendChild(document.createTextNode(' Excel/CSV dışa aktarımı her sürümün kararını ve birleşik (liberal) kararı ayrı sütunlarda verir.'));
       sVer.appendChild(note);
     }
@@ -3395,6 +3789,87 @@ async function showProjectAdmin(pid) {
   const conflicts = [...byRec.values()].filter(s => s.size > 1).length;
   sMem.appendChild(text('p', `Hakemler arası çatışan kayıt: ${conflicts} · En az bir karar almış kayıt: ${byRec.size}`, 'admin-hint'));
   refreshIcons();
+}
+
+/**
+ * Records per source (upload) of a project, counted from the records themselves
+ * rather than from the summary stored at import time:
+ *   [{ importId, label, fileName, date, im, fileTotal, rids, total, removed, pending, archived, active }]
+ * The first upload has importId ''. The four states are exclusive and add up to total.
+ */
+function sourceBreakdown(project, records, fallbackLabel) {
+  const imports = ((project && project.protocol && project.protocol.imports) || []).slice();
+  if (!imports.some(im => !im.importId)) {
+    const name = (project && project.file_name) || fallbackLabel || 'İlk dosya';
+    imports.unshift({ importId: '', label: name, fileName: name, date: project ? project.created_at : '', synthetic: true });
+  }
+  const row = (im, label) => ({
+    importId: im.importId || '', label: label || im.label || im.fileName || '—', fileName: im.fileName || '', date: im.date || '',
+    im, fileTotal: typeof im.total === 'number' ? im.total : null, synthetic: !!im.synthetic,
+    rids: [], total: 0, removed: 0, pending: 0, archived: 0, active: 0
+  });
+  const rows = new Map(imports.map(im => [im.importId || '', row(im)]));
+  records.forEach(r => {
+    const k = r.importId || '';
+    if (!rows.has(k)) rows.set(k, row({ importId: k }, `(bilinmeyen kaynak ${k})`));
+    const s = rows.get(k);
+    s.total++;
+    s.rids.push(r.rid);
+    if (r.removed) s.removed++;
+    else if (r.duplicateOf) s.pending++;
+    else if (r.archived) s.archived++;
+    else s.active++;
+  });
+  return [...rows.values()].filter(s => !(s.synthetic && !s.total));
+}
+
+/** Removes one upload with all its records, votes and AI results, after a typed confirmation. */
+async function deleteImportSource(project, s, recRows, votes) {
+  const pid = project.id;
+  if (isScreeningRunning()) return showError('Analiz sürerken kaynak silinemez.');
+  const fmt = n => n.toLocaleString('tr-TR');
+  const gone = new Set(s.rids);
+  const ids = new Set(recRows.filter(r => gone.has(r.rid)).map(r => r.id));
+  const vs = votes.filter(v => ids.has(v.record_id));
+  const decided = vs.filter(v => v.decision).length;
+  const finals = recRows.filter(r => gone.has(r.rid) && r.final_decision).length;
+  const analysed = recRows.filter(r => gone.has(r.rid) && r.ai_decision && r.ai_decision !== 'Duplicate').length;
+  // records of other sources that were marked as a copy of a record that goes away
+  const restore = recRows.filter(r => !gone.has(r.rid) && r.duplicate_of && gone.has(r.duplicate_of));
+  const lines = [
+    `"${s.label}" kaynağı projeden tamamen silinecek:`,
+    '',
+    `• ${fmt(s.total)} kayıt (${fmt(s.active)} aktif, ${fmt(s.removed + s.pending)} tekrar${s.archived ? `, ${fmt(s.archived)} arşivde` : ''})`,
+    `• bu kayıtlara verilmiş ${fmt(decided)} hakem oyu (etiket, not ve gerekçeleriyle) ve ${fmt(finals)} nihai karar`,
+    `• ${fmt(analysed)} AI sonucu, bütün sürümleriyle`
+  ];
+  if (restore.length) lines.push(`• Diğer kaynaklardan ${fmt(restore.length)} kayıt bu kaynaktaki bir kaydın tekrarı sayılmıştı; tekrar işaretleri kaldırılıp yeniden aktif olacak.`);
+  lines.push('', 'Diğer kaynakların kayıtlarına, oylarına ve kararlarına dokunulmaz. Bu işlem geri alınamaz.', '', 'Onaylamak için SİL yazın:');
+  const typed = prompt(lines.join('\n'));
+  if (typed === null) return;
+  if (!['SİL', 'SIL'].includes(typed.trim().toLocaleUpperCase('tr'))) { showError('Onay metni eşleşmedi, kaynak silinmedi.'); return; }
+  const open = WS.isCloud && WS.project && WS.project.id === pid;
+  try {
+    if (open && WS.aiQueue.length) await flushCloudAi();
+    const n = await Cloud.deleteImport(pid, s.importId, s.rids);
+    if (restore.length) {
+      await Cloud.patchRecords(pid, restore.map(r => ({ rid: r.rid, duplicate_of: null, dup_kind: null, dup_score: null, removed: false, removed_reason: '' })));
+    }
+    const fresh = await Cloud.getProject(pid);
+    const p = Object.assign({}, fresh.protocol);
+    p.imports = (p.imports || []).filter(im => im.importId !== s.importId);
+    await Cloud.updateProject(pid, { protocol: p });
+    // screenshots of the deleted notes (best effort: storage rules may keep other people's files)
+    const imgs = vs.flatMap(v => v.images || []).map(i => (typeof i === 'string' ? i : i && i.path)).filter(Boolean);
+    if (imgs.length) Cloud.removeNoteImages(imgs).catch(e => console.warn(e));
+    showSuccess(`"${s.label}" silindi: ${fmt(n)} kayıt kaldırıldı${restore.length ? `, ${fmt(restore.length)} kayıt yeniden aktif` : ''}. Projesi açık olan diğer hakemler "Yenile" ile güncel hâli görür.`);
+    if (open) await openCloudProject(pid);
+    refreshProjects();
+  } catch (e) {
+    showError('Kaynak silinemedi: ' + e.message);
+  }
+  switchTab('projects');
+  showProjectAdmin(pid);
 }
 
 /** Small shadcn-style table: miniTable(headers).row(cells) — cells may be nodes. */
@@ -3520,7 +3995,19 @@ function switchTab(name) {
 function initWorkspace() {
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
   const rerender = () => { WS.page = 1; renderWorkspace(); };
-  ['filterAi', 'filterMine', 'filterStatus', 'filterLabel', 'sortBy', 'pageSize'].forEach(id => el[id].addEventListener('change', rerender));
+  MS.ai = new MultiFilter(el.filterAi, { test: testAi });
+  MS.mine = new MultiFilter(el.filterMine, { test: testMine });
+  MS.status = new MultiFilter(el.filterStatus, {
+    test: testStatus,
+    hint: 'Aynı başlık altındakiler "ya da", farklı başlıklar "ve" ile birleşir. Havuz dışı listeler seçilince aktif kayıtların yerine onlar gösterilir.'
+  });
+  MS.people = new MultiFilter(el.filterPeople, {
+    test: testPeople, modeSwitch: true,
+    hint: 'Aynı kişinin seçenekleri "ya da" ile birleşir. Örn. Nihai: Dahil + A: Dahil + B: Dahil → üçü birden (Hepsi) ya da herhangi biri.'
+  });
+  MS.label = new MultiFilter(el.filterLabel, { test: testLabel, counts: false, modeSwitch: true });
+  Object.values(MS).forEach(m => { m.onChange = rerender; });
+  ['sortBy', 'pageSize'].forEach(id => el[id].addEventListener('change', rerender));
   el.filterSearch.addEventListener('input', debounce(rerender, 250));
   el.toggleAllAbstractsBtn.addEventListener('click', () => {
     WS.compactAbs = !WS.compactAbs;
@@ -3569,7 +4056,6 @@ function initWorkspace() {
   el.bulkNoteBtn.addEventListener('click', e => { if (WS.selected.size) openNotePopover(e.currentTarget); });
   el.themeFilterNone.addEventListener('click', () => { WS.themeSel.clear(); WS.page = 1; renderWorkspace(); });
   setupStickyFilters();
-  el.filterPeople.addEventListener('change', () => { WS.page = 1; renderWorkspace(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pollChanges(); });
   window.addEventListener('online', () => pollChanges());
   el.reanalyzeSelectedBtn.addEventListener('click', () => reanalyzeRids([...WS.selected]));
@@ -3583,11 +4069,13 @@ function initWorkspace() {
   // dashboard rows open the matching list (duplicates live in their own tab)
   document.querySelectorAll('.ws-queue-row[data-jump]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.jump === 'dups') { switchTab('dups'); return; }
-    el.filterStatus.value = b.dataset.jump;
+    MS.status.set([b.dataset.jump]);
     WS.page = 1;
     renderWorkspace();
-    el.filterStatus.closest('.ws-filters').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.filtersHome.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
+  el.statsSummaryBtn.addEventListener('click', openStatsSummary);
+  el.statsCopyBtn.addEventListener('click', copyStatsSummary);
   el.relevanceReportBtn.addEventListener('click', wsRelevanceReport);
   el.relTopN.addEventListener('change', wsRelevanceReport);
   el.clearFiltersBtn.addEventListener('click', clearFilters);
@@ -3612,9 +4100,8 @@ function initWorkspace() {
   document.querySelectorAll('.th-sort').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); onHeaderSort(b.dataset.sort); }));
   // close the document type panel when clicking elsewhere
   document.addEventListener('click', e => {
-    if (el.docTypeFilter.open && !el.docTypeFilter.contains(e.target)) el.docTypeFilter.open = false;
+    document.querySelectorAll('details.dd-filter[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
     if (el.exportMenu.open && !el.exportMenu.contains(e.target)) el.exportMenu.open = false;
-    if (el.themeFilterDd.open && !el.themeFilterDd.contains(e.target)) el.themeFilterDd.open = false;
   });
   // multi-select lists open to the left when they would leave the screen on the right
   document.addEventListener('toggle', e => {
@@ -3625,7 +4112,11 @@ function initWorkspace() {
     const panel = d.querySelector('.dd-panel');
     if (panel && panel.getBoundingClientRect().right > document.documentElement.clientWidth - 8) d.classList.add('dd-right');
   }, true);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { el.exportMenu.open = false; el.docTypeFilter.open = false; el.themeFilterDd.open = false; } });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    el.exportMenu.open = false;
+    document.querySelectorAll('details.dd-filter[open]').forEach(d => { d.open = false; });
+  });
   el.saveToCloudBtn.addEventListener('click', openSaveDialog);
   el.newProjectBtn.addEventListener('click', () => openImportDialog('new'));
   el.importFile.addEventListener('change', planImportFromDialog);

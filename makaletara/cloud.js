@@ -216,6 +216,26 @@ window.Cloud = (() => {
       }
       return ids;
     },
+    /** Light rows for counting per source (no abstracts, no AI JSON). */
+    async fetchRecordStats(pid) {
+      return fetchAll(() => client.from('records')
+        .select('id,rid,import_id,removed,archived,duplicate_of,final_decision,ai_decision').eq('project_id', pid).order('ord'));
+    },
+    /**
+     * Deletes every record of one import (votes go with them through the foreign
+     * key) and their AI result versions. Owner/admin only (row level security).
+     * Returns the number of deleted records.
+     */
+    async deleteImport(pid, importId, rids) {
+      if (!importId) throw new Error('İlk yüklemenin kayıtları bu yolla silinemez.');
+      if (v15) {
+        for (let i = 0; i < rids.length; i += CHUNK) {
+          check(await client.from('record_ai_versions').delete().eq('project_id', pid).in('rid', rids.slice(i, i + CHUNK)));
+        }
+      }
+      const gone = check(await client.from('records').delete().eq('project_id', pid).eq('import_id', importId).select('rid'));
+      return gone.length;
+    },
     /** Partial update of existing records; every patch must have the same keys (plus rid). */
     async patchRecords(pid, patches) {
       for (let i = 0; i < patches.length; i += CHUNK) {

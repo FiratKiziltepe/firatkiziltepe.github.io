@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=18">
+    <link rel="stylesheet" href="style.css?v=19">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -365,6 +365,7 @@
                     <div class="ws-head-actions results-actions">
                         <button id="saveToCloudBtn" class="ui-btn ui-btn-default" style="display: none;"><i data-lucide="cloud-upload"></i><span>Veritabanına kaydet</span></button>
                         <button id="loadProtocolBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Projenin ölçüt ve yönergesini Analiz formuna yükler"><i data-lucide="clipboard-list"></i><span>Protokolü forma yükle</span></button>
+                        <button id="statsSummaryBtn" class="ui-btn ui-btn-outline" title="Bütün sayıların açıklamalı özeti: kaynaklar, tekrarlar, kararlar, hakem uyumu"><i data-lucide="chart-pie"></i><span>İstatistik özeti</span></button>
                         <button id="relevanceReportBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Çalışma konunuza göre AI'nın verdiği yakınlık skoruna göre sıralı liste"><i data-lucide="target"></i><span>En yakın çalışmalar</span></button>
                         <details id="exportMenu" class="ui-menu">
                             <summary class="ui-btn ui-btn-outline" title="Sonuçları CSV veya Excel olarak indir"><i data-lucide="download"></i><span>Dışa aktar</span><i data-lucide="chevron-down" class="ui-chevron"></i></summary>
@@ -474,7 +475,7 @@
                 </section>
                 <section class="ui-card ws-filters" id="filtersHome" aria-label="Filtreler">
                     <div class="ws-filter-grid" id="filtersGrid">
-                        <label class="ui-field"><span class="ui-label"><i data-lucide="bot"></i>AI kararı</span>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="bot"></i>AI kararı</span>
                             <select id="filterAi" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <option value="analyzed">Analiz edilenler</option>
@@ -484,8 +485,8 @@
                                 <option value="none">Analiz edilmemiş</option>
                                 <option value="error">API hatası</option>
                             </select>
-                        </label>
-                        <label class="ui-field"><span class="ui-label"><i data-lucide="user-check"></i>Benim kararım</span>
+                        </div>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="user-check"></i>Benim kararım</span>
                             <select id="filterMine" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <option value="undecided">Karar vermediklerim</option>
@@ -495,8 +496,8 @@
                                 <option value="Exclude">Exclude dediklerim</option>
                                 <option value="disagree_ai">AI'dan farklı düşündüklerim</option>
                             </select>
-                        </label>
-                        <label class="ui-field"><span class="ui-label"><i data-lucide="list-filter"></i>Durum</span>
+                        </div>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="list-filter"></i>Durum</span>
                             <select id="filterStatus" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <optgroup label="İnceleme">
@@ -522,13 +523,13 @@
                                     <option value="archived">Arşivdekiler</option>
                                 </optgroup>
                             </select>
-                        </label>
-                        <label class="ui-field" id="filterPeopleField" style="display: none;"><span class="ui-label"><i data-lucide="users"></i>Hakem / nihai</span>
-                            <select id="filterPeople" class="ui-select" title="Hakem kararlarına ya da nihai karara göre"><option value="">Tümü</option></select>
-                        </label>
-                        <label class="ui-field"><span class="ui-label"><i data-lucide="tag"></i>Etiket / gerekçe</span>
+                        </div>
+                        <div class="ui-field" id="filterPeopleField" style="display: none;"><span class="ui-label"><i data-lucide="users"></i>Hakem / nihai</span>
+                            <select id="filterPeople" class="ui-select" title="Hakem kararlarına ya da nihai karara göre (birden çok seçilebilir)"><option value="">Tümü</option></select>
+                        </div>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="tag"></i>Etiket / gerekçe</span>
                             <select id="filterLabel" class="ui-select"><option value="">Tümü</option></select>
-                        </label>
+                        </div>
                         <div class="ui-field"><span class="ui-label"><i data-lucide="file-text"></i>Belge türü</span>
                             <details id="docTypeFilter" class="dd-filter">
                                 <summary id="docTypeSummary" class="ui-select" title="Belge türüne göre (birden çok seçilebilir)">Tümü</summary>
@@ -900,6 +901,23 @@
         </div>
     </div>
 
+    <!-- Statistics summary -->
+    <div id="statsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card stats-modal" role="dialog" aria-labelledby="statsModalTitle">
+            <div class="modal-header">
+                <h2 id="statsModalTitle">İstatistik özeti</h2>
+                <button type="button" class="close-modal-btn" data-close="statsModal" aria-label="Kapat">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="statsBody" class="stats-body"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="statsCopyBtn" class="ui-btn ui-btn-outline ui-btn-sm"><i data-lucide="copy"></i><span class="btn-text">Metin olarak kopyala</span></button>
+                <button type="button" class="btn-tertiary" data-close="statsModal">Kapat</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Protocol Preview Modal -->
     <div id="protocolModal" class="modal-overlay" style="display: none;">
         <div class="modal-content card">
@@ -1046,14 +1064,14 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=18"></script>
-    <script src="screening-core.js?v=18"></script>
-    <script src="default-prompt.js?v=18"></script>
-    <script src="cloud.js?v=18"></script>
-    <script src="script.js?v=18"></script>
-    <script src="workspace.js?v=18"></script>
-    <script src="prisma.js?v=18"></script>
-    <script src="assist.js?v=18"></script>
-    <script src="report.js?v=18"></script>
+    <script src="supabase-config.js?v=19"></script>
+    <script src="screening-core.js?v=19"></script>
+    <script src="default-prompt.js?v=19"></script>
+    <script src="cloud.js?v=19"></script>
+    <script src="script.js?v=19"></script>
+    <script src="workspace.js?v=19"></script>
+    <script src="prisma.js?v=19"></script>
+    <script src="assist.js?v=19"></script>
+    <script src="report.js?v=19"></script>
 </body>
 </html>

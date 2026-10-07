@@ -1081,14 +1081,14 @@ function finishRun() {
     el.continueBtn.style.display = 'inline-flex';
     resumeAction = () => runSync();
     // show what was analysed instead of hundreds of empty rows
-    if (el.filterAi.value === 'all') { el.filterAi.value = 'analyzed'; WS.page = 1; }
+    if (!MS.ai.size) { MS.ai.set(['analyzed']); WS.page = 1; }
     logEvent(`Örneklem tamamlandı; ${remaining} kayıt bekliyor.`);
   } else {
     el.progressText.textContent = `✅ Tamamlandı: ${results.size.toLocaleString('tr-TR')} kayıt${errTxt}.`;
     el.continueBtn.style.display = 'none';
     el.nextSampleBtn.style.display = 'none';
     resumeAction = null;
-    if (el.filterAi.value === 'analyzed') el.filterAi.value = 'all';
+    if (MS.ai.size === 1 && MS.ai.has('analyzed')) MS.ai.clear();
     logEvent('Analiz tamamlandı.');
   }
   renderWorkspace();
