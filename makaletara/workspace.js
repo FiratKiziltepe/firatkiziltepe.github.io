@@ -189,19 +189,17 @@ function isPendingDup(rec) { return !!rec.duplicateOf && !rec.removed; }
  * Turns a filter <select> into a checkbox dropdown. The <select> stays in the
  * DOM, hidden, as the source of the options (option groups included), so the
  * code that builds options keeps working. Options of the same group combine
- * with "ya da"; different groups with "ve" — or with "ya da" when the
- * dropdown has the any/all switch and it is set to "herhangi biri".
+ * with "ya da", different groups with "ve" (e.g. Nihai: Dahil + A: Dahil + B: Dahil
+ * → all three).
  *   test(rec, value) → does the record match this one option
  *   counts: show how many active records match each option (computed when opened)
- *   modeSwitch: show the "hepsi / herhangi biri" switch between groups
  */
 class MultiFilter {
-  constructor(select, { test, counts = true, modeSwitch = false, hint = '' } = {}) {
+  constructor(select, { test, counts = true } = {}) {
     this.select = select;
     this.test = test;
     this.counts = counts;
     this.sel = new Set();
-    this.any = false;
     this.onChange = () => {};
     select.hidden = true;
     select.style.display = 'none';
@@ -216,30 +214,13 @@ class MultiFilter {
     acts.className = 'dd-actions';
     const none = button('Seçimi kaldır', 'ui-btn ui-btn-ghost ui-btn-xs', () => { this.clear(); this.onChange(); });
     acts.appendChild(none);
-    if (modeSwitch) {
-      const seg = document.createElement('div');
-      seg.className = 'seg ui-seg dd-mode';
-      seg.title = 'Farklı gruplardan (ör. nihai karar ve hakemler) seçim yaptığınızda nasıl birleşsin';
-      this.modeBtns = [['all', 'Hepsi (ve)'], ['any', 'Herhangi biri (ya da)']].map(([m, label]) => {
-        const b = button(label, 'seg-btn', () => { this.any = m === 'any'; this.syncMode(); if (this.sel.size) this.onChange(); });
-        b.dataset.mode = m;
-        seg.appendChild(b);
-        return b;
-      });
-      acts.appendChild(seg);
-      this.syncMode();
-    }
     this.list = document.createElement('div');
     this.list.className = 'dd-list';
-    panel.appendChild(acts);
-    if (hint) panel.appendChild(text('p', hint, 'dd-hint'));
-    panel.appendChild(this.list);
+    panel.append(acts, this.list);
     dd.append(this.summary, panel);
     select.after(dd);
     dd.addEventListener('toggle', () => { if (dd.open) this.renderCounts(); });
   }
-
-  syncMode() { (this.modeBtns || []).forEach(b => b.classList.toggle('active', (b.dataset.mode === 'any') === this.any)); }
 
   /** [{ value, label, group }] from the hidden <select>, without "Tümü" and hidden options. */
   options() {
@@ -254,18 +235,18 @@ class MultiFilter {
   set(values) { this.sel = new Set(values); }
   clear() { this.sel.clear(); }
 
-  /** Selection as groups of values: { groups: [[v, v], [v]], any } (kept stable for one render). */
+  /** Selection as groups of values: { groups: [[v, v], [v]] }. */
   spec() {
     const byGroup = new Map();
     this.options().forEach(o => { if (this.sel.has(o.value)) { if (!byGroup.has(o.group)) byGroup.set(o.group, []); byGroup.get(o.group).push(o.value); } });
-    return { groups: [...byGroup.values()], any: this.any };
+    return { groups: [...byGroup.values()] };
   }
 
   /** Human-readable selection for the chips and the export metadata. */
   describe() {
     const labels = new Map(this.options().map(o => [o.value, o]));
     const parts = this.spec().groups.map(g => g.map(v => labels.get(v).label).join(' ya da '));
-    return parts.join(this.any ? ' · ya da · ' : ' · ve · ');
+    return parts.join(' · ve · ');
   }
 
   render() {
@@ -328,11 +309,9 @@ function poolTest(rec, v) {
 }
 function inPoolFor(rec, v) { return POOL_OPTIONS.includes(v) ? true : isActive(rec); }
 
-/** True when the record passes a selection spec: OR inside a group, AND (or OR) across groups. */
+/** True when the record passes a selection spec: OR inside a group, AND across groups. */
 function passesSpec(spec, test) {
-  if (!spec.groups.length) return true;
-  const ok = g => g.some(test);
-  return spec.any ? spec.groups.some(ok) : spec.groups.every(ok);
+  return spec.groups.every(g => g.some(test));
 }
 
 const aiDecisionOf = ai => (ai ? ai.ai_decision || ai.decision : '');
@@ -394,7 +373,7 @@ function wsFilterState() {
     mine: MS.mine.spec(),
     status: MS.status.spec(),
     label: MS.label.spec(),
-    people: WS.isCloud ? MS.people.spec() : { groups: [], any: false },
+    people: WS.isCloud ? MS.people.spec() : { groups: [] },
     docTypes: WS.docTypes,
     themes: WS.themeSel,
     yearFrom: parseInt(el.yearFrom.value, 10),
@@ -412,7 +391,7 @@ function matchesWs(rec, f) {
   const pools = f.status.groups.flat().filter(v => POOL_OPTIONS.includes(v));
   if (pools.length) { if (!pools.some(v => poolTest(rec, v))) return false; }
   else if (rec.removed || isPendingDup(rec) || rec.archived) return false;
-  const statusRest = { groups: f.status.groups.map(g => g.filter(v => !POOL_OPTIONS.includes(v))).filter(g => g.length), any: f.status.any };
+  const statusRest = { groups: f.status.groups.map(g => g.filter(v => !POOL_OPTIONS.includes(v))).filter(g => g.length) };
 
   if (!passesSpec(f.ai, v => testAi(rec, v))) return false;
   if (!passesSpec(f.mine, v => testMine(rec, v))) return false;
@@ -3997,15 +3976,9 @@ function initWorkspace() {
   const rerender = () => { WS.page = 1; renderWorkspace(); };
   MS.ai = new MultiFilter(el.filterAi, { test: testAi });
   MS.mine = new MultiFilter(el.filterMine, { test: testMine });
-  MS.status = new MultiFilter(el.filterStatus, {
-    test: testStatus,
-    hint: 'Aynı başlık altındakiler "ya da", farklı başlıklar "ve" ile birleşir. Havuz dışı listeler seçilince aktif kayıtların yerine onlar gösterilir.'
-  });
-  MS.people = new MultiFilter(el.filterPeople, {
-    test: testPeople, modeSwitch: true,
-    hint: 'Aynı kişinin seçenekleri "ya da" ile birleşir. Örn. Nihai: Dahil + A: Dahil + B: Dahil → üçü birden (Hepsi) ya da herhangi biri.'
-  });
-  MS.label = new MultiFilter(el.filterLabel, { test: testLabel, counts: false, modeSwitch: true });
+  MS.status = new MultiFilter(el.filterStatus, { test: testStatus });
+  MS.people = new MultiFilter(el.filterPeople, { test: testPeople });
+  MS.label = new MultiFilter(el.filterLabel, { test: testLabel, counts: false });
   Object.values(MS).forEach(m => { m.onChange = rerender; });
   ['sortBy', 'pageSize'].forEach(id => el[id].addEventListener('change', rerender));
   el.filterSearch.addEventListener('input', debounce(rerender, 250));

@@ -2289,12 +2289,8 @@ button.ws-queue-row:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--u
 .ws .dd-item:hover { background: var(--ui-muted); }
 .ws .dd-item input { accent-color: var(--ui-primary); }
 .ws .dd-filter summary.ui-select { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.ws .dd-actions { align-items: center; flex-wrap: wrap; }
-.ws .dd-mode { margin-left: auto; }
-.ws .dd-mode .seg-btn { padding: 3px 8px; font-size: 0.75rem; }
-.dd-group { padding: 8px 6px 2px; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ui-muted-fg); }
+.dd-group { padding: 8px 6px 2px; font-size: 0.8125rem; font-weight: 700; color: var(--ui-fg); }
 .dd-group:first-child { padding-top: 2px; }
-.dd-hint { margin: 0 0 4px; padding: 0 6px 6px; font-size: 0.75rem; line-height: 1.4; color: var(--ui-muted-fg); border-bottom: 1px solid var(--ui-border); }
 .ws-filters-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
   margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--ui-border);
