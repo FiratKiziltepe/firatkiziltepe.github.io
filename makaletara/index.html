@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20">
+    <link rel="stylesheet" href="style.css?v=23">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -366,7 +366,7 @@
                         <button id="saveToCloudBtn" class="ui-btn ui-btn-default" style="display: none;"><i data-lucide="cloud-upload"></i><span>Veritabanına kaydet</span></button>
                         <button id="loadProtocolBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Projenin ölçüt ve yönergesini Analiz formuna yükler"><i data-lucide="clipboard-list"></i><span>Protokolü forma yükle</span></button>
                         <button id="statsSummaryBtn" class="ui-btn ui-btn-outline" title="Bütün sayıların açıklamalı özeti: kaynaklar, tekrarlar, kararlar, hakem uyumu"><i data-lucide="chart-pie"></i><span>İstatistik özeti</span></button>
-                        <button id="relevanceReportBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Çalışma konunuza göre AI'nın verdiği yakınlık skoruna göre sıralı liste"><i data-lucide="target"></i><span>En yakın çalışmalar</span></button>
+                        <button id="relevanceReportBtn" class="ui-btn ui-btn-outline" style="display: none;" title="Çalışma konunuza göre YZ'nin verdiği yakınlık skoruna göre sıralı liste"><i data-lucide="target"></i><span>En yakın çalışmalar</span></button>
                         <details id="exportMenu" class="ui-menu">
                             <summary class="ui-btn ui-btn-outline" title="Sonuçları CSV veya Excel olarak indir"><i data-lucide="download"></i><span>Dışa aktar</span><i data-lucide="chevron-down" class="ui-chevron"></i></summary>
                             <div class="ui-menu-panel ui-menu-right" role="menu">
@@ -410,26 +410,8 @@
                                 <button type="button" class="seg-btn" data-scope="filter">Geçerli filtre</button>
                             </div>
                         </header>
-                        <div class="ws-dist">
-                            <div class="ws-dist-item inc">
-                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Include</span>
-                                <span class="ws-dist-num" id="includeCount">0</span>
-                                <span class="ws-dist-sub" id="includeSub"></span>
-                            </div>
-                            <div class="ws-dist-item may">
-                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Maybe</span>
-                                <span class="ws-dist-num" id="uncertainCount">0</span>
-                                <span class="ws-dist-sub" id="uncertainSub"></span>
-                            </div>
-                            <div class="ws-dist-item exc">
-                                <span class="ws-dist-label" lang="en"><span class="ws-dot"></span>Exclude</span>
-                                <span class="ws-dist-num" id="excludeCount">0</span>
-                                <span class="ws-dist-sub" id="excludeSub"></span>
-                            </div>
-                        </div>
-                        <div class="ws-dist-bar" aria-hidden="true">
-                            <span id="distBarInc" class="inc"></span><span id="distBarMay" class="may"></span><span id="distBarExc" class="exc"></span>
-                        </div>
+                        <!-- two rows: the human decision and the AI decision, each adding up to the active records (rendered by updateWsStats) -->
+                        <div id="decGrid" class="ws-dec" role="table" aria-label="Karar dağılımı"></div>
                     </section>
 
                     <section class="ui-card ws-stat-progress" aria-labelledby="progTitle">
@@ -475,7 +457,7 @@
                 </section>
                 <section class="ui-card ws-filters" id="filtersHome" aria-label="Filtreler">
                     <div class="ws-filter-grid" id="filtersGrid">
-                        <div class="ui-field"><span class="ui-label"><i data-lucide="bot"></i>AI kararı</span>
+                        <div class="ui-field"><span class="ui-label"><i data-lucide="bot"></i>YZ kararı</span>
                             <select id="filterAi" class="ui-select">
                                 <option value="all">Tümü</option>
                                 <option value="analyzed">Analiz edilenler</option>
@@ -494,7 +476,7 @@
                                 <option value="Include">Include dediklerim</option>
                                 <option value="Uncertain">Maybe dediklerim</option>
                                 <option value="Exclude">Exclude dediklerim</option>
-                                <option value="disagree_ai">AI'dan farklı düşündüklerim</option>
+                                <option value="disagree_ai">YZ'den farklı düşündüklerim</option>
                             </select>
                         </div>
                         <div class="ui-field"><span class="ui-label"><i data-lucide="list-filter"></i>Durum</span>
@@ -637,7 +619,7 @@
                                 <th class="col-pub">Yayın <span class="th-sorts"><button type="button" class="th-sort" data-sort="title">Başlık</button><button type="button" class="th-sort" data-sort="author">Yazar</button><button type="button" class="th-sort" data-sort="year">Yıl</button></span></th>
                                 <th class="col-abstract">Özet · kanıtlar <span class="ev-legend"><mark class="ev-mark ev-inc">dahil</mark><mark class="ev-mark ev-exc">hariç</mark><mark class="ev-mark ev-may">belirsiz</mark></span></th>
                                 <th class="col-reason">Ölçütler · kısa gerekçe</th>
-                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="AI güvenine göre sırala">Güven</button> <span class="th-keys" tabindex="0" title="Klavye: satıra tıklayın, sonra 1 Dahil · 2 Belirsiz · 3 Hariç · R gerekçeyle hariç · J / K sonraki / önceki satır" aria-label="Klavye kısayolları: satıra tıklayın, sonra 1 Dahil, 2 Belirsiz, 3 Hariç, R gerekçeyle hariç, J ve K satırlar arasında gezinme"><i data-lucide="keyboard"></i></span></th>
+                                <th class="col-decision">Karar <button type="button" class="th-sort" data-sort="conf" title="YZ güvenine göre sırala">Güven</button> <span class="th-keys" tabindex="0" title="Klavye: satıra tıklayın, sonra 1 Dahil · 2 Belirsiz · 3 Hariç · R gerekçeyle hariç · J / K sonraki / önceki satır" aria-label="Klavye kısayolları: satıra tıklayın, sonra 1 Dahil, 2 Belirsiz, 3 Hariç, R gerekçeyle hariç, J ve K satırlar arasında gezinme"><i data-lucide="keyboard"></i></span></th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody"></tbody>
@@ -673,7 +655,7 @@
             <div class="ws-head">
                 <div class="ws-head-text">
                     <h2 class="ws-title">Tematik analiz</h2>
-                    <p class="ws-subtitle">Taramadan ayrı bir adımdır: dahil/hariç kararlarını, hakem oylarını ve AI tarama sonucunu değiştirmez. Her makaleye tanımladığınız temalardan 1 ya da en fazla 2 tanesi atanır; uygun tema yoksa "Diğer". 0–100 yakınlık betimsel bir puandır, olasılık değildir.</p>
+                    <p class="ws-subtitle">Taramadan ayrı bir adımdır: dahil/hariç kararlarını, hakem oylarını ve YZ tarama sonucunu değiştirmez. Her makaleye tanımladığınız temalardan 1 ya da en fazla 2 tanesi atanır; uygun tema yoksa "Diğer". 0–100 yakınlık betimsel bir puandır, olasılık değildir.</p>
                 </div>
             </div>
             <div id="themeEmpty" class="ui-card empty-note">Önce bir analiz yükleyin ya da Projeler sekmesinden bir proje açın.</div>
@@ -710,7 +692,7 @@
                             <select id="themeScope" class="ui-select">
                                 <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
                                 <option value="include_any">Dahil + belirsiz (nihai karar / oyum)</option>
-                                <option value="include_ai">AI'nın Include dedikleri</option>
+                                <option value="include_ai">YZ'nin Include dedikleri</option>
                                 <option value="filter">Tarama sekmesindeki geçerli filtre</option>
                                 <option value="selected">Tarama sekmesinde seçtiklerim</option>
                                 <option value="all">Tüm aktif kayıtlar</option>
@@ -759,7 +741,7 @@
                         <select id="chatScope" class="ui-select">
                             <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
                             <option value="include_any">Dahil + belirsiz (nihai karar / oyum)</option>
-                            <option value="include_ai">AI'nın Include dedikleri</option>
+                            <option value="include_ai">YZ'nin Include dedikleri</option>
                             <option value="filter">Tarama sekmesindeki geçerli filtre</option>
                             <option value="selected">Tarama sekmesinde seçtiklerim</option>
                             <option value="all">Tüm aktif kayıtlar</option>
@@ -833,7 +815,7 @@
                             <select id="reportScope" class="ui-select">
                                 <option value="include_final">Dahil ettiklerim (nihai karar / oyum)</option>
                                 <option value="include_any">Dahil + belirsiz</option>
-                                <option value="include_ai">AI'nın Include dedikleri</option>
+                                <option value="include_ai">YZ'nin Include dedikleri</option>
                             </select></label>
                         <label class="ui-field"><span class="ui-label">Rapor türü</span>
                             <select id="reportKind" class="ui-select">
@@ -1042,7 +1024,7 @@
             </div>
             <div class="modal-body">
                 <div id="saveExistingGroup" class="form-group" style="display: none;">
-                    <label class="checkbox-label"><input type="radio" name="saveMode" id="saveModeUpdate"> Bağlı projeyi güncelle (hakem kararları korunur, AI sonuçları ve kayıtlar yenilenir)</label>
+                    <label class="checkbox-label"><input type="radio" name="saveMode" id="saveModeUpdate"> Bağlı projeyi güncelle (hakem kararları korunur, YZ sonuçları ve kayıtlar yenilenir)</label>
                     <label class="checkbox-label"><input type="radio" name="saveMode" id="saveModeNew"> Yeni proje olarak kaydet</label>
                 </div>
                 <div class="form-group">
@@ -1054,7 +1036,7 @@
                     <input type="text" id="saveDescription" class="text-input" maxlength="300">
                 </div>
                 <label class="checkbox-label"><input type="checkbox" id="saveBlind" checked> 🙈 Kör mod açık: hakemler birbirlerinin kararlarını görmez</label>
-                <label class="checkbox-label"><input type="checkbox" id="saveHideAi"> 🤖 AI kararlarını hakemlerden gizle</label>
+                <label class="checkbox-label"><input type="checkbox" id="saveHideAi"> 🤖 YZ kararlarını hakemlerden gizle</label>
                 <p id="saveProgress" class="muted-inline save-progress"></p>
             </div>
             <div class="modal-footer">
@@ -1064,14 +1046,14 @@
         </div>
     </div>
 
-    <script src="supabase-config.js?v=20"></script>
-    <script src="screening-core.js?v=20"></script>
-    <script src="default-prompt.js?v=20"></script>
-    <script src="cloud.js?v=20"></script>
-    <script src="script.js?v=20"></script>
-    <script src="workspace.js?v=20"></script>
-    <script src="prisma.js?v=20"></script>
-    <script src="assist.js?v=20"></script>
-    <script src="report.js?v=20"></script>
+    <script src="supabase-config.js?v=23"></script>
+    <script src="screening-core.js?v=23"></script>
+    <script src="default-prompt.js?v=23"></script>
+    <script src="cloud.js?v=23"></script>
+    <script src="script.js?v=23"></script>
+    <script src="workspace.js?v=23"></script>
+    <script src="prisma.js?v=23"></script>
+    <script src="assist.js?v=23"></script>
+    <script src="report.js?v=23"></script>
 </body>
 </html>

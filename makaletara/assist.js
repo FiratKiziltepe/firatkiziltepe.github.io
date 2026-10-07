@@ -129,7 +129,7 @@ const Assist = (() => {
     const a = WS.ai.get(rid);
     const tags = document.createElement('div');
     tags.className = 'rec-tags';
-    if (a && !WS.aiHidden && (a.ai_decision || a.decision)) tags.appendChild(badge('bot', `AI: ${DECISION_LABEL[a.ai_decision || a.decision] || a.ai_decision}`));
+    if (a && !WS.aiHidden && (a.ai_decision || a.decision)) tags.appendChild(badge('bot', `YZ: ${DECISION_LABEL[a.ai_decision || a.decision] || a.ai_decision}`));
     const h = humanDecision(rec);
     if (h) tags.appendChild(badge('user-check', `${WS.isCloud && rec.finalDecision ? 'Nihai' : 'Oyunuz'}: ${DECISION_LABEL[h]}`, 'ok'));
     const th = themeOf(rec);
@@ -527,7 +527,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       const add = (v, t, parent = el.themeFilter) => { const o = document.createElement('option'); o.value = v; o.textContent = t; parent.appendChild(o); };
       add('', 'Tüm sonuçlar');
       add('unconfirmed', 'Onaylanmamış');
-      add('changed', 'İnsan AI\'dan farklı tema seçti');
+      add('changed', 'İnsan YZ\'dan farklı tema seçti');
       add('stale', 'Eski tema ayarıyla üretilmiş');
       const g = document.createElement('optgroup'); g.label = 'Tema';
       cfg.all.forEach(t => add(`t:${t}`, isProposed(cfg, t) ? `${t} (YZ önerisi)` : t, g));
@@ -639,7 +639,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       if (t.evidence) mid.appendChild(text('blockquote', `“${t.evidence}”`, 'theme-quote'));
       if (t.limitations) mid.appendChild(text('p', `Sınırlılık: ${t.limitations}`, 'theme-lim'));
       if ((t.flags || []).length) mid.appendChild(text('p', `Denetim: ${t.flags.join('; ')}`, 'theme-lim'));
-    } else mid.appendChild(text('p', 'AI tema sonucu yok.', 'theme-lim'));
+    } else mid.appendChild(text('p', 'YZ tema sonucu yok.', 'theme-lim'));
     const right = document.createElement('div');
     right.className = 'theme-confirm';
     right.appendChild(text('div', fin.length ? 'Onaylı tema' : 'Temayı onaylayın (en fazla 2)', 'ui-label'));
@@ -658,7 +658,7 @@ Write "reason" and "limitations" in Turkish, one short sentence each. Copy one s
       box.appendChild(b);
     });
     right.appendChild(box);
-    if (t && !fin.length) right.appendChild(button('AI temasını onayla', 'ui-btn ui-btn-outline ui-btn-xs', () => setFinalThemes(rec, t.themes.filter(g => cfg.all.includes(g)))));
+    if (t && !fin.length) right.appendChild(button('YZ temasını onayla', 'ui-btn ui-btn-outline ui-btn-xs', () => setFinalThemes(rec, t.themes.filter(g => cfg.all.includes(g)))));
     if (fin.length) right.appendChild(button('Onayı kaldır', 'ui-btn ui-btn-ghost ui-btn-xs', () => setFinalThemes(rec, [])));
     row.append(left, mid, right);
     return row;

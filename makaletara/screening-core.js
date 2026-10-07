@@ -1529,7 +1529,7 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
         row[`Karar: ${label(m)}`] = d ? (d.error ? `HATA: ${d.error}` : d.decision) : '';
       });
       Object.assign(row, {
-        'AI Kararı': r.ai_decision,
+        'YZ Kararı': r.ai_decision,
         'İnsan Kararı': r.human_decision || '',
         'Nihai Karar': r.decision,
         'Güven': typeof r.confidence === 'number' ? Number(r.confidence.toFixed(2)) : '',
@@ -1592,7 +1592,7 @@ LANGUAGE OF "rationale": write "rationale" in ${lang || 'English'}. "evidence" q
       ['Uncertain', count('Uncertain')],
       ['İnsan incelemesi işaretli', all.filter(r => r.needs_human_review).length],
       ['İnsan tarafından karar verilen', all.filter(r => r.human_decision).length],
-      ['AI kararı insan tarafından değiştirilen', all.filter(r => r.human_decision && r.human_decision !== r.ai_decision).length],
+      ['YZ kararı insan tarafından değiştirilen', all.filter(r => r.human_decision && r.human_decision !== r.ai_decision).length],
       ['API hatası', all.filter(r => r.error).length],
       ...pairs.map(p => [`Cohen κ (${p.a} – ${p.b})`, `${p.kappa.toFixed(3)} · gözlenen uyum ${(p.observed * 100).toFixed(1)}% · n=${p.n}`]),
       ['', ''],

@@ -938,8 +938,8 @@ async function reanalyzeRecords(recs, opts = {}) {
       sp ? `Protokol: projenin kayıtlı ölçütleri ve yönergesi (v${promptHash})`
         : `Protokol: Analiz sekmesindeki ölçütler ve yönerge (v${promptHash})${prevHash && prevHash !== promptHash ? ` — mevcut sonuçlar v${prevHash} ile üretilmişti` : ''}`,
       cloud && Cloud.v15
-        ? 'Yeni AI kararları etkin sonuç olur; önceki AI sonuçları "AI sürümleri" altında saklanır. Hakem kararları, etiketler ve notlar korunur.'
-        : 'Yeni AI kararları eskilerinin yerine yazılır; hakem kararları, etiketler ve notlar korunur.',
+        ? 'Yeni YZ kararları etkin sonuç olur; önceki YZ sonuçları "YZ sürümleri" altında saklanır. Hakem kararları, etiketler ve notlar korunur.'
+        : 'Yeni YZ kararları eskilerinin yerine yazılır; hakem kararları, etiketler ve notlar korunur.',
       settings.mode === 'async' ? 'Not: Yeniden analiz her zaman paralel (gerçek zamanlı) modda yapılır.' : ''
     ].filter(Boolean).join('\n\n');
     if (!confirm(msg + '\n\nDevam edilsin mi?')) return;

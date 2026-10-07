@@ -2228,15 +2228,23 @@ svg.lucide { width: 16px; height: 16px; flex-shrink: 0; }
 .ws .seg-btn { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; color: var(--ui-muted-fg); }
 .ws .seg-btn:hover { color: var(--ui-fg); }
 .ws .seg-btn.active { background: var(--ui-card); color: var(--ui-fg); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
-.ws-dist { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.ws-dist-item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.ws-dist-label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 500; color: var(--ui-muted-fg); }
-.ws-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.ws-dist-item.inc .ws-dot { background: var(--ui-inc); }
-.ws-dist-item.may .ws-dot { background: var(--ui-may); }
-.ws-dist-item.exc .ws-dot { background: var(--ui-exc); }
-.ws-dist-num { font-size: 1.75rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: var(--ui-fg); font-variant-numeric: tabular-nums; }
-.ws-dist-sub { font-size: 0.72rem; color: var(--ui-muted-fg); cursor: help; font-variant-numeric: tabular-nums; }
+/* decision card: human decision row + AI decision row, each adding up to the records in scope.
+   One grid for both rows (rows use display: contents) so every box has the same size. */
+.ws-dec { display: grid; grid-template-columns: 104px repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 10px 8px; }
+.ws-dec-row { display: contents; }
+.ws-dec-title { align-self: center; font-size: 0.8125rem; font-weight: 600; color: var(--ui-fg); cursor: help; }
+.ws-dec-cell {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 2px; min-width: 0;
+  padding: 8px 10px; border: 1px solid var(--ui-border); border-radius: 8px; background: var(--ui-muted); cursor: help;
+}
+.ws-dec-label { font-size: 0.75rem; font-weight: 600; line-height: 1.3; color: var(--ui-muted-fg); overflow-wrap: anywhere; }
+.ws-dec-num { font-size: 1.35rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--ui-fg); font-variant-numeric: tabular-nums; }
+.ws-dec-cell.inc { background: var(--ui-inc-soft); border-color: var(--ui-inc-line); }
+.ws-dec-cell.inc .ws-dec-label { color: var(--ui-inc); }
+.ws-dec-cell.may { background: var(--ui-may-soft); border-color: var(--ui-may-line); }
+.ws-dec-cell.may .ws-dec-label { color: var(--ui-may); }
+.ws-dec-cell.exc { background: var(--ui-exc-soft); border-color: var(--ui-exc-line); }
+.ws-dec-cell.exc .ws-dec-label { color: var(--ui-exc); }
 .ws-dist-bar { display: flex; height: 8px; margin-top: 16px; border-radius: 999px; overflow: hidden; background: var(--ui-muted); }
 .ws-dist-bar span { height: 100%; width: 0; transition: width 0.3s ease; }
 .ws-dist-bar .inc { background: var(--ui-inc); }
@@ -2372,7 +2380,10 @@ button.ws-queue-row:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--u
   .ws-stats { grid-template-columns: minmax(0, 1fr); }
   .ws-head { margin-top: 16px; align-items: stretch; }
   .ws .ws-title { font-size: 1.25rem; }
-  .ws-dist-num { font-size: 1.4rem; }
+  .ws-dec { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: auto; gap: 6px; }
+  .ws-dec-title { grid-column: 1 / -1; margin-top: 4px; }
+  .ws-dec-cell { min-height: 4.4rem; padding: 6px 8px; }
+  .ws-dec-num { font-size: 1.1rem; }
   .ws-count { margin-left: 0; }
   .ws-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .ws-bulk-spacer { display: none; }
@@ -2385,7 +2396,6 @@ button.ws-queue-row:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--u
   .tab svg.lucide { display: none; }
 }
 @media (max-width: 420px) {
-  .ws-dist { gap: 8px; }
   .ws .ws-head-actions .ui-btn { flex: 1 1 auto; }
 }
 @media (max-width: 360px) {

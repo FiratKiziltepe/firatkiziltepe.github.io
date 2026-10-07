@@ -94,8 +94,8 @@ const Report = (() => {
     const { data, base, edits: e } = current();
     el.prismaFigure.innerHTML = Prisma.flowSvg(data, el.prismaLang.value).svg;
     const s = base.stats;
-    el.prismaNote.textContent = `Karar önceliği: ${WS.isCloud ? 'nihai karar, yoksa oyunuz' : 'oyunuz'}, yoksa AI kararı. `
-      + `${s.aiOnly.toLocaleString('tr-TR')} kaydın kararı yalnızca AI'dan geliyor (şemada ** ile "otomasyon araçlarıyla" satırı). `
+    el.prismaNote.textContent = `Karar önceliği: ${WS.isCloud ? 'nihai karar, yoksa oyunuz' : 'oyunuz'}, yoksa YZ kararı. `
+      + `${s.aiOnly.toLocaleString('tr-TR')} kaydın kararı yalnızca YZ'den geliyor (şemada ** ile "otomasyon araçlarıyla" satırı). `
       + (s.none ? `${s.none.toLocaleString('tr-TR')} kayıt henüz karar almamış. ` : '')
       + 'Tam metin aşaması (erişim, uygunluk, dahil edilen) bu aracın dışındadır; o kutuları siz doldurun. Değişiklikler bu tarayıcıda proje başına saklanır.';
     renderFields(data, base, e);
@@ -152,7 +152,7 @@ const Report = (() => {
     const gs = group('Başlık / özet taraması');
     numField(gs, 'screened', 'Taranan kayıtlar');
     numField(gs, 'excludedHuman', 'Hariç: insan kararıyla');
-    numField(gs, 'excludedAuto', 'Hariç: yalnızca AI kararıyla');
+    numField(gs, 'excludedAuto', 'Hariç: yalnızca YZ kararıyla');
     const gf = group('Tam metin (sizin doldurmanız gerekir)');
     numField(gf, 'sought', 'Erişilmeye çalışılan raporlar', 'Varsayılan: Include + Maybe');
     numField(gf, 'notRetrieved', 'Erişilemeyen raporlar');

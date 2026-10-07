@@ -679,12 +679,12 @@ function renderSourceBar() {
     meta.append(
       badge(p.blind ? 'eye-off' : 'eye', p.blind ? 'Kör mod açık' : 'Kör mod kapalı', p.blind ? 'warn' : ''),
       badge(Cloud.isAdmin ? 'shield' : 'user', Cloud.isAdmin ? 'Yönetici' : 'Hakem'));
-    if (p.hide_ai) meta.append(badge('bot-off', 'AI kararları hakemlerden gizli'));
+    if (p.hide_ai) meta.append(badge('bot-off', 'YZ kararları hakemlerden gizli'));
     const mix = new Map();
     WS.records.forEach(r => { if (isActive(r)) { const v = versionOf(WS.ai.get(r.rid)); if (v) mix.set(v, (mix.get(v) || 0) + 1); } });
     if (mix.size > 1) {
-      const b = badge('git-branch', `AI sonuçları ${mix.size} sürümden`, 'warn');
-      b.title = `Etkin AI sonuçları farklı protokol sürümleriyle üretilmiş: ${[...mix].map(([v, n]) => `v${v}: ${n}`).join(' · ')}. Proje → Yönet → AI sürümleri.`;
+      const b = badge('git-branch', `YZ sonuçları ${mix.size} sürümden`, 'warn');
+      b.title = `Etkin YZ sonuçları farklı protokol sürümleriyle üretilmiş: ${[...mix].map(([v, n]) => `v${v}: ${n}`).join(' · ')}. Proje → Yönet → YZ sürümleri.`;
       meta.append(b);
     }
     const live = text('span', '', 'live-status');
@@ -729,7 +729,7 @@ function activeFilterList() {
   const out = [];
   const q = el.filterSearch.value.trim();
   if (q) out.push({ label: 'Arama', value: `"${q}"`, clear: () => { el.filterSearch.value = ''; } });
-  [['ai', 'AI kararı'], ['mine', 'Benim kararım'], ['status', 'Durum'], ['people', 'Hakem / nihai'], ['label', 'Etiket / gerekçe']].forEach(([k, label]) => {
+  [['ai', 'YZ kararı'], ['mine', 'Benim kararım'], ['status', 'Durum'], ['people', 'Hakem / nihai'], ['label', 'Etiket / gerekçe']].forEach(([k, label]) => {
     if (k === 'people' && !WS.isCloud) return;
     if (MS[k].size) out.push({ label, value: MS[k].describe(), clear: () => { MS[k].clear(); } });
   });
@@ -1449,10 +1449,10 @@ function consensusInfo(rec, ai) {
     if (mine) return { kind: 'mine', decision: mine, text: WS.blindForMe ? 'Oyunuz kaydedildi · kör mod' : 'Yalnızca siz oy verdiniz' };
     if (ds.length === 1) return { kind: 'pending', decision: ds[0], text: '1 hakem oy verdi · sizi bekliyor' };
   } else if (mine) {
-    return { kind: 'mine', decision: mine, text: !aiDec ? 'Sizin kararınız' : mine === aiDec ? 'Sizin kararınız · AI ile aynı' : `Sizin kararınız · AI ${DEC_TR[aiDec]} demişti` };
+    return { kind: 'mine', decision: mine, text: !aiDec ? 'Sizin kararınız' : mine === aiDec ? 'Sizin kararınız · YZ ile aynı' : `Sizin kararınız · YZ ${DEC_TR[aiDec]} demişti` };
   }
-  if (aiDec) return { kind: 'ai', decision: aiDec, text: 'AI önerisi · oyunuzu verin' };
-  if (ai && ai.error && !WS.aiHidden) return { kind: 'error', decision: null, text: 'AI hatası · yeniden analiz edin' };
+  if (aiDec) return { kind: 'ai', decision: aiDec, text: 'YZ önerisi · oyunuzu verin' };
+  if (ai && ai.error && !WS.aiHidden) return { kind: 'error', decision: null, text: 'YZ hatası · yeniden analiz edin' };
   return { kind: 'none', decision: null, text: ai ? 'Henüz karar yok' : 'Analiz edilmedi' };
 }
 
@@ -1593,7 +1593,7 @@ function buildWsRow(rec) {
       bg.appendChild(fill); c.append(text('span', `Konu ilgisi ${pctR}%`, 'relevance-text'), bg);
       cR.appendChild(c);
     }
-  } else cR.appendChild(text('span', WS.aiHidden ? 'AI değerlendirmesi hakemlerden gizli' : 'Henüz analiz edilmedi', 'muted-inline'));
+  } else cR.appendChild(text('span', WS.aiHidden ? 'YZ değerlendirmesi hakemlerden gizli' : 'Henüz analiz edilmedi', 'muted-inline'));
 
   // 4. decision panel
   td('cell-decision').appendChild(decisionPanel(rec, ai, mv));
@@ -1903,25 +1903,63 @@ function onScreenKey(e) {
 function isActive(rec) { return !rec.removed && !rec.archived && !isPendingDup(rec); }
 
 /**
- * Dashboard. Each decision card shows the decision that currently counts
- * (final decision, or my vote locally; otherwise the AI decision) and below
- * it how many of those come from the final/my vote and how many the AI said.
+ * Dashboard. The decision card has two rows that each add up to the records in
+ * scope: the human decision (final decision; my vote locally) with "Bekliyor",
+ * and the AI decision with "Analiz edilmemiş". The two rows are independent
+ * counts — the same column does not mean the same records.
  * Scope: all active records, or the current filter result.
  */
+function renderDecisionGrid(n, human, noHuman, aiC, noAi, aiErr) {
+  const grid = el.decGrid;
+  grid.textContent = '';
+  const fmt = v => v.toLocaleString('tr-TR');
+  const who = WS.isCloud ? 'Nihai karar' : 'Sizin kararınız';
+  const row = (title, hint, cells) => {
+    const r = document.createElement('div');
+    r.className = 'ws-dec-row';
+    r.setAttribute('role', 'row');
+    const head = text('span', title, 'ws-dec-title');
+    head.setAttribute('role', 'rowheader');
+    head.title = hint;
+    r.appendChild(head);
+    cells.forEach(([cls, label, v, tip]) => {
+      const c = document.createElement('div');
+      c.className = `ws-dec-cell ${cls}`;
+      c.setAttribute('role', 'cell');
+      c.title = tip;
+      c.append(text('span', label, 'ws-dec-label'), text('span', fmt(v), 'ws-dec-num'));
+      r.appendChild(c);
+    });
+    grid.appendChild(r);
+  };
+  const whoLow = WS.isCloud ? 'nihai kararı' : 'sizin kararınız';
+  row(who, WS.isCloud ? 'Hakemlerin üzerinde anlaştığı, kesinleşmiş karar.' : 'Bu tarayıcıda verdiğiniz kararlar.', [
+    ['inc', 'Include', human.Include, `${whoLow} Include olan kayıt`],
+    ['may', 'Maybe', human.Uncertain, `${whoLow} Maybe olan kayıt`],
+    ['exc', 'Exclude', human.Exclude, `${whoLow} Exclude olan kayıt`],
+    ['none', 'Bekliyor', noHuman, WS.isCloud ? 'Henüz nihai kararı verilmemiş kayıt' : 'Henüz oy vermediğiniz kayıt']
+  ]);
+  if (!WS.aiHidden) {
+    row("YZ'nin kararı", 'Yapay zekâ analizinin verdiği karar. Nihai karar verilse de değişmez; yalnızca yeniden analizle değişir.', [
+      ['inc', 'Include', aiC.Include, "YZ'nin Include dediği kayıt"],
+      ['may', 'Maybe', aiC.Uncertain, "YZ'nin Maybe dediği kayıt"],
+      ['exc', 'Exclude', aiC.Exclude, "YZ'nin Exclude dediği kayıt"],
+      ['none', 'Analiz edilmemiş', noAi, `YZ sonucu olmayan kayıt${aiErr ? ` (${fmt(aiErr)} tanesinde API hatası)` : ''}`]
+    ]);
+  }
+}
+
 function updateWsStats() {
   const scope = WS.statsScope === 'filter' && WS._lastFiltered ? WS._lastFiltered : WS.records.filter(isActive);
-  const c = { Include: 0, Exclude: 0, Uncertain: 0 };
   const human = { Include: 0, Exclude: 0, Uncertain: 0 };
   const aiC = { Include: 0, Exclude: 0, Uncertain: 0 };
-  let rev = 0, err = 0, mine = 0, conflict = 0, fin = 0;
+  let rev = 0, err = 0, mine = 0, conflict = 0, fin = 0, noHuman = 0, noAi = 0, errScope = 0;
   scope.forEach(rec => {
     const ai = WS.ai.get(rec.rid);
     const aiDec = ai && !ai.error ? ai.ai_decision || ai.decision : null;
     const h = WS.isCloud ? rec.finalDecision : ((myVote(rec.rid) || {}).decision || '');
-    const d = h || (WS.aiHidden ? null : aiDec);
-    if (c[d] !== undefined) c[d]++;
-    if (h && human[h] !== undefined) human[h]++;
-    if (aiDec && aiC[aiDec] !== undefined && !WS.aiHidden) aiC[aiDec]++;
+    if (human[h] !== undefined) human[h]++; else noHuman++;
+    if (aiC[aiDec] !== undefined) aiC[aiDec]++; else { noAi++; if (ai && ai.error) errScope++; }
     if (ai && ai.error) err++;
     if (ai && ai.needs_human_review) rev++;
     const mv = myVote(rec.rid);
@@ -1930,19 +1968,7 @@ function updateWsStats() {
     if (WS.isCloud && hasConflict(rec.rid)) conflict++;
   });
   const n = scope.length;
-  const who = WS.isCloud ? 'nihai' : 'oyunuz';
-  [['Include', 'include'], ['Exclude', 'exclude'], ['Uncertain', 'uncertain']].forEach(([d, k]) => {
-    el[`${k}Count`].textContent = c[d].toLocaleString('tr-TR');
-    el[`${k}Sub`].textContent = WS.aiHidden ? `${who} ${human[d]}` : `${who} ${human[d]} · AI ${aiC[d]}`;
-    el[`${k}Sub`].title = WS.isCloud
-      ? `Nihai kararı ${DEC_TR[d]} olan ${human[d]} kayıt + nihai kararı olmayıp AI'nın ${d} dediği ${c[d] - human[d]} kayıt. AI toplamda ${aiC[d]} kayda ${d} dedi.`
-      : `Sizin ${DEC_TR[d]} dediğiniz ${human[d]} kayıt + oy vermediğiniz ve AI'nın ${d} dediği ${c[d] - human[d]} kayıt.`;
-  });
-  const decided = c.Include + c.Uncertain + c.Exclude;
-  [['distBarInc', 'Include'], ['distBarMay', 'Uncertain'], ['distBarExc', 'Exclude']].forEach(([id, d]) => {
-    el[id].style.width = decided ? `${c[d] / decided * 100}%` : '0%';
-    el[id].title = `${DECISION_LABEL[d]}: ${c[d].toLocaleString('tr-TR')} (%${decided ? Math.round(c[d] / decided * 100) : 0})`;
-  });
+  renderDecisionGrid(n, human, noHuman, aiC, noAi, errScope);
   const fmt = v => v.toLocaleString('tr-TR');
   const pct = v => (n ? `%${Math.round(v / n * 100)}` : '%0');
   el.reviewCount.textContent = fmt(rev);
@@ -1957,7 +1983,7 @@ function updateWsStats() {
   el.conflictCount.textContent = fmt(conflict);
   el.statsScopeInfo.textContent = WS.statsScope === 'filter'
     ? `Sayılar geçerli filtredeki ${n.toLocaleString('tr-TR')} kayda göre.`
-    : `Sayılar tüm aktif kayıtlara göre (tekrar ve arşiv hariç). ${WS.isCloud ? 'Nihai karar varsa o, yoksa AI kararı sayılır.' : 'Oyunuz varsa o, yoksa AI kararı sayılır.'}`;
+    : `Sayılar tüm aktif kayıtlara göre (tekrar ve arşiv hariç). ${WS.aiHidden ? '' : `${WS.isCloud ? 'Nihai karar' : 'Sizin kararınız'} ve YZ'nin kararı ayrı satırlarda; iki satırın toplamı da aktif kayıt sayısıdır.`}`;
   el.retryErrorsBtn.style.display = err && WS.canCurate ? 'inline-flex' : 'none';
   setBtnText(el.retryErrorsBtn, `Hatalı ${err} kaydı yeniden tara`);
   el.relevanceReportBtn.style.display = !WS.aiHidden && [...WS.ai.values()].some(r => typeof r.relevance_score === 'number') ? 'inline-flex' : 'none';
@@ -2188,7 +2214,7 @@ async function flushCloudAi() {
     }
   } catch (e) {
     WS.aiQueue.unshift(...rows);
-    showError('AI sonuçları veritabanına yazılamadı, tekrar denenecek: ' + e.message);
+    showError('YZ sonuçları veritabanına yazılamadı, tekrar denenecek: ' + e.message);
     WS.aiFlushTimer = setTimeout(flushCloudAi, 10000);
   }
 }
@@ -2271,7 +2297,7 @@ function buildDupPair({ a, b }, canEdit) {
     col.appendChild(field('Kaynak ID', rec.ID));
     col.appendChild(field('Excel satırı', rec.SourceRow ? String(rec.SourceRow) : ''));
     const ai = WS.ai.get(rec.rid);
-    const fa = field('AI kararı', '');
+    const fa = field('YZ kararı', '');
     fa.lastChild.replaceWith(ai && !ai.preset ? decisionBadge(ai.ai_decision || ai.decision, true) : text('span', 'analiz edilmedi', 'muted-inline'));
     col.appendChild(fa);
     const ab = document.createElement('div');
@@ -2453,7 +2479,7 @@ function wsExportRows(recs) {
     if (hasSources) row['Kaynak'] = rec.sourceLabel || '';
     if (hasThemes) {
       const t = Assist.themeOf(rec);
-      row['Tema (AI)'] = t ? t.themes.join('; ') : '';
+      row['Tema (YZ)'] = t ? t.themes.join('; ') : '';
       row['Tema yakınlığı (0–100)'] = t && typeof t.relevance === 'number' ? t.relevance : '';
       row['Tema gerekçesi'] = t ? t.reason : '';
       row['Tema kanıtı'] = t ? t.evidence : '';
@@ -2461,11 +2487,11 @@ function wsExportRows(recs) {
     }
     if (versions.length > 1) {
       const m = WS.versions.byRid.get(rec.rid) || new Map();
-      row['AI sürümü (etkin)'] = versionOf(WS.ai.get(rec.rid));
-      versions.forEach(v => { row[`AI v${v}`] = m.get(v) ? DECISION_LABEL[m.get(v)] || m.get(v) : ''; });
+      row['YZ sürümü (etkin)'] = versionOf(WS.ai.get(rec.rid));
+      versions.forEach(v => { row[`YZ v${v}`] = m.get(v) ? DECISION_LABEL[m.get(v)] || m.get(v) : ''; });
       const ds = [...m.values()].filter(Boolean);
       row['Sürüm uyumu'] = !ds.length ? '' : new Set(ds).size === 1 ? `aynı (${ds.length})` : 'farklı';
-      row['Birleşik AI (liberal)'] = ds.includes('Include') ? 'Include' : ds.includes('Uncertain') ? 'Maybe' : ds.length ? 'Exclude' : '';
+      row['Birleşik YZ (liberal)'] = ds.includes('Include') ? 'Include' : ds.includes('Uncertain') ? 'Maybe' : ds.length ? 'Exclude' : '';
     }
     if (WS.isCloud) {
       const m = WS.votes.get(rec.rid) || new Map();
@@ -2794,7 +2820,7 @@ function openSaveDialog() {
   el.saveExistingGroup.style.display = run.cloudProjectId ? 'block' : 'none';
   el.saveModeUpdate.checked = !!run.cloudProjectId;
   el.saveModeNew.checked = !run.cloudProjectId;
-  el.saveProgress.textContent = `${run.records.length} kayıt, ${results.size} AI sonucu ve ${Object.values(run.human || {}).filter(h => h.decision).length} kararınız kaydedilecek.`;
+  el.saveProgress.textContent = `${run.records.length} kayıt, ${results.size} YZ sonucu ve ${Object.values(run.human || {}).filter(h => h.decision).length} kararınız kaydedilecek.`;
   el.saveCloudModal.style.display = 'flex';
 }
 
@@ -2839,7 +2865,7 @@ async function saveToCloud() {
       rid: rec.rid, version: ai.promptHash || run.promptHash, ai: Cloud.stripAi(ai), ai_decision: ai.ai_decision || ai.decision
     }));
     if (Cloud.v15 && versioned.length) {
-      el.saveProgress.textContent = `AI sonuçları sürüm geçmişine yazılıyor (${versioned.length})…`;
+      el.saveProgress.textContent = `YZ sonuçları sürüm geçmişine yazılıyor (${versioned.length})…`;
       await Cloud.upsertAiVersions(project.id, versioned);
     }
     const myVotes = Object.entries(run.human || {})
@@ -2997,7 +3023,7 @@ async function loadVersionIndex(pid) {
     WS.versions = { byRid: new Map() };
     rows.forEach(r => noteVersion(r.rid, r.version, r.ai_decision));
     renderWorkspace();
-  } catch (e) { console.warn('AI sürümleri alınamadı', e); }
+  } catch (e) { console.warn('YZ sürümleri alınamadı', e); }
 }
 
 function noteVersion(rid, version, decision) {
@@ -3044,7 +3070,7 @@ function renderVersionFilter() {
   if (old) old.remove();
   if (list.length > 1) {
     const g = document.createElement('optgroup');
-    g.label = 'AI sürümleri';
+    g.label = 'YZ sürümleri';
     g.dataset.versions = '1';
     const add = (value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; g.appendChild(o); };
     add('vdiff', 'Sürümler farklı karar vermiş');
@@ -3073,7 +3099,7 @@ function versionCard(v, r, pid) {
   const acts = document.createElement('div');
   acts.className = 'admin-row-actions';
   if (v.active < v.total) acts.appendChild(uiButton('undo-2', 'Bu taramaya geri dön', 'ui-btn ui-btn-default ui-btn-xs', () => activateVersion(v.version),
-    'Bu sürümün AI kararlarını etkin yapar; hakem oyları ve nihai kararlar değişmez'));
+    'Bu sürümün YZ kararlarını etkin yapar; hakem oyları ve nihai kararlar değişmez'));
   acts.appendChild(button('Adlandır', 'ui-btn ui-btn-ghost ui-btn-xs', async () => {
     const name = prompt('Bu sürüm için kısa bir ad (ör. "Ölçüt seti A — geniş"):', r.label || '');
     if (name === null) return;
@@ -3205,7 +3231,7 @@ async function activateVersion(version) {
   try { rows = await Cloud.fetchAiVersion(pid, version); } catch (e) { return showError('Sürüm alınamadı: ' + e.message); }
   rows = rows.filter(r => WS.recByRid(r.rid) && r.ai);
   if (!rows.length) return showError('Bu sürümde etkinleştirilecek sonuç yok.');
-  if (!confirm(`v${version} sürümündeki AI sonuçları ${rows.length.toLocaleString('tr-TR')} kayıtta etkin sonuç olacak.\n\nBu sürümde sonucu olmayan kayıtlar değişmez. Hakem kararları, etiketler ve notlar etkilenmez; şu anki sonuçlar kendi sürümlerinde saklı kalır.${reg ? '\nProjenin protokolü de bu sürümün ölçütlerine döner.' : ''}\n\nDevam edilsin mi?`)) return;
+  if (!confirm(`v${version} sürümündeki YZ sonuçları ${rows.length.toLocaleString('tr-TR')} kayıtta etkin sonuç olacak.\n\nBu sürümde sonucu olmayan kayıtlar değişmez. Hakem kararları, etiketler ve notlar etkilenmez; şu anki sonuçlar kendi sürümlerinde saklı kalır.${reg ? '\nProjenin protokolü de bu sürümün ölçütlerine döner.' : ''}\n\nDevam edilsin mi?`)) return;
   try {
     await Cloud.patchRecords(pid, rows.map(r => ({ rid: r.rid, ai: r.ai, ai_decision: r.ai_decision })));
     if (reg) {
@@ -3292,8 +3318,8 @@ function openStatsSummary() {
   ]);
 
   // 2. decisions -----------------------------------------------------------
-  const human = {}, fill = {}, eff = {}, aiAll = {}, moveOut = {}, moveIn = {};
-  D.forEach(d => { human[d] = 0; fill[d] = 0; eff[d] = 0; aiAll[d] = 0; moveOut[d] = 0; moveIn[d] = 0; });
+  const human = {}, eff = {}, aiAll = {};
+  D.forEach(d => { human[d] = 0; eff[d] = 0; aiAll[d] = 0; });
   let undecided = 0, noAi = 0, aiErr = 0, rev = 0, revOpen = 0, fin = 0, mine = 0, conflicts = 0, conflictsOpen = 0;
   const pendingByAi = {}; D.forEach(d => { pendingByAi[d] = 0; });
   const matrix = {}; D.forEach(a => { matrix[a] = {}; D.forEach(h => { matrix[a][h] = 0; }); });
@@ -3302,11 +3328,9 @@ function openStatsSummary() {
     const aiDec = ai && !ai.error ? aiDecisionOf(ai) : '';
     const h = cloud ? rec.finalDecision : ((myVote(rec.rid) || {}).decision || '');
     if (D.includes(h)) { human[h]++; eff[h]++; }
-    else if (showAi && D.includes(aiDec)) { fill[aiDec]++; eff[aiDec]++; }
+    else if (showAi && D.includes(aiDec)) eff[aiDec]++;
     else undecided++;
     if (D.includes(aiDec)) aiAll[aiDec]++;
-    // a human decision moves the record out of the AI's row into its own
-    if (showAi && D.includes(h) && h !== aiDec) { moveIn[h]++; if (D.includes(aiDec)) moveOut[aiDec]++; }
     if (!ai) noAi++;
     if (ai && ai.error) aiErr++;
     if (ai && ai.needs_human_review) { rev++; if (!h) revOpen++; }
@@ -3318,24 +3342,23 @@ function openStatsSummary() {
     if (D.includes(h) && D.includes(aiDec)) matrix[aiDec][h]++;
   });
   const who = cloud ? 'Nihai karar' : 'Sizin kararınız';
-  const s2 = sec('2. Karar dağılımı', `Tarama sekmesindeki büyük sayılar "geçerli karar"dır: ${cloud ? 'nihai karar verilmişse o' : 'siz karar verdiyseniz sizinki'}, verilmemişse AI'nın kararı sayılır.`);
-  const t2 = miniTable(showAi ? ['', 'Geçerli karar', `= ${who}`, '+ AI (insan kararı yokken)', 'AI\'nın toplamda dediği'] : ['', who]);
-  D.forEach(d => t2.row(showAi
-    ? [DECISION_LABEL[d], strong(eff[d]), fmt(human[d]), fmt(fill[d]), fmt(aiAll[d])]
-    : [DECISION_LABEL[d], strong(human[d])]));
+  const whoLow = cloud ? 'nihai karar' : 'sizin kararınız';
   const sum = o => D.reduce((a, d) => a + o[d], 0);
+  const s2 = sec('2. Karar dağılımı', showAi
+    ? `Tarama sekmesindeki kart iki satır gösterir: ${whoLow} ve YZ'nin kararı. Her satırın toplamı aktif kayıt sayısıdır (${fmt(n)}); karar verilmemiş kayıtlar "Bekliyor", YZ sonucu olmayanlar "Analiz edilmemiş" kutusundadır.`
+    : `Tarama sekmesindeki kart ${whoLow} dağılımını gösterir; toplamı aktif kayıt sayısıdır (${fmt(n)}).`);
+  const t2 = miniTable(showAi ? ['', who, "YZ'nin kararı", `Tahmini sonuç (${whoLow} yoksa YZ)`] : ['', who]);
+  D.forEach(d => t2.row(showAi
+    ? [DECISION_LABEL[d], strong(human[d]), fmt(aiAll[d]), fmt(eff[d])]
+    : [DECISION_LABEL[d], strong(human[d])]));
   t2.row(showAi
-    ? [strong('Toplam'), strong(sum(eff)), strong(sum(human)), strong(sum(fill)), strong(sum(aiAll))]
-    : [strong('Toplam'), strong(sum(human))]);
+    ? ['Bekliyor / analiz edilmemiş', fmt(n - sum(human)), fmt(n - sum(aiAll)), fmt(undecided)]
+    : ['Bekliyor', fmt(n - sum(human))]);
+  t2.row(showAi ? [strong('Toplam'), strong(n), strong(n), strong(n)] : [strong('Toplam'), strong(n)]);
   s2.appendChild(t2.wrap);
   if (showAi) {
-    const whoLow = cloud ? 'nihai karar' : 'sizin kararınız';
-    const lines = D.filter(d => moveOut[d] || moveIn[d]).map(d =>
-      `${DECISION_LABEL[d]}: AI ${fmt(aiAll[d])} − ${fmt(moveOut[d])} (AI ${DECISION_LABEL[d]} dedi, ${whoLow} farklı) + ${fmt(moveIn[d])} (${whoLow} ${DECISION_LABEL[d]}, AI farklı ya da sonuç yok) = ${fmt(eff[d])}`);
-    note(s2, `Son sütun AI'nın bu kayıtlara verdiği kararların tamamıdır. ${who} AI'dan farklıysa kayıt AI'nın satırından çıkıp ${whoLow} satırına geçer; bu yüzden son sütun "Geçerli karar" sütununu tutmaz.` +
-      (lines.length ? ` Hesap: ${lines.join(' · ')}.` : ''));
+    note(s2, `Aynı satırdaki iki sayı aynı kayıtları göstermez. Örneğin ${whoLow} Include olan ${fmt(human.Include)} kaydın ${fmt(matrix.Include.Include)} tanesine YZ de Include demişti; ötekilerde YZ başka bir karar vermişti (ayrıntı bölüm 4'te). Son sütun, ${whoLow} verilmemiş kayıtlarda YZ'nin kararını sayarak "tarama şimdi bitse" tahminini verir.`);
   }
-  if (undecided) note(s2, `${fmt(undecided)} aktif kaydın geçerli kararı yok (${showAi ? 'ne insan kararı ne de kullanılabilir AI sonucu var' : 'henüz karar verilmemiş'}).`);
 
   // 3. progress ------------------------------------------------------------
   const s3 = sec('3. İlerleme');
@@ -3348,12 +3371,12 @@ function openStatsSummary() {
     if (hint) r.appendChild(text('span', hint, 'stats-kv-h'));
     kv.appendChild(r);
   };
-  if (cloud) kvRow('Nihai karar verilen', `${fmt(fin)} / ${fmt(n)} · ${pct(fin, n)}`, `Kalan ${fmt(n - fin)} kayıtta geçerli karar AI'dan geliyor${showAi ? ` (AI: ${fmt(pendingByAi.Include)} Include, ${fmt(pendingByAi.Uncertain)} Maybe, ${fmt(pendingByAi.Exclude)} Exclude)` : ''}.`);
+  if (cloud) kvRow('Nihai karar verilen', `${fmt(fin)} / ${fmt(n)} · ${pct(fin, n)}`, `Kalan ${fmt(n - fin)} kayıtta geçerli karar YZ'den geliyor${showAi ? ` (YZ: ${fmt(pendingByAi.Include)} Include, ${fmt(pendingByAi.Uncertain)} Maybe, ${fmt(pendingByAi.Exclude)} Exclude)` : ''}.`);
   kvRow('Sizin oyunuz', `${fmt(mine)} / ${fmt(n)} · ${pct(mine, n)}`, 'Sizin Include / Maybe / Exclude oy verdiğiniz aktif kayıtlar.');
   if (showAi) {
-    kvRow('İnceleme önerilen', fmt(rev), `AI'nın "bir insan baksın" dediği kayıtlar (Maybe kararları, düşük güven ya da belirsiz ölçüt). Bunlardan ${fmt(rev - revOpen)} tanesine ${cloud ? 'nihai karar' : 'karar'} verildi; bekleyen ${fmt(revOpen)}.`);
-    if (noAi) kvRow('AI analizi yapılmamış', fmt(noAi), 'AI kararı olmayan aktif kayıtlar; Tarama → "Filtredekileri yeniden analiz et" ile analiz edilebilir.');
-    if (aiErr) kvRow('AI hatası', fmt(aiErr), 'API hatası nedeniyle sonucu olmayan kayıtlar; yeniden taranabilir.');
+    kvRow('İnceleme önerilen', fmt(rev), `YZ'nin "bir insan baksın" dediği kayıtlar (Maybe kararları, düşük güven ya da belirsiz ölçüt). Bunlardan ${fmt(rev - revOpen)} tanesine ${cloud ? 'nihai karar' : 'karar'} verildi; bekleyen ${fmt(revOpen)}.`);
+    if (noAi) kvRow('YZ analizi yapılmamış', fmt(noAi), 'YZ kararı olmayan aktif kayıtlar; Tarama → "Filtredekileri yeniden analiz et" ile analiz edilebilir.');
+    if (aiErr) kvRow('YZ hatası', fmt(aiErr), 'API hatası nedeniyle sonucu olmayan kayıtlar; yeniden taranabilir.');
   }
   if (cloud && !WS.blindForMe) kvRow('Çatışma', fmt(conflicts), `En az iki hakemin farklı karar verdiği kayıt. ${fmt(conflicts - conflictsOpen)} tanesi nihai kararla çözüldü, ${fmt(conflictsOpen)} tanesi bekliyor.`);
   s3.appendChild(kv);
@@ -3362,12 +3385,12 @@ function openStatsSummary() {
   const both = D.reduce((a, x) => a + D.reduce((b, y) => b + matrix[x][y], 0), 0);
   if (showAi && both) {
     const agree = D.reduce((a, d) => a + matrix[d][d], 0);
-    const s4 = sec(`4. AI ile ${cloud ? 'nihai karar' : 'sizin kararınız'} ne kadar örtüşüyor`,
-      `Hem AI kararı hem ${cloud ? 'nihai karar' : 'sizin kararınız'} olan ${fmt(both)} kayıt. Satır AI'nın, sütun ${cloud ? 'nihai kararın' : 'sizin'} dediğidir; köşegen aynı kararlardır.`);
-    const t4 = miniTable([`AI ↓ / ${cloud ? 'Nihai' : 'Siz'} →`, ...D.map(d => DECISION_LABEL[d]), 'Toplam']);
+    const s4 = sec(`4. YZ ile ${cloud ? 'nihai karar' : 'sizin kararınız'} ne kadar örtüşüyor`,
+      `Hem YZ kararı hem ${cloud ? 'nihai karar' : 'sizin kararınız'} olan ${fmt(both)} kayıt. Satır YZ'nin, sütun ${cloud ? 'nihai kararın' : 'sizin'} dediğidir; köşegen aynı kararlardır.`);
+    const t4 = miniTable([`YZ ↓ / ${cloud ? 'Nihai' : 'Siz'} →`, ...D.map(d => DECISION_LABEL[d]), 'Toplam']);
     D.forEach(a => t4.row([DECISION_LABEL[a], ...D.map(h => (a === h ? strong(matrix[a][h]) : fmt(matrix[a][h]))), fmt(D.reduce((s, h) => s + matrix[a][h], 0))]));
     s4.appendChild(t4.wrap);
-    note(s4, `Aynı karar: ${fmt(agree)} / ${fmt(both)} · ${pct(agree, both)}. AI'nın Exclude deyip ${cloud ? 'nihai kararın' : 'sizin'} Include dediği ${fmt(matrix.Exclude.Include)} kayıt, AI'nın kaçırabileceği çalışmaların göstergesidir; AI'nın Include deyip Exclude edilen ${fmt(matrix.Include.Exclude)} kayıt ise AI'nın fazladan aldıklarıdır.`);
+    note(s4, `Aynı karar: ${fmt(agree)} / ${fmt(both)} · ${pct(agree, both)}. YZ'nin Exclude deyip ${cloud ? 'nihai kararın' : 'sizin'} Include dediği ${fmt(matrix.Exclude.Include)} kayıt, YZ'nin kaçırabileceği çalışmaların göstergesidir; YZ'nin Include deyip Exclude edilen ${fmt(matrix.Include.Exclude)} kayıt ise YZ'nin fazladan aldıklarıdır.`);
   }
 
   // 5–6. reviewers ---------------------------------------------------------
@@ -3603,7 +3626,7 @@ async function showProjectAdmin(pid) {
   sSet.appendChild(grid);
   const check = (checked, label) => { const l = document.createElement('label'); l.className = 'ui-check admin-check'; const c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(label)); return [l, c]; };
   const [blindL, blindC] = check(project.blind, 'Kör mod: hakemler yalnızca kendi kararlarını görür (veritabanı kuralıyla uygulanır)');
-  const [aiL, aiC] = check(project.hide_ai, 'AI kararlarını, güveni ve gerekçeyi hakemlerden gizle (kanıt vurguları görünür kalır)');
+  const [aiL, aiC] = check(project.hide_ai, 'YZ kararlarını, güveni ve gerekçeyi hakemlerden gizle (kanıt vurguları görünür kalır)');
   sSet.append(blindL, aiL);
   const acts = document.createElement('div');
   acts.className = 'admin-actions';
@@ -3671,14 +3694,14 @@ async function showProjectAdmin(pid) {
       t.wrap.classList.add('src-table');
       sSrc.appendChild(t.wrap);
       sSrc.appendChild(text('p', 'Kayıt: bu kaynaktan projede duran kayıt. Tekrar: başka bir kaydın kopyası olduğu için kaldırılan (yüklemede otomatik ya da Tekrarlar sekmesinde onaylanan). Tekrar adayı: kararınızı bekleyen benzer başlık. Aktif = Kayıt − Tekrar − Tekrar adayı − Arşiv; Tarama sekmesindeki sayılar aktif kayıtlardan hesaplanır.' +
-        (manage ? ' "Kaynağı sil" bir yüklemeyi bütün kayıtları, oyları ve AI sonuçlarıyla birlikte geri alır; yeni bir aramayı deneyip beğenmezseniz kaldırabilirsiniz.' : ''), 'admin-hint'));
+        (manage ? ' "Kaynağı sil" bir yüklemeyi bütün kayıtları, oyları ve YZ sonuçlarıyla birlikte geri alır; yeni bir aramayı deneyip beğenmezseniz kaldırabilirsiniz.' : ''), 'admin-hint'));
     }
   } catch (e) {
     sSrc.appendChild(text('p', 'Kaynak sayıları alınamadı: ' + e.message, 'admin-hint warn'));
   }
 
   // --- AI versions: which criteria gave which results; go back to any of them
-  const sVer = section('AI sürümleri', 'Ölçütleri ya da yönergeyi değiştirip yeniden analiz ettiğinizde yeni bir sürüm oluşur; öncekiler silinmez. "Bu taramaya geri dön" yalnızca AI kararlarını değiştirir: hakem oyları, nihai kararlar, etiket, not ve gerekçeler olduğu gibi kalır.');
+  const sVer = section('YZ sürümleri', 'Ölçütleri ya da yönergeyi değiştirip yeniden analiz ettiğinizde yeni bir sürüm oluşur; öncekiler silinmez. "Bu taramaya geri dön" yalnızca YZ kararlarını değiştirir: hakem oyları, nihai kararlar, etiket, not ve gerekçeler olduğu gibi kalır.');
   if (!Cloud.v15) {
     sVer.appendChild(text('p', 'Sürüm takibi için veritabanı güncellemesi gerekiyor.', 'admin-hint warn'));
   } else if (!isOpen) {
@@ -3694,7 +3717,7 @@ async function showProjectAdmin(pid) {
     }
     const list = versionSummary();
     const reg = (project.protocol && project.protocol.versions) || {};
-    if (!list.length) sVer.appendChild(text('p', 'Henüz AI sonucu yok.', 'admin-hint'));
+    if (!list.length) sVer.appendChild(text('p', 'Henüz YZ sonucu yok.', 'admin-hint'));
     list.forEach(v => sVer.appendChild(versionCard(v, reg[v.version], pid)));
     if (list.length > 1) {
       const diff = WS.records.filter(r => isActive(r) && versionsDisagree(r.rid)).length;
@@ -3820,7 +3843,7 @@ async function deleteImportSource(project, s, recRows, votes) {
     '',
     `• ${fmt(s.total)} kayıt (${fmt(s.active)} aktif, ${fmt(s.removed + s.pending)} tekrar${s.archived ? `, ${fmt(s.archived)} arşivde` : ''})`,
     `• bu kayıtlara verilmiş ${fmt(decided)} hakem oyu (etiket, not ve gerekçeleriyle) ve ${fmt(finals)} nihai karar`,
-    `• ${fmt(analysed)} AI sonucu, bütün sürümleriyle`
+    `• ${fmt(analysed)} YZ sonucu, bütün sürümleriyle`
   ];
   if (restore.length) lines.push(`• Diğer kaynaklardan ${fmt(restore.length)} kayıt bu kaynaktaki bir kaydın tekrarı sayılmıştı; tekrar işaretleri kaldırılıp yeniden aktif olacak.`);
   lines.push('', 'Diğer kaynakların kayıtlarına, oylarına ve kararlarına dokunulmaz. Bu işlem geri alınamaz.', '', 'Onaylamak için SİL yazın:');
