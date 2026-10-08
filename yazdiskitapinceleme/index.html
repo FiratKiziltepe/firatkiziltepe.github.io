@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>TTKB İnceleme Prototipi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar" id="topbar"></header>
+    <div class="workspace" id="workspace">
+      <aside class="left" id="left" aria-label="Kitap navigasyonu">
+        <nav class="rail" id="rail" aria-label="Sol panel sekmeleri"></nav>
+        <div class="left-panel" id="leftPanel"></div>
+      </aside>
+      <div class="left-scrim" id="leftScrim"></div>
+      <main class="center" id="center">
+        <div class="doc-tabs" id="docTabs" role="tablist" aria-label="İlişkili kitaplar"></div>
+        <div class="pdf-toolbar" id="pdfToolbar" role="toolbar" aria-label="PDF araçları"></div>
+        <div class="prog-bar" id="progBar" aria-label="Sayfanın öğretim programı bağlamı"></div>
+        <div class="viewer" id="viewer" tabindex="-1" aria-label="PDF çalışma alanı"><div class="pages" id="pages"></div></div>
+      </main>
+      <aside class="right" id="right" aria-label="Değerlendirme paneli">
+        <div class="resize-handle" id="resizeHandle" title="Sürükleyerek genişliği değiştirin · çift tık: varsayılan"></div>
+        <div class="sheet-grip" id="sheetGrip" role="button" aria-label="Paneli büyüt / küçült"><span></span></div>
+        <div class="right-inner" id="rightInner"></div>
+      </aside>
+    </div>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </div>
+  <input type="file" id="pdfFile" accept="application/pdf" hidden>
+  <script src="js/data.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/viewer.js"></script>
+  <script src="js/panels.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
