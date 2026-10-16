@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube MP3 & MP4 İndirici + Ses ve Video Düzenleme Stüdyosu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- LameJS for fast in-browser MP3 encoding -->
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- ÜST BAŞLIK -->
+    <header class="top-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-play"></i>
+        </div>
+        <div class="brand-text">
+          <h1>YouTube MP3 / MP4 & Medya Düzenleyici</h1>
+          <p>Program kurmadan tarayıcıda YouTube indirme, MP3 kesme/birleştirme, video kırpma ve ses ayırma</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div id="engineStatusBadge" class="engine-badge" title="Tüm işlemler tarayıcınızda gerçekleşir">
+          <span class="dot-pulse"></span>
+          <span id="engineStatusText">Tarayıcı Motoru Hazır</span>
+        </div>
+        <button id="loadSampleBtn" class="btn btn-accent btn-sm" title="Araçları hemen denemek için örnek bir MP3 ve MP4 video yükler">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Örnek Ses & Video Yükle (Test Et)
+        </button>
+        <button id="toggleApiSettingsBtn" class="btn btn-outline btn-sm" title="Gelişmiş YouTube API Ayarları">
+          <i class="fa-solid fa-gear"></i> API Ayarları
+        </button>
+        <button id="loadFfmpegBtn" class="btn btn-outline btn-sm" style="display:none;">
+          <i class="fa-solid fa-microchip"></i> FFmpeg
+        </button>
+      </div>
+    </header>
+
+    <!-- 3 ADIMDA KULLANIM REHBERİ -->
+    <div class="guide-strip">
+      <div class="guide-step">
+        <div class="guide-num">1</div>
+        <div>
+          <strong>YouTube Linki veya Dosya Seçin</strong>
+          <span>Üstten YouTube videosu çekin ya da soldan bilgisayarınızdaki MP3/MP4 dosyasını yükleyin.</span>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">2</div>
+        <div>
+          <strong>Yapmak İstediğiniz İşlemi Seçin</strong>
+          <span>Ses kesme, birleştirme, video kırpma, sesi videodan ayırma veya videoya müzik ekleme.</span>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">3</div>
+        <div>
+          <strong>Önizleyin ve İndirin</strong>
+          <span>İşlem tarayıcınızda saniyeler içinde tamamlanır ve doğrudan bilgisayarınıza iner.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BÖLÜM 1: YOUTUBE MP3 / MP4 İNDİRİCİ -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <span class="step-badge">Bölüm 1</span>
+            <i class="fa-brands fa-youtube" style="color: #ef4444; font-size: 1.5rem;"></i>
+            <span>YouTube'dan MP3 veya MP4 İndir</span>
+          </div>
+          <p class="panel-subtitle" style="margin-top:4px;">
+            YouTube video veya Shorts linkini yapıştırın, formatı seçip <strong>"Videoyu Getir"</strong> veya <strong>"Hemen İndir"</strong> butonuna tıklayın.
+          </p>
+        </div>
+      </div>
+
+      <div class="yt-search-bar">
+        <div class="input-group">
+          <i class="fa-brands fa-youtube" style="color:#ef4444;"></i>
+          <input type="text" id="ytUrlInput" class="form-input" placeholder="YouTube linkini buraya yapıştırın (Örn: https://www.youtube.com/watch?v=...)" />
+        </div>
+        <select id="ytFormatSelect" class="form-select" style="width: 195px; font-weight: 600;">
+          <option value="mp3">🎵 MP3 (Ses - 320kbps)</option>
+          <option value="mp4-1080">🎬 MP4 Video (1080p HD)</option>
+          <option value="mp4-720">🎬 MP4 Video (720p HD)</option>
+          <option value="mp4-480">🎬 MP4 Video (480p)</option>
+          <option value="mp4-360">🎬 MP4 Video (360p)</option>
+        </select>
+        <button id="ytAnalyzeBtn" class="btn btn-primary">
+          <i class="fa-solid fa-magnifying-glass"></i> Videoyu Getir
+        </button>
+        <button id="ytDirectDownloadBtn" class="btn btn-success">
+          <i class="fa-solid fa-download"></i> Hemen İndir
+        </button>
+      </div>
+
+      <!-- Gizli API Ayar Çekmecesi (İsteğe Bağlı) -->
+      <div id="apiDrawer" class="api-drawer">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong style="font-size:0.9rem;"><i class="fa-solid fa-server"></i> YouTube Çözümleyici API & Proxy Ayarları</strong>
+          <span style="font-size:0.78rem; color:var(--text-muted);">Bir sunucu yoğun olduğunda otomatik diğerine geçer</span>
+        </div>
+        <div class="controls-grid" style="margin-bottom:8px;">
+          <div class="control-card">
+            <label>Tercih Edilen API Motoru</label>
+            <select id="apiProviderSelect" class="form-select">
+              <option value="auto">Otomatik (Piped + Invidious + Cobalt)</option>
+              <option value="cobalt">Cobalt API</option>
+              <option value="piped">Piped API</option>
+              <option value="invidious">Invidious API</option>
+              <option value="custom">Özel API Adresi</option>
+            </select>
+          </div>
+          <div class="control-card">
+            <label>Özel Cobalt / Worker URL (İsteğe Bağlı)</label>
+            <input type="text" id="customApiUrlInput" class="form-input" placeholder="https://api.cobalt.tools/" />
+          </div>
+          <div class="control-card">
+            <label>CORS Proxy</label>
+            <select id="corsProxySelect" class="form-select">
+              <option value="https://corsproxy.io/?">corsproxy.io (Varsayılan)</option>
+              <option value="https://api.allorigins.win/raw?url=">allorigins.win</option>
+              <option value="none">Proxy Kullanma (Doğrudan)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- YouTube Video Önizleme Kartı -->
+      <div id="ytPreviewCard" class="yt-preview-card">
+        <div class="yt-thumb-wrap">
+          <img id="ytThumbImg" src="" alt="YouTube Kapak" crossorigin="anonymous" />
+          <span id="ytDurationBadge" class="yt-duration-badge">00:00</span>
+        </div>
+        <div class="yt-info">
+          <h3 id="ytTitleText">Video Başlığı</h3>
+          <div class="yt-meta">
+            <span><i class="fa-solid fa-user"></i> <span id="ytAuthorText">Kanal Adı</span></span>
+            <span><i class="fa-solid fa-hashtag"></i> ID: <span id="ytIdText">-</span></span>
+            <span id="ytApiStatusText" style="color: var(--accent);"><i class="fa-solid fa-bolt"></i> Hazır</span>
+          </div>
+          <div class="yt-actions-grid">
+            <button id="ytDownloadMp3Btn" class="btn btn-primary">
+              <i class="fa-solid fa-music"></i> MP3 Olarak İndir
+            </button>
+            <button id="ytDownloadMp4Btn" class="btn btn-accent">
+              <i class="fa-solid fa-video"></i> MP4 Video Olarak İndir
+            </button>
+            <button id="ytImportStudioBtn" class="btn btn-success">
+              <i class="fa-solid fa-scissors"></i> Düzenleme Stüdyosuna Aktar
+            </button>
+            <button id="ytDownloadThumbBtn" class="btn btn-outline btn-sm">
+              <i class="fa-solid fa-image"></i> Kapak Resmini İndir
+            </button>
+            <button id="ytFetchSubtitlesBtn" class="btn btn-outline btn-sm">
+              <i class="fa-solid fa-closed-captioning"></i> Altyazıyı Çek (.SRT)
+            </button>
+          </div>
+          <div id="ytFallbackLinks" style="margin-top: 14px; display: none; font-size: 0.84rem; color: var(--text-muted);">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BÖLÜM 2: MEDYA HAVUZU VE DÜZENLEME STÜDYOSU -->
+    <div class="workspace-grid">
+      <!-- SOL PANEL: DOSYA YÜKLEME & MEDYA LİSTESİ -->
+      <aside class="panel" style="margin-bottom: 0;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="step-badge">Adım 1</span>
+            <span>Dosyalarım</span>
+          </div>
+          <button id="clearPoolBtn" class="btn btn-danger btn-sm" title="Tüm Dosyaları Temizle">
+            <i class="fa-solid fa-trash-can"></i> Temizle
+          </button>
+        </div>
+
+        <div id="fileDropzone" class="dropzone">
+          <i class="fa-solid fa-file-arrow-up"></i>
+          <p>Bilgisayardan MP3 / MP4 Seçin</p>
+          <span>veya dosyaları buraya sürükleyip bırakın</span>
+          <input type="file" id="fileInput" multiple accept="audio/*,video/*,.mp3,.wav,.mp4,.webm,.mkv,.ogg,.m4a,.srt,.vtt" style="display:none;" />
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted);">
+          <span>Yüklü Dosyalar (<strong id="mediaCountLabel" style="color:#fff;">0</strong>)</span>
+          <span>İşlem için dosyaya tıklayın</span>
+        </div>
+
+        <div id="mediaList" class="media-list">
+          <div style="text-align:center; padding: 26px 12px; color: var(--text-dim); font-size: 0.85rem;">
+            <i class="fa-solid fa-music" style="font-size: 1.5rem; margin-bottom: 8px; display:block;"></i>
+            Henüz dosya yüklenmedi.<br><br>Yukarıdaki kutuya tıklayarak bilgisayarınızdan <strong>MP3 / MP4</strong> seçin veya sağ üstteki <strong>"Örnek Ses & Video Yükle"</strong> butonuna basın.
+          </div>
+        </div>
+      </aside>
+
+      <!-- SAĞ PANEL: DÜZENLEME ARAÇLARI -->
+      <main class="panel" style="margin-bottom: 0;">
+        <div class="panel-header" style="margin-bottom: 14px;">
+          <div class="panel-title">
+            <span class="step-badge">Adım 2</span>
+            <span>Yapmak İstediğiniz İşlemi Seçin</span>
+          </div>
+        </div>
+
+        <!-- 4 BÜYÜK VE ANLAŞILIR ANA KATEGORİ KARTI -->
+        <div class="studio-nav">
+          <button class="studio-tab-btn active" data-studio-tab="audioStudio">
+            <i class="fa-solid fa-music"></i>
+            <div class="tab-label">
+              <strong>MP3 Kes & Birleştir</strong>
+              <small>Ses kırpma, birleştirme, hız & bass</small>
+            </div>
+          </button>
+
+          <button class="studio-tab-btn" data-studio-tab="videoStudio">
+            <i class="fa-solid fa-video"></i>
+            <div class="tab-label">
+              <strong>Video Kırp & Birleştir</strong>
+              <small>MP4 kesme, Reels boyut, GIF, altyazı</small>
+            </div>
+          </button>
+
+          <button class="studio-tab-btn" data-studio-tab="muxStudio">
+            <i class="fa-solid fa-arrows-split-up-and-left"></i>
+            <div class="tab-label">
+              <strong>Sesi Ayır / Ses Ekle</strong>
+              <small>Videoyu MP3 yap veya videoya ses ekle</small>
+            </div>
+          </button>
+
+          <button class="studio-tab-btn" data-studio-tab="vizStudio">
+            <i class="fa-solid fa-wave-square"></i>
+            <div class="tab-label">
+              <strong>MP3'ten Video Yap</strong>
+              <small>Ses dalgalı MP4 video oluştur</small>
+            </div>
+          </button>
+        </div>
+
+        <!-- Seçili Dosya Bilgi Çubuğu -->
+        <div id="activeMediaBanner" style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); padding:12px 18px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="dot-pulse" style="color:var(--primary);"></span>
+            <span style="font-size:0.88rem; color:var(--text-muted);">Şu An Düzenlenen Dosya:</span>
+            <strong id="activeMediaName" style="font-size:0.95rem; color:#fff;">Henüz dosya seçilmedi (Soldan dosya yükleyin)</strong>
+          </div>
+          <div id="activeMediaInfo" style="font-size:0.82rem; color:var(--accent); font-weight:600;">
+            Sol taraftan bir MP3 veya MP4 seçin
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SEKME 1: MP3 KESME, EFEKT VE BİRLEŞTİRME   -->
+        <!-- ========================================== -->
+        <div id="audioStudio" class="studio-section active">
+          <div class="subtool-bar">
+            <button class="subtool-pill active" data-audio-pane="audioTrimPane">
+              <i class="fa-solid fa-scissors"></i> 1. MP3 Kesme & Ses Efektleri
+            </button>
+            <button class="subtool-pill" data-audio-pane="audioMergePane">
+              <i class="fa-solid fa-link"></i> 2. Birden Fazla MP3'ü Birleştir
+            </button>
+          </div>
+
+          <!-- Ses Dalga Formu (Waveform) -->
+          <div class="stage-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+              <div style="font-size:0.9rem; font-weight:700; color:#fff;">
+                <i class="fa-solid fa-scissors" style="color:var(--primary);"></i> Kesilecek Aralığı Seçin <span style="font-weight:400; font-size:0.8rem; color:var(--text-muted);">(Grafik üzerinde fareyle sürükleyin veya saniye yazın)</span>
+              </div>
+              <div style="font-size:0.84rem; color:var(--text-muted);">
+                Başlangıç: <strong id="audioStartLabel" style="color:var(--primary);">0.0s</strong> &bull;
+                Bitiş: <strong id="audioEndLabel" style="color:var(--secondary);">0.0s</strong> &bull;
+                Yeni Süre: <strong id="audioDurationLabel" style="color:var(--accent);">0.0 sn</strong>
+              </div>
+            </div>
+
+            <div class="waveform-container" id="waveformContainer" title="Kesmek istediğiniz bölgeyi fareyle basılı tutarak seçin">
+              <canvas id="waveformCanvas" width="900" height="128"></canvas>
+              <div id="audioTrimRegion" class="trim-region" style="left:0%; width:100%;"></div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px;">
+              <div style="display:flex; gap:8px;">
+                <button id="audioPlayPreviewBtn" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-play"></i> Seçili Kısmı Dinle
+                </button>
+                <button id="audioStopPreviewBtn" class="btn btn-outline btn-sm">
+                  <i class="fa-solid fa-stop"></i> Durdur
+                </button>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span style="font-size:0.82rem; color:var(--text-muted);">Başlangıç (sn):</span>
+                <input type="number" id="audioTrimStartInput" class="form-input" style="padding:7px 10px; width:95px;" step="0.1" min="0" value="0" />
+                <span style="font-size:0.82rem; color:var(--text-muted);">Bitiş (sn):</span>
+                <input type="number" id="audioTrimEndInput" class="form-input" style="padding:7px 10px; width:95px;" step="0.1" min="0" value="0" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Alt Araç 1A: MP3 Kesme ve Efektler -->
+          <div id="audioTrimPane" class="tool-pane active">
+            <div style="margin-bottom:10px; font-size:0.86rem; font-weight:600; color:var(--text-muted);">
+              İsteğe Bağlı Ses Efektleri (Değiştirmek istemiyorsanız "Normal" bırakın):
+            </div>
+            <div class="preset-chips">
+              <button class="chip active" data-audio-preset="normal">✨ Normal (Orijinal Ses)</button>
+              <button class="chip" data-audio-preset="slowed">🌙 Slowed + Reverb (Yavaş & Yankılı)</button>
+              <button class="chip" data-audio-preset="nightcore">⚡ Nightcore (Hızlı & İnce)</button>
+              <button class="chip" data-audio-preset="bassboost">🔊 Bass Boost (Güçlü Bas)</button>
+              <button class="chip" data-audio-preset="podcast">🎙️ Net Konuşma / Ses Yükselt</button>
+            </div>
+
+            <div class="controls-grid">
+              <div class="control-card">
+                <label>Çalma Hızı <span class="val" id="audioSpeedVal">1.00x</span></label>
+                <input type="range" id="audioSpeedRange" min="0.5" max="2.0" step="0.05" value="1.0" />
+              </div>
+              <div class="control-card">
+                <label>Ses Yüksekliği <span class="val" id="audioGainVal">100%</span></label>
+                <input type="range" id="audioGainRange" min="20" max="300" step="5" value="100" />
+              </div>
+              <div class="control-card">
+                <label>Bas Kuvvetlendirme (Bass) <span class="val" id="audioBassVal">0 dB</span></label>
+                <input type="range" id="audioBassRange" min="-10" max="18" step="1" value="0" />
+              </div>
+              <div class="control-card">
+                <label>Yankı (Reverb) <span class="val" id="audioReverbVal">0%</span></label>
+                <input type="range" id="audioReverbRange" min="0" max="80" step="5" value="0" />
+              </div>
+              <div class="control-card">
+                <label>Girişte Sesi Yavaşça Aç (Fade In) <span class="val" id="audioFadeInVal">0.0 sn</span></label>
+                <input type="range" id="audioFadeInRange" min="0" max="10" step="0.5" value="0" />
+              </div>
+              <div class="control-card">
+                <label>Bitişte Sesi Yavaşça Kıs (Fade Out) <span class="val" id="audioFadeOutVal">0.0 sn</span></label>
+                <input type="range" id="audioFadeOutRange" min="0" max="10" step="0.5" value="0" />
+              </div>
+            </div>
+
+            <div class="action-footer">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-size:0.88rem; color:var(--text-muted); font-weight:600;">İndirme Kalitesi:</label>
+                <select id="audioExportFormat" class="form-select" style="width:210px;">
+                  <option value="mp3-192">MP3 (192 kbps - Standart)</option>
+                  <option value="mp3-320">MP3 (320 kbps - En Yüksek)</option>
+                  <option value="mp3-128">MP3 (128 kbps - Küçük Boyut)</option>
+                  <option value="wav">WAV (Kayıpsız)</option>
+                </select>
+              </div>
+              <button id="exportAudioBtn" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-download"></i> Sesi Kes ve MP3 Olarak İndir
+              </button>
+            </div>
+          </div>
+
+          <!-- Alt Araç 1B: MP3 Birleştirme -->
+          <div id="audioMergePane" class="tool-pane">
+            <div class="helper-box">
+              <strong>Nasıl Birleştirilir?</strong> Soldaki <em>Dosyalarım</em> listesinden bir MP3 seçip aşağıdaki <strong>"+ Seçili Sesi Sıraya Ekle"</strong> butonuna basın. Birden fazla ses ekledikten sonra <strong>"Sesleri Birleştir ve MP3 İndir"</strong> butonuna tıklayın.
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <strong style="font-size:0.92rem;">Birleştirilecek Ses Sırası:</strong>
+              <button id="addActiveToAudioMergeBtn" class="btn btn-accent btn-sm">
+                <i class="fa-solid fa-plus"></i> Seçili Sesi Sıraya Ekle
+              </button>
+            </div>
+
+            <div id="audioMergeList" class="merge-list">
+              <div style="text-align:center; color:var(--text-dim); font-size:0.85rem; padding:18px;">
+                Henüz ses eklenmedi. Soldan bir ses seçip <strong>"+ Seçili Sesi Sıraya Ekle"</strong> butonuna tıklayın.
+              </div>
+            </div>
+
+            <div class="action-footer">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-size:0.88rem; color:var(--text-muted); font-weight:600;">Şarkılar Arası Geçiş:</label>
+                <select id="audioCrossfadeSelect" class="form-select" style="width:190px;">
+                  <option value="0">Normal (Arka arkaya ekle)</option>
+                  <option value="1">1 Saniye Yumuşak Geçiş</option>
+                  <option value="2">2 Saniye Yumuşak Geçiş</option>
+                </select>
+              </div>
+              <button id="mergeAudioExecuteBtn" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-object-group"></i> Sesleri Birleştir ve MP3 İndir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SEKME 2: VİDEO KIRPMA, BİRLEŞTİRME, GIF    -->
+        <!-- ========================================== -->
+        <div id="videoStudio" class="studio-section">
+          <div class="subtool-bar">
+            <button class="subtool-pill active" data-video-pane="videoTrimCropPane">
+              <i class="fa-solid fa-crop-simple"></i> 1. Video Kes & Boyut Küçült
+            </button>
+            <button class="subtool-pill" data-video-pane="videoMergePane">
+              <i class="fa-solid fa-film"></i> 2. Videoları Birleştir
+            </button>
+            <button class="subtool-pill" data-video-pane="videoGifFramePane">
+              <i class="fa-solid fa-images"></i> 3. Videodan GIF / Resim Al
+            </button>
+            <button class="subtool-pill" data-video-pane="videoWatermarkSubPane">
+              <i class="fa-solid fa-closed-captioning"></i> 4. Altyazı & Yazı Ekle
+            </button>
+          </div>
+
+          <!-- Video Oynatıcı Sahnesi -->
+          <div class="stage-box">
+            <div class="video-stage-wrap">
+              <video id="studioVideoPlayer" controls crossorigin="anonymous"></video>
+              <canvas id="videoProcessCanvas" style="display:none;"></canvas>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:14px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:0.84rem; color:var(--text-muted); font-weight:600;">Başlangıç (sn):</span>
+                <input type="number" id="videoTrimStart" class="form-input" style="width:90px; padding:7px 10px;" min="0" step="0.1" value="0" />
+                <button id="setVidStartCurrentBtn" class="btn btn-outline btn-sm" title="Videonun şu an durduğu saniyeyi başlangıç yap">Şu Anki Saniyeyi Al</button>
+                <span style="font-size:0.84rem; color:var(--text-muted); font-weight:600; margin-left:6px;">Bitiş (sn):</span>
+                <input type="number" id="videoTrimEnd" class="form-input" style="width:90px; padding:7px 10px;" min="0" step="0.1" value="10" />
+                <button id="setVidEndCurrentBtn" class="btn btn-outline btn-sm" title="Videonun şu an durduğu saniyeyi bitiş yap">Şu Anki Saniyeyi Al</button>
+              </div>
+              <button id="captureQuickFrameBtn" class="btn btn-accent btn-sm">
+                <i class="fa-solid fa-camera"></i> Bu Kareyi Fotoğraf Olarak İndir (PNG)
+              </button>
+            </div>
+          </div>
+
+          <!-- Alt Araç 2A: Video Kesme, Kırpma ve Boyut Küçültme -->
+          <div id="videoTrimCropPane" class="tool-pane active">
+            <div class="controls-grid">
+              <div class="control-card">
+                <label>Ekran Oranı (Kırpma)</label>
+                <select id="videoAspectSelect" class="form-select">
+                  <option value="original">Orijinal Boyut (Kırpma Yok)</option>
+                  <option value="9:16">📱 9:16 Dikey (Shorts / Reels / TikTok)</option>
+                  <option value="1:1">🟦 1:1 Kare (Instagram)</option>
+                  <option value="16:9">🖥️ 16:9 Yatay (YouTube)</option>
+                  <option value="4:5">🖼️ 4:5 Portre</option>
+                </select>
+              </div>
+              <div class="control-card">
+                <label>Video Boyutu Küçültme (Sıkıştırma)</label>
+                <select id="videoCompressSelect" class="form-select">
+                  <option value="high">Yüksek Kalite (8 Mbps - Net Görüntü)</option>
+                  <option value="medium" selected>Standart Kalite (3.5 Mbps - Önerilen)</option>
+                  <option value="discord">WhatsApp / Discord İçin Küçült (1.5 Mbps)</option>
+                  <option value="low">Maksimum Küçültme (800 kbps)</option>
+                </select>
+              </div>
+              <div class="control-card">
+                <label>Çözünürlük Ölçeği</label>
+                <select id="videoScaleSelect" class="form-select">
+                  <option value="1">Orijinal Çözünürlük (%100)</option>
+                  <option value="0.75">%75 Boyut</option>
+                  <option value="0.5">%50 Küçült (Daha Hızlı)</option>
+                </select>
+              </div>
+              <div class="control-card">
+                <label>Video Oynatma Hızı <span class="val" id="videoSpeedVal">1.0x</span></label>
+                <input type="range" id="videoSpeedRange" min="0.5" max="2.0" step="0.25" value="1.0" />
+              </div>
+            </div>
+
+            <div class="action-footer" style="justify-content:flex-end;">
+              <button id="processVideoTrimBtn" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-scissors"></i> Videoyu Kes / Kırp ve İndir
+              </button>
+            </div>
+          </div>
+
+          <!-- Alt Araç 2B: Video Birleştirme -->
+          <div id="videoMergePane" class="tool-pane">
+            <div class="helper-box">
+              <strong>Nasıl Birleştirilir?</strong> Soldaki <em>Dosyalarım</em> listesinden videolarınızı sırayla seçip <strong>"+ Seçili Videoyu Sıraya Ekle"</strong> butonuna tıklayın, ardından birleştirin.
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <strong style="font-size:0.92rem;">Birleştirilecek Video Sırası:</strong>
+              <button id="addActiveToVideoMergeBtn" class="btn btn-accent btn-sm">
+                <i class="fa-solid fa-plus"></i> Seçili Videoyu Sıraya Ekle
+              </button>
+            </div>
+            <div id="videoMergeList" class="merge-list">
+              <div style="text-align:center; color:var(--text-dim); font-size:0.85rem; padding:18px;">
+                Video birleştirme listesi boş. Soldan video seçip <strong>"+ Seçili Videoyu Sıraya Ekle"</strong> butonuna basın.
+              </div>
+            </div>
+            <div class="action-footer" style="justify-content:flex-end;">
+              <button id="mergeVideosExecuteBtn" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-film"></i> Videoları Birleştir ve İndir
+              </button>
+            </div>
+          </div>
+
+          <!-- Alt Araç 2C: GIF ve Kare Yakalama -->
+          <div id="videoGifFramePane" class="tool-pane">
+            <div class="controls-grid">
+              <div class="control-card">
+                <label>GIF Boyutu (Genişlik)</label>
+                <select id="gifWidthSelect" class="form-select">
+                  <option value="320">320 piksel (Küçük Boyut)</option>
+                  <option value="480" selected>480 piksel (Standart)</option>
+                  <option value="640">640 piksel (Büyük HD)</option>
+                </select>
+              </div>
+              <div class="control-card">
+                <label>GIF Akıcılığı (Kare Hızı)</label>
+                <select id="gifFpsSelect" class="form-select">
+                  <option value="8">8 FPS (Hafif)</option>
+                  <option value="12" selected>12 FPS (Akıcı - Önerilen)</option>
+                  <option value="15">15 FPS (Çok Akıcı)</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+              <button id="createGifBtn" class="btn btn-primary">
+                <i class="fa-solid fa-images"></i> Seçili Saniyelerden Hareketli GIF Yap
+              </button>
+              <button id="burstFramesBtn" class="btn btn-outline">
+                <i class="fa-solid fa-camera-retro"></i> Videodan Otomatik 6 Adet Fotoğraf Çıkar
+              </button>
+            </div>
+            <div id="capturedFramesGallery" class="frames-gallery"></div>
+          </div>
+
+          <!-- Alt Araç 2D: Altyazı ve Filigran (Yazı) Gömme -->
+          <div id="videoWatermarkSubPane" class="tool-pane">
+            <div class="controls-grid">
+              <div class="control-card">
+                <label>Video Üzerine Sabit Yazı / Logo (Filigran)</label>
+                <input type="text" id="watermarkTextInput" class="form-input" placeholder="Örn: @kanal_adim" />
+              </div>
+              <div class="control-card">
+                <label>Yazının Konumu</label>
+                <select id="watermarkPosSelect" class="form-select">
+                  <option value="bottom-right">Sağ Alt Köşe</option>
+                  <option value="top-right">Sağ Üst Köşe</option>
+                  <option value="top-left">Sol Üst Köşe</option>
+                  <option value="bottom-left">Sol Alt Köşe</option>
+                  <option value="center">Tam Orta</option>
+                </select>
+              </div>
+              <div class="control-card">
+                <label>Hazır Altyazı Dosyası (.SRT / .VTT) Yükle</label>
+                <input type="file" id="subtitleFileInput" accept=".srt,.vtt" class="form-input" style="padding:9px;" />
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:0.84rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:6px;">
+                Altyazı Metni (SRT Formatı):
+              </label>
+              <textarea id="subtitleTextarea" class="form-input" rows="4" placeholder="1&#10;00:00:00,500 --> 00:00:04,000&#10;Merhaba! Bu altyazı videoya kalıcı olarak işlenecek."></textarea>
+            </div>
+            <div class="action-footer">
+              <button id="downloadSrtBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-file-lines"></i> Sadece Altyazıyı (.SRT) İndir
+              </button>
+              <button id="burnSubWatermarkBtn" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-check"></i> Yazıyı & Altyazıyı Videoya İşle ve İndir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SEKME 3: SES AYIRMA & VİDEOYA SES EKLEME   -->
+        <!-- ========================================== -->
+        <div id="muxStudio" class="studio-section">
+          <div class="controls-grid">
+            <!-- Kutu 1: Videodan Sesi Ayırma -->
+            <div class="control-card" style="padding:22px;">
+              <h3 style="font-size:1.1rem; margin-bottom:10px; color:#fff;">
+                <i class="fa-solid fa-file-audio" style="color:var(--primary);"></i> 1. Videodan Sesi Ayır (Video ➔ MP3)
+              </h3>
+              <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">
+                Soldaki listeden seçtiğiniz bir MP4 videonun sadece sesini <strong>MP3 olarak indirebilir</strong> veya videonun sesini tamamen silip <strong>sessiz video</strong> yapabilirsiniz.
+              </p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button id="extractMp3FromVideoBtn" class="btn btn-primary">
+                  <i class="fa-solid fa-music"></i> Videonun Sesini MP3 Olarak İndir
+                </button>
+                <button id="muteVideoDownloadBtn" class="btn btn-outline">
+                  <i class="fa-solid fa-volume-xmark"></i> Videonun Sesini Kapat (Sessiz MP4 İndir)
+                </button>
+              </div>
+            </div>
+
+            <!-- Kutu 2: Videoya Ses / Müzik Ekleme -->
+            <div class="control-card" style="padding:22px;">
+              <h3 style="font-size:1.1rem; margin-bottom:10px; color:#fff;">
+                <i class="fa-solid fa-plus-circle" style="color:var(--secondary);"></i> 2. Videoya Müzik / Ses Ekle
+              </h3>
+              <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:14px;">
+                Yüklediğiniz bir videonun üzerine yeni bir MP3 ses dosyası ekleyin:
+              </p>
+              <div style="margin-bottom:12px;">
+                <label>1. Hangi Videoya Eklensin?</label>
+                <select id="muxVideoSelect" class="form-select"></select>
+              </div>
+              <div style="margin-bottom:12px;">
+                <label>2. Hangi MP3 / Ses Eklensin?</label>
+                <select id="muxAudioSelect" class="form-select"></select>
+              </div>
+              <div style="margin-bottom:16px;">
+                <label>Videonun Kendi Orijinal Sesi <span class="val" id="muxOrigVolVal">0% (Tamamen Kapat)</span></label>
+                <input type="range" id="muxOrigVolRange" min="0" max="100" step="10" value="0" />
+              </div>
+              <button id="combineVideoAudioBtn" class="btn btn-accent" style="width:100%;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Videoya Sesi Ekle ve İndir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SEKME 4: MP3'TEN VİDEO YAP (VISUALIZER)    -->
+        <!-- ========================================== -->
+        <div id="vizStudio" class="studio-section">
+          <div class="helper-box">
+            Soldaki <em>Dosyalarım</em> listesinden bir <strong>MP3</strong> seçin; müzik çalarken hareket eden ses dalgalarıyla otomatik olarak <strong>MP4 video</strong> oluşturulsun.
+          </div>
+          <div class="visualizer-canvas-wrap">
+            <canvas id="vizCanvas" width="854" height="480"></canvas>
+          </div>
+          <div class="controls-grid">
+            <div class="control-card">
+              <label>Animasyon Görünümü</label>
+              <select id="vizStyleSelect" class="form-select">
+                <option value="bars">📊 Neon Frekans Çubukları</option>
+                <option value="circle">⭕ Dairesel Bass Halkası</option>
+                <option value="wave">〰️ Canlı Ses Dalgası</option>
+              </select>
+            </div>
+            <div class="control-card">
+              <label>Video Üzerinde Yazacak Başlık</label>
+              <input type="text" id="vizTitleInput" class="form-input" placeholder="Şarkı Adı - Sanatçı" value="Müzik Çalar Stüdyosu" />
+            </div>
+            <div class="control-card">
+              <label>Arka Plan Resmi Seç (İsteğe Bağlı)</label>
+              <input type="file" id="vizBgInput" accept="image/*" class="form-input" style="padding:9px;" />
+            </div>
+          </div>
+          <div class="action-footer">
+            <div style="display:flex; gap:10px;">
+              <button id="vizPreviewBtn" class="btn btn-outline">
+                <i class="fa-solid fa-play"></i> Önizlemeyi Başlat
+              </button>
+              <button id="vizStopBtn" class="btn btn-outline">
+                <i class="fa-solid fa-stop"></i> Durdur
+              </button>
+            </div>
+            <button id="vizRenderVideoBtn" class="btn btn-primary btn-lg">
+              <i class="fa-solid fa-clapperboard"></i> MP3'ten Video Oluştur ve İndir
+            </button>
+          </div>
+        </div>
+
+        <!-- İlerleme Çubuğu (Progress Bar) -->
+        <div id="processBarWrap" class="process-bar-wrap">
+          <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:600;">
+            <span id="processStatusText"><i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...</span>
+            <span id="processPercentText">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="processProgressFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- İşlem Sonucu ve İndirme Kutusu -->
+        <div id="outputResultBox" class="output-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div>
+              <h4 style="color:#34d399; font-size:1.05rem; margin-bottom:4px;">
+                <i class="fa-solid fa-circle-check"></i> <span id="outputTitleText">İşlem Tamamlandı!</span>
+              </h4>
+              <p id="outputMetaText" style="font-size:0.85rem; color:var(--text-muted);">Dosyanız indirmeye hazır.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a id="outputDownloadLink" href="#" download="medya.mp3" class="btn btn-success">
+                <i class="fa-solid fa-download"></i> Hazır Dosyayı İndir
+              </a>
+              <button id="outputAddToPoolBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-folder-plus"></i> Dosyalarıma Ekle (Tekrar Düzenle)
+              </button>
+            </div>
+          </div>
+          <div id="outputPreviewContainer" style="margin-top:14px;"></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Bildirimler -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
