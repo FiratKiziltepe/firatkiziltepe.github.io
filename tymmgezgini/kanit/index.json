@@ -1,0 +1,1058 @@
+[
+ {
+  "slug": "akaid",
+  "program": "Akaid Dersi Öğretim Programı (11. Sınıf)",
+  "claims": 63,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-arapca-dersi-ogretim-programi-9-10-siniflar",
+  "program": "Anadolu İmam Hatip Lisesi Arapça Dersi Öğretim Programı (9-10. Sınıflar)",
+  "claims": 311,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-dini-musiki-i-ii-iii-ogretim-programi",
+  "program": "Anadolu İmam Hatip Lisesi Dinî Musiki (I-II-III) Öğretim Programı",
+  "claims": 135,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-ebru-dersi-i-ii-iii-ogretim-programi",
+  "program": "Anadolu İmam Hatip Lisesi Ebru Dersi (I-II-III) Öğretim Programı",
+  "claims": 91,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "fikih",
+  "program": "Anadolu İmam Hatip Lisesi Fıkıh Dersi Öğretim Programı (10. Sınıf)",
+  "claims": 42,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "hadis",
+  "program": "Anadolu İmam Hatip Lisesi Hadis Dersi Öğretim Programı (10.Sınıf)",
+  "claims": 36,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-husnuhat-dersi-i-ii-iii-ogretim-programi",
+  "program": "Anadolu İmam Hatip Lisesi Hüsnühat Dersi (I-II-III) Öğretim Programı",
+  "claims": 120,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-mesleki-arapca-dersi-ogretim-programi-11-12",
+  "program": "Anadolu İmam Hatip Lisesi Mesleki Arapça Dersi Öğretim Programı (11-12. Sınıflar)",
+  "claims": 95,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-siyer-dersi-ogretim-programi-10-sinif",
+  "program": "Anadolu İmam Hatip Lisesi Siyer Dersi Öğretim Programı (10. Sınıf)",
+  "claims": 67,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "anadolu-imam-hatip-lisesi-tezhip-dersi-i-ii-iii-ogretim-programi",
+  "program": "Anadolu İmam Hatip Lisesi Tezhip Dersi (I-II-III) Öğretim Programı",
+  "claims": 115,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "beden-egitimi-ve-oyun-dersi-ogretim-programi",
+  "program": "Beden Eğitimi ve Oyun Dersi Öğretim Programı",
+  "claims": 516,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "beden-egitimi-ve-spor-dersi-5-8-siniflar-ogretim-programi",
+  "program": "Beden Eğitimi ve Spor Dersi (5-8. Sınıflar) Öğretim Programı",
+  "claims": 547,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "bilisim-teknolojileri-ve-yazilim",
+  "program": "Bilişim Teknolojileri ve Yazılım",
+  "claims": 610,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "biyoloji-dersi-ogretim-programi-2026",
+  "program": "Biyoloji Dersi Öğretim Programı (2026)",
+  "claims": 337,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "din-egitimi-dersi-ogretim-programi",
+  "program": "Din Eğitimi Dersi Öğretim Programı",
+  "claims": 58,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "din-kulturu-ve-ahlak-bilgisi-dersi-ogretim-programi-4-5-6-7-ve-8-sinif",
+  "program": "Din Kültürü ve Ahlak Bilgisi Dersi Öğretim Programı (4, 5, 6, 7 ve 8. Sınıflar)",
+  "claims": 361,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "din-kulturu-ve-ahlak-bilgisi-dersi-ogretim-programi-9-10-11-ve-12-sini",
+  "program": "Din Kültürü ve Ahlak Bilgisi Dersi Öğretim Programı (9, 10, 11 ve 12. Sınıflar)",
+  "claims": 326,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "dinler-tarihi-dersi-12-sinif-ogretim-programi",
+  "program": "Dinler Tarihi Dersi (12. Sınıf) Öğretim Programı",
+  "claims": 65,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "fen-bilimleri",
+  "program": "Fen Bilimleri Dersi Öğretim Programı (3, 4, 5, 6, 7 ve 8. Sınıflar)",
+  "claims": 2000,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "fizik",
+  "program": "Fizik Dersi Öğretim Programı (2026)",
+  "claims": 656,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "gorsel-sanatlar-dersi-1-8-siniflar-ogretim-programi",
+  "program": "Görsel Sanatlar Dersi (1-8. Sınıflar) Öğretim Programı",
+  "claims": 1625,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-piyano-dersi-9-ve-10-siniflar-ogretim-programi",
+  "program": "Güzel Sanatlar Lisesi Piyano Dersi (9 ve 10. Sınıflar) Öğretim Programı",
+  "claims": 195,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-ud-dersi-11-ve-12-siniflar-ogretim-programi",
+  "program": "Güzel Sanatlar Lisesi Ud Dersi (11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 139,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-calgi-egitimi-kanun-dersi-9-10-11-ve-12-siniflar",
+  "program": "Güzel Sanatlar Lisesi Çalgı Eğitimi Kanun Dersi (9,10,11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 252,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-calgi-egitimi-piyano-dersi-9-10-11-ve-12-sinifla",
+  "program": "Güzel Sanatlar Lisesi Çalgı Eğitimi Piyano Dersi (9,10,11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 481,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-calgi-egitimi-ud-dersi-ogretim-programi-9-10-11",
+  "program": "Güzel Sanatlar Lisesi Çalgı Eğitimi Ud Dersi Öğretim Programı (9,10,11 ve 12. Sınıflar)",
+  "claims": 329,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "guzel-sanatlar-lisesi-calgi-topluluklari-turk-muzigi-dersi-ogretim-pro",
+  "program": "Güzel Sanatlar Lisesi Çalgı Toplulukları (Türk Müziği) Dersi Öğretim Programı (11 ve 12. Sınıflar)",
+  "claims": 42,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "halk-oyunlari-dersi-ogretim-programi",
+  "program": "Halk Oyunları Dersi Öğretim Programı",
+  "claims": 31,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "hayat-bilgisi",
+  "program": "Hayat Bilgisi Dersi Öğretim Programı",
+  "claims": 341,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "hitabet-ve-mesleki-uygulama-dersi-11-sinif-ogretim-programi",
+  "program": "Hitabet ve Mesleki Uygulama Dersi (11. Sınıf) Öğretim Programı",
+  "claims": 46,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kelam-dersi-12-sinif-ogretim-programi",
+  "program": "Kelam Dersi (12. Sınıf)Öğretim Programı",
+  "claims": 53,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kimya-dersi-ogretim-programi",
+  "program": "Kimya Dersi Öğretim Programı",
+  "claims": 867,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "koro-ve-repertuvar-dersi-ogretim-programi",
+  "program": "Koro ve Repertuvar Dersi Öğretim Programı",
+  "claims": 227,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kuran-i-kerim-dersi-5-6-7-ve-8-siniflar-ogretim-programi",
+  "program": "Kur’an-ı Kerim Dersi (5, 6, 7 ve 8. Sınıflar) Öğretim Programı",
+  "claims": 172,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kuran-i-kerim-dersi-9-10-11-ve-12-siniflar-ogretim-programi",
+  "program": "Kur’an-ı Kerim Dersi (9, 10, 11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 145,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kuran-i-kerim-dersi-hazirlik-9-10-11-ve-12-siniflar-ogretim-programi",
+  "program": "Kur’an-ı Kerim Dersi (Hazırlık, 9, 10, 11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 227,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "kuranin-ana-konulari-dersi-i-ii-ogretim-programi",
+  "program": "Kur’an’ın Ana Konuları Dersı (I-II) Öğretim Programı",
+  "claims": 106,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "matematik-dersi-hazirlik-9-12-siniflar-ogretim-programi",
+  "program": "Matematik Dersi (Hazırlık, 9-12. Sınıflar) Öğretim Programı",
+  "claims": 690,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "mesleki-egitim-merkezi-matematik-dersi-ogretim-programi-9-10-11-ve-12",
+  "program": "Mesleki Eğitim Merkezi Matematik Dersi Öğretim Programı (9, 10, 11 ve 12. Sınıflar)",
+  "claims": 162,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "mesleki-egitim-merkezi-tarih-dersi-ogretim-programi-9-sinif",
+  "program": "Mesleki Eğitim Merkezi Tarih Dersi Öğretim Programı (9. Sınıf)",
+  "claims": 181,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "mesleki-ve-teknik-ortaogretim-mesleki-gelisim-atolyesi-dersi-ogretim-p",
+  "program": "Mesleki ve Teknik Ortaöğretim Mesleki Gelişim Atölyesi Dersi Öğretim Programı",
+  "claims": 388,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-dersi-1-2-3-4-5-6-7-ve-8-siniflar-ogretim-programi",
+  "program": "Müzik Dersi (1, 2, 3, 4, 5, 6, 7 ve 8. Sınıflar) Öğretim Programı",
+  "claims": 1160,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-beden-egitimi-oyun-ve-muzik-dersi-ogretim-programi",
+  "program": "Müzik Okulları Beden Eğitimi, Oyun ve Müzik Dersi Öğretim Programı",
+  "claims": 777,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-ses-egitimi-dersi-ogretim-programi",
+  "program": "Müzik Okulları Bireysel Ses Eğitimi Dersi Öğretim Programı",
+  "claims": 718,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-baglama-m",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Bağlama Modülü",
+  "claims": 334,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-flut-modu",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Flüt Modülü",
+  "claims": 359,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-gitar-mod",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Gitar Modülü",
+  "claims": 231,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-kanun-mod",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Kanun Modülü",
+  "claims": 233,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-kaval-mod",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Kaval Modülü",
+  "claims": 310,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-keman-mod",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Keman Modülü",
+  "claims": 260,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-ney-modul",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Ney Modülü",
+  "claims": 327,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-piyano-mo",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Piyano Modülü",
+  "claims": 253,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-ud-modulu",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Ud Modülü",
+  "claims": 501,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-viyola-mo",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Viyola Modülü",
+  "claims": 276,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-bireysel-calgi-egitimi-dersi-ogretim-programi-viyolonse",
+  "program": "Müzik Okulları Bireysel Çalgı Eğitimi Dersi Öğretim Programı Viyolonsel Modülü",
+  "claims": 378,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-koro-ve-repertuvar-dersi-ogretim-programi",
+  "program": "Müzik Okulları Koro ve Repertuvar Dersi Öğretim Programı",
+  "claims": 885,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-muzik-kulturu-dersi-ogretim-programi",
+  "program": "Müzik Okulları Müzik Kültürü Dersi Öğretim Programı",
+  "claims": 162,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-muzik-tarihi-dersi-ogretim-programi",
+  "program": "Müzik Okulları Müzik Tarihi Dersi Öğretim Programı",
+  "claims": 521,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-muziksel-isitme-okuma-ve-yazma-ogretim-programi",
+  "program": "Müzik Okulları Müziksel İşitme, Okuma ve Yazma Öğretim Programı",
+  "claims": 476,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-turk-muzigi-teori-ve-uygulamasi-dersi-ogretim-programi",
+  "program": "Müzik Okulları Türk Müziği Teori ve Uygulaması Dersi Öğretim Programı",
+  "claims": 446,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "muzik-okullari-calgi-topluluklari-dersi-ogretim-programi",
+  "program": "Müzik Okulları Çalgı Toplulukları Dersi Öğretim Programı",
+  "claims": 279,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-afet-bilinci-dersi-ogretim-programi",
+  "program": "Ortaokul Afet Bilinci Dersi Öğretim Programı",
+  "claims": 245,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-ahlak-ve-vatandaslik-egitimi-dersi-ogretim-programi",
+  "program": "Ortaokul Ahlak ve Vatandaşlık Eğitimi Dersi Öğretim Programı",
+  "claims": 329,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-dusunme-egitimi-dersi-ogretim-programi",
+  "program": "Ortaokul Düşünme Eğitimi Dersi Öğretim Programı",
+  "claims": 179,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-gorgu-kurallari-ve-nezaket-dersi-ogretim-programi",
+  "program": "Ortaokul Görgü Kuralları ve Nezaket Dersi Öğretim Programı",
+  "claims": 245,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-hukuk-ve-adalet-dersi-ogretim-programi",
+  "program": "Ortaokul Hukuk ve Adalet Dersi Öğretim Programı",
+  "claims": 133,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-kultur-ve-medeniyetimize-yon-verenler-dersi-ogretim-programi",
+  "program": "Ortaokul Kültür ve Medeniyetimize Yön Verenler Dersi Öğretim Programı",
+  "claims": 202,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-masal-ve-destanlarimiz-dersi-ogretim-programi",
+  "program": "Ortaokul Masal ve Destanlarımız Dersi Öğretim Programı",
+  "claims": 223,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-matematik-dersi-ogretim-programi",
+  "program": "Ortaokul Matematik Dersi Öğretim Programı",
+  "claims": 690,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-matematik-ve-bilim-uygulamalari-dersi-ogretim-programi",
+  "program": "Ortaokul Matematik ve Bilim Uygulamaları Dersi Öğretim Programı",
+  "claims": 1174,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-medya-okuryazarligi-dersi-ogretim-programi",
+  "program": "Ortaokul Medya Okuryazarlığı Dersi Öğretim Programı",
+  "claims": 132,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-okul-temelli-sosyal-sorumluluk-calismalari-dersi-ogretim-prog",
+  "program": "Ortaokul Okul Temelli Sosyal Sorumluluk Çalışmaları Dersi Öğretim Programı",
+  "claims": 448,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-okuma-becerileri-ogretim-programi",
+  "program": "Ortaokul Okuma Becerileri Öğretim Programı",
+  "claims": 114,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-oyun-ve-oyun-etkinlikleri-dersi-ogretim-programi-drama-modulu",
+  "program": "Ortaokul Oyun ve Oyun Etkinlikleri Dersi Öğretim Programı Drama Modülü",
+  "claims": 412,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-secmeli-muzik-dersi-keman-modulu",
+  "program": "Ortaokul Seçmeli Müzik Dersi Keman Modülü",
+  "claims": 394,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-secmeli-muzik-dersi-ogretim-programi-genel-muzik-egitimi-modu",
+  "program": "Ortaokul Seçmeli Müzik Dersi Öğretim Programı Genel Müzik Eğitimi Modülü",
+  "claims": 80,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-secmeli-muzik-dersi-ogretim-programi-gitar-modulu",
+  "program": "Ortaokul Seçmeli Müzik Dersi Öğretim Programı Gitar Modülü",
+  "claims": 261,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-secmeli-muzik-dersi-ogretim-programi-piyano-modulu",
+  "program": "Ortaokul Seçmeli Müzik Dersi Öğretim Programı Piyano Modülü",
+  "claims": 139,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-secmeli-muzik-dersi-ogretim-programi-turk-halk-muzigi-koro-mo",
+  "program": "Ortaokul Seçmeli Müzik Dersi Öğretim Programı Türk Halk Müziği Koro Modülü",
+  "claims": 165,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-temel-yasam-becerileri-dersi-ogretim-programi",
+  "program": "Ortaokul Temel Yaşam Becerileri Dersi Öğretim Programı",
+  "claims": 312,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-turkce-dersi-ogretim-programi",
+  "program": "Ortaokul Türkçe Dersi Öğretim Programı",
+  "claims": 344,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-yazarlik-ve-yazma-becerileri-dersi-ogretim-programi",
+  "program": "Ortaokul Yazarlık ve Yazma Becerileri Dersi Öğretim Programı",
+  "claims": 244,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-yasayan-diller-ve-lehceler-dersi-abazaca-ogretim-programi",
+  "program": "Ortaokul Yaşayan Diller ve Lehçeler Dersi (Abazaca) Öğretim Programı",
+  "claims": 3793,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-yasayan-diller-ve-lehceler-dersi-kurmancca-ogretim-programi",
+  "program": "Ortaokul Yaşayan Diller ve Lehçeler Dersi (Kurmancca) Öğretim Programı",
+  "claims": 4418,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-yasayan-diller-ve-lehceler-dersi-lazca-ogretim-programi",
+  "program": "Ortaokul Yaşayan Diller ve Lehçeler Dersi (Lazca) Öğretim Programı",
+  "claims": 4489,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-ve-imam-hatip-ortaokulu-arapca-dersi-ogretim-programi-5-8-sin",
+  "program": "Ortaokul ve İmam Hatip Ortaokulu Arapça Dersi Öğretim Programı (5-8. Sınıflar)",
+  "claims": 837,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-ve-imam-hatip-ortaokulu-temel-dini-bilgiler-islam-1-2-dersi-o",
+  "program": "Ortaokul ve İmam Hatip Ortaokulu Temel Dinî Bilgiler (İslam 1-2) Dersi Öğretim Programı",
+  "claims": 139,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-cevre-egitimi-ve-iklim-degisikligi-dersi-ogretim-programi",
+  "program": "Ortaokul Çevre Eğitimi ve İklim Değişikliği Dersi Öğretim Programı",
+  "claims": 617,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-ogretim-programi-yasayan-diller-ve-lehceler-dersi-zazaca-ogre",
+  "program": "Ortaokul Öğretim Programı Yaşayan Diller ve Lehçeler Dersi (Zazaca) Öğretim Programı",
+  "claims": 1602,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaokul-sehrimiz-dersi-ogretim-programi",
+  "program": "Ortaokul “Şehrimiz ...” Dersi Öğretim Programı",
+  "claims": 169,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-felsefe-dersi-ogretim-programi-10-ve-11-siniflar",
+  "program": "Ortaögretım Felsefe Dersı Öğretim Programı (10 ve 11. Sınıflar)",
+  "claims": 344,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-astronomi-ve-uzay-bilimleri-dersi-ogretim-programi",
+  "program": "Ortaöğretim Astronomi ve Uzay Bilimleri Dersi Öğretim Programı",
+  "claims": 121,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-beden-egitimi-ve-spor-dersi-hazirlik-9-12-siniflar-ogretim",
+  "program": "Ortaöğretim Beden Eğitimi ve Spor Dersi (Hazırlık, 9-12. Sınıflar) Öğretim Programı",
+  "claims": 194,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-cografya-dersi-ogretim-programi-9-10-11-ve-12-siniflar",
+  "program": "Ortaöğretim Coğrafya Dersi Öğretim Programı ( 9,10,11 ve 12. Sınıflar)",
+  "claims": 766,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "demokrasi",
+  "program": "Ortaöğretim Demokrasi ve İnsan Hakları Dersi Öğretim Programı",
+  "claims": 42,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-gorsel-sanatlar-dersi-ogretim-programi",
+  "program": "Ortaöğretim Görsel Sanatlar Dersi Öğretim Programı",
+  "claims": 384,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-guzel-sanatlar-lisesi-baglama-dersi-11-ve-12-siniflar-ogre",
+  "program": "Ortaöğretim Güzel Sanatlar Lisesi Bağlama Dersi (11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 122,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-guzel-sanatlar-lisesi-endustriyel-tasarim-dersi-ogretim-pr",
+  "program": "Ortaöğretim Güzel Sanatlar Lisesi Endüstriyel Tasarım Dersi Öğretim Programı",
+  "claims": 79,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-guzel-sanatlar-lisesi-geleneksel-turk-sanatlari-temel",
+  "program": "Ortaöğretim Güzel Sanatlar Lisesi Geleneksel Türk Sanatları Dersi Öğretim Programı",
+  "claims": 218,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-guzel-sanatlar-lisesi-geleneksel-turk-sanatlari-dersi-ogre",
+  "program": "Ortaöğretim Güzel Sanatlar Lisesi Geleneksel Türk Sanatları Dersi Öğretim Programı (Modüller)",
+  "claims": 747,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-guzel-sanatlar-lisesi-calgi-egitimi-baglama-dersi-9-10-11",
+  "program": "Ortaöğretim Güzel Sanatlar Lisesi Çalgı Eğitimi Bağlama Dersi (9,10,11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 204,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-kanun-dersi-11-ve-12-siniflar-ogretim-programi",
+  "program": "Ortaöğretim Kanun Dersi (11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 143,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-mantik-dersi-ogretim-programi",
+  "program": "Ortaöğretim Mantık Dersi Öğretim Programı",
+  "claims": 149,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-matematik-uygulamalari-dersi-ogretim-programi",
+  "program": "Ortaöğretim Matematik Uygulamaları Dersi Öğretim Programı",
+  "claims": 138,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-muzik-dersi-hazirlik-9-12-siniflar-ogretim-programi",
+  "program": "Ortaöğretim Müzik Dersi (Hazırlık, 9-12. Sınıflar) Öğretim Programı",
+  "claims": 230,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-psikoloji-dersi-ogretim-programi",
+  "program": "Ortaöğretim Psikoloji Dersi Öğretim Programı",
+  "claims": 155,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-sosyal-bilim-calismalari-1-ogretim-programi",
+  "program": "Ortaöğretim Sosyal Bilim Çalışmaları 1 Öğretim Programı",
+  "claims": 139,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-sosyal-bilim-calismalari-2-ogretim-programi",
+  "program": "Ortaöğretim Sosyal Bilim Çalışmaları 2 Öğretim Programı",
+  "claims": 105,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-sosyal-bilim-calismalari-3-ogretim-programi",
+  "program": "Ortaöğretim Sosyal Bilim Çalışmaları 3 Öğretim Programı",
+  "claims": 87,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-sosyoloji-1-dersi-ogretim-programi",
+  "program": "Ortaöğretim Sosyoloji 1 Dersi Öğretim Programı",
+  "claims": 150,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "sosyoloji-2",
+  "program": "Ortaöğretim Sosyoloji 2 Dersi Öğretim Programı",
+  "claims": 67,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-temel-dini-bilgiler-islam-1-2-dersi-ogretim-programi",
+  "program": "Ortaöğretim Temel Dinî Bilgiler (İslam 1-2) Dersi Öğretim Programı",
+  "claims": 159,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-temel-matematik-dersi-ogretim-programi",
+  "program": "Ortaöğretim Temel Matematik Dersi Öğretim Programı",
+  "claims": 132,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-kultur-medeniyet",
+  "program": "Ortaöğretim Türk Kültür ve Medeniyet Tarihi Dersi Öğretim Programı",
+  "claims": 42,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "cagdas-turk-dunya",
+  "program": "Ortaöğretim Çağdaş Türk ve Dünya Tarihi Dersi Öğretim Programı",
+  "claims": 64,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-iklim-cevre-ve-yenilikci-cozumler-dersi-ogretim-programi",
+  "program": "Ortaöğretim İklim, Çevre ve Yenilikçi Çözümler Dersi Öğretim Programı",
+  "claims": 127,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ortaogretim-islam-bilim-tarihi-dersi-ogretim-programi",
+  "program": "Ortaöğretim İslam Bilim Tarihi Dersi Öğretim Programı",
+  "claims": 235,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "oyun-ve-oyun-etkinlikleri-dersi-geleneksel-oyunlar-modulu",
+  "program": "Oyun ve Oyun Etkinlikleri Dersi Geleneksel Oyunlar Modülü",
+  "claims": 113,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "peygamberimizin-hayati-dersi-5-6-7-ve-8-siniflar-ogretim-programi",
+  "program": "Peygamberimizin Hayatı Dersi (5, 6, 7 ve 8. Sınıflar) Öğretim Programı",
+  "claims": 147,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "peygamberimizin-hayati-dersi-9-10-11-ve-12-siniflar-ogretim-programi",
+  "program": "Peygamberimizin Hayatı Dersi (9, 10, 11 ve 12. Sınıflar) Öğretim Programı",
+  "claims": 145,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "proje-tasarimi-ve-uygulamalari",
+  "program": "Proje Tasarımı ve Uygulamaları",
+  "claims": 89,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "saglik-bilgisi-ve-trafik-kulturu-ogretim-programi",
+  "program": "Sağlık Bilgisi ve Trafik Kültürü Öğretim Programı",
+  "claims": 122,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-dijital-sanatlar",
+  "program": "Seçmeli Dijital Sanatlar",
+  "claims": 121,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-geleneksel-sanatlar",
+  "program": "Seçmeli Geleneksel Sanatlar",
+  "claims": 231,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-muzik-dersi-ogretim-programi-baglama-modulu",
+  "program": "Seçmeli Müzik Dersi Öğretim Programı Bağlama Modülü",
+  "claims": 67,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-muzik-dersi-ogretim-programi-ud-modulu",
+  "program": "Seçmeli Müzik Dersi Öğretim Programı Ud Modülü",
+  "claims": 145,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-oyun-ve-oyun-etkinlikleri-dersi-satranc-modulu",
+  "program": "Seçmeli Oyun ve Oyun Etkinlikleri Dersi Satranç Modülü",
+  "claims": 197,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-robotik-kodlama",
+  "program": "Seçmeli Robotik Kodlama",
+  "claims": 85,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "secmeli-yapay-zeka-uygulamalari",
+  "program": "Seçmeli Yapay Zekâ Uygulamaları",
+  "claims": 53,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "sosyal-bilgiler",
+  "program": "Sosyal Bilgiler Dersi Öğretim Programı (4,5,6 ve 7. Sınıflar)",
+  "claims": 809,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "spor-lisesi-genel-jimnastik-dersi-9-sinif-ogretim-programi",
+  "program": "Spor Lisesi Genel Jimnastik Dersi ( 9. Sınıf ) Öğretim Programı",
+  "claims": 142,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-lisesi-spor-ve-beslenme-dersi-9-sinif-ogretim-programi",
+  "program": "Spor Lisesi Spor ve Beslenme Dersi (9. Sınıf ) Öğretim Programı",
+  "claims": 78,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-lisesi-takim-sporlari-dersi-9-10-11-12-siniflar-ogretim-programi",
+  "program": "Spor Lisesi Takım Sporları Dersi (9, 10, 11, 12. Sınıflar) Öğretim Programı",
+  "claims": 248,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-lisesi-temel-spor-egitimi-dersi-9-sinif-ogretim-programi",
+  "program": "Spor Lisesi Temel Spor Eğitimi Dersi (9. Sınıf ) Öğretim Programı",
+  "claims": 151,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-ortaokullari-beden-egitimi-ve-sporun-temelleri-dersi-ogretim-prog",
+  "program": "Spor Ortaokulları Beden Eğitimi ve Sporun Temelleri Dersi Öğretim Programı",
+  "claims": 234,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-ortaokullari-kapsamli-spor-egitimi-dersi-ogretim-programi",
+  "program": "Spor Ortaokulları Kapsamlı Spor Eğitimi Dersi Öğretim Programı",
+  "claims": 164,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-ortaokullari-oyun-ve-taktiksel-farkindalik-dersi-ogretim-programi",
+  "program": "Spor Ortaokulları Oyun ve Taktiksel Farkındalık Dersi Öğretim Programı",
+  "claims": 175,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-ortaokullari-ritim-egitimi-ve-halk-oyunlari-dersi-ogretim-program",
+  "program": "Spor Ortaokulları Ritim Eğitimi ve Halk Oyunları Dersi Öğretim Programı",
+  "claims": 224,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-ortaokullari-cocuklarda-atletik-performans-uygulamalari-dersi-ogr",
+  "program": "Spor Ortaokulları Çocuklarda Atletik Performans Uygulamaları Dersi Öğretim Programı",
+  "claims": 220,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "spor-fiziki",
+  "program": "Spor ve Fiziki Etkinlikler Dersi Öğretim Programı",
+  "claims": 28,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "inkilap-tarihi-12",
+  "program": "T.C. İnkılap Tarihi ve Atatürkçülük Dersi (12. Sınıf) Öğretim Programı",
+  "claims": 92,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "inkilap-tarihi-8",
+  "program": "T.C. İnkılap Tarihi ve Atatürkçülük Dersi (8. Sınıf) Öğretim Programı",
+  "claims": 233,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "tarih",
+  "program": "Tarih Dersi Öğretim Programı",
+  "claims": 253,
+  "date": "2026-10-21"
+ },
+ {
+  "slug": "tasavvuf",
+  "program": "Tasavvuf Kültürü Dersi",
+  "claims": 49,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "tefsir",
+  "program": "Tefsir Dersi (11. Sınıf) Öğretim Programı",
+  "claims": 59,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "teknoloji-ve-tasarim-dersi-ogretim-programi",
+  "program": "Teknoloji ve Tasarım Dersi Öğretim Programı",
+  "claims": 514,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "temel-dini-bilgiler-dersi-ogretim-programi-9-sinif",
+  "program": "Temel Dinî Bilgiler Dersi Öğretim Programı [9. Sınıf]",
+  "claims": 34,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "toplumsal-uyum-becerileri-dersi-ogretim-programi",
+  "program": "Toplumsal Uyum Becerileri Dersi Öğretim Programı",
+  "claims": 169,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "trafik-guvenligi-dersi-ogretim-programi",
+  "program": "Trafik Güvenliği Dersi Öğretim Programı",
+  "claims": 115,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-dili-ve-edebiyati-dersi-ogretim-programi",
+  "program": "Türk Dili ve Edebiyatı Dersi Öğretim Programı",
+  "claims": 1395,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-dunyasi-ve-turk-islam-musikisi-dersi-ogretim-programi",
+  "program": "Türk Dünyası ve Türk İslam Musikisi Dersi Öğretim Programı",
+  "claims": 132,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-muzigi-koro-ve-repertuvari-dersi-ogretim-programi",
+  "program": "Türk Müziği Koro ve Repertuvarı Dersi Öğretim Programı",
+  "claims": 88,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-sosyal-hayatinda-aile-dersi",
+  "program": "Türk Sosyal Hayatında Aile Dersi",
+  "claims": 140,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "turk-isaret-dili-dersi-1-2-ve-3-siniflar-ogretim-programi",
+  "program": "Türk İşaret Dili Dersi (1, 2 ve 3. Sınıflar) Öğretim Programı",
+  "claims": 392,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "yasayan-diller-ve-lehceler-dersi-adigece-ogretim-programi",
+  "program": "Yaşayan Diller ve Lehçeler Dersi (Adigece) Öğretim Programı",
+  "claims": 2024,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "yasayan-diller-ve-lehceler-dersi-arnavutca-ogretim-programi",
+  "program": "Yaşayan Diller ve Lehçeler Dersi (Arnavutça) Öğretim Programı",
+  "claims": 4583,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "zeka-oyunlari",
+  "program": "Zeka Oyunları",
+  "claims": 132,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-bagimsiz-yasam-becerileri-dersi-iii-kademe-ogretim-program",
+  "program": "Özel Eğitim Bağımsız Yaşam Becerileri Dersi (III. Kademe) Öğretim Programı",
+  "claims": 236,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-beden-egitimi-oyun-ve-spor-dersi-i-ii-ve-iii-kademeler-ogr",
+  "program": "Özel Eğitim Beden Eğitimi, Oyun ve Spor Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 120,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-din-kulturu-ve-ahlak-bilgisi-dersi-i-ii-ve-iii-kademeler-o",
+  "program": "Özel Eğitim Din Kültürü ve Ahlâk Bilgisi Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 166,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-gorsel-sanatlar-dersi-i-ii-ve-iii-kademeler-ogretim-progra",
+  "program": "Özel Eğitim Görsel Sanatlar Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 129,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-hayat-bilgisi-ve-gunluk-yasam-becerileri-dersi-i-ve-ii-kad",
+  "program": "Özel Eğitim Hayat Bilgisi ve Günlük Yaşam Becerileri Dersi (I ve II. Kademeler) Öğretim Programı",
+  "claims": 130,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-matematik-dersi-i-ii-ve-iii-kademeler-ogretim-programi",
+  "program": "Özel Eğitim Matematik Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 212,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-muzik-dersi-i-ii-ve-iii-kademeler-ogretim-programi",
+  "program": "Özel Eğitim Müzik Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 104,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-saglikli-yasam-ve-guvenlik-becerileri-dersi-i-ii-ve-iii-ka",
+  "program": "Özel Eğitim Sağlıklı Yaşam ve Güvenlik Becerileri Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 188,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-sosyal-beceriler-dersi-i-ii-ve-iii-kademeler-ogretim-progr",
+  "program": "Özel Eğitim Sosyal Beceriler Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 67,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-turkce-dersi-i-ii-ve-iii-kademeler-ogretim-programi",
+  "program": "Özel Eğitim Türkçe Dersi (I, II ve III. Kademeler) Öğretim Programı",
+  "claims": 193,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ozel-egitim-iletisim-becerileri-dersi-i-ve-ii-kademeler-ogretim-progra",
+  "program": "Özel Eğitim İletişim Becerileri Dersi (I ve II. Kademeler) Öğretim Programı",
+  "claims": 94,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ilkokul-arapca-dersi-ogretim-programi-2-4-siniflar",
+  "program": "İlkokul Arapça Dersi Öğretim Programı (2-4. Sınıflar)",
+  "claims": 555,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ilkokul-matematik-dersi-ogretim-programi-1-2-3-ve-4-sinif",
+  "program": "İlkokul Matematik Dersi Öğretim Programı (1, 2, 3 ve 4. Sınıf)",
+  "claims": 596,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ilkokul-turkce-dersi-ogretim-programi",
+  "program": "İlkokul Türkçe Dersi Öğretim Programı",
+  "claims": 1665,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ilkokullarda-yetistirme-programi-iyep-matematik",
+  "program": "İlkokullarda Yetiştirme Programı (İyep) Matematik",
+  "claims": 63,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "ilkokullarda-yetistirme-programi-iyep-turkce",
+  "program": "İlkokullarda Yetiştirme Programı (İyep) Türkçe",
+  "claims": 47,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "insan-haklari-vatandaslik-ve-demokrasi-dersi-ogretim-programi",
+  "program": "İnsan Hakları, Vatandaşlık ve Demokrasi Dersi Öğretim Programı",
+  "claims": 147,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "islam-felsefesi-dersi-ogretim-programi",
+  "program": "İslam Felsefesi Dersi Öğretim Programı",
+  "claims": 49,
+  "date": "2026-10-27"
+ },
+ {
+  "slug": "islamda-cocuk-egitimi-dersi",
+  "program": "İslam’da Çocuk Eğitimi Dersi",
+  "claims": 48,
+  "date": "2026-10-27"
+ }
+]
