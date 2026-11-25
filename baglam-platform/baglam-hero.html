@@ -1367,6 +1367,256 @@ body[data-ekran="kur"] .proto { bottom: calc(92px + env(safe-area-inset-bottom, 
 @media (min-width: 861px) and (max-height: 760px) { .lp-v3 .lab-ray { padding-right: 110px; } }
 
 </style>
+<style>
+/* Seslendirilmiş etkileşimli çözümlü örnek (Slides & Narration) ve Yönetici üretim hattı stilleri */
+.slayt-sarici { display: flex; flex-direction: column; gap: 18px; }
+.slayt-kart { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 26px; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 12px 32px -24px rgba(17, 33, 30, .22); }
+.slayt-ust { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.slayt-adim-etiket { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--soluk); text-transform: uppercase; margin-bottom: 4px; }
+.slayt-ust h2 { font-size: clamp(22px, 2.4vw, 28px); font-weight: 700; letter-spacing: -.025em; }
+.slayt-ust p { color: var(--soluk); font-size: 15px; margin-top: 4px; }
+.slayt-sure-rozet { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 99px; background: var(--bg); color: var(--soluk); font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Sahne alanı */
+.slayt-sahne { display: flex; flex-direction: column; gap: 14px; }
+.slayt-gorsel-kutu { position: relative; border-radius: 18px; overflow: hidden; border: 1.5px solid var(--cizgi2); background: #F5F8F7; }
+.slayt-gorsel-kutu svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7.8; }
+.slayt-dosya-etiket { position: absolute; left: 12px; bottom: 12px; background: rgba(17, 33, 30, .74); backdrop-filter: blur(6px); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; }
+.slayt-soru-serit { background: var(--ana-acik); color: var(--murekkep); border-radius: 14px; padding: 14px 18px; font: 600 17px/1.4 var(--baslik); letter-spacing: -.01em; }
+
+/* Adım 2: 3 koşul kartı */
+.slayt-kosul-izgara { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.slayt-kosul { background: #F2F7F5; border: 1.5px solid var(--cizgi); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.slayt-kosul svg { width: 100%; max-width: 170px; height: auto; display: block; }
+.slayt-kosul small { font-size: 14px; font-weight: 600; color: var(--soluk); }
+.slayt-kosul b { font: 700 clamp(22px, 2.2vw, 28px)/1.1 var(--baslik); color: var(--murekkep); letter-spacing: -.02em; }
+.slayt-dipnot { font-size: 13.5px; color: var(--soluk); }
+
+/* Adım 3 & 4: Vurgulu değişken kutuları (Signaling Principle) */
+.slayt-ref-serit { background: var(--bg); color: var(--soluk); border-radius: 12px; padding: 11px 16px; font-size: 14.5px; font-weight: 500; }
+.slayt-ref-serit b { color: var(--murekkep); font-weight: 600; }
+.slayt-vurgu-kutu { border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; border: 2px solid var(--ana); background: #F9FCFB; }
+.slayt-vurgu-kutu.turuncu { border-color: var(--vurgu); background: #FFFBF8; }
+.slayt-vurgu-ust { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ana-koyu); }
+.slayt-vurgu-kutu.turuncu .slayt-vurgu-ust { color: #B84A12; }
+.slayt-vurgu-ad { font: 700 22px/1.25 var(--baslik); color: var(--murekkep); }
+.slayt-seviyeler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.slayt-seviye { background: var(--ana-acik); color: var(--ana-koyu); border: 1.5px solid color-mix(in srgb, var(--ana) 32%, transparent); border-radius: 12px; padding: 12px 14px; font-weight: 600; font-size: 15px; text-align: center; }
+.slayt-vurgu-alt { font-size: 13.5px; font-weight: 600; color: var(--murekkep); }
+
+/* Adım 4 yatay çubuk grafiği */
+.slayt-barlar { display: grid; gap: 12px; }
+.slayt-bar-satir { display: grid; grid-template-columns: 96px minmax(0, 1fr) 54px; gap: 12px; align-items: center; font-size: 15px; }
+.slayt-bar-satir span { text-align: right; color: var(--soluk); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slayt-bar-yol { height: 34px; border-radius: 10px; background: #F4EAE3; overflow: hidden; }
+.slayt-bar-yol i { display: block; height: 100%; border-radius: 10px; background: var(--vurgu); transition: width .35s ease; }
+.slayt-bar-satir b { font: 700 17px/1 var(--baslik); color: var(--murekkep); font-variant-numeric: tabular-nums; }
+
+/* Adım 5: Özet ilişki şeması */
+.slayt-ozet-izgara { display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); gap: 12px; align-items: center; }
+.slayt-ozet-kutu { border-radius: 20px; padding: 26px 20px; text-align: center; display: flex; flex-direction: column; gap: 14px; border: 2px solid var(--ana); background: #E3F3EE; }
+.slayt-ozet-kutu.turuncu { border-color: var(--vurgu); background: #FFEDE2; }
+.slayt-ozet-kutu small { font-size: 12.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ana-koyu); }
+.slayt-ozet-kutu.turuncu small { color: #B84A12; }
+.slayt-ozet-kutu b { font: 700 clamp(20px, 2.2vw, 26px)/1.2 var(--baslik); color: var(--murekkep); }
+.slayt-ozet-kutu span { font-size: 15px; color: var(--soluk); font-weight: 500; }
+.slayt-ozet-ok { display: grid; place-items: center; color: var(--soluk); }
+.slayt-ozet-ok .i { width: 28px; height: 28px; }
+.slayt-ozet-not { text-align: center; font-size: 15px; color: var(--murekkep); font-weight: 500; }
+
+/* Segmente ilerleme çubuğu ve ses kontrolleri */
+.slayt-ilerleme { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; padding-top: 4px; }
+.slayt-seg { height: 5px; border-radius: 99px; background: var(--cizgi); overflow: hidden; cursor: pointer; }
+.slayt-seg i { display: block; height: 100%; width: 0; background: var(--ana); border-radius: 99px; transition: width .15s linear; }
+.slayt-seg.bitti i { width: 100%; }
+.slayt-kontroller { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.slayt-ses-sol { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.slayt-ses-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--cizgi); display: grid; place-items: center; color: var(--soluk); background: var(--yuzey); }
+.slayt-ses-btn:hover:not(:disabled) { border-color: var(--murekkep); color: var(--murekkep); }
+.slayt-ses-btn:disabled { opacity: .4; cursor: not-allowed; }
+.slayt-ses-btn .i { width: 15px; height: 15px; }
+.slayt-oynat-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--murekkep); color: #fff; display: grid; place-items: center; transition: background .15s, transform .15s; }
+.slayt-oynat-btn:hover { background: var(--ana); transform: scale(1.04); }
+.slayt-oynat-btn.caliyor { background: var(--ana); }
+.slayt-oynat-btn .i { width: 17px; height: 17px; }
+.slayt-sayac { font-size: 14px; font-weight: 600; color: var(--soluk); font-variant-numeric: tabular-nums; margin-inline: 4px; }
+.slayt-pil { height: 32px; padding: 0 11px; border-radius: 99px; border: 1.5px solid var(--cizgi); background: var(--bg); font-size: 13px; font-weight: 600; color: var(--murekkep); display: inline-flex; align-items: center; gap: 6px; }
+.slayt-pil:hover { border-color: var(--ana); }
+.slayt-pil.on { background: var(--ana-acik); border-color: var(--ana); color: var(--ana-koyu); }
+.slayt-pil .i { width: 14px; height: 14px; }
+
+/* Açılır anlatım metni (Redundancy Principle: varsayılan kapalı, istenince açık) */
+.slayt-metin-kutu { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; animation: gir .2s ease both; }
+.slayt-metin-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--soluk); font-weight: 600; }
+.slayt-metin-kutu p { font-size: 15.5px; line-height: 1.6; color: var(--murekkep); }
+.slayt-metin-vurgu { color: var(--ana-koyu); font-weight: 600; }
+
+/* Alt küçük slayt önizlemeleri */
+.slayt-kucukler { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.slayt-kucuk { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.slayt-kucuk:hover { border-color: var(--ana); transform: translateY(-1px); }
+.slayt-kucuk.on { border: 2px solid var(--ana); box-shadow: 0 8px 20px -14px rgba(14, 140, 127, .45); }
+.slayt-kucuk-on { width: 100%; height: 48px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; color: var(--soluk); }
+.slayt-kucuk.on .slayt-kucuk-on { background: var(--ana-acik); color: var(--ana-koyu); }
+.slayt-kucuk-on .i { width: 20px; height: 20px; }
+.slayt-kucuk span { font-size: 13px; font-weight: 600; color: var(--murekkep); line-height: 1.25; }
+
+/* Alt ileri-geri çubuğu */
+.slayt-alt { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.slayt-alt .btn-koyu { background: var(--murekkep); color: #fff; border-radius: 99px; height: 44px; padding: 0 20px; font-weight: 600; font-size: 14.5px; display: inline-flex; align-items: center; gap: 8px; }
+.slayt-alt .btn-koyu:hover { background: var(--ana-koyu); }
+.slayt-alt .btn-pil { border-radius: 99px; height: 42px; padding: 0 18px; }
+
+/* Jüri sunumu: profil seçici ve CTML özeti */
+.juri-slayt-seciciler { display: flex; flex-wrap: wrap; gap: 8px; }
+.juri-slayt-tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 99px; background: var(--bg); border: 1.5px solid var(--cizgi); font-size: 14px; font-weight: 600; color: var(--soluk); transition: border-color .15s, background .15s, color .15s; }
+.juri-slayt-tab:hover { border-color: var(--ana); color: var(--murekkep); }
+.juri-slayt-tab.on { background: var(--ana); border-color: var(--ana); color: #fff; }
+.juri-ctml-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.juri-ctml-kutu { background: var(--bg); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.juri-ctml-kutu b { font: 700 15px/1.2 var(--baslik); color: var(--ana-koyu); }
+.juri-ctml-kutu p { font-size: 14px; color: var(--murekkep); line-height: 1.5; }
+
+/* Yönetici paneli: üretim hattı & API anahtarları */
+.yon-hat-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.yon-alt-kutu { background: var(--bg); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; border: 1.5px solid var(--cizgi); }
+.yon-alt-kutu h3 { font-size: 17px; font-weight: 700; }
+.yon-alt-kutu > p { font-size: 14px; color: var(--soluk); margin-top: -6px; }
+.yon-alan { display: flex; flex-direction: column; gap: 6px; }
+.yon-alan label { font-size: 13.5px; font-weight: 600; color: var(--murekkep); display: flex; justify-content: space-between; gap: 8px; }
+.yon-alan label small { color: var(--soluk); font-weight: 500; }
+.yon-girdi-satir { display: flex; gap: 8px; align-items: center; }
+.yon-girdi-satir .girdi { height: 42px; font-size: 14px; border-radius: 11px; }
+.yon-girdi-satir select.girdi { background: var(--yuzey); }
+.yon-goz-btn { height: 42px; padding: 0 12px; border-radius: 11px; border: 1.5px solid var(--cizgi); background: var(--yuzey); font-size: 13px; font-weight: 600; color: var(--soluk); flex: none; }
+.yon-goz-btn:hover { border-color: var(--murekkep); color: var(--murekkep); }
+.yon-adim-liste { display: grid; gap: 10px; }
+.yon-adim-satir { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 14px; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 12px; align-items: center; }
+.yon-adim-satir b { font-size: 14.5px; font-weight: 650; display: block; }
+.yon-adim-satir small { font-size: 12.5px; color: var(--soluk); display: block; margin-top: 2px; }
+.yon-adim-satir select { height: 38px; border-radius: 10px; border: 1.5px solid var(--cizgi); background: var(--yuzey); padding: 0 10px; font-size: 13.5px; font-weight: 600; width: 100%; }
+.yon-onbellek { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.yon-klasor { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.yon-klasor code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; color: var(--ana-koyu); }
+.yon-klasor span { font-size: 13px; color: var(--soluk); }
+.yon-durum-satir { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; font-size: 13.5px; color: var(--soluk); }
+
+@media (max-width: 860px) {
+  .slayt-kart { padding: 18px; }
+  .slayt-kosul-izgara, .slayt-seviyeler, .juri-ctml-izgara, .yon-hat-izgara, .yon-onbellek { grid-template-columns: minmax(0, 1fr); }
+  .slayt-ozet-izgara { grid-template-columns: minmax(0, 1fr); }
+  .slayt-ozet-ok { transform: rotate(90deg); }
+  .slayt-kucukler { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .yon-adim-satir { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .slayt-kucukler { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .slayt-bar-satir { grid-template-columns: 74px minmax(0, 1fr) 44px; gap: 8px; }
+}
+
+</style>
+<style>
+/* Etkileşimli mikro-görev prototipi ve 6 alternatif etkileşim şablonu */
+.mg-kart { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 26px; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 12px 32px -24px rgba(17, 33, 30, .2); }
+.mg-ust { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.mg-eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--ana-koyu); text-transform: uppercase; margin-bottom: 4px; }
+.mg-ust h2, .mg-ust h3 { font-size: clamp(22px, 2.3vw, 28px); font-weight: 700; letter-spacing: -.025em; }
+.mg-ust p { color: var(--soluk); font-size: 15px; margin-top: 4px; }
+.mg-sure { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--bg); color: var(--soluk); font-size: 13px; font-weight: 600; }
+
+.mg-senaryo-kutu { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: center; background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 20px; padding: 18px; }
+.mg-gorsel { border-radius: 14px; overflow: hidden; border: 1px solid var(--cizgi); background: #fff; }
+.mg-gorsel svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9.2; }
+.mg-senaryo-metin { display: flex; flex-direction: column; gap: 10px; }
+.mg-senaryo-etiket { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ana-koyu); }
+.mg-senaryo-metin h3, .mg-senaryo-metin h4 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
+.mg-senaryo-metin p { font-size: 15px; line-height: 1.6; color: var(--murekkep); }
+.mg-ses-satir { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.mg-ses-dugme { height: 36px; padding: 0 13px; border-radius: 99px; border: 1.5px solid var(--cizgi); background: var(--yuzey); font-size: 13.5px; font-weight: 600; color: var(--murekkep); display: inline-flex; align-items: center; gap: 7px; }
+.mg-ses-dugme:hover { border-color: var(--ana); }
+.mg-ses-dugme.on { background: var(--ana-acik); border-color: var(--ana); color: var(--ana-koyu); }
+.mg-ses-dugme .i { width: 15px; height: 15px; }
+.mg-anlatim-kutu { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 12px; padding: 11px 14px; font-size: 14px; line-height: 1.55; color: var(--soluk); animation: gir .2s ease both; }
+
+.mg-veri-bolum { display: flex; flex-direction: column; gap: 10px; }
+.mg-bolum-bas { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.mg-bolum-bas b { font: 700 17px/1.2 var(--baslik); }
+.mg-bolum-bas small { font-size: 13px; color: var(--soluk); }
+
+.mg-sorular { display: grid; gap: 16px; }
+.mg-soru-kart { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.mg-soru-bas { display: flex; align-items: center; gap: 12px; }
+.mg-soru-no { width: 28px; height: 28px; border-radius: 50%; background: var(--murekkep); color: #fff; font: 700 13.5px/1 var(--baslik); display: grid; place-items: center; flex: none; }
+.mg-soru-bas b { font: 650 17px/1.3 var(--baslik); color: var(--murekkep); }
+.mg-secenek-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mg-sec-btn { text-align: left; padding: 12px 15px; border-radius: 13px; background: var(--yuzey); border: 1.5px solid var(--cizgi); font-size: 15px; font-weight: 500; color: var(--murekkep); transition: border-color .14s, background .14s; }
+.mg-sec-btn:hover { border-color: var(--ana); }
+.mg-sec-btn.sec { background: var(--ana-acik); border-color: var(--ana); color: var(--ana-koyu); font-weight: 600; }
+.mg-sec-btn.dogru { background: var(--iyi-acik); border-color: var(--iyi); color: #14613D; font-weight: 600; }
+.mg-sec-btn.yanlis { background: var(--uyari-acik); border-color: var(--uyari); color: #8E2F1B; font-weight: 600; }
+
+.mg-ipucu-kutu { background: var(--not-bg); border: 1.5px dashed var(--not-cizgi); border-radius: 14px; padding: 12px 16px; font-size: 14.5px; color: var(--not-yazi); display: flex; gap: 10px; align-items: flex-start; animation: gir .2s ease both; }
+.mg-ipucu-kutu .i { flex: none; margin-top: 2px; }
+
+.mg-aksiyon { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.mg-aksiyon-sol { display: flex; gap: 10px; flex-wrap: wrap; }
+.mg-durum { font-size: 13.5px; font-weight: 600; color: var(--soluk); }
+
+/* 6 Şablon Kütüphanesi */
+.sablon-sekmeler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sablon-tab { text-align: left; padding: 13px 15px; border-radius: 16px; background: var(--bg); border: 1.5px solid var(--cizgi); display: flex; flex-direction: column; gap: 3px; transition: border-color .15s, background .15s; }
+.sablon-tab:hover { border-color: var(--ana); }
+.sablon-tab.on { background: var(--ana-acik); border-color: var(--ana); }
+.sablon-tab b { font: 700 15px/1.25 var(--baslik); color: var(--murekkep); }
+.sablon-tab.on b { color: var(--ana-koyu); }
+.sablon-tab small { font-size: 12.5px; color: var(--soluk); }
+
+.sablon-sahne { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.sablon-sahne-ust { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sablon-sahne-ust b { font: 700 18px/1.25 var(--baslik); }
+.sablon-sahne-ust span { font-size: 13px; font-weight: 600; color: var(--ana-koyu); background: var(--ana-acik); padding: 4px 10px; border-radius: 99px; }
+
+/* Eşleştirme */
+.es-izgara { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.es-slot { background: var(--yuzey); border: 1.5px dashed var(--cizgi); border-radius: 15px; padding: 14px; display: flex; flex-direction: column; gap: 8px; min-height: 98px; text-align: left; cursor: pointer; }
+.es-slot:hover { border-color: var(--ana); }
+.es-slot small { font-size: 12.5px; font-weight: 700; color: var(--soluk); text-transform: uppercase; letter-spacing: .04em; }
+.es-slot.dolu { border-style: solid; border-color: var(--ana); background: #FAFDFC; }
+.es-slot.dogru { border-color: var(--iyi); background: var(--iyi-acik); }
+.es-slot.yanlis { border-color: var(--uyari); background: var(--uyari-acik); }
+
+/* Boşluk doldurma */
+.bd-cumle { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 18px 20px; font-size: 17px; line-height: 1.9; color: var(--murekkep); }
+.bd-bosluk { display: inline-flex; align-items: center; justify-content: center; min-width: 126px; padding: 2px 12px; margin: 0 4px; border-radius: 10px; border: 2px dashed var(--ana); background: var(--ana-acik); font-weight: 700; color: var(--ana-koyu); vertical-align: baseline; }
+.bd-bosluk.bos { color: var(--soluk); font-weight: 500; border-color: var(--cizgi); background: var(--bg); }
+.bd-bosluk.dogru { border-style: solid; border-color: var(--iyi); background: var(--iyi-acik); color: #14613D; }
+.bd-bosluk.yanlis { border-style: solid; border-color: var(--uyari); background: var(--uyari-acik); color: #8E2F1B; }
+
+/* Bütünlük şeridi */
+.butunluk-izgara { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.butunluk-adim { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.butunluk-adim small { font-size: 12px; font-weight: 700; color: var(--ana-koyu); text-transform: uppercase; letter-spacing: .04em; }
+.butunluk-adim b { font: 700 15.5px/1.25 var(--baslik); color: var(--murekkep); }
+.butunluk-adim p { font-size: 13.5px; color: var(--soluk); line-height: 1.45; }
+
+/* Admin model çekme satırı */
+.yon-model-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.yon-cek-btn { height: 36px; padding: 0 13px; border-radius: 10px; background: var(--ana); color: #fff; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.yon-cek-btn:hover:not(:disabled) { background: var(--ana-koyu); }
+.yon-cek-btn:disabled { opacity: .6; cursor: wait; }
+.yon-model-bilgi { font-size: 12.5px; color: var(--soluk); background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 10px; padding: 8px 12px; }
+.yon-model-bilgi.hata { background: var(--uyari-acik); border-color: var(--uyari); color: #8E2F1B; }
+.yon-model-bilgi.basari { background: var(--iyi-acik); border-color: var(--iyi); color: #14613D; }
+
+@media (max-width: 960px) {
+  .mg-senaryo-kutu, .sablon-sekmeler, .butunluk-izgara, .es-izgara { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .mg-kart { padding: 18px; }
+  .mg-secenek-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+</style>
 </head>
 <body>
 <div id="app"></div>
@@ -4786,6 +5036,1258 @@ window.ResearchJourneyV3 = (() => {
 
 </script>
 <script>
+/* Seslendirilmiş etkileşimli çözümlü örnek (Slides & Narration) bileşeni ve yapılandırılmış slayt verileri. */
+window.SlaytSunum = (() => {
+  'use strict';
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* Yapılandırılmış 5 adımlı çözümlü örnekler (Modül 2 — Bağımlı ve bağımsız değişkenler)
+     Standart kontrol ve kişiselleştirilmiş deney profilleri birebir eşdeğer pedagojik şablonu paylaşır. */
+  const PROFILLER = [
+    {
+      id: 'standart',
+      etiket: 'Kontrol grubu — Standart içerik',
+      kisa: 'Standart (Kontrol)',
+      altBaslik: 'Ders çalışma süresi ve sınav başarısı',
+      sureToplam: '78 sn',
+      temaTip: 'calisma',
+      slaytlar: [
+        {
+          slide_id: 1,
+          slide_type: 'scenario_scene',
+          kisaAd: '1. Senaryo',
+          ikon: 'odul',
+          ustBaslik: 'Bir araştırma senaryosu',
+          altBaslik: 'Üniversitede ders çalışma süreleri',
+          soru: 'Çalışma süresi öğrencilerin test başarısını etkiler mi?',
+          image_path: 'images/m2-standart-s1.png',
+          audio_path: 'audio/m2-standart-s1.mp3',
+          narration: 'Bir araştırmacı, farklı çalışma sürelerinin üniversite öğrencilerinin test başarıları üzerindeki etkisini incelemek istemektedir. Öğrenciler rastgele üç gruba ayrılmıştır.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 2,
+          slide_type: 'condition_cards',
+          kisaAd: '2. Araştırma',
+          ikon: 'izgara',
+          ustBaslik: 'Araştırma nasıl yürütülüyor?',
+          altBaslik: 'Üç farklı çalışma süresi',
+          kosullar: [
+            { ad: '15 dakika', deger: '68 puan', diyagram: 'saat1' },
+            { ad: '30 dakika', deger: '76 puan', diyagram: 'saat2' },
+            { ad: '45 dakika', deger: '84 puan', diyagram: 'saat3' },
+          ],
+          dipnot: 'Örnek amaçlı kurgusal test sonuçları',
+          audio_path: 'audio/m2-standart-s2.mp3',
+          narration: 'Gruplara sırasıyla on beş, otuz ve kırk beş dakika çalışma süresi verilmiş, ardından tüm öğrencilere aynı başarı testi uygulanmıştır.',
+          estimated_duration_seconds: 17,
+        },
+        {
+          slide_id: 3,
+          slide_type: 'independent_var',
+          kisaAd: '3. Bağımsız değişken',
+          ikon: 'dal',
+          ustBaslik: 'Bağımsız değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının değiştirdiği unsur',
+          degisken: 'Çalışma süresi',
+          seviyeler: ['15 dakika', '30 dakika', '45 dakika'],
+          digerRef: 'Ölçülen sonuç: Başarı testinden alınan puan',
+          audio_path: 'audio/m2-standart-s3.mp3',
+          narration: 'Araştırmacının gruplar arasında bilerek değiştirdiği unsur çalışma süresidir. Bu nedenle çalışma süresi bağımsız değişkendir.',
+          estimated_duration_seconds: 15,
+        },
+        {
+          slide_id: 4,
+          slide_type: 'dependent_var',
+          kisaAd: '4. Bağımlı değişken',
+          ikon: 'grafik',
+          ustBaslik: 'Bağımlı değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının ölçtüğü sonuç',
+          degisken: 'Başarı testinden alınan puan',
+          oncekiRef: 'Değiştirilen unsur: Çalışma süresi',
+          veri: [
+            { etiket: '15 dk', deger: 68 },
+            { etiket: '30 dk', deger: 76 },
+            { etiket: '45 dk', deger: 84 },
+          ],
+          audio_path: 'audio/m2-standart-s4.mp3',
+          narration: 'Çalışma süresindeki değişime bağlı olarak ölçülen sonuç ise başarı testinden alınan puandır. Dolayısıyla test puanı bağımlı değişkendir.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 5,
+          slide_type: 'summary_relation',
+          kisaAd: '5. Özet',
+          ikon: 'tik',
+          ustBaslik: 'Araştırmanın değişkenleri',
+          altBaslik: 'Çözümün özeti',
+          bagimsiz: 'Çalışma süresi',
+          bagimli: 'Test puanı',
+          ozetNot: 'Bir değişkeni değiştiriyor, diğerindeki sonucu ölçüyoruz.',
+          audio_path: 'audio/m2-standart-s5.mp3',
+          narration: 'Özetle araştırmacı bağımsız değişken olan çalışma süresini değiştirir ve bağımlı değişken olan test puanındaki sonucu ölçer.',
+          estimated_duration_seconds: 14,
+        },
+      ],
+    },
+    {
+      id: 'basketbol',
+      etiket: 'Deney grubu — Basketbol / EuroLeague (Öğrenci 1)',
+      kisa: 'Basketbol (EuroLeague)',
+      altBaslik: "EuroLeague'de hücum performansı",
+      sureToplam: '78 sn',
+      temaTip: 'basketbol',
+      slaytlar: [
+        {
+          slide_id: 1,
+          slide_type: 'scenario_scene',
+          kisaAd: '1. Senaryo',
+          ikon: 'odul',
+          ustBaslik: 'Bir araştırma senaryosu',
+          altBaslik: "EuroLeague'de hücum performansı",
+          soru: 'Hücum stratejisi takım performansını etkiler mi?',
+          image_path: 'images/m2-basketbol-s1.png',
+          audio_path: 'audio/m2-basketbol-s1.mp3',
+          narration: 'Bir spor analisti, EuroLeague maçlarında uygulanan farklı hücum stratejilerinin basketbol takımlarının sayı üretimi üzerindeki etkisini incelemek istemektedir.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 2,
+          slide_type: 'condition_cards',
+          kisaAd: '2. Araştırma',
+          ikon: 'izgara',
+          ustBaslik: 'Araştırma nasıl yürütülüyor?',
+          altBaslik: 'Üç farklı hücum stratejisi',
+          kosullar: [
+            { ad: 'Hızlı hücum', deger: '72 sayı', diyagram: 'saha1' },
+            { ad: 'Set hücumu', deger: '64 sayı', diyagram: 'saha2' },
+            { ad: 'Karma hücum', deger: '80 sayı', diyagram: 'saha3' },
+          ],
+          dipnot: 'Örnek amaçlı kurgusal maç sonuçları',
+          audio_path: 'audio/m2-basketbol-s2.mp3',
+          narration: 'Aynı oyuncularla eşit süreli ve kontrollü deneme maçlarında hızlı hücum, set hücumu ve karma hücum stratejileri uygulanarak toplam sayılar kaydedilmiştir.',
+          estimated_duration_seconds: 17,
+        },
+        {
+          slide_id: 3,
+          slide_type: 'independent_var',
+          kisaAd: '3. Bağımsız değişken',
+          ikon: 'dal',
+          ustBaslik: 'Bağımsız değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının değiştirdiği unsur',
+          degisken: 'Hücum stratejisi',
+          seviyeler: ['Hızlı hücum', 'Set hücumu', 'Karma hücum'],
+          digerRef: 'Ölçülen sonuç: Atılan toplam sayı',
+          audio_path: 'audio/m2-basketbol-s3.mp3',
+          narration: 'Analistin deneme maçları arasında değiştirdiği unsur hücum stratejisidir. Bu nedenle uygulanan hücum stratejisi bağımsız değişkendir.',
+          estimated_duration_seconds: 15,
+        },
+        {
+          slide_id: 4,
+          slide_type: 'dependent_var',
+          kisaAd: '4. Bağımlı değişken',
+          ikon: 'grafik',
+          ustBaslik: 'Bağımlı değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının ölçtüğü sonuç',
+          degisken: 'Atılan toplam sayı',
+          oncekiRef: 'Değiştirilen unsur: Hücum stratejisi',
+          veri: [
+            { etiket: 'Hızlı', deger: 72 },
+            { etiket: 'Set', deger: 64 },
+            { etiket: 'Karma', deger: 80 },
+          ],
+          audio_path: 'audio/m2-basketbol-s4.mp3',
+          narration: 'Farklı hücum stratejilerinin etkisini görmek için ölçülen çıktı atılan toplam sayıdır. Dolayısıyla atılan toplam sayı bağımlı değişkendir.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 5,
+          slide_type: 'summary_relation',
+          kisaAd: '5. Özet',
+          ikon: 'tik',
+          ustBaslik: 'Araştırmanın değişkenleri',
+          altBaslik: 'Çözümün özeti',
+          bagimsiz: 'Hücum stratejisi',
+          bagimli: 'Atılan toplam sayı',
+          ozetNot: 'Bir değişkeni değiştiriyor, diğerindeki sonucu ölçüyoruz.',
+          audio_path: 'audio/m2-basketbol-s5.mp3',
+          narration: 'Özetle araştırmacı bağımsız değişken olan hücum stratejisini değiştirir ve bağımlı değişken olan toplam sayı üzerindeki etkisini ölçer.',
+          estimated_duration_seconds: 14,
+        },
+      ],
+    },
+    {
+      id: 'kahve',
+      etiket: 'Deney grubu — V60 Filtre Kahve (Öğrenci 5)',
+      kisa: 'Kahve (V60 Demleme)',
+      altBaslik: 'V60 demlemede su sıcaklığı ve lezzet',
+      sureToplam: '78 sn',
+      temaTip: 'kahve',
+      slaytlar: [
+        {
+          slide_id: 1,
+          slide_type: 'scenario_scene',
+          kisaAd: '1. Senaryo',
+          ikon: 'odul',
+          ustBaslik: 'Bir araştırma senaryosu',
+          altBaslik: 'V60 filtre kahve demleme',
+          soru: 'Demleme suyu sıcaklığı kahvenin tadım beğenisini etkiler mi?',
+          image_path: 'images/m2-kahve-s1.png',
+          audio_path: 'audio/m2-kahve-s1.mp3',
+          narration: 'Bir gıda araştırmacısı, V60 ile filtre kahve hazırlarken kullanılan farklı su sıcaklıklarının kahvenin tadım beğeni puanı üzerindeki etkisini incelemek istemektedir.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 2,
+          slide_type: 'condition_cards',
+          kisaAd: '2. Araştırma',
+          ikon: 'izgara',
+          ustBaslik: 'Araştırma nasıl yürütülüyor?',
+          altBaslik: 'Üç farklı demleme sıcaklığı',
+          kosullar: [
+            { ad: '88°C su', deger: '74 puan', diyagram: 'kahve1' },
+            { ad: '92°C su', deger: '86 puan', diyagram: 'kahve2' },
+            { ad: '96°C su', deger: '79 puan', diyagram: 'kahve3' },
+          ],
+          dipnot: 'Örnek amaçlı kurgusal tadım puanları',
+          audio_path: 'audio/m2-kahve-s2.mp3',
+          narration: 'Aynı kahve çekirdeği ve demleme süresi sabit tutulup 88, 92 ve 96 derece su sıcaklıklarında demleme yapılarak katılımcıların beğeni puanları kaydedilmiştir.',
+          estimated_duration_seconds: 17,
+        },
+        {
+          slide_id: 3,
+          slide_type: 'independent_var',
+          kisaAd: '3. Bağımsız değişken',
+          ikon: 'dal',
+          ustBaslik: 'Bağımsız değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının değiştirdiği unsur',
+          degisken: 'Demleme su sıcaklığı',
+          seviyeler: ['88°C su', '92°C su', '96°C su'],
+          digerRef: 'Ölçülen sonuç: Tadım beğeni puanı',
+          audio_path: 'audio/m2-kahve-s3.mp3',
+          narration: 'Araştırmacının demlemeler arasında bilerek değiştirdiği unsur su sıcaklığıdır. Bu nedenle demleme su sıcaklığı bağımsız değişkendir.',
+          estimated_duration_seconds: 15,
+        },
+        {
+          slide_id: 4,
+          slide_type: 'dependent_var',
+          kisaAd: '4. Bağımlı değişken',
+          ikon: 'grafik',
+          ustBaslik: 'Bağımlı değişkeni belirleyelim',
+          altBaslik: 'Araştırmacının ölçtüğü sonuç',
+          degisken: 'Tadım beğeni puanı',
+          oncekiRef: 'Değiştirilen unsur: Demleme su sıcaklığı',
+          veri: [
+            { etiket: '88°C', deger: 74 },
+            { etiket: '92°C', deger: 86 },
+            { etiket: '96°C', deger: 79 },
+          ],
+          audio_path: 'audio/m2-kahve-s4.mp3',
+          narration: 'Sıcaklık değişimine bağlı olarak katılımcılardan ölçülen sonuç tadım beğeni puanıdır. Dolayısıyla tadım beğeni puanı bağımlı değişkendir.',
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 5,
+          slide_type: 'summary_relation',
+          kisaAd: '5. Özet',
+          ikon: 'tik',
+          ustBaslik: 'Araştırmanın değişkenleri',
+          altBaslik: 'Çözümün özeti',
+          bagimsiz: 'Su sıcaklığı',
+          bagimli: 'Tadım beğeni puanı',
+          ozetNot: 'Bir değişkeni değiştiriyor, diğerindeki sonucu ölçüyoruz.',
+          audio_path: 'audio/m2-kahve-s5.mp3',
+          narration: 'Özetle araştırmacı bağımsız değişken olan su sıcaklığını değiştirir ve bağımlı değişken olan tadım beğeni puanını ölçer.',
+          estimated_duration_seconds: 14,
+        },
+      ],
+    },
+  ];
+
+  /* Öğrenci ders ekranında (#ders-m2-ornek) başka bir ilgi alanı seçilmişse
+     o bağlamın senaryo nesnesinden (c) dinamik 5 slaytlık yapı üretir. */
+  function baglamdanUret(b) {
+    if (b.alt && b.alt.id === 'spor.basketbol') return PROFILLER[1];
+    if (b.alt && b.alt.id === 'yemek.kahve') return PROFILLER[2];
+    const c = b.c, et = c.veri.etiket, dg = c.veri.deger;
+    return {
+      id: b.alt ? b.alt.id : 'genel',
+      etiket: b.alt ? b.alt.ad : 'Kişiselleştirilmiş bağlam',
+      kisa: b.alt ? b.alt.ad : 'Seçili bağlam',
+      altBaslik: c.tema,
+      sureToplam: '78 sn',
+      temaTip: b.ilgi ? b.ilgi.id : 'genel',
+      slaytlar: [
+        {
+          slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
+          ustBaslik: 'Bir araştırma senaryosu', altBaslik: c.tema, soru: c.soru,
+          image_path: `images/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s1.png`,
+          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s1.mp3`,
+          narration: `${c.gozlem} Bu gözlemden yola çıkarak araştırma sorumuz: ${c.soru}`,
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Araştırma', ikon: 'izgara',
+          ustBaslik: 'Araştırma nasıl yürütülüyor?', altBaslik: c.veri.olcu,
+          kosullar: et.map((ad, idx) => ({ ad, deger: String(dg[idx]), diyagram: `genel${idx + 1}` })),
+          dipnot: 'Örnek amaçlı kurgusal araştırma verileri',
+          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s2.mp3`,
+          narration: `Araştırmacı ${et.join(', ')} koşullarını karşılaştırarak "${c.veri.olcu}" ölçümünü kaydetmiştir.`,
+          estimated_duration_seconds: 17,
+        },
+        {
+          slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Bağımsız değişken', ikon: 'dal',
+          ustBaslik: 'Bağımsız değişkeni belirleyelim', altBaslik: 'Araştırmacının değiştirdiği unsur',
+          degisken: c.bagimsiz, seviyeler: et, digerRef: `Ölçülen sonuç: ${c.bagimli}`,
+          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s3.mp3`,
+          narration: `Araştırmacının karşılaştırdığı ve değiştirdiği unsur "${c.bagimsiz}" olduğu için bağımsız değişken budur.`,
+          estimated_duration_seconds: 15,
+        },
+        {
+          slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Bağımlı değişken', ikon: 'grafik',
+          ustBaslik: 'Bağımlı değişkeni belirleyelim', altBaslik: 'Araştırmacının ölçtüğü sonuç',
+          degisken: c.bagimli, oncekiRef: `Değiştirilen unsur: ${c.bagimsiz}`,
+          veri: et.map((etiket, idx) => ({ etiket, deger: dg[idx] })),
+          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s4.mp3`,
+          narration: `Değişime bağlı olarak ölçülen sonuç "${c.bagimli}" olduğundan bağımlı değişken budur.`,
+          estimated_duration_seconds: 16,
+        },
+        {
+          slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
+          ustBaslik: 'Araştırmanın değişkenleri', altBaslik: 'Çözümün özeti',
+          bagimsiz: c.bagimsiz, bagimli: c.bagimli,
+          ozetNot: 'Bir değişkeni değiştiriyor, diğerindeki sonucu ölçüyoruz.',
+          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s5.mp3`,
+          narration: `Özetle bağımsız değişken "${c.bagimsiz}", bağımlı değişken ise "${c.bagimli}" olarak belirlenir.`,
+          estimated_duration_seconds: 14,
+        },
+      ],
+    };
+  }
+
+  /* Yeniden kullanılabilir ikonlar ve vektörel sahne / şema bileşenleri */
+  const IKON = {
+    odul: '<path d="M6 9H4a2 2 0 0 1-2-2V5h4m12 4h2a2 2 0 0 0 2-2V5h-4M6 5h12v5a6 6 0 0 1-12 0V5Zm6 11v4m-4 0h8"/>',
+    izgara: '<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>',
+    dal: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.2 7.2 15.6 8M7.2 8.2 10.8 15.8"/>',
+    grafik: '<path d="M4 20h16"/><rect x="6" y="11" width="3.5" height="6" rx="1"/><rect x="11" y="7" width="3.5" height="10" rx="1"/><rect x="16" y="4" width="3.5" height="13" rx="1"/>',
+    tik: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/>',
+    geri: '<path d="M6 6v12"/><path d="m18 6-9 6 9 6V6Z"/>',
+    ileri: '<path d="M18 6v12"/><path d="m6 6 9 6-9 6V6Z"/>',
+    ses: '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12"/>',
+    dur: '<rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/>',
+    metin: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h6"/>',
+    sag: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+    sol: '<path d="M19 12H5m6 6-6-6 6-6"/>',
+  };
+  const svgIc = k => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IKON[k] || ''}</svg>`;
+
+  function sahneSVG(tip) {
+    if (tip === 'basketbol') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <defs>
+          <linearGradient id="bg-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#173832"/><stop offset="1" stop-color="#0B1F1B"/></linearGradient>
+        </defs>
+        <rect width="640" height="310" fill="url(#bg-b)"/>
+        <g opacity=".18" stroke="#9FD8CC" stroke-width="2" fill="none">
+          <rect x="40" y="34" width="560" height="242" rx="14"/>
+          <line x1="320" y1="34" x2="320" y2="276"/>
+          <circle cx="320" cy="155" r="46"/>
+          <path d="M40 94h86a61 61 0 0 1 0 122H40M600 94h-86a61 61 0 0 0 0 122h86"/>
+        </g>
+        <rect x="216" y="24" width="208" height="44" rx="10" fill="#102723" stroke="#2D5E55"/>
+        <text x="260" y="51" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="14" font-weight="700" text-anchor="middle">EV SAHİBİ</text>
+        <text x="320" y="52" fill="#FFFFFF" font-family="Bricolage Grotesque,sans-serif" font-size="20" font-weight="700" text-anchor="middle">74 : 64</text>
+        <text x="380" y="51" fill="#F4A278" font-family="Figtree,sans-serif" font-size="14" font-weight="700" text-anchor="middle">KONUK</text>
+        <g stroke-width="2.5" stroke-linecap="round">
+          <path d="M170 212 Q265 135 352 152" stroke="#EE6C2B" stroke-dasharray="6 6" fill="none"/>
+          <path d="M352 152 Q430 165 496 116" stroke="#9FD8CC" stroke-dasharray="5 5" fill="none"/>
+        </g>
+        <circle cx="170" cy="212" r="14" fill="#0E8C7F" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="290" cy="182" r="14" fill="#0E8C7F" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="352" cy="152" r="14" fill="#0E8C7F" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="496" cy="116" r="15" fill="#EE6C2B" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="445" cy="145" r="11" fill="#E6EEF0" opacity=".8"/>
+        <circle cx="242" cy="145" r="11" fill="#E6EEF0" opacity=".8"/>
+        <g transform="translate(520 198)">
+          <rect width="84" height="58" rx="12" fill="#102723" stroke="#2D5E55"/>
+          <text x="14" y="24" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="11" font-weight="700">EUROLEAGUE</text>
+          <text x="14" y="44" fill="#fff" font-family="Figtree,sans-serif" font-size="13" font-weight="600">Hücum Analizi</text>
+        </g>
+      </svg>`;
+    }
+    if (tip === 'kahve') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <defs>
+          <linearGradient id="bg-k" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7EFE7"/><stop offset="1" stop-color="#EFE4D7"/></linearGradient>
+        </defs>
+        <rect width="640" height="310" fill="url(#bg-k)"/>
+        <rect x="70" y="244" width="500" height="14" rx="7" fill="#DCCBBC"/>
+        <!-- V60 Sürahi ve Dripper -->
+        <g transform="translate(275 82)">
+          <polygon points="10,0 90,0 64,58 36,58" fill="#FFFFFF" stroke="#0E8C7F" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="26" y="58" width="48" height="8" rx="4" fill="#0E8C7F"/>
+          <path d="M30 66 h40 l16 68 a14 14 0 0 1 -14 16 H28 a14 14 0 0 1 -14 -16 Z" fill="#FFFFFF" fill-opacity=".8" stroke="#5C6C68" stroke-width="2.5"/>
+          <path d="M22 114 h56 l6 24 a10 10 0 0 1 -10 10 H26 a10 10 0 0 1 -10 -10 Z" fill="#8A4B24"/>
+          <path d="M86 82 c18 0 18 34 0 34" fill="none" stroke="#5C6C68" stroke-width="3"/>
+          <path d="M50 -24 Q42 -10 50 0" stroke="#EE6C2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- Kuğu boyunlu kettle -->
+        <g transform="translate(115 92)">
+          <path d="M24 34 h64 l10 88 H14 Z" fill="#11211E" rx="10"/>
+          <path d="M88 94 C122 88 124 22 152 16" fill="none" stroke="#11211E" stroke-width="7" stroke-linecap="round"/>
+          <path d="M24 44 C0 44 0 98 18 106" fill="none" stroke="#5C6C68" stroke-width="6" stroke-linecap="round"/>
+          <rect x="34" y="24" width="44" height="10" rx="5" fill="#5C6C68"/>
+        </g>
+        <!-- Sıcaklık kartları -->
+        <g transform="translate(428 72)">
+          <rect width="144" height="44" rx="12" fill="#FFFFFF" stroke="#DFE7E5" stroke-width="2"/>
+          <circle cx="22" cy="22" r="8" fill="#9FD8CC"/><text x="40" y="27" fill="#11211E" font-family="Figtree,sans-serif" font-size="14" font-weight="700">88°C · Yumuşak</text>
+          <rect y="56" width="144" height="44" rx="12" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="2.5"/>
+          <circle cx="22" cy="78" r="8" fill="#0E8C7F"/><text x="40" y="83" fill="#0A6A60" font-family="Figtree,sans-serif" font-size="14" font-weight="700">92°C · Dengeli</text>
+          <rect y="112" width="144" height="44" rx="12" fill="#FFEDE2" stroke="#EE6C2B" stroke-width="2"/>
+          <circle cx="22" cy="134" r="8" fill="#EE6C2B"/><text x="40" y="139" fill="#B84A12" font-family="Figtree,sans-serif" font-size="14" font-weight="700">96°C · Yoğun</text>
+        </g>
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 640 310" aria-hidden="true">
+      <defs>
+        <linearGradient id="bg-s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EAF3F1"/><stop offset="1" stop-color="#DCEAE6"/></linearGradient>
+      </defs>
+      <rect width="640" height="310" fill="url(#bg-s)"/>
+      <g transform="translate(76 62)">
+        <rect width="146" height="176" rx="18" fill="#FFFFFF" stroke="#CBE0DA" stroke-width="2"/>
+        <circle cx="73" cy="64" r="28" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="3"/>
+        <path d="M73 46v18l12 8" stroke="#0E8C7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <text x="73" y="122" fill="#11211E" font-family="Bricolage Grotesque,sans-serif" font-size="18" font-weight="700" text-anchor="middle">Grup 1</text>
+        <text x="73" y="146" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="14" text-anchor="middle">15 dakika</text>
+      </g>
+      <g transform="translate(247 62)">
+        <rect width="146" height="176" rx="18" fill="#FFFFFF" stroke="#0E8C7F" stroke-width="2.5"/>
+        <circle cx="73" cy="64" r="28" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="3"/>
+        <path d="M73 46v18h16" stroke="#0E8C7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <text x="73" y="122" fill="#11211E" font-family="Bricolage Grotesque,sans-serif" font-size="18" font-weight="700" text-anchor="middle">Grup 2</text>
+        <text x="73" y="146" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="14" text-anchor="middle">30 dakika</text>
+      </g>
+      <g transform="translate(418 62)">
+        <rect width="146" height="176" rx="18" fill="#FFFFFF" stroke="#EE6C2B" stroke-width="2.5"/>
+        <circle cx="73" cy="64" r="28" fill="#FFEDE2" stroke="#EE6C2B" stroke-width="3"/>
+        <path d="M73 46v18l-10 12" stroke="#EE6C2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <text x="73" y="122" fill="#11211E" font-family="Bricolage Grotesque,sans-serif" font-size="18" font-weight="700" text-anchor="middle">Grup 3</text>
+        <text x="73" y="146" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="14" text-anchor="middle">45 dakika</text>
+      </g>
+    </svg>`;
+  }
+
+  function diyagramSVG(kod, idx) {
+    if (kod.startsWith('saha')) {
+      const pts = [
+        [[46, 22], [86, 44], [116, 62]],
+        [[36, 46], [76, 60], [112, 32]],
+        [[42, 62], [74, 26], [118, 44]],
+      ][idx % 3];
+      return `<svg viewBox="0 0 164 90" aria-hidden="true">
+        <rect x="6" y="6" width="152" height="78" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.6"/>
+        <line x1="82" y1="6" x2="82" y2="84" stroke="#8EB3A8" stroke-width="1.4"/>
+        <circle cx="82" cy="45" r="16" fill="none" stroke="#8EB3A8" stroke-width="1.4"/>
+        <rect x="6" y="25" width="24" height="40" fill="none" stroke="#8EB3A8" stroke-width="1.4"/>
+        <rect x="134" y="25" width="24" height="40" fill="none" stroke="#8EB3A8" stroke-width="1.4"/>
+        ${pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6.5" fill="#0E8C7F"/>`).join('')}
+      </svg>`;
+    }
+    if (kod.startsWith('kahve')) {
+      const fillH = [26, 40, 54][idx % 3];
+      const renk = idx === 2 ? '#EE6C2B' : '#0E8C7F';
+      return `<svg viewBox="0 0 164 90" aria-hidden="true">
+        <rect x="6" y="6" width="152" height="78" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.4"/>
+        <polygon points="44,22 92,22 76,56 60,56" fill="#fff" stroke="#0E8C7F" stroke-width="2"/>
+        <rect x="52" y="56" width="32" height="18" rx="5" fill="#fff" stroke="#5C6C68" stroke-width="1.6"/>
+        <rect x="114" y="16" width="14" height="58" rx="7" fill="#fff" stroke="#8EB3A8" stroke-width="1.5"/>
+        <rect x="117" y="${72 - fillH}" width="8" height="${fillH}" rx="4" fill="${renk}"/>
+      </svg>`;
+    }
+    const aci = [90, 180, 270][idx % 3];
+    return `<svg viewBox="0 0 164 90" aria-hidden="true">
+      <rect x="6" y="6" width="152" height="78" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.4"/>
+      <circle cx="82" cy="45" r="24" fill="#fff" stroke="#0E8C7F" stroke-width="2.2"/>
+      <line x1="82" y1="45" x2="${82 + Math.sin(aci * Math.PI / 180) * 16}" y2="${45 - Math.cos(aci * Math.PI / 180) * 16}" stroke="#EE6C2B" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="82" cy="45" r="3" fill="#11211E"/>
+    </svg>`;
+  }
+
+  function slaytGovde(profil, s) {
+    if (s.slide_type === 'scenario_scene') {
+      return `<div class="slayt-gorsel-kutu">${sahneSVG(profil.temaTip)}<span class="slayt-dosya-etiket">${esc(s.image_path)}</span></div>
+        <div class="slayt-soru-serit">${esc(s.soru)}</div>`;
+    }
+    if (s.slide_type === 'condition_cards') {
+      return `<div class="slayt-kosul-izgara">${s.kosullar.map((k, idx) => `<div class="slayt-kosul">${diyagramSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}</div>
+        <p class="slayt-dipnot">${esc(s.dipnot)}</p>`;
+    }
+    if (s.slide_type === 'independent_var') {
+      return `<div class="slayt-vurgu-kutu">
+          <span class="slayt-vurgu-ust">Araştırmacının değiştirdiği</span>
+          <b class="slayt-vurgu-ad">${esc(s.degisken)}</b>
+          <div class="slayt-seviyeler">${s.seviyeler.map(sv => `<div class="slayt-seviye">${esc(sv)}</div>`).join('')}</div>
+          <span class="slayt-vurgu-alt">Bağımsız değişken</span>
+        </div>
+        <div class="slayt-ref-serit">${esc(s.digerRef)}</div>`;
+    }
+    if (s.slide_type === 'dependent_var') {
+      const max = Math.max(...s.veri.map(v => Number(v.deger) || 0), 1);
+      return `<div class="slayt-ref-serit">${esc(s.oncekiRef)}</div>
+        <div class="slayt-vurgu-kutu turuncu">
+          <span class="slayt-vurgu-ust">Araştırmacının ölçtüğü</span>
+          <b class="slayt-vurgu-ad">${esc(s.degisken)}</b>
+          <div class="slayt-barlar">${s.veri.map(v => `<div class="slayt-bar-satir"><span>${esc(v.etiket)}</span><div class="slayt-bar-yol"><i style="width:${Math.max(18, (v.deger / max) * 92).toFixed(1)}%"></i></div><b>${esc(v.deger)}</b></div>`).join('')}</div>
+          <span class="slayt-vurgu-alt">Bağımlı değişken</span>
+        </div>`;
+    }
+    return `<div class="slayt-ozet-izgara">
+        <div class="slayt-ozet-kutu"><small>Bağımsız değişken</small><b>${esc(s.bagimsiz)}</b><span>Değiştirilen</span></div>
+        <div class="slayt-ozet-ok">${svgIc('sag')}</div>
+        <div class="slayt-ozet-kutu turuncu"><small>Bağımlı değişken</small><b>${esc(s.bagimli)}</b><span>Ölçülen</span></div>
+      </div>
+      <p class="slayt-ozet-not">${esc(s.ozetNot)}</p>`;
+  }
+
+  /* Etkileşimli sunum bileşeni (hem Ders ekranında hem Jüri sunumunda mount edilir) */
+  function createPlayer(host, profil, opts = {}) {
+    if (!host) return { destroy() {} };
+    const slaytlar = profil.slaytlar;
+    let idx = Math.max(0, Math.min(slaytlar.length - 1, opts.initialSlide || 0));
+    let metinAcik = !!opts.metinAcik;
+    let otomatik = opts.otomatik !== false;
+    let hiz = 1;
+    let caliyor = false;
+    let ilerlemeOran = 0;
+    let timer = null;
+    let baslangic = 0;
+    let destroyed = false;
+
+    const durdurSes = () => {
+      caliyor = false;
+      clearInterval(timer);
+      timer = null;
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch (e) { /* yoksay */ }
+      }
+    };
+
+    const guncelleProgressDOM = () => {
+      const segs = [...host.querySelectorAll('.slayt-seg')];
+      segs.forEach((seg, i) => {
+        const bar = seg.querySelector('i');
+        seg.classList.toggle('bitti', i < idx);
+        if (i < idx) bar.style.width = '100%';
+        else if (i === idx) bar.style.width = (caliyor ? (ilerlemeOran * 100).toFixed(1) : '100') + '%';
+        else bar.style.width = '0%';
+      });
+      const btn = host.querySelector('.slayt-oynat-btn');
+      if (btn) {
+        btn.classList.toggle('caliyor', caliyor);
+        btn.innerHTML = svgIc(caliyor ? 'dur' : 'ses');
+        btn.setAttribute('aria-label', caliyor ? 'Seslendirmeyi duraklat' : 'Adımı seslendir');
+      }
+    };
+
+    const baslatSes = () => {
+      durdurSes();
+      const s = slaytlar[idx];
+      caliyor = true;
+      ilerlemeOran = 0;
+      baslangic = performance.now();
+      const sureMs = (s.estimated_duration_seconds * 1000) / hiz;
+
+      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+        try {
+          const u = new SpeechSynthesisUtterance(s.narration);
+          u.lang = 'tr-TR';
+          u.rate = hiz;
+          const sesler = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+          const tr = sesler.find(v => /^tr/i.test(v.lang));
+          if (tr) u.voice = tr;
+          u.onend = () => {
+            if (destroyed || !caliyor) return;
+            ilerlemeOran = 1;
+            guncelleProgressDOM();
+            if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
+            else { durdurSes(); guncelleProgressDOM(); }
+          };
+          window.speechSynthesis.speak(u);
+        } catch (e) { /* TTS yedek zamanlayıcı ile devam eder */ }
+      }
+
+      timer = setInterval(() => {
+        if (destroyed || !caliyor) return;
+        ilerlemeOran = Math.min(1, (performance.now() - baslangic) / sureMs);
+        guncelleProgressDOM();
+        if (ilerlemeOran >= 1 && !(window.speechSynthesis && window.speechSynthesis.speaking)) {
+          if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
+          else { durdurSes(); guncelleProgressDOM(); }
+        }
+      }, 120);
+      guncelleProgressDOM();
+    };
+
+    function draw() {
+      const s = slaytlar[idx];
+      const son = idx === slaytlar.length - 1;
+      const altSag = son && opts.onCompleteHash
+        ? `<a class="btn-koyu" href="#${esc(opts.onCompleteHash)}" data-act="${esc(opts.onCompleteAct || '')}" data-m="${esc(opts.moduleId || '')}">${esc(opts.completeLabel || 'Mikro-göreve geç')} ${svgIc('sag')}</a>`
+        : `<button type="button" class="btn-koyu" data-slayt="ileri"${son ? ' disabled' : ''}>Sonraki adım ${svgIc('sag')}</button>`;
+
+      host.innerHTML = `<div class="slayt-sarici">
+        <div class="slayt-kart">
+          <div class="slayt-ust">
+            <div>
+              <span class="slayt-adim-etiket">ADIM ${idx + 1} / ${slaytlar.length}</span>
+              <h2>${esc(s.ustBaslik)}</h2>
+              <p>${esc(s.altBaslik)}</p>
+            </div>
+            <span class="slayt-sure-rozet">${svgIc('ses')} ~${s.estimated_duration_seconds} sn · Toplam ${esc(profil.sureToplam)}</span>
+          </div>
+          <div class="slayt-sahne">${slaytGovde(profil, s)}</div>
+          <div class="slayt-ilerleme" role="tablist" aria-label="Slayt adımları">
+            ${slaytlar.map((sl, i) => `<button type="button" class="slayt-seg${i < idx ? ' bitti' : ''}" data-slayt-git="${i}" aria-label="${esc(sl.kisaAd)}"><i style="width:${i <= idx ? '100%' : '0%'}"></i></button>`).join('')}
+          </div>
+          <div class="slayt-kontroller">
+            <div class="slayt-ses-sol">
+              <button type="button" class="slayt-ses-btn" data-slayt="geri" aria-label="Önceki adım"${idx === 0 ? ' disabled' : ''}>${svgIc('geri')}</button>
+              <button type="button" class="slayt-oynat-btn${caliyor ? ' caliyor' : ''}" data-slayt="oynat" aria-label="${caliyor ? 'Seslendirmeyi duraklat' : 'Adımı seslendir'}">${svgIc(caliyor ? 'dur' : 'ses')}</button>
+              <button type="button" class="slayt-ses-btn" data-slayt="ileri" aria-label="Sonraki adım"${son ? ' disabled' : ''}>${svgIc('ileri')}</button>
+              <span class="slayt-sayac">${idx + 1} / ${slaytlar.length}</span>
+              <button type="button" class="slayt-pil" data-slayt="hiz" title="Seslendirme hızını değiştir">${String(hiz).replace('.', ',')}×</button>
+              <button type="button" class="slayt-pil${otomatik ? ' on' : ''}" data-slayt="otomatik">${otomatik ? 'Otomatik: Açık' : 'Otomatik: Kapalı'}</button>
+            </div>
+            <button type="button" class="slayt-pil${metinAcik ? ' on' : ''}" data-slayt="metin">${svgIc('metin')} Metin</button>
+          </div>
+          ${metinAcik ? `<div class="slayt-metin-kutu">
+            <div class="slayt-metin-ust"><span>Seslendirme metni · Google TTS önbellek yolu: <code>${esc(s.audio_path)}</code></span><span>~${s.estimated_duration_seconds} sn</span></div>
+            <p>${esc(s.narration)}</p>
+          </div>` : ''}
+        </div>
+        <div class="slayt-kucukler" role="tablist" aria-label="Slayt önizlemeleri">
+          ${slaytlar.map((sl, i) => `<button type="button" class="slayt-kucuk${i === idx ? ' on' : ''}" data-slayt-git="${i}" aria-current="${i === idx ? 'step' : 'false'}">
+            <span class="slayt-kucuk-on">${svgIc(sl.ikon)}</span>
+            <span>${esc(sl.kisaAd)}</span>
+          </button>`).join('')}
+        </div>
+        <div class="slayt-alt">
+          <button type="button" class="btn ghost btn-pil" data-slayt="geri"${idx === 0 ? ' disabled' : ''}>${svgIc('sol')} Önceki</button>
+          ${altSag}
+        </div>
+      </div>`;
+      guncelleProgressDOM();
+    }
+
+    const onClick = ev => {
+      const git = ev.target.closest('[data-slayt-git]');
+      if (git) {
+        const yeni = +git.dataset.slaytGit;
+        const devam = caliyor;
+        durdurSes();
+        idx = yeni;
+        draw();
+        if (devam) baslatSes();
+        return;
+      }
+      const act = ev.target.closest('[data-slayt]');
+      if (!act || act.disabled) return;
+      const tur = act.dataset.slayt;
+      if (tur === 'geri' && idx > 0) { const d = caliyor; durdurSes(); idx--; draw(); if (d) baslatSes(); }
+      else if (tur === 'ileri' && idx < slaytlar.length - 1) { const d = caliyor; durdurSes(); idx++; draw(); if (d) baslatSes(); }
+      else if (tur === 'oynat') { if (caliyor) { durdurSes(); guncelleProgressDOM(); } else baslatSes(); }
+      else if (tur === 'metin') { metinAcik = !metinAcik; draw(); }
+      else if (tur === 'otomatik') { otomatik = !otomatik; draw(); }
+      else if (tur === 'hiz') {
+        const hizlar = [1, 1.25, 1.5, 0.75];
+        hiz = hizlar[(hizlar.indexOf(hiz) + 1) % hizlar.length];
+        if (caliyor) baslatSes();
+        else draw();
+      }
+    };
+
+    host.addEventListener('click', onClick);
+    draw();
+
+    return {
+      destroy() {
+        destroyed = true;
+        durdurSes();
+        host.removeEventListener('click', onClick);
+      },
+    };
+  }
+
+  return { PROFILLER, baglamdanUret, createPlayer };
+})();
+
+</script>
+<script>
+/* Etkileşimli mikro-görev prototipi ve 6 alternatif etkileşim şablonu */
+window.GorevPrototip = (() => {
+  'use strict';
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* Transfer senaryoları: Çözümlü örnekten (hücum/su sıcaklığı/çalışma süresi) bağımsız yeni problem çözmeye geçiş */
+  const SENARYOLAR = [
+    {
+      id: 'standart',
+      etiket: 'Kontrol grubu — Standart içerik',
+      kisa: 'Standart (Kontrol)',
+      baslik: 'Problem çözme yöntemi başarıyı etkiler mi?',
+      metin: 'Bir araştırmacı, farklı problem çözme yöntemlerinin öğrencilerin doğru çözdükleri problem sayısına etkisini incelemektedir. Öğrenciler rastgele üç gruba ayrılmış, her grupta farklı bir problem çözme yöntemi uygulanmış ve sonunda doğru çözülen problem sayıları kaydedilmiştir.',
+      temaTip: 'standart',
+      kosullar: [
+        { ad: 'Örnekli çözüm', deger: '12 problem', diyagram: 'saat1' },
+        { ad: 'Grup tartışması', deger: '17 problem', diyagram: 'saat2' },
+        { ad: 'Bireysel çalışma', deger: '14 problem', diyagram: 'saat3' },
+      ],
+      bagimsizSecenekler: ['Problem çözme yöntemi', 'Doğru çözülen problem sayısı', 'Öğrenci sayısı', 'Soru sayısı'],
+      bagimsizDogru: 0,
+      bagimliSecenekler: ['Soru sayısı', 'Doğru çözülen problem sayısı', 'Öğrenci sayısı', 'Problem çözme yöntemi'],
+      bagimliDogru: 1,
+      ipucuBagimsiz: 'Bağımsız değişken için araştırmacının üç grupta bilerek farklılaştırdığı yönteme odaklan.',
+      ipucuBagimli: 'Bağımlı değişken için uygulama sonunda her gruptan ölçülen sonuca odaklan.',
+      aciklamaDogru: 'Harika! Araştırmacı gruplar arasında problem çözme yöntemini değiştirdiği için bağımsız değişken "Problem çözme yöntemi", sonunda ölçtüğü sonuç ise "Doğru çözülen problem sayısı" olduğu için bağımlı değişken budur.',
+    },
+    {
+      id: 'basketbol',
+      etiket: 'Deney grubu — Basketbol (Öğrenci 1)',
+      kisa: 'Basketbol (Paslaşma)',
+      baslik: 'Paslaşma düzeni takım performansını etkiler mi?',
+      metin: 'Bir basketbol analisti, farklı paslaşma düzenlerinin takımın başarılı asist sayısı üzerindeki etkisini araştırmaktadır. Analist aynı oyuncularla, eşit süreli üç deneme maçı düzenlemiş ve her maçta farklı bir paslaşma düzeni uygulamıştır. Maçların sonunda başarılı asist sayılarını kaydetmiştir.',
+      temaTip: 'basketbol',
+      kosullar: [
+        { ad: 'Kısa pas düzeni', deger: '14 asist', diyagram: 'saha1' },
+        { ad: 'Çapraz pas düzeni', deger: '21 asist', diyagram: 'saha2' },
+        { ad: 'Hızlı geçiş pası', deger: '18 asist', diyagram: 'saha3' },
+      ],
+      bagimsizSecenekler: ['Paslaşma düzeni', 'Başarılı asist sayısı', 'Oyuncu sayısı', 'Maç süresi'],
+      bagimsizDogru: 0,
+      bagimliSecenekler: ['Maç süresi', 'Başarılı asist sayısı', 'Oyuncu sayısı', 'Paslaşma düzeni'],
+      bagimliDogru: 1,
+      ipucuBagimsiz: 'Bağımsız değişken için araştırmacının üç maçta farklılaştırdığı koşula odaklan.',
+      ipucuBagimli: 'Bağımlı değişken için maçların sonunda ölçülen performans çıktısına odaklan.',
+      aciklamaDogru: 'Doğru! Analist maçlar arasında paslaşma düzenini değiştirdiği için bağımsız değişken "Paslaşma düzeni", bunun sonucunda ölçtüğü çıktı ise "Başarılı asist sayısı" olduğu için bağımlı değişken budur.',
+    },
+    {
+      id: 'kahve',
+      etiket: 'Deney grubu — V60 Kahve (Öğrenci 5)',
+      kisa: 'Kahve (Demleme Süresi)',
+      baslik: 'Demleme süresi aromatik yoğunluğu etkiler mi?',
+      metin: 'Bir gıda araştırmacısı, aynı kahve çekirdeği ve aynı su sıcaklığıyla V60 demlerken uygulanan farklı demleme sürelerinin kahvenin aromatik yoğunluk puanı üzerindeki etkisini incelemektedir. Katılımcılar üç farklı sürede demlenen kahveleri tatmış ve aromatik yoğunluk puanları kaydedilmiştir.',
+      temaTip: 'kahve',
+      kosullar: [
+        { ad: '2 dakika', deger: '68 puan', diyagram: 'kahve1' },
+        { ad: '3 dakika', deger: '85 puan', diyagram: 'kahve2' },
+        { ad: '4 dakika', deger: '74 puan', diyagram: 'kahve3' },
+      ],
+      bagimsizSecenekler: ['Demleme süresi', 'Aromatik yoğunluk puanı', 'Çekirdek miktarı', 'Su sıcaklığı'],
+      bagimsizDogru: 0,
+      bagimliSecenekler: ['Su sıcaklığı', 'Aromatik yoğunluk puanı', 'Çekirdek miktarı', 'Demleme süresi'],
+      bagimliDogru: 1,
+      ipucuBagimsiz: 'Bağımsız değişken için diğer koşullar sabit tutulurken araştırmacının değiştirdiği süreye odaklan.',
+      ipucuBagimli: 'Bağımlı değişken için tadım sonunda katılımcılardan ölçülen puana odaklan.',
+      aciklamaDogru: 'Doğru! Araştırmacı demleme süresini değiştirdiği için bağımsız değişken "Demleme süresi", tadım sonucunda ölçülen değer ise "Aromatik yoğunluk puanı" olduğu için bağımlı değişken budur.',
+    },
+  ];
+
+  /* 6 Alternatif Etkileşim Şablonu */
+  const SABLONLAR = [
+    { id: 'eslestirme', ad: 'Eşleştirme', kazanim: 'Değişkenler, kavramlar ve tanımlar' },
+    { id: 'siniflandirma', ad: 'Sınıflandırma', kazanim: 'Evren, örneklem, veri türleri' },
+    { id: 'sirala', ad: 'Sıralama', kazanim: 'Araştırma sürecinin aşamaları' },
+    { id: 'gorsel_veri', ad: 'Görsel veri yorumlama', kazanim: 'Grafikler, tablolar ve bulgular' },
+    { id: 'bosluk', ad: 'Boşluk doldurma', kazanim: 'Kavramların hatırlanması ve uygulanması' },
+    { id: 'acik_uclu', ad: 'Açık uçlu uygulama', kazanim: 'Araştırma sorusu ve hipotez oluşturma' },
+  ];
+
+  const TABLO_KARS = [
+    ['Sesli anlatım', 'Temel sunum biçimi', 'İsteğe bağlı'],
+    ['Görseller', 'Var', 'Var'],
+    ['Grafik ve tablolar', 'Gerektiğinde', 'Gerektiğinde'],
+    ['Adım adım çözüm', 'Var', 'Yanıt sonrasında'],
+    ['Öğrenci etkileşimi', 'İlerleme ve gezinme', 'Aktif problem çözme'],
+    ['İpucu', 'Gerekli değil', 'İsteğe bağlı'],
+    ['Açıklayıcı geri bildirim', 'Çözümün parçası', 'Yanıt sonrasında'],
+    ['Tahmini süre', '1–2 dakika', '1–3 dakika'],
+  ];
+
+  const IKON = {
+    ses: '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>',
+    metin: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h6"/>',
+    ampul: '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+    bilgi: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    yukari: '<polyline points="18 15 12 9 6 15"/>',
+    asagi: '<polyline points="6 9 12 15 18 9"/>',
+    sag: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+  };
+  const ic = k => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IKON[k] || ''}</svg>`;
+
+  function senaryoSVG(tip) {
+    if (tip === 'basketbol') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#13332D"/>
+        <g stroke="#9FD8CC" stroke-width="1.8" fill="none" opacity=".25">
+          <rect x="24" y="22" width="372" height="196" rx="10"/>
+          <line x1="210" y1="22" x2="210" y2="218"/>
+          <circle cx="210" cy="120" r="36"/>
+          <path d="M24 72h64a48 48 0 0 1 0 96H24M396 72h-64a48 48 0 0 0 0 96h64"/>
+        </g>
+        <path d="M96 158 L184 92 L286 146 L342 88" stroke="#EE6C2B" stroke-width="3" stroke-dasharray="6 5" fill="none" stroke-linecap="round"/>
+        <circle cx="96" cy="158" r="11" fill="#0E8C7F" stroke="#fff" stroke-width="2"/>
+        <circle cx="184" cy="92" r="11" fill="#0E8C7F" stroke="#fff" stroke-width="2"/>
+        <circle cx="286" cy="146" r="11" fill="#0E8C7F" stroke="#fff" stroke-width="2"/>
+        <circle cx="342" cy="88" r="13" fill="#EE6C2B" stroke="#fff" stroke-width="2.5"/>
+        <rect x="24" y="24" width="150" height="30" rx="8" fill="#0D221E" stroke="#2D5E55"/>
+        <text x="99" y="43" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">PASLAŞMA &amp; ASİST</text>
+      </svg>`;
+    }
+    if (tip === 'kahve') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#F5ECE3"/>
+        <rect x="44" y="192" width="332" height="10" rx="5" fill="#DCCBBC"/>
+        <g transform="translate(88 66)">
+          <polygon points="10,0 74,0 54,48 30,48" fill="#fff" stroke="#0E8C7F" stroke-width="2.5"/>
+          <path d="M24 48 h36 l12 58 a10 10 0 0 1 -10 12 H22 a10 10 0 0 1 -10 -12 Z" fill="#fff" stroke="#5C6C68" stroke-width="2"/>
+          <path d="M18 86 h48 l4 22 a8 8 0 0 1 -8 8 H22 a8 8 0 0 1 -8 -8 Z" fill="#8A4B24"/>
+        </g>
+        <g transform="translate(222 64)">
+          <rect width="144" height="34" rx="10" fill="#fff" stroke="#DFE7E5" stroke-width="1.8"/>
+          <text x="16" y="22" fill="#11211E" font-family="Figtree,sans-serif" font-size="13" font-weight="700">2 dk · Hafif gövde</text>
+          <rect y="44" width="144" height="34" rx="10" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="2"/>
+          <text x="16" y="66" fill="#0A6A60" font-family="Figtree,sans-serif" font-size="13" font-weight="700">3 dk · En yüksek aroma</text>
+          <rect y="88" width="144" height="34" rx="10" fill="#FFEDE2" stroke="#EE6C2B" stroke-width="1.8"/>
+          <text x="16" y="110" fill="#B84A12" font-family="Figtree,sans-serif" font-size="13" font-weight="700">4 dk · Yoğun acılık</text>
+        </g>
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 420 240" aria-hidden="true">
+      <rect width="420" height="240" fill="#E8F2EF"/>
+      <g transform="translate(38 48)">
+        <rect width="102" height="140" rx="14" fill="#fff" stroke="#CBE0DA" stroke-width="2"/>
+        <text x="51" y="48" fill="#0E8C7F" font-family="Bricolage Grotesque,sans-serif" font-size="24" font-weight="700" text-anchor="middle">12</text>
+        <text x="51" y="76" fill="#11211E" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Örnekli çözüm</text>
+        <text x="51" y="98" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="11" text-anchor="middle">Grup 1</text>
+      </g>
+      <g transform="translate(159 48)">
+        <rect width="102" height="140" rx="14" fill="#fff" stroke="#0E8C7F" stroke-width="2.5"/>
+        <text x="51" y="48" fill="#0E8C7F" font-family="Bricolage Grotesque,sans-serif" font-size="24" font-weight="700" text-anchor="middle">17</text>
+        <text x="51" y="76" fill="#11211E" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Grup tartışması</text>
+        <text x="51" y="98" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="11" text-anchor="middle">Grup 2</text>
+      </g>
+      <g transform="translate(280 48)">
+        <rect width="102" height="140" rx="14" fill="#fff" stroke="#EE6C2B" stroke-width="2"/>
+        <text x="51" y="48" fill="#EE6C2B" font-family="Bricolage Grotesque,sans-serif" font-size="24" font-weight="700" text-anchor="middle">14</text>
+        <text x="51" y="76" fill="#11211E" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Bireysel çalışma</text>
+        <text x="51" y="98" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="11" text-anchor="middle">Grup 3</text>
+      </g>
+    </svg>`;
+  }
+
+  function kosulSVG(kod, idx) {
+    if (kod.startsWith('saha')) {
+      const pts = [[[34, 22], [74, 48], [116, 28]], [[30, 58], [76, 30], [122, 62]], [[28, 42], [82, 22], [126, 44]]][idx % 3];
+      return `<svg viewBox="0 0 164 84" aria-hidden="true">
+        <rect x="6" y="6" width="152" height="72" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.5"/>
+        <line x1="82" y1="6" x2="82" y2="78" stroke="#8EB3A8" stroke-width="1.3"/>
+        <circle cx="82" cy="42" r="14" fill="none" stroke="#8EB3A8" stroke-width="1.3"/>
+        <path d="M${pts[0][0]} ${pts[0][1]} L${pts[1][0]} ${pts[1][1]} L${pts[2][0]} ${pts[2][1]}" stroke="#EE6C2B" stroke-width="2.2" stroke-dasharray="4 3" fill="none"/>
+        ${pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5.5" fill="#0E8C7F"/>`).join('')}
+      </svg>`;
+    }
+    if (kod.startsWith('kahve')) {
+      const aci = [120, 180, 240][idx % 3];
+      return `<svg viewBox="0 0 164 84" aria-hidden="true">
+        <rect x="6" y="6" width="152" height="72" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.4"/>
+        <circle cx="82" cy="42" r="22" fill="#fff" stroke="#0E8C7F" stroke-width="2"/>
+        <line x1="82" y1="42" x2="${82 + Math.sin(aci * Math.PI / 180) * 14}" y2="${42 - Math.cos(aci * Math.PI / 180) * 14}" stroke="#EE6C2B" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 164 84" aria-hidden="true">
+      <rect x="6" y="6" width="152" height="72" rx="8" fill="#E8F1EE" stroke="#8EB3A8" stroke-width="1.4"/>
+      <rect x="34" y="${54 - idx * 12}" width="24" height="${16 + idx * 12}" rx="4" fill="#9FD8CC"/>
+      <rect x="70" y="${44 - idx * 10}" width="24" height="${26 + idx * 10}" rx="4" fill="#0E8C7F"/>
+      <rect x="106" y="${38 - idx * 8}" width="24" height="${32 + idx * 8}" rx="4" fill="#EE6C2B"/>
+    </svg>`;
+  }
+
+  function baglamdanSenaryo(b) {
+    if (b.alt && b.alt.id === 'spor.basketbol') return SENARYOLAR[1];
+    if (b.alt && b.alt.id === 'yemek.kahve') return SENARYOLAR[2];
+    const c = b.c, et = c.veri.etiket, dg = c.veri.deger;
+    return {
+      id: b.alt ? b.alt.id : 'genel',
+      etiket: b.alt ? b.alt.ad : 'Seçili bağlam',
+      baslik: c.soru,
+      metin: c.gozlem,
+      temaTip: b.ilgi && b.ilgi.id === 'spor' ? 'basketbol' : b.ilgi && b.ilgi.id === 'yemek' ? 'kahve' : 'standart',
+      kosullar: et.map((ad, i) => ({ ad, deger: String(dg[i]), diyagram: `genel${i + 1}` })),
+      bagimsizSecenekler: [c.bagimsiz, c.bagimli, c.kontrol[0] || 'Katılımcı sayısı', c.kontrol[1] || 'Uygulama süresi'],
+      bagimsizDogru: 0,
+      bagimliSecenekler: [c.kontrol[1] || 'Uygulama süresi', c.bagimli, c.kontrol[0] || 'Katılımcı sayısı', c.bagimsiz],
+      bagimliDogru: 1,
+      ipucuBagimsiz: 'Bağımsız değişken için araştırmacının gruplar arasında değiştirdiği koşula odaklan.',
+      ipucuBagimli: 'Bağımlı değişken için çalışma sonunda ölçülen sonuca odaklan.',
+      aciklamaDogru: `Doğru! Araştırmacı "${c.bagimsiz}" koşulunu değiştirdiği için bağımsız değişken budur; sonunda ölçtüğü "${c.bagimli}" ise bağımlı değişkendir.`,
+    };
+  }
+
+  /* Etkileşimli Ana Mikro-Görev Oynatıcı */
+  function createTaskPlayer(host, senaryo, opts = {}) {
+    if (!host) return { destroy() {} };
+    let sec1 = null, sec2 = null, kontrol = false, ipucu = false, metin = false, caliyor = false, destroyed = false;
+
+    const durdurSes = () => {
+      caliyor = false;
+      if (window.speechSynthesis) try { window.speechSynthesis.cancel(); } catch (e) { /* yoksay */ }
+    };
+
+    const guncelleSesBtn = () => {
+      const b = host.querySelector('[data-mg="ses"]');
+      if (b) {
+        b.classList.toggle('on', caliyor);
+        b.innerHTML = `${ic('ses')} ${caliyor ? 'Seslendirmeyi durdur' : 'Senaryoyu dinle'}`;
+      }
+    };
+
+    function draw() {
+      const d1 = sec1 === senaryo.bagimsizDogru, d2 = sec2 === senaryo.bagimliDogru;
+      const tam = kontrol && d1 && d2;
+      const secili = sec1 != null && sec2 != null;
+      let geriBildirim = '';
+      if (kontrol) {
+        if (tam) {
+          geriBildirim = `<div class="gb d">${ic('bilgi')}<div><b>Tebrikler, her iki değişkeni de doğru belirledin!</b><br>${esc(senaryo.aciklamaDogru)}</div></div>`;
+        } else if (d1 && !d2) {
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>Bağımsız değişken seçimin doğru; ancak bağımlı değişken için araştırma sonunda ölçülen sonuca odaklan.</div></div>`;
+        } else if (!d1 && d2) {
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>Bağımlı değişken seçimin doğru; ancak ${esc(senaryo.ipucuBagimsiz)}</div></div>`;
+        } else {
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Tekrar deneyelim.</b><br>${esc(senaryo.ipucuBagimsiz)} ${esc(senaryo.ipucuBagimli)}</div></div>`;
+        }
+      }
+
+      const tamamBtn = opts.onCompleteHash
+        ? `<a class="btn lg" href="#${esc(opts.onCompleteHash)}" data-act="${esc(opts.onCompleteAct || '')}" data-m="${esc(opts.moduleId || '')}">${esc(opts.completeLabel || 'Mikro-görevi tamamla')} ${ic('sag')}</a>`
+        : '';
+
+      host.innerHTML = `<div class="mg-kart">
+        <div class="mg-ust">
+          <div>
+            <span class="mg-eyebrow">MODÜL 02 · MİKRO-GÖREV</span>
+            <h2>Şimdi sıra sende!</h2>
+            <p>Araştırma senaryosunu incele ve değişkenleri belirle.</p>
+          </div>
+          <span class="mg-sure">Yaklaşık 2 dk.</span>
+        </div>
+
+        <div class="mg-senaryo-kutu">
+          <div class="mg-gorsel">${senaryoSVG(senaryo.temaTip)}</div>
+          <div class="mg-senaryo-metin">
+            <span class="mg-senaryo-etiket">Araştırma senaryosu</span>
+            <h3>${esc(senaryo.baslik)}</h3>
+            <p>${esc(senaryo.metin)}</p>
+            <div class="mg-ses-satir">
+              <button type="button" class="mg-ses-dugme${caliyor ? ' on' : ''}" data-mg="ses">${ic('ses')} ${caliyor ? 'Seslendirmeyi durdur' : 'Senaryoyu dinle'}</button>
+              <button type="button" class="mg-ses-dugme${metin ? ' on' : ''}" data-mg="metin">${ic('metin')} ${metin ? 'Anlatım metnini gizle' : 'Anlatım metnini göster'}</button>
+            </div>
+            ${metin ? `<div class="mg-anlatim-kutu"><b>Seslendirme özeti:</b> ${esc(senaryo.metin)}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="mg-veri-bolum">
+          <div class="mg-bolum-bas">
+            <b>Araştırma sonuçları</b>
+            <small>Temsili şemalar ve kurgusal araştırma verileri</small>
+          </div>
+          <div class="slayt-kosul-izgara">
+            ${senaryo.kosullar.map((k, idx) => `<div class="slayt-kosul">${kosulSVG(k.diyagram, idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="mg-veri-bolum">
+          <div class="mg-bolum-bas">
+            <b>Araştırmanın değişkenlerini belirle</b>
+            <small>Bağımlı ve bağımsız değişkenler</small>
+          </div>
+          <div class="mg-sorular">
+            <div class="mg-soru-kart">
+              <div class="mg-soru-bas"><span class="mg-soru-no">1</span><b>Bağımsız değişken hangisidir?</b></div>
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="Bağımsız değişken hangisidir?">
+                ${senaryo.bagimsizSecenekler.map((s, i) => {
+                  const on = sec1 === i;
+                  const cls = on ? (kontrol ? (i === senaryo.bagimsizDogru ? ' dogru' : ' yanlis') : ' sec') : '';
+                  return `<button type="button" class="mg-sec-btn${cls}" data-mg-sec="1" data-i="${i}" aria-pressed="${on}">${esc(s)}</button>`;
+                }).join('')}
+              </div>
+            </div>
+            <div class="mg-soru-kart">
+              <div class="mg-soru-bas"><span class="mg-soru-no">2</span><b>Bağımlı değişken hangisidir?</b></div>
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="Bağımlı değişken hangisidir?">
+                ${senaryo.bagimliSecenekler.map((s, i) => {
+                  const on = sec2 === i;
+                  const cls = on ? (kontrol ? (i === senaryo.bagimliDogru ? ' dogru' : ' yanlis') : ' sec') : '';
+                  return `<button type="button" class="mg-sec-btn${cls}" data-mg-sec="2" data-i="${i}" aria-pressed="${on}">${esc(s)}</button>`;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${ipucu ? `<div class="mg-ipucu-kutu">${ic('ampul')}<div><b>İpucu:</b> ${esc(senaryo.ipucuBagimsiz)} ${esc(senaryo.ipucuBagimli)}</div></div>` : ''}
+        ${geriBildirim}
+
+        <div class="mg-aksiyon">
+          <div class="mg-aksiyon-sol">
+            <button type="button" class="btn ghost" data-mg="ipucu">${ic('ampul')} ${ipucu ? 'İpucunu gizle' : 'İpucuna ihtiyacım var'}</button>
+            <button type="button" class="btn" data-mg="kontrol"${secili ? '' : ' disabled'}>${kontrol && !tam ? 'Cevaplarımı tekrar kontrol et' : 'Cevapları kontrol et'}</button>
+            ${tam ? tamamBtn : ''}
+          </div>
+          <span class="mg-durum">${tam ? 'Mikro-görev tamamlandı' : 'Mikro-görev devam ediyor'}</span>
+        </div>
+      </div>`;
+    }
+
+    const onClick = ev => {
+      const sec = ev.target.closest('[data-mg-sec]');
+      if (sec) {
+        if (sec.dataset.mgSec === '1') sec1 = +sec.dataset.i;
+        else sec2 = +sec.dataset.i;
+        kontrol = false;
+        draw();
+        return;
+      }
+      const act = ev.target.closest('[data-mg]');
+      if (!act || act.disabled) return;
+      const tur = act.dataset.mg;
+      if (tur === 'ipucu') { ipucu = !ipucu; draw(); }
+      else if (tur === 'metin') { metin = !metin; draw(); }
+      else if (tur === 'kontrol') { kontrol = true; draw(); }
+      else if (tur === 'ses') {
+        if (caliyor) { durdurSes(); guncelleSesBtn(); return; }
+        durdurSes();
+        caliyor = true;
+        guncelleSesBtn();
+        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+          try {
+            const u = new SpeechSynthesisUtterance(senaryo.metin);
+            u.lang = 'tr-TR';
+            const tr = (window.speechSynthesis.getVoices() || []).find(v => /^tr/i.test(v.lang));
+            if (tr) u.voice = tr;
+            u.onend = () => { if (!destroyed) { caliyor = false; guncelleSesBtn(); } };
+            window.speechSynthesis.speak(u);
+          } catch (e) { caliyor = false; guncelleSesBtn(); }
+        }
+      }
+    };
+
+    host.addEventListener('click', onClick);
+    draw();
+    return {
+      destroy() { destroyed = true; durdurSes(); host.removeEventListener('click', onClick); },
+    };
+  }
+
+  /* 6 Alternatif Etkileşim Şablonu Kütüphanesi (Jüri Sunumu için etkileşimli gösterim) */
+  function createTemplateShowcase(host) {
+    if (!host) return { destroy() {} };
+    let aktifSablon = 'eslestirme';
+    let baglam = 'basketbol'; // 'standart' | 'basketbol' | 'kahve'
+    const st = {
+      esSec: null, esYer: {}, esKontrol: false,
+      snSec: null, snYer: {}, snKontrol: false,
+      srSira: [1, 3, 0, 2], srKontrol: false,
+      gvSec: null, gvKontrol: false,
+      bd1: '', bd2: '', bdKontrol: false,
+      auMetin: '', auOrnek: false,
+    };
+
+    function baglamVerisi() {
+      if (baglam === 'standart') {
+        return {
+          etiket: 'Standart (Kontrol)',
+          esOgeler: ['Problem çözme yöntemi', 'Doğru çözülen problem sayısı', 'Aynı sınıf düzeyi'],
+          snOgeler: [['Fakültedeki 300 öğrenci', 0], ['Rastgele seçilen 60 öğrenci', 1], ['Üniversitedeki 1.400 öğrenci', 0], ['Anket uygulanan 140 öğrenci', 1]],
+          srAdimlar: ['Araştırma problemini belirle', 'Çalışma gruplarını planla', 'Test verilerini topla', 'Doğru problem sayılarını analiz et'],
+          gvBaslik: 'Problem çözme yöntemine göre ortalama doğru sayısı',
+          gvVeri: [['Örnekli', 12], ['Tartışma', 17], ['Bireysel', 14]],
+          gvSecenekler: [
+            ['Grup tartışması yapan öğrenciler ortalama 17 problemle en yüksek başarıyı göstermiştir.', true, 'Doğrudan grafikteki değerleri aktarıyor.'],
+            ['Bireysel çalışma bütün öğrencilerin başarısını kesin olarak düşürür.', false, 'Aşırı genelleme içeriyor.'],
+            ['Örnekli çözüm her yaş grubunda etkisizdir.', false, 'Evren dışı genelleme yapılamaz.'],
+          ],
+          auSoru: 'Farklı problem çözme yöntemleri ve başarı testi için bir hipotez yaz.',
+          auOrnek: 'Grup tartışması yöntemini kullanan öğrencilerin doğru çözdükleri problem sayısı, bireysel çalışanlardan anlamlı düzeyde yüksek olacaktır.',
+        };
+      }
+      if (baglam === 'kahve') {
+        return {
+          etiket: 'Kahve (V60 Demleme)',
+          esOgeler: ['Demleme süresi', 'Aromatik yoğunluk puanı', 'Sabit 92°C su sıcaklığı'],
+          snOgeler: [['Şehirdeki 300 nitelikli kahve tüketicisi', 0], ['Anket uygulanan 60 tüketici', 1], ['Tadım etkinliğindeki 200 kişi', 0], ['Puanları kaydedilen 40 katılımcı', 1]],
+          srAdimlar: ['Demleme problemini belirle', 'Süre koşullarını planla', 'Tadım puanlarını topla', 'Aromatik yoğunlukları analiz et'],
+          gvBaslik: 'V60 demleme süresine göre aromatik yoğunluk puanı',
+          gvVeri: [['2 dk', 68], ['3 dk', 85], ['4 dk', 74]],
+          gvSecenekler: [
+            ['3 dakika demlenen kahve 85 puanla en yüksek aromatik yoğunluk puanını almıştır.', true, 'Doğrudan grafikteki ölçüme dayanıyor.'],
+            ['4 dakika demlenen kahve her zaman içilemez olur.', false, 'Grafikten çıkarılamayacak öznel bir yargı.'],
+            ['Kahve çekirdeğinin türü aromayı hiç etkilemez.', false, 'Sabit tutulan değişken hakkında sonuç çıkarılamaz.'],
+          ],
+          auSoru: 'V60 demleme süresi ve aromatik yoğunluk için bir hipotez yaz.',
+          auOrnek: '3 dakikalık demleme süresiyle hazırlanan V60 kahvenin aromatik yoğunluk puanı, 2 dakikalık demlemeye göre daha yüksek olacaktır.',
+        };
+      }
+      return {
+        etiket: 'Basketbol (Paslaşma)',
+        esOgeler: ['Paslaşma düzeni', 'Başarılı asist sayısı', 'Eşit maç süresi'],
+        snOgeler: [["EuroLeague'deki 300 maç", 0], ['Rastgele seçilen 60 maç', 1], ['Turnuvadaki 200 oyuncu', 0], ['Verisi incelenen 40 oyuncu', 1]],
+        srAdimlar: ['Araştırma problemini belirle', 'Deneme maçı düzenini planla', 'Asist verilerini topla', 'Paslaşma sonuçlarını analiz et'],
+        gvBaslik: 'Paslaşma düzenine göre maç başına başarılı asist sayısı',
+        gvVeri: [['Kısa pas', 14], ['Çapraz pas', 21], ['Hızlı geçiş', 18]],
+        gvSecenekler: [
+          ['Çapraz pas düzeninde takım maç başına 21 asistle en yüksek değere ulaşmıştır.', true, 'Bu ifade doğrudan grafikteki değerleri aktarıyor.'],
+          ['Kısa pas düzeni bütün basketbol liglerinde yasaklanmalıdır.', false, 'Veriye dayalı bilimsel bir sonuç değildir.'],
+          ['Oyuncuların boy uzunluğu asist sayısını belirlemiştir.', false, 'Araştırmada incelenen değişken bu değildir.'],
+        ],
+        auSoru: 'Paslaşma düzeni ve asist performansı için bir hipotez yaz.',
+        auOrnek: 'Çapraz pas düzeninin uygulandığı maçlarda takımın başarılı asist sayısı, kısa pas düzenine göre daha yüksek olacaktır.',
+      };
+    }
+
+    function sablonIcerik() {
+      const b = baglamVerisi();
+      if (aktifSablon === 'eslestirme') {
+        const roller = ['Bağımsız değişken', 'Bağımlı değişken', 'Kontrol değişkeni'];
+        const dogru = Object.keys(st.esYer).filter(k => +st.esYer[k] === +k).length;
+        return `<div class="sablon-sahne-ust"><b>Eşleştirme · Kavramları rolleriyle eşleştir</b><span>${esc(b.etiket)}</span></div>
+          <div class="havuz" data-tb="es-havuz">${b.esOgeler.map((ad, i) => Object.values(st.esYer).includes(i) ? '' : `<button type="button" class="cip${st.esSec === i ? ' sec' : ''}" data-tb="es-cip" data-i="${i}">${esc(ad)}</button>`).join('')}</div>
+          <div class="es-izgara">${roller.map((r, ri) => {
+            const oi = st.esYer[ri];
+            const cls = oi != null ? (st.esKontrol ? (oi === ri ? ' dogru' : ' yanlis') : ' dolu') : '';
+            return `<button type="button" class="es-slot${cls}" data-tb="es-slot" data-r="${ri}"><small>${esc(r)}</small>${oi != null ? `<b>${esc(b.esOgeler[oi])}</b>` : '<span>Bir kavram seçip buraya dokun</span>'}</button>`;
+          }).join('')}</div>
+          ${st.esKontrol ? `<div class="gb ${dogru === 3 ? 'd' : 'y'}">${ic('bilgi')}${dogru === 3 ? 'Tüm kavramlar doğru rolle eşleşti.' : `${dogru}/3 doğru eşleşme.`}</div>` : ''}
+          <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="es-kontrol">Kontrol et</button><button type="button" class="btn ghost" data-tb="es-sifirla">Sıfırla</button></div>`;
+      }
+      if (aktifSablon === 'siniflandirma') {
+        const dogru = b.snOgeler.filter((o, i) => st.snYer[i] === o[1]).length;
+        const yerlesen = Object.keys(st.snYer).length;
+        return `<div class="sablon-sahne-ust"><b>Sınıflandırma · Evren mi, örneklem mi?</b><span>${esc(b.etiket)}</span></div>
+          <div class="havuz" data-tb="sn-havuz">${b.snOgeler.map(([ad], i) => st.snYer[i] == null ? `<button type="button" class="cip${st.snSec === i ? ' sec' : ''}" data-tb="sn-cip" data-i="${i}">${esc(ad)}</button>` : '').join('')}</div>
+          <div class="kutular">${['Evren', 'Örneklem'].map((kt, ki) => `<div class="kutu" role="button" tabindex="0" data-tb="sn-kutu" data-k="${ki}"><h4>${kt}</h4>${b.snOgeler.map(([ad, d], i) => st.snYer[i] === ki ? `<button type="button" class="cip${st.snKontrol ? (d === ki ? ' d' : ' y') : ''}" data-tb="sn-cip" data-i="${i}">${esc(ad)}</button>` : '').join('')}</div>`).join('')}</div>
+          ${st.snKontrol ? `<div class="gb ${yerlesen === 4 && dogru === 4 ? 'd' : 'y'}">${ic('bilgi')}${yerlesen < 4 ? 'Önce tüm ifadeleri yerleştir.' : dogru === 4 ? 'Evren ve örneklem ayrımı tamamen doğru!' : `${dogru}/4 doğru sınıflandırma.`}</div>` : ''}
+          <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="sn-kontrol">Kontrol et</button><button type="button" class="btn ghost" data-tb="sn-sifirla">Sıfırla</button></div>`;
+      }
+      if (aktifSablon === 'sirala') {
+        const dogru = st.srSira.filter((oi, pos) => oi === pos).length;
+        return `<div class="sablon-sahne-ust"><b>Sıralama · Araştırma aşamalarını sıraya koy</b><span>${esc(b.etiket)}</span></div>
+          <ol class="sr">${st.srSira.map((oi, pos) => `<li class="${st.srKontrol ? (oi === pos ? 'd' : 'y') : ''}"><span class="no">${pos + 1}</span><span></span><span class="sr-t"><b>${esc(b.srAdimlar[oi])}</b></span><span class="sr-ok"><button type="button" data-tb="sr-tasi" data-pos="${pos}" data-yon="-1"${pos ? '' : ' disabled'}>${ic('yukari')}</button><button type="button" data-tb="sr-tasi" data-pos="${pos}" data-yon="1"${pos < 3 ? '' : ' disabled'}>${ic('asagi')}</button></span></li>`).join('')}</ol>
+          ${st.srKontrol ? `<div class="gb ${dogru === 4 ? 'd' : 'y'}">${ic('bilgi')}${dogru === 4 ? 'Araştırma süreci doğru sıralandı.' : `${dogru}/4 adım doğru sırada.`}</div>` : ''}
+          <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="sr-kontrol">Kontrol et</button></div>`;
+      }
+      if (aktifSablon === 'gorsel_veri') {
+        const max = Math.max(...b.gvVeri.map(v => v[1]), 1);
+        return `<div class="sablon-sahne-ust"><b>Görsel veri yorumlama · Grafikten hangi sonuca ulaşılabilir?</b><span>${esc(b.etiket)}</span></div>
+          <div class="slayt-vurgu-kutu turuncu">
+            <b class="slayt-vurgu-ad">${esc(b.gvBaslik)}</b>
+            <div class="slayt-barlar">${b.gvVeri.map(([et, dg]) => `<div class="slayt-bar-satir"><span>${esc(et)}</span><div class="slayt-bar-yol"><i style="width:${Math.max(18, (dg / max) * 92).toFixed(1)}%"></i></div><b>${dg}</b></div>`).join('')}</div>
+          </div>
+          <div class="secenekler">${b.gvSecenekler.map(([m, d], i) => `<button type="button" class="secenek${st.gvSec === i ? (st.gvKontrol ? (d ? ' d' : ' y') : ' sec') : ''}" data-tb="gv-sec" data-i="${i}"><i></i><span>${esc(m)}</span></button>`).join('')}</div>
+          ${st.gvKontrol && st.gvSec != null ? `<div class="gb ${b.gvSecenekler[st.gvSec][1] ? 'd' : 'y'}">${ic('bilgi')}${esc(b.gvSecenekler[st.gvSec][2])}</div>` : ''}
+          <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="gv-kontrol"${st.gvSec == null ? ' disabled' : ''}>Kontrol et</button></div>`;
+      }
+      if (aktifSablon === 'bosluk') {
+        const d1 = st.bd1.trim().toLocaleLowerCase('tr') === 'bağımsız';
+        const d2 = st.bd2.trim().toLocaleLowerCase('tr') === 'bağımlı';
+        return `<div class="sablon-sahne-ust"><b>Boşluk doldurma · Kavramları cümleye yerleştir</b><span>${esc(b.etiket)}</span></div>
+          <div class="bd-cumle">Araştırmacının gruplar arasında bilerek değiştirdiği unsur <span class="bd-bosluk${st.bd1 ? (st.bdKontrol ? (d1 ? ' dogru' : ' yanlis') : '') : ' bos'}">${esc(st.bd1 || '1. boşluk')}</span> değişkendir; bu değişime bağlı olarak ölçtüğü sonuç ise <span class="bd-bosluk${st.bd2 ? (st.bdKontrol ? (d2 ? ' dogru' : ' yanlis') : '') : ' bos'}">${esc(st.bd2 || '2. boşluk')}</span> değişkendir.</div>
+          <div class="yon-hat-izgara">
+            <div class="yon-alan"><label>1. boşluk</label><div class="yon-girdi-satir"><input class="girdi" data-tb-inp="bd1" value="${esc(st.bd1)}" placeholder="Kavramı yaz (ör. bağımsız)"></div></div>
+            <div class="yon-alan"><label>2. boşluk</label><div class="yon-girdi-satir"><input class="girdi" data-tb-inp="bd2" value="${esc(st.bd2)}" placeholder="Kavramı yaz (ör. bağımlı)"></div></div>
+          </div>
+          <div class="mg-ses-satir">
+            <button type="button" class="mg-ses-dugme" data-tb="bd-cip" data-kelime="bağımsız">bağımsız</button>
+            <button type="button" class="mg-ses-dugme" data-tb="bd-cip" data-kelime="bağımlı">bağımlı</button>
+            <button type="button" class="mg-ses-dugme" data-tb="bd-cip" data-kelime="kontrol">kontrol</button>
+          </div>
+          ${st.bdKontrol ? `<div class="gb ${d1 && d2 ? 'd' : 'y'}">${ic('bilgi')}${d1 && d2 ? 'İki boşluk da doğru tamamlandı!' : 'İpucu: Değiştirilen unsur bağımsız, ölçülen sonuç bağımlı değişkendir.'}</div>` : ''}
+          <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="bd-kontrol">Kontrol et</button></div>`;
+      }
+      return `<div class="sablon-sahne-ust"><b>Açık uçlu uygulama · Hipotez oluşturma</b><span>${esc(b.etiket)}</span></div>
+        <p class="gorev-soru">${esc(b.auSoru)}</p>
+        <div class="acik-duzen">
+          <div><textarea data-tb-inp="auMetin" placeholder="Hipotezini yaz...">${esc(st.auMetin)}</textarea><span class="sayac">${(st.auMetin.trim().match(/\S+/g) || []).length} kelime</span></div>
+          <aside class="ipucu"><h4>Kontrol listesi</h4><ul><li>Bağımsız değişken yer alıyor mu?</li><li>Bağımlı değişken ölçülebilir mi?</li><li>Beklenen yön veya fark belirtilmiş mi?</li></ul></aside>
+        </div>
+        <div class="gorev-alt"><button type="button" class="btn ghost" data-tb="au-ornek">${st.auOrnek ? 'Örnek yanıtı gizle' : 'Örnek kontrol yanıtını gör'}</button></div>
+        ${st.auOrnek ? `<div class="gb d">${ic('bilgi')}<div><b>Örnek hipotez:</b> ${esc(b.auOrnek)}</div></div>` : ''}`;
+    }
+
+    function draw() {
+      host.innerHTML = `<div class="slayt-sarici">
+        <div class="juri-slayt-seciciler" role="group" aria-label="Şablon bağlamını seç">
+          ${[['basketbol', 'Deney: Basketbol (Paslaşma)'], ['kahve', 'Deney: V60 Kahve'], ['standart', 'Kontrol: Standart']].map(([id, ad]) => `<button type="button" class="juri-slayt-tab${baglam === id ? ' on' : ''}" data-tb="baglam" data-id="${id}">${ad}</button>`).join('')}
+        </div>
+        <div class="sablon-sekmeler" role="tablist" aria-label="Mikro-görev etkileşim şablonları">
+          ${SABLONLAR.map(s => `<button type="button" class="sablon-tab${aktifSablon === s.id ? ' on' : ''}" data-tb="sablon" data-id="${s.id}" role="tab" aria-selected="${aktifSablon === s.id}"><b>${esc(s.ad)}</b><small>${esc(s.kazanim)}</small></button>`).join('')}
+        </div>
+        <div class="sablon-sahne">${sablonIcerik()}</div>
+      </div>`;
+    }
+
+    const onClick = ev => {
+      const el = ev.target.closest('[data-tb]');
+      if (!el || el.disabled) return;
+      const a = el.dataset.tb;
+      if (a === 'sablon') { aktifSablon = el.dataset.id; draw(); }
+      else if (a === 'baglam') { baglam = el.dataset.id; draw(); }
+      else if (a === 'es-cip') { const i = +el.dataset.i; st.esSec = st.esSec === i ? null : i; draw(); }
+      else if (a === 'es-slot') { if (st.esSec == null) delete st.esYer[+el.dataset.r]; else { Object.keys(st.esYer).forEach(k => { if (st.esYer[k] === st.esSec) delete st.esYer[k]; }); st.esYer[+el.dataset.r] = st.esSec; st.esSec = null; } st.esKontrol = false; draw(); }
+      else if (a === 'es-havuz') { if (st.esSec != null) { Object.keys(st.esYer).forEach(k => { if (st.esYer[k] === st.esSec) delete st.esYer[k]; }); st.esSec = null; draw(); } }
+      else if (a === 'es-kontrol') { st.esKontrol = true; draw(); }
+      else if (a === 'es-sifirla') { st.esSec = null; st.esYer = {}; st.esKontrol = false; draw(); }
+      else if (a === 'sn-cip') { const i = +el.dataset.i; st.snSec = st.snSec === i ? null : i; draw(); }
+      else if (a === 'sn-kutu') { if (st.snSec == null) return; st.snYer[st.snSec] = +el.dataset.k; st.snSec = null; st.snKontrol = false; draw(); }
+      else if (a === 'sn-havuz') { if (st.snSec == null) return; delete st.snYer[st.snSec]; st.snSec = null; st.snKontrol = false; draw(); }
+      else if (a === 'sn-kontrol') { st.snKontrol = true; draw(); }
+      else if (a === 'sn-sifirla') { st.snSec = null; st.snYer = {}; st.snKontrol = false; draw(); }
+      else if (a === 'sr-tasi') { const p = +el.dataset.pos, y = p + +el.dataset.yon; if (y >= 0 && y < 4) { [st.srSira[p], st.srSira[y]] = [st.srSira[y], st.srSira[p]]; st.srKontrol = false; draw(); } }
+      else if (a === 'sr-kontrol') { st.srKontrol = true; draw(); }
+      else if (a === 'gv-sec') { st.gvSec = +el.dataset.i; st.gvKontrol = false; draw(); }
+      else if (a === 'gv-kontrol') { st.gvKontrol = true; draw(); }
+      else if (a === 'bd-cip') { if (!st.bd1) st.bd1 = el.dataset.kelime; else if (!st.bd2) st.bd2 = el.dataset.kelime; else st.bd1 = el.dataset.kelime; st.bdKontrol = false; draw(); }
+      else if (a === 'bd-kontrol') { st.bdKontrol = true; draw(); }
+      else if (a === 'au-ornek') { st.auOrnek = !st.auOrnek; draw(); }
+    };
+    const onInput = ev => {
+      const t = ev.target;
+      if (t.dataset && t.dataset.tbInp) {
+        st[t.dataset.tbInp] = t.value;
+        if (t.dataset.tbInp === 'auMetin') {
+          const s = host.querySelector('.sayac');
+          if (s) s.textContent = (t.value.trim().match(/\S+/g) || []).length + ' kelime';
+        }
+      }
+    };
+
+    host.addEventListener('click', onClick);
+    host.addEventListener('input', onInput);
+    draw();
+    return {
+      destroy() { host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); },
+    };
+  }
+
+  return { SENARYOLAR, SABLONLAR, TABLO_KARS, baglamdanSenaryo, createTaskPlayer, createTemplateShowcase };
+})();
+
+</script>
+<script>
 /* Bağlam — prototip uygulaması. Veritabanı yok; durum bellekte ve tarayıcının yerel deposunda tutulur. */
 (() => {
   'use strict';
@@ -4848,6 +6350,41 @@ window.ResearchJourneyV3 = (() => {
   const YONTEM_ANAHTAR = 'baglam-ilgi-yontemi';
   const ZENGIN_ANAHTAR = 'baglam-zengin-ilgi-v1';
   const HERO_ANAHTAR = 'baglam-hero-surum';
+  const ORNEK_MOD_ANAHTAR = 'baglam-ornek-mod';
+  const GOREV_MOD_ANAHTAR = 'baglam-gorev-mod';
+  const URETIM_ANAHTAR = 'baglam-uretim-ayar';
+  const VARSAYILAN_MODELLER = {
+    claude: [
+      ['claude-sonnet-4-5', 'Claude Sonnet 4.5 (Varsayılan)'],
+      ['claude-opus-4-1', 'Claude Opus 4.1'],
+      ['claude-haiku-4-5', 'Claude Haiku 4.5'],
+    ],
+    geminiText: [
+      ['gemini-2.5-pro', 'Gemini 2.5 Pro (Varsayılan)'],
+      ['gemini-2.5-flash', 'Gemini 2.5 Flash'],
+    ],
+    geminiImage: [
+      ['imagen-3.0-generate-002', 'Gemini Imagen 3'],
+      ['gemini-2.5-flash-image', 'Gemini 2.5 Flash Image'],
+    ],
+    tts: [
+      ['tr-TR-Wavenet-E', 'Google TTS · tr-TR-Wavenet-E'],
+      ['tr-TR-Chirp3-HD', 'Google TTS · tr-TR-Chirp3-HD'],
+      ['tr-TR-Standard-A', 'Google TTS · tr-TR-Standard-A'],
+    ],
+  };
+  const varsayilanUretim = () => ({
+    claudeKey: '',
+    geminiKey: '',
+    ttsKey: '',
+    senaryoModel: 'claude-sonnet-4-5',
+    scriptModel: 'claude-sonnet-4-5',
+    promptModel: 'gemini-2.5-pro',
+    gorselModel: 'imagen-3.0-generate-002',
+    sesModel: 'tr-TR-Wavenet-E',
+    sesHiz: '1.0',
+    modeller: { claude: null, geminiText: null, geminiImage: null, tts: null },
+  });
   const bos = () => ({ kul: null, secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, ilerleme: {}, baglamSec: {}, cevap: {} });
   const bosZengin = () => ({ secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, etkinlik: {}, ozelEtkinlik: {} });
   let S = (() => { try { const x = JSON.parse(localStorage.getItem(ANAHTAR)); if (x && typeof x === 'object') return { ...bos(), ...x }; } catch (e) { /* depo yok */ } return bos(); })();
@@ -4860,9 +6397,17 @@ window.ResearchJourneyV3 = (() => {
     gs: {},
     drag: null,
     video: null,
+    slaytPlayer: null,
+    gorevPlayer: null,
+    sablonPlayer: null,
     juriProf: 0,
     juriEvrenProf: 0,
+    juriSlaytProf: 1,
+    juriGorevProf: 1,
     juriCozum: {},
+    keyGorunur: {},
+    modelYukleniyor: false,
+    modelBilgi: null,
     yontem: (() => { try { return localStorage.getItem(YONTEM_ANAHTAR) === 'zengin' ? 'zengin' : 'standart'; } catch (e) { return 'standart'; } })(),
     hero: (() => {
       try {
@@ -4874,8 +6419,12 @@ window.ResearchJourneyV3 = (() => {
         return (saved === 'v2' || saved === 'v3') ? saved : 'v1';
       } catch (e) { return 'v1'; }
     })(),
+    ornekMod: (() => { try { return localStorage.getItem(ORNEK_MOD_ANAHTAR) === 'slayt' ? 'slayt' : 'metin'; } catch (e) { return 'metin'; } })(),
+    gorevMod: (() => { try { return localStorage.getItem(GOREV_MOD_ANAHTAR) === 'etkilesimli' ? 'etkilesimli' : 'klasik'; } catch (e) { return 'klasik'; } })(),
+    uretim: (() => { try { const x = JSON.parse(localStorage.getItem(URETIM_ANAHTAR)); return x && typeof x === 'object' ? { ...varsayilanUretim(), ...x } : varsayilanUretim(); } catch (e) { return varsayilanUretim(); } })(),
     notlar: (() => { try { return localStorage.getItem('baglam-notlar') === '1'; } catch (e) { return false; } })(),
   };
+  const kaydetUretim = () => { try { localStorage.setItem(URETIM_ANAHTAR, JSON.stringify(UI.uretim)); } catch (e) { /* depo yok */ } };
   const heroMod = () => (UI.hero === 'v3' && window.ResearchJourneyV3) ? window.ResearchJourneyV3 : (UI.hero === 'v2' && window.ResearchJourneyV2) ? window.ResearchJourneyV2 : window.ResearchJourney;
   const zenginMi = () => UI.yontem === 'zengin';
   const ilgiListesi = () => zenginMi() ? D.zenginIlgiler : D.ilgiler;
@@ -5329,6 +6878,180 @@ window.ResearchJourneyV3 = (() => {
             </div>
           </div>
         </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Çözümlü örnek sunum biçimi</h2>
+            <p>Konu anlatım videosundan sonra gelen çözümlü örneklerin mevcut metin tabanlı biçimi veya alternatif seslendirilmiş etkileşimli slayt biçimi arasında geçiş yapın. Nihai deneyde seçilen biçim hem kontrol hem deney grubunda sabit tutulur.</p>
+          </div>
+          <span class="yon-rozet">${UI.ornekMod === 'slayt' ? 'Alternatif: Seslendirilmiş slayt' : 'Mevcut: Metin tabanlı'}</span>
+        </div>
+        <div class="yon-kartlar" role="radiogroup" aria-label="Çözümlü örnek sunum biçimi">
+          <div class="yon-k${UI.ornekMod !== 'slayt' ? ' on' : ''}" role="radio" aria-checked="${UI.ornekMod !== 'slayt'}" tabindex="0" data-act="ornekModSec" data-mod="metin">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.ornekMod !== 'slayt' ? ic('check') : ''}</span>
+              <div>
+                <b>Mevcut: Adım adım metin tabanlı çözümlü örnek</b>
+                <small>3 pedagojik adım · Statik metin ve şema</small>
+              </div>
+            </div>
+            <p>Mevcut öğrenci ekranlarındaki metin tabanlı çözümlü örnek akışı korunur.</p>
+            <div class="yon-k-alt">
+              <span>${UI.ornekMod !== 'slayt' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.ornekMod !== 'slayt' ? '' : ' ghost'}" data-act="ornekModSec" data-mod="metin" data-git="ders-m2-ornek">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.ornekMod === 'slayt' ? ' on' : ''}" role="radio" aria-checked="${UI.ornekMod === 'slayt'}" tabindex="0" data-act="ornekModSec" data-mod="slayt">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.ornekMod === 'slayt' ? ic('check') : ''}</span>
+              <div>
+                <b>Alternatif: Seslendirilmiş etkileşimli slayt (Slides &amp; Narration)</b>
+                <small>5 adım · Görsel sahne + TTS anlatım + öğrenci kontrolü</small>
+              </div>
+            </div>
+            <p>Google Learn Your Way ve Mayer'in Çoklu Ortam Öğrenme Kuramı ilkeleriyle hazırlanan, her adımı seslendirilen etkileşimli çözümlü örnek.</p>
+            <div class="yon-k-alt">
+              <span>${UI.ornekMod === 'slayt' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.ornekMod === 'slayt' ? '' : ' ghost'}" data-act="ornekModSec" data-mod="slayt" data-git="ders-m2-ornek">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+        </div>
+        <div class="yon-durum-satir">
+          <span>Jüriye standart kontrol, Basketbol ve V60 Kahve örneklerini yan yana göstermek için:</span>
+          <a class="btn ghost" href="#juri-slayt">${ic('ampul')}Jüri sunumunda Slayt &amp; Ses gösterimi</a>
+        </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Mikro-görev sunum biçimi</h2>
+            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrencinin senaryoyu görsel destek, isteğe bağlı seslendirme ve açıklayıcı geri bildirimle çözmesi için alternatif etkileşimli mikro-görev biçimini seçebilirsiniz.</p>
+          </div>
+          <span class="yon-rozet">${UI.gorevMod === 'etkilesimli' ? 'Alternatif: Etkileşimli mikro-görev' : 'Mevcut: Standart mikro-görev'}</span>
+        </div>
+        <div class="yon-kartlar" role="radiogroup" aria-label="Mikro-görev sunum biçimi">
+          <div class="yon-k${UI.gorevMod !== 'etkilesimli' ? ' on' : ''}" role="radio" aria-checked="${UI.gorevMod !== 'etkilesimli'}" tabindex="0" data-act="gorevModSec" data-mod="klasik">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.gorevMod !== 'etkilesimli' ? ic('check') : ''}</span>
+              <div>
+                <b>Mevcut: Standart mikro-görev</b>
+                <small>Mevcut eşleştirme ve açık uçlu soru düzeni</small>
+              </div>
+            </div>
+            <p>Mevcut öğrenci modül ekranlarındaki mikro-görev bileşenleri korunur.</p>
+            <div class="yon-k-alt">
+              <span>${UI.gorevMod !== 'etkilesimli' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.gorevMod !== 'etkilesimli' ? '' : ' ghost'}" data-act="gorevModSec" data-mod="klasik" data-git="ders-m2-gorev">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.gorevMod === 'etkilesimli' ? ' on' : ''}" role="radio" aria-checked="${UI.gorevMod === 'etkilesimli'}" tabindex="0" data-act="gorevModSec" data-mod="etkilesimli">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.gorevMod === 'etkilesimli' ? ic('check') : ''}</span>
+              <div>
+                <b>Alternatif: Görsel &amp; ipucu destekli etkileşimli mikro-görev</b>
+                <small>Senaryo görseli + isteğe bağlı ses + ipucu + açıklayıcı geri bildirim</small>
+              </div>
+            </div>
+            <p>Çözümlü örnekten transfer senaryosuna geçen, 6 alternatif etkileşim şablonuyla (Eşleştirme, Sınıflandırma, Sıralama, Grafik, Boşluk, Açık uçlu) uyumlu yeni tasarım.</p>
+            <div class="yon-k-alt">
+              <span>${UI.gorevMod === 'etkilesimli' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.gorevMod === 'etkilesimli' ? '' : ' ghost'}" data-act="gorevModSec" data-mod="etkilesimli" data-git="ders-m2-gorev">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+        </div>
+        <div class="yon-durum-satir">
+          <span>Jüriye mikro-görev prototipini ve 6 etkileşim şablonunu göstermek için:</span>
+          <a class="btn ghost" href="#juri-gorev">${ic('hedef')}Jüri sunumunda Mikro-Görev Şablonları</a>
+        </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Üretim hattı, API anahtarları ve model seçimi (Prototip)</h2>
+            <p>API anahtarlarını girdikten sonra güncel modelleri doğrudan Anthropic (Claude) ve Google (Gemini / TTS) API'lerinden çekebilirsiniz.</p>
+          </div>
+          <span class="yon-rozet" id="yonUretimRozet">Yerel yapılandırma hazır</span>
+        </div>
+
+        <div class="yon-hat-izgara">
+          <div class="yon-alt-kutu">
+            <h3>API anahtarları</h3>
+            <p>Anahtarlar yalnızca tarayıcının yerel deposunda saklanır; model listesini güncellemek için kullanılır.</p>
+            ${[
+              ['claudeKey', 'Claude API Key', 'Anthropic', 'sk-ant-api03-...'],
+              ['geminiKey', 'Gemini API Key', 'Google AI (Metin & Görsel)', 'AIzaSy...'],
+              ['ttsKey', 'Google Cloud TTS Key', 'Seslendirme (opsiyonel)', 'AIzaSy...'],
+            ].map(([k, ad, alt, yer]) => {
+              const goster = !!UI.keyGorunur[k];
+              return `<div class="yon-alan">
+                <label for="api-${k}"><span>${ad}</span><small>${alt}</small></label>
+                <div class="yon-girdi-satir">
+                  <input id="api-${k}" class="girdi" type="${goster ? 'text' : 'password'}" data-uretim="${k}" value="${esc(UI.uretim[k] || '')}" placeholder="${yer}" autocomplete="off">
+                  <button type="button" class="yon-goz-btn" data-act="keyGoster" data-key="${k}">${goster ? 'Gizle' : 'Göster'}</button>
+                </div>
+              </div>`;
+            }).join('')}
+            <div class="yon-model-ust">
+              <button type="button" class="yon-cek-btn" id="modelleriCekBtn" data-act="modelleriCek"${UI.modelYukleniyor ? ' disabled' : ''}>${UI.modelYukleniyor ? 'Modeller çekiliyor...' : 'Güncel modelleri API\'den çek'}</button>
+              <button type="button" class="yon-goz-btn" data-act="modelleriSifirla">Listeyi sıfırla</button>
+            </div>
+            ${UI.modelBilgi ? `<div class="yon-model-bilgi ${UI.modelBilgi.tip}">${esc(UI.modelBilgi.mesaj)}</div>` : ''}
+          </div>
+
+          <div class="yon-alt-kutu">
+            <h3>Adım bazlı model seçimi</h3>
+            <p>API'den çekilen güncel modeller (ör. Sonnet, Gemini Hydrogen vb.) listelere otomatik eklenir.</p>
+            <div class="yon-adim-liste">
+              ${(() => {
+                const m = UI.uretim.modeller || {};
+                const cl = (m.claude && m.claude.length) ? m.claude : VARSAYILAN_MODELLER.claude;
+                const gm = (m.geminiText && m.geminiText.length) ? m.geminiText : VARSAYILAN_MODELLER.geminiText;
+                const gi = (m.geminiImage && m.geminiImage.length) ? m.geminiImage : VARSAYILAN_MODELLER.geminiImage;
+                const ts = (m.tts && m.tts.length) ? m.tts : VARSAYILAN_MODELLER.tts;
+                const birlesikMetin = [...cl, ...gm];
+                const adimlar = [
+                  ['senaryoModel', '1. Senaryo ve metin üretimi', 'Bağlama uygun araştırma senaryosu ve çözüm adımları', birlesikMetin],
+                  ['scriptModel', '2. Seslendirme scripti yazımı', 'Doğal konuşma akışı ve zamanlama (70–100 sn)', birlesikMetin],
+                  ['promptModel', '3. Görsel üretim promptu oluşturma', 'Pedagojik sahne tarifi ve görsel tutarlılık promptu', birlesikMetin],
+                  ['gorselModel', '4a. Görsel üretimi (Gemini)', 'Senaryo görsellerinin üretilip images/ klasörüne kaydı', [...gi, ...gm]],
+                  ['sesModel', '4b. Ses üretimi (Google TTS)', 'Türkçe seslendirme üretimi ve audio/ klasörüne kaydı', ts],
+                ];
+                return adimlar.map(([k, bas, aciklama, secenekler]) => {
+                  const cur = UI.uretim[k];
+                  const liste = secenekler.some(([v]) => v === cur) ? secenekler : [[cur, cur], ...secenekler];
+                  return `<div class="yon-adim-satir">
+                    <div><b>${bas}</b><small>${aciklama}</small></div>
+                    <select data-uretim="${k}" aria-label="${bas}">
+                      ${liste.map(([val, lbl]) => `<option value="${esc(val)}"${cur === val ? ' selected' : ''}>${esc(lbl)}</option>`).join('')}
+                    </select>
+                  </div>`;
+                }).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <div class="yon-onbellek">
+          <div class="yon-klasor">
+            <code>images/&lt;modül&gt;-&lt;profil&gt;-s&lt;adım&gt;.png</code>
+            <span>Üretilen görseller <b>images/</b> klasöründe önbelleklenir; aynı bağlam için tekrar üretilmez.</span>
+          </div>
+          <div class="yon-klasor">
+            <code>audio/&lt;modül&gt;-&lt;profil&gt;-s&lt;adım&gt;.mp3</code>
+            <span>Google TTS ses dosyaları <b>audio/</b> klasöründe önbelleklenir; tüm seslendirmeler aynı ses ve hızda (${esc(UI.uretim.sesHiz)}×) üretilir.</span>
+          </div>
+        </div>
+
+        <aside class="ar-not">
+          <h3>Prototip notu</h3>
+          <p>Şu aşamada gerçek API üretimi çalıştırılmaz; bu ekran üretim hattı mimarisini ve model seçim arayüzünü göstermek içindir. Örnek sunumlar yerleşik dinamik SVG bileşenleri ve tarayıcı seslendirme önizlemesi ile çalışır.</p>
+        </aside>
       </section>
 
       <section class="kart">
@@ -5787,6 +7510,77 @@ window.ResearchJourneyV3 = (() => {
           <p>Burada hazırlanan içerikler jüriye kişiselleştirme mekanizmasını göstermek amacıyla üretilmiş simülasyonlardır. Öğrenme konuları tez önerisinde belirtilen kapsamdan seçilmiştir. Nihai uygulamadan önce standart ve kişiselleştirilmiş sürümlerin metin uzunluğu, bilişsel talep, alan bilgisi gereksinimi, görsel kullanımı ve pedagojik eşdeğerliği uzmanlar tarafından değerlendirilmelidir.</p>
         </aside>
       </section>
+      <!-- 8. Alternatif sunum biçimi: Seslendirilmiş etkileşimli çözümlü örnek -->
+      <section class="kart juri-bolum" id="juri-slayt">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">8</span>
+          <div>
+            <h2>Alternatif sunum biçimi: Çoklu ortam destekli, adım adım çözümlü örnek</h2>
+            <p>Konu anlatım videosundan sonra statik metin yerine Google Learn Your Way'deki <em>Slides &amp; Narration</em> yaklaşımından esinlenen, seslendirilmiş ve öğrenci kontrollü etkileşimli çözümlü örnek sunumu. Aşağıdaki üç profil arasında geçiş yaparak eşdeğer yapıyı inceleyebilirsiniz.</p>
+          </div>
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Çözümlü örnek profili seç">
+          ${(window.SlaytSunum ? window.SlaytSunum.PROFILLER : []).map((pr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriSlaytProf || 0) ? ' on' : ''}" data-act="juriSlaytProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriSlaytProf || 0)}">${esc(pr.etiket)}</button>`).join('')}
+        </div>
+
+        <div id="juriSlaytHost"></div>
+
+        <div class="juri-ctml-izgara">
+          <div class="juri-ctml-kutu">
+            <b>Mayer CTML Tasarım İlkeleri</b>
+            <p><b>Bölümlere ayırma:</b> Çözüm 5 kısa adıma bölünür. <b>İşaretleme:</b> Bağımsız değişken yeşil, bağımlı değişken turuncu vurgulanır. <b>Gereksiz tekrarın önlenmesi:</b> Seslendirme metni varsayılan olarak gizlidir, öğrenci isterse <em>Metin</em> düğmesiyle açar.</p>
+          </div>
+          <div class="juri-ctml-kutu">
+            <b>Deneysel Eşdeğerliğin Korunması</b>
+            <p>Kontrol grubuna <em>standart sesli sunum</em>, deney grubuna ise <em>kişiselleştirilmiş sesli sunum</em> verilir. Slayt sayısı (5), ses modeli, konuşma hızı, yaklaşık süre (~78 sn) ve bilişsel talep her iki grupta aynıdır; yalnızca bağlam değişir.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Etkileşimli Mikro-Görev Prototipi ve 6 Şablon Kütüphanesi -->
+      <section class="kart juri-bolum" id="juri-gorev">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">9</span>
+          <div>
+            <h2>Etkileşimli mikro-görev prototipi ve şablon kütüphanesi</h2>
+            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrenci izleyici konumundan uygulayıcı konumuna geçer. Klasik sınav ekranı yerine araştırma senaryosu, görsel veri, isteğe bağlı seslendirme, ipucu ve açıklayıcı geri bildirim sunulur.</p>
+          </div>
+        </div>
+
+        <div class="butunluk-izgara">
+          <div class="butunluk-adim"><small>1 · Konu anlatımı</small><b>Öğren</b><p>Video ile bağımlı ve bağımsız değişkenlerin açıklanması.</p></div>
+          <div class="butunluk-adim"><small>2 · Çözümlü örnek</small><b>İncele</b><p>Hücum stratejisi ve atılan sayı üzerinden adım adım çözüm.</p></div>
+          <div class="butunluk-adim"><small>3 · Mikro-görev</small><b>Uygula</b><p>Paslaşma düzeni ve asist sayısı gibi yeni bir senaryoya transfer.</p></div>
+          <div class="butunluk-adim"><small>4 · Geri bildirim</small><b>Pekiştir</b><p>Yanıta özgü ipucu ve açıklayıcı biçimlendirici dönüt.</p></div>
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Mikro-görev senaryo profili seç">
+          ${(window.GorevPrototip ? window.GorevPrototip.SENARYOLAR : []).map((sr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriGorevProf || 0) ? ' on' : ''}" data-act="juriGorevProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriGorevProf || 0)}">${esc(sr.etiket)}</button>`).join('')}
+        </div>
+
+        <div id="juriGorevHost"></div>
+
+        <div class="juri-bolum-bas" style="margin-top:8px">
+          <div>
+            <h3>Mikro-görevler için 6 alternatif etkileşim şablonu</h3>
+            <p>Yapay zekâ her öğrenci için yeni arayüz üretmez; aşağıdaki sabit pedagojik şablonları öğrencinin ilgi profiline uygun içerikle doldurur.</p>
+          </div>
+        </div>
+
+        <div id="juriSablonHost"></div>
+
+        <div class="juri-tablo-sarici">
+          <table class="juri-tablo">
+            <thead>
+              <tr><th>Bileşen</th><th>Çözümlü örnek</th><th>Mikro-görev (İsteğe bağlı ses)</th></tr>
+            </thead>
+            <tbody>
+              ${(window.GorevPrototip ? window.GorevPrototip.TABLO_KARS : []).map(([b, c, m]) => `<tr><td><b>${esc(b)}</b></td><td>${esc(c)}</td><td>${esc(m)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>`);
   }
 
@@ -5869,6 +7663,11 @@ window.ResearchJourneyV3 = (() => {
 
   function dOrnek(m) {
     const p = il(m.id), b = baglamAl(m), c = b.c, adim = D.ornekler[m.id](c);
+    if (UI.ornekMod === 'slayt' && window.SlaytSunum) {
+      return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Seslendirilmiş ve adım adım ilerleyen etkileşimli çözümlü örnek · ${esc(b.ilgi.ad)} bağlamı.</p></div>${bagSecici(m, b)}</div>
+        ${arastirmaNotu(m, b)}
+        <div id="dersSlaytHost"></div>`;
+    }
     const acik = UI.ornekAcik[m.id] || (p.ornek ? adim.length : 1);
     return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Konuyu adım adım, ${b.ilgi.ad.toLocaleLowerCase('tr')} dünyasından bir örnekle uygula.</p></div>${bagSecici(m, b)}</div>
       ${senaryo(b, c)}
@@ -5929,6 +7728,11 @@ window.ResearchJourneyV3 = (() => {
   }
   function dGorev(m) {
     const b = baglamAl(m);
+    if (UI.gorevMod === 'etkilesimli' && window.GorevPrototip) {
+      return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} · görsel ve ipucu destekli etkileşimli mikro-görev.</p></div>${bagSecici(m, b)}</div>
+        ${arastirmaNotu(m, b)}
+        <div id="dersGorevHost"></div>`;
+    }
     return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} örneği üzerinden.</p></div>${bagSecici(m, b)}</div>
       ${arastirmaNotu(m, b)}
       ${m.gorev.parcalar.map(pk => `<section class="gorev" data-gm="${m.id}" data-pk="${pk}">${gorevHTML(m, pk)}</section>`).join('')}
@@ -6035,10 +7839,15 @@ window.ResearchJourneyV3 = (() => {
       try { localStorage.setItem(HERO_ANAHTAR, UI.hero); } catch (e) { /* depo yok */ }
       return { ad: 'acilis' };
     }
+    if (h === 'juri-slayt') return { ad: 'juri', bolum: 'juri-slayt' };
+    if (h === 'juri-gorev') return { ad: 'juri', bolum: 'juri-gorev' };
     return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri'].includes(h) ? h : 'acilis' };
   }
   function render(kaydirma = true) {
     if (journey) { journey.destroy(); journey = null; }
+    if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
+    if (UI.gorevPlayer) { UI.gorevPlayer.destroy(); UI.gorevPlayer = null; }
+    if (UI.sablonPlayer) { UI.sablonPlayer.destroy(); UI.sablonPlayer = null; }
     if (UI.video) { UI.video.pause(); UI.video = null; }
     const r = rota();
     if (['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul', 'ders'].includes(r.ad)) {
@@ -6058,8 +7867,45 @@ window.ResearchJourneyV3 = (() => {
     sonRota = anahtar;
     document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : 'Bağlam';
     if (r.ad === 'acilis') journey = heroMod().mount($('.research-hero'));
+    if (r.ad === 'juri') {
+      if (window.SlaytSunum && $('#juriSlaytHost')) {
+        const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf || 0] || window.SlaytSunum.PROFILLER[0];
+        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), p, {});
+      }
+      if (window.GorevPrototip && $('#juriGorevHost')) {
+        const sr = window.GorevPrototip.SENARYOLAR[UI.juriGorevProf || 0] || window.GorevPrototip.SENARYOLAR[0];
+        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), sr, {});
+      }
+      if (window.GorevPrototip && $('#juriSablonHost')) {
+        UI.sablonPlayer = window.GorevPrototip.createTemplateShowcase($('#juriSablonHost'));
+      }
+      if (r.bolum) {
+        const bEl = document.getElementById(r.bolum);
+        if (bEl) bEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (r.ad === 'ders' && r.k === 'ornek' && UI.ornekMod === 'slayt' && window.SlaytSunum && $('#dersSlaytHost')) {
+      const b = baglamAl(r.m);
+      UI.slaytPlayer = window.SlaytSunum.createPlayer($('#dersSlaytHost'), window.SlaytSunum.baglamdanUret(b), {
+        moduleId: r.m.id,
+        onCompleteHash: `ders-${r.m.id}-gorev`,
+        onCompleteAct: 'ornekTamam',
+        completeLabel: 'Mikro-göreve geç',
+      });
+    }
+    if (r.ad === 'ders' && r.k === 'gorev' && UI.gorevMod === 'etkilesimli' && window.GorevPrototip && $('#dersGorevHost')) {
+      const b = baglamAl(r.m), s = sonrakiAdim(r.m, 'gorev');
+      UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#dersGorevHost'), window.GorevPrototip.baglamdanSenaryo(b), {
+        moduleId: r.m.id,
+        onCompleteHash: `ders-${r.m.id}-${s}`,
+        onCompleteAct: 'gorevTamam',
+        completeLabel: 'Mikro-görevi tamamla',
+      });
+    }
     yontemDugme();
     heroDugme();
+    ornekModDugme();
+    gorevModDugme();
     kurVideo();
   }
   const yenile = () => render(false);
@@ -6112,11 +7958,153 @@ window.ResearchJourneyV3 = (() => {
     }
   }
 
+  const ornekModDugme = () => {
+    $$('[data-act="ornekModSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b')) b.classList.toggle('on', b.dataset.mod === UI.ornekMod);
+    });
+    const et = $('#protoOrnekEtiket');
+    if (et) et.textContent = UI.ornekMod === 'slayt' ? 'Slayt + Ses' : 'Metin (Mevcut)';
+  };
+  function ornekModDegistir(mod, gitHash) {
+    if (mod !== 'metin' && mod !== 'slayt') return;
+    UI.ornekMod = mod;
+    try { localStorage.setItem(ORNEK_MOD_ANAHTAR, mod); } catch (e) { /* depo yok */ }
+    ornekModDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash) render();
+      else location.hash = gitHash;
+    } else {
+      yenile();
+    }
+  }
+  const gorevModDugme = () => {
+    $$('[data-act="gorevModSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b')) b.classList.toggle('on', b.dataset.mod === UI.gorevMod);
+    });
+    const et = $('#protoGorevEtiket');
+    if (et) et.textContent = UI.gorevMod === 'etkilesimli' ? 'Etkileşimli' : 'Klasik (Mevcut)';
+  };
+  function gorevModDegistir(mod, gitHash) {
+    if (mod !== 'klasik' && mod !== 'etkilesimli') return;
+    UI.gorevMod = mod;
+    try { localStorage.setItem(GOREV_MOD_ANAHTAR, mod); } catch (e) { /* depo yok */ }
+    gorevModDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash) render();
+      else location.hash = gitHash;
+    } else {
+      yenile();
+    }
+  }
+  async function modelleriCek() {
+    const ck = (UI.uretim.claudeKey || '').trim();
+    const gk = (UI.uretim.geminiKey || '').trim();
+    const tk = (UI.uretim.ttsKey || gk || '').trim();
+    if (!ck && !gk && !tk) {
+      UI.modelBilgi = { tip: 'hata', mesaj: 'Önce en az bir Claude veya Gemini API anahtarı girin.' };
+      yenile();
+      return;
+    }
+    UI.modelYukleniyor = true;
+    UI.modelBilgi = null;
+    yenile();
+    const ozet = [];
+    const hatalar = [];
+    UI.uretim.modeller = UI.uretim.modeller || { claude: null, geminiText: null, geminiImage: null, tts: null };
+
+    if (ck) {
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/models?limit=100', {
+          headers: {
+            'x-api-key': ck,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
+        const list = (data.data || []).map(m => [m.id, `${m.display_name || m.id} (${m.id})`]);
+        if (list.length) {
+          UI.uretim.modeller.claude = list;
+          ozet.push(`Claude: ${list.length} model`);
+        }
+      } catch (e) {
+        hatalar.push(`Claude: ${e.message}`);
+      }
+    }
+
+    if (gk) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(gk)}&pageSize=100`);
+        const data = await res.json();
+        if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
+        const tum = data.models || [];
+        const textModels = tum
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
+        const imgModels = tum
+          .filter(m => /imagen|image/i.test(m.name || '') || (m.supportedGenerationMethods || []).includes('predict'))
+          .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
+        if (textModels.length) UI.uretim.modeller.geminiText = textModels;
+        if (imgModels.length) UI.uretim.modeller.geminiImage = imgModels;
+        ozet.push(`Gemini: ${textModels.length} metin / ${imgModels.length} görsel modeli`);
+      } catch (e) {
+        hatalar.push(`Gemini: ${e.message}`);
+      }
+    }
+
+    if (tk) {
+      try {
+        const res = await fetch(`https://texttospeech.googleapis.com/v1/voices?languageCode=tr-TR&key=${encodeURIComponent(tk)}`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.voices) && data.voices.length) {
+          UI.uretim.modeller.tts = data.voices.map(v => [v.name, `Google TTS · ${v.name}${v.ssmlGender ? ' (' + v.ssmlGender + ')' : ''}`]);
+          ozet.push(`TTS: ${data.voices.length} Türkçe ses`);
+        }
+      } catch (e) { /* TTS key opsiyonel; hata vermeden varsayılanlar korunur */ }
+    }
+
+    UI.modelYukleniyor = false;
+    kaydetUretim();
+    UI.modelBilgi = hatalar.length && !ozet.length
+      ? { tip: 'hata', mesaj: `Model çekilemedi — ${hatalar.join(' · ')}` }
+      : { tip: hatalar.length ? 'hata' : 'basari', mesaj: [...ozet, ...hatalar].join(' · ') };
+    yenile();
+  }
+
   /* ---------- Etkileşimler ---------- */
   const eylem = {
     kaydir: el => { const h = document.getElementById(el.dataset.hedef); if (h) h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); },
     yontemSec: el => { yontemDegistir(el.dataset.yontem, el.dataset.git); },
     heroSec: el => { heroDegistir(el.dataset.hero, el.dataset.git); },
+    ornekModSec: el => { ornekModDegistir(el.dataset.mod, el.dataset.git); },
+    gorevModSec: el => { gorevModDegistir(el.dataset.mod, el.dataset.git); },
+    modelleriCek: () => { modelleriCek(); },
+    modelleriSifirla: () => { UI.uretim.modeller = { claude: null, geminiText: null, geminiImage: null, tts: null }; UI.modelBilgi = null; kaydetUretim(); yenile(); },
+    juriSlaytProf: el => {
+      UI.juriSlaytProf = +el.dataset.i;
+      if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
+      $$('[data-act="juriSlaytProf"]').forEach(b => { const on = +b.dataset.i === UI.juriSlaytProf; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+      if (window.SlaytSunum && $('#juriSlaytHost')) {
+        const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf] || window.SlaytSunum.PROFILLER[0];
+        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), p, {});
+      }
+    },
+    juriGorevProf: el => {
+      UI.juriGorevProf = +el.dataset.i;
+      if (UI.gorevPlayer) { UI.gorevPlayer.destroy(); UI.gorevPlayer = null; }
+      $$('[data-act="juriGorevProf"]').forEach(b => { const on = +b.dataset.i === UI.juriGorevProf; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+      if (window.GorevPrototip && $('#juriGorevHost')) {
+        const sr = window.GorevPrototip.SENARYOLAR[UI.juriGorevProf] || window.GorevPrototip.SENARYOLAR[0];
+        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), sr, {});
+      }
+    },
+    keyGoster: el => {
+      const k = el.dataset.key;
+      UI.keyGorunur[k] = !UI.keyGorunur[k];
+      const inp = $(`#api-${k}`);
+      if (inp) { inp.type = UI.keyGorunur[k] ? 'text' : 'password'; el.textContent = UI.keyGorunur[k] ? 'Gizle' : 'Göster'; }
+    },
     juriProfSec: el => { UI.juriProf = +el.dataset.i; yenile(); const m2 = document.getElementById('juri-mod2'); if (m2) m2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); },
     juriProfAdim: el => { const n = D.juriSunum.profiller.length; UI.juriProf = Math.max(0, Math.min(n - 1, (UI.juriProf || 0) + +el.dataset.yon)); yenile(); },
     juriCozumAc: el => { const k = el.dataset.key; UI.juriCozum[k] = !UI.juriCozum[k]; yenile(); },
@@ -6220,11 +8208,13 @@ window.ResearchJourneyV3 = (() => {
     const t = e.target;
     if (t.dataset.detay) { P().detay[t.dataset.detay] = t.value; kaydet(); }
     if (t.dataset.cevap) { S.cevap[t.dataset.cevap] = t.value; kaydet(); const s = document.getElementById('say-' + t.dataset.cevap); if (s) s.textContent = kelime(t.value) + ' kelime · otomatik kaydedilir'; }
+    if (t.dataset.uretim) { UI.uretim[t.dataset.uretim] = t.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Otomatik kaydedildi'; }
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'bagSec') { S.baglamSec[e.target.dataset.m] = e.target.value; kaydet(); yenile(); }
     if (e.target.id === 'juriProfSelect') { UI.juriProf = +e.target.value; yenile(); }
     if (e.target.id === 'juriEvrenSelect') { UI.juriEvrenProf = +e.target.value; yenile(); }
+    if (e.target.dataset && e.target.dataset.uretim) { UI.uretim[e.target.dataset.uretim] = e.target.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Model güncellendi'; }
   });
   document.addEventListener('submit', e => {
     if (e.target.id === 'ozelForm') {
@@ -6301,11 +8291,25 @@ window.ResearchJourneyV3 = (() => {
         <button type="button" class="proto-yontem-b" data-act="heroSec" data-hero="v3" data-git="acilis">3. Adım</button>
       </div>
     </div>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>Çözümlü örnek</span><b id="protoOrnekEtiket"></b></div>
+      <div class="proto-yontem-sec">
+        <button type="button" class="proto-yontem-b" data-act="ornekModSec" data-mod="metin">Metin (Mevcut)</button>
+        <button type="button" class="proto-yontem-b" data-act="ornekModSec" data-mod="slayt">Slayt + Ses</button>
+      </div>
+    </div>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>Mikro-görev</span><b id="protoGorevEtiket"></b></div>
+      <div class="proto-yontem-sec">
+        <button type="button" class="proto-yontem-b" data-act="gorevModSec" data-mod="klasik">Klasik (Mevcut)</button>
+        <button type="button" class="proto-yontem-b" data-act="gorevModSec" data-mod="etkilesimli">Etkileşimli</button>
+      </div>
+    </div>
     ${[
     ['acilis-1', 'Açılış sayfası (1. versiyon)'], ['acilis-2', 'Açılış sayfası (2. versiyon · 3B)'], ['acilis-3', 'Açılış sayfası (3. versiyon · Adım adım)'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
     ['panel', 'Öğrenci ana sayfası'], ['moduller', 'Modüller'], ['modul-m2', 'Modül sayfası'], ['ders-m2-v1', 'Konu anlatım videosu'],
     ['ders-m2-ornek', 'Örnek uygulama'], ['ders-m2-gorev', 'Mikro görev'], ['ders-m4-gorev', 'Mikro görev (etkileşimli)'],
-    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['yonetici', 'Yönetici paneli'],
+    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['juri-slayt', 'Jüri sunumu (Slayt + Ses)'], ['juri-gorev', 'Jüri sunumu (Mikro-görev)'], ['yonetici', 'Yönetici paneli'],
   ].map(([r, a]) => `<a href="#${r}">${a}</a>`).join('')}<button class="proto-not" id="notDugme" data-act="notlar"></button><button data-act="sifirla">Verileri sıfırla</button></div>
   <div class="proto-alt-satir">
     <div class="proto-hero-bar" role="group" aria-label="Açılış sayfası versiyonu">
@@ -6319,6 +8323,8 @@ window.ResearchJourneyV3 = (() => {
   notDugme();
   yontemDugme();
   heroDugme();
+  ornekModDugme();
+  gorevModDugme();
 
   window.addEventListener('hashchange', () => render());
   render();

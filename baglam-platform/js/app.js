@@ -60,6 +60,41 @@
   const YONTEM_ANAHTAR = 'baglam-ilgi-yontemi';
   const ZENGIN_ANAHTAR = 'baglam-zengin-ilgi-v1';
   const HERO_ANAHTAR = 'baglam-hero-surum';
+  const ORNEK_MOD_ANAHTAR = 'baglam-ornek-mod';
+  const GOREV_MOD_ANAHTAR = 'baglam-gorev-mod';
+  const URETIM_ANAHTAR = 'baglam-uretim-ayar';
+  const VARSAYILAN_MODELLER = {
+    claude: [
+      ['claude-sonnet-4-5', 'Claude Sonnet 4.5 (Varsayılan)'],
+      ['claude-opus-4-1', 'Claude Opus 4.1'],
+      ['claude-haiku-4-5', 'Claude Haiku 4.5'],
+    ],
+    geminiText: [
+      ['gemini-2.5-pro', 'Gemini 2.5 Pro (Varsayılan)'],
+      ['gemini-2.5-flash', 'Gemini 2.5 Flash'],
+    ],
+    geminiImage: [
+      ['imagen-3.0-generate-002', 'Gemini Imagen 3'],
+      ['gemini-2.5-flash-image', 'Gemini 2.5 Flash Image'],
+    ],
+    tts: [
+      ['tr-TR-Wavenet-E', 'Google TTS · tr-TR-Wavenet-E'],
+      ['tr-TR-Chirp3-HD', 'Google TTS · tr-TR-Chirp3-HD'],
+      ['tr-TR-Standard-A', 'Google TTS · tr-TR-Standard-A'],
+    ],
+  };
+  const varsayilanUretim = () => ({
+    claudeKey: '',
+    geminiKey: '',
+    ttsKey: '',
+    senaryoModel: 'claude-sonnet-4-5',
+    scriptModel: 'claude-sonnet-4-5',
+    promptModel: 'gemini-2.5-pro',
+    gorselModel: 'imagen-3.0-generate-002',
+    sesModel: 'tr-TR-Wavenet-E',
+    sesHiz: '1.0',
+    modeller: { claude: null, geminiText: null, geminiImage: null, tts: null },
+  });
   const bos = () => ({ kul: null, secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, ilerleme: {}, baglamSec: {}, cevap: {} });
   const bosZengin = () => ({ secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, etkinlik: {}, ozelEtkinlik: {} });
   let S = (() => { try { const x = JSON.parse(localStorage.getItem(ANAHTAR)); if (x && typeof x === 'object') return { ...bos(), ...x }; } catch (e) { /* depo yok */ } return bos(); })();
@@ -72,9 +107,17 @@
     gs: {},
     drag: null,
     video: null,
+    slaytPlayer: null,
+    gorevPlayer: null,
+    sablonPlayer: null,
     juriProf: 0,
     juriEvrenProf: 0,
+    juriSlaytProf: 1,
+    juriGorevProf: 1,
     juriCozum: {},
+    keyGorunur: {},
+    modelYukleniyor: false,
+    modelBilgi: null,
     yontem: (() => { try { return localStorage.getItem(YONTEM_ANAHTAR) === 'zengin' ? 'zengin' : 'standart'; } catch (e) { return 'standart'; } })(),
     hero: (() => {
       try {
@@ -86,8 +129,12 @@
         return (saved === 'v2' || saved === 'v3') ? saved : 'v1';
       } catch (e) { return 'v1'; }
     })(),
+    ornekMod: (() => { try { return localStorage.getItem(ORNEK_MOD_ANAHTAR) === 'slayt' ? 'slayt' : 'metin'; } catch (e) { return 'metin'; } })(),
+    gorevMod: (() => { try { return localStorage.getItem(GOREV_MOD_ANAHTAR) === 'etkilesimli' ? 'etkilesimli' : 'klasik'; } catch (e) { return 'klasik'; } })(),
+    uretim: (() => { try { const x = JSON.parse(localStorage.getItem(URETIM_ANAHTAR)); return x && typeof x === 'object' ? { ...varsayilanUretim(), ...x } : varsayilanUretim(); } catch (e) { return varsayilanUretim(); } })(),
     notlar: (() => { try { return localStorage.getItem('baglam-notlar') === '1'; } catch (e) { return false; } })(),
   };
+  const kaydetUretim = () => { try { localStorage.setItem(URETIM_ANAHTAR, JSON.stringify(UI.uretim)); } catch (e) { /* depo yok */ } };
   const heroMod = () => (UI.hero === 'v3' && window.ResearchJourneyV3) ? window.ResearchJourneyV3 : (UI.hero === 'v2' && window.ResearchJourneyV2) ? window.ResearchJourneyV2 : window.ResearchJourney;
   const zenginMi = () => UI.yontem === 'zengin';
   const ilgiListesi = () => zenginMi() ? D.zenginIlgiler : D.ilgiler;
@@ -541,6 +588,180 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Çözümlü örnek sunum biçimi</h2>
+            <p>Konu anlatım videosundan sonra gelen çözümlü örneklerin mevcut metin tabanlı biçimi veya alternatif seslendirilmiş etkileşimli slayt biçimi arasında geçiş yapın. Nihai deneyde seçilen biçim hem kontrol hem deney grubunda sabit tutulur.</p>
+          </div>
+          <span class="yon-rozet">${UI.ornekMod === 'slayt' ? 'Alternatif: Seslendirilmiş slayt' : 'Mevcut: Metin tabanlı'}</span>
+        </div>
+        <div class="yon-kartlar" role="radiogroup" aria-label="Çözümlü örnek sunum biçimi">
+          <div class="yon-k${UI.ornekMod !== 'slayt' ? ' on' : ''}" role="radio" aria-checked="${UI.ornekMod !== 'slayt'}" tabindex="0" data-act="ornekModSec" data-mod="metin">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.ornekMod !== 'slayt' ? ic('check') : ''}</span>
+              <div>
+                <b>Mevcut: Adım adım metin tabanlı çözümlü örnek</b>
+                <small>3 pedagojik adım · Statik metin ve şema</small>
+              </div>
+            </div>
+            <p>Mevcut öğrenci ekranlarındaki metin tabanlı çözümlü örnek akışı korunur.</p>
+            <div class="yon-k-alt">
+              <span>${UI.ornekMod !== 'slayt' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.ornekMod !== 'slayt' ? '' : ' ghost'}" data-act="ornekModSec" data-mod="metin" data-git="ders-m2-ornek">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.ornekMod === 'slayt' ? ' on' : ''}" role="radio" aria-checked="${UI.ornekMod === 'slayt'}" tabindex="0" data-act="ornekModSec" data-mod="slayt">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.ornekMod === 'slayt' ? ic('check') : ''}</span>
+              <div>
+                <b>Alternatif: Seslendirilmiş etkileşimli slayt (Slides &amp; Narration)</b>
+                <small>5 adım · Görsel sahne + TTS anlatım + öğrenci kontrolü</small>
+              </div>
+            </div>
+            <p>Google Learn Your Way ve Mayer'in Çoklu Ortam Öğrenme Kuramı ilkeleriyle hazırlanan, her adımı seslendirilen etkileşimli çözümlü örnek.</p>
+            <div class="yon-k-alt">
+              <span>${UI.ornekMod === 'slayt' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.ornekMod === 'slayt' ? '' : ' ghost'}" data-act="ornekModSec" data-mod="slayt" data-git="ders-m2-ornek">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+        </div>
+        <div class="yon-durum-satir">
+          <span>Jüriye standart kontrol, Basketbol ve V60 Kahve örneklerini yan yana göstermek için:</span>
+          <a class="btn ghost" href="#juri-slayt">${ic('ampul')}Jüri sunumunda Slayt &amp; Ses gösterimi</a>
+        </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Mikro-görev sunum biçimi</h2>
+            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrencinin senaryoyu görsel destek, isteğe bağlı seslendirme ve açıklayıcı geri bildirimle çözmesi için alternatif etkileşimli mikro-görev biçimini seçebilirsiniz.</p>
+          </div>
+          <span class="yon-rozet">${UI.gorevMod === 'etkilesimli' ? 'Alternatif: Etkileşimli mikro-görev' : 'Mevcut: Standart mikro-görev'}</span>
+        </div>
+        <div class="yon-kartlar" role="radiogroup" aria-label="Mikro-görev sunum biçimi">
+          <div class="yon-k${UI.gorevMod !== 'etkilesimli' ? ' on' : ''}" role="radio" aria-checked="${UI.gorevMod !== 'etkilesimli'}" tabindex="0" data-act="gorevModSec" data-mod="klasik">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.gorevMod !== 'etkilesimli' ? ic('check') : ''}</span>
+              <div>
+                <b>Mevcut: Standart mikro-görev</b>
+                <small>Mevcut eşleştirme ve açık uçlu soru düzeni</small>
+              </div>
+            </div>
+            <p>Mevcut öğrenci modül ekranlarındaki mikro-görev bileşenleri korunur.</p>
+            <div class="yon-k-alt">
+              <span>${UI.gorevMod !== 'etkilesimli' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.gorevMod !== 'etkilesimli' ? '' : ' ghost'}" data-act="gorevModSec" data-mod="klasik" data-git="ders-m2-gorev">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.gorevMod === 'etkilesimli' ? ' on' : ''}" role="radio" aria-checked="${UI.gorevMod === 'etkilesimli'}" tabindex="0" data-act="gorevModSec" data-mod="etkilesimli">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.gorevMod === 'etkilesimli' ? ic('check') : ''}</span>
+              <div>
+                <b>Alternatif: Görsel &amp; ipucu destekli etkileşimli mikro-görev</b>
+                <small>Senaryo görseli + isteğe bağlı ses + ipucu + açıklayıcı geri bildirim</small>
+              </div>
+            </div>
+            <p>Çözümlü örnekten transfer senaryosuna geçen, 6 alternatif etkileşim şablonuyla (Eşleştirme, Sınıflandırma, Sıralama, Grafik, Boşluk, Açık uçlu) uyumlu yeni tasarım.</p>
+            <div class="yon-k-alt">
+              <span>${UI.gorevMod === 'etkilesimli' ? '<b>Seçili biçim</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.gorevMod === 'etkilesimli' ? '' : ' ghost'}" data-act="gorevModSec" data-mod="etkilesimli" data-git="ders-m2-gorev">Modül 2'de önizle ${ic('sag')}</button>
+            </div>
+          </div>
+        </div>
+        <div class="yon-durum-satir">
+          <span>Jüriye mikro-görev prototipini ve 6 etkileşim şablonunu göstermek için:</span>
+          <a class="btn ghost" href="#juri-gorev">${ic('hedef')}Jüri sunumunda Mikro-Görev Şablonları</a>
+        </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Üretim hattı, API anahtarları ve model seçimi (Prototip)</h2>
+            <p>API anahtarlarını girdikten sonra güncel modelleri doğrudan Anthropic (Claude) ve Google (Gemini / TTS) API'lerinden çekebilirsiniz.</p>
+          </div>
+          <span class="yon-rozet" id="yonUretimRozet">Yerel yapılandırma hazır</span>
+        </div>
+
+        <div class="yon-hat-izgara">
+          <div class="yon-alt-kutu">
+            <h3>API anahtarları</h3>
+            <p>Anahtarlar yalnızca tarayıcının yerel deposunda saklanır; model listesini güncellemek için kullanılır.</p>
+            ${[
+              ['claudeKey', 'Claude API Key', 'Anthropic', 'sk-ant-api03-...'],
+              ['geminiKey', 'Gemini API Key', 'Google AI (Metin & Görsel)', 'AIzaSy...'],
+              ['ttsKey', 'Google Cloud TTS Key', 'Seslendirme (opsiyonel)', 'AIzaSy...'],
+            ].map(([k, ad, alt, yer]) => {
+              const goster = !!UI.keyGorunur[k];
+              return `<div class="yon-alan">
+                <label for="api-${k}"><span>${ad}</span><small>${alt}</small></label>
+                <div class="yon-girdi-satir">
+                  <input id="api-${k}" class="girdi" type="${goster ? 'text' : 'password'}" data-uretim="${k}" value="${esc(UI.uretim[k] || '')}" placeholder="${yer}" autocomplete="off">
+                  <button type="button" class="yon-goz-btn" data-act="keyGoster" data-key="${k}">${goster ? 'Gizle' : 'Göster'}</button>
+                </div>
+              </div>`;
+            }).join('')}
+            <div class="yon-model-ust">
+              <button type="button" class="yon-cek-btn" id="modelleriCekBtn" data-act="modelleriCek"${UI.modelYukleniyor ? ' disabled' : ''}>${UI.modelYukleniyor ? 'Modeller çekiliyor...' : 'Güncel modelleri API\'den çek'}</button>
+              <button type="button" class="yon-goz-btn" data-act="modelleriSifirla">Listeyi sıfırla</button>
+            </div>
+            ${UI.modelBilgi ? `<div class="yon-model-bilgi ${UI.modelBilgi.tip}">${esc(UI.modelBilgi.mesaj)}</div>` : ''}
+          </div>
+
+          <div class="yon-alt-kutu">
+            <h3>Adım bazlı model seçimi</h3>
+            <p>API'den çekilen güncel modeller (ör. Sonnet, Gemini Hydrogen vb.) listelere otomatik eklenir.</p>
+            <div class="yon-adim-liste">
+              ${(() => {
+                const m = UI.uretim.modeller || {};
+                const cl = (m.claude && m.claude.length) ? m.claude : VARSAYILAN_MODELLER.claude;
+                const gm = (m.geminiText && m.geminiText.length) ? m.geminiText : VARSAYILAN_MODELLER.geminiText;
+                const gi = (m.geminiImage && m.geminiImage.length) ? m.geminiImage : VARSAYILAN_MODELLER.geminiImage;
+                const ts = (m.tts && m.tts.length) ? m.tts : VARSAYILAN_MODELLER.tts;
+                const birlesikMetin = [...cl, ...gm];
+                const adimlar = [
+                  ['senaryoModel', '1. Senaryo ve metin üretimi', 'Bağlama uygun araştırma senaryosu ve çözüm adımları', birlesikMetin],
+                  ['scriptModel', '2. Seslendirme scripti yazımı', 'Doğal konuşma akışı ve zamanlama (70–100 sn)', birlesikMetin],
+                  ['promptModel', '3. Görsel üretim promptu oluşturma', 'Pedagojik sahne tarifi ve görsel tutarlılık promptu', birlesikMetin],
+                  ['gorselModel', '4a. Görsel üretimi (Gemini)', 'Senaryo görsellerinin üretilip images/ klasörüne kaydı', [...gi, ...gm]],
+                  ['sesModel', '4b. Ses üretimi (Google TTS)', 'Türkçe seslendirme üretimi ve audio/ klasörüne kaydı', ts],
+                ];
+                return adimlar.map(([k, bas, aciklama, secenekler]) => {
+                  const cur = UI.uretim[k];
+                  const liste = secenekler.some(([v]) => v === cur) ? secenekler : [[cur, cur], ...secenekler];
+                  return `<div class="yon-adim-satir">
+                    <div><b>${bas}</b><small>${aciklama}</small></div>
+                    <select data-uretim="${k}" aria-label="${bas}">
+                      ${liste.map(([val, lbl]) => `<option value="${esc(val)}"${cur === val ? ' selected' : ''}>${esc(lbl)}</option>`).join('')}
+                    </select>
+                  </div>`;
+                }).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <div class="yon-onbellek">
+          <div class="yon-klasor">
+            <code>images/&lt;modül&gt;-&lt;profil&gt;-s&lt;adım&gt;.png</code>
+            <span>Üretilen görseller <b>images/</b> klasöründe önbelleklenir; aynı bağlam için tekrar üretilmez.</span>
+          </div>
+          <div class="yon-klasor">
+            <code>audio/&lt;modül&gt;-&lt;profil&gt;-s&lt;adım&gt;.mp3</code>
+            <span>Google TTS ses dosyaları <b>audio/</b> klasöründe önbelleklenir; tüm seslendirmeler aynı ses ve hızda (${esc(UI.uretim.sesHiz)}×) üretilir.</span>
+          </div>
+        </div>
+
+        <aside class="ar-not">
+          <h3>Prototip notu</h3>
+          <p>Şu aşamada gerçek API üretimi çalıştırılmaz; bu ekran üretim hattı mimarisini ve model seçim arayüzünü göstermek içindir. Örnek sunumlar yerleşik dinamik SVG bileşenleri ve tarayıcı seslendirme önizlemesi ile çalışır.</p>
+        </aside>
       </section>
 
       <section class="kart">
@@ -999,6 +1220,77 @@
           <p>Burada hazırlanan içerikler jüriye kişiselleştirme mekanizmasını göstermek amacıyla üretilmiş simülasyonlardır. Öğrenme konuları tez önerisinde belirtilen kapsamdan seçilmiştir. Nihai uygulamadan önce standart ve kişiselleştirilmiş sürümlerin metin uzunluğu, bilişsel talep, alan bilgisi gereksinimi, görsel kullanımı ve pedagojik eşdeğerliği uzmanlar tarafından değerlendirilmelidir.</p>
         </aside>
       </section>
+      <!-- 8. Alternatif sunum biçimi: Seslendirilmiş etkileşimli çözümlü örnek -->
+      <section class="kart juri-bolum" id="juri-slayt">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">8</span>
+          <div>
+            <h2>Alternatif sunum biçimi: Çoklu ortam destekli, adım adım çözümlü örnek</h2>
+            <p>Konu anlatım videosundan sonra statik metin yerine Google Learn Your Way'deki <em>Slides &amp; Narration</em> yaklaşımından esinlenen, seslendirilmiş ve öğrenci kontrollü etkileşimli çözümlü örnek sunumu. Aşağıdaki üç profil arasında geçiş yaparak eşdeğer yapıyı inceleyebilirsiniz.</p>
+          </div>
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Çözümlü örnek profili seç">
+          ${(window.SlaytSunum ? window.SlaytSunum.PROFILLER : []).map((pr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriSlaytProf || 0) ? ' on' : ''}" data-act="juriSlaytProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriSlaytProf || 0)}">${esc(pr.etiket)}</button>`).join('')}
+        </div>
+
+        <div id="juriSlaytHost"></div>
+
+        <div class="juri-ctml-izgara">
+          <div class="juri-ctml-kutu">
+            <b>Mayer CTML Tasarım İlkeleri</b>
+            <p><b>Bölümlere ayırma:</b> Çözüm 5 kısa adıma bölünür. <b>İşaretleme:</b> Bağımsız değişken yeşil, bağımlı değişken turuncu vurgulanır. <b>Gereksiz tekrarın önlenmesi:</b> Seslendirme metni varsayılan olarak gizlidir, öğrenci isterse <em>Metin</em> düğmesiyle açar.</p>
+          </div>
+          <div class="juri-ctml-kutu">
+            <b>Deneysel Eşdeğerliğin Korunması</b>
+            <p>Kontrol grubuna <em>standart sesli sunum</em>, deney grubuna ise <em>kişiselleştirilmiş sesli sunum</em> verilir. Slayt sayısı (5), ses modeli, konuşma hızı, yaklaşık süre (~78 sn) ve bilişsel talep her iki grupta aynıdır; yalnızca bağlam değişir.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Etkileşimli Mikro-Görev Prototipi ve 6 Şablon Kütüphanesi -->
+      <section class="kart juri-bolum" id="juri-gorev">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">9</span>
+          <div>
+            <h2>Etkileşimli mikro-görev prototipi ve şablon kütüphanesi</h2>
+            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrenci izleyici konumundan uygulayıcı konumuna geçer. Klasik sınav ekranı yerine araştırma senaryosu, görsel veri, isteğe bağlı seslendirme, ipucu ve açıklayıcı geri bildirim sunulur.</p>
+          </div>
+        </div>
+
+        <div class="butunluk-izgara">
+          <div class="butunluk-adim"><small>1 · Konu anlatımı</small><b>Öğren</b><p>Video ile bağımlı ve bağımsız değişkenlerin açıklanması.</p></div>
+          <div class="butunluk-adim"><small>2 · Çözümlü örnek</small><b>İncele</b><p>Hücum stratejisi ve atılan sayı üzerinden adım adım çözüm.</p></div>
+          <div class="butunluk-adim"><small>3 · Mikro-görev</small><b>Uygula</b><p>Paslaşma düzeni ve asist sayısı gibi yeni bir senaryoya transfer.</p></div>
+          <div class="butunluk-adim"><small>4 · Geri bildirim</small><b>Pekiştir</b><p>Yanıta özgü ipucu ve açıklayıcı biçimlendirici dönüt.</p></div>
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Mikro-görev senaryo profili seç">
+          ${(window.GorevPrototip ? window.GorevPrototip.SENARYOLAR : []).map((sr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriGorevProf || 0) ? ' on' : ''}" data-act="juriGorevProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriGorevProf || 0)}">${esc(sr.etiket)}</button>`).join('')}
+        </div>
+
+        <div id="juriGorevHost"></div>
+
+        <div class="juri-bolum-bas" style="margin-top:8px">
+          <div>
+            <h3>Mikro-görevler için 6 alternatif etkileşim şablonu</h3>
+            <p>Yapay zekâ her öğrenci için yeni arayüz üretmez; aşağıdaki sabit pedagojik şablonları öğrencinin ilgi profiline uygun içerikle doldurur.</p>
+          </div>
+        </div>
+
+        <div id="juriSablonHost"></div>
+
+        <div class="juri-tablo-sarici">
+          <table class="juri-tablo">
+            <thead>
+              <tr><th>Bileşen</th><th>Çözümlü örnek</th><th>Mikro-görev (İsteğe bağlı ses)</th></tr>
+            </thead>
+            <tbody>
+              ${(window.GorevPrototip ? window.GorevPrototip.TABLO_KARS : []).map(([b, c, m]) => `<tr><td><b>${esc(b)}</b></td><td>${esc(c)}</td><td>${esc(m)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>`);
   }
 
@@ -1081,6 +1373,11 @@
 
   function dOrnek(m) {
     const p = il(m.id), b = baglamAl(m), c = b.c, adim = D.ornekler[m.id](c);
+    if (UI.ornekMod === 'slayt' && window.SlaytSunum) {
+      return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Seslendirilmiş ve adım adım ilerleyen etkileşimli çözümlü örnek · ${esc(b.ilgi.ad)} bağlamı.</p></div>${bagSecici(m, b)}</div>
+        ${arastirmaNotu(m, b)}
+        <div id="dersSlaytHost"></div>`;
+    }
     const acik = UI.ornekAcik[m.id] || (p.ornek ? adim.length : 1);
     return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Konuyu adım adım, ${b.ilgi.ad.toLocaleLowerCase('tr')} dünyasından bir örnekle uygula.</p></div>${bagSecici(m, b)}</div>
       ${senaryo(b, c)}
@@ -1141,6 +1438,11 @@
   }
   function dGorev(m) {
     const b = baglamAl(m);
+    if (UI.gorevMod === 'etkilesimli' && window.GorevPrototip) {
+      return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} · görsel ve ipucu destekli etkileşimli mikro-görev.</p></div>${bagSecici(m, b)}</div>
+        ${arastirmaNotu(m, b)}
+        <div id="dersGorevHost"></div>`;
+    }
     return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} örneği üzerinden.</p></div>${bagSecici(m, b)}</div>
       ${arastirmaNotu(m, b)}
       ${m.gorev.parcalar.map(pk => `<section class="gorev" data-gm="${m.id}" data-pk="${pk}">${gorevHTML(m, pk)}</section>`).join('')}
@@ -1247,10 +1549,15 @@
       try { localStorage.setItem(HERO_ANAHTAR, UI.hero); } catch (e) { /* depo yok */ }
       return { ad: 'acilis' };
     }
+    if (h === 'juri-slayt') return { ad: 'juri', bolum: 'juri-slayt' };
+    if (h === 'juri-gorev') return { ad: 'juri', bolum: 'juri-gorev' };
     return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri'].includes(h) ? h : 'acilis' };
   }
   function render(kaydirma = true) {
     if (journey) { journey.destroy(); journey = null; }
+    if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
+    if (UI.gorevPlayer) { UI.gorevPlayer.destroy(); UI.gorevPlayer = null; }
+    if (UI.sablonPlayer) { UI.sablonPlayer.destroy(); UI.sablonPlayer = null; }
     if (UI.video) { UI.video.pause(); UI.video = null; }
     const r = rota();
     if (['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul', 'ders'].includes(r.ad)) {
@@ -1270,8 +1577,45 @@
     sonRota = anahtar;
     document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : 'Bağlam';
     if (r.ad === 'acilis') journey = heroMod().mount($('.research-hero'));
+    if (r.ad === 'juri') {
+      if (window.SlaytSunum && $('#juriSlaytHost')) {
+        const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf || 0] || window.SlaytSunum.PROFILLER[0];
+        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), p, {});
+      }
+      if (window.GorevPrototip && $('#juriGorevHost')) {
+        const sr = window.GorevPrototip.SENARYOLAR[UI.juriGorevProf || 0] || window.GorevPrototip.SENARYOLAR[0];
+        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), sr, {});
+      }
+      if (window.GorevPrototip && $('#juriSablonHost')) {
+        UI.sablonPlayer = window.GorevPrototip.createTemplateShowcase($('#juriSablonHost'));
+      }
+      if (r.bolum) {
+        const bEl = document.getElementById(r.bolum);
+        if (bEl) bEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (r.ad === 'ders' && r.k === 'ornek' && UI.ornekMod === 'slayt' && window.SlaytSunum && $('#dersSlaytHost')) {
+      const b = baglamAl(r.m);
+      UI.slaytPlayer = window.SlaytSunum.createPlayer($('#dersSlaytHost'), window.SlaytSunum.baglamdanUret(b), {
+        moduleId: r.m.id,
+        onCompleteHash: `ders-${r.m.id}-gorev`,
+        onCompleteAct: 'ornekTamam',
+        completeLabel: 'Mikro-göreve geç',
+      });
+    }
+    if (r.ad === 'ders' && r.k === 'gorev' && UI.gorevMod === 'etkilesimli' && window.GorevPrototip && $('#dersGorevHost')) {
+      const b = baglamAl(r.m), s = sonrakiAdim(r.m, 'gorev');
+      UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#dersGorevHost'), window.GorevPrototip.baglamdanSenaryo(b), {
+        moduleId: r.m.id,
+        onCompleteHash: `ders-${r.m.id}-${s}`,
+        onCompleteAct: 'gorevTamam',
+        completeLabel: 'Mikro-görevi tamamla',
+      });
+    }
     yontemDugme();
     heroDugme();
+    ornekModDugme();
+    gorevModDugme();
     kurVideo();
   }
   const yenile = () => render(false);
@@ -1324,11 +1668,153 @@
     }
   }
 
+  const ornekModDugme = () => {
+    $$('[data-act="ornekModSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b')) b.classList.toggle('on', b.dataset.mod === UI.ornekMod);
+    });
+    const et = $('#protoOrnekEtiket');
+    if (et) et.textContent = UI.ornekMod === 'slayt' ? 'Slayt + Ses' : 'Metin (Mevcut)';
+  };
+  function ornekModDegistir(mod, gitHash) {
+    if (mod !== 'metin' && mod !== 'slayt') return;
+    UI.ornekMod = mod;
+    try { localStorage.setItem(ORNEK_MOD_ANAHTAR, mod); } catch (e) { /* depo yok */ }
+    ornekModDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash) render();
+      else location.hash = gitHash;
+    } else {
+      yenile();
+    }
+  }
+  const gorevModDugme = () => {
+    $$('[data-act="gorevModSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b')) b.classList.toggle('on', b.dataset.mod === UI.gorevMod);
+    });
+    const et = $('#protoGorevEtiket');
+    if (et) et.textContent = UI.gorevMod === 'etkilesimli' ? 'Etkileşimli' : 'Klasik (Mevcut)';
+  };
+  function gorevModDegistir(mod, gitHash) {
+    if (mod !== 'klasik' && mod !== 'etkilesimli') return;
+    UI.gorevMod = mod;
+    try { localStorage.setItem(GOREV_MOD_ANAHTAR, mod); } catch (e) { /* depo yok */ }
+    gorevModDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash) render();
+      else location.hash = gitHash;
+    } else {
+      yenile();
+    }
+  }
+  async function modelleriCek() {
+    const ck = (UI.uretim.claudeKey || '').trim();
+    const gk = (UI.uretim.geminiKey || '').trim();
+    const tk = (UI.uretim.ttsKey || gk || '').trim();
+    if (!ck && !gk && !tk) {
+      UI.modelBilgi = { tip: 'hata', mesaj: 'Önce en az bir Claude veya Gemini API anahtarı girin.' };
+      yenile();
+      return;
+    }
+    UI.modelYukleniyor = true;
+    UI.modelBilgi = null;
+    yenile();
+    const ozet = [];
+    const hatalar = [];
+    UI.uretim.modeller = UI.uretim.modeller || { claude: null, geminiText: null, geminiImage: null, tts: null };
+
+    if (ck) {
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/models?limit=100', {
+          headers: {
+            'x-api-key': ck,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
+        const list = (data.data || []).map(m => [m.id, `${m.display_name || m.id} (${m.id})`]);
+        if (list.length) {
+          UI.uretim.modeller.claude = list;
+          ozet.push(`Claude: ${list.length} model`);
+        }
+      } catch (e) {
+        hatalar.push(`Claude: ${e.message}`);
+      }
+    }
+
+    if (gk) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(gk)}&pageSize=100`);
+        const data = await res.json();
+        if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
+        const tum = data.models || [];
+        const textModels = tum
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
+        const imgModels = tum
+          .filter(m => /imagen|image/i.test(m.name || '') || (m.supportedGenerationMethods || []).includes('predict'))
+          .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
+        if (textModels.length) UI.uretim.modeller.geminiText = textModels;
+        if (imgModels.length) UI.uretim.modeller.geminiImage = imgModels;
+        ozet.push(`Gemini: ${textModels.length} metin / ${imgModels.length} görsel modeli`);
+      } catch (e) {
+        hatalar.push(`Gemini: ${e.message}`);
+      }
+    }
+
+    if (tk) {
+      try {
+        const res = await fetch(`https://texttospeech.googleapis.com/v1/voices?languageCode=tr-TR&key=${encodeURIComponent(tk)}`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.voices) && data.voices.length) {
+          UI.uretim.modeller.tts = data.voices.map(v => [v.name, `Google TTS · ${v.name}${v.ssmlGender ? ' (' + v.ssmlGender + ')' : ''}`]);
+          ozet.push(`TTS: ${data.voices.length} Türkçe ses`);
+        }
+      } catch (e) { /* TTS key opsiyonel; hata vermeden varsayılanlar korunur */ }
+    }
+
+    UI.modelYukleniyor = false;
+    kaydetUretim();
+    UI.modelBilgi = hatalar.length && !ozet.length
+      ? { tip: 'hata', mesaj: `Model çekilemedi — ${hatalar.join(' · ')}` }
+      : { tip: hatalar.length ? 'hata' : 'basari', mesaj: [...ozet, ...hatalar].join(' · ') };
+    yenile();
+  }
+
   /* ---------- Etkileşimler ---------- */
   const eylem = {
     kaydir: el => { const h = document.getElementById(el.dataset.hedef); if (h) h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); },
     yontemSec: el => { yontemDegistir(el.dataset.yontem, el.dataset.git); },
     heroSec: el => { heroDegistir(el.dataset.hero, el.dataset.git); },
+    ornekModSec: el => { ornekModDegistir(el.dataset.mod, el.dataset.git); },
+    gorevModSec: el => { gorevModDegistir(el.dataset.mod, el.dataset.git); },
+    modelleriCek: () => { modelleriCek(); },
+    modelleriSifirla: () => { UI.uretim.modeller = { claude: null, geminiText: null, geminiImage: null, tts: null }; UI.modelBilgi = null; kaydetUretim(); yenile(); },
+    juriSlaytProf: el => {
+      UI.juriSlaytProf = +el.dataset.i;
+      if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
+      $$('[data-act="juriSlaytProf"]').forEach(b => { const on = +b.dataset.i === UI.juriSlaytProf; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+      if (window.SlaytSunum && $('#juriSlaytHost')) {
+        const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf] || window.SlaytSunum.PROFILLER[0];
+        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), p, {});
+      }
+    },
+    juriGorevProf: el => {
+      UI.juriGorevProf = +el.dataset.i;
+      if (UI.gorevPlayer) { UI.gorevPlayer.destroy(); UI.gorevPlayer = null; }
+      $$('[data-act="juriGorevProf"]').forEach(b => { const on = +b.dataset.i === UI.juriGorevProf; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+      if (window.GorevPrototip && $('#juriGorevHost')) {
+        const sr = window.GorevPrototip.SENARYOLAR[UI.juriGorevProf] || window.GorevPrototip.SENARYOLAR[0];
+        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), sr, {});
+      }
+    },
+    keyGoster: el => {
+      const k = el.dataset.key;
+      UI.keyGorunur[k] = !UI.keyGorunur[k];
+      const inp = $(`#api-${k}`);
+      if (inp) { inp.type = UI.keyGorunur[k] ? 'text' : 'password'; el.textContent = UI.keyGorunur[k] ? 'Gizle' : 'Göster'; }
+    },
     juriProfSec: el => { UI.juriProf = +el.dataset.i; yenile(); const m2 = document.getElementById('juri-mod2'); if (m2) m2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); },
     juriProfAdim: el => { const n = D.juriSunum.profiller.length; UI.juriProf = Math.max(0, Math.min(n - 1, (UI.juriProf || 0) + +el.dataset.yon)); yenile(); },
     juriCozumAc: el => { const k = el.dataset.key; UI.juriCozum[k] = !UI.juriCozum[k]; yenile(); },
@@ -1432,11 +1918,13 @@
     const t = e.target;
     if (t.dataset.detay) { P().detay[t.dataset.detay] = t.value; kaydet(); }
     if (t.dataset.cevap) { S.cevap[t.dataset.cevap] = t.value; kaydet(); const s = document.getElementById('say-' + t.dataset.cevap); if (s) s.textContent = kelime(t.value) + ' kelime · otomatik kaydedilir'; }
+    if (t.dataset.uretim) { UI.uretim[t.dataset.uretim] = t.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Otomatik kaydedildi'; }
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'bagSec') { S.baglamSec[e.target.dataset.m] = e.target.value; kaydet(); yenile(); }
     if (e.target.id === 'juriProfSelect') { UI.juriProf = +e.target.value; yenile(); }
     if (e.target.id === 'juriEvrenSelect') { UI.juriEvrenProf = +e.target.value; yenile(); }
+    if (e.target.dataset && e.target.dataset.uretim) { UI.uretim[e.target.dataset.uretim] = e.target.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Model güncellendi'; }
   });
   document.addEventListener('submit', e => {
     if (e.target.id === 'ozelForm') {
@@ -1513,11 +2001,25 @@
         <button type="button" class="proto-yontem-b" data-act="heroSec" data-hero="v3" data-git="acilis">3. Adım</button>
       </div>
     </div>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>Çözümlü örnek</span><b id="protoOrnekEtiket"></b></div>
+      <div class="proto-yontem-sec">
+        <button type="button" class="proto-yontem-b" data-act="ornekModSec" data-mod="metin">Metin (Mevcut)</button>
+        <button type="button" class="proto-yontem-b" data-act="ornekModSec" data-mod="slayt">Slayt + Ses</button>
+      </div>
+    </div>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>Mikro-görev</span><b id="protoGorevEtiket"></b></div>
+      <div class="proto-yontem-sec">
+        <button type="button" class="proto-yontem-b" data-act="gorevModSec" data-mod="klasik">Klasik (Mevcut)</button>
+        <button type="button" class="proto-yontem-b" data-act="gorevModSec" data-mod="etkilesimli">Etkileşimli</button>
+      </div>
+    </div>
     ${[
     ['acilis-1', 'Açılış sayfası (1. versiyon)'], ['acilis-2', 'Açılış sayfası (2. versiyon · 3B)'], ['acilis-3', 'Açılış sayfası (3. versiyon · Adım adım)'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
     ['panel', 'Öğrenci ana sayfası'], ['moduller', 'Modüller'], ['modul-m2', 'Modül sayfası'], ['ders-m2-v1', 'Konu anlatım videosu'],
     ['ders-m2-ornek', 'Örnek uygulama'], ['ders-m2-gorev', 'Mikro görev'], ['ders-m4-gorev', 'Mikro görev (etkileşimli)'],
-    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['yonetici', 'Yönetici paneli'],
+    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['juri-slayt', 'Jüri sunumu (Slayt + Ses)'], ['juri-gorev', 'Jüri sunumu (Mikro-görev)'], ['yonetici', 'Yönetici paneli'],
   ].map(([r, a]) => `<a href="#${r}">${a}</a>`).join('')}<button class="proto-not" id="notDugme" data-act="notlar"></button><button data-act="sifirla">Verileri sıfırla</button></div>
   <div class="proto-alt-satir">
     <div class="proto-hero-bar" role="group" aria-label="Açılış sayfası versiyonu">
@@ -1531,6 +2033,8 @@
   notDugme();
   yontemDugme();
   heroDugme();
+  ornekModDugme();
+  gorevModDugme();
 
   window.addEventListener('hashchange', () => render());
   render();
