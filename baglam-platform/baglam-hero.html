@@ -683,6 +683,240 @@ body[data-ekran="kur"] .proto { bottom: calc(92px + env(safe-area-inset-bottom, 
   .ozel-ekle > div { flex-direction: column; }
 }
 
+/* ---------- Zenginleştirilmiş İlgi Toplama ve Yönetici Paneli ---------- */
+.as-daire { border-radius: 50%; width: 26px; height: 26px; }
+.as-zengin.on .as-daire { background: var(--murekkep); color: #fff; box-shadow: none; }
+.as-zengin-sec:hover .as-daire { box-shadow: inset 0 0 0 2px var(--murekkep); }
+.as-zengin-ic { display: flex; flex-direction: column; gap: 20px; padding: 2px 4px 24px 40px; max-width: 720px; }
+.as-zengin-ic .as-puan .et { font-weight: 500; color: var(--soluk); font-size: 15px; margin-bottom: 10px; }
+.as-zengin-ic .puan button { width: 40px; height: 40px; font-size: 15px; }
+.as-zengin-ic .as-puan .puan-uc { width: min(100%, 580px); font-size: 14px; font-weight: 500; color: var(--soluk); margin-top: 10px; }
+.as-zengin-ic .as-soru-baslik { display: block; font: 600 15px/1.35 var(--govde); color: var(--murekkep); margin-bottom: 10px; }
+.as-etkinlik { display: flex; flex-direction: column; }
+.etkinlik-etiketler { display: flex; flex-wrap: wrap; gap: 8px; }
+.etk-cip { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 8px 14px; border-radius: 12px; background: var(--bg); color: var(--soluk); font-size: 14px; font-weight: 500; box-shadow: inset 0 0 0 1.5px var(--cizgi2); transition: background .15s, color .15s, box-shadow .15s; text-align: left; }
+.etk-cip:hover { color: var(--murekkep); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.etk-cip.on { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--ana); }
+.etk-cip .i { width: 15px; height: 15px; stroke-width: 2.4; color: var(--ana); }
+.ozel-etk-ekle { display: flex; gap: 8px; margin-top: 10px; max-width: 480px; }
+.ozel-etk-girdi { height: 40px; font-size: 14px; border-radius: 11px; }
+.ozel-etk-btn { height: 40px; padding: 0 14px; font-size: 14px; border-radius: 11px; }
+.as-zengin-detay { width: 100%; max-width: 580px; }
+.as-zengin-girdi { height: 54px; border-radius: 14px; font-size: 16px; border-color: #8A9995; }
+.istege-bagli { display: block; margin-top: 7px; font-size: 13px; color: var(--soluk); font-weight: 500; }
+
+.pr-etk { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0 3px; }
+.pr-etk i { font-style: normal; font-size: 12px; font-weight: 600; color: var(--ana-koyu); background: var(--ana-acik); padding: 3px 9px; border-radius: 99px; }
+
+/* Yönetici paneli */
+.yon-aksiyon { display: flex; gap: 10px; flex-wrap: wrap; }
+.yon-secim-kart { display: flex; flex-direction: column; gap: 20px; }
+.yon-bas { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.yon-bas h2 { font-size: 22px; font-weight: 650; }
+.yon-bas p { color: var(--soluk); margin-top: 6px; max-width: 46em; font-size: 15px; }
+.yon-rozet { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 99px; background: var(--ana-acik); color: var(--ana-koyu); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.yon-kartlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.yon-k { background: var(--bg); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; box-shadow: inset 0 0 0 2px var(--cizgi); transition: box-shadow .15s, background .15s; }
+.yon-k:hover { box-shadow: inset 0 0 0 2px var(--ana); }
+.yon-k.on { background: var(--yuzey); box-shadow: inset 0 0 0 2.5px var(--ana); }
+.yon-k-ust { display: flex; align-items: center; gap: 12px; }
+.yon-radio { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--cizgi); display: grid; place-items: center; color: transparent; flex: none; }
+.yon-k.on .yon-radio { background: var(--ana); color: #fff; box-shadow: none; }
+.yon-k-ust b { font: 650 19px/1.2 var(--baslik); display: block; }
+.yon-k-ust small { color: var(--soluk); font-size: 13px; font-weight: 500; }
+.yon-k > p { color: var(--soluk); font-size: 15px; line-height: 1.5; }
+.yon-ozellik { display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
+.yon-ozellik li { display: flex; align-items: center; gap: 8px; }
+.yon-ozellik .i { color: var(--ana); width: 16px; height: 16px; }
+.yon-k-alt { margin-top: auto; padding-top: 14px; border-top: 1.5px solid var(--cizgi2); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--soluk); }
+.yon-k-alt b { color: var(--murekkep); }
+.yon-kat-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 8px; }
+.yon-kat { background: var(--bg); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.yon-kat-bas { display: flex; align-items: center; gap: 10px; }
+.yon-kat-bas img { width: 52px; height: 52px; margin-left: -6px; }
+.yon-kat-bas b { font: 650 17px/1.2 var(--baslik); display: block; }
+.yon-kat-bas small { color: var(--soluk); font-size: 13px; }
+.yon-alt-etiketler { display: flex; flex-wrap: wrap; gap: 6px; }
+.yon-alt-etiketler span { background: var(--yuzey); border-radius: 9px; padding: 4px 10px; font-size: 13px; font-weight: 500; color: var(--murekkep); box-shadow: inset 0 0 0 1px var(--cizgi); }
+
+/* Sağ alt hızlı yönetici yöntem seçici */
+.proto-panel { width: 276px; }
+.proto-yontem { background: rgba(255, 255, 255, .08); border-radius: 12px; padding: 10px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 8px; }
+.proto-yontem-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: #B9C7C3; }
+.proto-yontem-bas b { color: #fff; font-weight: 600; }
+.proto-yontem-sec { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.proto-panel button.proto-yontem-b { margin: 0; border: 0; border-radius: 8px; padding: 7px 8px; font-size: 12px; font-weight: 600; text-align: center; color: #CFEAE6; background: rgba(255, 255, 255, .08); }
+.proto-panel button.proto-yontem-b:hover { background: rgba(255, 255, 255, .18); }
+.proto-panel button.proto-yontem-b.on { background: var(--ana); color: #fff; }
+
+@media (max-width: 860px) {
+  .yon-kartlar { grid-template-columns: minmax(0, 1fr); }
+  .as-zengin-ic { padding-left: 4px; }
+}
+@media (max-width: 620px) {
+  .ozel-etk-ekle { flex-direction: column; }
+  .yon-kat-izgara { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Jüri Sunumu: Kişiselleştirme Mekanizması ---------- */
+.juri-sayfa { gap: 26px; }
+.juri-bolum { display: flex; flex-direction: column; gap: 20px; padding: 26px; }
+.juri-bolum-bas { display: flex; align-items: flex-start; gap: 16px; }
+.juri-adim-no { width: 36px; height: 36px; border-radius: 50%; background: var(--ana); color: #fff; display: grid; place-items: center; font: 700 17px/1 var(--baslik); flex: none; margin-top: 2px; }
+.juri-bolum-bas h2 { font-size: 24px; font-weight: 700; }
+.juri-bolum-bas p { color: var(--soluk); margin-top: 6px; font-size: 15.5px; max-width: 62em; }
+.juri-kazanim { color: var(--murekkep) !important; background: var(--ana-acik); padding: 10px 14px; border-radius: 12px; display: inline-block; margin-top: 8px !important; }
+.juri-kazanim b { color: var(--ana-koyu); }
+.juri-alt-aciklama { margin-top: 8px !important; }
+
+.juri-ilke-kart { display: flex; flex-direction: column; gap: 18px; padding: 24px 26px; border: 1.5px solid var(--cizgi); }
+.juri-ust-etiket { display: inline-block; font-size: 12.5px; font-weight: 700; color: var(--ana-koyu); background: var(--ana-acik); padding: 4px 10px; border-radius: 99px; margin-bottom: 6px; }
+.juri-ilke-ust h2 { font-size: 22px; font-weight: 700; }
+.juri-ilke-ust p { color: var(--soluk); margin-top: 4px; font-size: 15px; }
+.juri-ilke-izgara { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.juri-ilke-kutu { background: var(--bg); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.juri-ilke-kutu small { font-size: 12.5px; font-weight: 600; color: var(--soluk); }
+.juri-ilke-kutu b { font: 650 18px/1.2 var(--baslik); }
+.juri-ilke-kutu p { font-size: 14px; font-weight: 500; line-height: 1.4; }
+.juri-ilke-puan { display: flex; gap: 6px; margin-top: 2px; }
+.juri-ilke-puan span { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--vurgu); color: var(--vurgu); background: var(--yuzey); }
+.juri-ilke-puan span.on { background: var(--vurgu); color: #fff; }
+
+.juri-profil-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.jp-kart { background: var(--bg); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--cizgi); transition: box-shadow .15s, transform .15s, background .15s; }
+.jp-kart:hover { box-shadow: inset 0 0 0 2px var(--ana); transform: translateY(-2px); }
+.jp-kart.on { background: var(--yuzey); box-shadow: inset 0 0 0 2.5px var(--ana); }
+.jp-ust { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1.5px solid var(--cizgi2); }
+.jp-ust img { width: 52px; height: 52px; margin-left: -6px; flex: none; }
+.jp-baslik { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.jp-baslik b { font: 700 17px/1.2 var(--baslik); }
+.jp-baslik small { font-size: 13.5px; color: var(--soluk); font-weight: 500; }
+.jp-alt-satir { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.jp-alt-ad { font: 700 19px/1.2 var(--baslik); }
+.juri-yildiz { display: inline-flex; align-items: center; gap: 3px; font-size: 16px; color: var(--cizgi); }
+.juri-yildiz i { font-style: normal; line-height: 1; }
+.juri-yildiz i.d { color: var(--vurgu); }
+.juri-yildiz b { font-size: 13.5px; font-weight: 600; color: var(--soluk); margin-left: 4px; }
+.jp-etk-grup, .jp-aciklama { display: flex; flex-direction: column; gap: 6px; }
+.jp-etk-grup small, .jp-aciklama small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.jp-etk-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+.jp-etk-liste span { display: inline-flex; align-items: center; gap: 4px; background: var(--yuzey); color: var(--murekkep); padding: 5px 11px; border-radius: 9px; font-size: 13px; font-weight: 500; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.jp-kart.on .jp-etk-liste span { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 600; box-shadow: inset 0 0 0 1px var(--ana); }
+.jp-etk-liste .i { width: 13px; height: 13px; stroke-width: 2.5; }
+.jp-aciklama { margin-top: auto; pt: 4px; }
+.jp-aciklama p { font-size: 14.5px; line-height: 1.5; color: var(--murekkep); }
+.jp-aciklama em { font-style: italic; }
+.juri-dipnot { display: flex; align-items: flex-start; gap: 10px; background: var(--bg); padding: 12px 16px; border-radius: 14px; font-size: 14px; color: var(--soluk); }
+.juri-dipnot .i { color: var(--ana); margin-top: 2px; }
+
+.juri-grup-kutu { border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.kontrol-kutu { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.deney-kutu { background: color-mix(in srgb, var(--ana-acik) 40%, var(--yuzey)); box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-grup-etiket { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 99px; font-size: 13px; font-weight: 700; width: fit-content; }
+.juri-grup-etiket.kontrol { background: var(--yuzey); color: var(--soluk); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-grup-etiket.deney { background: var(--ana); color: #fff; }
+.juri-yan-bas { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-yan-bas small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-yan-bas h3 { font-size: 20px; font-weight: 700; }
+.juri-iki-sutun { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.juri-icerik-kart { background: var(--yuzey); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1px var(--cizgi2); }
+.juri-kart-ust { font-size: 14px; font-weight: 700; color: var(--murekkep); }
+.juri-icerik-kart > p { font-size: 15px; line-height: 1.55; white-space: pre-line; }
+.juri-cozum-kutu { margin-top: auto; background: var(--bg); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.juri-cozum-kutu.acilir { background: var(--iyi-acik); box-shadow: inset 0 0 0 1.5px var(--iyi); animation: gir .2s ease both; }
+.juri-cozum-kutu > b { font-size: 14.5px; color: var(--murekkep); }
+.juri-cozum-kutu > p { font-size: 14.5px; color: var(--murekkep); line-height: 1.5; }
+.juri-cozum-kutu dl { margin: 0; display: grid; gap: 6px; font-size: 14.5px; }
+.juri-cozum-kutu dl > div { display: grid; grid-template-columns: 152px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.juri-cozum-kutu dt { font-weight: 700; color: var(--murekkep); }
+.juri-cozum-kutu.acilir dt { color: #14613D; }
+.juri-cozum-kutu dd { margin: 0; font-weight: 400; }
+.juri-soru-listesi { display: grid; gap: 10px; margin-top: 4px; }
+.juri-soru-alan { display: grid; gap: 5px; }
+.juri-soru-alan label { font-size: 13.5px; font-weight: 600; color: var(--soluk); }
+.juri-soru-alan .girdi { height: 42px; font-size: 14px; border-radius: 99px; padding: 0 16px; }
+.juri-cozum-btn { height: 42px; font-size: 14px; padding: 0 18px; border-radius: 99px; }
+
+.juri-deney-ust { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.juri-deney-aciklama { font-size: 14.5px; color: var(--soluk); margin-top: 6px; }
+.juri-secici-etiket { display: flex; flex-direction: column; gap: 6px; }
+.juri-secici-etiket small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-tam-secici { max-width: 460px; }
+.juri-select { height: 44px; border-radius: 12px; border: 1.5px solid var(--cizgi); background: var(--yuzey); padding: 0 12px; font-weight: 600; font-size: 14.5px; min-width: 290px; }
+.juri-secili-serit { background: var(--yuzey); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-secili-serit img { width: 54px; height: 54px; margin-left: -6px; flex: none; }
+.juri-serit-bilgi { display: flex; flex-direction: column; gap: 4px; }
+.juri-serit-bilgi b { font: 700 18px/1.2 var(--baslik); }
+.juri-serit-aciklama { font-size: 14px; color: var(--soluk); }
+.juri-serit-etiketler { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.serit-etk { display: inline-flex; align-items: center; gap: 4px; background: var(--bg); color: var(--murekkep); font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.juri-gezgin { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; font-size: 14.5px; color: var(--soluk); }
+.juri-gezgin .btn { border-radius: 99px; height: 40px; }
+.juri-gezgin b { color: var(--murekkep); }
+
+.juri-desen-liste { display: flex; flex-direction: column; gap: 16px; }
+.juri-desen-bas { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-desen-bas img { width: 48px; height: 48px; margin-left: -6px; }
+.juri-kitap-ikon { width: 40px; height: 40px; border-radius: 12px; background: var(--yuzey); display: grid; place-items: center; color: var(--soluk); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-desen-bas div { display: flex; flex-direction: column; }
+.juri-desen-bas b { font: 700 18px/1.2 var(--baslik); }
+.juri-desen-bas small { font-size: 13.5px; color: var(--soluk); font-weight: 500; }
+
+/* 5. Bölüm: Ağaç karşılaştırma şeması */
+.juri-vurgu-kart { box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-agac { background: var(--bg); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-agac-kok { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; background: var(--yuzey); padding: 16px 24px; border-radius: 18px; align-self: center; min-width: 280px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); }
+.juri-agac-kok img { width: 58px; height: 58px; margin-top: -6px; }
+.juri-agac-kok b { font: 700 20px/1.2 var(--baslik); }
+.juri-agac-kok span { font-size: 14px; color: var(--soluk); }
+.juri-agac-dallanma, .juri-agac-birlestir { display: grid; grid-template-columns: 1fr 1fr; text-align: center; color: var(--soluk); font-size: 20px; font-weight: 600; line-height: 1; }
+.juri-dal-kol { display: flex; flex-direction: column; gap: 10px; }
+.juri-dal-ok { text-align: center; color: var(--soluk); font-size: 20px; font-weight: 600; line-height: 1; }
+.juri-ab-kart { background: var(--yuzey); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); }
+.juri-ab-bas { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.juri-ab-bas b { font: 700 18px/1.2 var(--baslik); }
+.juri-ab-etiket { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 700; font-size: 12.5px; padding: 4px 10px; border-radius: 99px; }
+.juri-ab-etiket.turuncu { background: var(--vurgu-acik); color: #B84A12; }
+.juri-ab-profil { margin: 0; display: grid; gap: 10px; font-size: 14.5px; }
+.juri-ab-profil > div { display: flex; flex-direction: column; gap: 2px; }
+.juri-ab-profil dt { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-ab-profil dd { margin: 0; font-weight: 600; color: var(--murekkep); }
+.juri-ab-baglam { background: var(--yuzey); padding: 18px 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); flex: 1; }
+.juri-ab-baglam > b { font: 700 16px/1.2 var(--baslik); }
+.juri-ab-baglam > p { font-size: 15px; color: var(--murekkep); padding-bottom: 10px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-deg-satir { display: grid; gap: 8px; }
+.juri-deg-satir > div { display: flex; flex-direction: column; gap: 2px; }
+.juri-deg-satir small { font-size: 13px; color: var(--soluk); font-weight: 600; }
+.juri-deg-satir b { font-size: 15px; font-weight: 600; }
+.juri-agac-hedef { background: var(--yuzey); border-radius: 18px; padding: 16px 22px; text-align: center; display: flex; flex-direction: column; gap: 4px; box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-agac-hedef b { font: 700 17px/1.2 var(--baslik); color: var(--ana-koyu); }
+.juri-agac-hedef span { font-size: 15px; font-weight: 500; }
+
+.juri-tablo-sarici { overflow-x: auto; border-radius: 16px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-tablo { width: 100%; border-collapse: collapse; font-size: 14.5px; background: var(--yuzey); }
+.juri-tablo th { text-align: left; background: var(--bg); padding: 12px 16px; font-weight: 700; color: var(--soluk); font-size: 13.5px; border-bottom: 1.5px solid var(--cizgi); }
+.juri-tablo td { padding: 12px 16px; border-bottom: 1px solid var(--cizgi2); }
+.juri-tablo tr:last-child td { border-bottom: 0; }
+.karar-etiket { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12.5px; font-weight: 700; }
+.karar-etiket.sabit { background: var(--bg); color: var(--murekkep); box-shadow: inset 0 0 0 1px var(--cizgi); }
+.karar-etiket.degisken { background: var(--ana-acik); color: var(--ana-koyu); }
+.karar-etiket.kontrol { background: var(--vurgu-acik); color: #B84A12; }
+
+.juri-metin-blok { display: flex; flex-direction: column; gap: 14px; font-size: 16px; line-height: 1.65; background: var(--bg); padding: 20px 24px; border-radius: 18px; }
+.juri-metin-blok em { font-style: normal; font-weight: 600; color: var(--ana-koyu); }
+.juri-aciklama-kart .ar-not p { font-size: 14.5px; line-height: 1.55; color: var(--murekkep); }
+
+@media (max-width: 1100px) {
+  .juri-ilke-izgara { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .juri-iki-sutun, .juri-profil-izgara, .juri-ilke-izgara { grid-template-columns: minmax(0, 1fr); }
+  .juri-bolum { padding: 20px 16px; }
+  .juri-cozum-kutu dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .juri-select { min-width: 100%; }
+  .juri-agac-dallanma, .juri-agac-birlestir { display: none; }
+}
+
 </style>
 <style>
 /* Hero'ya özel görsel sistem; uygulamanın diğer ekranlarından bağımsızdır. */
@@ -1646,6 +1880,393 @@ window.DATA = (() => {
     ]},
   ].map(k => ({ ...k, altlar: k.altlar.map(([id, ad, soru]) => ({ id: k.id + '.' + id, ad, soru })) }));
 
+  /* ---------- Zenginleştirilmiş İlgi Toplama: 12 ana kategori ve alt alan konfigürasyonları ---------- */
+  const zenginIlgiler = [
+    { id: 'spor', ad: 'Spor', kisaAd: 'Spor', alt: 'Takımlar, antrenman, bireysel branşlar', arastirma: 'Tüm araştırmalar: 60 · Eğitim: 16', obj: 'top', renk: '#0E8C7F', ozelOrnek: 'Yüzme',
+      ozelEtkinlikler: ['Antrenman yapmak', 'Maç izlemek', 'Takım takip etmek', 'İstatistikleri incelemek', 'Spor etkinliklerine katılmak'],
+      altlar: [
+        ['voleybol', 'Voleybol',
+          ['Voleybol oynamak', 'Maç izlemek', 'Takım takip etmek', 'İstatistikleri incelemek', 'Voleybol haberlerini takip etmek', 'Maçlara gitmek'],
+          'Özellikle ilgilendiğin voleybol takımı, oyuncu veya lig var mı?', 'Örn. Filenin Sultanları, Eczacıbaşı, Sultanlar Ligi'],
+        ['bisiklet', 'Bisiklet',
+          ['Bisiklet sürmek', 'Yeni rotalar keşfetmek', 'Yarışları izlemek', 'Sürüş verilerini incelemek', 'Grup sürüşlerine katılmak', 'Bisiklet bakımı yapmak'],
+          'Özellikle hangi bisiklet türleriyle veya rotalarla ilgileniyorsun?', 'Örn. Yol bisikleti, dağ bisikleti, Tour de France'],
+        ['atletizm', 'Atletizm',
+          ['Koşu antrenmanı yapmak', 'Yarışlara katılmak', 'Şampiyonaları izlemek', 'Sporcuları takip etmek', 'Dereceleri karşılaştırmak'],
+          'Özellikle ilgilendiğin bir atletizm branşı veya sporcu var mı?', 'Örn. 100 metre koşu, maraton, sırıkla atlama'],
+        ['masatenisi', 'Masa tenisi',
+          ['Masa tenisi oynamak', 'Servis ve vuruş çalışmak', 'Turnuva maçlarını izlemek', 'Turnuvalara katılmak', 'Maç istatistiklerini incelemek'],
+          'Oynarken sevdiğin bir oyun tarzı veya takip ettiğin sporcu var mı?', 'Örn. Hücum oyunu, Ma Long, kulüp turnuvaları'],
+        ['badminton', 'Badminton',
+          ['Badminton oynamak', 'Vuruş teknikleri çalışmak', 'Turnuva maçlarını izlemek', 'Çiftler maçı yapmak', 'Turnuvalara katılmak'],
+          'Badmintonda özellikle sevdiğin bir oyun biçimi veya turnuva var mı?', 'Örn. Çiftler maçı, smaç teknikleri, olimpiyat maçları'],
+        ['okculuk', 'Okçuluk',
+          ['Atış antrenmanı yapmak', 'Müsabakaları izlemek', 'Sporcuları takip etmek', 'Atış puanlarını karşılaştırmak', 'Okçuluk ekipmanlarını incelemek'],
+          'Özellikle hangi okçuluk türleriyle veya sporcularla ilgileniyorsun?', 'Örn. Mete Gazoz, klasik yay, geleneksel okçuluk'],
+        ['dovus', 'Dövüş sporları',
+          ['Antrenman yapmak', 'Teknik çalışmak', 'Müsabakaları izlemek', 'Sporcuları takip etmek', 'Maç taktiklerini incelemek'],
+          'Özellikle ilgilendiğin dövüş sporu, sporcu veya organizasyon hangisi?', 'Örn. Tekvando, judo, boks, karate'],
+        ['jimnastik', 'Jimnastik',
+          ['Esneklik ve denge çalışmak', 'Hareket serileri çalışmak', 'Şampiyonaları izlemek', 'Sporcuları takip etmek', 'Puanlamaları incelemek'],
+          'Artistik, ritmik jimnastik veya özellikle ilgini çeken bir alet/sporcu var mı?', 'Örn. Artistik jimnastik, halka, Ferhat Arıcan'],
+        ['fitness', 'Fitness',
+          ['Ağırlık çalışmak', 'Kardiyo yapmak', 'Vücut ağırlığıyla çalışmak', 'Esneme egzersizleri yapmak', 'Grup antrenmanlarına katılmak', 'Antrenman sonuçlarını karşılaştırmak'],
+          'Özellikle hangi egzersizleri veya antrenman türlerini seviyorsun?', 'Örn. Pilates, ağırlık antrenmanı'],
+        ['tirmanis', 'Tırmanış',
+          ['Duvar tırmanışı yapmak', 'Kaya tırmanışı yapmak', 'Yeni rotalar denemek', 'Tırmanış yarışmalarını izlemek', 'Tırmanış antrenmanı yapmak'],
+          'Özellikle hangi tırmanış türleriyle ilgileniyorsun?', 'Örn. Bouldering, doğada kaya tırmanışı'],
+      ]},
+    { id: 'oyun', ad: 'Dijital oyunlar', kisaAd: 'Oyun', alt: 'Bilgisayar, konsol, mobil ve e-spor', arastirma: 'Tüm araştırmalar: 29 · Eğitim: 14', obj: 'gamepad', renk: '#4957D8', ozelOrnek: 'Açık dünya ve inşa oyunları',
+      ozelEtkinlikler: ['Oyun oynamak', 'Oyun yayınlarını izlemek', 'Arkadaşlarla oynamak', 'Oyun taktiklerini incelemek', 'Yeni oyunlar keşfetmek'],
+      altlar: [
+        ['mobil', 'Mobil oyunlar',
+          ['Mobil oyun oynamak', 'Günlük görevleri tamamlamak', 'Arkadaşlarla oynamak', 'Sıralamalarda yarışmak', 'Yeni oyunlar denemek'],
+          'Telefonda veya tablette en çok hangi oyunları oynuyorsun?', 'Örn. Brawl Stars, Clash Royale, PUBG Mobile'],
+        ['cevrimici', 'Çevrim içi oyunlar',
+          ['Takımla oynamak', 'Dereceli maçlara girmek', 'Oyun taktiklerini incelemek', 'Oyun yayınlarını izlemek', 'Oyun güncellemelerini takip etmek'],
+          'Düzenli oynadığın çevrim içi oyunlar veya tercih ettiğin rol hangisi?', 'Örn. Valorant, League of Legends, destek rolü'],
+        ['aksiyon', 'Aksiyon ve macera oyunları',
+          ['Görevleri tamamlamak', 'Hikâyeyi takip etmek', 'Yeni dünyalar keşfetmek', 'Karakter geliştirmek', 'Oyun yayınlarını izlemek'],
+          'Özellikle sevdiğin aksiyon veya macera oyunları hangileri?', 'Örn. GTA, Uncharted, Tomb Raider, Assassin’s Creed'],
+        ['strateji', 'Strateji oyunları',
+          ['Strateji geliştirmek', 'Kaynakları yönetmek', 'Şehir veya üs kurmak', 'Rakiplerle yarışmak', 'Oyun taktiklerini incelemek'],
+          'Özellikle hangi strateji oyunlarını seviyorsun?', 'Örn. Age of Empires, Civilization'],
+        ['simulasyon', 'Simülasyon oyunları',
+          ['Araç simülasyonları oynamak', 'Şehir veya işletme yönetmek', 'Senaryolar kurmak', 'Oyun modları denemek', 'Simülasyon yayınlarını izlemek'],
+          'En çok vakit geçirdiğin simülasyon oyunları hangileri?', 'Örn. Euro Truck Simulator 2, Stardew Valley, Cities: Skylines'],
+        ['rpg', 'Rol yapma oyunları',
+          ['Karakter geliştirmek', 'Hikâyeyi yönlendirmek', 'Açık dünyayı keşfetmek', 'Yan görevleri tamamlamak', 'Oyun evrenlerini araştırmak'],
+          'Seni en çok etkileyen rol yapma oyunları veya evrenler hangileri?', 'Örn. The Witcher 3, Skyrim, Baldur’s Gate 3'],
+        ['sporoyun', 'Spor oyunları',
+          ['Maç yapmak', 'Takım kurmak', 'Kariyer modu oynamak', 'Çevrim içi rekabet etmek', 'Oyuncu istatistiklerini incelemek'],
+          'Sevdiğin spor oyunları, takımlar veya oyun modları hangileri?', 'Örn. EA Sports FC, NBA 2K'],
+        ['bulmaca', 'Bulmaca oyunları',
+          ['Bulmaca çözmek', 'Zor bölümleri geçmek', 'Süreye karşı yarışmak', 'Yeni bulmacalar keşfetmek', 'Bölüm tasarlamak'],
+          'Hangi bulmaca oyunlarını veya bulmaca türlerini seviyorsun?', 'Örn. Portal 2, Tetris, kelime oyunları'],
+        ['espor', 'E-spor',
+          ['Turnuva maçlarını izlemek', 'Takımları takip etmek', 'Oyuncu istatistiklerini incelemek', 'Maç analizlerini izlemek', 'Turnuvalara katılmak'],
+          'Takip ettiğin e-spor oyunu, takım veya turnuva hangisi?', 'Örn. VCT, Worlds, FUT Esports, CS2 Major'],
+        ['masaoyun', 'Masa oyunları',
+          ['Kutu oyunları oynamak', 'Arkadaşlarla oyun gecesi yapmak', 'Oyun stratejileri geliştirmek', 'Yeni masa oyunları keşfetmek', 'Turnuvalara katılmak'],
+          'En sevdiğin kutu veya masa oyunları hangileri?', 'Örn. Catan, satranç, Carcassonne, Monopoly'],
+        ['kartoyun', 'Kart oyunları',
+          ['Kart oyunu oynamak', 'Deste oluşturmak', 'Rakiplerle maç yapmak', 'Kart stratejilerini incelemek', 'Kart koleksiyonu yapmak'],
+          'Oynadığın fiziksel veya dijital kart oyunları hangileri?', 'Örn. Hearthstone, UNO, Marvel Snap'],
+      ]},
+    { id: 'yemek', ad: 'Yemek ve içecek', kisaAd: 'Yemek', alt: 'Mutfak kültürü, tarifler, kahve ve lezzetler', arastirma: 'Tüm araştırmalar: 44 · Eğitim: 14', obj: 'donut', renk: '#EE6C2B', ozelOrnek: 'Sokak lezzetleri',
+      ozelEtkinlikler: ['Yemek yapmak', 'Yeni tarifler denemek', 'Farklı lezzetler tatmak', 'Mekanlar keşfetmek', 'Yemek videoları izlemek'],
+      altlar: [
+        ['kahvecay', 'Kahve ve çay',
+          ['Kahve hazırlamak', 'Çay demlemek', 'Farklı kahveler tatmak', 'Yeni demleme yöntemleri denemek', 'Kafeler keşfetmek'],
+          'Özellikle hangi kahve veya çay türlerini seviyorsun?', 'Örn. Filtre kahve, espresso, Türk kahvesi'],
+        ['dunyamutfak', 'Dünya mutfakları',
+          ['Farklı mutfakları tatmak', 'Yabancı tarifler denemek', 'Restoranlar keşfetmek', 'Yemek belgeselleri izlemek', 'Mutfak kültürlerini araştırmak'],
+          'Özellikle ilgini çeken ülke mutfakları veya yemekler hangileri?', 'Örn. İtalyan mutfağı, Uzak Doğu, Meksika mutfağı'],
+        ['hamurisi', 'Hamur işleri',
+          ['Tatlı ve kek yapmak', 'Ekmek ve hamur yoğurmak', 'Yeni tarifler denemek', 'Tatlı süslemesi yapmak', 'Fırın ve pastaneleri keşfetmek'],
+          'Yapmaktan veya yemekten en çok hoşlandığın hamur işi ya da tatlı hangisi?', 'Örn. Ekşi mayalı ekmek, kruvasan, cheesecake, börek'],
+        ['barbeku', 'Barbekü ve ızgara',
+          ['Mangal ve ızgara yapmak', 'Sos ve marinasyon hazırlamak', 'Farklı pişirme yöntemleri denemek', 'Arkadaşlarla mangal yapmak', 'Izgara tarifleri izlemek'],
+          'Izgarada pişirmeyi veya tatmayı en sevdiğin yemekler neler?', 'Örn. Köfte, ızgara sebze, burger, özel soslar'],
+        ['saglikliyemek', 'Sağlıklı yemek tarifleri',
+          ['Sağlıklı öğünler hazırlamak', 'Yeni tarifler denemek', 'Besin değerlerini incelemek', 'Şekersiz tatlılar yapmak', 'Beslenme içeriklerini takip etmek'],
+          'Özellikle dikkat ettiğin bir beslenme yaklaşımı veya sevdiğin sağlıklı tarif var mı?', 'Örn. Akdeniz mutfağı, yulaf kaseleri, proteinli tarifler'],
+        ['vegan', 'Vegan ve vejetaryen mutfak',
+          ['Bitkisel yemekler pişirmek', 'Yeni vegan tarifler denemek', 'Bitkisel ürünleri karşılaştırmak', 'Vegan mekanlar keşfetmek', 'Bitkisel beslenmeyi araştırmak'],
+          'En sevdiğin bitkisel yemekler veya sık kullandığın malzemeler neler?', 'Örn. Falafel, mercimek yemekleri, badem sütü, tofu'],
+      ]},
+    { id: 'moda', ad: 'Alışveriş, moda ve güzellik', kisaAd: 'Moda', alt: 'Stil, kişisel bakım, aksesuar ve tasarım', arastirma: 'Tüm araştırmalar: 34 · Eğitim: 12', obj: 'canta', renk: '#D9466F', ozelOrnek: 'İkinci el ve vintage',
+      ozelEtkinlikler: ['Kombin yapmak', 'Ürünleri karşılaştırmak', 'Yeni trendleri takip etmek', 'Fiyat araştırması yapmak', 'Mağazaları keşfetmek'],
+      altlar: [
+        ['giyim', 'Giyim',
+          ['Kombin yapmak', 'Alışveriş yapmak', 'Moda trendlerini takip etmek', 'Kumaş ve kalıpları incelemek', 'Fiyatları karşılaştırmak'],
+          'Giyimde kendine yakın bulduğun tarz veya takip ettiğin markalar hangileri?', 'Örn. Minimalist, spor giyim, vintage'],
+        ['ayakkabi', 'Ayakkabılar',
+          ['Ayakkabı modellerini takip etmek', 'Sneaker kombinlemek', 'Modelleri karşılaştırmak', 'Koleksiyon yapmak', 'Ayakkabı bakımı yapmak'],
+          'En sevdiğin ayakkabı tarzı, model veya marka hangisi?', 'Örn. Koşu ayakkabıları, klasik sneaker, bot'],
+        ['sokakmodasi', 'Sokak modası',
+          ['Sokak stili kombinler yapmak', 'Yeni markalar keşfetmek', 'Stil sayfalarını takip etmek', 'Kıyafetleri kişiselleştirmek', 'Koleksiyonları incelemek'],
+          'Sokak modasında sevdiğin parçalar, akımlar veya markalar neler?', 'Örn. Oversize kapüşonlu, kargo pantolon, kaykay stili'],
+        ['makyaj', 'Makyaj',
+          ['Makyaj yapmak', 'Yeni stiller denemek', 'Makyaj videoları izlemek', 'Ürünleri karşılaştırmak', 'Renk uyumlarını denemek'],
+          'Tercih ettiğin makyaj stili veya favori ürünlerin hangileri?', 'Örn. Doğal günlük makyaj, göz makyajı'],
+        ['ciltbakimi', 'Cilt bakımı',
+          ['Bakım rutini uygulamak', 'Ürün içeriklerini incelemek', 'Yeni ürünler denemek', 'Ürünleri karşılaştırmak', 'Cilt bakımı içeriklerini takip etmek'],
+          'Cilt bakımında ilgini çeken içerikler veya rutinler neler?', 'Örn. Kore cilt bakımı, nemlendirici serumlar, güneş kremi'],
+        ['sacbakimi', 'Saç bakımı',
+          ['Saç bakımı yapmak', 'Saç şekillendirmek', 'Yeni modeller denemek', 'Bakım ürünlerini incelemek', 'Doğal bakım kürleri uygulamak'],
+          'Saç bakımında odaklandığın konular veya sevdiğin uygulamalar neler?', 'Örn. Kıvırcık saç bakımı, bitkisel yağlar'],
+        ['parfum', 'Parfümler',
+          ['Farklı parfümler denemek', 'Koku notalarını incelemek', 'Kalıcılıkları karşılaştırmak', 'Parfüm yorumlarını takip etmek', 'Parfüm koleksiyonu yapmak'],
+          'En sevdiğin koku türleri veya parfümler hangileri?', 'Örn. Ferah kokular, odunsu notalar, vanilya'],
+        ['saatler', 'Saatler',
+          ['Saat modellerini incelemek', 'Saat takmak ve kombinlemek', 'Mekanizmaları araştırmak', 'Modelleri karşılaştırmak', 'Saat koleksiyonu yapmak'],
+          'İlgi duyduğun saat türleri veya markalar hangileri?', 'Örn. Mekanik saatler, klasik dijital saatler, akıllı saatler'],
+        ['modatasarimi', 'Moda tasarımı',
+          ['Kıyafet çizimi yapmak', 'Kumaş ve renk seçmek', 'Dikim ve tasarım yapmak', 'Defileleri takip etmek', 'Kıyafetleri dönüştürmek'],
+          'Moda tasarımında ilgini çeken alan veya tarz hangisi?', 'Örn. Sürdürülebilir moda, tekstil tasarımı, eskiz çizimi'],
+      ]},
+    { id: 'sinema', ad: 'Film, dizi ve video', kisaAd: 'Film ve dizi', alt: 'Sinema türleri, diziler, belgesel ve eleştiri', arastirma: 'Tüm araştırmalar: 52 · Eğitim: 11', obj: 'klaket', renk: '#7A4FD6', ozelOrnek: 'Animasyon ve anime',
+      ozelEtkinlikler: ['Film izlemek', 'Dizi takip etmek', 'Film incelemelerini okumak', 'Arkadaşlarla tartışmak', 'İzleme listeleri oluşturmak'],
+      altlar: [
+        ['aksiyonmacera', 'Aksiyon ve macera',
+          ['Aksiyon filmleri izlemek', 'Macera dizileri takip etmek', 'Sinemaya gitmek', 'Kamera arkası videoları izlemek', 'Film serilerini takip etmek'],
+          'Unutamadığın aksiyon-macera filmleri veya dizileri hangileri?', 'Örn. Mad Max, Mission: Impossible, Indiana Jones'],
+        ['bilimkurgu', 'Bilim kurgu',
+          ['Bilim kurgu filmleri izlemek', 'Bilim kurgu dizileri takip etmek', 'Film teorilerini tartışmak', 'Gelecek kurgularını incelemek', 'Kitap uyarlamalarını karşılaştırmak'],
+          'En sevdiğin bilim kurgu filmleri, dizileri veya temaları hangileri?', 'Örn. Interstellar, Dune, Black Mirror'],
+        ['fantastik', 'Fantastik',
+          ['Fantastik filmler izlemek', 'Fantastik dizileri takip etmek', 'Kurgusal evrenleri araştırmak', 'Hayran teorilerini takip etmek', 'Kitap uyarlamalarını izlemek'],
+          'En sevdiğin fantastik yapımlar veya evrenler hangileri?', 'Örn. Yüzüklerin Efendisi, Harry Potter, House of the Dragon'],
+        ['korku', 'Korku',
+          ['Korku filmleri izlemek', 'Gerilim dizileri izlemek', 'Arkadaşlarla film gecesi yapmak', 'Korku hikayelerini araştırmak', 'Film incelemelerini izlemek'],
+          'Korku ve gerilim türünde sevdiğin yapımlar hangileri?', 'Örn. Psikolojik gerilim, The Conjuring, Get Out'],
+        ['belgesel', 'Belgesel',
+          ['Belgesel izlemek', 'Yeni konular araştırmak', 'Belgesel serilerini takip etmek', 'Belgeselleri arkadaşlarla tartışmak', 'Veri ve bulguları incelemek'],
+          'Hangi konulardaki belgeseller veya hangi seriler ilgini çekiyor?', 'Örn. Planet Earth, tarih belgeselleri, spor belgeselleri'],
+        ['dram', 'Dram',
+          ['Dram filmleri izlemek', 'Dram dizilerini takip etmek', 'Karakterleri çözümlemek', 'Ödüllü filmleri takip etmek', 'Film eleştirilerini okumak'],
+          'Seni etkileyen dram filmleri, dizileri veya yönetmenler kimler?', 'Örn. Esaretin Bedeli, Nuri Bilge Ceylan filmleri'],
+        ['polisiye', 'Polisiye',
+          ['Polisiye film izlemek', 'Dedektif dizileri izlemek', 'Gizemleri çözmek', 'Suç belgeselleri izlemek', 'Olay örgülerini çözümlemek'],
+          'Özellikle sevdiğin polisiye filmler veya diziler hangileri?', 'Örn. Sherlock, Behzat Ç.'],
+        ['romantik', 'Romantik',
+          ['Romantik filmler izlemek', 'Romantik dizileri takip etmek', 'Film müziklerini dinlemek', 'İzleme listeleri hazırlamak', 'Favori sahneleri paylaşmak'],
+          'Tekrar izlemekten keyif aldığın romantik film veya diziler hangileri?', 'Örn. Before Sunrise, Aşk ve Gurur, La La Land'],
+        ['bagimsiz', 'Bağımsız sinema',
+          ['Festival filmleri izlemek', 'Yönetmenleri takip etmek', 'Film festivallerine gitmek', 'Film çözümlemeleri okumak', 'Kısa filmler izlemek'],
+          'Takip ettiğin bağımsız yönetmenler, festivaller veya filmler var mı?', 'Örn. İstanbul Film Festivali, MUBI seçkisi, Zeki Demirkubuz'],
+        ['realite', 'Realite programları',
+          ['Yarışma programları izlemek', 'Yarışmacıları takip etmek', 'Arkadaşlarla bölüm yorumlamak', 'Program formatlarını karşılaştırmak', 'Tahminlerde bulunmak'],
+          'İzlemekten keyif aldığın yarışma veya realite programları hangileri?', 'Örn. MasterChef, bilgi yarışmaları, tasarım yarışmaları'],
+      ]},
+    { id: 'muzik', ad: 'Müzik', kisaAd: 'Müzik', alt: 'Türler, ritimler, konserler ve ses dünyası', arastirma: 'Tüm araştırmalar: 33 · Eğitim: 7', obj: 'kulaklik', renk: '#F4B63F', ozelOrnek: 'Pop veya Enstrüman çalmak',
+      ozelEtkinlikler: ['Müzik dinlemek', 'Şarkı söylemek', 'Sanatçıları takip etmek', 'Konserlere gitmek', 'Çalma listeleri oluşturmak'],
+      altlar: [
+        ['elektronik', 'Elektronik müzik',
+          ['Elektronik müzik dinlemek', 'DJ setleri dinlemek', 'Müzik üretmek', 'Festivallere gitmek', 'Çalma listeleri oluşturmak'],
+          'Sevdiğin elektronik müzik türleri, DJ’ler veya prodüktörler kimler?', 'Örn. House, techno, Daft Punk, Fred again..'],
+        ['metal', 'Metal',
+          ['Metal müzik dinlemek', 'Albümleri incelemek', 'Konserlere gitmek', 'Enstrüman çalmak', 'Grupları takip etmek'],
+          'Özellikle dinlediğin metal grupları veya alt türler hangileri?', 'Örn. Metallica, Iron Maiden, Opeth'],
+        ['halkmuzigi', 'Halk müziği',
+          ['Türkü dinlemek', 'Türkü söylemek', 'Bağlama veya enstrüman çalmak', 'Türkü hikayelerini araştırmak', 'Konser ve dinletilere gitmek'],
+          'Sevdiğin halk müziği sanatçıları, yöreler veya türküler hangileri?', 'Örn. Neşet Ertaş, Aşık Veysel, Musa Eroğlu'],
+        ['alternatif', 'Alternatif müzik',
+          ['Alternatif müzik dinlemek', 'Yeni gruplar keşfetmek', 'Konserlere gitmek', 'Çalma listeleri hazırlamak', 'Şarkı sözlerini incelemek'],
+          'Son dönemde en çok dinlediğin alternatif müzik grupları veya sanatçılar kimler?', 'Örn. Mor ve Ötesi, Duman, Arctic Monkeys'],
+        ['reggae', 'Reggae',
+          ['Reggae dinlemek', 'Yeni sanatçılar keşfetmek', 'Festivallere gitmek', 'Çalma listeleri oluşturmak', 'Ritimleri incelemek'],
+          'Reggae türünde sevdiğin sanatçılar, gruplar veya şarkılar hangileri?', 'Örn. Bob Marley, Sattas, Damian Marley'],
+        ['rnb', 'R&B',
+          ['R&B dinlemek', 'Şarkı söylemek', 'Sanatçıları takip etmek', 'Çalma listeleri hazırlamak', 'Yeni albümler keşfetmek'],
+          'En çok dinlediğin R&B veya soul sanatçıları kimler?', 'Örn. The Weeknd, Alicia Keys, SZA'],
+        ['filmmuzikleri', 'Film müzikleri',
+          ['Film müzikleri dinlemek', 'Çalışırken müzik dinlemek', 'Bestecileri takip etmek', 'Enstrümanla film müziği çalmak', 'Orkestra konserlerine gitmek'],
+          'En sevdiğin film, dizi veya oyun müzikleri ve besteciler kimler?', 'Örn. Hans Zimmer, Ennio Morricone, Interstellar'],
+        ['latin', 'Latin müziği',
+          ['Latin müziği dinlemek', 'Latin dansları yapmak', 'Yeni ritimler keşfetmek', 'Konser ve dans gecelerine gitmek', 'Çalma listeleri oluşturmak'],
+          'Sevdiğin Latin müziği türleri, dansları veya sanatçıları hangileri?', 'Örn. Salsa, bossa nova, Buena Vista Social Club'],
+      ]},
+    { id: 'teknoloji', ad: 'Teknoloji, bilgisayar ve internet', kisaAd: 'Teknoloji', alt: 'Yazılım, ağlar, siber güvenlik ve yeni nesil sistemler', arastirma: 'Tüm araştırmalar: 43 · Eğitim: 7', obj: 'robot', renk: '#2B8FD9', ozelOrnek: 'Yapay zekâ',
+      ozelEtkinlikler: ['Kod yazmak', 'Yeni araçlar denemek', 'Proje geliştirmek', 'Teknoloji haberlerini takip etmek', 'Performans karşılaştırmak'],
+      altlar: [
+        ['siberguvenlik', 'Siber güvenlik',
+          ['Güvenlik bulmacaları çözmek', 'Güvenlik araçlarını denemek', 'Sistem açıklarını araştırmak', 'Siber güvenlik haberlerini takip etmek', 'Hesap güvenliği ayarları yapmak'],
+          'Siber güvenlikte özellikle merak ettiğin konular veya araçlar neler?', 'Örn. Etik hackerlık, ağ güvenliği, kriptografi'],
+        ['bulut', 'Bulut bilişim',
+          ['Bulut sunucu kurmak', 'Uygulama yayınlamak', 'Bulut servislerini karşılaştırmak', 'Yedekleme sistemleri kurmak', 'Yeni bulut araçlarını denemek'],
+          'Kullandığın veya öğrenmek istediğin bulut servisleri hangileri?', 'Örn. AWS, Google Cloud, Docker, Vercel'],
+        ['veritabani', 'Veri tabanları',
+          ['Veri tabanı tasarlamak', 'SQL sorguları yazmak', 'Veri analizi yapmak', 'Veri tabanlarını karşılaştırmak', 'Büyük verileri düzenlemek'],
+          'Özellikle hangi veri tabanı sistemleriyle veya araçlarla ilgileniyorsun?', 'Örn. PostgreSQL, SQLite, MongoDB, Firebase'],
+        ['mobiluyg', 'Mobil uygulamalar',
+          ['Mobil uygulama geliştirmek', 'Arayüz tasarlamak', 'Yeni uygulamalar denemek', 'Uygulamaları karşılaştırmak', 'Uygulama mağazalarını incelemek'],
+          'Geliştirmek istediğin bir uygulama veya kullandığın araç var mı?', 'Örn. Flutter, React Native, üretkenlik uygulamaları'],
+        ['vr', 'Sanal gerçeklik',
+          ['VR oyunları oynamak', 'VR simülasyonları denemek', 'Sanal turlara katılmak', 'VR içerikleri geliştirmek', 'VR gözlükleri karşılaştırmak'],
+          'Deneyimlediğin veya merak ettiğin VR cihazları ve uygulamaları neler?', 'Örn. Meta Quest, VR simülasyonlar, sanal müzeler'],
+        ['ar', 'Artırılmış gerçeklik',
+          ['AR uygulamalarını denemek', 'AR filtreleri kullanmak', '3B modelleri incelemek', 'AR projeleri geliştirmek', 'Yeni AR teknolojilerini takip etmek'],
+          'Artırılmış gerçekliğin hangi kullanım alanı veya uygulaması ilgini çekiyor?', 'Örn. AR oyunları, 3B eğitim modelleri, akıllı gözlükler'],
+        ['acikkaynak', 'Açık kaynak',
+          ['Açık kaynak yazılım kullanmak', 'Kaynak kodları incelemek', 'Projelere katkıda bulunmak', 'Kendi projesini paylaşmak', 'Yazılım topluluklarını takip etmek'],
+          'Severek kullandığın veya takip ettiğin açık kaynak projeler hangileri?', 'Örn. Linux, VS Code, Blender, Python'],
+        ['ucboyutlu', 'Üç boyutlu grafikler',
+          ['3B modelleme yapmak', 'Animasyon hazırlamak', 'Render ve ışıklandırma yapmak', 'Oyun sahnesi tasarlamak', '3B yazıcı modelleri hazırlamak'],
+          'Kullandığın veya öğrenmek istediğin 3B araçlar ve çalışmalar neler?', 'Örn. Blender, Three.js, karakter modelleme'],
+        ['giyilebilir', 'Giyilebilir teknolojiler',
+          ['Akıllı saat kullanmak', 'Aktivite verilerini takip etmek', 'Uyku verilerini incelemek', 'Cihaz özelliklerini karşılaştırmak', 'Yeni giyilebilir cihazları takip etmek'],
+          'Kullandığın veya ilgini çeken giyilebilir cihazlar hangileri?', 'Örn. Akıllı saat, akıllı bileklik, sağlık sensörleri'],
+        ['aglar', 'Bilgisayar ağları',
+          ['Ağ kurmak', 'Sunucu kurmak', 'Bağlantı hızını test etmek', 'Ağ sorunlarını çözmek', 'Ağ simülasyonları yapmak'],
+          'Özellikle hangi ağ teknolojileriyle ilgileniyorsun?', 'Örn. Wi-Fi, ev sunucuları, Cisco'],
+        ['isletimsistemi', 'İşletim sistemleri',
+          ['Farklı işletim sistemleri denemek', 'Sanal makine kurmak', 'Komut satırı kullanmak', 'Sistem performansını ölçmek', 'Sistemi özelleştirmek'],
+          'Tercih ettiğin veya denemekten keyif aldığın işletim sistemleri hangileri?', 'Örn. Linux, Ubuntu, macOS, Windows'],
+      ]},
+    { id: 'sanat', ad: 'Sanat, tasarım ve edebiyat', kisaAd: 'Sanat ve edebiyat', alt: 'Görsel sanatlar, el işleri, tasarım ve kitaplar', arastirma: 'Tüm araştırmalar: 39 / 24 · Eğitim: 5 / 4', obj: 'palet', renk: '#17A594', ozelOrnek: 'Fotoğrafçılık',
+      ozelEtkinlikler: ['Çizim ve tasarım yapmak', 'Kitap okumak', 'Yazı yazmak', 'Eserleri incelemek', 'Sergi ve atölyelere katılmak'],
+      altlar: [
+        ['resimcizim', 'Resim ve çizim',
+          ['Karakalem çizmek', 'Boyama yapmak', 'Dijital çizim yapmak', 'Portre çizmek', 'Manzara çizmek', 'Sergileri gezmek'],
+          'Özellikle hangi çizim tekniklerini veya konuları seviyorsun?', 'Örn. Suluboya, anime karakterleri'],
+        ['taki', 'Takı tasarımı',
+          ['Takı yapmak', 'Yeni modeller tasarlamak', 'Farklı malzemeler denemek', 'Tasarım sayfalarını takip etmek', 'Atölyelere katılmak'],
+          'Takı yapımında kullandığın malzemeler veya sevdiğin tasarım tarzı nedir?', 'Örn. Doğal taş bileklik, boncuk, gümüş tasarım'],
+        ['ahsap', 'Ahşap işçiliği',
+          ['Ahşap oymak', 'Ahşap eşya yapmak', 'Maket yapmak', 'Eski eşyaları yenilemek', 'Ahşap atölyelerine katılmak'],
+          'Ahşapla yaptığın veya yapmak istediğin çalışmalar neler?', 'Örn. Ahşap figürler, masaüstü düzenleyici, maket'],
+        ['dikisorgu', 'Dikiş ve örgü',
+          ['Örgü örmek', 'Amigurumi yapmak', 'Kıyafet veya çanta dikmek', 'Yeni modeller denemek', 'Kıyafetleri yenilemek'],
+          'Üretmekten en çok keyif aldığın örgü veya dikiş çalışmaları neler?', 'Örn. Amigurumi oyuncak, hırka örgü, bez çanta dikimi'],
+        ['grafik', 'Grafik tasarım',
+          ['Afiş ve poster tasarlamak', 'Logo tasarlamak', 'Arayüz tasarlamak', 'Tipografi çalışmak', 'Tasarımları incelemek'],
+          'Kullandığın tasarım araçları veya sevdiğin tasarım alanları hangileri?', 'Örn. Figma, Illustrator, afiş tasarımı, logo'],
+        ['roman', 'Roman',
+          ['Roman okumak', 'Yazarları takip etmek', 'Kitap tartışmalarına katılmak', 'Kitap incelemeleri okumak', 'Öykü veya roman yazmak'],
+          'En sevdiğin romanlar veya yazarlar kimler?', 'Örn. Sabahattin Ali, Yaşar Kemal, Dostoyevski'],
+        ['siir', 'Şiir',
+          ['Şiir okumak', 'Şiir yazmak', 'Şiir dinlemek', 'Şairleri araştırmak', 'Şiir dinletilerine katılmak'],
+          'Özellikle sevdiğin şairler veya şiir türleri hangileri?', 'Örn. Nâzım Hikmet, Orhan Veli, Turgut Uyar'],
+        ['bilimkurgued', 'Bilim kurgu edebiyatı',
+          ['Bilim kurgu romanları okumak', 'Gelecek kurgularını incelemek', 'Kitap serilerini takip etmek', 'Bilim kurgu öyküleri yazmak', 'Film uyarlamalarını karşılaştırmak'],
+          'Unutamadığın bilim kurgu kitapları veya yazarları kimler?', 'Örn. Isaac Asimov, Frank Herbert, Ursula K. Le Guin'],
+        ['fantastiked', 'Fantastik edebiyat',
+          ['Fantastik romanlar okumak', 'Kurgusal evrenleri incelemek', 'Kitap serilerini takip etmek', 'Fantastik öyküler yazmak', 'Okur topluluklarına katılmak'],
+          'En sevdiğin fantastik kitap serileri veya yazarlar kimler?', 'Örn. Yüzüklerin Efendisi, Yerdeniz, Brandon Sanderson'],
+        ['polisiyeroman', 'Polisiye roman',
+          ['Polisiye roman okumak', 'İpuçlarını takip etmek', 'Suçluyu tahmin etmek', 'Dedektif serilerini takip etmek', 'Gizem öyküleri yazmak'],
+          'Severek okuduğun polisiye yazarları veya dedektif karakterleri kimler?', 'Örn. Agatha Christie, Ahmet Ümit, Sherlock Holmes'],
+        ['biyografi', 'Biyografi',
+          ['Biyografi okumak', 'Tarihi kişilikleri araştırmak', 'Anı kitapları okumak', 'Yaşam öykülerini karşılaştırmak', 'Biyografi belgeselleri izlemek'],
+          'Yaşam öyküsü seni en çok etkileyen kişiler veya kitaplar hangileri?', 'Örn. Marie Curie, Aziz Sancar, Stefan Zweig biyografileri'],
+        ['cizgiroman', 'Çizgi roman',
+          ['Çizgi roman okumak', 'Manga okumak', 'Çizgi roman çizmek', 'Serileri takip etmek', 'Koleksiyon yapmak'],
+          'Takip ettiğin çizgi roman, grafik roman veya manga serileri hangileri?', 'Örn. Sandman, One Piece, Marvel, Persepolis'],
+      ]},
+    { id: 'doga', ad: 'Doğa, hayvanlar ve seyahat', kisaAd: 'Doğa ve seyahat', alt: 'Keşif rotaları, açık hava ve hayvanlar dünyası', arastirma: 'Tüm araştırmalar: 43 / 14 · Eğitim: 4 / 3', obj: 'bavul', renk: '#3FA35F', ozelOrnek: 'Kamp ve doğa yürüyüşü',
+      ozelEtkinlikler: ['Yeni yerler keşfetmek', 'Doğa yürüyüşü yapmak', 'Hayvanları gözlemlemek', 'Gezi planlamak', 'Doğa fotoğrafı çekmek'],
+      altlar: [
+        ['macera', 'Macera seyahati',
+          ['Doğa yürüyüşü yapmak', 'Kamp yapmak', 'Doğa sporları denemek', 'Yeni rotalar keşfetmek', 'Gezi videoları izlemek'],
+          'Deneyimlediğin veya gitmeyi hayal ettiğin macera rotası hangisi?', 'Örn. Likya Yolu, Kaçkarlar kampı, rafting'],
+        ['millipark', 'Millî parklar',
+          ['Millî parkları gezmek', 'Doğa yürüyüşü yapmak', 'Doğa fotoğrafı çekmek', 'Yaban hayatını gözlemlemek', 'Kamp yapmak'],
+          'Gezdiğin veya görmek istediğin millî parklar hangileri?', 'Örn. Yedigöller, Kazdağları, Göreme Millî Parkı'],
+        ['ekonomik', 'Ekonomik seyahat',
+          ['Gezi rotası planlamak', 'Bilet ve konaklama karşılaştırmak', 'Sırt çantalı geziye çıkmak', 'Ücretsiz etkinlikleri keşfetmek', 'Gezi bloglarını takip etmek'],
+          'Ekonomik seyahatlerde kullandığın yöntemler veya rotalar neler?', 'Örn. Interrail, tren yolculuğu, gençlik hostelleri'],
+        ['arabayla', 'Arabayla seyahat',
+          ['Yol rotası planlamak', 'Farklı şehirleri gezmek', 'Manzara durakları keşfetmek', 'Karavan veya araç kampı yapmak', 'Yolculuk listeleri hazırlamak'],
+          'Arabayla gitmekten keyif aldığın veya hayal ettiğin rota neresi?', 'Örn. Ege kıyıları, Karadeniz yaylaları'],
+        ['kediler', 'Kediler',
+          ['Kedi beslemek', 'Kedilerle oynamak', 'Sokak kedileriyle ilgilenmek', 'Kedi davranışlarını gözlemlemek', 'Kedi bakımı araştırmak'],
+          'Kedilerle ilgili en çok ne ilgini çekiyor, baktığın bir kedi var mı?', 'Örn. Tekir kedim var, kedi davranışları, sokak kedileri'],
+        ['kopekler', 'Köpekler',
+          ['Köpek beslemek', 'Köpekle yürüyüş yapmak', 'Köpek eğitmek', 'Köpek ırklarını araştırmak', 'Barınaklara destek olmak'],
+          'Baktığın bir köpek var mı veya sevdiğin köpek ırkları hangileri?', 'Örn. Golden Retriever, çoban köpekleri, köpek eğitimi'],
+        ['kuslar', 'Kuşlar',
+          ['Kuş gözlemi yapmak', 'Evcil kuş beslemek', 'Kuş seslerini dinlemek', 'Kuş fotoğrafı çekmek', 'Göç yollarını araştırmak'],
+          'İlgini çeken kuş türleri veya gözlem alanları hangileri?', 'Örn. Muhabbet kuşu, yırtıcı kuşlar, Manyas Kuş Cenneti'],
+        ['atlar', 'Atlar',
+          ['Ata binmek', 'Binicilik eğitimi almak', 'At bakımı yapmak', 'Binicilik yarışlarını izlemek', 'At ırklarını araştırmak'],
+          'Atlarla veya binicilikle ilgili deneyimin ya da merak ettiğin konu nedir?', 'Örn. Engel atlama, doğada at binme, Arap atları'],
+        ['surungenler', 'Sürüngenler',
+          ['Sürüngen türlerini araştırmak', 'Belgesel izlemek', 'Teraryum kurmak', 'Doğada gözlem yapmak', 'Evcil sürüngen beslemek'],
+          'Özellikle merak ettiğin sürüngen türleri hangileri?', 'Örn. Su kaplumbağası, bukalemun, kertenkele türleri'],
+      ]},
+    { id: 'kariyer', ad: 'Kariyer ve gelecek meslekler', kisaAd: 'Kariyer', alt: 'Mesleki gelişim, girişimcilik ve öğrenme stratejileri', arastirma: 'Tüm araştırmalar: 30 · Eğitim: 4', obj: 'evrak', renk: '#5B6BE8', ozelOrnek: 'Staj ve gönüllülük',
+      ozelEtkinlikler: ['Meslekleri araştırmak', 'Eğitimlere katılmak', 'Proje geliştirmek', 'Deneyim paylaşımlarını dinlemek', 'Yeni beceriler öğrenmek'],
+      altlar: [
+        ['planlama', 'Kariyer planlama',
+          ['Meslekleri araştırmak', 'Kariyer etkinliklerine katılmak', 'Mezunlarla görüşmek', 'Sektör trendlerini takip etmek', 'Staj fırsatlarını incelemek'],
+          'Gelecekte yönelmeyi düşündüğün kariyer alanı veya meslek nedir?', 'Örn. Eğitim teknolojileri, veri analizi, akademisyenlik'],
+        ['isarama', 'İş arama',
+          ['Özgeçmiş ve portfolyo hazırlamak', 'İş ve staj ilanlarını incelemek', 'Mülakatlara hazırlanmak', 'Şirketleri karşılaştırmak', 'Kariyer ağlarını kullanmak'],
+          'Şu sıralar hazırlandığın bir staj veya iş başvurusu alanı var mı?', 'Örn. Yaz stajı, portfolyo hazırlığı, mülakat teknikleri'],
+        ['girisimcilik', 'Girişimcilik',
+          ['İş fikri geliştirmek', 'Prototip hazırlamak', 'Yarışmalara katılmak', 'Girişim hikayelerini incelemek', 'Pazar araştırması yapmak'],
+          'İlgini çeken bir girişim alanı veya geliştirmek istediğin fikir var mı?', 'Örn. Eğitim girişimleri, mobil uygulama fikri, Teknofest'],
+        ['meslekigelisim', 'Mesleki gelişim',
+          ['Atölye ve seminerlere katılmak', 'Sunum becerisi geliştirmek', 'Mesleki araçlar öğrenmek', 'Yabancı dil çalışmak', 'Öğrenci kulüplerinde görev almak'],
+          'Şu dönemde en çok hangi mesleki becerini geliştirmek istiyorsun?', 'Örn. Topluluk önünde konuşma, akademik İngilizce, veri analizi'],
+        ['cevrimiciegitim', 'Çevrim içi eğitim',
+          ['Çevrim içi kurs tamamlamak', 'Eğitim videoları izlemek', 'Uygulama ödevleri yapmak', 'Farklı platformları karşılaştırmak', 'Sertifika programlarına katılmak'],
+          'Takip ettiğin çevrim içi eğitim platformları veya kurs konuları neler?', 'Örn. Coursera, BTK Akademi, yazılım ve tasarım kursları'],
+        ['lisansustu', 'Lisansüstü eğitim',
+          ['Akademik makale okumak', 'Yüksek lisans programlarını araştırmak', 'Araştırma projelerine katılmak', 'Akademik sınavlara hazırlanmak', 'Burs olanaklarını incelemek'],
+          'Lisansüstü eğitimde ilgini çeken alan veya araştırma konusu nedir?', 'Örn. Eğitim bilimleri, yurt dışı yüksek lisans, akademik araştırma'],
+        ['calismateknik', 'Çalışma ve öğrenme teknikleri',
+          ['Pomodoro ile çalışmak', 'Aralıklı tekrar yapmak', 'Kavram haritası çıkarmak', 'Not tutma yöntemleri denemek', 'Çalışma verimini karşılaştırmak'],
+          'Ders çalışırken en çok kullandığın veya denediğin yöntem hangisi?', 'Örn. Pomodoro tekniği, Feynman yöntemi, bilgi kartları'],
+      ]},
+    { id: 'sosyalmedya', ad: 'Sosyal medya ve içerik üretimi', kisaAd: 'Sosyal medya', alt: 'Dijital platformlar, video, podcast ve topluluk yönetimi', arastirma: 'Tüm araştırmalar: 8 · Eğitim: 3', obj: 'mikrofon', renk: '#E85D75', ozelOrnek: 'Blog ve bülten yazarlığı',
+      ozelEtkinlikler: ['İçerik üretmek', 'Video ve yayın izlemek', 'Gündemi takip etmek', 'Etkileşim verilerini incelemek', 'Topluluklara katılmak'],
+      altlar: [
+        ['sosyalaglar', 'Sosyal ağlar',
+          ['Gündemi takip etmek', 'Paylaşım yapmak', 'Topluluk tartışmalarına katılmak', 'Yeni hesaplar keşfetmek', 'Kullanım süresini incelemek'],
+          'En sık kullandığın sosyal ağlar ve takip ettiğin konular neler?', 'Örn. X, Reddit, LinkedIn, teknoloji ve mizah sayfaları'],
+        ['dijitalpazarlama', 'Dijital pazarlama',
+          ['Reklam kampanyalarını incelemek', 'İçerik planı hazırlamak', 'Etkileşim verilerini analiz etmek', 'Reklam metni ve görseli tasarlamak', 'Arama trendlerini takip etmek'],
+          'Dijital pazarlamada özellikle ilgini çeken konu veya kampanya türü nedir?', 'Örn. Sosyal medya reklamları, SEO, marka iletişimi'],
+        ['kisavideo', 'Kısa video üretimi',
+          ['Kısa video çekmek', 'Video kurgulamak', 'Kısa videolar izlemek', 'Trend akımları denemek', 'İzlenme verilerini incelemek'],
+          'Kısa videolarda üretmeyi veya izlemeyi sevdiğin içerik türü nedir?', 'Örn. Bilgi videoları, günlük vlog, kitap ve film önerileri'],
+        ['canliyayin', 'Canlı yayın',
+          ['Canlı yayın izlemek', 'Sohbete katılmak', 'Canlı yayın açmak', 'Yayıncıları takip etmek', 'Yayın ekipmanlarını incelemek'],
+          'Takip ettiğin canlı yayın platformları, yayın türleri veya yayıncılar hangileri?', 'Örn. Twitch, YouTube Canlı, birlikte çalışma yayınları'],
+        ['podcast', 'Podcast',
+          ['Podcast dinlemek', 'Yeni kanallar keşfetmek', 'Podcast kaydetmek', 'Bölüm konuları araştırmak', 'Ses kurgusu yapmak'],
+          'Düzenli dinlediğin podcast serileri veya ilgini çeken konular neler?', 'Örn. Bilim ve tarih sohbetleri, kültür ve psikoloji yayınları'],
+        ['youtube', 'YouTube içerikleri',
+          ['Eğitim ve belgesel izlemek', 'İnceleme videoları izlemek', 'Video üretmek', 'Kanalları takip etmek', 'İzlenme istatistiklerini incelemek'],
+          'YouTube’da en çok hangi tür kanalları veya içerikleri takip ediyorsun?', 'Örn. Barış Özcan, Evrim Ağacı, teknoloji incelemeleri'],
+        ['instagram', 'Instagram içerikleri',
+          ['Fotoğraf ve Reels paylaşmak', 'Hikâye paylaşmak', 'İçerik sayfalarını takip etmek', 'Görsel tasarım hazırlamak', 'Etkileşimleri incelemek'],
+          'Instagram’da takip etmekten veya paylaşmaktan hoşlandığın içerikler neler?', 'Örn. Fotoğrafçılık, bilgilendirici gönderiler, gezi sayfaları'],
+        ['tiktok', 'TikTok içerikleri',
+          ['Kısa videolar izlemek', 'Akımları takip etmek', 'Video çekip kurgulamak', 'Eğitim ve hobi içerikleri keşfetmek', 'Algoritma önerilerini incelemek'],
+          'TikTok’ta karşına çıkmasını sevdiğin içerik temaları hangileri?', 'Örn. BookTok, kısa bilim videoları, yemek tarifleri'],
+      ]},
+    { id: 'bilim', ad: 'Bilim ve uzay', kisaAd: 'Bilim ve uzay', alt: 'Doğa bilimleri, matematik, yerküre ve evren', arastirma: '', obj: 'gezegen', renk: '#3642B4', ozelOrnek: 'Astronomi ve uzay gözlemi',
+      ozelEtkinlikler: ['Deney ve gözlem yapmak', 'Bilimsel içerikler izlemek', 'Popüler bilim okumak', 'Veri ve harita incelemek', 'Problem çözmek'],
+      altlar: [
+        ['fizik', 'Fizik',
+          ['Deney yapmak', 'Fizik problemleri çözmek', 'Fizik simülasyonları yapmak', 'Bilimsel içerikler izlemek', 'Doğa olaylarını araştırmak', 'Cihazların çalışma mantığını öğrenmek'],
+          'Fiziğin özellikle hangi konuları ilgini çekiyor?', 'Örn. Kuantum fiziği, optik, mekanik'],
+        ['kimya', 'Kimya',
+          ['Kimya deneyleri yapmak', 'Ürün içeriklerini incelemek', 'Tepkimeleri araştırmak', 'Deney videoları izlemek', 'Elementleri ve malzemeleri incelemek'],
+          'Kimyada özellikle ilgini çeken konular veya uygulamalar neler?', 'Örn. Organik kimya, gıda kimyası, malzeme bilimi'],
+        ['biyoloji', 'Biyoloji',
+          ['Mikroskopla inceleme yapmak', 'Canlıları gözlemlemek', 'Genetik ve evrim araştırmak', 'Biyoloji belgeselleri izlemek', 'Deneyler yapmak'],
+          'Biyolojide en çok merak ettiğin alt dal veya konu hangisi?', 'Örn. Genetik, sinirbilim, deniz biyolojisi, mikrobiyoloji'],
+        ['matematik', 'Matematik',
+          ['Matematik problemleri çözmek', 'Mantık bulmacaları çözmek', 'İstatistik ve olasılık incelemek', 'Matematik videoları izlemek', 'Geometrik örüntüleri araştırmak'],
+          'Matematikte uğraşmaktan keyif aldığın konular hangileri?', 'Örn. Olasılık, oyun teorisi, asal sayılar, mantık bulmacaları'],
+        ['jeoloji', 'Jeoloji',
+          ['Kayaç ve mineral incelemek', 'Deprem verilerini takip etmek', 'Yer şekillerini araştırmak', 'Doğa gezilerine katılmak', 'Fosil ve müzeleri gezmek'],
+          'Yer bilimlerinde özellikle merak ettiğin doğa olayı veya konu nedir?', 'Örn. Depremler, volkanlar, mineraller ve fosiller'],
+        ['cografya', 'Coğrafya',
+          ['Harita ve uydu görüntüsü incelemek', 'Harita oyunları oynamak', 'Ülkeleri ve kültürleri araştırmak', 'İklim ve nüfus verilerini incelemek', 'Yeni coğrafyalar keşfetmek'],
+          'Coğrafyada en çok hangi konular veya bölgeler ilgini çekiyor?', 'Örn. Haritacılık, şehir coğrafyası, kutup bölgeleri'],
+        ['ekoloji', 'Ekoloji',
+          ['Ekosistemleri araştırmak', 'Çevre verilerini incelemek', 'Geri dönüşüm uygulamak', 'Doğa koruma etkinliklerine katılmak', 'Ekoloji belgeselleri izlemek'],
+          'Ekoloji ve çevre konusunda özellikle ilgilendiğin başlık nedir?', 'Örn. Biyoçeşitlilik, su kaynakları, yenilenebilir enerji'],
+        ['meteoroloji', 'Meteoroloji',
+          ['Hava durumu haritalarını incelemek', 'Bulut ve hava gözlemi yapmak', 'Hava tahminlerini karşılaştırmak', 'Atmosfer olaylarını araştırmak', 'Yağış verilerini takip etmek'],
+          'Hava ve atmosfer olaylarında özellikle ilgini çeken konular neler?', 'Örn. Fırtına oluşumu, radar haritaları, iklim verileri'],
+        ['bilimhaber', 'Bilim haberleri',
+          ['Bilim haberlerini okumak', 'Uzay görevlerini takip etmek', 'Popüler bilim videoları izlemek', 'Yeni keşifleri araştırmak', 'Bilimsel iddiaları doğrulamak'],
+          'Düzenli takip ettiğin bilim yayınları veya ilgini çeken yeni keşifler neler?', 'Örn. James Webb Teleskobu, Evrim Ağacı, Bilim ve Teknik'],
+      ]},
+  ].map(k => ({
+    ...k,
+    altlar: k.altlar.map(([id, ad, etkinlikler, soru, yer]) => ({
+      id: k.id + '.' + id, ad, etkinlikler, soru, yer,
+    })),
+  }));
+
   /* ---------- Kategori düzeyi senaryolar ----------
      Öğrencinin kendi eklediği alt alanlar için hazır senaryo yoktur; o durumda kategorinin bu genel senaryosu kullanılır.
      Alt alan düzeyindeki senaryolar senaryolar.js dosyasındadır. */
@@ -1769,6 +2390,81 @@ window.DATA = (() => {
       etik: 'Stres puanı hassas bir veridir; sonuçlar yalnızca grup ortalaması olarak raporlanır.',
       veri: { etiket: ['1 saatten az', '1–3 saat', '3+ saat'], deger: [24, 19, 15], olcu: 'Ortalama stres puanı' },
       bulgu: 'Haftada 3 saatten fazla yeşil alanda vakit geçiren grubun stres ortalaması 15, 1 saatten az geçiren grubun 24’tür.',
+    },
+    moda: {
+      tema: 'Kumaş içeriği ve kullanım süresi',
+      gozlem: 'Dolabındaki bazı tişörtler birkaç yıkamada formunu kaybederken, etiketine bakarak aldığın pamuklu parçaları yıllarca giyebiliyorsun.',
+      gorus: 'Pahalı kıyafet her zaman daha dayanıklıdır.',
+      zayif: 'Hangi kıyafetler daha kalitelidir?',
+      soru: 'Kumaştaki doğal lif oranı, günlük giyilen tişörtlerin formunu koruduğu yıkama sayısıyla ilişkili mi?',
+      bagimsiz: 'Doğal lif oranı', bagimli: 'Formunu koruduğu yıkama sayısı', kontrol: ['Yıkama sıcaklığı', 'Kumaş gramajı'],
+      evren: 'Tekstil laboratuvarında incelenen 180 farklı tişört modeli', birim: 'ürün', tabakalar: ['Giyim', 'Sokak modası', 'Spor giyim'],
+      arac: 'Standart yıkama döngüsü testi ve boyut değişim ölçümü',
+      nitel: 'Genç tüketiciler kıyafet satın alırken etiket ve içerik bilgilerini nasıl değerlendiriyor?',
+      karma: 'Önce 180 ürünün yıkama dayanımı ölçülür, ardından alışveriş alışkanlığı farklı 8 öğrenciyle görüşülür.',
+      etik: 'Marka karşılaştırmalarında ticari yanlılığı önlemek için ürünler kodlanarak kör test uygulanır.',
+      veri: { etiket: ['%50 altı doğal', '%50–80 doğal', '%80+ doğal'], deger: [18, 29, 41], olcu: 'Ortalama yıkama dayanımı (yıkama)' },
+      bulgu: 'Doğal lif oranı %80 ve üzeri olan ürünlerin ortalama dayanımı 41 yıkama, %50 altı olanların 18 yıkamadır.',
+    },
+    sanat: {
+      tema: 'Eskiz alışkanlığı ve yaratıcı çözüm üretme',
+      gozlem: 'Düzenli çizim veya okuma günlüğü tutan arkadaşların proje derslerinde çok daha hızlı alternatif fikir çıkarabildiğini görüyorsun.',
+      gorus: 'Sanat yeteneği doğuştan gelir, çalışmakla değişmez.',
+      zayif: 'Sanatla uğraşmak yaratıcılığı artırır mı?',
+      soru: 'Haftalık serbest eskiz ve tasarım pratiği süresi, öğrencilerin ıraksak düşünme testi puanıyla ilişkili mi?',
+      bagimsiz: 'Haftalık eskiz ve pratik süresi', bagimli: 'Iraksak düşünme testi puanı', kontrol: ['Bölüm', 'Daha önce alınan sanat eğitimi'],
+      evren: 'Üniversitenin sanat, tasarım ve edebiyat topluluklarına üye 960 öğrenci', birim: 'öğrenci', tabakalar: ['Görsel sanatlar', 'Tasarım', 'Edebiyat'],
+      arac: 'Alternatif kullanım üretme testi ve haftalık üretim günlüğü',
+      nitel: 'Öğrenciler bir fikri eskizden ya da taslaktan nihai esere dönüştürürken tıkanıklıkları nasıl aşıyor?',
+      karma: 'Önce 150 öğrenciye yaratıcı düşünme testi uygulanır, ardından düzenli üretim yapan ve yapmayan 8 öğrenciyle görüşülür.',
+      etik: 'Öğrencilerin eskiz ve yazıları kişisel eserdir; yalnızca izin verilen sayfalar anonim olarak incelenir.',
+      veri: { etiket: ['1 saatten az', '1–3 saat', '3+ saat'], deger: [48, 61, 73], olcu: 'Ortalama yaratıcı akıcılık puanı' },
+      bulgu: 'Haftada 3 saatten fazla pratik yapan grubun ortalama puanı 73, 1 saatten az yapan grubun 48’dir.',
+    },
+    kariyer: {
+      tema: 'Aralıklı tekrar ve uzun süreli hatırlama',
+      gozlem: 'Sınavdan bir gece önce sabahlayarak çalıştığın konuları iki hafta sonra unuturken, aralıklı tekrar yaptığın konuları dönem sonunda bile hatırlıyorsun.',
+      gorus: 'Çok saat çalışan her zaman yüksek not alır.',
+      zayif: 'En iyi ders çalışma yöntemi hangisidir?',
+      soru: 'Çalışma süresini günlere yayma biçimi, üniversite öğrencilerinin dört hafta sonraki hatırlama testi puanını etkiler mi?',
+      bagimsiz: 'Çalışma takvimi (toplu / aralıklı)', bagimli: '4 hafta sonraki hatırlama puanı', kontrol: ['Toplam çalışma süresi', 'Ön bilgi düzeyi'],
+      evren: 'Kariyer ve mesleki gelişim dersini alan 1.200 lisans öğrencisi', birim: 'öğrenci', tabakalar: ['1. sınıf', '2–3. sınıf', '4. sınıf'],
+      arac: 'Gecikmeli hatırlama testi ve çalışma oturumu kayıtları',
+      nitel: 'Öğrenciler sınav dönemlerinde çalışma stratejilerini neye göre seçiyor?',
+      karma: 'Önce 180 öğrencinin çalışma kayıtları ve test puanları karşılaştırılır, ardından 8 öğrenciyle çalışma alışkanlıkları üzerine görüşülür.',
+      etik: 'Akademik başarı ve not verileri gizlidir; araştırma sonuçları ders notunu etkilemez ve kimliksiz işlenir.',
+      veri: { etiket: ['Tek günde toplu', '2 güne bölünmüş', '4 güne aralıklı'], deger: [46, 62, 78], olcu: 'Ortalama hatırlama puanı' },
+      bulgu: 'Aynı toplam süreyi 4 güne yayarak çalışanların 4 hafta sonraki hatırlama ortalaması 78, tek günde toplu çalışanların 46 puandır.',
+    },
+    sosyalmedya: {
+      tema: 'Video açılış süresi ve izleyiciyi elde tutma',
+      gozlem: 'Kısa videolarda ilk birkaç saniyede doğrudan konuya giren içerikleri sonuna kadar izlerken, uzun giriş yapan videoları hemen kaydırıp geçiyorsun.',
+      gorus: 'Sosyal medyada yalnızca eğlenceli videolar izlenir.',
+      zayif: 'Videolar nasıl daha çok izlenir?',
+      soru: 'Kısa eğitim videolarında ana sorunun ilk 3 saniyede verilmesi, videonun sonuna kadar izlenme oranıyla ilişkili mi?',
+      bagimsiz: 'Ana sorunun verildiği saniye aralığı', bagimli: 'Videoyu tamamlama oranı (%)', kontrol: ['Toplam video süresi', 'Konu başlığı'],
+      evren: 'Eğitim içerikleri üreten öğrenci hesaplarının paylaştığı 600 kısa video', birim: 'video', tabakalar: ['Kısa video (Reels/TikTok)', 'YouTube Shorts', 'Podcast kesiti'],
+      arac: 'Platform analitik panellerindeki izleyici tutma (retention) grafikleri',
+      nitel: 'İzleyiciler bir videoyu ilk saniyelerde geçip geçmemeye nasıl karar veriyor?',
+      karma: 'Önce 600 videonun tamamlanma oranları incelenir, ardından içerik tüketen ve üreten 8 öğrenciyle görüşülür.',
+      etik: 'Yorum yapan takipçilerin kullanıcı adları gizlenir; yalnızca toplu izlenme istatistikleri kullanılır.',
+      veri: { etiket: ['İlk 3 saniye', '4–8. saniye', '8. saniye sonrası'], deger: [64, 47, 31], olcu: 'Ortalama tamamlama oranı (%)' },
+      bulgu: 'Ana soruyu ilk 3 saniyede veren videoların ortalama tamamlanma oranı %64, 8. saniyeden sonra verenlerin %31’dir.',
+    },
+    bilim: {
+      tema: 'Gece ışık kirliliği ve gözlemlenen yıldız sayısı',
+      gozlem: 'Şehir merkezinde gece gökyüzüne baktığında yalnızca birkaç parlak yıldız görürken, kamp alanında yüzlercesini seçebiliyorsun.',
+      gorus: 'Yıldızları görmek için mutlaka teleskop gerekir.',
+      zayif: 'Şehirde neden yıldız görünmez?',
+      soru: 'Bulunulan bölgenin yapay ışık kirliliği düzeyi, çıplak gözle sayılabilen takımyıldız yıldızı sayısıyla ilişkili mi?',
+      bagimsiz: 'Işık kirliliği düzeyi (Bortle sınıfı)', bagimli: 'Çıplak gözle görülen yıldız sayısı', kontrol: ['Bulutluluk oranı', 'Ayın evresi'],
+      evren: 'Amatör astronomi kulübünün farklı bölgelerde yaptığı 240 gece gözlem kaydı', birim: 'gözlem', tabakalar: ['Şehir merkezi', 'Yarı kırsal', 'Karanlık gökyüzü alanı'],
+      arac: 'Bortle ışık kirliliği ölçeği ve standart gökyüzü karesi yıldız sayım formu',
+      nitel: 'Amatör gözlemciler şehir ışığından uzaklaşarak yaptıkları gözlem gecelerini nasıl deneyimliyor?',
+      karma: 'Önce 240 gözlem kaydındaki yıldız sayıları karşılaştırılır, ardından gözlem etkinliklerine katılan 8 öğrenciyle görüşülür.',
+      etik: 'Gece gözlemi yapılan özel arazilerin ve katılımcıların anlık konum verileri açık paylaşılmaz.',
+      veri: { etiket: ['Şehir merkezi', 'Yarı kırsal', 'Kırsal karanlık alan'], deger: [14, 48, 92], olcu: 'Referans alanda görülen ortalama yıldız' },
+      bulgu: 'Kırsal karanlık alanda referans bölgede ortalama 92 yıldız sayılırken, şehir merkezinde ortalama 14 yıldız sayılmıştır.',
     },
   };
 
@@ -1964,8 +2660,362 @@ window.DATA = (() => {
     'Öğrendiklerimi günlük hayatımla ilişkilendirebildim.',
   ];
 
+  /* ---------- Jüri Sunumu: Simüle Edilmiş Öğrenci Profilleri ve Kişiselleştirilmiş İçerik Örnekleri ---------- */
+  const juriSunum = {
+    profiller: [
+      {
+        id: 'o1',
+        no: 'Öğrenci 1',
+        etiket: 'Öğrenci 1 — Basketbol (İzleyici)',
+        kisaEtiket: 'Basketbol (İzleyici)',
+        kategori: 'Spor',
+        altKategori: 'Basketbol',
+        obj: 'top',
+        renk: '#0E8C7F',
+        puan: 5,
+        etkilesimler: ['Maç izlemek', 'Takım takip etmek', 'İstatistikleri incelemek'],
+        ozgulKisa: 'EuroLeague, Anadolu Efes',
+        aciklama: 'EuroLeague maçlarını takip ediyorum. Anadolu Efes taraftarıyım. Oyuncuların asist, sayı ve şut isabet oranlarını karşılaştırmayı seviyorum.',
+      },
+      {
+        id: 'o2',
+        no: 'Öğrenci 2',
+        etiket: 'Öğrenci 2 — Basketbol (Oyuncu)',
+        kisaEtiket: 'Basketbol (Oyuncu)',
+        kategori: 'Spor',
+        altKategori: 'Basketbol',
+        obj: 'top',
+        renk: '#0E8C7F',
+        puan: 5,
+        etkilesimler: ['Basketbol oynamak', 'Antrenman yapmak'],
+        ozgulKisa: 'Üniversite takımı, üç sayılık atışlar',
+        aciklama: 'Üniversitenin basketbol takımında oynuyorum. Özellikle üç sayılık atışlarımı geliştirmek için düzenli antrenman yapıyorum.',
+      },
+      {
+        id: 'o3',
+        no: 'Öğrenci 3',
+        etiket: 'Öğrenci 3 — Strateji oyunları',
+        kisaEtiket: 'Strateji oyunları',
+        kategori: 'Dijital oyunlar',
+        altKategori: 'Strateji oyunları',
+        obj: 'gamepad',
+        renk: '#4957D8',
+        puan: 5,
+        etkilesimler: ['Strateji geliştirmek', 'Kaynakları yönetmek', 'Rakiplerle yarışmak'],
+        ozgulKisa: 'Age of Empires IV, kaynak stratejileri',
+        aciklama: 'Age of Empires IV oynuyorum. Farklı kaynak toplama stratejileri denemeyi ve hangisinin daha avantajlı olduğunu keşfetmeyi seviyorum.',
+      },
+      {
+        id: 'o4',
+        no: 'Öğrenci 4',
+        etiket: 'Öğrenci 4 — Enstrüman çalmak',
+        kisaEtiket: 'Enstrüman çalmak',
+        kategori: 'Müzik',
+        altKategori: 'Enstrüman çalmak',
+        obj: 'kulaklik',
+        renk: '#F4B63F',
+        puan: 4,
+        etkilesimler: ['Yeni parçalar öğrenmek', 'Düzenli pratik yapmak'],
+        ozgulKisa: 'Akustik gitar, çalışma yöntemleri',
+        aciklama: 'Yaklaşık iki yıldır akustik gitar çalıyorum. Yeni parçalar öğreniyorum ve farklı çalışma yöntemleri deniyorum.',
+      },
+      {
+        id: 'o5',
+        no: 'Öğrenci 5',
+        etiket: 'Öğrenci 5 — Kahve ve çay',
+        kisaEtiket: 'Kahve ve çay',
+        kategori: 'Yemek ve içecek',
+        altKategori: 'Kahve ve çay',
+        obj: 'donut',
+        renk: '#EE6C2B',
+        puan: 5,
+        etkilesimler: ['Kahve hazırlamak', 'Farklı kahveler tatmak', 'Yeni demleme yöntemleri denemek'],
+        ozgulKisa: 'V60 filtre kahve, su sıcaklığı ve süre',
+        aciklama: 'Evde V60 ile filtre kahve hazırlıyorum. Farklı kahve çekirdeklerini, su sıcaklıklarını ve demleme sürelerini deniyorum.',
+      },
+      {
+        id: 'o6',
+        no: 'Öğrenci 6',
+        etiket: 'Öğrenci 6 — Resim ve çizim',
+        kisaEtiket: 'Resim ve çizim',
+        kategori: 'Sanat, tasarım ve edebiyat',
+        altKategori: 'Resim ve çizim',
+        obj: 'palet',
+        renk: '#17A594',
+        puan: 4,
+        etkilesimler: ['Dijital çizim yapmak', 'Portre çizmek'],
+        ozgulKisa: 'Grafik tablet, dijital karakter ve portre',
+        aciklama: 'Grafik tablet kullanarak dijital karakterler ve portreler çiziyorum. Farklı çizim teknikleri denemeyi seviyorum.',
+      },
+    ],
+
+    /* 2. Modül: Bağımlı ve bağımsız değişkenler */
+    degiskenler: {
+      baslik: 'Modül: Bağımlı ve bağımsız değişkenler',
+      kazanim: 'Öğrenci, verilen bir araştırma senaryosunda bağımlı ve bağımsız değişkenleri belirler ve bunların araştırmadaki rollerini açıklar.',
+      standart: {
+        ornekMetin: 'Bir araştırmacı, farklı çalışma sürelerinin üniversite öğrencilerinin test başarıları üzerindeki etkisini incelemek istemektedir. Öğrenciler rastgele üç gruba ayrılmıştır. Gruplara sırasıyla 15, 30 ve 45 dakika çalışma süresi verilmiş, ardından tüm öğrencilere aynı başarı testi uygulanmıştır.',
+        bagimsiz: 'Çalışma süresi (15, 30 ve 45 dakika).',
+        bagimli: 'Başarı testinden alınan puan.',
+        gerekce: 'Araştırmacı çalışma süresini değiştirmekte ve bu değişimin test başarısı üzerindeki etkisini ölçmektedir.',
+        gorevMetin: 'Bir araştırmacı, farklı mola sürelerinin öğrencilerin problem çözme başarısına etkisini incelemektedir. Öğrenciler rastgele üç gruba ayrılmış ve gruplara 5, 10 ve 15 dakika mola verilmiştir. Ardından öğrencilerin doğru çözdükleri problem sayıları belirlenmiştir.',
+        gorevBagimsiz: 'Mola süresi (5, 10 ve 15 dakika).',
+        gorevBagimli: 'Doğru çözülen problem sayısı.',
+        gorevGerekce: 'Araştırmacı mola süresini gruplar arasında değiştirmekte ve bunun doğru çözülen problem sayısına etkisini ölçmektedir.',
+      },
+      deney: {
+        o1: {
+          ornekMetin: 'Bir spor analisti, EuroLeague maçlarında uygulanan farklı hücum stratejilerinin basketbol takımlarının sayı üretimi üzerindeki etkisini incelemek istemektedir. Takımların hücum düzenlerini karşılaştırmak için aynı oyuncularla, eşit süreli ve kontrollü deneme maçları düzenlenmiştir. Üç farklı hücum stratejisi uygulanmış ve her stratejide atılan toplam sayı kaydedilmiştir.',
+          bagimsiz: 'Uygulanan hücum stratejisi.',
+          bagimli: 'Atılan toplam sayı.',
+          gerekce: 'Araştırmacı hücum stratejisini değiştirmekte ve bu değişimin takımın sayı üretimi üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir basketbol analisti, üç farklı paslaşma düzeninin takımın asist sayısı üzerindeki etkisini incelemektedir. Kontrollü deneme maçlarında her paslaşma düzeni eşit süreyle uygulanmış ve yapılan başarılı asistlerin sayısı kaydedilmiştir.',
+          gorevBagimsiz: 'Uygulanan paslaşma düzeni.',
+          gorevBagimli: 'Yapılan başarılı asist sayısı.',
+          gorevGerekce: 'Analist paslaşma düzenini değiştirmekte ve bu değişimin başarılı asist sayısı üzerindeki etkisini ölçmektedir.',
+        },
+        o2: {
+          ornekMetin: 'Bir basketbol antrenörü, farklı antrenman sürelerinin üniversite takımı oyuncularının üç sayılık atış başarısı üzerindeki etkisini incelemek istemektedir. Oyuncular rastgele üç gruba ayrılmıştır. Gruplara sırasıyla 15, 30 ve 45 dakika üç sayılık şut antrenmanı yaptırılmış, ardından her oyuncunun 20 denemedeki başarılı atış sayısı kaydedilmiştir.',
+          bagimsiz: 'Üç sayılık şut antrenmanı süresi (15, 30 ve 45 dakika).',
+          bagimli: '20 denemedeki başarılı üç sayılık atış sayısı.',
+          gerekce: 'Antrenör şut antrenmanı süresini değiştirmekte ve bu değişimin başarılı üç sayılık atış sayısı üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir antrenör, atış öncesi uygulanan üç farklı ısınma rutininin oyuncuların serbest atış isabeti üzerindeki etkisini incelemektedir. Oyuncular rastgele üç gruba ayrılmış ve her grup farklı bir ısınma rutini tamamladıktan sonra 15 serbest atış yapmıştır. İsabetli atış sayıları kaydedilmiştir.',
+          gorevBagimsiz: 'Atış öncesi uygulanan ısınma rutini.',
+          gorevBagimli: '15 denemedeki isabetli serbest atış sayısı.',
+          gorevGerekce: 'Antrenör ısınma rutinini gruplar arasında değiştirmekte ve bunun serbest atış isabetine etkisini ölçmektedir.',
+        },
+        o3: {
+          ornekMetin: 'Bir oyun araştırmacısı, Age of Empires IV oyununda uygulanan farklı kaynak toplama stratejilerinin oyuncuların ilk 15 dakikada topladığı toplam kaynak miktarı üzerindeki etkisini incelemek istemektedir. Eşit seviyedeki oyuncular rastgele üç gruba ayrılmış, her grup aynı haritada farklı bir kaynak toplama stratejisi uygulamış ve süre sonunda toplanan kaynak miktarları kaydedilmiştir.',
+          bagimsiz: 'Uygulanan kaynak toplama stratejisi.',
+          bagimli: 'İlk 15 dakikada toplanan toplam kaynak miktarı.',
+          gerekce: 'Araştırmacı kaynak toplama stratejisini değiştirmekte ve bu değişimin toplanan kaynak miktarı üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir araştırmacı, strateji oyununda üç farklı üs savunma düzeninin rakiplerin saldırısını durdurma süresi üzerindeki etkisini incelemektedir. Kontrollü karşılaşmalarda her savunma düzeni eşit koşullarda uygulanmış ve üssün ayakta kalma süresi kaydedilmiştir.',
+          gorevBagimsiz: 'Uygulanan üs savunma düzeni.',
+          gorevBagimli: 'Üssün saldırıya karşı ayakta kalma süresi.',
+          gorevGerekce: 'Araştırmacı savunma düzenini değiştirmekte ve bunun üssün ayakta kalma süresine etkisini ölçmektedir.',
+        },
+        o4: {
+          ornekMetin: 'Bir müzik eğitimi araştırmacısı, akustik gitar çalışmalarında uygulanan farklı pratik yöntemlerinin yeni bir parçayı hatasız çalma başarısı üzerindeki etkisini incelemek istemektedir. Gitar öğrencileri rastgele üç gruba ayrılmıştır. Gruplar aynı parçayı üç farklı pratik yöntemiyle eşit sürede çalışmış, ardından parçayı çalarken doğru bastıkları nota sayıları kaydedilmiştir.',
+          bagimsiz: 'Uygulanan gitar pratik yöntemi.',
+          bagimli: 'Parçayı çalarken doğru basılan nota sayısı.',
+          gerekce: 'Araştırmacı pratik yöntemini değiştirmekte ve bu değişimin doğru basılan nota sayısı üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir müzik eğitmeni, üç farklı günlük egzersiz süresinin (15, 30 ve 45 dakika) gitar öğrencilerinin akor geçiş hızı üzerindeki etkisini incelemektedir. Öğrenciler rastgele üç gruba ayrılmış ve bir hafta sonunda bir dakikada yaptıkları doğru akor geçişi sayısı ölçülmüştür.',
+          gorevBagimsiz: 'Günlük egzersiz süresi (15, 30 ve 45 dakika).',
+          gorevBagimli: 'Bir dakikada yapılan doğru akor geçişi sayısı.',
+          gorevGerekce: 'Eğitmen günlük egzersiz süresini değiştirmekte ve bunun akor geçiş hızına etkisini ölçmektedir.',
+        },
+        o5: {
+          ornekMetin: 'Bir gıda araştırmacısı, V60 ile filtre kahve hazırlarken kullanılan farklı su sıcaklıklarının kahvenin tadım beğeni puanı üzerindeki etkisini incelemek istemektedir. Aynı kahve çekirdeği ve demleme süresi kullanılarak 88°C, 92°C ve 96°C su sıcaklıklarında üç ayrı demleme yapılmış, ardından katılımcıların her kahveye verdiği beğeni puanları kaydedilmiştir.',
+          bagimsiz: 'Demlemede kullanılan su sıcaklığı (88°C, 92°C ve 96°C).',
+          bagimli: 'Kahvenin tadım beğeni puanı.',
+          gerekce: 'Araştırmacı su sıcaklığını değiştirmekte ve bu değişimin tadım beğeni puanı üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir araştırmacı, üç farklı demleme süresinin (2, 3 ve 4 dakika) filtre kahvenin aromatik yoğunluk puanı üzerindeki etkisini incelemektedir. Aynı çekirdek ve su sıcaklığı kullanılarak hazırlanan kahveler katılımcılara tattırılmış ve verdikleri aromatik yoğunluk puanları belirlenmiştir.',
+          gorevBagimsiz: 'Demleme süresi (2, 3 ve 4 dakika).',
+          gorevBagimli: 'Aromatik yoğunluk puanı.',
+          gorevGerekce: 'Araştırmacı demleme süresini değiştirmekte ve bunun aromatik yoğunluk puanına etkisini ölçmektedir.',
+        },
+        o6: {
+          ornekMetin: 'Bir tasarım eğitimi araştırmacısı, grafik tabletle dijital portre çizerken kullanılan farklı fırça ve katman tekniklerinin çizimi tamamlama süresi üzerindeki etkisini incelemek istemektedir. Öğrenciler rastgele üç gruba ayrılmıştır. Her grup aynı referans portreyi farklı bir dijital çizim tekniğiyle çizmiş ve çizimi tamamlama süreleri kaydedilmiştir.',
+          bagimsiz: 'Kullanılan dijital çizim tekniği.',
+          bagimli: 'Portre çizimini tamamlama süresi.',
+          gerekce: 'Araştırmacı dijital çizim tekniğini değiştirmekte ve bu değişimin tamamlama süresi üzerindeki etkisini ölçmektedir.',
+          gorevMetin: 'Bir araştırmacı, çizim öncesi yapılan üç farklı eskiz hazırlık süresinin (5, 10 ve 15 dakika) dijital karakter çizimindeki oran-orantı doğruluk puanına etkisini incelemektedir. Öğrenciler rastgele üç gruba ayrılmış ve çizim sonunda çalışmaları aynı rubrikle puanlanmıştır.',
+          gorevBagimsiz: 'Eskiz hazırlık süresi (5, 10 ve 15 dakika).',
+          gorevBagimli: 'Oran-orantı doğruluk puanı.',
+          gorevGerekce: 'Araştırmacı eskiz hazırlık süresini değiştirmekte ve bunun oran-orantı doğruluk puanına etkisini ölçmektedir.',
+        },
+      },
+    },
+
+    /* 3. Modül: Evren ve örneklem (Yan yana karşılaştırma — 6 öğrenci profili destekli) */
+    evrenOrneklem: {
+      baslik: 'Modül: Evren ve örneklem',
+      kazanim: 'Öğrenci, verilen bir araştırma senaryosunda araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirler.',
+      not: 'Senaryolardaki evren büyüklükleri, örneklem sayıları ve araştırmalar kurgusal olarak oluşturulmuştur.',
+      standart: {
+        grup: 'Kontrol grubu',
+        altBaslik: 'Standart içerik',
+        ornekMetin: 'Bir araştırmacı, bir üniversitedeki 300 öğrencinin ders çalışma alışkanlıklarını incelemek istemektedir. Rastgele seçtiği 60 öğrenciye anket uygulamıştır.',
+        evren: 'Üniversitedeki 300 öğrenci.',
+        orneklem: 'Anket uygulanan 60 öğrenci.',
+        buyukluk: '60.',
+        gorevMetin: 'Bir araştırmacı, bir fakültedeki 200 öğrencinin kütüphane kullanım alışkanlıklarını incelemek istemektedir. Rastgele seçilen 40 öğrenciye anket uygulamıştır.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+        gorevEvren: 'Fakültedeki 200 öğrenci.',
+        gorevOrneklem: 'Rastgele seçilen 40 öğrenci.',
+        gorevBuyukluk: '40.',
+      },
+      deney: {
+        o1: {
+          seciciEtiket: 'Basketbol — Maç takip eden öğrenci (Öğrenci 1)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir araştırmacı, EuroLeague\'de bir sezon boyunca oynanan 300 maçtaki asist sayılarını incelemek istemektedir. Bu maçlardan rastgele seçtiği 60 maçın istatistiklerini analiz etmiştir.',
+          evren: 'İncelenmek istenen 300 EuroLeague maçı.',
+          orneklem: 'Rastgele seçilen 60 maç.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, bir basketbol turnuvasındaki 200 oyuncunun şut isabet oranlarını incelemek istemektedir. Rastgele seçilen 40 oyuncunun performans verilerini analiz etmiştir.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Turnuvadaki 200 basketbol oyuncusu.',
+          gorevOrneklem: 'Performans verileri analiz edilen 40 oyuncu.',
+          gorevBuyukluk: '40.',
+        },
+        o2: {
+          seciciEtiket: 'Basketbol — Antrenman yapan oyuncu (Öğrenci 2)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir antrenör, üniversite basketbol ligindeki 300 oyuncunun haftalık üç sayılık şut antrenmanı sürelerini incelemek istemektedir. Rastgele seçtiği 60 oyuncunun antrenman kayıtlarını incelemiştir.',
+          evren: 'Üniversite basketbol ligindeki 300 oyuncu.',
+          orneklem: 'Antrenman kayıtları incelenen 60 oyuncu.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, spor fakültesindeki 200 basketbol oyuncusunun şut isabet gelişimini incelemek istemektedir. Rastgele seçilen 40 oyuncuya şut testi uygulamıştır.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Spor fakültesindeki 200 basketbol oyuncusu.',
+          gorevOrneklem: 'Şut testi uygulanan 40 oyuncu.',
+          gorevBuyukluk: '40.',
+        },
+        o3: {
+          seciciEtiket: 'Strateji oyunları — Age of Empires IV (Öğrenci 3)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir oyun araştırmacısı, bir Age of Empires IV turnuvasında oynanan 300 karşılaşmadaki kaynak toplama sürelerini incelemek istemektedir. Rastgele seçtiği 60 karşılaşmanın oyun kaydını analiz etmiştir.',
+          evren: 'Turnuvada oynanan 300 Age of Empires IV karşılaşması.',
+          orneklem: 'Oyun kaydı analiz edilen 60 karşılaşma.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, strateji topluluğundaki 200 oyuncunun tercih ettiği başlangıç stratejilerini incelemek istemektedir. Rastgele seçilen 40 oyuncunun maç verilerini incelemiştir.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Strateji topluluğundaki 200 oyuncu.',
+          gorevOrneklem: 'Maç verileri incelenen 40 oyuncu.',
+          gorevBuyukluk: '40.',
+        },
+        o4: {
+          seciciEtiket: 'Müzik — Akustik gitar çalan öğrenci (Öğrenci 4)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir müzik araştırmacısı, bir konservatuvar kursundaki 300 gitar öğrencisinin günlük pratik alışkanlıklarını incelemek istemektedir. Rastgele seçtiği 60 öğrenciye çalışma günlüğü doldurtmuştur.',
+          evren: 'Kurstaki 300 gitar öğrencisi.',
+          orneklem: 'Çalışma günlüğü dolduran 60 öğrenci.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, üniversite müzik kulübündeki 200 öğrencinin yeni parça öğrenme sürelerini incelemek istemektedir. Rastgele seçilen 40 öğrencinin pratik kayıtlarını incelemiştir.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Üniversite müzik kulübündeki 200 öğrenci.',
+          gorevOrneklem: 'Pratik kayıtları incelenen 40 öğrenci.',
+          gorevBuyukluk: '40.',
+        },
+        o5: {
+          seciciEtiket: 'Kahve ve çay — Filtre kahve demleyen öğrenci (Öğrenci 5)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir araştırmacı, bir şehirdeki 300 nitelikli kahve tüketicisinin evde V60 demleme alışkanlıklarını incelemek istemektedir. Rastgele seçtiği 60 tüketiciye anket uygulamıştır.',
+          evren: 'Şehirdeki 300 nitelikli kahve tüketicisi.',
+          orneklem: 'Anket uygulanan 60 tüketici.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, bir tadım etkinliğine katılan 200 kişinin farklı su sıcaklıklarında demlenen kahvelere yönelik tercihlerini incelemek istemektedir. Rastgele seçilen 40 katılımcının tadım puanlarını kaydetmiştir.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Tadım etkinliğine katılan 200 kişi.',
+          gorevOrneklem: 'Tadım puanları kaydedilen 40 katılımcı.',
+          gorevBuyukluk: '40.',
+        },
+        o6: {
+          seciciEtiket: 'Resim ve çizim — Dijital portre çizen öğrenci (Öğrenci 6)',
+          grup: 'Deney grubu',
+          altBaslik: 'Kişiselleştirilmiş içerik',
+          ornekMetin: 'Bir araştırmacı, güzel sanatlar fakültesindeki 300 öğrencinin grafik tabletle dijital çizim yapma sürelerini incelemek istemektedir. Rastgele seçtiği 60 öğrencinin portfolyo çalışma kayıtlarını incelemiştir.',
+          evren: 'Fakültedeki 300 öğrenci.',
+          orneklem: 'Çalışma kayıtları incelenen 60 öğrenci.',
+          buyukluk: '60.',
+          gorevMetin: 'Bir araştırmacı, bir dijital sanat topluluğundaki 200 çizerin portre çiziminde kullandığı katman tekniklerini incelemek istemektedir. Rastgele seçilen 40 çizerin proje dosyalarını analiz etmiştir.\nBu araştırmanın evrenini, örneklemini ve örneklem büyüklüğünü belirleyiniz.',
+          gorevEvren: 'Dijital sanat topluluğundaki 200 çizer.',
+          gorevOrneklem: 'Proje dosyaları analiz edilen 40 çizer.',
+          gorevBuyukluk: '40.',
+        },
+      },
+    },
+
+    /* 4. Modül: Araştırma desenleri */
+    desenler: {
+      baslik: 'Modül: Araştırma desenleri',
+      kazanim: 'Öğrenci, araştırmacının değişkenleri manipüle edip etmediğini dikkate alarak deneysel ve ilişkisel araştırma desenlerini ayırt eder.',
+      kartlar: [
+        {
+          id: 'kontrol',
+          ust: 'Standart içerik',
+          grup: 'Kontrol grubu',
+          renk: '#5C6C68',
+          ornekMetin: 'Bir araştırmacı, öğrencilerin günlük ders çalışma süreleri ile sınav puanları arasındaki ilişkiyi incelemektedir. Öğrencilerin mevcut çalışma sürelerini ve sınav puanlarını kaydetmiş, herhangi bir müdahalede bulunmamıştır.',
+          ornekDesen: 'İlişkisel araştırma.',
+          ornekGerekce: 'Araştırmacı mevcut değişkenler arasındaki ilişkiyi incelemekte, değişkenlere müdahale etmemektedir.',
+          gorevMetin: 'Bir araştırmacı, öğrencileri rastgele üç gruba ayırmış ve her gruba farklı bir çalışma yöntemi uygulamıştır. Uygulama sonunda öğrencilerin sınav puanlarını karşılaştırmıştır.\nBu araştırmanın deseni nedir? Araştırmacının değişkenlere müdahale edip etmediğini dikkate alarak gerekçelendiriniz.',
+          beklenenDesen: 'Deneysel araştırma.',
+          beklenenGerekce: 'Araştırmacı öğrencileri gruplara rastgele atamış ve bağımsız değişken olan çalışma yöntemine doğrudan müdahale etmiştir (manipüle etmiştir).',
+        },
+        {
+          id: 'basketbol',
+          ust: 'Basketbol',
+          grup: 'Deney grubu',
+          obj: 'top',
+          renk: '#0E8C7F',
+          ornekMetin: 'Bir spor analisti, Anadolu Efes oyuncularının maç başına asist sayıları ile takımın maçlarda attığı toplam sayı arasındaki ilişkiyi incelemektedir. Mevcut maç kayıtlarını kullanmış ve oyunculara herhangi bir müdahalede bulunmamıştır.',
+          ornekDesen: 'İlişkisel araştırma.',
+          ornekGerekce: 'Araştırmacı mevcut değişkenler arasındaki ilişkiyi incelemekte, değişkenlere müdahale etmemektedir.',
+          gorevMetin: 'Bir antrenör, oyuncuları rastgele üç gruba ayırmış ve her gruba farklı bir paslaşma antrenmanı uygulamıştır. Uygulama sonunda oyuncuların başarılı pas sayılarını karşılaştırmıştır.\nBu araştırmanın deseni nedir? Araştırmacının değişkenlere müdahale edip etmediğini dikkate alarak gerekçelendiriniz.',
+          beklenenDesen: 'Deneysel araştırma.',
+          beklenenGerekce: 'Antrenör oyuncuları rastgele gruplara ayırmış ve uygulanan paslaşma antrenmanını doğrudan değiştirerek (müdahale ederek) başarılı pas sayısına etkisini incelemiştir.',
+        },
+        {
+          id: 'oyun',
+          ust: 'Dijital oyunlar',
+          grup: 'Deney grubu',
+          obj: 'gamepad',
+          renk: '#4957D8',
+          ornekMetin: 'Bir araştırmacı, Age of Empires IV oyuncularının günlük oyun süreleri ile oyunlarda topladıkları kaynak miktarları arasındaki ilişkiyi incelemektedir. Mevcut oyun kayıtlarını kullanmış ve oyunculara herhangi bir müdahalede bulunmamıştır.',
+          ornekDesen: 'İlişkisel araştırma.',
+          ornekGerekce: 'Araştırmacı mevcut değişkenler arasındaki ilişkiyi incelemekte, değişkenlere müdahale etmemektedir.',
+          gorevMetin: 'Bir araştırmacı, oyuncuları rastgele üç gruba ayırmış ve her gruba farklı bir kaynak toplama stratejisi uygulamıştır. Oyun sonunda grupların topladığı kaynak miktarlarını karşılaştırmıştır.\nBu araştırmanın deseni nedir? Araştırmacının değişkenlere müdahale edip etmediğini dikkate alarak gerekçelendiriniz.',
+          beklenenDesen: 'Deneysel araştırma.',
+          beklenenGerekce: 'Araştırmacı oyuncuları rastgele üç gruba atamış ve kaynak toplama stratejisini manipüle ederek toplanan kaynak miktarı üzerindeki etkisini test etmiştir.',
+        },
+        {
+          id: 'kahve',
+          ust: 'Kahve ve çay',
+          grup: 'Deney grubu',
+          obj: 'donut',
+          renk: '#EE6C2B',
+          ornekMetin: 'Bir araştırmacı, kahve tüketicilerinin günlük kahve tüketim miktarları ile kahve hazırlamaya ayırdıkları süre arasındaki ilişkiyi incelemektedir. Katılımcılardan mevcut alışkanlıklarına ilişkin bilgi toplamış ve herhangi bir müdahalede bulunmamıştır.',
+          ornekDesen: 'İlişkisel araştırma.',
+          ornekGerekce: 'Araştırmacı mevcut değişkenler arasındaki ilişkiyi incelemekte, değişkenlere müdahale etmemektedir.',
+          gorevMetin: 'Bir araştırmacı, katılımcıları rastgele üç gruba ayırmış ve her gruba farklı sıcaklıkta demlenen kahvelerden tattırmıştır. Diğer demleme koşullarını sabit tutarak grupların beğeni puanlarını karşılaştırmıştır.\nBu araştırmanın deseni nedir? Araştırmacının değişkenlere müdahale edip etmediğini dikkate alarak gerekçelendiriniz.',
+          beklenenDesen: 'Deneysel araştırma.',
+          beklenenGerekce: 'Araştırmacı diğer koşulları sabit tutup demleme sıcaklığına müdahale etmiş ve rastgele ayrılan grupların beğeni puanlarını karşılaştırmıştır.',
+        },
+        {
+          id: 'muzik',
+          ust: 'Müzik',
+          grup: 'Deney grubu',
+          obj: 'kulaklik',
+          renk: '#F4B63F',
+          ornekMetin: 'Bir araştırmacı, gitar öğrencilerinin günlük pratik süreleri ile yeni bir parçayı öğrenme başarıları arasındaki ilişkiyi incelemektedir. Mevcut çalışma ve performans verilerini toplamış, herhangi bir müdahalede bulunmamıştır.',
+          ornekDesen: 'İlişkisel araştırma.',
+          ornekGerekce: 'Araştırmacı mevcut değişkenler arasındaki ilişkiyi incelemekte, değişkenlere müdahale etmemektedir.',
+          gorevMetin: 'Bir müzik eğitmeni, gitar öğrencilerini rastgele üç gruba ayırmış ve her gruba farklı bir pratik yöntemi uygulamıştır. Uygulama sonunda öğrencilerin doğru çaldıkları nota sayılarını karşılaştırmıştır.\nBu araştırmanın deseni nedir? Araştırmacının değişkenlere müdahale edip etmediğini dikkate alarak gerekçelendiriniz.',
+          beklenenDesen: 'Deneysel araştırma.',
+          beklenenGerekce: 'Müzik eğitmeni öğrencileri rastgele gruplara ayırıp pratik yöntemine doğrudan müdahale etmiş ve doğru çalınan nota sayısına etkisini ölçmüştür.',
+        },
+      ],
+    },
+
+    /* 6. Deneysel eşdeğerlik tablosu */
+    esdegerlik: [
+      ['Öğrenme kazanımı', 'Ortak', 'Ortak', 'Sabit'],
+      ['Konu anlatımı', 'Ortak', 'Ortak', 'Sabit'],
+      ['Çözümlü örneğin bağlamı', 'Genel', 'İlgi temelli', 'Değişken'],
+      ['Mikro-görevin bağlamı', 'Genel', 'İlgi temelli', 'Değişken'],
+      ['Bilişsel talep', 'Eşdeğer olmalı', 'Eşdeğer olmalı', 'Kontrol edilmeli'],
+      ['Görev türü', 'Ortak', 'Ortak', 'Sabit'],
+      ['Soru sayısı', 'Ortak', 'Ortak', 'Sabit'],
+      ['Metin uzunluğu', 'Benzer', 'Benzer', 'Kontrol edilmeli'],
+      ['Geri bildirim yapısı', 'Ortak', 'Ortak', 'Sabit'],
+      ['Değerlendirme ölçütleri', 'Ortak', 'Ortak', 'Sabit'],
+      ['Alan bilgisi gereksinimi', 'Gerektirmemeli', 'Gerektirmemeli', 'Kontrol edilmeli'],
+    ],
+  };
+
   const baglam = { ...genel, ...(window.SENARYOLAR || {}) };
-  return { ilgiler, baglam, moduller, ornekler, gorevler, duygular, ilgiMaddeleri };
+  return { ilgiler, zenginIlgiler, juriSunum, baglam, moduller, ornekler, gorevler, duygular, ilgiMaddeleri };
 })();
 
 </script>
@@ -2127,9 +3177,59 @@ window.Models = (() => {
       [[0.5, C.sari], [0.9, C.turuncu], [1.25, C.pembe], [1.65, C.beyaz]].forEach(([h, c], i) =>
         add(g, rbox(0.36, h, 0.36, 0.07), mat(c), [-0.69 + i * 0.46, -0.72 + h / 2, 0]));
     },
+    canta(g) {
+      add(g, rbox(1.42, 1.32, 0.56, 0.18), mat(C.pembe), [0, -0.18, 0]);
+      add(g, rbox(1.44, 0.24, 0.58, 0.06), mat(C.beyaz), [0, -0.58, 0]);
+      add(g, tor(0.36, 0.065, Math.PI), mat(C.koyu), [0, 0.48, 0.14]);
+      add(g, tor(0.36, 0.065, Math.PI), mat(C.koyu), [0, 0.48, -0.14]);
+      for (const s of [-1, 1]) {
+        add(g, sph(0.09), mat(C.sari), [s * 0.36, 0.38, 0.29]);
+      }
+      add(g, cyl(0.16, 0.16, 0.08), mat(C.sari), [0.35, 0.08, 0.3], [R90, 0, 0]);
+    },
+    palet(g) {
+      add(g, cyl(1.05, 1.05, 0.18), mat(C.hamur), [0, -0.05, 0], [R90, 0, 0]);
+      add(g, sph(0.22), mat(C.koyu), [-0.46, -0.35, 0.06], [0, 0, 0], [1, 1, 0.5]);
+      [[-0.42, 0.38, C.pembe], [0.1, 0.56, C.sari], [0.54, 0.28, C.teal], [0.52, -0.26, C.indigo], [0.06, -0.54, C.turuncu]].forEach(([x, y, c]) =>
+        add(g, sph(0.18), mat(c), [x, y, 0.11], [0, 0, 0], [1, 1, 0.55]));
+      const f = new T.Group();
+      add(f, cyl(0.055, 0.075, 1.45), mat(C.koyu), [0, 0, 0]);
+      add(f, cyl(0.08, 0.075, 0.22), mat(C.gri), [0, 0.78, 0]);
+      add(f, new T.ConeGeometry(0.11, 0.34, 28), mat(C.turuncu), [0, 1.04, 0]);
+      f.position.set(0.18, 0.05, 0.24); f.rotation.set(0.15, 0.1, -0.65); g.add(f);
+    },
+    evrak(g) {
+      add(g, rbox(1.75, 1.22, 0.52, 0.16), mat(C.koyu), [0, -0.14, 0]);
+      add(g, rbox(1.77, 0.48, 0.55, 0.12), mat(C.indigo), [0, 0.16, 0]);
+      add(g, tor(0.32, 0.065, Math.PI), mat(C.koyu), [0, 0.48, 0]);
+      for (const s of [-1, 1]) {
+        add(g, rbox(0.18, 0.24, 0.08, 0.04), mat(C.sari), [s * 0.46, -0.05, 0.27]);
+      }
+      add(g, cyl(0.14, 0.14, 0.06), mat(C.teal), [0, 0.16, 0.28], [R90, 0, 0]);
+    },
+    mikrofon(g) {
+      add(g, cyl(0.46, 0.52, 0.14), mat(C.koyu), [0, -0.92, 0]);
+      add(g, cyl(0.065, 0.065, 0.48), mat(C.gri), [0, -0.62, 0]);
+      add(g, tor(0.46, 0.055, Math.PI), mat(C.koyu), [0, 0.02, 0], [0, 0, Math.PI]);
+      for (const s of [-1, 1]) add(g, sph(0.09), mat(C.turuncu), [s * 0.46, 0.02, 0]);
+      add(g, cyl(0.28, 0.28, 0.68), mat(C.teal), [0, 0.16, 0]);
+      add(g, sph(0.28), mat(C.gri), [0, 0.5, 0]);
+      add(g, sph(0.28), mat(C.teal), [0, -0.18, 0]);
+      add(g, tor(0.285, 0.03), mat(C.sari), [0, 0.32, 0], [R90, 0, 0]);
+    },
+    gezegen(g) {
+      add(g, sph(0.72), mat(C.indigo));
+      add(g, sph(0.73), mat(C.teal), [0.06, 0.12, 0.04], [0, 0, 0], [0.95, 0.65, 0.95]);
+      const h = new T.Group();
+      add(h, tor(1.18, 0.11), mat(C.sari), [0, 0, 0], [R90, 0, 0]);
+      add(h, tor(0.98, 0.045), mat(C.turuncu), [0, 0, 0], [R90, 0, 0]);
+      h.rotation.set(0.42, 0.15, -0.32); g.add(h);
+      add(g, sph(0.16), mat(C.pembe), [0.95, 0.62, -0.2]);
+    },
   };
   const poz = { donut: [-0.85, 0.35], kulaklik: [0.1, -0.45], gamepad: [0.2, -0.3], klaket: [0.1, -0.4], pano: [0.08, -0.45], buyutec: [0.1, -0.2],
-    top: [0.3, -0.5], grafik: [0.22, -0.55], bavul: [0.12, -0.5], piyonlar: [0.3, -0.25], bloklar: [0.22, -0.5] };
+    top: [0.3, -0.5], grafik: [0.22, -0.55], bavul: [0.12, -0.5], piyonlar: [0.3, -0.25], bloklar: [0.22, -0.5],
+    canta: [0.16, -0.42], palet: [0.14, -0.32], evrak: [0.18, -0.45], mikrofon: [0.14, -0.38], gezegen: [0.18, -0.35] };
 
   function olustur(ad) {
     const ic = new T.Group(); (kur[ad] || kur.top)(ic);
@@ -2507,6 +3607,7 @@ window.ResearchJourney = (() => {
     ampul: '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
     arti: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
     ekran: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    ayar: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   };
   const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
   const obj = (ad, donus = 0) => { const src = M.icon(ad, donus); return src ? `<img class="obj" src="${src}" alt="">` : '<span class="obj obj-yok"></span>'; };
@@ -2521,7 +3622,6 @@ window.ResearchJourney = (() => {
   const sureTop = m => Math.round(m.videolar.reduce((t, v) => t + sn(v.sure), 0) / 60) + ' dk';
   const sayi = v => v.toLocaleString('tr-TR');
   const kelime = s => (s.trim().match(/\S+/g) || []).length;
-  const ilgi = id => D.ilgiler.find(k => k.id === id);
   const modul = id => D.moduller.find(m => m.id === id);
   const noktalar = p => `<span class="nokta5" role="img" aria-label="5 üzerinden ${p}">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= p ? 'd' : ''}"></i>`).join('')}</span>`;
   function karistir(arr, tohum) {
@@ -2534,28 +3634,77 @@ window.ResearchJourney = (() => {
 
   /* ---------- Durum ---------- */
   const ANAHTAR = 'baglam-prototip-v1';
+  const YONTEM_ANAHTAR = 'baglam-ilgi-yontemi';
+  const ZENGIN_ANAHTAR = 'baglam-zengin-ilgi-v1';
   const bos = () => ({ kul: null, secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, ilerleme: {}, baglamSec: {}, cevap: {} });
+  const bosZengin = () => ({ secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, etkinlik: {}, ozelEtkinlik: {} });
   let S = (() => { try { const x = JSON.parse(localStorage.getItem(ANAHTAR)); if (x && typeof x === 'object') return { ...bos(), ...x }; } catch (e) { /* depo yok */ } return bos(); })();
-  const kaydet = () => { try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { /* depo yok */ } };
-  const UI = { aktif: null, ornekAcik: {}, gs: {}, drag: null, video: null, notlar: (() => { try { return localStorage.getItem('baglam-notlar') === '1'; } catch (e) { return false; } })() };
+  let SZ = (() => { try { const x = JSON.parse(localStorage.getItem(ZENGIN_ANAHTAR)); if (x && typeof x === 'object') return { ...bosZengin(), ...x }; } catch (e) { /* depo yok */ } return bosZengin(); })();
+  const kaydet = () => { try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); localStorage.setItem(ZENGIN_ANAHTAR, JSON.stringify(SZ)); } catch (e) { /* depo yok */ } };
+  const UI = {
+    aktif: null,
+    zenginAktif: null,
+    ornekAcik: {},
+    gs: {},
+    drag: null,
+    video: null,
+    juriProf: 0,
+    juriEvrenProf: 0,
+    juriCozum: {},
+    yontem: (() => { try { return localStorage.getItem(YONTEM_ANAHTAR) === 'zengin' ? 'zengin' : 'standart'; } catch (e) { return 'standart'; } })(),
+    notlar: (() => { try { return localStorage.getItem('baglam-notlar') === '1'; } catch (e) { return false; } })(),
+  };
+  const zenginMi = () => UI.yontem === 'zengin';
+  const ilgiListesi = () => zenginMi() ? D.zenginIlgiler : D.ilgiler;
+  const ilgi = id => ilgiListesi().find(k => k.id === id);
+  const P = () => zenginMi() ? SZ : S;
   const OZEL_SORU = 'Bu alanda en çok neyle ilgileniyorsun?';
+  const ZENGIN_OZEL_SORU = 'Bu alanda özellikle ilgilendiğin konular, kişiler, eserler veya örnekler hangileri?';
   const OZEL_ORNEK = { spor: 'Bisiklet', muzik: 'Caz', oyun: 'Bulmaca oyunları', sinema: 'Kore dizileri', teknoloji: 'Drone', seyahat: 'Bisiklet turları', yemek: 'Vegan mutfak', doga: 'Akvaryum' };
-  const altlarOf = k => [...k.altlar, ...(S.ozel[k.id] || []).map(o => ({ ...o, soru: OZEL_SORU, ozel: true }))];
-  const seciliMi = a => !!(a.ozel || S.altSec[a.id]);
+  const altlarOf = k => {
+    const p = P();
+    return [...k.altlar, ...(p.ozel[k.id] || []).map(o => ({
+      ...o,
+      soru: zenginMi() ? ZENGIN_OZEL_SORU : OZEL_SORU,
+      yer: zenginMi() ? `Örn. ${o.ad} ile ilgili sevdiğin örnekler, takımlar veya araçlar` : 'İstersen birkaç kelimeyle anlat',
+      etkinlikler: k.ozelEtkinlikler || [],
+      ozel: true,
+    }))];
+  };
+  const seciliMi = a => !!(a.ozel || P().altSec[a.id]);
   const seciliAltlar = k => altlarOf(k).filter(seciliMi);
 
   function ornekProfil() {
     S.kul = S.kul || { ad: 'Deniz Aydın' };
-    S.secilen = ['spor', 'muzik', 'oyun'];
-    S.altSec = { 'spor.futbol': true, 'spor.fitness': true, 'muzik.rock': true, 'muzik.enstruman': true, 'oyun.strateji': true, 'oyun.rpg': true };
-    S.ozel = { spor: [{ id: 'spor.ozel1', ad: 'Bisiklet' }] };
-    S.puan = { 'spor.futbol': 5, 'spor.fitness': 4, 'spor.ozel1': 3, 'muzik.rock': 5, 'muzik.enstruman': 3, 'oyun.strateji': 4, 'oyun.rpg': 4 };
-    S.detay = { 'spor.futbol': 'Trabzonspor, maçları kaçırmam', 'spor.fitness': 'Haftada üç gün sahilde koşuyorum', 'spor.ozel1': 'Hafta sonu sahil yolunda sürüyorum', 'muzik.rock': 'Duman ve Arctic Monkeys', 'muzik.enstruman': 'Gitar öğreniyorum', 'oyun.strateji': 'Age of Empires II', 'oyun.rpg': 'The Witcher 3' };
+    if (!S.secilen.length) {
+      S.secilen = ['spor', 'muzik', 'oyun'];
+      S.altSec = { 'spor.futbol': true, 'spor.fitness': true, 'muzik.rock': true, 'muzik.enstruman': true, 'oyun.strateji': true, 'oyun.rpg': true };
+      S.ozel = { spor: [{ id: 'spor.ozel1', ad: 'Bisiklet' }] };
+      S.puan = { 'spor.futbol': 5, 'spor.fitness': 4, 'spor.ozel1': 3, 'muzik.rock': 5, 'muzik.enstruman': 3, 'oyun.strateji': 4, 'oyun.rpg': 4 };
+      S.detay = { 'spor.futbol': 'Trabzonspor, maçları kaçırmam', 'spor.fitness': 'Haftada üç gün sahilde koşuyorum', 'spor.ozel1': 'Hafta sonu sahil yolunda sürüyorum', 'muzik.rock': 'Duman ve Arctic Monkeys', 'muzik.enstruman': 'Gitar öğreniyorum', 'oyun.strateji': 'Age of Empires II', 'oyun.rpg': 'The Witcher 3' };
+    }
+    if (!SZ.secilen.length) {
+      SZ.secilen = ['spor', 'muzik', 'oyun'];
+      SZ.altSec = { 'spor.voleybol': true, 'spor.bisiklet': true, 'muzik.alternatif': true, 'muzik.filmmuzikleri': true, 'oyun.aksiyon': true };
+      SZ.ozel = {};
+      SZ.puan = { 'spor.voleybol': 5, 'spor.bisiklet': 4, 'muzik.alternatif': 5, 'muzik.filmmuzikleri': 4, 'oyun.aksiyon': 5 };
+      SZ.etkinlik = {
+        'spor.voleybol': ['Voleybol oynamak', 'Maç izlemek'],
+        'spor.bisiklet': ['Bisiklet sürmek', 'Yeni rotalar keşfetmek'],
+        'muzik.alternatif': ['Alternatif müzik dinlemek', 'Konserlere gitmek'],
+        'muzik.filmmuzikleri': ['Film müzikleri dinlemek', 'Çalışırken müzik dinlemek'],
+        'oyun.aksiyon': ['Görevleri tamamlamak'],
+      };
+      SZ.ozelEtkinlik = {};
+      SZ.detay = { 'spor.voleybol': 'Filenin Sultanları, Sultanlar Ligi', 'spor.bisiklet': 'Sahil rotası, yol bisikleti', 'muzik.alternatif': 'Duman, Arctic Monkeys', 'muzik.filmmuzikleri': 'Hans Zimmer, Interstellar', 'oyun.aksiyon': 'GTA' };
+    }
     S.baglamSec = {};
-    S.ilerleme = {
-      m1: { v: [true, true, true], ornek: true, gorev: true, duygu: { 0: 4, 1: 3, 2: 4, 3: 2, 4: 1, 5: 1, 6: 2 }, ilgi: { 0: 4, 1: 3, 2: 5, 3: 4, 4: 4, 5: 3, 6: 4 }, duyguOk: true, ilgiOk: true },
-      m2: { v: [true, true, false], ornek: false, gorev: false, duygu: {}, ilgi: {}, duyguOk: false, ilgiOk: false },
-    };
+    if (!Object.keys(S.ilerleme || {}).length) {
+      S.ilerleme = {
+        m1: { v: [true, true, true], ornek: true, gorev: true, duygu: { 0: 4, 1: 3, 2: 4, 3: 2, 4: 1, 5: 1, 6: 2 }, ilgi: { 0: 4, 1: 3, 2: 5, 3: 4, 4: 4, 5: 3, 6: 4 }, duyguOk: true, ilgiOk: true },
+        m2: { v: [true, true, false], ornek: false, gorev: false, duygu: {}, ilgi: {}, duyguOk: false, ilgiOk: false },
+      };
+    }
   }
   const il = mid => (S.ilerleme[mid] = S.ilerleme[mid] || { v: [false, false, false], ornek: false, gorev: false, duygu: {}, ilgi: {}, duyguOk: false, ilgiOk: false });
   function adimlar(m) {
@@ -2579,8 +3728,8 @@ window.ResearchJourney = (() => {
      En az 3 puan alanlar, farklı ilgi alanlarına öncelik verilerek modüllere sırayla dağıtılır.
      Eşit puanda hazır senaryosu olan alt alan, öğrencinin eklediğinin önüne geçer. */
   function siraliAltlar() {
-    const l = [];
-    S.secilen.map(ilgi).filter(Boolean).forEach((k, ki) => seciliAltlar(k).forEach((a, ai) => l.push({ k, a, p: S.puan[a.id] || 0, sira: ki * 20 + ai })));
+    const l = [], p = P();
+    p.secilen.map(ilgi).filter(Boolean).forEach((k, ki) => seciliAltlar(k).forEach((a, ai) => l.push({ k, a, p: p.puan[a.id] || 0, sira: ki * 20 + ai })));
     return l.sort((x, y) => y.p - x.p || (x.a.ozel ? 1 : 0) - (y.a.ozel ? 1 : 0) || x.sira - y.sira);
   }
   function baglamHavuzu() {
@@ -2589,10 +3738,16 @@ window.ResearchJourney = (() => {
     taban.forEach(x => { if (gorulen.has(x.k.id)) sonra.push(x); else { gorulen.add(x.k.id); once.push(x); } });
     return [...once, ...sonra];
   }
-  const paket = (k, a, p, neden) => ({ ilgi: k, alt: a, p, neden, c: D.baglam[a.id] || D.baglam[k.id], duzey: D.baglam[a.id] ? 'alt' : 'kategori', detay: (S.detay[a.id] || '').trim() });
+  const altDetayMetni = id => {
+    const p = P(), d = (p.detay[id] || '').trim();
+    if (!zenginMi()) return d;
+    const etk = (p.etkinlik && p.etkinlik[id]) || [];
+    return [etk.join(', '), d].filter(Boolean).join(' · ');
+  };
+  const paket = (k, a, p, neden) => ({ ilgi: k, alt: a, p, neden, c: D.baglam[a.id] || D.baglam[k.id] || D.baglam.spor, duzey: D.baglam[a.id] ? 'alt' : 'kategori', detay: altDetayMetni(a.id) });
   function baglamAl(m) {
     const l = siraliAltlar();
-    if (!l.length) { const k = D.ilgiler[0]; return paket(k, k.altlar[0], 0, 'varsayilan'); }
+    if (!l.length) { const k = ilgiListesi()[0]; return paket(k, k.altlar[0], 0, 'varsayilan'); }
     const secim = S.baglamSec[m.id] && l.find(x => x.a.id === S.baglamSec[m.id]);
     if (secim) return paket(secim.k, secim.a, secim.p, 'secim');
     const h = baglamHavuzu(), x = h[D.moduller.indexOf(m) % Math.min(4, h.length)];
@@ -2661,15 +3816,16 @@ window.ResearchJourney = (() => {
   /* ---------- İlgi alanları ---------- */
   const kurUst = adim => `<header class="wrap kur-ust">${logo()}<ol class="adimlar">
       <li class="${adim === 1 ? 'on' : 'bitti'}">${adim > 1 ? ic('check') : ''}İlgi alanları</li><li class="${adim === 2 ? 'on' : ''}">Alt alanlar</li></ol></header>`;
-  const secimMetni = () => S.secilen.length ? `${S.secilen.length} alan seçildi` : 'En az bir alan seç';
+  const secimMetni = () => { const n = P().secilen.length; return n ? `${n} alan seçildi` : 'En az bir alan seç'; };
   function sIlgi() {
+    const p = P(), liste = ilgiListesi(), z = zenginMi();
     return `<div class="kur">${kurUst(1)}<main class="wrap kur-govde">
       <h1>Nelerle ilgileniyorsun?</h1><p>Sana yakın gelen alanları seç. Örnekler ve görevler bu alanlardan kurulacak.</p>
-      <div class="ilgi-izgara">${D.ilgiler.map(k => { const on = S.secilen.includes(k.id); return `<button class="ik${on ? ' on' : ''}" data-act="ilgiSec" data-id="${k.id}" aria-pressed="${on}"><span class="ik-tik">${ic('check')}</span>${obj(k.obj)}<b>${k.ad}</b><small>${k.alt}</small></button>`; }).join('')}</div>
+      <div class="ilgi-izgara${z ? ' ilgi-izgara-12' : ''}">${liste.map(k => { const on = p.secilen.includes(k.id); return `<button class="ik${on ? ' on' : ''}" data-act="ilgiSec" data-id="${k.id}" aria-pressed="${on}"><span class="ik-tik">${ic('check')}</span>${obj(k.obj)}<b>${k.ad}</b><small>${k.alt}</small></button>`; }).join('')}</div>
       </main>
-      <div class="kur-alt"><div class="wrap"><span id="ilgiSay">${secimMetni()}</span><div class="sag-grup"><a class="btn lg" id="ilgiDevam" href="#alt-ilgi"${S.secilen.length ? '' : ' hidden'}>Devam ${ic('sag')}</a><button class="btn lg" disabled${S.secilen.length ? ' hidden' : ''} id="ilgiPasif">Devam ${ic('sag')}</button></div></div></div></div>`;
+      <div class="kur-alt"><div class="wrap"><span id="ilgiSay">${secimMetni()}</span><div class="sag-grup"><a class="btn lg" id="ilgiDevam" href="#alt-ilgi"${p.secilen.length ? '' : ' hidden'}>Devam ${ic('sag')}</a><button class="btn lg" disabled${p.secilen.length ? ' hidden' : ''} id="ilgiPasif">Devam ${ic('sag')}</button></div></div></div></div>`;
   }
-  function altSatir(a) {
+  function altSatirStandart(a) {
     const on = seciliMi(a), p = S.puan[a.id] || 0, fid = 'd-' + a.id.replace(/\W/g, '-');
     const bas = a.ozel
       ? `<div class="as-bas as-ozel"><span class="as-kutu">${ic('check')}</span><b class="as-ad">${esc(a.ad)}</b><button class="as-sil" data-act="ozelSil" data-id="${a.id}" aria-label="${esc(a.ad)} alanını kaldır" title="Kaldır">${ic('x')}</button></div>`
@@ -2682,17 +3838,51 @@ window.ResearchJourney = (() => {
         <div class="as-detay"><label for="${fid}">${esc(a.soru)}</label><input class="girdi" id="${fid}" data-detay="${a.id}" value="${esc(S.detay[a.id] || '')}" placeholder="İstersen birkaç kelimeyle anlat" autocomplete="off"></div>
       </div>` : ''}</div>`;
   }
+  function altSatirZengin(a) {
+    const on = seciliMi(a), p = SZ.puan[a.id] || 0, fid = 'dz-' + a.id.replace(/\W/g, '-');
+    const seciliEtkinlik = (SZ.etkinlik && SZ.etkinlik[a.id]) || [];
+    const ozelEtkinlikler = (SZ.ozelEtkinlik && SZ.ozelEtkinlik[a.id]) || [];
+    const tumEtkinlikler = [...(a.etkinlikler || []), ...ozelEtkinlikler.filter(x => !(a.etkinlikler || []).includes(x))];
+    const bas = a.ozel
+      ? `<div class="as-bas as-ozel as-zengin-bas"><span class="as-kutu as-daire">${ic('check')}</span><b class="as-ad">${esc(a.ad)}</b><button class="as-sil" data-act="ozelSil" data-id="${a.id}" aria-label="${esc(a.ad)} alanını kaldır" title="Kaldır">${ic('x')}</button></div>`
+      : `<button class="as-sec as-zengin-sec" data-act="altSec" data-id="${a.id}" aria-pressed="${on}"><span class="as-kutu as-daire">${ic('check')}</span><b>${a.ad}</b></button>`;
+    return `<div class="as as-zengin${on ? ' on' : ''}">${bas}
+      ${on ? `<div class="as-ic as-zengin-ic">
+        <div class="as-puan"><span class="et" id="pl-${fid}">Ne kadar ilgini çekiyor?</span>
+          <div class="puan" role="radiogroup" aria-labelledby="pl-${fid}">${[1, 2, 3, 4, 5].map(n => `<button role="radio" aria-checked="${n === p}" class="${n <= p ? 'dolu' : ''}${n === p ? ' on' : ''}" data-act="puan" data-alt="${a.id}" data-n="${n}" aria-label="${n}">${n}</button>`).join('')}</div>
+          <div class="puan-uc"><span>Çok düşük</span><span>Çok yüksek</span></div></div>
+        <div class="as-etkinlik">
+          <span class="et as-soru-baslik">Bu alanda neler yapmaktan hoşlanıyorsun?</span>
+          <div class="etkinlik-etiketler" role="group" aria-label="Bu alanda neler yapmaktan hoşlanıyorsun?">
+            ${tumEtkinlikler.map(etk => {
+              const eOn = seciliEtkinlik.includes(etk);
+              return `<button type="button" class="etk-cip${eOn ? ' on' : ''}" data-act="etkinlikSec" data-alt="${a.id}" data-etk="${esc(etk)}" aria-pressed="${eOn}">${eOn ? ic('check') : ''}<span>${esc(etk)}</span></button>`;
+            }).join('')}
+          </div>
+          ${a.ozel ? `<div class="ozel-etk-ekle"><input class="girdi ozel-etk-girdi" id="oe-${fid}" data-ozel-etk-girdi="${a.id}" maxlength="48" placeholder="Kendi etkileşim biçimini yaz (isteğe bağlı)" autocomplete="off"><button type="button" class="btn ghost ozel-etk-btn" data-act="ozelEtkinlikEkle" data-alt="${a.id}">${ic('arti')}Ekle</button></div>` : ''}
+        </div>
+        <div class="as-detay as-zengin-detay">
+          <label class="as-soru-baslik" for="${fid}">${esc(a.soru)}</label>
+          <input class="girdi as-zengin-girdi" id="${fid}" data-detay="${a.id}" value="${esc(SZ.detay[a.id] || '')}" placeholder="${esc(a.yer || 'İstersen kendi ifadelerinle yaz')}" autocomplete="off">
+          <small class="istege-bagli">İsteğe bağlı</small>
+        </div>
+      </div>` : ''}</div>`;
+  }
+  const altSatir = a => zenginMi() ? altSatirZengin(a) : altSatirStandart(a);
   function ozelEkle(k) {
-    const n = (S.ozel[k.id] || []).length;
+    const p = P(), n = (p.ozel[k.id] || []).length;
     if (n >= 3) return '<p class="ozel-not">Bu alana ekleyebileceğin 3 alt alanın hepsini ekledin.</p>';
+    const ornek = k.ozelOrnek || OZEL_ORNEK[k.id] || '';
     return `<form class="ozel-ekle" id="ozelForm" data-k="${k.id}" novalidate><label for="ozelAd">Listede yok mu? Kendi alt alanını ekle</label>
-      <div><input class="girdi" id="ozelAd" maxlength="40" placeholder="Örneğin: ${OZEL_ORNEK[k.id] || ''}" autocomplete="off"><button class="btn ghost" type="submit">${ic('arti')}Ekle</button></div>
+      <div><input class="girdi" id="ozelAd" maxlength="40" placeholder="Örneğin: ${esc(ornek)}" autocomplete="off"><button class="btn ghost" type="submit">${ic('arti')}Ekle</button></div>
       <small id="ozelBilgi">${n ? `${n}/3 eklendi` : 'En fazla 3 alt alan ekleyebilirsin.'}</small></form>`;
   }
   function sAlt() {
-    const sec = S.secilen.map(ilgi).filter(Boolean);
-    const aktif = sec.find(k => k.id === UI.aktif) || sec[0]; UI.aktif = aktif.id;
-    const durum = k => { const s = seciliAltlar(k); return { n: s.length, eksik: s.filter(a => !S.puan[a.id]).length }; };
+    const p = P(), z = zenginMi();
+    const sec = p.secilen.map(ilgi).filter(Boolean);
+    const aktifKey = z ? 'zenginAktif' : 'aktif';
+    const aktif = sec.find(k => k.id === UI[aktifKey]) || sec[0]; UI[aktifKey] = aktif.id;
+    const durum = k => { const s = seciliAltlar(k); return { n: s.length, eksik: s.filter(a => !p.puan[a.id]).length }; };
     const tamamMi = k => { const d = durum(k); return d.n > 0 && d.eksik === 0; };
     const topN = sec.reduce((t, k) => t + durum(k).n, 0), bekleyen = sec.reduce((t, k) => t + durum(k).eksik, 0);
     const bos = sec.filter(k => !durum(k).n).length;
@@ -2700,7 +3890,7 @@ window.ResearchJourney = (() => {
     const ozet = !topN ? 'Her ilgi alanından en az bir alt alan seç'
       : [`${topN} alt alan seçildi`, bekleyen ? `${bekleyen} puan bekliyor` : '', bos ? `${bos} alanda seçim yok` : ''].filter(Boolean).join(' · ');
     return `<div class="kur">${kurUst(2)}<main class="wrap kur-govde"><div class="alt-duzen">
-      <aside class="alt-yan">${sec.map(k => { const d = durum(k); return `<button class="ay${k === aktif ? ' on' : ''}" data-act="altAktif" data-id="${k.id}">${obj(k.obj)}<span><b>${k.ad}</b><small>${d.n ? `${d.n} alt alan seçildi` : 'Henüz seçim yok'}</small></span>${tamamMi(k) ? ic('check') : ''}</button>`; }).join('')}
+      <aside class="alt-yan">${sec.map(k => { const d = durum(k); const yanAd = z && k.kisaAd ? k.kisaAd : k.ad; return `<button class="ay${k === aktif ? ' on' : ''}" data-act="altAktif" data-id="${k.id}">${obj(k.obj)}<span><b>${yanAd}</b><small>${d.n ? `${d.n} alt alan seçildi` : 'Henüz seçim yok'}</small></span>${tamamMi(k) ? ic('check') : ''}</button>`; }).join('')}
         <a class="geri alt-geri" href="#ilgi">${ic('sol')}Alanları değiştir</a></aside>
       <section class="alt-panel">
         <div class="alt-panel-bas">${obj(aktif.obj)}<div><h1>${aktif.ad}</h1><p>İlgilendiğin alt alanları seç. Seçtiğin her alanı 1 ile 5 arasında puanla.</p></div></div>
@@ -2715,7 +3905,7 @@ window.ResearchJourney = (() => {
   /* ---------- Uygulama kabuğu ---------- */
   const basHarf = ad => ad.split(/\s+/).filter(Boolean).slice(0, 2).map(s => s[0].toLocaleUpperCase('tr')).join('');
   const kabuk = (aktif, govde) => `<div class="uyg"><aside class="yan">${logo('#panel')}<nav>
-      ${[['panel', 'ev', 'Ana sayfa'], ['moduller', 'katman', 'Modüller'], ['profil', 'kalp', 'İlgi profilim']].map(([r, i, a]) => `<a href="#${r}" class="${aktif === r ? 'on' : ''}">${ic(i)}<span>${a}</span></a>`).join('')}</nav>
+      ${[['panel', 'ev', 'Ana sayfa'], ['moduller', 'katman', 'Modüller'], ['profil', 'kalp', 'İlgi profilim'], ['juri', 'ampul', 'Jüri sunumu'], ['yonetici', 'ayar', 'Yönetici paneli']].map(([r, i, a]) => `<a href="#${r}" class="${aktif === r ? 'on' : ''}">${ic(i)}<span>${a}</span></a>`).join('')}</nav>
       <div class="yan-kul"><span class="avatar">${esc(basHarf(S.kul.ad))}</span><b>${esc(S.kul.ad)}</b><button data-act="cikis" title="Çıkış yap" aria-label="Çıkış yap">${ic('cikis')}</button></div>
     </aside><main class="ana-alan">${govde}</main></div>`;
 
@@ -2742,7 +3932,7 @@ window.ResearchJourney = (() => {
       </div>
       <aside class="sag">
         <section class="kart"><div class="kart-bas"><h3>İlgi profilin</h3><a href="#profil">Tümü</a></div>
-          <ul class="ip">${tum.map(x => `<li>${obj(x.k.obj)}<span><b>${esc(x.a.ad)}</b><small>${esc(S.detay[x.a.id] || x.k.ad)}</small></span>${noktalar(x.p)}</li>`).join('')}</ul>
+          <ul class="ip">${tum.map(x => `<li>${obj(x.k.obj)}<span><b>${esc(x.a.ad)}</b><small>${esc(altDetayMetni(x.a.id) || x.k.ad)}</small></span>${noktalar(x.p)}</li>`).join('')}</ul>
           <p class="kart-not">Örnekler ve görevler bu alanlardan seçiliyor.</p></section>
         <section class="kart"><div class="kart-bas"><h3>İlerleme</h3></div>
           <div class="halka"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--cizgi2)" stroke-width="4"/><circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--ana)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${yuzde} 100"${yuzde ? '' : ' opacity="0"'} transform="rotate(-90 18 18)"/></svg>
@@ -2782,9 +3972,543 @@ window.ResearchJourney = (() => {
   }
 
   function sProfil() {
+    const p = P(), z = zenginMi();
     return kabuk('profil', `<div class="sayfa"><div class="sb"><div><h1>İlgi profilin</h1><p>Örnek uygulamalar ve mikro görevler bu puanlara göre seçiliyor.</p></div><a class="btn ghost" href="#ilgi">${ic('duzenle')}Düzenle</a></div>
-      <div class="pr-izgara">${S.secilen.map(ilgi).filter(Boolean).map(k => `<section class="kart"><div class="pr-bas">${obj(k.obj)}<h2>${k.ad}</h2></div>
-        <ul class="pr">${seciliAltlar(k).sort((a, b) => (S.puan[b.id] || 0) - (S.puan[a.id] || 0)).map(a => `<li><span><b>${esc(a.ad)}</b>${S.detay[a.id] ? `<small>${esc(S.detay[a.id])}</small>` : ''}</span>${noktalar(S.puan[a.id] || 0)}</li>`).join('')}</ul></section>`).join('')}</div></div>`);
+      <div class="pr-izgara">${p.secilen.map(ilgi).filter(Boolean).map(k => `<section class="kart"><div class="pr-bas">${obj(k.obj)}<h2>${k.ad}</h2></div>
+        <ul class="pr">${seciliAltlar(k).sort((a, b) => (p.puan[b.id] || 0) - (p.puan[a.id] || 0)).map(a => {
+          const etk = z ? ((p.etkinlik && p.etkinlik[a.id]) || []) : [];
+          const det = (p.detay[a.id] || '').trim();
+          return `<li><span><b>${esc(a.ad)}</b>${etk.length ? `<span class="pr-etk">${etk.map(e => `<i>${esc(e)}</i>`).join('')}</span>` : ''}${det ? `<small>${esc(det)}</small>` : ''}</span>${noktalar(p.puan[a.id] || 0)}</li>`;
+        }).join('')}</ul></section>`).join('')}</div></div>`);
+  }
+
+  function sYonetici() {
+    const z = zenginMi();
+    const sTop = S.secilen.map(id => D.ilgiler.find(k => k.id === id)).filter(Boolean);
+    const zTop = SZ.secilen.map(id => D.zenginIlgiler.find(k => k.id === id)).filter(Boolean);
+    const topAltZ = D.zenginIlgiler.reduce((t, k) => t + k.altlar.length, 0);
+    const topAltS = D.ilgiler.reduce((t, k) => t + k.altlar.length, 0);
+    return kabuk('yonetici', `<div class="sayfa">
+      <div class="sb">
+        <div>
+          <h1>Yönetici paneli</h1>
+          <p>Öğrenci ilgi toplama yöntemini seçin, yapılandırmayı inceleyin ve iki yöntem arasında geçiş yapın.</p>
+        </div>
+        <div class="yon-aksiyon">
+          <a class="btn ghost" href="#juri">${ic('ampul')}Jüri sunumu</a>
+          <a class="btn ghost" href="#ilgi">1. Ekranı önizle</a>
+          <a class="btn" href="#alt-ilgi">2. Ekranı önizle ${ic('sag')}</a>
+        </div>
+      </div>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Aktif ilgi toplama yöntemi</h2>
+            <p>Buradan yapılan seçim kayıt sonrası, profil düzenleme ekranlarında ve prototip gezgininde anında geçerli olur. Mevcut yöntem ve verileri korunur.</p>
+          </div>
+          <span class="yon-rozet">${z ? 'Zenginleştirilmiş yöntem aktif' : 'Standart (mevcut) yöntem aktif'}</span>
+        </div>
+        <div class="yon-kartlar" role="radiogroup" aria-label="İlgi toplama yöntemi">
+          <div class="yon-k${!z ? ' on' : ''}" role="radio" aria-checked="${!z}" tabindex="0" data-act="yontemSec" data-yontem="standart">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${!z ? ic('check') : ''}</span>
+              <div>
+                <b>Mevcut İlgi Toplama (Standart)</b>
+                <small>${D.ilgiler.length} ana kategori · ${topAltS} hazır alt alan</small>
+              </div>
+            </div>
+            <p>Mevcut 8 ana kategori, alt kategori seçimi, 1–5 arası ilgi puanlaması ve tek satırlık kısa detay sorusundan oluşan standart yapı.</p>
+            <ul class="yon-ozellik">
+              <li>${ic('check')}<span>8 ana ilgi kategorisi ve 3B kategori ikonları</span></li>
+              <li>${ic('check')}<span>Alt kategori başına 1–5 ilgi yoğunluğu ve açık uçlu soru</span></li>
+              <li>${ic('check')}<span>Kategori başına en fazla 3 özel alt alan ekleme</span></li>
+            </ul>
+            <div class="yon-k-alt">
+              <span>Kayıtlı seçim: <b>${sTop.length} ana alan</b></span>
+              <button type="button" class="btn${!z ? '' : ' ghost'}" data-act="yontemSec" data-yontem="standart">${!z ? 'Seçili yöntem' : 'Bu yönteme geç'}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${z ? ' on' : ''}" role="radio" aria-checked="${z}" tabindex="0" data-act="yontemSec" data-yontem="zengin">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${z ? ic('check') : ''}</span>
+              <div>
+                <b>Zenginleştirilmiş İlgi Toplama</b>
+                <small>${D.zenginIlgiler.length} ana kategori · ${topAltZ} hazır alt alan</small>
+              </div>
+            </div>
+            <p>12 genişletilmiş ana kategori; her alt kategori için zorunlu 1–5 ilgi yoğunluğu, çoklu seçilebilir etkileşim etiketleri (chips) ve alt alana özgü takip sorusu.</p>
+            <ul class="yon-ozellik">
+              <li>${ic('check')}<span>12 ana kategori, 3B ikonlar ve genişletilmiş ızgara düzeni</span></li>
+              <li>${ic('check')}<span>Alt kategoriye özgü etkileşim biçimi etiketleri (selectable chips)</span></li>
+              <li>${ic('check')}<span>Özgül takip sorusu, placeholder ve özel alt alanlarda özel etkileşim ekleme</span></li>
+            </ul>
+            <div class="yon-k-alt">
+              <span>Kayıtlı seçim: <b>${zTop.length} ana alan</b></span>
+              <button type="button" class="btn${z ? '' : ' ghost'}" data-act="yontemSec" data-yontem="zengin">${z ? 'Seçili yöntem' : 'Bu yönteme geç'}</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="kart">
+        <div class="kart-bas">
+          <h3>Zenginleştirilmiş yöntem kategori yapısı (12 ana kategori · ${topAltZ} alt kategori)</h3>
+        </div>
+        <div class="yon-kat-izgara">
+          ${D.zenginIlgiler.map((k, idx) => `<div class="yon-kat">
+            <div class="yon-kat-bas">${obj(k.obj)}<div><b>${idx + 1}. ${k.ad}</b><small>${k.arastirma ? k.arastirma + ' · ' : ''}${k.altlar.length} alt kategori</small></div></div>
+            <div class="yon-alt-etiketler">${k.altlar.map(a => `<span>${esc(a.ad)}</span>`).join('')}</div>
+          </div>`).join('')}
+        </div>
+      </section>
+    </div>`);
+  }
+
+  /* ---------- Jüri Sunumu: Kişiselleştirme Mekanizması ve Simüle Edilmiş Profiller ---------- */
+  const yildiz5 = p => `<span class="juri-yildiz" aria-label="5 üzerinden ${p}">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= p ? 'd' : ''}">★</i>`).join('')}<b>${p}/5</b></span>`;
+  function sJuri() {
+    const J = D.juriSunum;
+    const pIdx = Math.max(0, Math.min(J.profiller.length - 1, UI.juriProf || 0));
+    const evIdx = Math.max(0, Math.min(J.profiller.length - 1, UI.juriEvrenProf || 0));
+    const aktP = J.profiller[pIdx];
+    const evP = J.profiller[evIdx];
+    const dSt = J.degiskenler.standart;
+    const dDn = J.degiskenler.deney[aktP.id];
+    const ev = J.evrenOrneklem;
+    const evDn = ev.deney[evP.id];
+    const acikMiCozum = k => !!UI.juriCozum[k];
+
+    return kabuk('juri', `<div class="sayfa juri-sayfa">
+      <div class="sb">
+        <div>
+          <h1>Kişiselleştirme mekanizması · Jüri sunumu</h1>
+          <p>Aynı öğrenme kazanımının farklı öğrenci ilgi profillerine göre nasıl kişiselleştirildiğini, çözümlü örnek ve mikro-görev bağlamlarının öğrencinin ilgi alanıyla kurduğu ilişkiye göre nasıl değiştiğini inceleyin.</p>
+        </div>
+        <div class="yon-aksiyon">
+          <a class="btn ghost" href="#yonetici">${ic('ayar')}Yönetici paneli</a>
+          <a class="btn" href="#alt-ilgi">İlgi toplama ekranı ${ic('sag')}</a>
+        </div>
+      </div>
+
+      <!-- Temel tasarım ilkesi özeti -->
+      <section class="kart juri-ilke-kart">
+        <div class="juri-ilke-ust">
+          <div>
+            <span class="juri-ust-etiket">Temel tasarım ilkesi</span>
+            <h2>Çok katmanlı ilgi verisinden öğrenme bağlamına geçiş</h2>
+            <p>Ayrıntının yeri etkileşim etiketleri değil, öğrencinin kendi ifadeleriyle doldurduğu özgül ilgi alanıdır. Böylece hem arayüz sade kalır hem de kişiselleştirme için zengin veri elde edilir.</p>
+          </div>
+        </div>
+        <div class="juri-ilke-izgara">
+          <div class="juri-ilke-kutu">
+            <small>Alt kategori — Öğrenci neye ilgi duyuyor?</small>
+            <b>Kahve ve çay</b>
+          </div>
+          <div class="juri-ilke-kutu">
+            <small>Etkileşim biçimi — İlgisiyle nasıl etkileşim kuruyor?</small>
+            <div class="jp-etk-liste"><span>${ic('check')}Kahve hazırlamak</span><span>${ic('check')}Farklı kahveler tatmak</span></div>
+          </div>
+          <div class="juri-ilke-kutu">
+            <small>Özgül ilgi — Tam olarak neyi seviyor?</small>
+            <p>V60 ile filtre kahve demlemek, farklı yörelerin kahve çekirdeklerini denemek</p>
+          </div>
+          <div class="juri-ilke-kutu">
+            <small>İlgi yoğunluğu — Ne kadar ilgileniyor?</small>
+            <div class="puan juri-ilke-puan">${[1, 2, 3, 4, 5].map(n => `<span class="${n === 5 ? 'on' : 'dolu'}">${n}</span>`).join('')}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. Simüle edilmiş öğrenci ilgi profilleri -->
+      <section class="kart juri-bolum">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">1</span>
+          <div>
+            <h2>Simüle edilmiş öğrenci ilgi profilleri</h2>
+            <p>Aşağıda altı simüle edilmiş öğrenci profili yer almaktadır. Özellikle <b>Öğrenci 1</b> ve <b>Öğrenci 2</b>’nin aynı alt ilgi kategorisini (Spor → Basketbol) seçmesine rağmen farklı etkileşim biçimleri ve açıklamalar girmesi, zenginleştirilmiş ilgi toplama yönteminin katkısını görünür kılar.</p>
+          </div>
+        </div>
+        <div class="juri-profil-izgara">
+          ${J.profiller.map((p, i) => `<article class="jp-kart${i === pIdx ? ' on' : ''}" data-act="juriProfSec" data-i="${i}" role="button" tabindex="0">
+            <div class="jp-ust">
+              ${obj(p.obj)}
+              <div class="jp-baslik">
+                <b>${esc(p.no)}</b>
+                <small>${esc(p.kategori)}</small>
+              </div>
+            </div>
+            <div class="jp-alt-satir">
+              <h3 class="jp-alt-ad">${esc(p.altKategori)}</h3>
+              ${yildiz5(p.puan)}
+            </div>
+            <div class="jp-etk-grup">
+              <small>Etkileşim biçimleri</small>
+              <div class="jp-etk-liste">${p.etkilesimler.map(e => `<span>${esc(e)}</span>`).join('')}</div>
+            </div>
+            <div class="jp-aciklama">
+              <small>Öğrencinin kendi açıklaması</small>
+              <p><em>${esc(p.aciklama)}</em></p>
+            </div>
+          </article>`).join('')}
+        </div>
+        <p class="juri-dipnot">${ic('bilgi')}<span>Öğrenci profilleri tamamen kurgusaldır. Gerçek öğrenci verisi veya pilot uygulama bulgusu değildir. İlgi puanları jüriye yöntemi açıklamak amacıyla gösterilmiştir.</span></p>
+      </section>
+
+      <!-- 2. Modül: Bağımlı ve bağımsız değişkenler -->
+      <section class="kart juri-bolum" id="juri-mod2">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">2</span>
+          <div>
+            <h2>${esc(J.degiskenler.baslik)}</h2>
+            <p class="juri-kazanim"><b>Öğrenme kazanımı:</b> ${esc(J.degiskenler.kazanim)}</p>
+            <p class="juri-alt-aciklama">Bu kazanım için bir standart içerik (kontrol grubu) ve altı farklı kişiselleştirilmiş içerik (deney grubu) hazırlanmıştır. Konu anlatımı sabit tutulmuş; yalnızca çözümlü örnekler ve mikro-görevler kişiselleştirilmiştir.</p>
+          </div>
+        </div>
+
+        <div class="juri-grup-kutu kontrol-kutu">
+          <div class="juri-etiket-satir">
+            <span class="juri-grup-etiket kontrol">Standart içerik — Kontrol grubu</span>
+          </div>
+          <div class="juri-iki-sutun">
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Çözümlü örnek</small>
+              <p>${esc(dSt.ornekMetin)}</p>
+              <div class="juri-cozum-kutu">
+                <b>Çözüm</b>
+                <dl>
+                  <div><dt>Bağımsız değişken:</dt><dd>${esc(dSt.bagimsiz)}</dd></div>
+                  <div><dt>Bağımlı değişken:</dt><dd>${esc(dSt.bagimli)}</dd></div>
+                  <div><dt>Gerekçe:</dt><dd>${esc(dSt.gerekce)}</dd></div>
+                </dl>
+              </div>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Mikro-görev</small>
+              <p>${esc(dSt.gorevMetin)}</p>
+              <div class="juri-soru-listesi">
+                <div class="juri-soru-alan"><label>Bağımsız değişken nedir?</label><input class="girdi" placeholder="Cevabını yaz..."></div>
+                <div class="juri-soru-alan"><label>Bağımlı değişken nedir?</label><input class="girdi" placeholder="Cevabını yaz..."></div>
+              </div>
+              <button type="button" class="btn ghost tam juri-cozum-btn" data-act="juriCozumAc" data-key="deg-standart">${acikMiCozum('deg-standart') ? 'Cevabı gizle' : 'Cevabımı kontrol et'}</button>
+              ${acikMiCozum('deg-standart') ? `<div class="juri-cozum-kutu acilir">
+                <dl>
+                  <div><dt>Bağımsız değişken:</dt><dd>${esc(dSt.gorevBagimsiz)}</dd></div>
+                  <div><dt>Bağımlı değişken:</dt><dd>${esc(dSt.gorevBagimli)}</dd></div>
+                  <div><dt>Gerekçe:</dt><dd>${esc(dSt.gorevGerekce)}</dd></div>
+                </dl>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="juri-grup-kutu deney-kutu">
+          <div class="juri-deney-ust">
+            <div>
+              <span class="juri-grup-etiket deney">Kişiselleştirilmiş içerikler — Deney grubu</span>
+              <p class="juri-deney-aciklama">Aşağıdaki etkileşimli alanda öğrenci profilini değiştirerek aynı kazanıma yönelik örnek ve mikro-görevlerin nasıl değiştiğini inceleyebilirsin.</p>
+            </div>
+            <label class="juri-secici-etiket">
+              <small>Simüle edilmiş öğrenci profili seç</small>
+              <select id="juriProfSelect" class="juri-select">
+                ${J.profiller.map((p, i) => `<option value="${i}"${i === pIdx ? ' selected' : ''}>${esc(p.etiket)}</option>`).join('')}
+              </select>
+            </label>
+          </div>
+
+          <div class="juri-secili-serit">
+            ${obj(aktP.obj)}
+            <div class="juri-serit-bilgi">
+              <b>${esc(aktP.altKategori)}</b>
+              <span class="juri-serit-aciklama">${esc(aktP.ozgulKisa)}</span>
+              <div class="juri-serit-etiketler">
+                ${aktP.etkilesimler.map(e => `<span class="serit-etk">${esc(e)}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="juri-iki-sutun">
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Çözümlü örnek</small>
+              <p>${esc(dDn.ornekMetin)}</p>
+              <div class="juri-cozum-kutu">
+                <b>Çözüm</b>
+                <dl>
+                  <div><dt>Bağımsız değişken:</dt><dd>${esc(dDn.bagimsiz)}</dd></div>
+                  <div><dt>Bağımlı değişken:</dt><dd>${esc(dDn.bagimli)}</dd></div>
+                  <div><dt>Gerekçe:</dt><dd>${esc(dDn.gerekce)}</dd></div>
+                </dl>
+              </div>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Mikro-görev</small>
+              <p>${esc(dDn.gorevMetin)}</p>
+              <div class="juri-soru-listesi">
+                <div class="juri-soru-alan"><label>Bağımsız değişken nedir?</label><input class="girdi" placeholder="Cevabını yaz..."></div>
+                <div class="juri-soru-alan"><label>Bağımlı değişken nedir?</label><input class="girdi" placeholder="Cevabını yaz..."></div>
+              </div>
+              <button type="button" class="btn ghost tam juri-cozum-btn" data-act="juriCozumAc" data-key="deg-${aktP.id}">${acikMiCozum('deg-' + aktP.id) ? 'Cevabı gizle' : 'Cevabımı kontrol et'}</button>
+              ${acikMiCozum('deg-' + aktP.id) ? `<div class="juri-cozum-kutu acilir">
+                <dl>
+                  <div><dt>Bağımsız değişken:</dt><dd>${esc(dDn.gorevBagimsiz)}</dd></div>
+                  <div><dt>Bağımlı değişken:</dt><dd>${esc(dDn.gorevBagimli)}</dd></div>
+                  <div><dt>Gerekçe:</dt><dd>${esc(dDn.gorevGerekce)}</dd></div>
+                </dl>
+              </div>` : ''}
+            </div>
+          </div>
+
+          <div class="juri-gezgin">
+            <button type="button" class="btn ghost" data-act="juriProfAdim" data-yon="-1"${pIdx === 0 ? ' disabled' : ''}>${ic('sol')}Önceki öğrenci</button>
+            <span><b>${pIdx + 1}/${J.profiller.length}</b></span>
+            <button type="button" class="btn ghost" data-act="juriProfAdim" data-yon="1"${pIdx === J.profiller.length - 1 ? ' disabled' : ''}>Sonraki öğrenci${ic('sag')}</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Modül: Evren ve örneklem -->
+      <section class="kart juri-bolum">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">3</span>
+          <div>
+            <h2>${esc(ev.baslik)}</h2>
+            <p class="juri-kazanim"><b>Öğrenme kazanımı:</b> ${esc(ev.kazanim)}</p>
+            <p class="juri-alt-aciklama">Bu kez standart ve kişiselleştirilmiş içerikler yan yana gösterilmektedir. Jüriye kişiselleştirmenin sınırlarını anlatmak açısından bu gösterim daha işlevseldir.</p>
+          </div>
+        </div>
+
+        <label class="juri-secici-etiket juri-tam-secici">
+          <small>Kişiselleştirilmiş içeriğin öğrenci profili</small>
+          <select id="juriEvrenSelect" class="juri-select">
+            ${J.profiller.map((p, i) => `<option value="${i}"${i === evIdx ? ' selected' : ''}>${esc(ev.deney[p.id].seciciEtiket)}</option>`).join('')}
+          </select>
+        </label>
+
+        <div class="juri-iki-sutun">
+          <div class="juri-grup-kutu kontrol-kutu">
+            <div class="juri-yan-bas">
+              <small>${esc(ev.standart.grup)}</small>
+              <h3>${esc(ev.standart.altBaslik)}</h3>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Çözümlü örnek</small>
+              <p>${esc(ev.standart.ornekMetin)}</p>
+              <div class="juri-cozum-kutu">
+                <dl>
+                  <div><dt>Evren:</dt><dd>${esc(ev.standart.evren)}</dd></div>
+                  <div><dt>Örneklem:</dt><dd>${esc(ev.standart.orneklem)}</dd></div>
+                  <div><dt>Örneklem büyüklüğü:</dt><dd>${esc(ev.standart.buyukluk)}</dd></div>
+                </dl>
+              </div>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Mikro-görev</small>
+              <p>${esc(ev.standart.gorevMetin)}</p>
+              <button type="button" class="btn ghost tam juri-cozum-btn" data-act="juriCozumAc" data-key="ev-standart">${acikMiCozum('ev-standart') ? 'Çözümü gizle' : 'Çözümü göster'}</button>
+              ${acikMiCozum('ev-standart') ? `<div class="juri-cozum-kutu acilir">
+                <dl>
+                  <div><dt>Evren:</dt><dd>${esc(ev.standart.gorevEvren)}</dd></div>
+                  <div><dt>Örneklem:</dt><dd>${esc(ev.standart.gorevOrneklem)}</dd></div>
+                  <div><dt>Örneklem büyüklüğü:</dt><dd>${esc(ev.standart.gorevBuyukluk)}</dd></div>
+                </dl>
+              </div>` : ''}
+            </div>
+          </div>
+
+          <div class="juri-grup-kutu deney-kutu">
+            <div class="juri-yan-bas">
+              <small>${esc(evDn.grup)}</small>
+              <h3>${esc(evDn.altBaslik)}</h3>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Çözümlü örnek</small>
+              <p>${esc(evDn.ornekMetin)}</p>
+              <div class="juri-cozum-kutu">
+                <dl>
+                  <div><dt>Evren:</dt><dd>${esc(evDn.evren)}</dd></div>
+                  <div><dt>Örneklem:</dt><dd>${esc(evDn.orneklem)}</dd></div>
+                  <div><dt>Örneklem büyüklüğü:</dt><dd>${esc(evDn.buyukluk)}</dd></div>
+                </dl>
+              </div>
+            </div>
+            <div class="juri-icerik-kart">
+              <small class="juri-kart-ust">Mikro-görev</small>
+              <p>${esc(evDn.gorevMetin)}</p>
+              <button type="button" class="btn ghost tam juri-cozum-btn" data-act="juriCozumAc" data-key="ev-deney-${evP.id}">${acikMiCozum('ev-deney-' + evP.id) ? 'Çözümü gizle' : 'Çözümü göster'}</button>
+              ${acikMiCozum('ev-deney-' + evP.id) ? `<div class="juri-cozum-kutu acilir">
+                <dl>
+                  <div><dt>Evren:</dt><dd>${esc(evDn.gorevEvren)}</dd></div>
+                  <div><dt>Örneklem:</dt><dd>${esc(evDn.gorevOrneklem)}</dd></div>
+                  <div><dt>Örneklem büyüklüğü:</dt><dd>${esc(evDn.gorevBuyukluk)}</dd></div>
+                </dl>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>
+        <p class="juri-dipnot">${ic('bilgi')}<span>${esc(ev.not)}</span></p>
+      </section>
+
+      <!-- 4. Modül: Araştırma desenleri -->
+      <section class="kart juri-bolum">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">4</span>
+          <div>
+            <h2>${esc(J.desenler.baslik)}</h2>
+            <p class="juri-kazanim"><b>Öğrenme kazanımı:</b> ${esc(J.desenler.kazanim)}</p>
+          </div>
+        </div>
+
+        <div class="juri-desen-liste">
+          ${J.desenler.kartlar.map(k => `<div class="juri-grup-kutu ${k.id === 'kontrol' ? 'kontrol-kutu' : 'deney-kutu'}">
+            <div class="juri-desen-bas">
+              ${k.obj ? obj(k.obj) : `<span class="juri-kitap-ikon">${ic('katman')}</span>`}
+              <div>
+                <b>${esc(k.ust)}</b>
+                <small>${esc(k.grup)}</small>
+              </div>
+            </div>
+            <div class="juri-iki-sutun">
+              <div class="juri-icerik-kart">
+                <small class="juri-kart-ust">Çözümlü örnek</small>
+                <p>${esc(k.ornekMetin)}</p>
+                <div class="juri-cozum-kutu">
+                  <b>Araştırma deseni: ${esc(k.ornekDesen)}</b>
+                  <p>${esc(k.ornekGerekce)}</p>
+                </div>
+              </div>
+              <div class="juri-icerik-kart">
+                <small class="juri-kart-ust">Mikro-görev</small>
+                <p>${esc(k.gorevMetin)}</p>
+                <button type="button" class="btn ghost juri-cozum-btn" data-act="juriCozumAc" data-key="desen-${k.id}">${acikMiCozum('desen-' + k.id) ? 'Beklenen cevabı gizle' : 'Beklenen cevabı göster'} ${ic('asagi')}</button>
+                ${acikMiCozum('desen-' + k.id) ? `<div class="juri-cozum-kutu acilir">
+                  <b>Araştırma deseni: ${esc(k.beklenenDesen)}</b>
+                  <p>${esc(k.beklenenGerekce)}</p>
+                </div>` : ''}
+              </div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </section>
+
+      <!-- 5. Jüriye özellikle gösterilecek karşılaştırma (Ağaç diyagramı) -->
+      <section class="kart juri-bolum juri-vurgu-kart">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">5</span>
+          <div>
+            <h2>Jüriye özellikle gösterilecek karşılaştırma</h2>
+            <p>Sunumda en dikkat çekici örnek, iki öğrencinin de basketbol kategorisini seçmesine rağmen farklı içerikler almasıdır. Bu örnek, geliştirilen zenginleştirilmiş ilgi toplama yönteminin neden gerekli olduğunu doğrudan göstermektedir.</p>
+          </div>
+        </div>
+
+        <div class="juri-agac">
+          <div class="juri-agac-kok">
+            ${obj('top')}
+            <b>Spor → Basketbol</b>
+            <span>Her iki öğrencinin ilgi yoğunluğu: 5/5</span>
+          </div>
+          <div class="juri-agac-dallanma" aria-hidden="true"><span>↓</span><span>↓</span></div>
+
+          <div class="juri-iki-sutun">
+            <div class="juri-dal-kol">
+              <div class="juri-ab-kart">
+                <div class="juri-ab-bas">
+                  <b>Öğrenci A</b>
+                  <span class="juri-ab-etiket">İzleyici ve İstatistik</span>
+                </div>
+                <dl class="juri-ab-profil">
+                  <div><dt>Etkileşim biçimi</dt><dd>Maç izlemek, istatistik incelemek</dd></div>
+                  <div><dt>Özgül ilgi</dt><dd>EuroLeague, Anadolu Efes</dd></div>
+                </dl>
+              </div>
+              <div class="juri-dal-ok" aria-hidden="true">↓</div>
+              <div class="juri-ab-baglam">
+                <b>Kişiselleştirilmiş bağlam A</b>
+                <p>Hücum stratejilerinin takımın sayı üretimine etkisi.</p>
+                <div class="juri-deg-satir">
+                  <div><small>Bağımsız değişken</small><b>Hücum stratejisi</b></div>
+                  <div><small>Bağımlı değişken</small><b>Atılan toplam sayı</b></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="juri-dal-kol">
+              <div class="juri-ab-kart">
+                <div class="juri-ab-bas">
+                  <b>Öğrenci B</b>
+                  <span class="juri-ab-etiket turuncu">Oyuncu ve Antrenman</span>
+                </div>
+                <dl class="juri-ab-profil">
+                  <div><dt>Etkileşim biçimi</dt><dd>Basketbol oynamak, antrenman yapmak</dd></div>
+                  <div><dt>Özgül ilgi</dt><dd>Üç sayılık atışlar</dd></div>
+                </dl>
+              </div>
+              <div class="juri-dal-ok" aria-hidden="true">↓</div>
+              <div class="juri-ab-baglam">
+                <b>Kişiselleştirilmiş bağlam B</b>
+                <p>Antrenman süresinin üç sayılık atış başarısına etkisi.</p>
+                <div class="juri-deg-satir">
+                  <div><small>Bağımsız değişken</small><b>Antrenman süresi</b></div>
+                  <div><small>Bağımlı değişken</small><b>Başarılı atış sayısı</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="juri-agac-birlestir" aria-hidden="true"><span>↓</span><span>↓</span></div>
+          <div class="juri-agac-hedef">
+            <b>Aynı öğrenme kazanımı</b>
+            <span>Araştırma senaryosunda bağımlı ve bağımsız değişkenleri belirleme</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Kişiselleştirmede deneysel eşdeğerliğin korunması -->
+      <section class="kart juri-bolum">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">6</span>
+          <div>
+            <h2>Kişiselleştirmede deneysel eşdeğerliğin korunması</h2>
+            <p>Jüri üyelerinin özellikle sorabileceği bir konu, kişiselleştirilmiş içeriğin kontrol grubuna göre daha kolay veya zor olup olmadığıdır. Tez önerisinde de bu eşdeğerliğin korunacağı belirtilmiştir:</p>
+          </div>
+        </div>
+        <div class="juri-tablo-sarici">
+          <table class="juri-tablo">
+            <thead>
+              <tr><th>İçerik bileşeni</th><th>Standart</th><th>Kişiselleştirilmiş</th><th>Tasarım kararı</th></tr>
+            </thead>
+            <tbody>
+              ${J.esdegerlik.map(([bilesen, st, dn, karar]) => `<tr>
+                <td><b>${esc(bilesen)}</b></td>
+                <td>${esc(st)}</td>
+                <td>${esc(dn)}</td>
+                <td><span class="karar-etiket ${karar === 'Sabit' ? 'sabit' : karar === 'Değişken' ? 'degisken' : 'kontrol'}">${esc(karar)}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <p class="juri-dipnot">${ic('ampul')}<span><b>Burada son madde özellikle önemli:</b> Örneğin Age of Empires oynayan bir öğrenciye sunulan araştırma senaryosu, araştırma yöntemleri bilgisini ölçmeli; öğrencinin Age of Empires oyunundaki ustalığını değil.</span></p>
+      </section>
+
+      <!-- 7. Jüri sunumunda kullanılabilecek açıklama ve metodolojik not -->
+      <section class="kart juri-bolum juri-aciklama-kart">
+        <div class="juri-bolum-bas">
+          <span class="juri-adim-no">7</span>
+          <div>
+            <h2>Jüri sunumunda kullanılabilecek açıklama</h2>
+          </div>
+        </div>
+        <div class="juri-metin-blok">
+          <p>Geliştirilen kişiselleştirme mekanizması, öğrencilerin yalnızca genel ilgi alanlarını değil, bu alanlara yönelik <b>ilgi yoğunluklarını</b>, <b>etkileşim biçimlerini</b> ve <b>özgül ilgi nesnelerini</b> de dikkate almaktadır. Böylece aynı ilgi kategorisini seçen öğrenciler için dahi farklı bağlamlarda öğrenme içerikleri oluşturulabilmektedir.</p>
+          <p>Örneğin basketbola ilgi duyan ve basketbol maçlarını takip ederek oyuncu istatistiklerini incelemekten hoşlanan bir öğrenci için <em>takım performansı ve maç istatistikleri</em> üzerinden bir araştırma senaryosu oluşturulurken, basketbol oynamayı ve atış antrenmanı yapmayı seven bir öğrenci için <em>antrenman süresi ve atış başarısı</em> üzerinden bir senaryo oluşturulabilmektedir.</p>
+          <p>Bu süreçte öğrenme kazanımları, görev yapısı ve değerlendirme ölçütleri korunmakta; yalnızca çözümlü örneklerin ve mikro-görevlerin bağlamı öğrencinin ilgi profiline göre uyarlanmaktadır. Böylece kişiselleştirme, belirli kişi veya nesne adlarının standart içeriğe yerleştirilmesiyle sınırlı kalmamakta, öğrencinin ilgi alanıyla kurduğu ilişkinin öğrenme görevinin bağlamına yansıtılması hedeflenmektedir.</p>
+        </div>
+        <aside class="ar-not">
+          <h3>Metodolojik not</h3>
+          <p>Burada hazırlanan içerikler jüriye kişiselleştirme mekanizmasını göstermek amacıyla üretilmiş simülasyonlardır. Öğrenme konuları tez önerisinde belirtilen kapsamdan seçilmiştir. Nihai uygulamadan önce standart ve kişiselleştirilmiş sürümlerin metin uzunluğu, bilişsel talep, alan bilgisi gereksinimi, görsel kullanımı ve pedagojik eşdeğerliği uzmanlar tarafından değerlendirilmelidir.</p>
+        </aside>
+      </section>
+    </div>`);
   }
 
   /* ---------- Ders ekranı ---------- */
@@ -2837,9 +4561,9 @@ window.ResearchJourney = (() => {
   }
 
   function bagSecici(m, b) {
-    const l = siraliAltlar();
+    const l = siraliAltlar(), p = P();
     if (l.length < 2) return '';
-    const gruplar = S.secilen.map(ilgi).filter(Boolean).map(k => ({ k, l: l.filter(x => x.k === k) })).filter(g => g.l.length);
+    const gruplar = p.secilen.map(ilgi).filter(Boolean).map(k => ({ k, l: l.filter(x => x.k === k) })).filter(g => g.l.length);
     return `<label class="bag" for="bagSec"><small>Örneğin konusu</small><select id="bagSec" data-m="${m.id}">${gruplar.map(g => `<optgroup label="${g.k.ad}">${g.l.map(x => `<option value="${x.a.id}"${x.a.id === b.alt.id ? ' selected' : ''}>${esc(x.a.ad)}</option>`).join('')}</optgroup>`).join('')}</select></label>`;
   }
   function senaryo(b, c) {
@@ -3026,55 +4750,109 @@ window.ResearchJourney = (() => {
     if (r) return { ad: 'ders', m: modul(r[1]), k: r[2] };
     r = /^ders-(m[1-6])/.exec(h);
     if (r) return { ad: 'ders', m: modul(r[1]), k: 'v1' };
-    return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil'].includes(h) ? h : 'acilis' };
+    return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri'].includes(h) ? h : 'acilis' };
   }
   function render(kaydirma = true) {
     if (journey) { journey.destroy(); journey = null; }
     if (UI.video) { UI.video.pause(); UI.video = null; }
     const r = rota();
-    if (['panel', 'moduller', 'profil', 'modul', 'ders'].includes(r.ad)) {
+    if (['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul', 'ders'].includes(r.ad)) {
       if (!S.kul) S.kul = { ad: 'Deniz Aydın' };
-      if (!S.secilen.length || !siraliAltlar().length) ornekProfil();
+      if (!P().secilen.length || !siraliAltlar().length) ornekProfil();
       kaydet();
     }
-    if (r.ad === 'alt-ilgi' && !S.secilen.length) { location.hash = 'ilgi'; return; }
+    if (r.ad === 'alt-ilgi' && !P().secilen.length) { location.hash = 'ilgi'; return; }
     const sayfalar = {
       acilis: sAcilis, giris: () => sAuth('giris'), kayit: () => sAuth('kayit'), ilgi: sIlgi, 'alt-ilgi': sAlt,
-      panel: sPanel, moduller: sModuller, profil: sProfil, modul: () => sModul(r.m), ders: () => sDers(r.m, r.k),
+      panel: sPanel, moduller: sModuller, profil: sProfil, yonetici: sYonetici, juri: sJuri, modul: () => sModul(r.m), ders: () => sDers(r.m, r.k),
     };
     app.innerHTML = sayfalar[r.ad]();
-    document.body.dataset.ekran = ['ilgi', 'alt-ilgi'].includes(r.ad) ? 'kur' : ['panel', 'moduller', 'profil', 'modul'].includes(r.ad) ? 'uyg' : r.ad;
+    document.body.dataset.ekran = ['ilgi', 'alt-ilgi'].includes(r.ad) ? 'kur' : ['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul'].includes(r.ad) ? 'uyg' : r.ad;
     const anahtar = location.hash;
     if (kaydirma && anahtar !== sonRota) window.scrollTo(0, 0);
     sonRota = anahtar;
-    document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : 'Bağlam';
+    document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : 'Bağlam';
     if (r.ad === 'acilis') journey = window.ResearchJourney.mount($('.research-hero'));
+    yontemDugme();
     kurVideo();
   }
   const yenile = () => render(false);
   const odakla = sel => { const e = $(sel); if (e) e.focus({ preventScroll: true }); };
   const notDugme = () => { const d = $('#notDugme'); if (d) d.textContent = UI.notlar ? 'Kişiselleştirme notlarını gizle' : 'Kişiselleştirme notlarını göster'; };
+  const yontemDugme = () => {
+    const z = zenginMi();
+    $$('[data-act="yontemSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b')) b.classList.toggle('on', b.dataset.yontem === UI.yontem);
+    });
+    const et = $('#protoYontemEtiket');
+    if (et) et.textContent = z ? 'Zenginleştirilmiş' : 'Standart (Mevcut)';
+  };
+  function yontemDegistir(y, gitHash) {
+    if (y !== 'standart' && y !== 'zengin') return;
+    UI.yontem = y;
+    try { localStorage.setItem(YONTEM_ANAHTAR, y); } catch (e) { /* depo yok */ }
+    yontemDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash) render();
+      else location.hash = gitHash;
+    } else {
+      yenile();
+    }
+  }
 
   /* ---------- Etkileşimler ---------- */
   const eylem = {
     kaydir: el => { const h = document.getElementById(el.dataset.hedef); if (h) h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); },
+    yontemSec: el => { yontemDegistir(el.dataset.yontem, el.dataset.git); },
+    juriProfSec: el => { UI.juriProf = +el.dataset.i; yenile(); const m2 = document.getElementById('juri-mod2'); if (m2) m2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); },
+    juriProfAdim: el => { const n = D.juriSunum.profiller.length; UI.juriProf = Math.max(0, Math.min(n - 1, (UI.juriProf || 0) + +el.dataset.yon)); yenile(); },
+    juriCozumAc: el => { const k = el.dataset.key; UI.juriCozum[k] = !UI.juriCozum[k]; yenile(); },
     ilgiSec: el => {
-      const id = el.dataset.id, i = S.secilen.indexOf(id);
-      if (i < 0) S.secilen.push(id); else S.secilen.splice(i, 1);
+      const p = P(), id = el.dataset.id, i = p.secilen.indexOf(id);
+      if (i < 0) p.secilen.push(id); else p.secilen.splice(i, 1);
       kaydet();
       const on = i < 0; el.classList.toggle('on', on); el.setAttribute('aria-pressed', on);
-      $('#ilgiSay').textContent = secimMetni(); $('#ilgiDevam').hidden = !S.secilen.length; $('#ilgiPasif').hidden = !!S.secilen.length;
+      $('#ilgiSay').textContent = secimMetni(); $('#ilgiDevam').hidden = !p.secilen.length; $('#ilgiPasif').hidden = !!p.secilen.length;
     },
-    altAktif: el => { UI.aktif = el.dataset.id; yenile(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
-    puan: el => { S.puan[el.dataset.alt] = +el.dataset.n; kaydet(); yenile(); odakla(`[data-act="puan"][data-alt="${el.dataset.alt}"][data-n="${el.dataset.n}"]`); },
+    altAktif: el => {
+      if (zenginMi()) UI.zenginAktif = el.dataset.id; else UI.aktif = el.dataset.id;
+      yenile(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    puan: el => { const p = P(); p.puan[el.dataset.alt] = +el.dataset.n; kaydet(); yenile(); odakla(`[data-act="puan"][data-alt="${el.dataset.alt}"][data-n="${el.dataset.n}"]`); },
     altSec: el => {
-      const id = el.dataset.id;
-      if (S.altSec[id]) { delete S.altSec[id]; delete S.puan[id]; } else S.altSec[id] = true;
+      const p = P(), id = el.dataset.id;
+      if (p.altSec[id]) { delete p.altSec[id]; delete p.puan[id]; } else p.altSec[id] = true;
       kaydet(); yenile(); odakla(`[data-act="altSec"][data-id="${id}"]`);
     },
+    etkinlikSec: el => {
+      const alt = el.dataset.alt, etk = el.dataset.etk;
+      if (!alt || !etk) return;
+      const l = SZ.etkinlik[alt] = SZ.etkinlik[alt] || [];
+      const i = l.indexOf(etk);
+      if (i < 0) l.push(etk); else l.splice(i, 1);
+      kaydet(); yenile();
+    },
+    ozelEtkinlikEkle: el => {
+      const alt = el.dataset.alt, inp = $(`[data-ozel-etk-girdi="${alt}"]`);
+      if (!inp) return;
+      const val = inp.value.trim().replace(/\s+/g, ' ');
+      if (!val) { inp.focus(); return; }
+      const k = ilgi(alt.split('.')[0]);
+      const hazir = (k && k.ozelEtkinlikler) || [];
+      const ozelL = SZ.ozelEtkinlik[alt] = SZ.ozelEtkinlik[alt] || [];
+      const tum = [...hazir, ...ozelL];
+      const mevcut = tum.find(x => x.toLocaleLowerCase('tr') === val.toLocaleLowerCase('tr'));
+      const hedef = mevcut || val;
+      if (!mevcut) ozelL.push(val);
+      const secL = SZ.etkinlik[alt] = SZ.etkinlik[alt] || [];
+      if (!secL.includes(hedef)) secL.push(hedef);
+      kaydet(); yenile(); odakla(`[data-ozel-etk-girdi="${alt}"]`);
+    },
     ozelSil: el => {
-      const id = el.dataset.id, k = id.split('.')[0];
-      S.ozel[k] = (S.ozel[k] || []).filter(o => o.id !== id); delete S.puan[id]; delete S.detay[id];
+      const p = P(), id = el.dataset.id, k = id.split('.')[0];
+      p.ozel[k] = (p.ozel[k] || []).filter(o => o.id !== id); delete p.puan[id]; delete p.detay[id];
+      if (p.etkinlik) delete p.etkinlik[id];
+      if (p.ozelEtkinlik) delete p.ozelEtkinlik[id];
       Object.keys(S.baglamSec).forEach(m => { if (S.baglamSec[m] === id) delete S.baglamSec[m]; });
       kaydet(); yenile(); odakla('#ozelAd');
     },
@@ -3104,7 +4882,7 @@ window.ResearchJourney = (() => {
     },
     olcekBitir: el => { adimIsaretle(el.dataset.m, el.dataset.tur); location.hash = el.dataset.r; },
     ekAc: el => { const p = $('#ekPanel'); p.hidden = !p.hidden; el.setAttribute('aria-expanded', !p.hidden); },
-    sifirla: () => { S = bos(); UI.gs = {}; UI.ornekAcik = {}; kaydet(); $('#ekPanel').hidden = true; if (location.hash === '#acilis') render(); else location.hash = 'acilis'; },
+    sifirla: () => { S = bos(); SZ = bosZengin(); UI.gs = {}; UI.ornekAcik = {}; kaydet(); $('#ekPanel').hidden = true; if (location.hash === '#acilis') render(); else location.hash = 'acilis'; },
   };
 
   document.addEventListener('click', e => {
@@ -3115,22 +4893,30 @@ window.ResearchJourney = (() => {
     if (e.target.closest('.proto-panel a')) panel.hidden = true;
   });
   document.addEventListener('keydown', e => {
-    const el = e.target.closest && e.target.closest('[role="button"][data-act]');
+    if (e.target.dataset && e.target.dataset.ozelEtkGirdi && e.key === 'Enter') {
+      e.preventDefault();
+      const btn = $(`[data-act="ozelEtkinlikEkle"][data-alt="${e.target.dataset.ozelEtkGirdi}"]`);
+      if (btn) btn.click();
+      return;
+    }
+    const el = e.target.closest && e.target.closest('[role="button"][data-act], [role="radio"][data-act]');
     if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); el.click(); }
   });
   document.addEventListener('input', e => {
     const t = e.target;
-    if (t.dataset.detay) { S.detay[t.dataset.detay] = t.value; kaydet(); }
+    if (t.dataset.detay) { P().detay[t.dataset.detay] = t.value; kaydet(); }
     if (t.dataset.cevap) { S.cevap[t.dataset.cevap] = t.value; kaydet(); const s = document.getElementById('say-' + t.dataset.cevap); if (s) s.textContent = kelime(t.value) + ' kelime · otomatik kaydedilir'; }
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'bagSec') { S.baglamSec[e.target.dataset.m] = e.target.value; kaydet(); yenile(); }
+    if (e.target.id === 'juriProfSelect') { UI.juriProf = +e.target.value; yenile(); }
+    if (e.target.id === 'juriEvrenSelect') { UI.juriEvrenProf = +e.target.value; yenile(); }
   });
   document.addEventListener('submit', e => {
     if (e.target.id === 'ozelForm') {
       e.preventDefault();
-      const k = e.target.dataset.k, inp = $('#ozelAd'), ad = inp.value.trim().replace(/\s+/g, ' ');
-      const liste = S.ozel[k] = S.ozel[k] || [], bilgi = $('#ozelBilgi');
+      const p = P(), k = e.target.dataset.k, inp = $('#ozelAd'), ad = inp.value.trim().replace(/\s+/g, ' ');
+      const liste = p.ozel[k] = p.ozel[k] || [], bilgi = $('#ozelBilgi');
       const var_ = altlarOf(ilgi(k)).some(a => a.ad.toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr'));
       if (!ad) { bilgi.textContent = 'Eklemek için bir alt alan adı yaz.'; bilgi.classList.add('ozel-hata'); inp.focus(); return; }
       if (var_) { bilgi.textContent = `“${ad}” zaten listede. Listeden işaretleyebilirsin.`; bilgi.classList.add('ozel-hata'); inp.focus(); return; }
@@ -3142,10 +4928,10 @@ window.ResearchJourney = (() => {
     e.preventDefault();
     if (e.target.dataset.tur === 'kayit') {
       const ad = ($('#fAd').value || '').trim() || 'Deniz Aydın';
-      S = bos(); S.kul = { ad }; UI.gs = {}; kaydet(); location.hash = 'ilgi';
+      S = bos(); SZ = bosZengin(); S.kul = { ad }; UI.gs = {}; kaydet(); location.hash = 'ilgi';
     } else {
       if (!S.kul) S.kul = { ad: 'Deniz Aydın' };
-      if (!S.secilen.length) ornekProfil();
+      if (!P().secilen.length) ornekProfil();
       kaydet(); location.hash = 'panel';
     }
   });
@@ -3182,18 +4968,27 @@ window.ResearchJourney = (() => {
   });
   document.addEventListener('dragend', () => { UI.drag = null; temizle(); $$('.suruk').forEach(x => x.classList.remove('suruk')); });
 
-  /* Prototip ekran listesi: araştırmacının ekranlar arasında hızlı gezinmesi için */
+  /* Prototip ekran listesi ve yönetici hızlı geçişi */
   const ek = document.createElement('div');
   ek.className = 'proto';
-  ek.innerHTML = `<div class="proto-panel" id="ekPanel" hidden>${[
+  ek.innerHTML = `<div class="proto-panel" id="ekPanel" hidden>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>İlgi toplama yöntemi</span><b id="protoYontemEtiket"></b></div>
+      <div class="proto-yontem-sec">
+        <button type="button" class="proto-yontem-b" data-act="yontemSec" data-yontem="standart">Mevcut (Standart)</button>
+        <button type="button" class="proto-yontem-b" data-act="yontemSec" data-yontem="zengin">Zenginleştirilmiş</button>
+      </div>
+    </div>
+    ${[
     ['acilis', 'Açılış sayfası'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
     ['panel', 'Öğrenci ana sayfası'], ['moduller', 'Modüller'], ['modul-m2', 'Modül sayfası'], ['ders-m2-v1', 'Konu anlatım videosu'],
     ['ders-m2-ornek', 'Örnek uygulama'], ['ders-m2-gorev', 'Mikro görev'], ['ders-m4-gorev', 'Mikro görev (etkileşimli)'],
-    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'],
+    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['yonetici', 'Yönetici paneli'],
   ].map(([r, a]) => `<a href="#${r}">${a}</a>`).join('')}<button class="proto-not" id="notDugme" data-act="notlar"></button><button data-act="sifirla">Verileri sıfırla</button></div>
-  <button class="proto-dugme" data-act="ekAc" aria-expanded="false">${ic('ekran')}Ekranlar</button>`;
+  <button class="proto-dugme" data-act="ekAc" aria-expanded="false">${ic('ekran')}Ekranlar ve Yönetici</button>`;
   document.body.appendChild(ek);
   notDugme();
+  yontemDugme();
 
   window.addEventListener('hashchange', () => render());
   render();

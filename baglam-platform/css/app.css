@@ -670,3 +670,237 @@ body[data-ekran="kur"] .proto { bottom: calc(92px + env(safe-area-inset-bottom, 
   .ar-not dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .ozel-ekle > div { flex-direction: column; }
 }
+
+/* ---------- Zenginleştirilmiş İlgi Toplama ve Yönetici Paneli ---------- */
+.as-daire { border-radius: 50%; width: 26px; height: 26px; }
+.as-zengin.on .as-daire { background: var(--murekkep); color: #fff; box-shadow: none; }
+.as-zengin-sec:hover .as-daire { box-shadow: inset 0 0 0 2px var(--murekkep); }
+.as-zengin-ic { display: flex; flex-direction: column; gap: 20px; padding: 2px 4px 24px 40px; max-width: 720px; }
+.as-zengin-ic .as-puan .et { font-weight: 500; color: var(--soluk); font-size: 15px; margin-bottom: 10px; }
+.as-zengin-ic .puan button { width: 40px; height: 40px; font-size: 15px; }
+.as-zengin-ic .as-puan .puan-uc { width: min(100%, 580px); font-size: 14px; font-weight: 500; color: var(--soluk); margin-top: 10px; }
+.as-zengin-ic .as-soru-baslik { display: block; font: 600 15px/1.35 var(--govde); color: var(--murekkep); margin-bottom: 10px; }
+.as-etkinlik { display: flex; flex-direction: column; }
+.etkinlik-etiketler { display: flex; flex-wrap: wrap; gap: 8px; }
+.etk-cip { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 8px 14px; border-radius: 12px; background: var(--bg); color: var(--soluk); font-size: 14px; font-weight: 500; box-shadow: inset 0 0 0 1.5px var(--cizgi2); transition: background .15s, color .15s, box-shadow .15s; text-align: left; }
+.etk-cip:hover { color: var(--murekkep); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.etk-cip.on { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--ana); }
+.etk-cip .i { width: 15px; height: 15px; stroke-width: 2.4; color: var(--ana); }
+.ozel-etk-ekle { display: flex; gap: 8px; margin-top: 10px; max-width: 480px; }
+.ozel-etk-girdi { height: 40px; font-size: 14px; border-radius: 11px; }
+.ozel-etk-btn { height: 40px; padding: 0 14px; font-size: 14px; border-radius: 11px; }
+.as-zengin-detay { width: 100%; max-width: 580px; }
+.as-zengin-girdi { height: 54px; border-radius: 14px; font-size: 16px; border-color: #8A9995; }
+.istege-bagli { display: block; margin-top: 7px; font-size: 13px; color: var(--soluk); font-weight: 500; }
+
+.pr-etk { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0 3px; }
+.pr-etk i { font-style: normal; font-size: 12px; font-weight: 600; color: var(--ana-koyu); background: var(--ana-acik); padding: 3px 9px; border-radius: 99px; }
+
+/* Yönetici paneli */
+.yon-aksiyon { display: flex; gap: 10px; flex-wrap: wrap; }
+.yon-secim-kart { display: flex; flex-direction: column; gap: 20px; }
+.yon-bas { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.yon-bas h2 { font-size: 22px; font-weight: 650; }
+.yon-bas p { color: var(--soluk); margin-top: 6px; max-width: 46em; font-size: 15px; }
+.yon-rozet { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 99px; background: var(--ana-acik); color: var(--ana-koyu); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.yon-kartlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.yon-k { background: var(--bg); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; box-shadow: inset 0 0 0 2px var(--cizgi); transition: box-shadow .15s, background .15s; }
+.yon-k:hover { box-shadow: inset 0 0 0 2px var(--ana); }
+.yon-k.on { background: var(--yuzey); box-shadow: inset 0 0 0 2.5px var(--ana); }
+.yon-k-ust { display: flex; align-items: center; gap: 12px; }
+.yon-radio { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--cizgi); display: grid; place-items: center; color: transparent; flex: none; }
+.yon-k.on .yon-radio { background: var(--ana); color: #fff; box-shadow: none; }
+.yon-k-ust b { font: 650 19px/1.2 var(--baslik); display: block; }
+.yon-k-ust small { color: var(--soluk); font-size: 13px; font-weight: 500; }
+.yon-k > p { color: var(--soluk); font-size: 15px; line-height: 1.5; }
+.yon-ozellik { display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
+.yon-ozellik li { display: flex; align-items: center; gap: 8px; }
+.yon-ozellik .i { color: var(--ana); width: 16px; height: 16px; }
+.yon-k-alt { margin-top: auto; padding-top: 14px; border-top: 1.5px solid var(--cizgi2); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--soluk); }
+.yon-k-alt b { color: var(--murekkep); }
+.yon-kat-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 8px; }
+.yon-kat { background: var(--bg); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.yon-kat-bas { display: flex; align-items: center; gap: 10px; }
+.yon-kat-bas img { width: 52px; height: 52px; margin-left: -6px; }
+.yon-kat-bas b { font: 650 17px/1.2 var(--baslik); display: block; }
+.yon-kat-bas small { color: var(--soluk); font-size: 13px; }
+.yon-alt-etiketler { display: flex; flex-wrap: wrap; gap: 6px; }
+.yon-alt-etiketler span { background: var(--yuzey); border-radius: 9px; padding: 4px 10px; font-size: 13px; font-weight: 500; color: var(--murekkep); box-shadow: inset 0 0 0 1px var(--cizgi); }
+
+/* Sağ alt hızlı yönetici yöntem seçici */
+.proto-panel { width: 276px; }
+.proto-yontem { background: rgba(255, 255, 255, .08); border-radius: 12px; padding: 10px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 8px; }
+.proto-yontem-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: #B9C7C3; }
+.proto-yontem-bas b { color: #fff; font-weight: 600; }
+.proto-yontem-sec { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.proto-panel button.proto-yontem-b { margin: 0; border: 0; border-radius: 8px; padding: 7px 8px; font-size: 12px; font-weight: 600; text-align: center; color: #CFEAE6; background: rgba(255, 255, 255, .08); }
+.proto-panel button.proto-yontem-b:hover { background: rgba(255, 255, 255, .18); }
+.proto-panel button.proto-yontem-b.on { background: var(--ana); color: #fff; }
+
+@media (max-width: 860px) {
+  .yon-kartlar { grid-template-columns: minmax(0, 1fr); }
+  .as-zengin-ic { padding-left: 4px; }
+}
+@media (max-width: 620px) {
+  .ozel-etk-ekle { flex-direction: column; }
+  .yon-kat-izgara { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Jüri Sunumu: Kişiselleştirme Mekanizması ---------- */
+.juri-sayfa { gap: 26px; }
+.juri-bolum { display: flex; flex-direction: column; gap: 20px; padding: 26px; }
+.juri-bolum-bas { display: flex; align-items: flex-start; gap: 16px; }
+.juri-adim-no { width: 36px; height: 36px; border-radius: 50%; background: var(--ana); color: #fff; display: grid; place-items: center; font: 700 17px/1 var(--baslik); flex: none; margin-top: 2px; }
+.juri-bolum-bas h2 { font-size: 24px; font-weight: 700; }
+.juri-bolum-bas p { color: var(--soluk); margin-top: 6px; font-size: 15.5px; max-width: 62em; }
+.juri-kazanim { color: var(--murekkep) !important; background: var(--ana-acik); padding: 10px 14px; border-radius: 12px; display: inline-block; margin-top: 8px !important; }
+.juri-kazanim b { color: var(--ana-koyu); }
+.juri-alt-aciklama { margin-top: 8px !important; }
+
+.juri-ilke-kart { display: flex; flex-direction: column; gap: 18px; padding: 24px 26px; border: 1.5px solid var(--cizgi); }
+.juri-ust-etiket { display: inline-block; font-size: 12.5px; font-weight: 700; color: var(--ana-koyu); background: var(--ana-acik); padding: 4px 10px; border-radius: 99px; margin-bottom: 6px; }
+.juri-ilke-ust h2 { font-size: 22px; font-weight: 700; }
+.juri-ilke-ust p { color: var(--soluk); margin-top: 4px; font-size: 15px; }
+.juri-ilke-izgara { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.juri-ilke-kutu { background: var(--bg); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.juri-ilke-kutu small { font-size: 12.5px; font-weight: 600; color: var(--soluk); }
+.juri-ilke-kutu b { font: 650 18px/1.2 var(--baslik); }
+.juri-ilke-kutu p { font-size: 14px; font-weight: 500; line-height: 1.4; }
+.juri-ilke-puan { display: flex; gap: 6px; margin-top: 2px; }
+.juri-ilke-puan span { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--vurgu); color: var(--vurgu); background: var(--yuzey); }
+.juri-ilke-puan span.on { background: var(--vurgu); color: #fff; }
+
+.juri-profil-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.jp-kart { background: var(--bg); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--cizgi); transition: box-shadow .15s, transform .15s, background .15s; }
+.jp-kart:hover { box-shadow: inset 0 0 0 2px var(--ana); transform: translateY(-2px); }
+.jp-kart.on { background: var(--yuzey); box-shadow: inset 0 0 0 2.5px var(--ana); }
+.jp-ust { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1.5px solid var(--cizgi2); }
+.jp-ust img { width: 52px; height: 52px; margin-left: -6px; flex: none; }
+.jp-baslik { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.jp-baslik b { font: 700 17px/1.2 var(--baslik); }
+.jp-baslik small { font-size: 13.5px; color: var(--soluk); font-weight: 500; }
+.jp-alt-satir { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.jp-alt-ad { font: 700 19px/1.2 var(--baslik); }
+.juri-yildiz { display: inline-flex; align-items: center; gap: 3px; font-size: 16px; color: var(--cizgi); }
+.juri-yildiz i { font-style: normal; line-height: 1; }
+.juri-yildiz i.d { color: var(--vurgu); }
+.juri-yildiz b { font-size: 13.5px; font-weight: 600; color: var(--soluk); margin-left: 4px; }
+.jp-etk-grup, .jp-aciklama { display: flex; flex-direction: column; gap: 6px; }
+.jp-etk-grup small, .jp-aciklama small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.jp-etk-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+.jp-etk-liste span { display: inline-flex; align-items: center; gap: 4px; background: var(--yuzey); color: var(--murekkep); padding: 5px 11px; border-radius: 9px; font-size: 13px; font-weight: 500; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.jp-kart.on .jp-etk-liste span { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 600; box-shadow: inset 0 0 0 1px var(--ana); }
+.jp-etk-liste .i { width: 13px; height: 13px; stroke-width: 2.5; }
+.jp-aciklama { margin-top: auto; pt: 4px; }
+.jp-aciklama p { font-size: 14.5px; line-height: 1.5; color: var(--murekkep); }
+.jp-aciklama em { font-style: italic; }
+.juri-dipnot { display: flex; align-items: flex-start; gap: 10px; background: var(--bg); padding: 12px 16px; border-radius: 14px; font-size: 14px; color: var(--soluk); }
+.juri-dipnot .i { color: var(--ana); margin-top: 2px; }
+
+.juri-grup-kutu { border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.kontrol-kutu { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.deney-kutu { background: color-mix(in srgb, var(--ana-acik) 40%, var(--yuzey)); box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-grup-etiket { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 99px; font-size: 13px; font-weight: 700; width: fit-content; }
+.juri-grup-etiket.kontrol { background: var(--yuzey); color: var(--soluk); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-grup-etiket.deney { background: var(--ana); color: #fff; }
+.juri-yan-bas { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-yan-bas small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-yan-bas h3 { font-size: 20px; font-weight: 700; }
+.juri-iki-sutun { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.juri-icerik-kart { background: var(--yuzey); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1px var(--cizgi2); }
+.juri-kart-ust { font-size: 14px; font-weight: 700; color: var(--murekkep); }
+.juri-icerik-kart > p { font-size: 15px; line-height: 1.55; white-space: pre-line; }
+.juri-cozum-kutu { margin-top: auto; background: var(--bg); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.juri-cozum-kutu.acilir { background: var(--iyi-acik); box-shadow: inset 0 0 0 1.5px var(--iyi); animation: gir .2s ease both; }
+.juri-cozum-kutu > b { font-size: 14.5px; color: var(--murekkep); }
+.juri-cozum-kutu > p { font-size: 14.5px; color: var(--murekkep); line-height: 1.5; }
+.juri-cozum-kutu dl { margin: 0; display: grid; gap: 6px; font-size: 14.5px; }
+.juri-cozum-kutu dl > div { display: grid; grid-template-columns: 152px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.juri-cozum-kutu dt { font-weight: 700; color: var(--murekkep); }
+.juri-cozum-kutu.acilir dt { color: #14613D; }
+.juri-cozum-kutu dd { margin: 0; font-weight: 400; }
+.juri-soru-listesi { display: grid; gap: 10px; margin-top: 4px; }
+.juri-soru-alan { display: grid; gap: 5px; }
+.juri-soru-alan label { font-size: 13.5px; font-weight: 600; color: var(--soluk); }
+.juri-soru-alan .girdi { height: 42px; font-size: 14px; border-radius: 99px; padding: 0 16px; }
+.juri-cozum-btn { height: 42px; font-size: 14px; padding: 0 18px; border-radius: 99px; }
+
+.juri-deney-ust { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.juri-deney-aciklama { font-size: 14.5px; color: var(--soluk); margin-top: 6px; }
+.juri-secici-etiket { display: flex; flex-direction: column; gap: 6px; }
+.juri-secici-etiket small { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-tam-secici { max-width: 460px; }
+.juri-select { height: 44px; border-radius: 12px; border: 1.5px solid var(--cizgi); background: var(--yuzey); padding: 0 12px; font-weight: 600; font-size: 14.5px; min-width: 290px; }
+.juri-secili-serit { background: var(--yuzey); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-secili-serit img { width: 54px; height: 54px; margin-left: -6px; flex: none; }
+.juri-serit-bilgi { display: flex; flex-direction: column; gap: 4px; }
+.juri-serit-bilgi b { font: 700 18px/1.2 var(--baslik); }
+.juri-serit-aciklama { font-size: 14px; color: var(--soluk); }
+.juri-serit-etiketler { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.serit-etk { display: inline-flex; align-items: center; gap: 4px; background: var(--bg); color: var(--murekkep); font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.juri-gezgin { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; font-size: 14.5px; color: var(--soluk); }
+.juri-gezgin .btn { border-radius: 99px; height: 40px; }
+.juri-gezgin b { color: var(--murekkep); }
+
+.juri-desen-liste { display: flex; flex-direction: column; gap: 16px; }
+.juri-desen-bas { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-desen-bas img { width: 48px; height: 48px; margin-left: -6px; }
+.juri-kitap-ikon { width: 40px; height: 40px; border-radius: 12px; background: var(--yuzey); display: grid; place-items: center; color: var(--soluk); box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-desen-bas div { display: flex; flex-direction: column; }
+.juri-desen-bas b { font: 700 18px/1.2 var(--baslik); }
+.juri-desen-bas small { font-size: 13.5px; color: var(--soluk); font-weight: 500; }
+
+/* 5. Bölüm: Ağaç karşılaştırma şeması */
+.juri-vurgu-kart { box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-agac { background: var(--bg); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-agac-kok { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; background: var(--yuzey); padding: 16px 24px; border-radius: 18px; align-self: center; min-width: 280px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); }
+.juri-agac-kok img { width: 58px; height: 58px; margin-top: -6px; }
+.juri-agac-kok b { font: 700 20px/1.2 var(--baslik); }
+.juri-agac-kok span { font-size: 14px; color: var(--soluk); }
+.juri-agac-dallanma, .juri-agac-birlestir { display: grid; grid-template-columns: 1fr 1fr; text-align: center; color: var(--soluk); font-size: 20px; font-weight: 600; line-height: 1; }
+.juri-dal-kol { display: flex; flex-direction: column; gap: 10px; }
+.juri-dal-ok { text-align: center; color: var(--soluk); font-size: 20px; font-weight: 600; line-height: 1; }
+.juri-ab-kart { background: var(--yuzey); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); }
+.juri-ab-bas { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.juri-ab-bas b { font: 700 18px/1.2 var(--baslik); }
+.juri-ab-etiket { background: var(--ana-acik); color: var(--ana-koyu); font-weight: 700; font-size: 12.5px; padding: 4px 10px; border-radius: 99px; }
+.juri-ab-etiket.turuncu { background: var(--vurgu-acik); color: #B84A12; }
+.juri-ab-profil { margin: 0; display: grid; gap: 10px; font-size: 14.5px; }
+.juri-ab-profil > div { display: flex; flex-direction: column; gap: 2px; }
+.juri-ab-profil dt { font-size: 13px; font-weight: 600; color: var(--soluk); }
+.juri-ab-profil dd { margin: 0; font-weight: 600; color: var(--murekkep); }
+.juri-ab-baglam { background: var(--yuzey); padding: 18px 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: inset 0 0 0 1.5px var(--cizgi2); flex: 1; }
+.juri-ab-baglam > b { font: 700 16px/1.2 var(--baslik); }
+.juri-ab-baglam > p { font-size: 15px; color: var(--murekkep); padding-bottom: 10px; border-bottom: 1.5px solid var(--cizgi2); }
+.juri-deg-satir { display: grid; gap: 8px; }
+.juri-deg-satir > div { display: flex; flex-direction: column; gap: 2px; }
+.juri-deg-satir small { font-size: 13px; color: var(--soluk); font-weight: 600; }
+.juri-deg-satir b { font-size: 15px; font-weight: 600; }
+.juri-agac-hedef { background: var(--yuzey); border-radius: 18px; padding: 16px 22px; text-align: center; display: flex; flex-direction: column; gap: 4px; box-shadow: inset 0 0 0 2px var(--ana); }
+.juri-agac-hedef b { font: 700 17px/1.2 var(--baslik); color: var(--ana-koyu); }
+.juri-agac-hedef span { font-size: 15px; font-weight: 500; }
+
+.juri-tablo-sarici { overflow-x: auto; border-radius: 16px; box-shadow: inset 0 0 0 1.5px var(--cizgi); }
+.juri-tablo { width: 100%; border-collapse: collapse; font-size: 14.5px; background: var(--yuzey); }
+.juri-tablo th { text-align: left; background: var(--bg); padding: 12px 16px; font-weight: 700; color: var(--soluk); font-size: 13.5px; border-bottom: 1.5px solid var(--cizgi); }
+.juri-tablo td { padding: 12px 16px; border-bottom: 1px solid var(--cizgi2); }
+.juri-tablo tr:last-child td { border-bottom: 0; }
+.karar-etiket { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12.5px; font-weight: 700; }
+.karar-etiket.sabit { background: var(--bg); color: var(--murekkep); box-shadow: inset 0 0 0 1px var(--cizgi); }
+.karar-etiket.degisken { background: var(--ana-acik); color: var(--ana-koyu); }
+.karar-etiket.kontrol { background: var(--vurgu-acik); color: #B84A12; }
+
+.juri-metin-blok { display: flex; flex-direction: column; gap: 14px; font-size: 16px; line-height: 1.65; background: var(--bg); padding: 20px 24px; border-radius: 18px; }
+.juri-metin-blok em { font-style: normal; font-weight: 600; color: var(--ana-koyu); }
+.juri-aciklama-kart .ar-not p { font-size: 14.5px; line-height: 1.55; color: var(--murekkep); }
+
+@media (max-width: 1100px) {
+  .juri-ilke-izgara { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .juri-iki-sutun, .juri-profil-izgara, .juri-ilke-izgara { grid-template-columns: minmax(0, 1fr); }
+  .juri-bolum { padding: 20px 16px; }
+  .juri-cozum-kutu dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .juri-select { min-width: 100%; }
+  .juri-agac-dallanma, .juri-agac-birlestir { display: none; }
+}

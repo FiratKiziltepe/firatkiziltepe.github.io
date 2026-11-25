@@ -155,9 +155,59 @@ window.Models = (() => {
       [[0.5, C.sari], [0.9, C.turuncu], [1.25, C.pembe], [1.65, C.beyaz]].forEach(([h, c], i) =>
         add(g, rbox(0.36, h, 0.36, 0.07), mat(c), [-0.69 + i * 0.46, -0.72 + h / 2, 0]));
     },
+    canta(g) {
+      add(g, rbox(1.42, 1.32, 0.56, 0.18), mat(C.pembe), [0, -0.18, 0]);
+      add(g, rbox(1.44, 0.24, 0.58, 0.06), mat(C.beyaz), [0, -0.58, 0]);
+      add(g, tor(0.36, 0.065, Math.PI), mat(C.koyu), [0, 0.48, 0.14]);
+      add(g, tor(0.36, 0.065, Math.PI), mat(C.koyu), [0, 0.48, -0.14]);
+      for (const s of [-1, 1]) {
+        add(g, sph(0.09), mat(C.sari), [s * 0.36, 0.38, 0.29]);
+      }
+      add(g, cyl(0.16, 0.16, 0.08), mat(C.sari), [0.35, 0.08, 0.3], [R90, 0, 0]);
+    },
+    palet(g) {
+      add(g, cyl(1.05, 1.05, 0.18), mat(C.hamur), [0, -0.05, 0], [R90, 0, 0]);
+      add(g, sph(0.22), mat(C.koyu), [-0.46, -0.35, 0.06], [0, 0, 0], [1, 1, 0.5]);
+      [[-0.42, 0.38, C.pembe], [0.1, 0.56, C.sari], [0.54, 0.28, C.teal], [0.52, -0.26, C.indigo], [0.06, -0.54, C.turuncu]].forEach(([x, y, c]) =>
+        add(g, sph(0.18), mat(c), [x, y, 0.11], [0, 0, 0], [1, 1, 0.55]));
+      const f = new T.Group();
+      add(f, cyl(0.055, 0.075, 1.45), mat(C.koyu), [0, 0, 0]);
+      add(f, cyl(0.08, 0.075, 0.22), mat(C.gri), [0, 0.78, 0]);
+      add(f, new T.ConeGeometry(0.11, 0.34, 28), mat(C.turuncu), [0, 1.04, 0]);
+      f.position.set(0.18, 0.05, 0.24); f.rotation.set(0.15, 0.1, -0.65); g.add(f);
+    },
+    evrak(g) {
+      add(g, rbox(1.75, 1.22, 0.52, 0.16), mat(C.koyu), [0, -0.14, 0]);
+      add(g, rbox(1.77, 0.48, 0.55, 0.12), mat(C.indigo), [0, 0.16, 0]);
+      add(g, tor(0.32, 0.065, Math.PI), mat(C.koyu), [0, 0.48, 0]);
+      for (const s of [-1, 1]) {
+        add(g, rbox(0.18, 0.24, 0.08, 0.04), mat(C.sari), [s * 0.46, -0.05, 0.27]);
+      }
+      add(g, cyl(0.14, 0.14, 0.06), mat(C.teal), [0, 0.16, 0.28], [R90, 0, 0]);
+    },
+    mikrofon(g) {
+      add(g, cyl(0.46, 0.52, 0.14), mat(C.koyu), [0, -0.92, 0]);
+      add(g, cyl(0.065, 0.065, 0.48), mat(C.gri), [0, -0.62, 0]);
+      add(g, tor(0.46, 0.055, Math.PI), mat(C.koyu), [0, 0.02, 0], [0, 0, Math.PI]);
+      for (const s of [-1, 1]) add(g, sph(0.09), mat(C.turuncu), [s * 0.46, 0.02, 0]);
+      add(g, cyl(0.28, 0.28, 0.68), mat(C.teal), [0, 0.16, 0]);
+      add(g, sph(0.28), mat(C.gri), [0, 0.5, 0]);
+      add(g, sph(0.28), mat(C.teal), [0, -0.18, 0]);
+      add(g, tor(0.285, 0.03), mat(C.sari), [0, 0.32, 0], [R90, 0, 0]);
+    },
+    gezegen(g) {
+      add(g, sph(0.72), mat(C.indigo));
+      add(g, sph(0.73), mat(C.teal), [0.06, 0.12, 0.04], [0, 0, 0], [0.95, 0.65, 0.95]);
+      const h = new T.Group();
+      add(h, tor(1.18, 0.11), mat(C.sari), [0, 0, 0], [R90, 0, 0]);
+      add(h, tor(0.98, 0.045), mat(C.turuncu), [0, 0, 0], [R90, 0, 0]);
+      h.rotation.set(0.42, 0.15, -0.32); g.add(h);
+      add(g, sph(0.16), mat(C.pembe), [0.95, 0.62, -0.2]);
+    },
   };
   const poz = { donut: [-0.85, 0.35], kulaklik: [0.1, -0.45], gamepad: [0.2, -0.3], klaket: [0.1, -0.4], pano: [0.08, -0.45], buyutec: [0.1, -0.2],
-    top: [0.3, -0.5], grafik: [0.22, -0.55], bavul: [0.12, -0.5], piyonlar: [0.3, -0.25], bloklar: [0.22, -0.5] };
+    top: [0.3, -0.5], grafik: [0.22, -0.55], bavul: [0.12, -0.5], piyonlar: [0.3, -0.25], bloklar: [0.22, -0.5],
+    canta: [0.16, -0.42], palet: [0.14, -0.32], evrak: [0.18, -0.45], mikrofon: [0.14, -0.38], gezegen: [0.18, -0.35] };
 
   function olustur(ad) {
     const ic = new T.Group(); (kur[ad] || kur.top)(ic);
