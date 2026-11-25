@@ -59,6 +59,7 @@
   const ANAHTAR = 'baglam-prototip-v1';
   const YONTEM_ANAHTAR = 'baglam-ilgi-yontemi';
   const ZENGIN_ANAHTAR = 'baglam-zengin-ilgi-v1';
+  const HERO_ANAHTAR = 'baglam-hero-surum';
   const bos = () => ({ kul: null, secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, ilerleme: {}, baglamSec: {}, cevap: {} });
   const bosZengin = () => ({ secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, etkinlik: {}, ozelEtkinlik: {} });
   let S = (() => { try { const x = JSON.parse(localStorage.getItem(ANAHTAR)); if (x && typeof x === 'object') return { ...bos(), ...x }; } catch (e) { /* depo yok */ } return bos(); })();
@@ -75,8 +76,19 @@
     juriEvrenProf: 0,
     juriCozum: {},
     yontem: (() => { try { return localStorage.getItem(YONTEM_ANAHTAR) === 'zengin' ? 'zengin' : 'standart'; } catch (e) { return 'standart'; } })(),
+    hero: (() => {
+      try {
+        const q = new URLSearchParams(location.search).get('v');
+        if (q === '3') return 'v3';
+        if (q === '2') return 'v2';
+        if (q === '1') return 'v1';
+        const saved = localStorage.getItem(HERO_ANAHTAR);
+        return (saved === 'v2' || saved === 'v3') ? saved : 'v1';
+      } catch (e) { return 'v1'; }
+    })(),
     notlar: (() => { try { return localStorage.getItem('baglam-notlar') === '1'; } catch (e) { return false; } })(),
   };
+  const heroMod = () => (UI.hero === 'v3' && window.ResearchJourneyV3) ? window.ResearchJourneyV3 : (UI.hero === 'v2' && window.ResearchJourneyV2) ? window.ResearchJourneyV2 : window.ResearchJourney;
   const zenginMi = () => UI.yontem === 'zengin';
   const ilgiListesi = () => zenginMi() ? D.zenginIlgiler : D.ilgiler;
   const ilgi = id => ilgiListesi().find(k => k.id === id);
@@ -124,7 +136,7 @@
     S.baglamSec = {};
     if (!Object.keys(S.ilerleme || {}).length) {
       S.ilerleme = {
-        m1: { v: [true, true, true], ornek: true, gorev: true, duygu: { 0: 4, 1: 3, 2: 4, 3: 2, 4: 1, 5: 1, 6: 2 }, ilgi: { 0: 4, 1: 3, 2: 5, 3: 4, 4: 4, 5: 3, 6: 4 }, duyguOk: true, ilgiOk: true },
+        m1: { v: [true, true, true], ornek: true, gorev: true, duygu: { 0: 4, 1: 3, 2: 4, 3: 2, 4: 1, 5: 1, 6: 2 }, ilgi: { 0: 4, 1: 4, 2: 5, 3: 4, 4: 4, 5: 2 }, duyguOk: true, ilgiOk: true },
         m2: { v: [true, true, false], ornek: false, gorev: false, duygu: {}, ilgi: {}, duyguOk: false, ilgiOk: false },
       };
     }
@@ -136,8 +148,8 @@
       ...m.videolar.map((v, i) => ({ k: 'v' + (i + 1), ad: v.ad, ek: v.sure, t: !!p.v[i], grup: 'Konu anlatımı' })),
       { k: 'ornek', ad: 'Örnek uygulama', ek: '3 adım', t: !!p.ornek, grup: 'Uygulama' },
       { k: 'gorev', ad: 'Mikro görev', t: !!p.gorev, grup: 'Uygulama' },
-      { k: 'duygu', ad: 'Neler hissettin?', ek: '7 soru', t: !!p.duyguOk, grup: 'Modül sonu' },
-      { k: 'ilgi', ad: 'Modülü değerlendir', ek: '7 soru', t: !!p.ilgiOk, grup: 'Modül sonu' },
+      { k: 'duygu', ad: 'Neler hissettin?', ek: `${D.duygular.length} soru`, t: !!p.duyguOk, grup: 'Modül sonu' },
+      { k: 'ilgi', ad: 'Modülü değerlendir', ek: `${D.ilgiMaddeleri.length} soru`, t: !!p.ilgiOk, grup: 'Modül sonu' },
     ];
   }
   const ADIM = 7;
@@ -193,12 +205,12 @@
 
   /* ---------- Açılış ---------- */
   function sAcilis() {
-    return `<div class="lp">
+    const cls = (UI.hero === 'v3' && window.ResearchJourneyV3) ? 'lp-v3' : (UI.hero === 'v2' && window.ResearchJourneyV2) ? 'lp-v2' : 'lp-v1';
+    return `<div class="lp ${cls}">
       <header class="wrap lp-nav">${logo()}
         <nav><button data-act="kaydir" data-hedef="nasil">Nasıl çalışır</button><button data-act="kaydir" data-hedef="lp-moduller">Modüller</button></nav>
         <div class="lp-nav-btn"><a class="btn ghost" href="#giris">Giriş yap</a><a class="btn" href="#kayit">Kayıt ol</a></div></header>
-      ${window.ResearchJourney.render()}
-      <div class="wrap research-transition"><span>${ic('katman')} Bir soru. Altı adım. Bilimsel bir bakış.</span><span>Gözlemle başlayan, bilgiye uzanan bir yolculuk.</span></div>
+      ${heroMod().render()}
       <section class="lp-sec" id="nasil"><div class="wrap">
         <div class="sec-bas"><h2>Gözlemle, araştır, anlamlandır</h2><p>Günlük bir sorudan bilimsel bir açıklamaya, adım adım ilerle.</p></div>
         <div class="nasil">
@@ -389,8 +401,8 @@
         <a class="uk" href="#ders-${m.id}-gorev"><small>Mikro görev · ${m.gorev.tur}</small><h3>${m.gorev.ad}</h3><p>${b.c.tema}</p><span class="durum${p.gorev ? ' t' : ''}">${p.gorev ? ic('check') + 'Tamamlandı' : 'Göreve git ' + ic('sag')}</span>${obj(m.obj, -0.5)}</a>
       </div></section>
       <section><h2 class="bb">Modül sonu</h2><div class="son-liste">
-        <a class="sl" href="#ders-${m.id}-duygu">${ic('kalp')}<div><b>Neler hissettin?</b><small>7 duygu · yaklaşık 1 dakika</small></div>${sonDurum(p.duyguOk)}</a>
-        <a class="sl" href="#ders-${m.id}-ilgi">${ic('liste')}<div><b>Modülü değerlendir</b><small>7 ifade · yaklaşık 1 dakika</small></div>${sonDurum(p.ilgiOk)}</a>
+        <a class="sl" href="#ders-${m.id}-duygu">${ic('kalp')}<div><b>Neler hissettin?</b><small>${D.duygular.length} duygu · yaklaşık 1 dakika</small></div>${sonDurum(p.duyguOk)}</a>
+        <a class="sl" href="#ders-${m.id}-ilgi">${ic('liste')}<div><b>Modülü değerlendir</b><small>${D.ilgiMaddeleri.length} ifade · yaklaşık 1 dakika</small></div>${sonDurum(p.ilgiOk)}</a>
       </div></section></div>`);
   }
 
@@ -470,6 +482,62 @@
             <div class="yon-k-alt">
               <span>Kayıtlı seçim: <b>${zTop.length} ana alan</b></span>
               <button type="button" class="btn${z ? '' : ' ghost'}" data-act="yontemSec" data-yontem="zengin">${z ? 'Seçili yöntem' : 'Bu yönteme geç'}</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="kart yon-secim-kart">
+        <div class="yon-bas">
+          <div>
+            <h2>Açılış sayfası (Ana index) versiyonu</h2>
+            <p>Danışmanın karşılaştırmalı olarak inceleyebilmesi için üç farklı açılış sahnesi sunulmaktadır. İstediğiniz versiyonu seçip açılış ekranında önizleyebilirsiniz.</p>
+          </div>
+          <span class="yon-rozet">${UI.hero === 'v3' ? '3. Versiyon aktif (Adım Adım 3B)' : UI.hero === 'v2' ? '2. Versiyon aktif (3B Basamaklar)' : '1. Versiyon aktif (Yolculuk)'}</span>
+        </div>
+        <div class="yon-kartlar yon-kartlar-3" role="radiogroup" aria-label="Açılış sayfası versiyonu">
+          <div class="yon-k${UI.hero === 'v1' ? ' on' : ''}" role="radio" aria-checked="${UI.hero === 'v1'}" tabindex="0" data-act="heroSec" data-hero="v1">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.hero === 'v1' ? ic('check') : ''}</span>
+              <div>
+                <b>1. Versiyon — Araştırma Yolculuğu (Mevcut)</b>
+                <small>SVG yol diyagramı ve robot animasyonu</small>
+              </div>
+            </div>
+            <p>Altı araştırma adımını kıvrımlı bir yol üzerinde gezen karakter, alt gösterge noktaları ve adım kartlarıyla sunan mevcut açılış sayfası.</p>
+            <div class="yon-k-alt">
+              <span>${UI.hero === 'v1' ? '<b>Seçili versiyon</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.hero === 'v1' ? '' : ' ghost'}" data-act="heroSec" data-hero="v1" data-git="acilis">Açılışta görüntüle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.hero === 'v2' ? ' on' : ''}" role="radio" aria-checked="${UI.hero === 'v2'}" tabindex="0" data-act="heroSec" data-hero="v2">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.hero === 'v2' ? ic('check') : ''}</span>
+              <div>
+                <b>2. Versiyon — 3B Araştırma Basamakları</b>
+                <small>Three.js 3B sahne, veri tablosu ve saçılım grafiği</small>
+              </div>
+            </div>
+            <p>Yükselen altı 3B basamak üzerinde ilerleyen robot, her adımda değişen konuşma balonu (veri tablosu, değişkenler, r ≈ 0,96 saçılım grafiği) ile ikinci gösterim.</p>
+            <div class="yon-k-alt">
+              <span>${UI.hero === 'v2' ? '<b>Seçili versiyon</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.hero === 'v2' ? '' : ' ghost'}" data-act="heroSec" data-hero="v2" data-git="acilis">Açılışta görüntüle ${ic('sag')}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.hero === 'v3' ? ' on' : ''}" role="radio" aria-checked="${UI.hero === 'v3'}" tabindex="0" data-act="heroSec" data-hero="v3">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.hero === 'v3' ? ic('check') : ''}</span>
+              <div>
+                <b>3. Versiyon — Adım Adım Basamaklar</b>
+                <small>Tek tek beliren 3B basamaklar ve basamak yüzeyi etiketleri</small>
+              </div>
+            </div>
+            <p>Karakter ilerledikçe merdiven basamaklarının adım adım yükseldiği ve adım etiketlerinin doğrudan basamakların yan/ön yüzeyine yazıldığı gösterim.</p>
+            <div class="yon-k-alt">
+              <span>${UI.hero === 'v3' ? '<b>Seçili versiyon</b>' : 'Alternatif'}</span>
+              <button type="button" class="btn${UI.hero === 'v3' ? '' : ' ghost'}" data-act="heroSec" data-hero="v3" data-git="acilis">Açılışta görüntüle ${ic('sag')}</button>
             </div>
           </div>
         </div>
@@ -938,7 +1006,7 @@
   function akis(m, k) {
     const gr = {};
     adimlar(m).forEach(a => (gr[a.grup] = gr[a.grup] || []).push(a));
-    return `<aside class="akis"><h2>Bu modülde</h2>${Object.entries(gr).map(([g, l]) => `<h3>${g}</h3><div class="akis-grup">${l.map(a => `<a class="ad${a.t ? ' t' : ''}${a.k === k ? ' on' : ''}" data-adim="${a.k}" href="#ders-${m.id}-${a.k}"><span class="ad-n">${a.t ? ic('check') : ''}</span><span class="ad-t">${a.ad}</span>${a.ek ? `<time>${a.ek}</time>` : ''}</a>`).join('')}</div>`).join('')}</aside>`;
+    return `<aside class="akis"><h2>Bu modülde</h2>${Object.entries(gr).map(([g, l]) => `<h3>${g}</h3><div class="akis-grup">${l.map(a => `<a class="akis-adim${a.t ? ' t' : ''}${a.k === k ? ' on' : ''}" data-adim="${a.k}" href="#ders-${m.id}-${a.k}"><span class="akis-durum">${a.t ? ic('check') : ''}</span><span class="akis-baslik">${a.ad}</span>${a.ek ? `<time>${a.ek}</time>` : ''}</a>`).join('')}</div>`).join('')}</aside>`;
   }
   const ileri = (m, k, act, metin = 'Devam et') => { const s = sonrakiAdim(m, k); return `<div class="adim-alt"><span>Sıradaki: ${adimAdi(m, s)}</span><a class="btn lg" href="#ders-${m.id}-${s}" data-act="${act}" data-m="${m.id}" data-k="${k}">${metin} ${ic('sag')}</a></div>`; };
 
@@ -1092,10 +1160,11 @@
       ${olcekAlt(m, 'duygu', n, D.duygular.length)}`;
   }
   function dIlgi(m) {
-    const p = il(m.id), n = Object.keys(p.ilgi).length;
-    return `<div class="ic-bas"><div><h1>Bu modül hakkında ne düşünüyorsun?</h1><p>Her ifadeye ne kadar katıldığını seç. 1 hiç katılmıyorum, 5 tamamen katılıyorum.</p></div></div>
-      <div class="olcek"><div class="ol-ust"><span></span><div><span>Hiç katılmıyorum</span><span>Tamamen katılıyorum</span></div></div>
-        ${D.ilgiMaddeleri.map((d, i) => `<div class="li"><p>${d}</p><div class="li-sec" role="radiogroup" aria-label="${esc(d)}">${[1, 2, 3, 4, 5].map(v => `<button class="${p.ilgi[i] === v ? 'on' : ''}" role="radio" aria-checked="${p.ilgi[i] === v}" data-act="olcek" data-tur="ilgi" data-m="${m.id}" data-i="${i}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}</div>
+    const p = il(m.id), etiketler = ['Benim için kesinlikle doğru değil', 'Benim için doğru değil', 'Kararsızım', 'Benim için doğru', 'Benim için kesinlikle doğru'];
+    const n = D.ilgiMaddeleri.filter((_, i) => p.ilgi[i] != null).length;
+    return `<div class="ic-bas"><div><h1>Bu modül hakkında ne düşünüyorsun?</h1><p>Her ifadenin senin için ne kadar doğru olduğunu seç. 1 benim için kesinlikle doğru değil, 5 benim için kesinlikle doğru.</p></div></div>
+      <div class="olcek"><div class="ol-ust"><span></span><div><span>Benim için kesinlikle doğru değil</span><span>Benim için kesinlikle doğru</span></div></div>
+        ${D.ilgiMaddeleri.map((d, i) => `<div class="li"><p>${d}</p><div class="li-sec" role="radiogroup" aria-label="${esc(d)}">${[1, 2, 3, 4, 5].map(v => `<button class="${p.ilgi[i] === v ? 'on' : ''}" role="radio" aria-checked="${p.ilgi[i] === v}" aria-label="${esc(d)}: ${v} (${etiketler[v - 1]})" title="${etiketler[v - 1]}" data-act="olcek" data-tur="ilgi" data-m="${m.id}" data-i="${i}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}</div>
       ${olcekAlt(m, 'ilgi', n, D.ilgiMaddeleri.length)}`;
   }
   function olcekAlt(m, tur, n, top) {
@@ -1157,8 +1226,8 @@
     else if (k === 'duygu') p.duyguOk = true;
     else if (k === 'ilgi') p.ilgiOk = true;
     kaydet();
-    const a = $(`.akis .ad[data-adim="${k}"]`);
-    if (a && !a.classList.contains('t')) { a.classList.add('t'); a.querySelector('.ad-n').innerHTML = ic('check'); }
+    const a = $(`.akis .akis-adim[data-adim="${k}"]`);
+    if (a && !a.classList.contains('t')) { a.classList.add('t'); a.querySelector('.akis-durum').innerHTML = ic('check'); }
     const t = tamamSay(m);
     if ($('#dersCubuk')) { $('#dersCubuk').style.width = t / ADIM * 100 + '%'; $('#dersSay').textContent = t + '/' + ADIM; }
   }
@@ -1173,6 +1242,11 @@
     if (r) return { ad: 'ders', m: modul(r[1]), k: r[2] };
     r = /^ders-(m[1-6])/.exec(h);
     if (r) return { ad: 'ders', m: modul(r[1]), k: 'v1' };
+    if (h === 'acilis-1' || h === 'acilis-2' || h === 'acilis-3') {
+      UI.hero = h === 'acilis-3' ? 'v3' : h === 'acilis-2' ? 'v2' : 'v1';
+      try { localStorage.setItem(HERO_ANAHTAR, UI.hero); } catch (e) { /* depo yok */ }
+      return { ad: 'acilis' };
+    }
     return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri'].includes(h) ? h : 'acilis' };
   }
   function render(kaydirma = true) {
@@ -1195,8 +1269,9 @@
     if (kaydirma && anahtar !== sonRota) window.scrollTo(0, 0);
     sonRota = anahtar;
     document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : 'Bağlam';
-    if (r.ad === 'acilis') journey = window.ResearchJourney.mount($('.research-hero'));
+    if (r.ad === 'acilis') journey = heroMod().mount($('.research-hero'));
     yontemDugme();
+    heroDugme();
     kurVideo();
   }
   const yenile = () => render(false);
@@ -1210,6 +1285,16 @@
     const et = $('#protoYontemEtiket');
     if (et) et.textContent = z ? 'Zenginleştirilmiş' : 'Standart (Mevcut)';
   };
+  const heroDugme = () => {
+    $$('[data-act="heroSec"]').forEach(b => {
+      if (b.classList.contains('proto-yontem-b') || b.classList.contains('proto-hero-b')) {
+        b.classList.toggle('on', b.dataset.hero === UI.hero);
+        b.setAttribute('aria-pressed', b.dataset.hero === UI.hero);
+      }
+    });
+    const et = $('#protoHeroEtiket');
+    if (et) et.textContent = UI.hero === 'v3' ? '3. Adım Adım' : UI.hero === 'v2' ? '2. 3B Basamak' : '1. Yolculuk';
+  };
   function yontemDegistir(y, gitHash) {
     if (y !== 'standart' && y !== 'zengin') return;
     UI.yontem = y;
@@ -1222,11 +1307,28 @@
       yenile();
     }
   }
+  function heroDegistir(h, gitHash) {
+    if (h !== 'v1' && h !== 'v2' && h !== 'v3') return;
+    UI.hero = h;
+    try { localStorage.setItem(HERO_ANAHTAR, h); } catch (e) { /* depo yok */ }
+    heroDugme();
+    if (gitHash) {
+      if (location.hash === '#' + gitHash || (gitHash === 'acilis' && (!location.hash || location.hash === '#acilis-1' || location.hash === '#acilis-2' || location.hash === '#acilis-3'))) {
+        if (location.hash && location.hash !== '#acilis') location.hash = 'acilis';
+        else render(false);
+      } else {
+        location.hash = gitHash;
+      }
+    } else {
+      yenile();
+    }
+  }
 
   /* ---------- Etkileşimler ---------- */
   const eylem = {
     kaydir: el => { const h = document.getElementById(el.dataset.hedef); if (h) h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); },
     yontemSec: el => { yontemDegistir(el.dataset.yontem, el.dataset.git); },
+    heroSec: el => { heroDegistir(el.dataset.hero, el.dataset.git); },
     juriProfSec: el => { UI.juriProf = +el.dataset.i; yenile(); const m2 = document.getElementById('juri-mod2'); if (m2) m2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); },
     juriProfAdim: el => { const n = D.juriSunum.profiller.length; UI.juriProf = Math.max(0, Math.min(n - 1, (UI.juriProf || 0) + +el.dataset.yon)); yenile(); },
     juriCozumAc: el => { const k = el.dataset.key; UI.juriCozum[k] = !UI.juriCozum[k]; yenile(); },
@@ -1300,7 +1402,8 @@
     olcek: el => {
       const p = il(el.dataset.m), tur = el.dataset.tur; p[tur][el.dataset.i] = +el.dataset.v; kaydet();
       $$('button', el.parentElement).forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
-      const top = tur === 'duygu' ? D.duygular.length : D.ilgiMaddeleri.length, n = Object.keys(p[tur]).length;
+      const liste = tur === 'duygu' ? D.duygular : D.ilgiMaddeleri;
+      const top = liste.length, n = liste.filter((_, i) => p[tur][i] != null).length;
       $('#olSay').textContent = `${n}/${top} yanıtlandı`; $('#olDevam').disabled = n < top;
     },
     olcekBitir: el => { adimIsaretle(el.dataset.m, el.dataset.tur); location.hash = el.dataset.r; },
@@ -1402,16 +1505,32 @@
         <button type="button" class="proto-yontem-b" data-act="yontemSec" data-yontem="zengin">Zenginleştirilmiş</button>
       </div>
     </div>
+    <div class="proto-yontem">
+      <div class="proto-yontem-bas"><span>Açılış (Index)</span><b id="protoHeroEtiket"></b></div>
+      <div class="proto-yontem-sec proto-yontem-sec-3">
+        <button type="button" class="proto-yontem-b" data-act="heroSec" data-hero="v1" data-git="acilis">1. Yol</button>
+        <button type="button" class="proto-yontem-b" data-act="heroSec" data-hero="v2" data-git="acilis">2. 3B</button>
+        <button type="button" class="proto-yontem-b" data-act="heroSec" data-hero="v3" data-git="acilis">3. Adım</button>
+      </div>
+    </div>
     ${[
-    ['acilis', 'Açılış sayfası'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
+    ['acilis-1', 'Açılış sayfası (1. versiyon)'], ['acilis-2', 'Açılış sayfası (2. versiyon · 3B)'], ['acilis-3', 'Açılış sayfası (3. versiyon · Adım adım)'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
     ['panel', 'Öğrenci ana sayfası'], ['moduller', 'Modüller'], ['modul-m2', 'Modül sayfası'], ['ders-m2-v1', 'Konu anlatım videosu'],
     ['ders-m2-ornek', 'Örnek uygulama'], ['ders-m2-gorev', 'Mikro görev'], ['ders-m4-gorev', 'Mikro görev (etkileşimli)'],
     ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['yonetici', 'Yönetici paneli'],
   ].map(([r, a]) => `<a href="#${r}">${a}</a>`).join('')}<button class="proto-not" id="notDugme" data-act="notlar"></button><button data-act="sifirla">Verileri sıfırla</button></div>
-  <button class="proto-dugme" data-act="ekAc" aria-expanded="false">${ic('ekran')}Ekranlar ve Yönetici</button>`;
+  <div class="proto-alt-satir">
+    <div class="proto-hero-bar" role="group" aria-label="Açılış sayfası versiyonu">
+      <button type="button" class="proto-hero-b" data-act="heroSec" data-hero="v1" data-git="acilis">1. Versiyon</button>
+      <button type="button" class="proto-hero-b" data-act="heroSec" data-hero="v2" data-git="acilis">2. Versiyon</button>
+      <button type="button" class="proto-hero-b" data-act="heroSec" data-hero="v3" data-git="acilis">3. Versiyon</button>
+    </div>
+    <button class="proto-dugme" data-act="ekAc" aria-expanded="false">${ic('ekran')}Ekranlar ve Yönetici</button>
+  </div>`;
   document.body.appendChild(ek);
   notDugme();
   yontemDugme();
+  heroDugme();
 
   window.addEventListener('hashchange', () => render());
   render();

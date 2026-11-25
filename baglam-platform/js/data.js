@@ -831,13 +831,12 @@ window.DATA = (() => {
   /* ---------- Ölçekler ---------- */
   const duygular = ['Merak', 'Şaşkınlık', 'Heyecan', 'Kafa karışıklığı', 'Kaygı', 'Hüsran', 'Sıkılma'];
   const ilgiMaddeleri = [
-    'Bu modülün konusu ilgimi çekti.',
-    'Modülü çalışırken zamanın nasıl geçtiğini fark etmedim.',
-    'Örnek uygulama dikkatimi konuya topladı.',
-    'Bu konuda daha fazlasını öğrenmek isterim.',
-    'Modüldeki içerik benim için anlamlıydı.',
-    'Mikro görev üzerinde çalışmak hoşuma gitti.',
-    'Öğrendiklerimi günlük hayatımla ilişkilendirebildim.',
+    'Bu dersteki konulara tam olarak odaklandım ve başka şeyler dikkatimi dağıtmadı.',
+    'Bence bu dersteki konular ilgi çekiciydi.',
+    'Bu dersteki konuları iyi öğrendiğimi düşünüyorum.',
+    'Bu dersteki konular üzerinde çalışmaktan zevk aldım.',
+    'Bu dersteki konular hakkında daha çok şey öğrenmek istiyorum.',
+    'Bu derste sıkıldım.',
   ];
 
   /* ---------- Jüri Sunumu: Simüle Edilmiş Öğrenci Profilleri ve Kişiselleştirilmiş İçerik Örnekleri ---------- */

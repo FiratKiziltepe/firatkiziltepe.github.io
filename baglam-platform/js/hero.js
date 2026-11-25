@@ -63,7 +63,7 @@ window.ResearchJourney = (() => {
         <div class="research-footnote"><span>${icon('check')}</span> Gerçek problemler <i></i> Bilimsel düşünme</div>
       </div>
       <div class="journey" aria-label="Altı adımda bilimsel araştırma yolculuğu">
-        <div class="journey-topline"><span>BİR SORUNUN YOLCULUĞU</span><span class="j-example">ÖRNEK ARAŞTIRMA</span></div>
+        <div class="journey-topline"><span>BİR SORUNUN YOLCULUĞU</span></div>
         <div class="journey-viewport"><div class="journey-stage">
           <div class="journey-halo" aria-hidden="true"></div>
           <div class="j-bubble"><div class="j-bubble-icon">${icon('ice')}</div><div><span class="j-bubble-label">${steps[0].label}</span><p class="j-message">Sıcaklık arttıkça dondurma satışları da artar mı?</p><small class="j-note">${steps[0].note}</small></div></div>
