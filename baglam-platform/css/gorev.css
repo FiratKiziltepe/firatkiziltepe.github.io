@@ -8,7 +8,7 @@
 
 .mg-senaryo-kutu { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: center; background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 20px; padding: 18px; }
 .mg-gorsel { border-radius: 14px; overflow: hidden; border: 1px solid var(--cizgi); background: #fff; }
-.mg-gorsel svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9.2; }
+.mg-gorsel svg, .mg-gorsel img.mg-uretilen-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9.2; object-fit: cover; }
 .mg-senaryo-metin { display: flex; flex-direction: column; gap: 10px; }
 .mg-senaryo-etiket { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ana-koyu); }
 .mg-senaryo-metin h3, .mg-senaryo-metin h4 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }

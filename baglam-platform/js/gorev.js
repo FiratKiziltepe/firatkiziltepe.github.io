@@ -212,10 +212,11 @@ window.GorevPrototip = (() => {
   /* Etkileşimli Ana Mikro-Görev Oynatıcı */
   function createTaskPlayer(host, senaryo, opts = {}) {
     if (!host) return { destroy() {} };
-    let sec1 = null, sec2 = null, kontrol = false, ipucu = false, metin = false, caliyor = false, destroyed = false;
+    let sec1 = null, sec2 = null, kontrol = false, ipucu = false, metin = false, caliyor = false, audioEl = null, destroyed = false;
 
     const durdurSes = () => {
       caliyor = false;
+      if (audioEl) { try { audioEl.pause(); audioEl.currentTime = 0; } catch (e) { /* yoksay */ } audioEl = null; }
       if (window.speechSynthesis) try { window.speechSynthesis.cancel(); } catch (e) { /* yoksay */ }
     };
 
@@ -234,11 +235,11 @@ window.GorevPrototip = (() => {
       let geriBildirim = '';
       if (kontrol) {
         if (tam) {
-          geriBildirim = `<div class="gb d">${ic('bilgi')}<div><b>Tebrikler, her iki değişkeni de doğru belirledin!</b><br>${esc(senaryo.aciklamaDogru)}</div></div>`;
+          geriBildirim = `<div class="gb d">${ic('bilgi')}<div><b>Tebrikler, her iki soruyu da doğru yanıtladın!</b><br>${esc(senaryo.aciklamaDogru)}</div></div>`;
         } else if (d1 && !d2) {
-          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>Bağımsız değişken seçimin doğru; ancak bağımlı değişken için araştırma sonunda ölçülen sonuca odaklan.</div></div>`;
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>${esc(senaryo.feedback2Yanlis || 'İlk seçimin doğru; ikinci soruda ise araştırma sonunda ölçülen sonuca veya çıktısına odaklan.')}</div></div>`;
         } else if (!d1 && d2) {
-          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>Bağımlı değişken seçimin doğru; ancak ${esc(senaryo.ipucuBagimsiz)}</div></div>`;
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>${esc(senaryo.feedback1Yanlis || ('İkinci seçimin doğru; ilk soru için ' + senaryo.ipucuBagimsiz))}</div></div>`;
         } else {
           geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Tekrar deneyelim.</b><br>${esc(senaryo.ipucuBagimsiz)} ${esc(senaryo.ipucuBagimli)}</div></div>`;
         }
@@ -251,15 +252,15 @@ window.GorevPrototip = (() => {
       host.innerHTML = `<div class="mg-kart">
         <div class="mg-ust">
           <div>
-            <span class="mg-eyebrow">MODÜL 02 · MİKRO-GÖREV</span>
+            <span class="mg-eyebrow">${esc(senaryo.eyebrow || 'MODÜL 02 · MİKRO-GÖREV')}</span>
             <h2>Şimdi sıra sende!</h2>
-            <p>Araştırma senaryosunu incele ve değişkenleri belirle.</p>
+            <p>${esc(senaryo.altYazi || 'Araştırma senaryosunu incele ve değişkenleri belirle.')}</p>
           </div>
           <span class="mg-sure">Yaklaşık 2 dk.</span>
         </div>
 
         <div class="mg-senaryo-kutu">
-          <div class="mg-gorsel">${senaryoSVG(senaryo.temaTip)}</div>
+          <div class="mg-gorsel">${senaryo.image_data_url ? `<img class="mg-uretilen-img" src="${senaryo.image_data_url}" alt="${esc(senaryo.baslik)}">` : senaryoSVG(senaryo.temaTip)}</div>
           <div class="mg-senaryo-metin">
             <span class="mg-senaryo-etiket">Araştırma senaryosu</span>
             <h3>${esc(senaryo.baslik)}</h3>
@@ -278,19 +279,19 @@ window.GorevPrototip = (() => {
             <small>Temsili şemalar ve kurgusal araştırma verileri</small>
           </div>
           <div class="slayt-kosul-izgara">
-            ${senaryo.kosullar.map((k, idx) => `<div class="slayt-kosul">${kosulSVG(k.diyagram, idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}
+            ${senaryo.kosullar.map((k, idx) => `<div class="slayt-kosul">${kosulSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}
           </div>
         </div>
 
         <div class="mg-veri-bolum">
           <div class="mg-bolum-bas">
-            <b>Araştırmanın değişkenlerini belirle</b>
-            <small>Bağımlı ve bağımsız değişkenler</small>
+            <b>${esc(senaryo.soruBaslik || 'Araştırmanın değişkenlerini belirle')}</b>
+            <small>${esc(senaryo.soruAlt || 'Bağımlı ve bağımsız değişkenler')}</small>
           </div>
           <div class="mg-sorular">
             <div class="mg-soru-kart">
-              <div class="mg-soru-bas"><span class="mg-soru-no">1</span><b>Bağımsız değişken hangisidir?</b></div>
-              <div class="mg-secenek-grid" role="radiogroup" aria-label="Bağımsız değişken hangisidir?">
+              <div class="mg-soru-bas"><span class="mg-soru-no">1</span><b>${esc(senaryo.soru1 || 'Bağımsız değişken hangisidir?')}</b></div>
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru1 || 'Bağımsız değişken hangisidir?')}">
                 ${senaryo.bagimsizSecenekler.map((s, i) => {
                   const on = sec1 === i;
                   const cls = on ? (kontrol ? (i === senaryo.bagimsizDogru ? ' dogru' : ' yanlis') : ' sec') : '';
@@ -299,8 +300,8 @@ window.GorevPrototip = (() => {
               </div>
             </div>
             <div class="mg-soru-kart">
-              <div class="mg-soru-bas"><span class="mg-soru-no">2</span><b>Bağımlı değişken hangisidir?</b></div>
-              <div class="mg-secenek-grid" role="radiogroup" aria-label="Bağımlı değişken hangisidir?">
+              <div class="mg-soru-bas"><span class="mg-soru-no">2</span><b>${esc(senaryo.soru2 || 'Bağımlı değişken hangisidir?')}</b></div>
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru2 || 'Bağımlı değişken hangisidir?')}">
                 ${senaryo.bagimliSecenekler.map((s, i) => {
                   const on = sec2 === i;
                   const cls = on ? (kontrol ? (i === senaryo.bagimliDogru ? ' dogru' : ' yanlis') : ' sec') : '';
@@ -345,16 +346,34 @@ window.GorevPrototip = (() => {
         durdurSes();
         caliyor = true;
         guncelleSesBtn();
-        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+        const speechYedek = () => {
+          if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+            try {
+              if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+              const u = new SpeechSynthesisUtterance(senaryo.metin);
+              u.lang = 'tr-TR';
+              const tr = (window.speechSynthesis.getVoices() || []).find(v => /^tr/i.test(v.lang));
+              if (tr) u.voice = tr;
+              u.onend = () => { if (!destroyed) { caliyor = false; guncelleSesBtn(); } };
+              u.onerror = () => { if (!destroyed) { caliyor = false; guncelleSesBtn(); } };
+              window.speechSynthesis.speak(u);
+              return;
+            } catch (e) { /* yoksay */ }
+          }
+          caliyor = false;
+          guncelleSesBtn();
+        };
+        if (senaryo.audio_data_url) {
           try {
-            const u = new SpeechSynthesisUtterance(senaryo.metin);
-            u.lang = 'tr-TR';
-            const tr = (window.speechSynthesis.getVoices() || []).find(v => /^tr/i.test(v.lang));
-            if (tr) u.voice = tr;
-            u.onend = () => { if (!destroyed) { caliyor = false; guncelleSesBtn(); } };
-            window.speechSynthesis.speak(u);
-          } catch (e) { caliyor = false; guncelleSesBtn(); }
+            audioEl = new Audio(senaryo.audio_data_url);
+            audioEl.onended = () => { if (!destroyed) { caliyor = false; audioEl = null; guncelleSesBtn(); } };
+            audioEl.onerror = () => { if (!destroyed && caliyor) { audioEl = null; speechYedek(); } };
+            const pr = audioEl.play();
+            if (pr && pr.catch) pr.catch(() => { if (!destroyed && caliyor) { audioEl = null; speechYedek(); } });
+            return;
+          } catch (e) { audioEl = null; }
         }
+        speechYedek();
       }
     };
 

@@ -10,7 +10,7 @@
 /* Sahne alanı */
 .slayt-sahne { display: flex; flex-direction: column; gap: 14px; }
 .slayt-gorsel-kutu { position: relative; border-radius: 18px; overflow: hidden; border: 1.5px solid var(--cizgi2); background: #F5F8F7; }
-.slayt-gorsel-kutu svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7.8; }
+.slayt-gorsel-kutu svg, .slayt-gorsel-kutu img.slayt-uretilen-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7.8; object-fit: cover; }
 .slayt-dosya-etiket { position: absolute; left: 12px; bottom: 12px; background: rgba(17, 33, 30, .74); backdrop-filter: blur(6px); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; }
 .slayt-soru-serit { background: var(--ana-acik); color: var(--murekkep); border-radius: 14px; padding: 14px 18px; font: 600 17px/1.4 var(--baslik); letter-spacing: -.01em; }
 

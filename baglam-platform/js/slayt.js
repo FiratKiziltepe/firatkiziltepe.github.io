@@ -480,7 +480,10 @@ window.SlaytSunum = (() => {
 
   function slaytGovde(profil, s) {
     if (s.slide_type === 'scenario_scene') {
-      return `<div class="slayt-gorsel-kutu">${sahneSVG(profil.temaTip)}<span class="slayt-dosya-etiket">${esc(s.image_path)}</span></div>
+      const gorsel = s.image_data_url
+        ? `<img class="slayt-uretilen-img" src="${s.image_data_url}" alt="${esc(s.altBaslik || s.ustBaslik)}">`
+        : sahneSVG(profil.temaTip);
+      return `<div class="slayt-gorsel-kutu">${gorsel}<span class="slayt-dosya-etiket">${esc(s.image_path)}</span></div>
         <div class="slayt-soru-serit">${esc(s.soru)}</div>`;
     }
     if (s.slide_type === 'condition_cards') {
@@ -525,6 +528,7 @@ window.SlaytSunum = (() => {
     let caliyor = false;
     let ilerlemeOran = 0;
     let timer = null;
+    let audioEl = null;
     let baslangic = 0;
     let destroyed = false;
 
@@ -532,6 +536,10 @@ window.SlaytSunum = (() => {
       caliyor = false;
       clearInterval(timer);
       timer = null;
+      if (audioEl) {
+        try { audioEl.pause(); audioEl.currentTime = 0; } catch (e) { /* yoksay */ }
+        audioEl = null;
+      }
       if (window.speechSynthesis) {
         try { window.speechSynthesis.cancel(); } catch (e) { /* yoksay */ }
       }
@@ -560,37 +568,72 @@ window.SlaytSunum = (() => {
       caliyor = true;
       ilerlemeOran = 0;
       baslangic = performance.now();
-      const sureMs = (s.estimated_duration_seconds * 1000) / hiz;
+      const sureMs = ((s.estimated_duration_seconds || 15) * 1000) / hiz;
 
-      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+      if (s.audio_data_url) {
         try {
-          const u = new SpeechSynthesisUtterance(s.narration);
-          u.lang = 'tr-TR';
-          u.rate = hiz;
-          const sesler = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
-          const tr = sesler.find(v => /^tr/i.test(v.lang));
-          if (tr) u.voice = tr;
-          u.onend = () => {
+          audioEl = new Audio(s.audio_data_url);
+          audioEl.playbackRate = hiz;
+          audioEl.ontimeupdate = () => {
+            if (!audioEl || !audioEl.duration || destroyed || !caliyor) return;
+            ilerlemeOran = Math.min(1, audioEl.currentTime / audioEl.duration);
+            guncelleProgressDOM();
+          };
+          audioEl.onended = () => {
             if (destroyed || !caliyor) return;
             ilerlemeOran = 1;
             guncelleProgressDOM();
             if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
             else { durdurSes(); guncelleProgressDOM(); }
           };
-          window.speechSynthesis.speak(u);
-        } catch (e) { /* TTS yedek zamanlayıcı ile devam eder */ }
+          audioEl.onerror = () => {
+            if (destroyed || !caliyor) return;
+            audioEl = null;
+            baslatSpeechFallback();
+          };
+          const pr = audioEl.play();
+          if (pr && pr.catch) pr.catch(() => { if (!destroyed && caliyor) { audioEl = null; baslatSpeechFallback(); } });
+          guncelleProgressDOM();
+          return;
+        } catch (e) { audioEl = null; }
       }
 
-      timer = setInterval(() => {
-        if (destroyed || !caliyor) return;
-        ilerlemeOran = Math.min(1, (performance.now() - baslangic) / sureMs);
-        guncelleProgressDOM();
-        if (ilerlemeOran >= 1 && !(window.speechSynthesis && window.speechSynthesis.speaking)) {
-          if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
-          else { durdurSes(); guncelleProgressDOM(); }
+      function baslatSpeechFallback() {
+        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+          try {
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+            const u = new SpeechSynthesisUtterance(s.narration);
+            u.lang = 'tr-TR';
+            u.rate = hiz;
+            const sesler = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+            const tr = sesler.find(v => /^tr/i.test(v.lang));
+            if (tr) u.voice = tr;
+            u.onend = () => {
+              if (destroyed || !caliyor) return;
+              ilerlemeOran = 1;
+              guncelleProgressDOM();
+              if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
+              else { durdurSes(); guncelleProgressDOM(); }
+            };
+            u.onerror = () => { /* Görsel zamanlayıcı ile devam eder */ };
+            window.speechSynthesis.speak(u);
+          } catch (e) { /* TTS yedek zamanlayıcı ile devam eder */ }
         }
-      }, 120);
-      guncelleProgressDOM();
+        if (!timer) {
+          baslangic = performance.now();
+          timer = setInterval(() => {
+            if (destroyed || !caliyor) return;
+            ilerlemeOran = Math.min(1, (performance.now() - baslangic) / sureMs);
+            guncelleProgressDOM();
+            if (ilerlemeOran >= 1 && !(window.speechSynthesis && window.speechSynthesis.speaking)) {
+              if (otomatik && idx < slaytlar.length - 1) { idx++; draw(); baslatSes(); }
+              else { durdurSes(); guncelleProgressDOM(); }
+            }
+          }, 120);
+        }
+        guncelleProgressDOM();
+      }
+      baslatSpeechFallback();
     };
 
     function draw() {

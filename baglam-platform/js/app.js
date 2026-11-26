@@ -29,6 +29,8 @@
     hedef: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
     ampul: '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
     arti: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    yildiz: '<polygon points="12 2 14.9 8.6 22 9.3 16.6 14 18.2 21 12 17.3 5.8 21 7.4 14 2 9.3 9.1 8.6 12 2"/>',
+    indir: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
     ekran: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
     ayar: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   };
@@ -78,9 +80,11 @@
       ['gemini-2.5-flash-image', 'Gemini 2.5 Flash Image'],
     ],
     tts: [
-      ['tr-TR-Wavenet-E', 'Google TTS · tr-TR-Wavenet-E'],
-      ['tr-TR-Chirp3-HD', 'Google TTS · tr-TR-Chirp3-HD'],
-      ['tr-TR-Standard-A', 'Google TTS · tr-TR-Standard-A'],
+      ['gemini-2.5-flash-preview-tts', 'Gemini 2.5 Flash TTS (Gemini Key · Türkçe)'],
+      ['gemini-2.5-pro-preview-tts', 'Gemini 2.5 Pro TTS (Gemini Key · Yüksek kalite)'],
+      ['tr-TR-Wavenet-E', 'Google Cloud TTS · tr-TR-Wavenet-E'],
+      ['tr-TR-Chirp3-HD-Aoede', 'Google Cloud TTS · tr-TR-Chirp3-HD-Aoede'],
+      ['tr-TR-Standard-A', 'Google Cloud TTS · tr-TR-Standard-A'],
     ],
   };
   const varsayilanUretim = () => ({
@@ -91,7 +95,7 @@
     scriptModel: 'claude-sonnet-4-5',
     promptModel: 'gemini-2.5-pro',
     gorselModel: 'imagen-3.0-generate-002',
-    sesModel: 'tr-TR-Wavenet-E',
+    sesModel: 'gemini-2.5-flash-preview-tts',
     sesHiz: '1.0',
     modeller: { claude: null, geminiText: null, geminiImage: null, tts: null },
   });
@@ -110,6 +114,22 @@
     slaytPlayer: null,
     gorevPlayer: null,
     sablonPlayer: null,
+    canliKSlayt: null,
+    canliKGorev: null,
+    canliDSlayt: null,
+    canliDGorev: null,
+    canliModul: 'm2',
+    canliProfil: 'o1',
+    canliOzelKategori: 'Spor',
+    canliOzelAlt: 'Tenis',
+    canliOzelAciklama: 'Haftada 3 gün tenis antrenmanı yapıyorum, servis hızımı ve ilk servis isabet oranımı takip ediyorum.',
+    canliKontrolGorunum: 'slayt',
+    canliDeneyGorunum: 'slayt',
+    canliSonuc: null,
+    canliAdimlar: {},
+    canliCalisiyor: false,
+    canliHata: null,
+    canliDetayAcik: false,
     juriProf: 0,
     juriEvrenProf: 0,
     juriSlaytProf: 1,
@@ -441,7 +461,9 @@
         <div class="mod-bas-alt"><a class="btn beyaz" href="#ders-${m.id}-${n || 'v1'}">${t === ADIM ? 'Baştan izle' : t ? 'Devam et' : 'Başla'} ${ic('sag')}</a><span>${m.videolar.length} video · ${sureTop(m)}</span><span>${t}/${ADIM} adım</span></div>
         ${obj(m.obj, 0.4)}</header>
       <section><h2 class="bb">Konu anlatımı</h2><div class="vid-izgara">${m.videolar.map((v, j) => `<a class="vk" href="#ders-${m.id}-v${j + 1}">
-          <div class="kapak vk-kapak${ac(m)}" style="${stil(m)}"><time>${v.sure}</time>${p.v[j] ? `<span class="vk-tik">${ic('check')}İzlendi</span>` : ''}${obj(m.obj, j * 0.9 - 0.6)}<span class="vk-oynat">${ic('play')}</span></div>
+          ${v.video
+            ? `<div class="kapak vk-kapak vk-has-video"><video class="vk-video" src="${encodeURI(v.video)}#t=0.05" preload="metadata" muted playsinline tabindex="-1" aria-hidden="true"></video><time>${v.sure}</time>${p.v[j] ? `<span class="vk-tik">${ic('check')}İzlendi</span>` : ''}<span class="vk-oynat">${ic('play')}</span></div>`
+            : `<div class="kapak vk-kapak${ac(m)}" style="${stil(m)}"><time>${v.sure}</time>${p.v[j] ? `<span class="vk-tik">${ic('check')}İzlendi</span>` : ''}${obj(m.obj, j * 0.9 - 0.6)}<span class="vk-oynat">${ic('play')}</span></div>`}
           <h3>${j + 1}. ${v.ad}</h3><p>${v.ozet}</p></a>`).join('')}</div></section>
       <section><h2 class="bb">Uygulama</h2><div class="ikili">
         <a class="uk" href="#ders-${m.id}-ornek"><small>Örnek uygulama · ${esc(b.alt.ad)}</small><h3>${m.ornek.ad}</h3><p>${b.c.tema}</p><span class="durum${p.ornek ? ' t' : ''}">${p.ornek ? ic('check') + 'Tamamlandı' : '3 adım ' + ic('sag')}</span>${obj(b.ilgi.obj, 0.2)}</a>
@@ -477,9 +499,10 @@
           <p>Öğrenci ilgi toplama yöntemini seçin, yapılandırmayı inceleyin ve iki yöntem arasında geçiş yapın.</p>
         </div>
         <div class="yon-aksiyon">
+          <a class="btn" href="#canli">${ic('yildiz')}Canlı API deneyi</a>
           <a class="btn ghost" href="#juri">${ic('ampul')}Jüri sunumu</a>
           <a class="btn ghost" href="#ilgi">1. Ekranı önizle</a>
-          <a class="btn" href="#alt-ilgi">2. Ekranı önizle ${ic('sag')}</a>
+          <a class="btn ghost" href="#alt-ilgi">2. Ekranı önizle ${ic('sag')}</a>
         </div>
       </div>
 
@@ -758,9 +781,14 @@
           </div>
         </div>
 
+        <div class="yon-durum-satir">
+          <span>Yukarıdaki anahtarlar ve model seçimleriyle deney grubunu canlı çalıştırıp kontrol grubuyla yan yana karşılaştırın:</span>
+          <a class="btn" href="#canli">${ic('yildiz')}Canlı Deney Laboratuvarını Aç (API) ${ic('sag')}</a>
+        </div>
+
         <aside class="ar-not">
-          <h3>Prototip notu</h3>
-          <p>Şu aşamada gerçek API üretimi çalıştırılmaz; bu ekran üretim hattı mimarisini ve model seçim arayüzünü göstermek içindir. Örnek sunumlar yerleşik dinamik SVG bileşenleri ve tarayıcı seslendirme önizlemesi ile çalışır.</p>
+          <h3>Önbellek ve canlı API üretimi</h3>
+          <p>Canlı Deney ekranında üretilen metin, Gemini görselleri ve Google TTS sesleri tarayıcının IndexedDB önbelleğinde saklanır; istenirse <b>images/</b> ve <b>audio/</b> klasörlerine indirilebilir.</p>
         </aside>
       </section>
 
@@ -1304,9 +1332,13 @@
 
   function dVideo(m, j) {
     const v = m.videolar[j], no = D.moduller.indexOf(m) + 1;
+    const videoSrc = v.video ? `${encodeURI(v.video)}#t=0.05` : `assets/video/m${no}.mp4`;
+    const kapakBtn = v.video
+      ? `<button class="vp-kapak vp-kapak-video" id="vpKapak" aria-label="Videoyu oynat"><span class="vp-buyuk">${ic('play')}</span><small>Video ${j + 1}/${m.videolar.length}</small><h2>${v.ad}</h2></button>`
+      : `<button class="vp-kapak kapak${ac(m)}" id="vpKapak" aria-label="Videoyu oynat"><span class="vp-buyuk">${ic('play')}</span><small>Video ${j + 1}/${m.videolar.length}</small><h2>${v.ad}</h2>${obj(m.obj, j * 0.9 - 0.6)}</button>`;
     return `<div class="vp" id="vp" data-sure="${sn(v.sure)}" data-m="${m.id}" data-j="${j}">
-        <video id="vid" src="assets/video/m${no}.mp4" preload="metadata" playsinline></video>
-        <button class="vp-kapak kapak${ac(m)}" id="vpKapak" aria-label="Videoyu oynat"><span class="vp-buyuk">${ic('play')}</span><small>Video ${j + 1}/${m.videolar.length}</small><h2>${v.ad}</h2>${obj(m.obj, j * 0.9 - 0.6)}</button>
+        <video id="vid" src="${videoSrc}" preload="metadata" playsinline></video>
+        ${kapakBtn}
         <div class="vp-kontrol"><button id="vpOyna" aria-label="Oynat / duraklat">${ic('play')}</button><span id="vpZaman">0:00 / ${v.sure}</span>
           <div class="vp-cubuk" id="vpCubuk" role="slider" aria-label="Video konumu" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><span><i id="vpIlerle"></i></span></div>
           <button id="vpHiz" aria-label="Oynatma hızı">1×</button><button id="vpTam" aria-label="Tam ekran">${ic('tam')}</button></div></div>
@@ -1501,17 +1533,26 @@
     const v = $('#vid'), ilan = +vp.dataset.sure; UI.video = v;
     const guncelle = () => {
       if (!vp.isConnected) return;
-      const p = v.duration ? v.currentTime / v.duration : 0;
+      const top = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : ilan;
+      const cur = v.duration ? v.currentTime : 0;
+      const p = top ? cur / top : 0;
       $('#vpIlerle').style.width = p * 100 + '%';
       $('#vpCubuk').setAttribute('aria-valuenow', Math.round(p * 100));
-      $('#vpZaman').textContent = fmt(p * ilan) + ' / ' + fmt(ilan);
+      $('#vpZaman').textContent = fmt(cur) + ' / ' + fmt(top);
       $('#vpOyna').innerHTML = ic(v.paused ? 'play' : 'pause');
     };
-    const oynat = () => { vp.classList.add('basladi'); const pr = v.play(); if (pr) pr.catch(() => {}); };
+    const oynat = () => {
+      vp.classList.add('basladi');
+      if (v.currentTime > 0 && v.currentTime < 0.25 && v.readyState >= 1) {
+        try { v.currentTime = 0; } catch (e) { /* yoksay */ }
+      }
+      const pr = v.play();
+      if (pr) pr.catch(() => {});
+    };
     const degistir = () => (v.paused ? oynat() : v.pause());
     UI.oynat = oynat;
     $('#vpKapak').onclick = oynat; $('#vpOyna').onclick = degistir; v.onclick = degistir;
-    v.ontimeupdate = guncelle; v.onplay = guncelle; v.onpause = guncelle;
+    v.onloadedmetadata = guncelle; v.ontimeupdate = guncelle; v.onplay = guncelle; v.onpause = guncelle;
     v.onended = () => { guncelle(); adimIsaretle(vp.dataset.m, 'v' + (+vp.dataset.j + 1)); };
     const ara = oran => { if (v.duration) v.currentTime = Math.min(Math.max(oran, 0), 1) * v.duration; };
     $('#vpCubuk').onclick = e => { const r = e.currentTarget.getBoundingClientRect(); ara((e.clientX - r.left) / r.width); };
@@ -1534,6 +1575,233 @@
     if ($('#dersCubuk')) { $('#dersCubuk').style.width = t / ADIM * 100 + '%'; $('#dersSay').textContent = t + '/' + ADIM; }
   }
 
+  /* ---------- Canlı Deney Laboratuvarı: Kontrol Grubu vs API Üretimi ---------- */
+  function canliSeciliProfil() {
+    if (UI.canliProfil === 'ozel') {
+      const alt = (UI.canliOzelAlt || '').trim() || 'Özel ilgi';
+      const kat = (UI.canliOzelKategori || '').trim() || 'İlgi alanı';
+      const slugId = alt.toLocaleLowerCase('tr').replace(/[^a-z0-9]/g, '').slice(0, 14) || 'ilgi';
+      return {
+        id: 'ozel-' + slugId,
+        etiket: `Özel öğrenci — ${alt}`,
+        kisaEtiket: alt,
+        kategori: kat,
+        altKategori: alt,
+        ozgulKisa: alt,
+        etkilesimler: [],
+        aciklama: (UI.canliOzelAciklama || '').trim() || `${kat} alanında ${alt} ile ilgileniyorum.`,
+      };
+    }
+    if (UI.canliProfil === 'aktif') {
+      const top = siraliAltlar()[0];
+      if (top) {
+        const det = (P().detay[top.a.id] || '').trim();
+        const etk = zenginMi() ? ((P().etkinlik && P().etkinlik[top.a.id]) || []) : [];
+        return {
+          id: 'aktif-' + top.a.id,
+          etiket: `Aktif öğrenci (${S.kul ? S.kul.ad : 'Deniz'}) — ${top.a.ad}`,
+          kisaEtiket: top.a.ad,
+          kategori: top.k.ad,
+          altKategori: top.a.ad,
+          ozgulKisa: det || top.a.ad,
+          etkilesimler: etk,
+          aciklama: det || `${top.k.ad} kategorisinde ${top.a.ad} (puan: ${top.p}/5).`,
+        };
+      }
+    }
+    return D.juriSunum.profiller.find(p => p.id === UI.canliProfil) || D.juriSunum.profiller[0];
+  }
+
+  let canliBakAnahtar = '';
+  async function canliOnbellekBak() {
+    if (!window.CanliDeney) return;
+    const p = canliSeciliProfil();
+    const key = `${UI.canliModul}::${p.id}`;
+    if (UI.canliSonuc && UI.canliSonuc.cacheKey === key) return;
+    if (canliBakAnahtar === key) return;
+    canliBakAnahtar = key;
+    const cached = await window.CanliDeney.cacheGet(key);
+    canliBakAnahtar = '';
+    if (cached && rota().ad === 'canli') {
+      const simdikiP = canliSeciliProfil();
+      if (`${UI.canliModul}::${simdikiP.id}` === key) {
+        UI.canliSonuc = cached;
+        yenile();
+      }
+    }
+  }
+
+  async function canliUretBaslat(zorla = false) {
+    if (!window.CanliDeney || UI.canliCalisiyor) return;
+    const m = modul(UI.canliModul);
+    const profil = canliSeciliProfil();
+    UI.canliCalisiyor = true;
+    UI.canliHata = null;
+    UI.canliAdimlar = {
+      1: { adim: 1, durum: 'bekliyor', mesaj: 'Hazırlanıyor' },
+      2: { adim: 2, durum: 'bekliyor', mesaj: 'Bekliyor' },
+      3: { adim: 3, durum: 'bekliyor', mesaj: 'Bekliyor' },
+      4: { adim: 4, durum: 'bekliyor', mesaj: 'Bekliyor' },
+    };
+    yenile();
+    try {
+      const sonuc = await window.CanliDeney.uretDeneyIcerigi(
+        { modul: m, profil, uretim: UI.uretim, zorla },
+        bilgi => {
+          UI.canliAdimlar[bilgi.adim] = bilgi;
+          const kutu = document.querySelector(`[data-canli-adim="${bilgi.adim}"]`);
+          if (kutu) {
+            kutu.className = `canli-adim ${bilgi.durum || ''}`;
+            const sp = kutu.querySelector('span');
+            if (sp) sp.textContent = bilgi.mesaj;
+          }
+        }
+      );
+      UI.canliSonuc = sonuc;
+    } catch (err) {
+      UI.canliHata = err && err.message ? err.message : String(err);
+    } finally {
+      UI.canliCalisiyor = false;
+      yenile();
+    }
+  }
+
+  function sCanli() {
+    const m = modul(UI.canliModul);
+    const profil = canliSeciliProfil();
+    const beklenenKey = `${m.id}::${profil.id}`;
+    const aktifSonuc = (UI.canliSonuc && UI.canliSonuc.cacheKey === beklenenKey) ? UI.canliSonuc : null;
+    const claudeOk = !!(UI.uretim.claudeKey || '').trim();
+    const geminiOk = !!(UI.uretim.geminiKey || '').trim();
+    const ttsOk = !!((UI.uretim.ttsKey || UI.uretim.geminiKey || '').trim());
+    const adimTanimlari = [
+      [1, '1. Senaryo & İçerik', UI.uretim.senaryoModel],
+      [2, '2. Seslendirme Scripti', UI.uretim.scriptModel],
+      [3, '3. Görsel Prompt', UI.uretim.promptModel],
+      [4, '4. Görsel & TTS Ses', `${UI.uretim.gorselModel} + ${UI.uretim.sesModel}`],
+    ];
+    return kabuk('yonetici', `<div class="sayfa canli-sayfa">
+      <div class="sb">
+        <div>
+          <h1>Canlı Deney Laboratuvarı · Kontrol vs API</h1>
+          <p>Kontrol grubu için 6 modülde hazır standart içerik sunulur; deney grubu için seçtiğiniz öğrenci profili ve modellerle API üzerinden canlı üretim yapılır.</p>
+        </div>
+        <div class="yon-aksiyon">
+          <a class="btn ghost" href="#yonetici">${ic('ayar')}API &amp; Model Ayarları</a>
+          <a class="btn ghost" href="#juri">${ic('ampul')}Jüri sunumu</a>
+        </div>
+      </div>
+
+      <section class="canli-panel">
+        <div class="canli-secim-izgara">
+          <div class="canli-alan">
+            <label for="canliModul">Modül seçimi (6 modül · hazır Kontrol içeriği)</label>
+            <select id="canliModul">
+              ${D.moduller.map((md, idx) => `<option value="${md.id}"${md.id === m.id ? ' selected' : ''}>Modül ${idx + 1} — ${esc(md.ad)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="canli-alan">
+            <label for="canliProfil">Deney grubu öğrenci profili</label>
+            <select id="canliProfil">
+              ${D.juriSunum.profiller.map(pr => `<option value="${pr.id}"${UI.canliProfil === pr.id ? ' selected' : ''}>${esc(pr.etiket)} (${esc(pr.ozgulKisa)})</option>`).join('')}
+              <option value="aktif"${UI.canliProfil === 'aktif' ? ' selected' : ''}>Aktif platform öğrencisi (${esc(S.kul ? S.kul.ad : 'Deniz Aydın')})</option>
+              <option value="ozel"${UI.canliProfil === 'ozel' ? ' selected' : ''}>Özel profil (kendin yaz...)</option>
+            </select>
+          </div>
+          <div class="canli-aksiyonlar">
+            <button type="button" class="btn" data-act="canliUret"${UI.canliCalisiyor ? ' disabled' : ''}>
+              ${UI.canliCalisiyor ? 'API ile üretiliyor...' : aktifSonuc ? 'Önbellekten gösteriliyor · Yeniden Üret' : 'Deney Grubu Üret (Canlı API)'}
+            </button>
+          </div>
+        </div>
+
+        ${UI.canliProfil === 'ozel' ? `<div class="canli-ozel-profil">
+          <div class="canli-alan">
+            <label for="canliOzelKategori">Ana kategori</label>
+            <input id="canliOzelKategori" type="text" value="${esc(UI.canliOzelKategori)}" placeholder="Örn. Spor, Teknoloji, Müzik">
+          </div>
+          <div class="canli-alan">
+            <label for="canliOzelAlt">Alt ilgi alanı</label>
+            <input id="canliOzelAlt" type="text" value="${esc(UI.canliOzelAlt)}" placeholder="Örn. Tenis, Robotik, Fotoğrafçılık">
+          </div>
+          <div class="canli-alan" style="grid-column:1/-1">
+            <label for="canliOzelAciklama">Öğrencinin özgül açıklaması (kişiselleştirme bağlamı)</label>
+            <textarea id="canliOzelAciklama" rows="2" placeholder="Öğrencinin günlük pratiğini veya takip ettiği konuyu yazın...">${esc(UI.canliOzelAciklama)}</textarea>
+          </div>
+        </div>` : ''}
+
+        <div class="canli-model-serit">
+          <div class="canli-model-etiketler">
+            <span>Claude: ${claudeOk ? 'Hazır ✓' : 'Anahtar yok'}</span>
+            <span>Gemini: ${geminiOk ? 'Hazır ✓' : 'Anahtar yok'}</span>
+            <span>TTS: ${ttsOk ? 'Cloud TTS ✓' : 'Tarayıcı TTS'}</span>
+            <span>Kazanım: ${esc(m.ozet)}</span>
+          </div>
+          <a href="#yonetici">Modelleri / Anahtarları düzenle →</a>
+        </div>
+
+        <div class="canli-akis" id="canliAkis">
+          ${adimTanimlari.map(([no, bas, modAd]) => {
+            const st = UI.canliAdimlar[no] || (aktifSonuc ? { durum: 'bitti', mesaj: aktifSonuc.onbellekten ? 'IndexedDB önbellekten yüklendi' : 'Tamamlandı' } : { durum: '', mesaj: 'Bekliyor' });
+            return `<div class="canli-adim ${st.durum || ''}" data-canli-adim="${no}">
+              <small>${bas}</small>
+              <b>${esc(modAd)}</b>
+              <span>${esc(st.mesaj || '')}</span>
+            </div>`;
+          }).join('')}
+        </div>
+
+        ${UI.canliHata ? `<div class="yon-model-bilgi hata"><b>Üretim hatası:</b> ${esc(UI.canliHata)} · <a href="#yonetici" style="text-decoration:underline;color:inherit">Yönetici panelinden anahtar ve modelleri kontrol et</a></div>` : ''}
+
+        ${aktifSonuc ? `<div class="canli-aksiyonlar">
+          <button type="button" class="btn ghost" data-act="canliYenidenUret"${UI.canliCalisiyor ? ' disabled' : ''}>Önbelleği yoksay &amp; Yeniden üret</button>
+          <button type="button" class="btn ghost" data-act="canliIndir">${ic('indir')}Klasöre Kaydet (images/ &amp; audio/)</button>
+          <button type="button" class="btn ghost" data-act="canliOnbellekSil">Bu önbelleği temizle</button>
+          <button type="button" class="btn ghost" data-act="canliDetay">${UI.canliDetayAcik ? 'Prompt &amp; JSON gizle' : 'Üretilen Prompt &amp; JSON'}</button>
+        </div>` : ''}
+
+        ${aktifSonuc && UI.canliDetayAcik ? `<div class="canli-detay-kutu">
+          <b>Üretim meta bilgileri (${esc(aktifSonuc.meta.tarih || '')}) · ${esc(aktifSonuc.meta.gorselNot || '')} · ${esc(aktifSonuc.meta.ttsNot || '')}</b>
+          <pre>${esc(JSON.stringify({ prompts: aktifSonuc.prompts, slayt: { ...aktifSonuc.slayt, slaytlar: aktifSonuc.slayt.slaytlar.map(s => ({ ...s, image_data_url: s.image_data_url ? '[image data url]' : undefined, audio_data_url: s.audio_data_url ? '[audio data url]' : undefined })) }, gorev: { ...aktifSonuc.gorev, image_data_url: aktifSonuc.gorev.image_data_url ? '[image data url]' : undefined, audio_data_url: aktifSonuc.gorev.audio_data_url ? '[audio data url]' : undefined } }, null, 2))}</pre>
+        </div>` : ''}
+      </section>
+
+      <div class="canli-karsilastirma">
+        <section class="canli-kolon">
+          <div class="canli-kolon-ust">
+            <div class="canli-kolon-bas">
+              <small>Kontrol grubu · Deneysel eşdeğerlik tabanı</small>
+              <h2>Standart içerik (${esc(m.id.toUpperCase())})</h2>
+            </div>
+            <div class="canli-gorunum-sec" role="group" aria-label="Kontrol görünümü">
+              <button type="button" class="${UI.canliKontrolGorunum === 'slayt' ? 'on' : ''}" data-act="canliKGorunum" data-v="slayt">Çözümlü örnek</button>
+              <button type="button" class="${UI.canliKontrolGorunum === 'gorev' ? 'on' : ''}" data-act="canliKGorunum" data-v="gorev">Mikro-görev</button>
+            </div>
+          </div>
+          <div id="canliKontrolHost"></div>
+        </section>
+
+        <section class="canli-kolon deney">
+          <div class="canli-kolon-ust">
+            <div class="canli-kolon-bas">
+              <small>Deney grubu · Canlı kişiselleştirme</small>
+              <h2>${esc(profil.kisaEtiket || profil.altKategori)} (${esc(m.id.toUpperCase())})</h2>
+            </div>
+            <div class="canli-gorunum-sec" role="group" aria-label="Deney görünümü">
+              <button type="button" class="${UI.canliDeneyGorunum === 'slayt' ? 'on' : ''}" data-act="canliDGorunum" data-v="slayt">Çözümlü örnek</button>
+              <button type="button" class="${UI.canliDeneyGorunum === 'gorev' ? 'on' : ''}" data-act="canliDGorunum" data-v="gorev">Mikro-görev</button>
+            </div>
+          </div>
+          ${aktifSonuc ? `<div id="canliDeneyHost"></div>` : `<div class="canli-bos">
+            <h3>${UI.canliCalisiyor ? 'Deney grubu API ile üretiliyor...' : 'Canlı API üretimi bekliyor'}</h3>
+            <p>${UI.canliCalisiyor ? 'Seçtiğiniz senaryo, script, prompt, Gemini görsel ve Google TTS adımları sırayla çalıştırılıyor.' : `Sol tarafta Kontrol grubunun hazır standart içeriğini inceleyebilirsiniz. “Deney Grubu Üret (Canlı API)” düğmesine bastığınızda ${esc(profil.altKategori)} bağlamında kişiselleştirilmiş 5 slaytlık örnek ve mikro-görev burada oluşur.`}</p>
+            ${!UI.canliCalisiyor ? `<button type="button" class="btn" data-act="canliUret">${ic('yildiz')}Şimdi Canlı Üret (API)</button>` : ''}
+          </div>`}
+        </section>
+      </div>
+    </div>`);
+  }
+
   /* ---------- Yönlendirme ---------- */
   let journey = null, sonRota = null;
   function rota() {
@@ -1551,16 +1819,20 @@
     }
     if (h === 'juri-slayt') return { ad: 'juri', bolum: 'juri-slayt' };
     if (h === 'juri-gorev') return { ad: 'juri', bolum: 'juri-gorev' };
-    return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri'].includes(h) ? h : 'acilis' };
+    return { ad: ['giris', 'kayit', 'ilgi', 'alt-ilgi', 'panel', 'moduller', 'profil', 'yonetici', 'juri', 'canli'].includes(h) ? h : 'acilis' };
   }
   function render(kaydirma = true) {
     if (journey) { journey.destroy(); journey = null; }
     if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
     if (UI.gorevPlayer) { UI.gorevPlayer.destroy(); UI.gorevPlayer = null; }
     if (UI.sablonPlayer) { UI.sablonPlayer.destroy(); UI.sablonPlayer = null; }
+    if (UI.canliKSlayt) { UI.canliKSlayt.destroy(); UI.canliKSlayt = null; }
+    if (UI.canliKGorev) { UI.canliKGorev.destroy(); UI.canliKGorev = null; }
+    if (UI.canliDSlayt) { UI.canliDSlayt.destroy(); UI.canliDSlayt = null; }
+    if (UI.canliDGorev) { UI.canliDGorev.destroy(); UI.canliDGorev = null; }
     if (UI.video) { UI.video.pause(); UI.video = null; }
     const r = rota();
-    if (['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul', 'ders'].includes(r.ad)) {
+    if (['panel', 'moduller', 'profil', 'yonetici', 'juri', 'canli', 'modul', 'ders'].includes(r.ad)) {
       if (!S.kul) S.kul = { ad: 'Deniz Aydın' };
       if (!P().secilen.length || !siraliAltlar().length) ornekProfil();
       kaydet();
@@ -1568,15 +1840,36 @@
     if (r.ad === 'alt-ilgi' && !P().secilen.length) { location.hash = 'ilgi'; return; }
     const sayfalar = {
       acilis: sAcilis, giris: () => sAuth('giris'), kayit: () => sAuth('kayit'), ilgi: sIlgi, 'alt-ilgi': sAlt,
-      panel: sPanel, moduller: sModuller, profil: sProfil, yonetici: sYonetici, juri: sJuri, modul: () => sModul(r.m), ders: () => sDers(r.m, r.k),
+      panel: sPanel, moduller: sModuller, profil: sProfil, yonetici: sYonetici, juri: sJuri, canli: sCanli, modul: () => sModul(r.m), ders: () => sDers(r.m, r.k),
     };
     app.innerHTML = sayfalar[r.ad]();
-    document.body.dataset.ekran = ['ilgi', 'alt-ilgi'].includes(r.ad) ? 'kur' : ['panel', 'moduller', 'profil', 'yonetici', 'juri', 'modul'].includes(r.ad) ? 'uyg' : r.ad;
+    document.body.dataset.ekran = ['ilgi', 'alt-ilgi'].includes(r.ad) ? 'kur' : ['panel', 'moduller', 'profil', 'yonetici', 'juri', 'canli', 'modul'].includes(r.ad) ? 'uyg' : r.ad;
     const anahtar = location.hash;
     if (kaydirma && anahtar !== sonRota) window.scrollTo(0, 0);
     sonRota = anahtar;
-    document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : 'Bağlam';
+    document.title = r.ad === 'ders' ? `${adimAdi(r.m, r.k)} · Bağlam` : r.ad === 'modul' ? `${r.m.ad} · Bağlam` : r.ad === 'yonetici' ? 'Yönetici paneli · Bağlam' : r.ad === 'juri' ? 'Jüri sunumu · Bağlam' : r.ad === 'canli' ? 'Canlı deney (Kontrol vs API) · Bağlam' : 'Bağlam';
     if (r.ad === 'acilis') journey = heroMod().mount($('.research-hero'));
+    if (r.ad === 'canli' && window.CanliDeney) {
+      const m = modul(UI.canliModul), p = canliSeciliProfil();
+      const kontrol = window.CanliDeney.getKontrol(m.id);
+      if (kontrol && $('#canliKontrolHost')) {
+        if (UI.canliKontrolGorunum === 'gorev' && window.GorevPrototip) {
+          UI.canliKGorev = window.GorevPrototip.createTaskPlayer($('#canliKontrolHost'), kontrol.gorev, {});
+        } else if (window.SlaytSunum) {
+          UI.canliKSlayt = window.SlaytSunum.createPlayer($('#canliKontrolHost'), kontrol.slayt, {});
+        }
+      }
+      const beklenenKey = `${m.id}::${p.id}`;
+      if (UI.canliSonuc && UI.canliSonuc.cacheKey === beklenenKey && $('#canliDeneyHost')) {
+        if (UI.canliDeneyGorunum === 'gorev' && window.GorevPrototip) {
+          UI.canliDGorev = window.GorevPrototip.createTaskPlayer($('#canliDeneyHost'), UI.canliSonuc.gorev, {});
+        } else if (window.SlaytSunum) {
+          UI.canliDSlayt = window.SlaytSunum.createPlayer($('#canliDeneyHost'), UI.canliSonuc.slayt, {});
+        }
+      } else {
+        canliOnbellekBak();
+      }
+    }
     if (r.ad === 'juri') {
       if (window.SlaytSunum && $('#juriSlaytHost')) {
         const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf || 0] || window.SlaytSunum.PROFILLER[0];
@@ -1750,13 +2043,20 @@
         if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
         const tum = data.models || [];
         const textModels = tum
-          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && !/tts|image/i.test(m.name || ''))
           .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
         const imgModels = tum
           .filter(m => /imagen|image/i.test(m.name || '') || (m.supportedGenerationMethods || []).includes('predict'))
           .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
+        const geminiTtsModels = tum
+          .filter(m => /tts/i.test(m.name || '') && (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map(m => { const id = (m.name || '').replace(/^models\//, ''); return [id, `${m.displayName || id} (${id})`]; });
         if (textModels.length) UI.uretim.modeller.geminiText = textModels;
         if (imgModels.length) UI.uretim.modeller.geminiImage = imgModels;
+        if (geminiTtsModels.length) {
+          UI.uretim.modeller.tts = [...geminiTtsModels, ...VARSAYILAN_MODELLER.tts.filter(([v]) => !geminiTtsModels.some(([g]) => g === v))];
+          ozet.push(`Gemini TTS: ${geminiTtsModels.length} model`);
+        }
         ozet.push(`Gemini: ${textModels.length} metin / ${imgModels.length} görsel modeli`);
       } catch (e) {
         hatalar.push(`Gemini: ${e.message}`);
@@ -1768,8 +2068,10 @@
         const res = await fetch(`https://texttospeech.googleapis.com/v1/voices?languageCode=tr-TR&key=${encodeURIComponent(tk)}`);
         const data = await res.json();
         if (res.ok && Array.isArray(data.voices) && data.voices.length) {
-          UI.uretim.modeller.tts = data.voices.map(v => [v.name, `Google TTS · ${v.name}${v.ssmlGender ? ' (' + v.ssmlGender + ')' : ''}`]);
-          ozet.push(`TTS: ${data.voices.length} Türkçe ses`);
+          const cloudVoices = data.voices.map(v => [v.name, `Google Cloud TTS · ${v.name}${v.ssmlGender ? ' (' + v.ssmlGender + ')' : ''}`]);
+          const geminiOnes = (UI.uretim.modeller.tts || []).filter(([id]) => /^gemini-/i.test(id));
+          UI.uretim.modeller.tts = [...(geminiOnes.length ? geminiOnes : VARSAYILAN_MODELLER.tts.filter(([id]) => /^gemini-/i.test(id))), ...cloudVoices];
+          ozet.push(`Cloud TTS: ${data.voices.length} Türkçe ses`);
         }
       } catch (e) { /* TTS key opsiyonel; hata vermeden varsayılanlar korunur */ }
     }
@@ -1791,6 +2093,33 @@
     gorevModSec: el => { gorevModDegistir(el.dataset.mod, el.dataset.git); },
     modelleriCek: () => { modelleriCek(); },
     modelleriSifirla: () => { UI.uretim.modeller = { claude: null, geminiText: null, geminiImage: null, tts: null }; UI.modelBilgi = null; kaydetUretim(); yenile(); },
+    canliUret: () => { canliUretBaslat(false); },
+    canliYenidenUret: () => { canliUretBaslat(true); },
+    canliOnbellekSil: async () => {
+      if (!window.CanliDeney) return;
+      const p = canliSeciliProfil();
+      const key = `${UI.canliModul}::${p.id}`;
+      await window.CanliDeney.cacheDel(key);
+      if (UI.canliSonuc && UI.canliSonuc.cacheKey === key) UI.canliSonuc = null;
+      UI.canliAdimlar = {};
+      yenile();
+    },
+    canliIndir: async () => {
+      if (!window.CanliDeney || !UI.canliSonuc) return;
+      try {
+        const msg = await window.CanliDeney.dosyalaraKaydet(UI.canliSonuc);
+        UI.canliHata = null;
+        UI.canliAdimlar[4] = { adim: 4, durum: 'bitti', mesaj: msg };
+        yenile();
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        UI.canliHata = err && err.message ? err.message : String(err);
+        yenile();
+      }
+    },
+    canliKGorunum: el => { UI.canliKontrolGorunum = el.dataset.v === 'gorev' ? 'gorev' : 'slayt'; yenile(); },
+    canliDGorunum: el => { UI.canliDeneyGorunum = el.dataset.v === 'gorev' ? 'gorev' : 'slayt'; yenile(); },
+    canliDetay: () => { UI.canliDetayAcik = !UI.canliDetayAcik; yenile(); },
     juriSlaytProf: el => {
       UI.juriSlaytProf = +el.dataset.i;
       if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }
@@ -1919,11 +2248,16 @@
     if (t.dataset.detay) { P().detay[t.dataset.detay] = t.value; kaydet(); }
     if (t.dataset.cevap) { S.cevap[t.dataset.cevap] = t.value; kaydet(); const s = document.getElementById('say-' + t.dataset.cevap); if (s) s.textContent = kelime(t.value) + ' kelime · otomatik kaydedilir'; }
     if (t.dataset.uretim) { UI.uretim[t.dataset.uretim] = t.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Otomatik kaydedildi'; }
+    if (t.id === 'canliOzelKategori') UI.canliOzelKategori = t.value;
+    if (t.id === 'canliOzelAlt') UI.canliOzelAlt = t.value;
+    if (t.id === 'canliOzelAciklama') UI.canliOzelAciklama = t.value;
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'bagSec') { S.baglamSec[e.target.dataset.m] = e.target.value; kaydet(); yenile(); }
     if (e.target.id === 'juriProfSelect') { UI.juriProf = +e.target.value; yenile(); }
     if (e.target.id === 'juriEvrenSelect') { UI.juriEvrenProf = +e.target.value; yenile(); }
+    if (e.target.id === 'canliModul') { UI.canliModul = e.target.value; UI.canliAdimlar = {}; UI.canliHata = null; yenile(); }
+    if (e.target.id === 'canliProfil') { UI.canliProfil = e.target.value; UI.canliAdimlar = {}; UI.canliHata = null; yenile(); }
     if (e.target.dataset && e.target.dataset.uretim) { UI.uretim[e.target.dataset.uretim] = e.target.value; kaydetUretim(); const r = $('#yonUretimRozet'); if (r) r.textContent = 'Model güncellendi'; }
   });
   document.addEventListener('submit', e => {
@@ -2019,7 +2353,7 @@
     ['acilis-1', 'Açılış sayfası (1. versiyon)'], ['acilis-2', 'Açılış sayfası (2. versiyon · 3B)'], ['acilis-3', 'Açılış sayfası (3. versiyon · Adım adım)'], ['giris', 'Giriş'], ['kayit', 'Kayıt'], ['ilgi', 'İlgi alanları'], ['alt-ilgi', 'Alt alanlar ve puanlama'],
     ['panel', 'Öğrenci ana sayfası'], ['moduller', 'Modüller'], ['modul-m2', 'Modül sayfası'], ['ders-m2-v1', 'Konu anlatım videosu'],
     ['ders-m2-ornek', 'Örnek uygulama'], ['ders-m2-gorev', 'Mikro görev'], ['ders-m4-gorev', 'Mikro görev (etkileşimli)'],
-    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['juri-slayt', 'Jüri sunumu (Slayt + Ses)'], ['juri-gorev', 'Jüri sunumu (Mikro-görev)'], ['yonetici', 'Yönetici paneli'],
+    ['ders-m2-duygu', 'Epistemik duygular'], ['ders-m2-ilgi', 'Durumsal ilgi'], ['ders-m2-son', 'Modül sonu'], ['profil', 'İlgi profili'], ['juri', 'Jüri sunumu (Kişiselleştirme)'], ['juri-slayt', 'Jüri sunumu (Slayt + Ses)'], ['juri-gorev', 'Jüri sunumu (Mikro-görev)'], ['yonetici', 'Yönetici paneli'], ['canli', 'Canlı Deney (Kontrol vs API)'],
   ].map(([r, a]) => `<a href="#${r}">${a}</a>`).join('')}<button class="proto-not" id="notDugme" data-act="notlar"></button><button data-act="sifirla">Verileri sıfırla</button></div>
   <div class="proto-alt-satir">
     <div class="proto-hero-bar" role="group" aria-label="Açılış sayfası versiyonu">

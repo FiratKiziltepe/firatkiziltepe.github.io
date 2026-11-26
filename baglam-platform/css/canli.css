@@ -1,0 +1,58 @@
+/* Canlı Deney Laboratuvarı: Kontrol Grubu (Standart) vs Deney Grubu (Canlı API) */
+.canli-sayfa { display: flex; flex-direction: column; gap: 22px; }
+.canli-panel { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 24px; padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; }
+.canli-secim-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; gap: 14px; align-items: end; }
+.canli-alan { display: flex; flex-direction: column; gap: 6px; }
+.canli-alan label { font-size: 13.5px; font-weight: 650; color: var(--murekkep); }
+.canli-alan select, .canli-alan input, .canli-alan textarea { border-radius: 12px; border: 1.5px solid var(--cizgi); background: var(--bg); padding: 10px 13px; font-size: 14.5px; font-weight: 500; width: 100%; }
+.canli-alan select { height: 44px; background: var(--yuzey); }
+.canli-ozel-profil { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 14px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.canli-model-serit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg); border-radius: 14px; font-size: 13px; color: var(--soluk); }
+.canli-model-etiketler { display: flex; flex-wrap: wrap; gap: 6px; }
+.canli-model-etiketler span { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 99px; padding: 4px 10px; font-weight: 600; color: var(--murekkep); }
+.canli-aksiyonlar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* 4 Adımlı Canlı Pipeline Çubuğu */
+.canli-akis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.canli-adim { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 14px; padding: 11px 13px; display: flex; flex-direction: column; gap: 4px; transition: border-color .2s, background .2s; }
+.canli-adim small { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--soluk); }
+.canli-adim b { font-size: 13.5px; font-weight: 650; color: var(--murekkep); }
+.canli-adim span { font-size: 12px; color: var(--soluk); }
+.canli-adim.calisiyor { border-color: var(--vurgu); background: var(--vurgu-acik); }
+.canli-adim.calisiyor small { color: #B84A12; }
+.canli-adim.bitti { border-color: var(--iyi); background: var(--iyi-acik); }
+.canli-adim.bitti small { color: #14613D; }
+.canli-adim.uyari { border-color: #E2B24A; background: #FFF7E3; }
+
+/* Yan Yana Kontrol vs Deney Görünümü */
+.canli-karsilastirma { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.canli-kolon { background: var(--yuzey); border: 1.5px solid var(--cizgi); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.canli-kolon.deney { border: 2px solid var(--ana); background: color-mix(in srgb, var(--ana-acik) 18%, var(--yuzey)); }
+.canli-kolon-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1.5px solid var(--cizgi2); }
+.canli-kolon-bas { display: flex; flex-direction: column; gap: 3px; }
+.canli-kolon-bas small { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--soluk); }
+.canli-kolon.deney .canli-kolon-bas small { color: var(--ana-koyu); }
+.canli-kolon-bas h2 { font-size: 20px; font-weight: 700; }
+.canli-gorunum-sec { display: inline-flex; gap: 4px; background: var(--bg); padding: 4px; border-radius: 99px; border: 1px solid var(--cizgi); }
+.canli-gorunum-sec button { height: 32px; padding: 0 12px; border-radius: 99px; font-size: 13px; font-weight: 600; color: var(--soluk); }
+.canli-gorunum-sec button.on { background: var(--murekkep); color: #fff; }
+
+.canli-bos { background: var(--bg); border: 1.5px dashed var(--cizgi); border-radius: 20px; padding: 36px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.canli-bos h3 { font-size: 20px; font-weight: 700; }
+.canli-bos p { color: var(--soluk); font-size: 15px; max-width: 34em; }
+
+.canli-kolon .slayt-kart, .canli-kolon .mg-kart { padding: 18px 20px; }
+.canli-kolon .slayt-kucukler { gap: 6px; }
+.canli-kolon .slayt-kucuk { padding: 8px 6px; }
+.canli-kolon .slayt-kucuk span { font-size: 11.5px; }
+.canli-kolon .mg-senaryo-kutu { grid-template-columns: minmax(0, 1fr); }
+
+.canli-detay-kutu { background: var(--bg); border: 1px solid var(--cizgi); border-radius: 16px; padding: 14px 16px; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+.canli-detay-kutu pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; max-height: 220px; overflow: auto; background: var(--yuzey); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--cizgi); }
+
+@media (max-width: 1180px) {
+  .canli-karsilastirma { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 860px) {
+  .canli-secim-izgara, .canli-ozel-profil, .canli-akis { grid-template-columns: minmax(0, 1fr); }
+}
