@@ -469,6 +469,143 @@ window.CanliDeney = (() => {
     return KONTROL_ICERIK[modulId] || KONTROL_ICERIK.m2;
   }
 
+  /* ---------- 1b. Learn Your Way (arXiv:2509.13348) Appendix B: Pedagojik Rubrikler & Deneysel Eşdeğerlik ---------- */
+  const APPENDIX_B_RUBRIKLER = [
+    {
+      id: 'accuracy',
+      kod: 'B1',
+      ad: 'Doğruluk (Accuracy)',
+      enAd: 'Accuracy — Faithful to the source and accurate',
+      tanim: 'Üretilen içeriğin kaynak materyale ve bilimsel yönteme sadakati; kavramları yanıltmadan veya yanlış ilişkilendirmeden doğru sunması.',
+      agree: 'Kaynakla tam tutarlıdır; kavramları yanlış temsil etmez veya yanlış bağlamaz. Ana argümanları ve temel iddiaları doğru, olgusal bir yapıda aktarır.',
+      partial: 'Ana kavramları bozmaz ancak küçük hatalar içerebilir veya bazı ikincil kavram/ilişkileri eksik bırakabilir.',
+      disagree: 'Kaynağa ters düşen iddialar, ciddi kavramsal hatalar içerir veya ana kavramları atlar.',
+    },
+    {
+      id: 'coverage',
+      kod: 'B2',
+      ad: 'Kapsam (Coverage)',
+      enAd: 'Coverage — Completeness of representation of source messages',
+      tanim: 'Kaynak içeriğin hiyerarşisini, bağlantılarını ve tüm temel öğrenme kazanımlarını (LO) eksiksiz temsil etmesi.',
+      agree: 'Kaynağın yapısını ve hiyerarşisini koruyarak tüm temel kavramları ve öğrenme kazanımlarını kapsar; yalnızca öğrenilebilirliği artırmak için önemsiz detayları sadeleştirir.',
+      partial: 'Konuyu çoğunlukla kapsar ancak bazı anahtar kavramları veya ilişkileri atlar; hiyerarşi kısmen bozulmuştur.',
+      disagree: 'Temel konu içeriği veya kavramsal yapı üretilen içerikte eksiktir.',
+    },
+    {
+      id: 'emphasis',
+      kod: 'B3',
+      ad: 'Vurgu (Emphasis)',
+      enAd: 'Emphasis — Precisely prioritizes core concepts',
+      tanim: 'Temel kavramları doğru önceliklendirmesi; kaynak hiyerarşisini tanıyıp ana mesajları optimal biçimde seçmesi ve yerleştirmesi.',
+      agree: 'Önemsiz veya marjinal detaylar yerine kaynağın anahtar kavramlarına ve ilişkilerine odaklanır; öğelerin hiyerarşisi bilgi/beceri hiyerarşisiyle örtüşür.',
+      partial: 'Çekirdek kavramların çoğunu içerir ancak önemli bir kavramı atlayabilir veya önemsiz bir detayı aşırı vurgulayabilir.',
+      disagree: 'Öğe seçimi rastgeledir; ana mesajlar yerine önemsiz kavramları öne çıkarır.',
+    },
+    {
+      id: 'engagement',
+      kod: 'B4',
+      ad: 'İlgi Çekicilik (Engagement)',
+      enAd: 'Engagement — Positive, pleasant and purposeful user experience',
+      tanim: 'Olumlu duygusal tepki uyandıran, tonu, anlatısı ve kişiselleştirme öğeleriyle anlamlı ve sürükleyici bir öğrenme deneyimi sunması.',
+      agree: 'Olumlu duygusal tepki uyandırır; ton, estetik, anlatı ve kişiselleştirme unsurları ilgi çekici ve amaçlı bir öğrenme deneyimi yaratır.',
+      partial: 'Tutarlı biçimde ilgi çekmez; kişiselleştirme sınırlıdır. Kullanıcı için faydası vardır ancak öğrenciye yeterince açık değildir.',
+      disagree: 'Kuru, sıkıcı ve tekdüze bir sunumdur; kullanıcı için algılanan bir değer oluşturmaz.',
+    },
+    {
+      id: 'cognitive_load',
+      kod: 'B5',
+      ad: 'Bilişsel Yük (Cognitive Load)',
+      enAd: 'Cognitive load — Effective use of cognitive effort',
+      tanim: 'Bilişsel çabanın etkin kullanımı; açık, özlü organizasyon, erişilebilir dil ve çoklu temsillerin (örnek, analoji, anlatı, görsel) uyumu.',
+      agree: 'İyi organize edilmiş, açık ve özlüdür. Erişilebilir dil kullanır, kilit noktaları vurgular; anlamayı güçlendirmek için örnekleri, anlatıyı ve çoklu temsilleri etkin kullanır.',
+      partial: 'Oldukça iyi yapılandırılmıştır ancak bazı ifadeler zordur veya gereksiz tekrarlar içerir; örnek ve çoklu temsil kullanımı sınırlıdır.',
+      disagree: 'Kötü yapılandırılmış, bunaltıcı metin blokları veya tutarsız dil düzeyi içerir; görsel/örnek desteği yoktur.',
+    },
+    {
+      id: 'active_learning',
+      kod: 'B6',
+      ad: 'Aktif Öğrenme (Active Learning)',
+      enAd: 'Active Learning — Promotes active learning beyond recall',
+      tanim: 'Hatırlama ve kavramanın ötesine geçerek analiz, uygulama, değerlendirme düzeylerinde aktif bilişsel katılımı teşvik etmesi.',
+      agree: 'Sorular sorar ve öğrenciyi konuyla hatırlama, kavrama, analiz, uygulama ve değerlendirme gibi çoklu düzeylerde etkileşime sokar.',
+      partial: 'Çoğunlukla bilgi aktarımına odaklanır; öğrenciyi öğrenme kazanımlarıyla çoklu düzeylerde etkileşime sokma fırsatlarını kaçırır.',
+      disagree: 'Tamamen bilgi aktarımıdır; üst düzey düşünmeyi teşvik etmez.',
+    },
+    {
+      id: 'metacognition',
+      kod: 'B7',
+      ad: 'Üstbilişi Derinleştirme (Deepen Metacognition)',
+      enAd: 'Deepen Metacognition — Promotes active self-reflection and monitoring',
+      tanim: 'Düşünme ve öğrenme süreçlerinin aktif öz-yansıtmasını, izlenmesini ve düzenlenmesini destekleyen eyleme dönüştürülebilir dönütler sunması.',
+      agree: 'İlgili ve eyleme dönüştürülebilir (actionable) geri bildirim sunar; aktif düşünmeyi ve öğrenme sürecini izlemeyi teşvik eder.',
+      partial: 'Kısmen yararlı geri bildirim sunar ancak yeterince eyleme dönük değildir; yüzeysel yansıtma sağlar.',
+      disagree: 'Düz bilgilendirici içeriktir; yararlı geri bildirim veya öz-düzenleme ipucu içermez.',
+    },
+    {
+      id: 'motivation',
+      kod: 'B8',
+      ad: 'Motivasyon ve Merak (Motivation & Curiosity)',
+      enAd: 'Motivation & curiosity — Encourages users to persist and deeply engage',
+      tanim: 'Destekleyici ton, optimal zorluk düzeyi ve konunun öğrencinin ilgi/kaygılarıyla bağını kurarak bilişsel çabayı teşvik etmesi.',
+      agree: 'Tutarlı biçimde destekleyici bir ton kullanır; çok kolay ile çok zor arasında optimal zorluk düzeyini korur ve konunun öğrencinin ilgi alanıyla ilişkisini vurgular.',
+      partial: 'Teşvik düzensizdir; zorluk düzeyi tam dengeli değildir veya gerçek yaşam/ilgi bağlantıları sınırlıdır.',
+      disagree: 'Destekleyici değildir; zorluk düzeyi uygunsuzdur ve öğrencinin ilgi alanıyla görünür bir bağ kurmaz.',
+    },
+    {
+      id: 'adaptability',
+      kod: 'B9',
+      ad: 'Uyarlanabilirlik ve Kişiselleştirme (Adaptability & Personalization)',
+      enAd: 'Adaptability & Personalization — Adjusted to fit user interests and characteristics',
+      tanim: 'Öğrenme deneyiminin öğrencinin ilgi profiline, etkileşim biçimine, özgül ilgi nesnesine ve düzeyine yüzeysel kalmadan uyarlanması.',
+      agree: 'İçerik öğrencinin ilgi alanına, etkileşim biçimlerine, özgül açıklamasına ve sınıf/dil düzeyine tam olarak uyarlanmıştır; görevler öğrencinin kapasitesiyle uyumludur.',
+      partial: 'Öğrencinin tercihlerini ve ilgi alanını tanır ancak yalnızca yüzeysel/kısmi olarak uyarlanmıştır.',
+      disagree: 'Öğrenci tercihlerini ve özelliklerini göz ardı eder; herkese tek tip ("one size fits all") içerik sunar.',
+    },
+    {
+      id: 'clarity_intentions',
+      kod: 'B10',
+      ad: 'Öğrenme Hedefleri ve Başarı Ölçütleri (Clarity of Learning Intentions)',
+      enAd: 'Clarity of Learning Intentions & Success Criteria',
+      tanim: 'Nelerin öğrenileceğinin (öğrenme kazanımı) ve öğrencinin başarılı olduğunu nasıl anlayacağının (başarı ölçütleri) açıkça ortaya konması.',
+      agree: 'Öğrenme kazanımları açık ve öğrenci dostudur; başarılı tamamlamanın neye benzediği nettir ve içerik kazanımlarla doğrudan hizalıdır.',
+      partial: 'Öğrenme kazanımları belirtilmiştir ancak yeterince detaylandırılmamıştır; başarı ölçütleri kısmen belirsizdir.',
+      disagree: 'Öğrenme kazanımları belirsiz veya tutarsızdır; görünür bir başarı ölçütü yoktur.',
+    },
+  ];
+
+  const ESDEGERLIK_KRITERLERI = [
+    {
+      id: 'eq_lo',
+      kod: 'E1',
+      ad: 'Öğrenme Kazanımı Eşdeğerliği',
+      tanim: 'Kontrol ve deney grubu içeriklerinin birebir aynı hedef kavramı ve araştırma becerisini ölçmesi.',
+    },
+    {
+      id: 'eq_bloom',
+      kod: 'E2',
+      ad: 'Bilişsel Talep (Bloom Düzeyi) Eşdeğerliği',
+      tanim: 'Çözümlü örnek ve transfer mikro-görevin kontrol grubuyla aynı bilişsel işlem adımını gerektirmesi; ne daha kolay ne daha zor olması.',
+    },
+    {
+      id: 'eq_structure',
+      kod: 'E3',
+      ad: 'Yapısal, Süre ve Uzunluk Eşdeğerliği',
+      tanim: '5 slaytlık yapı, 3 karşılaştırma koşulu, 2 mikro-görev sorusu, metin uzunluğu ve yaklaşık 75–80 sn seslendirme süresinin korunması.',
+    },
+    {
+      id: 'eq_domain_neutral',
+      kod: 'E4',
+      ad: 'Ön Bilgi Bağımsızlığı (Alan Ustalığı Gerektirmeme)',
+      tanim: 'Senaryonun ilgi alanındaki teknik/ezoterik uzmanlığı değil, yalnızca araştırma yöntemleri bilgisini ölçmesi.',
+    },
+    {
+      id: 'eq_transfer',
+      kod: 'E5',
+      ad: 'Çözümlü Örnek → Mikro-Görev Transfer Mesafesi',
+      tanim: 'Mikro-görevin çözümlü örneği birebir kopyalam 않고 aynı ilgi evreninde yeni bir senaryoya (kontrol grubundaki transfer mesafesiyle eşdeğer) taşıması.',
+    },
+  ];
+
   /* ---------- 2. IndexedDB Önbellek (images/ & audio/ üretimleri için) ---------- */
   const DB_NAME = 'baglam-canli-onbellek-v1';
   const STORE = 'uretiler';
@@ -776,10 +913,156 @@ window.CanliDeney = (() => {
     return `data:audio/mp3;base64,${data.audioContent}`;
   }
 
-  /* ---------- 4. 4 Aşamalı Canlı Deney Üretim Hattı ---------- */
-  async function uretDeneyIcerigi({ modul, profil, uretim, zorla }, onAdim) {
+  /* ---------- 3b. Appendix B & Deneysel Eşdeğerlik YZ Ön Denetim (Pre-Check) Fonksiyonu ---------- */
+  function varsayilanRubrikDegerlendirme() {
+    const pedagojik = {};
+    APPENDIX_B_RUBRIKLER.forEach(r => {
+      pedagojik[r.id] = { puan: 1.0, karar: 'Agree', gerekce: 'Kaynak kazanımla ve öğrenme bilimi ilkeleriyle uyumlu.', oneri: '' };
+    });
+    const esdegerlik = {};
+    ESDEGERLIK_KRITERLERI.forEach(e => {
+      esdegerlik[e.id] = { puan: 1.0, karar: 'Agree', gerekce: 'Kontrol grubu referans şablonuyla birebir eşdeğer.', oneri: '' };
+    });
+    return { pedagojik, esdegerlik, pedagojikOrtalama: 1.0, esdegerlikOrtalama: 1.0, genelOrtalama: 1.0, gectiMi: true, genelYorum: 'Tüm pedagojik ve deneysel eşdeğerlik ölçütleri karşılandı.', revizyonTalimati: '' };
+  }
+
+  function hesaplaDenetimSkor(ham, esikPuan = 0.85) {
+    const pedagojik = {};
+    let pedTop = 0;
+    let enDusukSayi = 1.0;
+    const eksikNotlar = [];
+
+    APPENDIX_B_RUBRIKLER.forEach(r => {
+      const g = (ham && ham.pedagojik && ham.pedagojik[r.id]) || {};
+      const hamPuan = Number(g.puan);
+      const p = (hamPuan === 0 || hamPuan === 0.5 || hamPuan === 1) ? hamPuan : (hamPuan < 0.25 ? 0 : hamPuan < 0.75 ? 0.5 : 1.0);
+      const karar = p === 1 ? 'Agree' : p === 0.5 ? 'Neutral / Partial' : 'Disagree';
+      const gerekce = String(g.gerekce || 'Değerlendirildi.').trim();
+      const oneri = String(g.oneri || '').trim();
+      pedagojik[r.id] = { puan: p, karar, gerekce, oneri };
+      pedTop += p;
+      if (p < enDusukSayi) enDusukSayi = p;
+      if (p < 1.0) eksikNotlar.push(`[${r.kod} ${r.ad} = ${p}] ${oneri || gerekce}`);
+    });
+
+    const esdegerlik = {};
+    let esTop = 0;
+    ESDEGERLIK_KRITERLERI.forEach(e => {
+      const g = (ham && ham.esdegerlik && ham.esdegerlik[e.id]) || {};
+      const hamPuan = Number(g.puan);
+      const p = (hamPuan === 0 || hamPuan === 0.5 || hamPuan === 1) ? hamPuan : (hamPuan < 0.25 ? 0 : hamPuan < 0.75 ? 0.5 : 1.0);
+      const karar = p === 1 ? 'Agree' : p === 0.5 ? 'Neutral / Partial' : 'Disagree';
+      const gerekce = String(g.gerekce || 'Kontrol grubu ile karşılaştırıldı.').trim();
+      const oneri = String(g.oneri || '').trim();
+      esdegerlik[e.id] = { puan: p, karar, gerekce, oneri };
+      esTop += p;
+      if (p < enDusukSayi) enDusukSayi = p;
+      if (p < 1.0) eksikNotlar.push(`[${e.kod} ${e.ad} = ${p}] ${oneri || gerekce}`);
+    });
+
+    const pedOrt = +(pedTop / APPENDIX_B_RUBRIKLER.length).toFixed(2);
+    const esOrt = +(esTop / ESDEGERLIK_KRITERLERI.length).toFixed(2);
+    const genelOrt = +((pedTop + esTop) / (APPENDIX_B_RUBRIKLER.length + ESDEGERLIK_KRITERLERI.length)).toFixed(2);
+    const esik = Math.max(0.5, Math.min(1.0, Number(esikPuan) || 0.85));
+    // Geçme koşulu: Genel ortalama >= eşik VE hiçbir boyutta Disagree (0.0) olmaması VE eşdeğerlik ortalamasının >= eşik olması
+    const gectiMi = genelOrt >= esik && esOrt >= esik && enDusukSayi > 0;
+    const genelYorum = String((ham && ham.genelYorum) || (gectiMi ? 'Üretilen içerik Appendix B pedagojik yeterlik ve deney-kontrol eşdeğerlik ölçütlerini sağlamaktadır.' : 'Bazı rubrik boyutlarında kısmi uyumsuzluk tespit edildi; düzeltme önerilerine göre revizyon gerekiyor.')).trim();
+    const revizyonTalimati = String((ham && ham.revizyonTalimati) || eksikNotlar.join(' | ')).trim();
+
+    return {
+      pedagojik,
+      esdegerlik,
+      pedagojikOrtalama: pedOrt,
+      esdegerlikOrtalama: esOrt,
+      genelOrtalama: genelOrt,
+      esikPuan: esik,
+      enDusukPuan: enDusukSayi,
+      gectiMi,
+      genelYorum,
+      revizyonTalimati,
+      eksikNotlar,
+    };
+  }
+
+  async function yzOnDenetimYap({ modul, kontrol, profil, uretilen, denetimModel, keys, esikPuan, turNo }) {
+    const rubrikListesiMetin = APPENDIX_B_RUBRIKLER.map(r =>
+      `- "${r.id}" (${r.kod} · ${r.ad} / ${r.enAd}): ${r.tanim}\n  * 1.0 (Agree): ${r.agree}\n  * 0.5 (Neutral/Partial): ${r.partial}\n  * 0.0 (Disagree): ${r.disagree}`
+    ).join('\n');
+    const esdegerlikListesiMetin = ESDEGERLIK_KRITERLERI.map(e =>
+      `- "${e.id}" (${e.kod} · ${e.ad}): ${e.tanim}`
+    ).join('\n');
+
+    const sysEval = `Sen Google LearnLM "Towards an AI-Augmented Textbook" (arXiv:2509.13348) çalışmasının Appendix B (Rubrics for Pedagogical Evaluations) çerçevesini ve deneysel araştırma tasarımında Deney–Kontrol Grubu Eşdeğerliğini uygulayan bağımsız bir pedagojik hakemsin (AI Pedagogical & Equivalence Reviewer).
+Görevin: Üretilen kişiselleştirilmiş deney grubu içeriğini (5 slaytlık çözümlü örnek + transfer mikro-görevi), kontrol grubunun standart referans içeriğiyle karşılaştırarak 3 noktalı ölçekte (1.0 = Agree, 0.5 = Neutral/Partial, 0.0 = Disagree) puanlamak, her boyut için Türkçe kanıta dayalı gerekçe ve (1.0 altındaysa) somut düzeltme önerisi yazmaktır.
+Yalnızca geçerli RFC 8259 JSON döndür.`;
+
+    const usrEval = `DEĞERLENDİRME TURU: ${turNo}
+MODÜL: ${modul.id.toUpperCase()} — ${modul.ad}
+HEDEF ÖĞRENME KAZANIMI (LO): ${kontrol.kazanim}
+
+ÖĞRENCİ İLGİ PROFİLİ:
+- Kategori / Alt alan: ${profil.kategori || ''} / ${profil.altKategori || ''}
+- Etkileşim biçimleri: ${(profil.etkilesimler || []).join(', ')}
+- Özgül ilgi açıklaması: ${profil.ozgulKisa || ''} — ${profil.aciklama || ''}
+
+KONTROL GRUBU STANDART İÇERİĞİ (Eşdeğerlik Referansı):
+${JSON.stringify({
+  altBaslik: kontrol.slayt.altBaslik,
+  slaytlar: kontrol.slayt.slaytlar.map(s => ({ slide_id: s.slide_id, ustBaslik: s.ustBaslik, altBaslik: s.altBaslik, soru: s.soru, kosullar: s.kosullar, degisken: s.degisken, narration: s.narration })),
+  gorev: { baslik: kontrol.gorev.baslik, metin: kontrol.gorev.metin, soru1: kontrol.gorev.soru1, bagimsizSecenekler: kontrol.gorev.bagimsizSecenekler, soru2: kontrol.gorev.soru2, bagimliSecenekler: kontrol.gorev.bagimliSecenekler }
+}, null, 2)}
+
+DEĞERLENDİRİLECEK DENEY GRUBU İÇERİĞİ (Üretilen):
+${JSON.stringify(uretilen, null, 2)}
+
+1) APPENDIX B PEDAGOJİK YETERLİK RUBRİKLERİ (Her biri 1.0, 0.5 veya 0.0 puan):
+${rubrikListesiMetin}
+
+2) DENEY-KONTROL GRUBU EŞDEĞERLİK ÖLÇÜTLERİ (Her biri 1.0, 0.5 veya 0.0 puan):
+${esdegerlikListesiMetin}
+
+AŞAĞIDAKİ JSON ŞEMASINI EKSİKSİZ DOLDUR:
+{
+  "pedagojik": {
+    "accuracy": { "puan": 1.0, "gerekce": "Kısa kanıta dayalı değerlendirme", "oneri": "1.0 altındaysa somut düzeltme önerisi, tam ise boş string" },
+    "coverage": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "emphasis": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "engagement": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "cognitive_load": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "active_learning": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "metacognition": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "motivation": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "adaptability": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "clarity_intentions": { "puan": 1.0, "gerekce": "...", "oneri": "" }
+  },
+  "esdegerlik": {
+    "eq_lo": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "eq_bloom": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "eq_structure": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "eq_domain_neutral": { "puan": 1.0, "gerekce": "...", "oneri": "" },
+    "eq_transfer": { "puan": 1.0, "gerekce": "...", "oneri": "" }
+  },
+  "genelYorum": "Genel pedagojik ve deneysel eşdeğerlik değerlendirme özeti (2-3 cümle)",
+  "revizyonTalimati": "Eğer 1.0 altında kalan boyutlar varsa içerik üretici modele verilecek net, maddeli düzeltme talimatı"
+}`;
+
+    const rawEval = await callLLM(denetimModel, sysEval, usrEval, keys, true);
+    const parsed = parseJSON(rawEval);
+    const skor = hesaplaDenetimSkor(parsed, esikPuan);
+    return {
+      ...skor,
+      model: denetimModel,
+      systemPrompt: sysEval,
+      userPrompt: usrEval,
+      rawResponse: rawEval,
+      tarih: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    };
+  }
+
+  /* ---------- 4. 5 Aşamalı Canlı Deney Üretim, YZ Ön Denetim (Revizyon Döngülü) ve Akademisyen Onay Hattı ---------- */
+  async function uretDeneyIcerigi({ modul, profil, uretim, zorla, akademisyenNotu, mevcutSonuc }, onAdim) {
     const cacheKey = `${modul.id}::${profil.id}`;
-    if (!zorla) {
+    if (!zorla && !akademisyenNotu) {
       const mevcut = await cacheGet(cacheKey);
       if (mevcut) {
         onAdim && onAdim({ adim: 4, durum: 'onbellek', mesaj: 'Önbellekten yüklendi (images/ & audio/)' });
@@ -790,6 +1073,18 @@ window.CanliDeney = (() => {
     const kontrol = getKontrol(modul.id);
     const pSlug = slug(profil.kisaEtiket || profil.id);
     const keys = { claudeKey: uretim.claudeKey, geminiKey: uretim.geminiKey, ttsKey: uretim.ttsKey };
+    const onDenetimAcik = uretim.onDenetimAcik !== false;
+    const maxRevizyon = Math.max(0, Math.min(5, Number(uretim.maxRevizyon ?? 2)));
+    const esikPuan = Math.max(0.5, Math.min(1.0, Number(uretim.gecmeEsigi ?? 0.85)));
+    const denetimModel = uretim.denetimModel || uretim.senaryoModel || 'claude-sonnet-4-5';
+
+    // Tüm adımların prompt, ham çıktı, dönüt ve revizyon geçmişini kaydeden izleme günlüğü
+    const denetimIzi = (mevcutSonuc && Array.isArray(mevcutSonuc.denetimIzi) && akademisyenNotu)
+      ? [...mevcutSonuc.denetimIzi]
+      : [];
+    const turlar = (mevcutSonuc && Array.isArray(mevcutSonuc.turlar) && akademisyenNotu)
+      ? [...mevcutSonuc.turlar]
+      : [];
 
     /* ADIM 1: Senaryo ve yapılandırılmış slayt + mikro-görev üretimi */
     onAdim && onAdim({ adim: 1, durum: 'calisiyor', mesaj: `${uretim.senaryoModel} ile senaryo üretiliyor...` });
@@ -799,9 +1094,10 @@ Kurallar:
 - Yalnızca geçerli JSON döndür, başka açıklama yazma.
 - Öğrenme kazanımı, bilişsel talep, soru sayısı ve adım yapısı kontrol grubuyla aynı kalmalı; yalnızca senaryo bağlamı kişiselleştirilmeli.
 - Çözümlü örnek ile mikro-görev AYNI ilgi alanı içinde ama FARKLI bir araştırma senaryosu (transfer) olmalı (ör. basketbolda çözümlü örnek hücum stratejisi ise mikro-görev paslaşma düzeni).
+- Senaryo öğrencinin ilgili alandaki teknik uzmanlığını değil, araştırma yöntemleri kazanımını ölçmelidir (ön bilgi bağımsızlığı).
 - Tüm metinler doğal, akıcı Türkçe olmalı; sayılar kurgusal ve gerçekçi olmalı.`;
 
-    const usr1 = `MODÜL: ${modul.id.toUpperCase()} — ${modul.ad}
+    const temelUsr1 = `MODÜL: ${modul.id.toUpperCase()} — ${modul.ad}
 KAZANIM: ${kontrol.kazanim}
 
 ÖĞRENCİ İLGİ PROFİLİ:
@@ -893,6 +1189,10 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
   }
 }`;
 
+    const usr1 = akademisyenNotu && mevcutSonuc && mevcutSonuc.hamUretilen
+      ? `${temelUsr1}\n\nAKADEMİSYEN REVİZYON TALEBİ (ÖNCEKİ TASLAĞI BU DÖNÜTE GÖRE DÜZELT):\nAkademisyen Notu: "${akademisyenNotu}"\nÖnceki Taslak JSON:\n${JSON.stringify(mevcutSonuc.hamUretilen, null, 2)}`
+      : temelUsr1;
+
     const raw1 = await callLLM(uretim.senaryoModel, sys1, usr1, keys, true);
     let uretilen;
     try {
@@ -909,7 +1209,147 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
     if (!uretilen.slaytlar || uretilen.slaytlar.length < 5 || !uretilen.gorev) {
       throw new Error('Üretilen JSON beklenen 5 slayt + mikro-görev şemasına uymuyor.');
     }
+
+    denetimIzi.push({
+      id: `uretim-${turlar.length + 1}`,
+      asama: akademisyenNotu ? `Akademisyen Dönütüyle Yeniden Üretim` : '1. İlk Senaryo ve İçerik Üretimi',
+      tur: 'uretim',
+      model: uretim.senaryoModel,
+      tarih: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      systemPrompt: sys1,
+      userPrompt: usr1,
+      outputJson: JSON.parse(JSON.stringify(uretilen)),
+      ozet: `${uretilen.altBaslik} · 5 slayt ve "${uretilen.gorev.baslik}" transfer mikro-görevi üretildi.`,
+    });
     onAdim && onAdim({ adim: 1, durum: 'bitti', mesaj: `${uretim.senaryoModel} tamamlandı` });
+
+    /* ADIM 1b / ADIM 5: YZ Pedagojik Ön Denetim (Appendix B) & Otomatik Revizyon Döngüsü */
+    let sonDenetim = null;
+    let kullanilanRevizyon = 0;
+
+    if (onDenetimAcik) {
+      for (let rev = 0; rev <= maxRevizyon; rev++) {
+        const turEtiket = rev === 0 ? 'İlk Ön Denetim' : `${rev}. Revizyon Sonrası Ön Denetim`;
+        onAdim && onAdim({
+          adim: 5,
+          durum: 'calisiyor',
+          mesaj: `${denetimModel} ile Appendix B ön denetimi (${rev + 1}/${maxRevizyon + 1})...`,
+        });
+
+        sonDenetim = await yzOnDenetimYap({
+          modul,
+          kontrol,
+          profil,
+          uretilen,
+          denetimModel,
+          keys,
+          esikPuan,
+          turNo: rev + 1,
+        });
+
+        turlar.push({
+          turNo: turlar.length + 1,
+          revizyonNo: rev,
+          etiket: turEtiket,
+          model: denetimModel,
+          tarih: sonDenetim.tarih,
+          pedagojikOrtalama: sonDenetim.pedagojikOrtalama,
+          esdegerlikOrtalama: sonDenetim.esdegerlikOrtalama,
+          genelOrtalama: sonDenetim.genelOrtalama,
+          esikPuan: sonDenetim.esikPuan,
+          gectiMi: sonDenetim.gectiMi,
+          genelYorum: sonDenetim.genelYorum,
+          revizyonTalimati: sonDenetim.revizyonTalimati,
+          eksikNotlar: sonDenetim.eksikNotlar,
+          pedagojik: sonDenetim.pedagojik,
+          esdegerlik: sonDenetim.esdegerlik,
+          icerikSnapshot: JSON.parse(JSON.stringify(uretilen)),
+        });
+
+        denetimIzi.push({
+          id: `denetim-${turlar.length}`,
+          asama: `YZ Ön Denetim (${turEtiket})`,
+          tur: 'denetim',
+          model: denetimModel,
+          tarih: sonDenetim.tarih,
+          systemPrompt: sonDenetim.systemPrompt,
+          userPrompt: sonDenetim.userPrompt,
+          outputJson: {
+            genelOrtalama: sonDenetim.genelOrtalama,
+            pedagojikOrtalama: sonDenetim.pedagojikOrtalama,
+            esdegerlikOrtalama: sonDenetim.esdegerlikOrtalama,
+            gectiMi: sonDenetim.gectiMi,
+            genelYorum: sonDenetim.genelYorum,
+            revizyonTalimati: sonDenetim.revizyonTalimati,
+            pedagojik: sonDenetim.pedagojik,
+            esdegerlik: sonDenetim.esdegerlik,
+          },
+          ozet: `${sonDenetim.gectiMi ? 'ONAYLANDI' : 'REVİZYON GEREKLİ'} · Genel Skor: ${Math.round(sonDenetim.genelOrtalama * 100)}% (Pedagojik: ${sonDenetim.pedagojikOrtalama}, Eşdeğerlik: ${sonDenetim.esdegerlikOrtalama}) — ${sonDenetim.genelYorum}`,
+        });
+
+        if (sonDenetim.gectiMi || rev >= maxRevizyon) {
+          break;
+        }
+
+        // Eşiğin altında kaldıysa ve revizyon hakkı varsa otomatik revizyon üretimi yap
+        kullanilanRevizyon = rev + 1;
+        onAdim && onAdim({
+          adim: 5,
+          durum: 'calisiyor',
+          mesaj: `Revizyon ${kullanilanRevizyon}/${maxRevizyon}: YZ dönütlerine göre düzeltiliyor...`,
+        });
+
+        const revUserPrompt = `${temelUsr1}
+
+---
+ÖNCEKİ TASLAK İÇERİK:
+${JSON.stringify(uretilen, null, 2)}
+
+YZ PEDAGOJİK ÖN DENETİM (APPENDIX B & EŞDEĞERLİK) GERİ BİLDİRİMİ (Skor: ${sonDenetim.genelOrtalama} < Eşik: ${esikPuan}):
+Genel Yorum: ${sonDenetim.genelYorum}
+Düzeltme Önerileri:
+${(sonDenetim.eksikNotlar || []).map(n => '- ' + n).join('\n')}
+Revizyon Talimatı: ${sonDenetim.revizyonTalimati}
+
+GÖREV: Yukarıdaki pedagojik ve deneysel eşdeğerlik eleştirilerinin tamamını gidererek içeriği revize et ve aynı JSON şemasıyla döndür.`;
+
+        const rawRev = await callLLM(uretim.senaryoModel, sys1, revUserPrompt, keys, true);
+        try {
+          const revParsed = parseJSON(rawRev);
+          if (revParsed && Array.isArray(revParsed.slaytlar) && revParsed.slaytlar.length >= 5 && revParsed.gorev) {
+            uretilen = revParsed;
+          }
+        } catch (eRev) {
+          // Revizyon JSON ayrıştırılamazsa mevcut taslak korunur
+        }
+
+        denetimIzi.push({
+          id: `revizyon-${kullanilanRevizyon}`,
+          asama: `Otomatik YZ Revizyonu (${kullanilanRevizyon}/${maxRevizyon})`,
+          tur: 'revizyon',
+          model: uretim.senaryoModel,
+          tarih: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          systemPrompt: sys1,
+          userPrompt: revUserPrompt,
+          outputJson: JSON.parse(JSON.stringify(uretilen)),
+          ozet: `Ön denetim düzeltme önerileri doğrultusunda ${kullanilanRevizyon}. revizyon taslağı üretildi.`,
+        });
+      }
+
+      onAdim && onAdim({
+        adim: 5,
+        durum: sonDenetim && sonDenetim.gectiMi ? 'bitti' : 'uyari',
+        mesaj: sonDenetim
+          ? `${sonDenetim.gectiMi ? 'YZ Ön Onay ✓' : 'Eşik altı / Akademisyen incelemesinde'} · Skor: %${Math.round(sonDenetim.genelOrtalama * 100)} (${kullanilanRevizyon}/${maxRevizyon} revizyon)`
+          : 'Tamamlandı',
+      });
+    } else {
+      onAdim && onAdim({
+        adim: 5,
+        durum: 'uyari',
+        mesaj: 'Ön denetim kapalı (Denetimsiz doğrudan görünüm)',
+      });
+    }
 
     /* ADIM 2: Seslendirme scripti iyileştirme */
     onAdim && onAdim({ adim: 2, durum: 'calisiyor', mesaj: `${uretim.scriptModel} ile seslendirme scripti düzenleniyor...` });
@@ -925,6 +1365,17 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
         s2.narrations.forEach((n, idx) => { if (n) uretilen.slaytlar[idx].narration = n; });
       }
       if (s2.gorevMetin) uretilen.gorev.metin = s2.gorevMetin;
+      denetimIzi.push({
+        id: `script-${denetimIzi.length + 1}`,
+        asama: '2. Seslendirme Scripti Düzenleme (Mayer CTML)',
+        tur: 'script',
+        model: uretim.scriptModel,
+        tarih: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        systemPrompt: sys2,
+        userPrompt: usr2,
+        outputJson: s2,
+        ozet: '5 slayt ve mikro-görev seslendirme metinleri işitsel akıcılık için optimize edildi.',
+      });
       onAdim && onAdim({ adim: 2, durum: 'bitti', mesaj: `${uretim.scriptModel} tamamlandı` });
     } catch (e) {
       onAdim && onAdim({ adim: 2, durum: 'uyari', mesaj: `Script adımı atlandı (${e.message})` });
@@ -945,6 +1396,17 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
       const p3 = parseJSON(raw3);
       if (p3.slaytPrompt) gorselPromptSlayt = p3.slaytPrompt;
       if (p3.gorevPrompt) gorselPromptGorev = p3.gorevPrompt;
+      denetimIzi.push({
+        id: `gorsel-prompt-${denetimIzi.length + 1}`,
+        asama: '3. Görsel Üretim Promptu Oluşturma',
+        tur: 'prompt',
+        model: uretim.promptModel,
+        tarih: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        systemPrompt: sys3,
+        userPrompt: usr3,
+        outputJson: p3,
+        ozet: 'Çözümlü örnek ve mikro-görev için metinsiz pedagojik sahne promptları oluşturuldu.',
+      });
       onAdim && onAdim({ adim: 3, durum: 'bitti', mesaj: `${uretim.promptModel} tamamlandı` });
     } catch (e) {
       onAdim && onAdim({ adim: 3, durum: 'uyari', mesaj: `Varsayılan görsel promptu kullanıldı` });
@@ -1042,18 +1504,41 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
       aciklamaDogru: g.aciklamaDogru || kontrol.gorev.aciklamaDogru,
     };
 
+    // Onay durumu:
+    // - Ön denetim kapalıysa: 'denetimsiz_acik' (doğrudan görünür)
+    // - Ön denetim açıksa ve YZ ön onay verdiyse: 'akademisyen_bekliyor' (akademisyen onayına düşer)
+    // - Ön denetim açıksa ve tüm revizyonlara rağmen eşik altındaysa: 'yz_red' (akademisyen müdahalesi / ek revizyon bekler)
+    const onayDurumu = !onDenetimAcik
+      ? 'denetimsiz_acik'
+      : (sonDenetim && sonDenetim.gectiMi ? 'akademisyen_bekliyor' : 'yz_red');
+
     const sonuc = {
       cacheKey,
       modulId: modul.id,
       profil,
+      hamUretilen: uretilen,
       slayt: slaytObj,
       gorev: gorevObj,
       prompts: { slayt: gorselPromptSlayt, gorev: gorselPromptGorev },
+      denetim: {
+        onDenetimAcik,
+        maxRevizyon,
+        kullanilanRevizyon,
+        esikPuan,
+        denetimModel,
+        sonDenetim,
+        onayDurumu, // 'denetimsiz_acik' | 'akademisyen_bekliyor' | 'yz_red' | 'akademisyen_onayli' | 'akademisyen_revizyon'
+        ogrenciGorebilir: !onDenetimAcik,
+        akademisyenKarar: null,
+      },
+      turlar,
+      denetimIzi,
       meta: {
         senaryoModel: uretim.senaryoModel,
         scriptModel: uretim.scriptModel,
         promptModel: uretim.promptModel,
         gorselModel: uretim.gorselModel,
+        denetimModel: onDenetimAcik ? denetimModel : 'Kapalı',
         sesModel: ttsSay > 0 ? uretim.sesModel : 'Tarayıcı TTS',
         gorselNot,
         ttsNot,
@@ -1062,6 +1547,48 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
     };
     await cacheSet(cacheKey, sonuc);
     return sonuc;
+  }
+
+  /* Mevcut bir içerik üzerinde sadece YZ Ön Denetimini (veya akademisyen kararını) çalıştır/güncelle */
+  async function akademisyenKararKaydet(sonuc, { karar, akademisyenAd, not }) {
+    if (!sonuc) return null;
+    const tarih = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    sonuc.denetim = sonuc.denetim || {};
+    sonuc.denetim.onayDurumu = karar === 'onay' ? 'akademisyen_onayli' : 'akademisyen_revizyon';
+    sonuc.denetim.ogrenciGorebilir = karar === 'onay' || !sonuc.denetim.onDenetimAcik;
+    sonuc.denetim.akademisyenKarar = {
+      karar,
+      akademisyenAd: akademisyenAd || 'Doç. Dr. Akademik Danışman',
+      not: not || (karar === 'onay' ? 'Appendix B pedagojik yeterlik ve deney-kontrol eşdeğerlik ölçütleri incelendi; öğrencinin erişimine açılması onaylandı.' : 'Revizyon talep edildi.'),
+      tarih,
+    };
+    sonuc.denetimIzi = sonuc.denetimIzi || [];
+    sonuc.denetimIzi.push({
+      id: `akademisyen-${sonuc.denetimIzi.length + 1}`,
+      asama: karar === 'onay' ? 'Akademisyen Nihai Onayı (Öğrenciye Açıldı)' : 'Akademisyen Revizyon Talebi',
+      tur: karar === 'onay' ? 'akademisyen_onay' : 'akademisyen_red',
+      model: sonuc.denetim.akademisyenKarar.akademisyenAd,
+      tarih,
+      systemPrompt: 'Akademisyen Uzman İncelemesi (Human-in-the-Loop Gatekeeper)',
+      userPrompt: `İncelenen İçerik: ${sonuc.slayt.altBaslik} (${sonuc.modulId.toUpperCase()} · ${sonuc.profil.altKategori})`,
+      outputJson: sonuc.denetim.akademisyenKarar,
+      ozet: `${sonuc.denetim.akademisyenKarar.akademisyenAd}: "${sonuc.denetim.akademisyenKarar.not}"`,
+    });
+    await cacheSet(sonuc.cacheKey, sonuc);
+    return sonuc;
+  }
+
+  async function cacheListAll() {
+    try {
+      const db = await openDB();
+      return await new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const st = tx.objectStore(STORE);
+        const req = st.getAll();
+        req.onsuccess = () => res(req.result || []);
+        req.onerror = () => rej(req.error);
+      });
+    } catch (e) { return []; }
   }
 
   /* Üretilen görsel ve ses dosyalarını kullanıcının seçtiği klasöre (images/ & audio/) veya dosya olarak kaydet */
@@ -1106,5 +1633,18 @@ AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
     return `${dosyalar.length} medya + 1 JSON indirildi.`;
   }
 
-  return { getKontrol, cacheGet, cacheDel, uretDeneyIcerigi, dosyalaraKaydet };
+  return {
+    APPENDIX_B_RUBRIKLER,
+    ESDEGERLIK_KRITERLERI,
+    varsayilanRubrikDegerlendirme,
+    hesaplaDenetimSkor,
+    getKontrol,
+    cacheGet,
+    cacheSet,
+    cacheDel,
+    cacheListAll,
+    uretDeneyIcerigi,
+    akademisyenKararKaydet,
+    dosyalaraKaydet,
+  };
 })();

@@ -97,6 +97,11 @@
     gorselModel: 'imagen-3.0-generate-002',
     sesModel: 'gemini-2.5-flash-preview-tts',
     sesHiz: '1.0',
+    onDenetimAcik: true,
+    maxRevizyon: 2,
+    gecmeEsigi: '0.85',
+    denetimModel: 'claude-sonnet-4-5',
+    akademisyenAd: 'Doç. Dr. Akademik Danışman',
     modeller: { claude: null, geminiText: null, geminiImage: null, tts: null },
   });
   const bos = () => ({ kul: null, secilen: [], altSec: {}, ozel: {}, puan: {}, detay: {}, ilerleme: {}, baglamSec: {}, cevap: {} });
@@ -125,6 +130,12 @@
     canliOzelAciklama: 'Haftada 3 gün tenis antrenmanı yapıyorum, servis hızımı ve ilk servis isabet oranımı takip ediyorum.',
     canliKontrolGorunum: 'slayt',
     canliDeneyGorunum: 'slayt',
+    canliBakModu: 'arastirmaci', // 'arastirmaci' | 'ogrenci'
+    canliDenetimSekme: 'rubrik', // 'rubrik' | 'turlar' | 'iz' | 'akademisyen'
+    canliSeciliTur: 0,
+    canliAcikIz: {},
+    canliAkademisyenNot: '',
+    canliTumUretiler: [],
     canliSonuc: null,
     canliAdimlar: {},
     canliCalisiyor: false,
@@ -750,6 +761,7 @@
                 const birlesikMetin = [...cl, ...gm];
                 const adimlar = [
                   ['senaryoModel', '1. Senaryo ve metin üretimi', 'Bağlama uygun araştırma senaryosu ve çözüm adımları', birlesikMetin],
+                  ['denetimModel', '1b. Pedagojik ön denetim (Appendix B hakemi)', 'Deney-kontrol eşdeğerliği ve 10 boyutlu Learn Your Way rubrik denetimi', birlesikMetin],
                   ['scriptModel', '2. Seslendirme scripti yazımı', 'Doğal konuşma akışı ve zamanlama (70–100 sn)', birlesikMetin],
                   ['promptModel', '3. Görsel üretim promptu oluşturma', 'Pedagojik sahne tarifi ve görsel tutarlılık promptu', birlesikMetin],
                   ['gorselModel', '4a. Görsel üretimi (Gemini)', 'Senaryo görsellerinin üretilip images/ klasörüne kaydı', [...gi, ...gm]],
@@ -790,6 +802,86 @@
           <h3>Önbellek ve canlı API üretimi</h3>
           <p>Canlı Deney ekranında üretilen metin, Gemini görselleri ve Google TTS sesleri tarayıcının IndexedDB önbelleğinde saklanır; istenirse <b>images/</b> ve <b>audio/</b> klasörlerine indirilebilir.</p>
         </aside>
+      </section>
+
+      <section class="kart yon-secim-kart" id="yon-denetim">
+        <div class="yon-bas">
+          <div>
+            <h2>Pedagojik Ön Denetim (Appendix B) &amp; Akademisyen Onay Süreci</h2>
+            <p>Google LearnLM <em>"Towards an AI-Augmented Textbook"</em> (arXiv:2509.13348) çalışmasının <b>Appendix B: Rubrics for Pedagogical Evaluations</b> (10 boyut) ve <b>Deney–Kontrol Grubu Eşdeğerliği</b> (5 boyut) ölçütlerine göre iki aşamalı denetim mekanizması: YZ önce ürettiği içeriği denetler ve gerekirse revize eder; YZ ön onayından geçen içerikler <b>Akademisyen Onayına</b> düşer ve akademisyen onayladığında öğrenciye görünür olur.</p>
+          </div>
+          <span class="yon-rozet ${UI.uretim.onDenetimAcik !== false ? 'aktif-rozet' : 'kapali-rozet'}">${UI.uretim.onDenetimAcik !== false ? 'Denetimli Mod Aktif (YZ Ön Denetim + Akademisyen Onayı)' : 'Denetimsiz Mod (Doğrudan Öğrenciye Açık)'}</span>
+        </div>
+
+        <div class="yon-kartlar" role="radiogroup" aria-label="Pedagojik ön denetim durumu">
+          <div class="yon-k${UI.uretim.onDenetimAcik !== false ? ' on' : ''}" role="radio" aria-checked="${UI.uretim.onDenetimAcik !== false}" tabindex="0" data-act="onDenetimSec" data-acik="1">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.uretim.onDenetimAcik !== false ? ic('check') : ''}</span>
+              <div>
+                <b>Ön Denetim Açık (YZ Ön Kontrol + Akademisyen Onayı)</b>
+                <small>arXiv:2509.13348 Appendix B · Otomatik revizyon + uzman onayı</small>
+              </div>
+            </div>
+            <p>Üretilen içerik önce YZ hakemi tarafından 10 pedagojik rubrik ve 5 deneysel eşdeğerlik boyutunda (1.0 Agree / 0.5 Partial / 0.0 Disagree) puanlanır. Eşik altındaysa belirlenen revizyon hakkı kadar düzeltme önerileriyle otomatik yeniden üretilir. YZ onayından geçen içerik akademisyen onayına düşer; akademisyen onaylayınca öğrenci görebilir.</p>
+            <div class="yon-k-alt">
+              <span>Öğrenci görünürlüğü: <b>Akademisyen onayından sonra</b></span>
+              <button type="button" class="btn${UI.uretim.onDenetimAcik !== false ? '' : ' ghost'}" data-act="onDenetimSec" data-acik="1">${UI.uretim.onDenetimAcik !== false ? 'Aktif mod' : 'Denetimli moda geç'}</button>
+            </div>
+          </div>
+
+          <div class="yon-k${UI.uretim.onDenetimAcik === false ? ' on' : ''}" role="radio" aria-checked="${UI.uretim.onDenetimAcik === false}" tabindex="0" data-act="onDenetimSec" data-acik="0">
+            <div class="yon-k-ust">
+              <span class="yon-radio">${UI.uretim.onDenetimAcik === false ? ic('check') : ''}</span>
+              <div>
+                <b>Ön Denetim Kapalı (Denetimsiz Doğrudan Sonuç)</b>
+                <small>Hızlı prototipleme · Revizyon ve onay adımı atlanır</small>
+              </div>
+            </div>
+            <p>YZ ön denetimi, otomatik revizyon döngüsü ve akademisyen onay kilidi devre dışı bırakılır. API'den üretilen kişiselleştirilmiş deney grubu içeriği herhangi bir denetim beklemeksizin doğrudan öğrenci görünümünde açılır.</p>
+            <div class="yon-k-alt">
+              <span>Öğrenci görünürlüğü: <b>Üretildiği anda doğrudan görünür</b></span>
+              <button type="button" class="btn${UI.uretim.onDenetimAcik === false ? '' : ' ghost'}" data-act="onDenetimSec" data-acik="0">${UI.uretim.onDenetimAcik === false ? 'Aktif mod' : 'Denetimsiz moda geç'}</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="yon-denetim-ayar-izgara">
+          <div class="yon-alan">
+            <label for="denetim-maxRevizyon"><span>Maksimum Otomatik YZ Revizyon Hakkı</span><small>Eşik altında kalırsa kaç kez revize edilsin?</small></label>
+            <select id="denetim-maxRevizyon" class="girdi" data-uretim="maxRevizyon">
+              ${[
+                ['0', '0 revizyon (Sadece tek sefer değerlendir, revize etme)'],
+                ['1', '1 revizyon hakkı (İlk üretim + en fazla 1 düzeltme turu)'],
+                ['2', '2 revizyon hakkı (Önerilen · En fazla 2 düzeltme turu)'],
+                ['3', '3 revizyon hakkı (Derin denetim · En fazla 3 düzeltme turu)'],
+                ['4', '4 revizyon hakkı'],
+              ].map(([v, lbl]) => `<option value="${v}"${String(UI.uretim.maxRevizyon ?? 2) === v ? ' selected' : ''}>${lbl}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="yon-alan">
+            <label for="denetim-gecmeEsigi"><span>YZ Ön Onay Geçme Eşiği (0.00 – 1.00)</span><small>Makaledeki referans eşik: ≥ 0.90 (veya ≥ 0.85)</small></label>
+            <select id="denetim-gecmeEsigi" class="girdi" data-uretim="gecmeEsigi">
+              ${[
+                ['0.75', '%75 (0.75 · Esnek eşik)'],
+                ['0.80', '%80 (0.80 · Orta eşik)'],
+                ['0.85', '%85 (0.85 · Dengeli akademik eşik — Varsayılan)'],
+                ['0.90', '%90 (0.90 · Learn Your Way makale referans eşiği)'],
+                ['0.95', '%95 (0.95 · Çok sıkı eşik — Neredeyse tam puan)'],
+              ].map(([v, lbl]) => `<option value="${v}"${String(UI.uretim.gecmeEsigi || '0.85') === v ? ' selected' : ''}>${lbl}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="yon-alan">
+            <label for="denetim-akademisyenAd"><span>Onaylayıcı Akademisyen / Uzman Unvanı</span><small>Onay kaydında ve denetim izinde görünür</small></label>
+            <input id="denetim-akademisyenAd" class="girdi" type="text" data-uretim="akademisyenAd" value="${esc(UI.uretim.akademisyenAd || 'Doç. Dr. Akademik Danışman')}" placeholder="Örn. Prof. Dr. ...">
+          </div>
+        </div>
+
+        <div class="yon-durum-satir">
+          <span>Tüm adımların promptlarını, Appendix B rubrik puanlarını, düzeltme önerilerini ve akademisyen onay akışını incelemek için:</span>
+          <a class="btn" href="#canli">${ic('hedef')}Canlı Deney &amp; Denetim İzleme Ekranına Git ${ic('sag')}</a>
+        </div>
       </section>
 
       <section class="kart">
@@ -1403,15 +1495,45 @@
     </dl></aside>`;
   }
 
+  function dersDenetimDurumBanner(m) {
+    if (!UI.canliSonuc || UI.canliSonuc.modulId !== m.id) return '';
+    const s = UI.canliSonuc;
+    const onDenetimAcik = UI.uretim.onDenetimAcik !== false;
+    const goren = ogrenciGorebilirMi(s);
+    if (!onDenetimAcik) {
+      return `<div class="ders-denetim-serit acik">
+        <div><b>Canlı API İçeriği (Ön Denetim Kapalı — Doğrudan Öğrenciye Açık):</b> <span>${esc(s.profil.altKategori)} bağlamında üretilen içerik denetimsiz modda doğrudan gösteriliyor.</span></div>
+        <a class="btn ghost" href="#canli">Denetim Merkezini Aç</a>
+      </div>`;
+    }
+    if (goren) {
+      const ak = (s.denetim && s.denetim.akademisyenKarar) || {};
+      return `<div class="ders-denetim-serit onayli">
+        <div><b>✓ Akademisyen Onaylı YZ İçeriği:</b> <span>${esc(s.profil.altKategori)} bağlamında üretilen bu içerik Appendix B ön denetiminden ve <b>${esc(ak.akademisyenAd || 'Akademisyen')}</b> onayından geçerek öğrenciye açılmıştır.</span></div>
+        <a class="btn ghost" href="#canli">Denetim Raporunu Gör</a>
+      </div>`;
+    }
+    return `<div class="ders-denetim-serit kilitli">
+      <div><b>🔒 YZ İçeriği Akademisyen Onayı Bekliyor:</b> <span>${esc(s.profil.altKategori)} için üretilen canlı YZ içeriği henüz akademisyen tarafından onaylanmadığı için öğrenciye gösterilmiyor (varsayılan içerik aktif).</span></div>
+      <div class="ders-denetim-aks">
+        <button type="button" class="btn onay-btn" data-act="akademisyenOnayla">${ic('check')}Akademisyen Olarak Onayla</button>
+        <a class="btn ghost" href="#canli">Denetim Merkezine Git</a>
+      </div>
+    </div>`;
+  }
+
   function dOrnek(m) {
     const p = il(m.id), b = baglamAl(m), c = b.c, adim = D.ornekler[m.id](c);
-    if (UI.ornekMod === 'slayt' && window.SlaytSunum) {
-      return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Seslendirilmiş ve adım adım ilerleyen etkileşimli çözümlü örnek · ${esc(b.ilgi.ad)} bağlamı.</p></div>${bagSecici(m, b)}</div>
+    const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === m.id && ogrenciGorebilirMi(UI.canliSonuc);
+    if ((UI.ornekMod === 'slayt' || canliAktif) && window.SlaytSunum) {
+      return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Seslendirilmiş ve adım adım ilerleyen etkileşimli çözümlü örnek · ${esc(canliAktif ? UI.canliSonuc.profil.altKategori : b.ilgi.ad)} bağlamı.</p></div>${bagSecici(m, b)}</div>
+        ${dersDenetimDurumBanner(m)}
         ${arastirmaNotu(m, b)}
         <div id="dersSlaytHost"></div>`;
     }
     const acik = UI.ornekAcik[m.id] || (p.ornek ? adim.length : 1);
     return `<div class="ic-bas"><div><h1>${m.ornek.ad}</h1><p>Konuyu adım adım, ${b.ilgi.ad.toLocaleLowerCase('tr')} dünyasından bir örnekle uygula.</p></div>${bagSecici(m, b)}</div>
+      ${dersDenetimDurumBanner(m)}
       ${senaryo(b, c)}
       ${arastirmaNotu(m, b)}
       <ol class="adm">${adim.map((a, i) => i < acik
@@ -1470,12 +1592,15 @@
   }
   function dGorev(m) {
     const b = baglamAl(m);
-    if (UI.gorevMod === 'etkilesimli' && window.GorevPrototip) {
-      return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} · görsel ve ipucu destekli etkileşimli mikro-görev.</p></div>${bagSecici(m, b)}</div>
+    const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === m.id && ogrenciGorebilirMi(UI.canliSonuc);
+    if ((UI.gorevMod === 'etkilesimli' || canliAktif) && window.GorevPrototip) {
+      return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${canliAktif ? esc(UI.canliSonuc.gorev.baslik) : b.c.tema} · görsel ve ipucu destekli etkileşimli mikro-görev.</p></div>${bagSecici(m, b)}</div>
+        ${dersDenetimDurumBanner(m)}
         ${arastirmaNotu(m, b)}
         <div id="dersGorevHost"></div>`;
     }
     return `<div class="ic-bas"><div><h1>${m.gorev.ad}</h1><p>${b.c.tema} örneği üzerinden.</p></div>${bagSecici(m, b)}</div>
+      ${dersDenetimDurumBanner(m)}
       ${arastirmaNotu(m, b)}
       ${m.gorev.parcalar.map(pk => `<section class="gorev" data-gm="${m.id}" data-pk="${pk}">${gorevHTML(m, pk)}</section>`).join('')}
       ${ileri(m, 'gorev', 'gorevTamam', 'Görevi tamamla')}`;
@@ -1617,28 +1742,34 @@
     if (!window.CanliDeney) return;
     const p = canliSeciliProfil();
     const key = `${UI.canliModul}::${p.id}`;
-    if (UI.canliSonuc && UI.canliSonuc.cacheKey === key) return;
     if (canliBakAnahtar === key) return;
     canliBakAnahtar = key;
-    const cached = await window.CanliDeney.cacheGet(key);
+    const [cached, tum] = await Promise.all([
+      window.CanliDeney.cacheGet(key),
+      window.CanliDeney.cacheListAll ? window.CanliDeney.cacheListAll() : Promise.resolve([]),
+    ]);
     canliBakAnahtar = '';
+    UI.canliTumUretiler = Array.isArray(tum) ? tum : [];
     if (cached && rota().ad === 'canli') {
       const simdikiP = canliSeciliProfil();
       if (`${UI.canliModul}::${simdikiP.id}` === key) {
         UI.canliSonuc = cached;
+        UI.canliSeciliTur = Math.max(0, ((cached.turlar && cached.turlar.length) || 1) - 1);
         yenile();
       }
     }
   }
 
-  async function canliUretBaslat(zorla = false) {
+  async function canliUretBaslat(zorla = false, akademisyenNotu = '') {
     if (!window.CanliDeney || UI.canliCalisiyor) return;
     const m = modul(UI.canliModul);
     const profil = canliSeciliProfil();
+    const onDenetimAcik = UI.uretim.onDenetimAcik !== false;
     UI.canliCalisiyor = true;
     UI.canliHata = null;
     UI.canliAdimlar = {
       1: { adim: 1, durum: 'bekliyor', mesaj: 'Hazırlanıyor' },
+      5: { adim: 5, durum: 'bekliyor', mesaj: onDenetimAcik ? `Appendix B denetimi (maks. ${UI.uretim.maxRevizyon ?? 2} revizyon)` : 'Ön denetim kapalı' },
       2: { adim: 2, durum: 'bekliyor', mesaj: 'Bekliyor' },
       3: { adim: 3, durum: 'bekliyor', mesaj: 'Bekliyor' },
       4: { adim: 4, durum: 'bekliyor', mesaj: 'Bekliyor' },
@@ -1646,7 +1777,14 @@
     yenile();
     try {
       const sonuc = await window.CanliDeney.uretDeneyIcerigi(
-        { modul: m, profil, uretim: UI.uretim, zorla },
+        {
+          modul: m,
+          profil,
+          uretim: UI.uretim,
+          zorla: zorla || !!akademisyenNotu,
+          akademisyenNotu: akademisyenNotu || undefined,
+          mevcutSonuc: akademisyenNotu ? UI.canliSonuc : undefined,
+        },
         bilgi => {
           UI.canliAdimlar[bilgi.adim] = bilgi;
           const kutu = document.querySelector(`[data-canli-adim="${bilgi.adim}"]`);
@@ -1658,12 +1796,368 @@
         }
       );
       UI.canliSonuc = sonuc;
+      UI.canliSeciliTur = Math.max(0, ((sonuc.turlar && sonuc.turlar.length) || 1) - 1);
+      UI.canliAkademisyenNot = '';
+      if (window.CanliDeney.cacheListAll) {
+        UI.canliTumUretiler = await window.CanliDeney.cacheListAll();
+      }
     } catch (err) {
       UI.canliHata = err && err.message ? err.message : String(err);
     } finally {
       UI.canliCalisiyor = false;
       yenile();
     }
+  }
+
+  function durumRozetiHTML(sonuc, onDenetimAcikAyar) {
+    if (!sonuc) return '<span class="denetim-durum-rozet bekliyor">Henüz üretilmedi</span>';
+    const d = sonuc.denetim || {};
+    if (!onDenetimAcikAyar || d.onayDurumu === 'denetimsiz_acik') {
+      return '<span class="denetim-durum-rozet acik">Ön Denetim Kapalı · Doğrudan Öğrenciye Açık</span>';
+    }
+    if (d.onayDurumu === 'akademisyen_onayli') {
+      return '<span class="denetim-durum-rozet onayli">✓ Akademisyen Onayladı · Öğrenciye Açık</span>';
+    }
+    if (d.onayDurumu === 'akademisyen_bekliyor') {
+      return '<span class="denetim-durum-rozet akademisyen">⏳ YZ Ön Onay Verdi · Akademisyen Onayı Bekliyor (Öğrenciye Gizli)</span>';
+    }
+    if (d.onayDurumu === 'akademisyen_revizyon') {
+      return '<span class="denetim-durum-rozet red">↺ Akademisyen Revizyon İstedi · Öğrenciye Gizli</span>';
+    }
+    return '<span class="denetim-durum-rozet red">⚠ YZ Ön Denetim Eşik Altı · Akademisyen İncelemesinde (Öğrenciye Gizli)</span>';
+  }
+
+  function ogrenciGorebilirMi(sonuc) {
+    if (!sonuc) return false;
+    if (UI.uretim.onDenetimAcik === false) return true;
+    const d = sonuc.denetim;
+    if (!d) return true;
+    return d.onayDurumu === 'akademisyen_onayli' || d.onayDurumu === 'denetimsiz_acik';
+  }
+
+  function puanEtiketiHTML(puan) {
+    const p = Number(puan);
+    if (p >= 1) return '<span class="rubrik-puan tam">1.0 · Agree (Tam Uyum)</span>';
+    if (p >= 0.5) return '<span class="rubrik-puan kismi">0.5 · Neutral / Partial (Kısmi)</span>';
+    return '<span class="rubrik-puan zayif">0.0 · Disagree (Uyumsuz)</span>';
+  }
+
+  function renderDenetimMerkezi(aktifSonuc) {
+    if (!aktifSonuc || !window.CanliDeney) return '';
+    const d = aktifSonuc.denetim || {};
+    const turlar = Array.isArray(aktifSonuc.turlar) ? aktifSonuc.turlar : [];
+    const izler = Array.isArray(aktifSonuc.denetimIzi) ? aktifSonuc.denetimIzi : [];
+    const turIdx = Math.max(0, Math.min(turlar.length - 1, UI.canliSeciliTur || 0));
+    const seciliTur = turlar[turIdx] || (d.sonDenetim ? {
+      turNo: 1,
+      revizyonNo: 0,
+      etiket: 'Son Ön Denetim',
+      model: d.denetimModel,
+      tarih: aktifSonuc.meta && aktifSonuc.meta.tarih,
+      ...d.sonDenetim,
+    } : null);
+
+    const rubrikTanimlari = window.CanliDeney.APPENDIX_B_RUBRIKLER || [];
+    const esdegerlikTanimlari = window.CanliDeney.ESDEGERLIK_KRITERLERI || [];
+    const sekme = UI.canliDenetimSekme || 'rubrik';
+    const onDenetimAcik = UI.uretim.onDenetimAcik !== false;
+    const ogrenciAcik = ogrenciGorebilirMi(aktifSonuc);
+
+    const genYuzde = seciliTur ? Math.round((seciliTur.genelOrtalama || 0) * 100) : null;
+    const pedYuzde = seciliTur ? Math.round((seciliTur.pedagojikOrtalama || 0) * 100) : null;
+    const esYuzde = seciliTur ? Math.round((seciliTur.esdegerlikOrtalama || 0) * 100) : null;
+
+    return `<section class="canli-panel denetim-merkezi" id="denetimMerkezi">
+      <div class="denetim-ust-bar">
+        <div>
+          <span class="juri-ust-etiket">arXiv:2509.13348 · Appendix B: Rubrics for Pedagogical Evaluations &amp; Deneysel Eşdeğerlik</span>
+          <h2>YZ Ön Denetim, Otomatik Revizyon ve Akademisyen Onay Merkezi</h2>
+          <p>Üretilen içerik önce YZ hakemi tarafından 10 pedagojik rubrik ve 5 deney-kontrol eşdeğerlik ölçütünde değerlendirilir. YZ ön onayından geçen içerikler akademisyen onayına düşer; <b>akademisyen onayladığında öğrenci ekranında görünür olur.</b></p>
+        </div>
+        <div class="denetim-ust-rozetler">
+          ${durumRozetiHTML(aktifSonuc, onDenetimAcik)}
+          <span class="denetim-gorunurluk-etiket ${ogrenciAcik ? 'acik' : 'kapali'}">
+            Öğrenci Görünürlüğü: <b>${ogrenciAcik ? 'AÇIK (Öğrenci görebilir)' : 'KİLİTLİ (Onay bekliyor)'}</b>
+          </span>
+        </div>
+      </div>
+
+      ${seciliTur ? `<div class="denetim-skor-serit">
+        <div class="denetim-skor-kart ${seciliTur.gectiMi ? 'gecti' : 'kaldi'}">
+          <small>Genel Ön Denetim Skoru</small>
+          <b>%${genYuzde} <span>(${seciliTur.genelOrtalama} / 1.00)</span></b>
+          <span class="skor-alt">Geçme eşiği: %${Math.round((d.esikPuan || 0.85) * 100)} (${d.esikPuan || 0.85}) · ${seciliTur.gectiMi ? 'YZ Ön Onay Verdi ✓' : 'Eşik Altında Kaldı'}</span>
+        </div>
+        <div class="denetim-skor-kart">
+          <small>Appendix B Pedagojik Yeterlik (10 Boyut)</small>
+          <b>%${pedYuzde} <span>(${seciliTur.pedagojikOrtalama} / 1.00)</span></b>
+          <span class="skor-alt">Accuracy, Coverage, Emphasis, Cognitive Load, Active Learning...</span>
+        </div>
+        <div class="denetim-skor-kart">
+          <small>Deney–Kontrol Eşdeğerliği (5 Boyut)</small>
+          <b>%${esYuzde} <span>(${seciliTur.esdegerlikOrtalama} / 1.00)</span></b>
+          <span class="skor-alt">Kazanım, Bloom düzeyi, yapı/süre, alan bağımsızlığı, transfer</span>
+        </div>
+        <div class="denetim-skor-kart">
+          <small>Revizyon Döngüsü &amp; Hakem Model</small>
+          <b>${d.kullanilanRevizyon || 0} / ${d.maxRevizyon ?? UI.uretim.maxRevizyon ?? 2} <span>revizyon kullanıldı</span></b>
+          <span class="skor-alt">Hakem: ${esc(seciliTur.model || d.denetimModel || UI.uretim.denetimModel)}</span>
+        </div>
+      </div>` : `<div class="denetim-kapali-bilgi">
+        <div>
+          <b>Bu içerik Ön Denetim Kapalı modda üretildi.</b>
+          <p>Ön denetim kapalı olduğunda içerik denetimsiz olarak doğrudan öğrenciye açılır. İsterseniz ön denetimi açıp mevcut içeriği Appendix B rubriğiyle değerlendirebilirsiniz.</p>
+        </div>
+        <button type="button" class="btn" data-act="canliSimdiDenetle"${UI.canliCalisiyor ? ' disabled' : ''}>Ön Denetimi Aç &amp; Şimdi Denetle</button>
+      </div>`}
+
+      <div class="denetim-sekmeler" role="tablist" aria-label="Denetim merkezi sekmeleri">
+        <button type="button" class="denetim-sekme${sekme === 'rubrik' ? ' on' : ''}" data-act="canliDenetimSekme" data-sekme="rubrik">
+          1. Appendix B Rubrik &amp; Eşdeğerlik Tablosu (${rubrikTanimlari.length + esdegerlikTanimlari.length} Ölçüt)
+        </button>
+        <button type="button" class="denetim-sekme${sekme === 'turlar' ? ' on' : ''}" data-act="canliDenetimSekme" data-sekme="turlar">
+          2. Revizyon Turları &amp; Düzeltme Önerileri (${turlar.length} Tur)
+        </button>
+        <button type="button" class="denetim-sekme${sekme === 'iz' ? ' on' : ''}" data-act="canliDenetimSekme" data-sekme="iz">
+          3. Tüm Adımların Promptları &amp; Dönütleri (${izler.length} Adım)
+        </button>
+        <button type="button" class="denetim-sekme${sekme === 'akademisyen' ? ' on' : ''}" data-act="canliDenetimSekme" data-sekme="akademisyen">
+          4. Akademisyen Onay Masası ${d.onayDurumu === 'akademisyen_bekliyor' ? '<span class="bekleyen-nokta">Onay Bekliyor</span>' : ''}
+        </button>
+      </div>
+
+      ${sekme === 'rubrik' ? `<div class="denetim-sekme-icerik">
+        ${turlar.length > 1 ? `<div class="tur-secici-serit">
+          <span>İncelenen değerlendirme turu:</span>
+          <div class="tur-dugmeler">
+            ${turlar.map((tr, idx) => `<button type="button" class="tur-btn${idx === turIdx ? ' on' : ''}" data-act="canliTurSec" data-i="${idx}">
+              Tur ${idx + 1}: ${esc(tr.etiket)} (%${Math.round((tr.genelOrtalama || 0) * 100)})
+            </button>`).join('')}
+          </div>
+        </div>` : ''}
+
+        ${seciliTur ? `<div class="denetim-genel-yorum">
+          <div>
+            <small>YZ Hakem Genel Değerlendirmesi (${esc(seciliTur.etiket)} · ${esc(seciliTur.tarih || '')})</small>
+            <p>${esc(seciliTur.genelYorum)}</p>
+          </div>
+          ${seciliTur.revizyonTalimati && !seciliTur.gectiMi ? `<div class="denetim-revizyon-uyari">
+            <b>Üretici Modele İletilen Düzeltme Talimatı:</b>
+            <p>${esc(seciliTur.revizyonTalimati)}</p>
+          </div>` : ''}
+        </div>` : ''}
+
+        <div class="rubrik-bolum-bas">
+          <h3>A. Deney–Kontrol Grubu Eşdeğerlik Değerlendirmesi (5 Ölçüt)</h3>
+          <p>Kişiselleştirilmiş deney içeriğinin kontrol grubuna göre daha kolay/zor olmamasını ve yalnızca bağlamın değişmesini denetler.</p>
+        </div>
+        <div class="rubrik-izgara">
+          ${esdegerlikTanimlari.map(e => {
+            const deger = (seciliTur && seciliTur.esdegerlik && seciliTur.esdegerlik[e.id]) || null;
+            return `<article class="rubrik-kart ${deger ? (deger.puan >= 1 ? 'tam' : deger.puan >= 0.5 ? 'kismi' : 'zayif') : ''}">
+              <div class="rubrik-kart-ust">
+                <div>
+                  <span class="rubrik-kod">${esc(e.kod)}</span>
+                  <b>${esc(e.ad)}</b>
+                </div>
+                ${deger ? puanEtiketiHTML(deger.puan) : '<span class="rubrik-puan">Değerlendirilmedi</span>'}
+              </div>
+              <p class="rubrik-tanim">${esc(e.tanim)}</p>
+              ${deger ? `<div class="rubrik-donut">
+                <div><small>YZ Hakem Dönütü:</small><p>${esc(deger.gerekce)}</p></div>
+                ${deger.oneri ? `<div class="rubrik-oneri"><small>Düzeltme Önerisi:</small><p>${esc(deger.oneri)}</p></div>` : ''}
+              </div>` : ''}
+            </article>`;
+          }).join('')}
+        </div>
+
+        <div class="rubrik-bolum-bas" style="margin-top:10px">
+          <h3>B. Google LearnLM (arXiv:2509.13348) Appendix B: Pedagojik Değerlendirme Rubriği (10 Ölçüt)</h3>
+          <p>Makalenin ekindeki 3 noktalı ölçek: <b>Agree (1.0)</b> · <b>Neutral / Partial (0.5)</b> · <b>Disagree (0.0)</b></p>
+        </div>
+        <div class="rubrik-izgara">
+          ${rubrikTanimlari.map(r => {
+            const deger = (seciliTur && seciliTur.pedagojik && seciliTur.pedagojik[r.id]) || null;
+            return `<article class="rubrik-kart ${deger ? (deger.puan >= 1 ? 'tam' : deger.puan >= 0.5 ? 'kismi' : 'zayif') : ''}">
+              <div class="rubrik-kart-ust">
+                <div>
+                  <span class="rubrik-kod">${esc(r.kod)}</span>
+                  <b>${esc(r.ad)}</b>
+                </div>
+                ${deger ? puanEtiketiHTML(deger.puan) : '<span class="rubrik-puan">Değerlendirilmedi</span>'}
+              </div>
+              <p class="rubrik-tanim">${esc(r.tanim)}</p>
+              <details class="rubrik-kriter-detay">
+                <summary>Makaledeki Orijinal Puanlama Ölçütleri (1.0 / 0.5 / 0.0)</summary>
+                <ul>
+                  <li><b>Agree (1.0):</b> ${esc(r.agree)}</li>
+                  <li><b>Neutral / Partial (0.5):</b> ${esc(r.partial)}</li>
+                  <li><b>Disagree (0.0):</b> ${esc(r.disagree)}</li>
+                </ul>
+              </details>
+              ${deger ? `<div class="rubrik-donut">
+                <div><small>YZ Hakem Dönütü:</small><p>${esc(deger.gerekce)}</p></div>
+                ${deger.oneri ? `<div class="rubrik-oneri"><small>Düzeltme Önerisi:</small><p>${esc(deger.oneri)}</p></div>` : ''}
+              </div>` : ''}
+            </article>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+
+      ${sekme === 'turlar' ? `<div class="denetim-sekme-icerik">
+        ${turlar.length ? `<div class="revizyon-zaman-cizelgesi">
+          ${turlar.map((tr, idx) => `<div class="revizyon-tur-kart ${tr.gectiMi ? 'gecti' : 'revizyon'}">
+            <div class="revizyon-tur-ust">
+              <div>
+                <span class="rubrik-kod">TUR ${idx + 1}</span>
+                <b>${esc(tr.etiket)}</b>
+                <small>Model: ${esc(tr.model)} · Saat: ${esc(tr.tarih || '')}</small>
+              </div>
+              <div class="revizyon-tur-skorlar">
+                <span>Pedagojik: <b>%${Math.round((tr.pedagojikOrtalama || 0) * 100)}</b></span>
+                <span>Eşdeğerlik: <b>%${Math.round((tr.esdegerlikOrtalama || 0) * 100)}</b></span>
+                <span class="genel ${tr.gectiMi ? 'iyi' : 'uyari'}">Genel: <b>%${Math.round((tr.genelOrtalama || 0) * 100)}</b> (${tr.gectiMi ? 'ONAY ✓' : 'REVİZYON ↺'})</span>
+              </div>
+            </div>
+            <p class="revizyon-tur-yorum"><b>Hakem Özeti:</b> ${esc(tr.genelYorum)}</p>
+            ${tr.eksikNotlar && tr.eksikNotlar.length ? `<div class="revizyon-eksik-liste">
+              <b>Tespit Edilen Eksikler ve Düzeltme Önerileri (${tr.eksikNotlar.length} madde):</b>
+              <ul>${tr.eksikNotlar.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
+            </div>` : `<div class="revizyon-tam-not">✓ Bu turda tüm Appendix B ve deneysel eşdeğerlik boyutları tam uyum sağladı.</div>`}
+            ${tr.revizyonTalimati && !tr.gectiMi ? `<div class="revizyon-talimat-kutu">
+              <b>Bir Sonraki Üretim Turuna Gönderilen Revizyon Prompt Talimatı:</b>
+              <p>${esc(tr.revizyonTalimati)}</p>
+            </div>` : ''}
+            ${tr.icerikSnapshot ? `<details class="revizyon-snapshot">
+              <summary>Bu turda değerlendirilen içerik taslağını görüntüle (${esc(tr.icerikSnapshot.altBaslik || '')})</summary>
+              <div class="snapshot-ic">
+                <p><b>Slayt 1 Soru:</b> ${esc(tr.icerikSnapshot.slaytlar && tr.icerikSnapshot.slaytlar[0] && tr.icerikSnapshot.slaytlar[0].soru)}</p>
+                <p><b>Mikro-görev:</b> ${esc(tr.icerikSnapshot.gorev && tr.icerikSnapshot.gorev.baslik)} — ${esc(tr.icerikSnapshot.gorev && tr.icerikSnapshot.gorev.metin)}</p>
+              </div>
+            </details>` : ''}
+          </div>`).join('')}
+        </div>` : '<p class="soluk-bilgi">Henüz ön denetim turu kaydı bulunmuyor.</p>'}
+      </div>` : ''}
+
+      ${sekme === 'iz' ? `<div class="denetim-sekme-icerik">
+        <div class="iz-aciklama-ust">
+          <p>Üretim hattındaki tüm adımların (1. İlk Senaryo Üretimi, YZ Ön Denetim Hakemi, Otomatik Revizyonlar, Seslendirme Scripti, Görsel Prompt ve Akademisyen Onayı) <b>Sistem Promptları</b>, <b>Kullanıcı Promptları</b> ve <b>Model Dönütleri / Çıktıları</b> aşağıda okunaklı biçimde listelenmektedir.</p>
+          <div class="iz-toplu-btn">
+            <button type="button" class="btn ghost" data-act="canliIzHepsi" data-ac="1">Tüm Adımları Aç</button>
+            <button type="button" class="btn ghost" data-act="canliIzHepsi" data-ac="0">Tümünü Daralt</button>
+          </div>
+        </div>
+        <div class="iz-listesi">
+          ${izler.map((iz, idx) => {
+            const acik = UI.canliAcikIz[iz.id] !== undefined ? UI.canliAcikIz[iz.id] : (idx === 0 || iz.tur === 'denetim' || iz.tur === 'revizyon');
+            const turEtiket = iz.tur === 'uretim' ? 'İçerik Üretimi'
+              : iz.tur === 'denetim' ? 'Appendix B Ön Denetim'
+              : iz.tur === 'revizyon' ? 'Otomatik Revizyon'
+              : iz.tur === 'script' ? 'TTS Script Editörü'
+              : iz.tur === 'prompt' ? 'Görsel Prompt'
+              : 'Akademisyen Kararı';
+            return `<article class="iz-kart tur-${esc(iz.tur)}">
+              <header class="iz-kart-bas" data-act="canliIzToggle" data-id="${esc(iz.id)}" role="button" tabindex="0">
+                <div class="iz-bas-sol">
+                  <span class="iz-sira">${idx + 1}</span>
+                  <div>
+                    <div class="iz-baslik-satir">
+                      <b>${esc(iz.asama)}</b>
+                      <span class="iz-tur-etiket">${turEtiket}</span>
+                      <code class="iz-model-etiket">${esc(iz.model)}</code>
+                      <time>${esc(iz.tarih || '')}</time>
+                    </div>
+                    <p class="iz-ozet">${esc(iz.ozet || '')}</p>
+                  </div>
+                </div>
+                <span class="iz-ac-ikon">${acik ? 'Gizle ▲' : 'Prompt & Çıktıyı Gör ▼'}</span>
+              </header>
+              ${acik ? `<div class="iz-kart-govde">
+                <div class="iz-iki-kolon">
+                  <div class="iz-kod-kutu">
+                    <div class="iz-kod-bas"><b>Sistem Promptu (System Instruction)</b><span>Role &amp; Kurallar</span></div>
+                    <pre>${esc(iz.systemPrompt || '')}</pre>
+                  </div>
+                  <div class="iz-kod-kutu">
+                    <div class="iz-kod-bas"><b>Kullanıcı Promptu (User Prompt &amp; Bağlam / Dönüt)</b><span>Girdi Verisi</span></div>
+                    <pre>${esc(iz.userPrompt || '')}</pre>
+                  </div>
+                </div>
+                <div class="iz-kod-kutu cikti">
+                  <div class="iz-kod-bas"><b>Model Çıktısı / Yapılandırılmış Dönüt (JSON)</b><span>Üretilen Yanıt</span></div>
+                  <pre>${esc(typeof iz.outputJson === 'string' ? iz.outputJson : JSON.stringify(iz.outputJson, null, 2))}</pre>
+                </div>
+              </div>` : ''}
+            </article>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+
+      ${sekme === 'akademisyen' ? `<div class="denetim-sekme-icerik">
+        <div class="akademisyen-masa-izgara">
+          <div class="akademisyen-karar-kutu">
+            <div class="akademisyen-bas">
+              <span class="juri-ust-etiket">İnsan-Döngüde (Human-in-the-Loop) Uzman Denetimi</span>
+              <h3>Akademisyen Onay ve Revizyon Masası</h3>
+              <p>YZ ön denetiminden geçen içerikler burada akademisyen onayına sunulur. Akademisyen içeriği onayladığında öğrenci modül ekranında kişiselleştirilmiş içeriği görebilir; revizyon isterse akademisyenin yazdığı düzeltme notuyla YZ içeriği yeniden üretir ve tekrar denetler.</p>
+            </div>
+
+            <div class="akademisyen-durum-panel">
+              <div>
+                <small>İncelenen İçerik</small>
+                <b>${esc(aktifSonuc.modulId.toUpperCase())} · ${esc(aktifSonuc.profil.altKategori)} — ${esc(aktifSonuc.slayt.altBaslik)}</b>
+              </div>
+              <div>
+                <small>Mevcut Onay Durumu</small>
+                ${durumRozetiHTML(aktifSonuc, onDenetimAcik)}
+              </div>
+            </div>
+
+            ${d.akademisyenKarar ? `<div class="akademisyen-kayitli-karar ${d.akademisyenKarar.karar === 'onay' ? 'onay' : 'red'}">
+              <b>Son Akademisyen Kararı (${esc(d.akademisyenKarar.akademisyenAd)} · ${esc(d.akademisyenKarar.tarih)}):</b>
+              <p>${esc(d.akademisyenKarar.not)}</p>
+            </div>` : ''}
+
+            <div class="canli-alan">
+              <label for="canliAkademisyenNot">Akademisyen Değerlendirme Notu / Revizyon Talimatı</label>
+              <textarea id="canliAkademisyenNot" rows="3" placeholder="Onay gerekçenizi veya YZ'nin düzeltmesini istediğiniz pedagojik/eşdeğerlik noktasını yazın (ör. 'Mikro-görevdeki çeldiricileri kontrol grubuna daha yakın zorlukta kurgula')...">${esc(UI.canliAkademisyenNot || '')}</textarea>
+            </div>
+
+            <div class="akademisyen-butonlar">
+              <button type="button" class="btn onay-btn" data-act="akademisyenOnayla"${UI.canliCalisiyor ? ' disabled' : ''}>
+                ${ic('check')} Akademisyen Olarak Onayla &amp; Öğrenciye Aç
+              </button>
+              <button type="button" class="btn ghost revizyon-btn" data-act="akademisyenRevizyonIste"${UI.canliCalisiyor ? ' disabled' : ''}>
+                ↺ Akademisyen Notuyla YZ'ye Yeniden Revize Ettir
+              </button>
+              ${d.onayDurumu === 'akademisyen_onayli' ? `<button type="button" class="btn ghost" data-act="akademisyenOnayGeriAl">Onayı Geri Al (Öğrenciye Kapat)</button>` : ''}
+            </div>
+          </div>
+
+          <div class="akademisyen-kuyruk-kutu">
+            <h3>Önbellekteki Tüm Üretilen İçerikler &amp; Onay Kuyruğu</h3>
+            <p>Farklı modül ve öğrenci profilleri için üretilen içeriklerin YZ ön denetim skorları ve akademisyen onay durumları:</p>
+            ${UI.canliTumUretiler && UI.canliTumUretiler.length ? `<div class="kuyruk-liste">
+              ${UI.canliTumUretiler.map(u => {
+                const ud = u.denetim || {};
+                const skor = ud.sonDenetim ? `%${Math.round((ud.sonDenetim.genelOrtalama || 0) * 100)}` : 'Denetimsiz';
+                const seciliMiKuyruk = u.cacheKey === aktifSonuc.cacheKey;
+                return `<div class="kuyruk-satir${seciliMiKuyruk ? ' on' : ''}">
+                  <div>
+                    <b>${esc((u.modulId || '').toUpperCase())} · ${esc((u.profil && (u.profil.kisaEtiket || u.profil.altKategori)) || u.cacheKey)}</b>
+                    <small>${esc((u.slayt && u.slayt.altBaslik) || '')} · YZ Skoru: <b>${skor}</b></small>
+                  </div>
+                  <div class="kuyruk-sag">
+                    ${durumRozetiHTML(u, onDenetimAcik)}
+                    ${!seciliMiKuyruk ? `<button type="button" class="btn ghost kuyruk-ac-btn" data-act="kuyrukSec" data-m="${esc(u.modulId)}" data-p="${esc(u.profil && u.profil.id)}">İncele</button>` : ''}
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>` : '<p class="soluk-bilgi">Henüz önbellekte kayıtlı üretim yok.</p>'}
+          </div>
+        </div>
+      </div>` : ''}
+    </section>`;
   }
 
   function sCanli() {
@@ -1674,8 +2168,15 @@
     const claudeOk = !!(UI.uretim.claudeKey || '').trim();
     const geminiOk = !!(UI.uretim.geminiKey || '').trim();
     const ttsOk = !!((UI.uretim.ttsKey || UI.uretim.geminiKey || '').trim());
+    const onDenetimAcik = UI.uretim.onDenetimAcik !== false;
+    const denetimModel = UI.uretim.denetimModel || UI.uretim.senaryoModel;
+    const maxRev = UI.uretim.maxRevizyon ?? 2;
+    const ogrenciGorebilir = ogrenciGorebilirMi(aktifSonuc);
+    const ogrenciModu = UI.canliBakModu === 'ogrenci';
+
     const adimTanimlari = [
       [1, '1. Senaryo & İçerik', UI.uretim.senaryoModel],
+      [5, `1b. YZ Ön Denetim (Maks. ${maxRev} Rev.)`, onDenetimAcik ? `${denetimModel} · Appendix B` : 'Kapalı (Denetimsiz)'],
       [2, '2. Seslendirme Scripti', UI.uretim.scriptModel],
       [3, '3. Görsel Prompt', UI.uretim.promptModel],
       [4, '4. Görsel & TTS Ses', `${UI.uretim.gorselModel} + ${UI.uretim.sesModel}`],
@@ -1683,12 +2184,15 @@
     return kabuk('yonetici', `<div class="sayfa canli-sayfa">
       <div class="sb">
         <div>
-          <h1>Canlı Deney Laboratuvarı · Kontrol vs API</h1>
-          <p>Kontrol grubu için 6 modülde hazır standart içerik sunulur; deney grubu için seçtiğiniz öğrenci profili ve modellerle API üzerinden canlı üretim yapılır.</p>
+          <h1>Canlı Deney Laboratuvarı · Appendix B Ön Denetim &amp; Akademisyen Onayı</h1>
+          <p>Kontrol grubu standart içeriği ile deney grubu canlı API üretimini karşılaştırın; <b>arXiv:2509.13348 Appendix B</b> rubriğiyle YZ ön kontrolünü, revizyon döngüsünü ve akademisyen onayına bağlı öğrenci görünürlüğünü yönetin.</p>
         </div>
         <div class="yon-aksiyon">
-          <a class="btn ghost" href="#yonetici">${ic('ayar')}API &amp; Model Ayarları</a>
-          <a class="btn ghost" href="#juri">${ic('ampul')}Jüri sunumu</a>
+          <div class="canli-gorunum-sec rol-secici" role="group" aria-label="Görünüm modu">
+            <button type="button" class="${!ogrenciModu ? 'on' : ''}" data-act="canliBakModu" data-mod="arastirmaci">Araştırmacı / Akademisyen</button>
+            <button type="button" class="${ogrenciModu ? 'on' : ''}" data-act="canliBakModu" data-mod="ogrenci">Öğrenci Görünümü (${ogrenciGorebilir ? 'Açık ✓' : 'Kilitli 🔒'})</button>
+          </div>
+          <a class="btn ghost" href="#yonetici">${ic('ayar')}Yönetici &amp; Denetim Ayarları</a>
         </div>
       </div>
 
@@ -1710,7 +2214,7 @@
           </div>
           <div class="canli-aksiyonlar">
             <button type="button" class="btn" data-act="canliUret"${UI.canliCalisiyor ? ' disabled' : ''}>
-              ${UI.canliCalisiyor ? 'API ile üretiliyor...' : aktifSonuc ? 'Önbellekten gösteriliyor · Yeniden Üret' : 'Deney Grubu Üret (Canlı API)'}
+              ${UI.canliCalisiyor ? 'API & Ön Denetim Çalışıyor...' : aktifSonuc ? 'Önbellekten Yüklü · Yeniden Üret' : 'Deney Grubu Üret & Denetle'}
             </button>
           </div>
         </div>
@@ -1730,19 +2234,49 @@
           </div>
         </div>` : ''}
 
-        <div class="canli-model-serit">
+        <!-- Hızlı Ön Denetim Aç/Kapat ve Revizyon Ayar Şeridi -->
+        <div class="canli-denetim-ayar-serit">
+          <div class="canli-denetim-sol">
+            <button type="button" class="denetim-toggle-btn ${onDenetimAcik ? 'on' : 'off'}" data-act="onDenetimToggle" aria-pressed="${onDenetimAcik}">
+              <span class="toggle-nokta"></span>
+              <b>YZ Ön Denetim &amp; Akademisyen Onayı: ${onDenetimAcik ? 'AÇIK' : 'KAPALI (Denetimsiz)'}</b>
+            </button>
+            ${onDenetimAcik ? `<label class="mini-ayar">
+              <span>Revizyon hakkı:</span>
+              <select data-uretim="maxRevizyon" aria-label="Maksimum revizyon hakkı">
+                ${[0, 1, 2, 3, 4].map(n => `<option value="${n}"${Number(maxRev) === n ? ' selected' : ''}>${n} revizyon</option>`).join('')}
+              </select>
+            </label>
+            <label class="mini-ayar">
+              <span>Geçme eşiği:</span>
+              <select data-uretim="gecmeEsigi" aria-label="YZ ön onay geçme eşiği">
+                ${[['0.75', '%75'], ['0.80', '%80'], ['0.85', '%85'], ['0.90', '%90 (Makale)'], ['0.95', '%95']].map(([v, l]) => `<option value="${v}"${String(UI.uretim.gecmeEsigi || '0.85') === v ? ' selected' : ''}>${l}</option>`).join('')}
+              </select>
+            </label>` : `<span class="denetimsiz-uyari-not">Ön denetim kapalı: Üretilen içerik revizyonsuz ve akademisyen onayı beklemeksizin doğrudan öğrenciye gösterilir.</span>`}
+          </div>
           <div class="canli-model-etiketler">
             <span>Claude: ${claudeOk ? 'Hazır ✓' : 'Anahtar yok'}</span>
             <span>Gemini: ${geminiOk ? 'Hazır ✓' : 'Anahtar yok'}</span>
             <span>TTS: ${ttsOk ? 'Cloud TTS ✓' : 'Tarayıcı TTS'}</span>
-            <span>Kazanım: ${esc(m.ozet)}</span>
           </div>
-          <a href="#yonetici">Modelleri / Anahtarları düzenle →</a>
         </div>
 
-        <div class="canli-akis" id="canliAkis">
+        <div class="canli-akis canli-akis-5" id="canliAkis">
           ${adimTanimlari.map(([no, bas, modAd]) => {
-            const st = UI.canliAdimlar[no] || (aktifSonuc ? { durum: 'bitti', mesaj: aktifSonuc.onbellekten ? 'IndexedDB önbellekten yüklendi' : 'Tamamlandı' } : { durum: '', mesaj: 'Bekliyor' });
+            let varsayilanSt = { durum: '', mesaj: 'Bekliyor' };
+            if (aktifSonuc) {
+              if (no === 5) {
+                const sd = aktifSonuc.denetim && aktifSonuc.denetim.sonDenetim;
+                varsayilanSt = !onDenetimAcik
+                  ? { durum: 'uyari', mesaj: 'Ön denetim kapalı' }
+                  : sd
+                    ? { durum: sd.gectiMi ? 'bitti' : 'uyari', mesaj: `${sd.gectiMi ? 'YZ Ön Onay ✓' : 'Eşik altı'} · %${Math.round(sd.genelOrtalama * 100)} (${aktifSonuc.denetim.kullanilanRevizyon || 0}/${aktifSonuc.denetim.maxRevizyon ?? maxRev} rev.)` }
+                    : { durum: 'uyari', mesaj: 'Denetim kaydı yok' };
+              } else {
+                varsayilanSt = { durum: 'bitti', mesaj: aktifSonuc.onbellekten ? 'Önbellekten yüklendi' : 'Tamamlandı' };
+              }
+            }
+            const st = UI.canliAdimlar[no] || varsayilanSt;
             return `<div class="canli-adim ${st.durum || ''}" data-canli-adim="${no}">
               <small>${bas}</small>
               <b>${esc(modAd)}</b>
@@ -1755,16 +2289,14 @@
 
         ${aktifSonuc ? `<div class="canli-aksiyonlar">
           <button type="button" class="btn ghost" data-act="canliYenidenUret"${UI.canliCalisiyor ? ' disabled' : ''}>Önbelleği yoksay &amp; Yeniden üret</button>
+          ${onDenetimAcik && aktifSonuc.denetim && aktifSonuc.denetim.onayDurumu !== 'akademisyen_onayli' ? `<button type="button" class="btn onay-btn" data-act="akademisyenOnayla">${ic('check')}Akademisyen Olarak Onayla (Öğrenciye Aç)</button>` : ''}
           <button type="button" class="btn ghost" data-act="canliIndir">${ic('indir')}Klasöre Kaydet (images/ &amp; audio/)</button>
           <button type="button" class="btn ghost" data-act="canliOnbellekSil">Bu önbelleği temizle</button>
-          <button type="button" class="btn ghost" data-act="canliDetay">${UI.canliDetayAcik ? 'Prompt &amp; JSON gizle' : 'Üretilen Prompt &amp; JSON'}</button>
-        </div>` : ''}
-
-        ${aktifSonuc && UI.canliDetayAcik ? `<div class="canli-detay-kutu">
-          <b>Üretim meta bilgileri (${esc(aktifSonuc.meta.tarih || '')}) · ${esc(aktifSonuc.meta.gorselNot || '')} · ${esc(aktifSonuc.meta.ttsNot || '')}</b>
-          <pre>${esc(JSON.stringify({ prompts: aktifSonuc.prompts, slayt: { ...aktifSonuc.slayt, slaytlar: aktifSonuc.slayt.slaytlar.map(s => ({ ...s, image_data_url: s.image_data_url ? '[image data url]' : undefined, audio_data_url: s.audio_data_url ? '[audio data url]' : undefined })) }, gorev: { ...aktifSonuc.gorev, image_data_url: aktifSonuc.gorev.image_data_url ? '[image data url]' : undefined, audio_data_url: aktifSonuc.gorev.audio_data_url ? '[audio data url]' : undefined } }, null, 2))}</pre>
+          <a class="btn ghost" href="#ders-${m.id}-ornek">Öğrenci Ders Ekranında Test Et ${ic('sag')}</a>
         </div>` : ''}
       </section>
+
+      ${aktifSonuc ? renderDenetimMerkezi(aktifSonuc) : ''}
 
       <div class="canli-karsilastirma">
         <section class="canli-kolon">
@@ -1784,7 +2316,7 @@
         <section class="canli-kolon deney">
           <div class="canli-kolon-ust">
             <div class="canli-kolon-bas">
-              <small>Deney grubu · Canlı kişiselleştirme</small>
+              <small>Deney grubu · ${ogrenciModu ? 'Öğrenci Görünümü Önizlemesi' : 'Araştırmacı / Akademisyen Önizlemesi'}</small>
               <h2>${esc(profil.kisaEtiket || profil.altKategori)} (${esc(m.id.toUpperCase())})</h2>
             </div>
             <div class="canli-gorunum-sec" role="group" aria-label="Deney görünümü">
@@ -1792,11 +2324,23 @@
               <button type="button" class="${UI.canliDeneyGorunum === 'gorev' ? 'on' : ''}" data-act="canliDGorunum" data-v="gorev">Mikro-görev</button>
             </div>
           </div>
-          ${aktifSonuc ? `<div id="canliDeneyHost"></div>` : `<div class="canli-bos">
-            <h3>${UI.canliCalisiyor ? 'Deney grubu API ile üretiliyor...' : 'Canlı API üretimi bekliyor'}</h3>
-            <p>${UI.canliCalisiyor ? 'Seçtiğiniz senaryo, script, prompt, Gemini görsel ve Google TTS adımları sırayla çalıştırılıyor.' : `Sol tarafta Kontrol grubunun hazır standart içeriğini inceleyebilirsiniz. “Deney Grubu Üret (Canlı API)” düğmesine bastığınızda ${esc(profil.altKategori)} bağlamında kişiselleştirilmiş 5 slaytlık örnek ve mikro-görev burada oluşur.`}</p>
-            ${!UI.canliCalisiyor ? `<button type="button" class="btn" data-act="canliUret">${ic('yildiz')}Şimdi Canlı Üret (API)</button>` : ''}
-          </div>`}
+          ${!aktifSonuc ? `<div class="canli-bos">
+            <h3>${UI.canliCalisiyor ? 'Deney grubu API ile üretiliyor ve Appendix B rubriğiyle denetleniyor...' : 'Canlı API üretimi bekliyor'}</h3>
+            <p>${UI.canliCalisiyor ? 'Senaryo üretimi, YZ Appendix B pedagojik ön kontrolü (ve gerekirse otomatik revizyonu), seslendirme scripti, Gemini görsel ve Google TTS adımları sırayla çalıştırılıyor.' : `Sol tarafta Kontrol grubunun hazır standart içeriğini inceleyebilirsiniz. “Deney Grubu Üret & Denetle” düğmesine bastığınızda ${esc(profil.altKategori)} bağlamında kişiselleştirilmiş 5 slaytlık örnek ve mikro-görev üretilir, YZ ön kontrolünden geçer ve akademisyen onayına sunulur.`}</p>
+            ${!UI.canliCalisiyor ? `<button type="button" class="btn" data-act="canliUret">${ic('yildiz')}Şimdi Canlı Üret &amp; Denetle (API)</button>` : ''}
+          </div>` : (ogrenciModu && !ogrenciGorebilir) ? `<div class="canli-bos ogrenci-kilit-kutu">
+            <span class="kilit-ikon">🔒</span>
+            <h3>Bu İçerik Henüz Öğrenci Erişimine Açılmadı</h3>
+            <p>Ön denetim açık modda üretilen YZ içerikleri, <b>YZ Ön Denetiminden (Appendix B)</b> geçtikten sonra <b>Akademisyen Onayına</b> düşer. Akademisyen onaylayana kadar öğrenci bu içeriği göremez.</p>
+            <div class="kilit-durum-ozet">
+              ${durumRozetiHTML(aktifSonuc, onDenetimAcik)}
+            </div>
+            <div class="canli-aksiyonlar" style="justify-content:center;margin-top:8px">
+              <button type="button" class="btn onay-btn" data-act="akademisyenOnayla">${ic('check')}Akademisyen Olarak Şimdi Onayla &amp; Öğrenciye Aç</button>
+              <button type="button" class="btn ghost" data-act="canliBakModu" data-mod="arastirmaci">Araştırmacı Görünümüne Dön</button>
+              <button type="button" class="btn ghost" data-act="onDenetimToggle">Ön Denetimi Kapat (Denetimsiz Göster)</button>
+            </div>
+          </div>` : `<div id="canliDeneyHost"></div>`}
         </section>
       </div>
     </div>`);
@@ -1887,18 +2431,22 @@
         if (bEl) bEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
-    if (r.ad === 'ders' && r.k === 'ornek' && UI.ornekMod === 'slayt' && window.SlaytSunum && $('#dersSlaytHost')) {
+    if (r.ad === 'ders' && r.k === 'ornek' && window.SlaytSunum && $('#dersSlaytHost')) {
       const b = baglamAl(r.m);
-      UI.slaytPlayer = window.SlaytSunum.createPlayer($('#dersSlaytHost'), window.SlaytSunum.baglamdanUret(b), {
+      const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === r.m.id && ogrenciGorebilirMi(UI.canliSonuc);
+      const slaytVeri = canliAktif ? UI.canliSonuc.slayt : window.SlaytSunum.baglamdanUret(b);
+      UI.slaytPlayer = window.SlaytSunum.createPlayer($('#dersSlaytHost'), slaytVeri, {
         moduleId: r.m.id,
         onCompleteHash: `ders-${r.m.id}-gorev`,
         onCompleteAct: 'ornekTamam',
         completeLabel: 'Mikro-göreve geç',
       });
     }
-    if (r.ad === 'ders' && r.k === 'gorev' && UI.gorevMod === 'etkilesimli' && window.GorevPrototip && $('#dersGorevHost')) {
+    if (r.ad === 'ders' && r.k === 'gorev' && window.GorevPrototip && $('#dersGorevHost')) {
       const b = baglamAl(r.m), s = sonrakiAdim(r.m, 'gorev');
-      UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#dersGorevHost'), window.GorevPrototip.baglamdanSenaryo(b), {
+      const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === r.m.id && ogrenciGorebilirMi(UI.canliSonuc);
+      const gorevVeri = canliAktif ? UI.canliSonuc.gorev : window.GorevPrototip.baglamdanSenaryo(b);
+      UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#dersGorevHost'), gorevVeri, {
         moduleId: r.m.id,
         onCompleteHash: `ders-${r.m.id}-${s}`,
         onCompleteAct: 'gorevTamam',
@@ -2095,6 +2643,89 @@
     modelleriSifirla: () => { UI.uretim.modeller = { claude: null, geminiText: null, geminiImage: null, tts: null }; UI.modelBilgi = null; kaydetUretim(); yenile(); },
     canliUret: () => { canliUretBaslat(false); },
     canliYenidenUret: () => { canliUretBaslat(true); },
+    onDenetimSec: el => {
+      UI.uretim.onDenetimAcik = el.dataset.acik === '1';
+      kaydetUretim();
+      yenile();
+    },
+    onDenetimToggle: () => {
+      UI.uretim.onDenetimAcik = !(UI.uretim.onDenetimAcik !== false);
+      kaydetUretim();
+      yenile();
+    },
+    canliSimdiDenetle: () => {
+      UI.uretim.onDenetimAcik = true;
+      kaydetUretim();
+      canliUretBaslat(true);
+    },
+    canliBakModu: el => {
+      UI.canliBakModu = el.dataset.mod === 'ogrenci' ? 'ogrenci' : 'arastirmaci';
+      yenile();
+    },
+    canliDenetimSekme: el => {
+      UI.canliDenetimSekme = el.dataset.sekme || 'rubrik';
+      yenile();
+    },
+    canliTurSec: el => {
+      UI.canliSeciliTur = +el.dataset.i || 0;
+      yenile();
+    },
+    canliIzToggle: el => {
+      const id = el.dataset.id;
+      const cur = UI.canliAcikIz[id];
+      UI.canliAcikIz[id] = cur === undefined ? false : !cur;
+      yenile();
+    },
+    canliIzHepsi: el => {
+      const ac = el.dataset.ac === '1';
+      const izler = (UI.canliSonuc && UI.canliSonuc.denetimIzi) || [];
+      izler.forEach(iz => { UI.canliAcikIz[iz.id] = ac; });
+      yenile();
+    },
+    akademisyenOnayla: async () => {
+      if (!window.CanliDeney || !UI.canliSonuc) return;
+      const notEl = $('#canliAkademisyenNot');
+      const not = (notEl ? notEl.value : UI.canliAkademisyenNot || '').trim();
+      UI.canliSonuc = await window.CanliDeney.akademisyenKararKaydet(UI.canliSonuc, {
+        karar: 'onay',
+        akademisyenAd: UI.uretim.akademisyenAd || 'Doç. Dr. Akademik Danışman',
+        not: not || 'Appendix B pedagojik yeterlik (10 boyut) ve deney-kontrol eşdeğerliği (5 boyut) incelendi; öğrenci erişimine açılması onaylandı.',
+      });
+      if (window.CanliDeney.cacheListAll) UI.canliTumUretiler = await window.CanliDeney.cacheListAll();
+      yenile();
+    },
+    akademisyenOnayGeriAl: async () => {
+      if (!window.CanliDeney || !UI.canliSonuc) return;
+      UI.canliSonuc.denetim = UI.canliSonuc.denetim || {};
+      UI.canliSonuc.denetim.onayDurumu = 'akademisyen_bekliyor';
+      UI.canliSonuc.denetim.ogrenciGorebilir = false;
+      await window.CanliDeney.cacheSet(UI.canliSonuc.cacheKey, UI.canliSonuc);
+      if (window.CanliDeney.cacheListAll) UI.canliTumUretiler = await window.CanliDeney.cacheListAll();
+      yenile();
+    },
+    akademisyenRevizyonIste: async () => {
+      if (!window.CanliDeney || !UI.canliSonuc) return;
+      const notEl = $('#canliAkademisyenNot');
+      const not = (notEl ? notEl.value : UI.canliAkademisyenNot || '').trim() || 'Deney-kontrol eşdeğerliğini ve bilişsel yük uyumunu güçlendirerek senaryoyu yeniden kurgula.';
+      UI.canliSonuc = await window.CanliDeney.akademisyenKararKaydet(UI.canliSonuc, {
+        karar: 'revizyon',
+        akademisyenAd: UI.uretim.akademisyenAd || 'Doç. Dr. Akademik Danışman',
+        not,
+      });
+      await canliUretBaslat(true, not);
+    },
+    kuyrukSec: async el => {
+      const mId = el.dataset.m;
+      const pId = el.dataset.p;
+      if (mId) UI.canliModul = mId;
+      if (pId) {
+        const bilinen = D.juriSunum.profiller.some(pr => pr.id === pId);
+        UI.canliProfil = bilinen ? pId : (pId.startsWith('aktif-') ? 'aktif' : 'ozel');
+      }
+      UI.canliSonuc = null;
+      await canliOnbellekBak();
+      yenile();
+    },
     canliOnbellekSil: async () => {
       if (!window.CanliDeney) return;
       const p = canliSeciliProfil();
@@ -2251,6 +2882,7 @@
     if (t.id === 'canliOzelKategori') UI.canliOzelKategori = t.value;
     if (t.id === 'canliOzelAlt') UI.canliOzelAlt = t.value;
     if (t.id === 'canliOzelAciklama') UI.canliOzelAciklama = t.value;
+    if (t.id === 'canliAkademisyenNot') UI.canliAkademisyenNot = t.value;
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'bagSec') { S.baglamSec[e.target.dataset.m] = e.target.value; kaydet(); yenile(); }
