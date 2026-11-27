@@ -145,6 +145,10 @@
     juriEvrenProf: 0,
     juriSlaytProf: 1,
     juriGorevProf: 1,
+    juriSlaytModul: 'm2',
+    juriSlaytGrup: 'o1',
+    juriGorevModul: 'm2',
+    juriGorevGrup: 'o1',
     juriCozum: {},
     keyGorunur: {},
     modelYukleniyor: false,
@@ -1340,53 +1344,63 @@
           <p>Burada hazırlanan içerikler jüriye kişiselleştirme mekanizmasını göstermek amacıyla üretilmiş simülasyonlardır. Öğrenme konuları tez önerisinde belirtilen kapsamdan seçilmiştir. Nihai uygulamadan önce standart ve kişiselleştirilmiş sürümlerin metin uzunluğu, bilişsel talep, alan bilgisi gereksinimi, görsel kullanımı ve pedagojik eşdeğerliği uzmanlar tarafından değerlendirilmelidir.</p>
         </aside>
       </section>
-      <!-- 8. Alternatif sunum biçimi: Seslendirilmiş etkileşimli çözümlü örnek -->
+      <!-- 8. Alternatif sunum biçimi: Seslendirilmiş etkileşimli çözümlü örnek (6 Modül × Kontrol + 6 Deney Profili) -->
       <section class="kart juri-bolum" id="juri-slayt">
         <div class="juri-bolum-bas">
           <span class="juri-adim-no">8</span>
           <div>
-            <h2>Alternatif sunum biçimi: Çoklu ortam destekli, adım adım çözümlü örnek</h2>
-            <p>Konu anlatım videosundan sonra statik metin yerine Google Learn Your Way'deki <em>Slides &amp; Narration</em> yaklaşımından esinlenen, seslendirilmiş ve öğrenci kontrollü etkileşimli çözümlü örnek sunumu. Aşağıdaki üç profil arasında geçiş yaparak eşdeğer yapıyı inceleyebilirsiniz.</p>
+            <h2>Konuya özgü çoklu ortam destekli çözümlü örnekler (6 Modül × 6 Deney Profili)</h2>
+            <p>Her modül (M1–M6) kendi konusunun pedagojik doğasına en uygun özel bir slayt tasarım şablonuna sahiptir; ancak <b>aynı modül içinde Kontrol grubu ile 6 farklı öğrenci ilgi profili (Deney grubu) birebir aynı şablonu kullanır</b>. Aşağıdan modülü ve öğrenci profilini değiştirerek hem konuya özgü şablon çeşitliliğini hem de modül içi tam deneysel eşdeğerliği inceleyebilirsiniz.</p>
           </div>
         </div>
 
-        <div class="juri-slayt-seciciler" role="tablist" aria-label="Çözümlü örnek profili seç">
-          ${(window.SlaytSunum ? window.SlaytSunum.PROFILLER : []).map((pr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriSlaytProf || 0) ? ' on' : ''}" data-act="juriSlaytProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriSlaytProf || 0)}">${esc(pr.etiket)}</button>`).join('')}
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Çözümlü örnek modülü seç">
+          ${D.moduller.map((md, idx) => `<button type="button" class="juri-slayt-tab${(UI.juriSlaytModul || 'm2') === md.id ? ' on' : ''}" data-act="juriSlaytModul" data-m="${md.id}" role="tab" aria-selected="${(UI.juriSlaytModul || 'm2') === md.id}">Modül ${idx + 1}: ${esc(md.ad)}</button>`).join('')}
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Çözümlü örnek grubu ve öğrenci profili seç">
+          <button type="button" class="juri-slayt-tab${(UI.juriSlaytGrup || 'o1') === 'kontrol' ? ' on' : ''}" data-act="juriSlaytGrup" data-g="kontrol" role="tab" aria-selected="${(UI.juriSlaytGrup || 'o1') === 'kontrol'}">Kontrol Grubu (Standart)</button>
+          ${J.profiller.map(pr => `<button type="button" class="juri-slayt-tab${(UI.juriSlaytGrup || 'o1') === pr.id ? ' on' : ''}" data-act="juriSlaytGrup" data-g="${pr.id}" role="tab" aria-selected="${(UI.juriSlaytGrup || 'o1') === pr.id}">Deney: ${esc(pr.no)} — ${esc(pr.altKategori)} (${esc(pr.ozgulKisa.split(',')[0])})</button>`).join('')}
         </div>
 
         <div id="juriSlaytHost"></div>
 
         <div class="juri-ctml-izgara">
           <div class="juri-ctml-kutu">
-            <b>Mayer CTML Tasarım İlkeleri</b>
-            <p><b>Bölümlere ayırma:</b> Çözüm 5 kısa adıma bölünür. <b>İşaretleme:</b> Bağımsız değişken yeşil, bağımlı değişken turuncu vurgulanır. <b>Gereksiz tekrarın önlenmesi:</b> Seslendirme metni varsayılan olarak gizlidir, öğrenci isterse <em>Metin</em> düğmesiyle açar.</p>
+            <b>Modüller Arası Konuya Özgü Şablonlar</b>
+            <p><b>M1:</b> Görüş vs Sınanabilir Soru + 4 Adımlı Döngü + Etik İlkeler · <b>M2:</b> Soruyu Daraltma Hunisi + Bağımsız/Bağımlı/Kontrol · <b>M3:</b> Nicel/Nitel/Karma Matris + Müdahale Karar Ağacı · <b>M4:</b> Evren/Örneklem Kapsülü + Tabakalı Nokta Izgarası · <b>M5:</b> Ölçme Aracı Planı + 3'lü Hedef Tahtası + Hata Teşhisi · <b>M6:</b> Betimsel Veri Tablosu + İlişki vs Nedensellik + Sınırlılıklar.</p>
           </div>
           <div class="juri-ctml-kutu">
-            <b>Deneysel Eşdeğerliğin Korunması</b>
-            <p>Kontrol grubuna <em>standart sesli sunum</em>, deney grubuna ise <em>kişiselleştirilmiş sesli sunum</em> verilir. Slayt sayısı (5), ses modeli, konuşma hızı, yaklaşık süre (~78 sn) ve bilişsel talep her iki grupta aynıdır; yalnızca bağlam değişir.</p>
+            <b>Modül İçi Tam Deneysel Eşdeğerlik</b>
+            <p>Seçilen modül hangisiyse Kontrol grubuna da Deney grubundaki 6 öğrenci profiline de <b>birebir aynı tasarım şablonu</b>, aynı slayt sayısı (5), aynı ses modeli ve bilişsel talep sunulur; fark yalnızca öğrencinin ilgi profiline göre yapılan bağlamsal kişiselleştirmeden kaynaklanır.</p>
           </div>
         </div>
       </section>
 
-      <!-- 9. Etkileşimli Mikro-Görev Prototipi ve 6 Şablon Kütüphanesi -->
+      <!-- 9. Etkileşimli Mikro-Görev Prototipi (6 Modül × Kontrol + 6 Deney Profili) ve 6 Şablon Kütüphanesi -->
       <section class="kart juri-bolum" id="juri-gorev">
         <div class="juri-bolum-bas">
           <span class="juri-adim-no">9</span>
           <div>
-            <h2>Etkileşimli mikro-görev prototipi ve şablon kütüphanesi</h2>
-            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrenci izleyici konumundan uygulayıcı konumuna geçer. Klasik sınav ekranı yerine araştırma senaryosu, görsel veri, isteğe bağlı seslendirme, ipucu ve açıklayıcı geri bildirim sunulur.</p>
+            <h2>Konuya özgü etkileşimli mikro-görevler (6 Modül × 6 Deney Profili) ve şablon kütüphanesi</h2>
+            <p>Çözümlü örnekten mikro-göreve geçildiğinde öğrenci aynı ilgi alanı içinde <b>yeni bir transfer senaryosu</b> üzerinde aktif uygulama yapar. Her modül kendi konusuna en uygun etkileşim şablonunu (Sıralama, Değişken Eşleştirme, Desen Sınıflandırma, Tabakalı Örneklem Seçimi, Geçerlik/Güvenirlik Teşhisi, Grafik/Sınırlılık Yorumlama) hem Kontrol hem Deney grubunda birebir aynı yapıda çalıştırır.</p>
           </div>
         </div>
 
         <div class="butunluk-izgara">
-          <div class="butunluk-adim"><small>1 · Konu anlatımı</small><b>Öğren</b><p>Video ile bağımlı ve bağımsız değişkenlerin açıklanması.</p></div>
-          <div class="butunluk-adim"><small>2 · Çözümlü örnek</small><b>İncele</b><p>Hücum stratejisi ve atılan sayı üzerinden adım adım çözüm.</p></div>
-          <div class="butunluk-adim"><small>3 · Mikro-görev</small><b>Uygula</b><p>Paslaşma düzeni ve asist sayısı gibi yeni bir senaryoya transfer.</p></div>
+          <div class="butunluk-adim"><small>1 · Konu anlatımı</small><b>Öğren</b><p>Video ile temel araştırma kavramlarının açıklanması.</p></div>
+          <div class="butunluk-adim"><small>2 · Çözümlü örnek</small><b>İncele</b><p>Modüle özgü 5 adımlı şablonla adım adım sesli çözüm.</p></div>
+          <div class="butunluk-adim"><small>3 · Transfer mikro-görev</small><b>Uygula</b><p>Aynı ilgi evreninde yeni bir senaryoya etkileşimli transfer.</p></div>
           <div class="butunluk-adim"><small>4 · Geri bildirim</small><b>Pekiştir</b><p>Yanıta özgü ipucu ve açıklayıcı biçimlendirici dönüt.</p></div>
         </div>
 
-        <div class="juri-slayt-seciciler" role="tablist" aria-label="Mikro-görev senaryo profili seç">
-          ${(window.GorevPrototip ? window.GorevPrototip.SENARYOLAR : []).map((sr, idx) => `<button type="button" class="juri-slayt-tab${idx === (UI.juriGorevProf || 0) ? ' on' : ''}" data-act="juriGorevProf" data-i="${idx}" role="tab" aria-selected="${idx === (UI.juriGorevProf || 0)}">${esc(sr.etiket)}</button>`).join('')}
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Mikro-görev modülü seç">
+          ${D.moduller.map((md, idx) => `<button type="button" class="juri-slayt-tab${(UI.juriGorevModul || 'm2') === md.id ? ' on' : ''}" data-act="juriGorevModul" data-m="${md.id}" role="tab" aria-selected="${(UI.juriGorevModul || 'm2') === md.id}">Modül ${idx + 1}: ${esc(md.ad)}</button>`).join('')}
+        </div>
+
+        <div class="juri-slayt-seciciler" role="tablist" aria-label="Mikro-görev grubu ve öğrenci profili seç">
+          <button type="button" class="juri-slayt-tab${(UI.juriGorevGrup || 'o1') === 'kontrol' ? ' on' : ''}" data-act="juriGorevGrup" data-g="kontrol" role="tab" aria-selected="${(UI.juriGorevGrup || 'o1') === 'kontrol'}">Kontrol Grubu (Standart)</button>
+          ${J.profiller.map(pr => `<button type="button" class="juri-slayt-tab${(UI.juriGorevGrup || 'o1') === pr.id ? ' on' : ''}" data-act="juriGorevGrup" data-g="${pr.id}" role="tab" aria-selected="${(UI.juriGorevGrup || 'o1') === pr.id}">Deney: ${esc(pr.no)} — ${esc(pr.altKategori)} (${esc(pr.ozgulKisa.split(',')[0])})</button>`).join('')}
         </div>
 
         <div id="juriGorevHost"></div>
@@ -1750,11 +1764,12 @@
     ]);
     canliBakAnahtar = '';
     UI.canliTumUretiler = Array.isArray(tum) ? tum : [];
-    if (cached && rota().ad === 'canli') {
+    const sonuc = cached || (window.CanliDeney.getHazirDeneyPaketi ? window.CanliDeney.getHazirDeneyPaketi(UI.canliModul, p, UI.uretim) : null);
+    if (sonuc && rota().ad === 'canli') {
       const simdikiP = canliSeciliProfil();
       if (`${UI.canliModul}::${simdikiP.id}` === key) {
-        UI.canliSonuc = cached;
-        UI.canliSeciliTur = Math.max(0, ((cached.turlar && cached.turlar.length) || 1) - 1);
+        UI.canliSonuc = sonuc;
+        UI.canliSeciliTur = Math.max(0, ((sonuc.turlar && sonuc.turlar.length) || 1) - 1);
         yenile();
       }
     }
@@ -2164,6 +2179,10 @@
     const m = modul(UI.canliModul);
     const profil = canliSeciliProfil();
     const beklenenKey = `${m.id}::${profil.id}`;
+    if ((!UI.canliSonuc || UI.canliSonuc.cacheKey !== beklenenKey) && window.CanliDeney && window.CanliDeney.getHazirDeneyPaketi) {
+      UI.canliSonuc = window.CanliDeney.getHazirDeneyPaketi(m.id, profil, UI.uretim);
+      UI.canliSeciliTur = Math.max(0, ((UI.canliSonuc.turlar && UI.canliSonuc.turlar.length) || 1) - 1);
+    }
     const aktifSonuc = (UI.canliSonuc && UI.canliSonuc.cacheKey === beklenenKey) ? UI.canliSonuc : null;
     const claudeOk = !!(UI.uretim.claudeKey || '').trim();
     const geminiOk = !!(UI.uretim.geminiKey || '').trim();
@@ -2416,12 +2435,20 @@
     }
     if (r.ad === 'juri') {
       if (window.SlaytSunum && $('#juriSlaytHost')) {
-        const p = window.SlaytSunum.PROFILLER[UI.juriSlaytProf || 0] || window.SlaytSunum.PROFILLER[0];
-        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), p, {});
+        const sMod = UI.juriSlaytModul || 'm2';
+        const sGrup = UI.juriSlaytGrup || 'o1';
+        const slaytVeri = (sGrup === 'kontrol' && window.CanliDeney)
+          ? window.CanliDeney.getKontrol(sMod).slayt
+          : (window.SlaytSunum.getDeneySlayt ? window.SlaytSunum.getDeneySlayt(sMod, sGrup) : window.SlaytSunum.PROFILLER[0]);
+        UI.slaytPlayer = window.SlaytSunum.createPlayer($('#juriSlaytHost'), slaytVeri, {});
       }
       if (window.GorevPrototip && $('#juriGorevHost')) {
-        const sr = window.GorevPrototip.SENARYOLAR[UI.juriGorevProf || 0] || window.GorevPrototip.SENARYOLAR[0];
-        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), sr, {});
+        const gMod = UI.juriGorevModul || 'm2';
+        const gGrup = UI.juriGorevGrup || 'o1';
+        const gorevVeri = (gGrup === 'kontrol' && window.CanliDeney)
+          ? window.CanliDeney.getKontrol(gMod).gorev
+          : (window.GorevPrototip.getDeneyGorev ? window.GorevPrototip.getDeneyGorev(gMod, gGrup) : window.GorevPrototip.SENARYOLAR[0]);
+        UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#juriGorevHost'), gorevVeri, {});
       }
       if (window.GorevPrototip && $('#juriSablonHost')) {
         UI.sablonPlayer = window.GorevPrototip.createTemplateShowcase($('#juriSablonHost'));
@@ -2751,6 +2778,22 @@
     canliKGorunum: el => { UI.canliKontrolGorunum = el.dataset.v === 'gorev' ? 'gorev' : 'slayt'; yenile(); },
     canliDGorunum: el => { UI.canliDeneyGorunum = el.dataset.v === 'gorev' ? 'gorev' : 'slayt'; yenile(); },
     canliDetay: () => { UI.canliDetayAcik = !UI.canliDetayAcik; yenile(); },
+    juriSlaytModul: el => {
+      UI.juriSlaytModul = el.dataset.m || 'm2';
+      yenile();
+    },
+    juriSlaytGrup: el => {
+      UI.juriSlaytGrup = el.dataset.g || 'o1';
+      yenile();
+    },
+    juriGorevModul: el => {
+      UI.juriGorevModul = el.dataset.m || 'm2';
+      yenile();
+    },
+    juriGorevGrup: el => {
+      UI.juriGorevGrup = el.dataset.g || 'o1';
+      yenile();
+    },
     juriSlaytProf: el => {
       UI.juriSlaytProf = +el.dataset.i;
       if (UI.slaytPlayer) { UI.slaytPlayer.destroy(); UI.slaytPlayer = null; }

@@ -138,6 +138,52 @@ window.GorevPrototip = (() => {
         </g>
       </svg>`;
     }
+    if (tip === 'basketbol_oyuncu') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#15322C"/>
+        <circle cx="318" cy="76" r="16" fill="none" stroke="#EE6C2B" stroke-width="4"/>
+        <path d="M84 186 Q192 50 312 76" fill="none" stroke="#EE6C2B" stroke-width="3" stroke-dasharray="6 5"/>
+        <circle cx="84" cy="186" r="14" fill="#0E8C7F" stroke="#fff" stroke-width="2"/>
+        <rect x="28" y="26" width="176" height="32" rx="8" fill="#0D221E" stroke="#2D5E55"/>
+        <text x="116" y="46" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">SERBEST ATIŞ &amp; ISINMA</text>
+      </svg>`;
+    }
+    if (tip === 'oyun') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#1B233E"/>
+        <rect x="38" y="54" width="102" height="132" rx="12" fill="#263258" stroke="#5B6BE8" stroke-width="2"/>
+        <text x="89" y="102" fill="#fff" font-family="Bricolage Grotesque,sans-serif" font-size="20" font-weight="700" text-anchor="middle">Tek Sur</text>
+        <text x="89" y="132" fill="#9FB0F5" font-family="Figtree,sans-serif" font-size="12" text-anchor="middle">8,5 dk</text>
+        <rect x="159" y="44" width="102" height="152" rx="12" fill="#2A3C66" stroke="#17A594" stroke-width="2.5"/>
+        <text x="210" y="98" fill="#F6C445" font-family="Bricolage Grotesque,sans-serif" font-size="20" font-weight="700" text-anchor="middle">Kule + Sur</text>
+        <text x="210" y="130" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="12" text-anchor="middle">14,2 dk</text>
+        <rect x="280" y="54" width="102" height="132" rx="12" fill="#263258" stroke="#EE6C2B" stroke-width="2"/>
+        <text x="331" y="102" fill="#fff" font-family="Bricolage Grotesque,sans-serif" font-size="20" font-weight="700" text-anchor="middle">Karakol</text>
+        <text x="331" y="132" fill="#F4A278" font-family="Figtree,sans-serif" font-size="12" text-anchor="middle">11,4 dk</text>
+      </svg>`;
+    }
+    if (tip === 'muzik') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#FAF2E4"/>
+        <rect x="36" y="76" width="348" height="88" rx="12" fill="#5A3821"/>
+        ${[0, 1, 2, 3, 4, 5].map(i => `<line x1="36" y1="${88 + i * 13}" x2="384" y2="${88 + i * 13}" stroke="#EAD7C3" stroke-width="1.5"/>`).join('')}
+        <circle cx="122" cy="101" r="8" fill="#0E8C7F"/><circle cx="210" cy="127" r="8" fill="#EE6C2B"/><circle cx="298" cy="114" r="8" fill="#0E8C7F"/>
+      </svg>`;
+    }
+    if (tip === 'sanat') {
+      return `<svg viewBox="0 0 420 240" aria-hidden="true">
+        <rect width="420" height="240" fill="#EAF2F0"/>
+        <rect x="48" y="34" width="170" height="172" rx="14" fill="#fff" stroke="#0E8C7F" stroke-width="2.5"/>
+        <circle cx="133" cy="102" r="34" fill="#F7E4D4" stroke="#0E8C7F" stroke-width="2"/>
+        <line x1="133" y1="58" x2="133" y2="148" stroke="#EE6C2B" stroke-dasharray="4 3"/>
+        <line x1="92" y1="102" x2="174" y2="102" stroke="#EE6C2B" stroke-dasharray="4 3"/>
+        <g transform="translate(242 54)">
+          <rect width="136" height="36" rx="9" fill="#fff" stroke="#CBD8D4"/><text x="14" y="23" fill="#11211E" font-family="Figtree,sans-serif" font-size="12.5" font-weight="700">5 dk Eskiz · 71p</text>
+          <rect y="48" width="136" height="36" rx="9" fill="#E1F3F0" stroke="#0E8C7F"/><text x="14" y="71" fill="#0A6A60" font-family="Figtree,sans-serif" font-size="12.5" font-weight="700">10 dk Eskiz · 81p</text>
+          <rect y="96" width="136" height="36" rx="9" fill="#FFEDE2" stroke="#EE6C2B"/><text x="14" y="119" fill="#B84A12" font-family="Figtree,sans-serif" font-size="12.5" font-weight="700">15 dk Eskiz · 89p</text>
+        </g>
+      </svg>`;
+    }
     return `<svg viewBox="0 0 420 240" aria-hidden="true">
       <rect width="420" height="240" fill="#E8F2EF"/>
       <g transform="translate(38 48)">
@@ -187,6 +233,160 @@ window.GorevPrototip = (() => {
       <rect x="106" y="${38 - idx * 8}" width="24" height="${32 + idx * 8}" rx="4" fill="#EE6C2B"/>
     </svg>`;
   }
+
+  /* 6 Öğrenci Profili (o1..o6) için Çözümlü Örnekten Farklı Transfer Mikro-Görev Bağlamları */
+  const JURI_GOREV_BAGLAMLAR = {
+    o1: {
+      id: 'o1',
+      etiket: 'Öğrenci 1 — Basketbol (İzleyici · Paslaşma & Asist)',
+      kisa: 'Basketbol (Paslaşma)',
+      temaTip: 'basketbol',
+      c: {
+        tema: "EuroLeague'de paslaşma düzeni ve başarılı asist sayısı",
+        gozlem: 'Bir basketbol analisti, farklı paslaşma düzenlerinin (kısa pas, çapraz pas, hızlı geçiş pası) takımın başarılı asist sayısı üzerindeki etkisini araştırmaktadır. Aynı oyuncularla eşit süreli üç deneme maçı düzenlenmiş ve maç sonundaki asist sayıları kaydedilmiştir.',
+        soru: 'Paslaşma düzeni takımın maç başına başarılı asist sayısını etkiler mi?',
+        bagimsiz: 'Uygulanan paslaşma düzeni',
+        bagimli: 'Yapılan başarılı asist sayısı',
+        kontrol: ['Maç süresi ve oyuncu kadrosu', 'Rakip savunma düzeni'],
+        evren: 'EuroLeague turnuvasındaki 200 basketbol oyuncusu',
+        birim: 'oyuncu',
+        tabakalar: ['Oyun Kurucular', 'Şutör Guardlar', 'Forvetler'],
+        arac: 'Resmî maç asist takip tablosu ve pas ağı video analizi',
+        nitel: 'Oyun kurucular savunma baskısı altında pas tercihini nasıl yapıyor?',
+        karma: 'Önce 200 oyuncunun pas ve asist istatistikleri karşılaştırılır, ardından asist ortalaması en yüksek ve en düşük 8 oyuncuyla görüşülür.',
+        etik: 'Oyuncuların maç içi nabız ve performans verileri kulüp ve oyuncu onamı alınarak anonim kodlarla işlenir.',
+        gecersiz: 'Takımın paslaşma başarısını ölçmek için asist sayısı yerine yalnızca salonun seyirci kapasitesine bakılması',
+        guvenilmez: 'İki farklı istatistikçinin asist tanımını farklı yorumlayıp aynı maçta 14 ve 25 gibi çelişkili asist sayıları kaydetmesi',
+        veri: { etiket: ['Kısa pas', 'Çapraz pas', 'Hızlı geçiş'], deger: [14, 21, 18], olcu: 'Maç başına ortalama asist' },
+        bulgu: 'Çapraz pas düzeninin uygulandığı maçlarda ortalama 21 asist yapılırken, hızlı geçiş pasında 18, kısa pas düzeninde 14 asist yapılmıştır.',
+      },
+    },
+    o2: {
+      id: 'o2',
+      etiket: 'Öğrenci 2 — Basketbol (Oyuncu · Serbest Atış Isınması)',
+      kisa: 'Basketbol (Oyuncu)',
+      temaTip: 'basketbol_oyuncu',
+      c: {
+        tema: 'Atış öncesi ısınma rutini ve serbest atış isabeti',
+        gozlem: 'Bir basketbol antrenörü, atış öncesi uygulanan üç farklı ısınma rutininin (statik esneme, dinamik top sürme, ritimli şut ısınması) oyuncuların 15 serbest atıştaki isabet sayısı üzerindeki etkisini incelemektedir.',
+        soru: 'Atış öncesi uygulanan ısınma rutini, oyuncuların 15 denemedeki serbest atış isabetini etkiler mi?',
+        bagimsiz: 'Atış öncesi uygulanan ısınma rutini',
+        bagimli: '15 denemedeki isabetli serbest atış sayısı',
+        kontrol: ['Serbest atış çizgisi mesafesi', 'Toplam atış sayısı (15 atış)'],
+        evren: 'Spor fakültesindeki 200 üniversite basketbol oyuncusu',
+        birim: 'oyuncu',
+        tabakalar: ['1. Sınıf Oyuncuları', '2–3. Sınıf Oyuncuları', '4. Sınıf Kaptanlar'],
+        arac: '15 atışlık standart serbest atış kayıt formu',
+        nitel: 'Oyuncular maçın son saniyesindeki kritik serbest atış öncesinde nefes ve dikkatlerini nasıl düzenliyor?',
+        karma: 'Önce 120 oyuncunun üç ısınma rutinindeki serbest atış isabetleri ölçülür, ardından 8 oyuncuyla atış anı odaklanma deneyimleri üzerine görüşülür.',
+        etik: 'Öğrencilerin antrenman testi sonuçları ders notunu veya takımdan çıkarılma kararını etkilemez; gönüllü onamla toplanır.',
+        gecersiz: 'Serbest atış isabetini ölçmek için potaya giren atışlar yerine oyuncunun koşu hızının ölçülmesi',
+        guvenilmez: 'Aynı oyuncuya iki gün arayla farklı ağırlıktaki toplarla test yapıldığı için tutarsız isabet sayıları çıkması',
+        veri: { etiket: ['Statik esneme', 'Dinamik sürme', 'Ritimli şut'], deger: [10, 12, 14], olcu: '15 atışta ortalama isabet' },
+        bulgu: 'Ritimli şut ısınması yapan grubun 15 serbest atıştaki ortalaması 14 isabet iken, dinamik top sürmede 12, statik esnemede 10 isabettir.',
+      },
+    },
+    o3: {
+      id: 'o3',
+      etiket: 'Öğrenci 3 — Strateji Oyunları (AoE IV · Üs Savunma Düzeni)',
+      kisa: 'Strateji (Savunma)',
+      temaTip: 'oyun',
+      c: {
+        tema: 'Age of Empires IV üs savunma düzeni ve ayakta kalma süresi',
+        gozlem: 'Bir oyun araştırmacısı, strateji oyununda üç farklı üs savunma düzeninin (tek sur hattı, kule destekli sur, ileri karakol düzeni) rakip saldırısına karşı üssün ayakta kalma süresi üzerindeki etkisini kontrollü karşılaşmalarda incelemektedir.',
+        soru: 'Uygulanan üs savunma düzeni, üssün saldırıya karşı ayakta kalma süresini etkiler mi?',
+        bagimsiz: 'Uygulanan üs savunma düzeni',
+        bagimli: 'Üssün saldırıya karşı ayakta kalma süresi (dakika)',
+        kontrol: ['Saldıran ordunun büyüklüğü', 'Harita ve başlangıç kaynakları'],
+        evren: 'Strateji topluluğundaki 200 Age of Empires IV oyuncusu',
+        birim: 'oyuncu',
+        tabakalar: ['Savunmacı Oyuncular', 'Dengeli Oyuncular', 'Hücumcu Oyuncular'],
+        arac: 'Oyun kaydı (replay) savunma kronometresi ve hasar dökümü',
+        nitel: 'Oyuncular üsleri aynı anda iki cepheden saldırı altındayken öncelik kararlarını nasıl veriyor?',
+        karma: 'Önce 150 karşılaşmada üç savunma düzeninin dayanma süreleri ölçülür, ardından 9 oyuncuyla kriz anı stratejileri üzerine görüşülür.',
+        etik: 'Turnuva hazırlığındaki oyuncuların özel taktik dizilimleri açık kimlikle paylaşılmaz; veriler anonim kodlarla kaydedilir.',
+        gecersiz: 'Üssün savunma dayanıklılığını ölçmek için ayakta kalma süresi yerine oyuncunun ekran parlaklığı ayarına bakılması',
+        guvenilmez: 'Karşılaşmalarda oyun zorluk seviyesi her seferinde rastgele değiştiği için aynı savunma düzeninde tutarsız süreler çıkması',
+        veri: { etiket: ['Tek sur', 'İleri karakol', 'Kule + Sur'], deger: [8.5, 11.4, 14.2], olcu: 'Ortalama dayanma süresi (dk)' },
+        bulgu: 'Kule destekli sur düzeninde üssün ortalama ayakta kalma süresi 14,2 dakika iken, ileri karakol düzeninde 11,4, tek sur hattında 8,5 dakikadır.',
+      },
+    },
+    o4: {
+      id: 'o4',
+      etiket: 'Öğrenci 4 — Enstrüman Çalmak (Gitar · Akor Geçiş Hızı)',
+      kisa: 'Müzik (Akor Geçişi)',
+      temaTip: 'muzik',
+      c: {
+        tema: 'Günlük egzersiz süresi ve akor geçiş hızı',
+        gozlem: 'Bir müzik eğitmeni, üç farklı günlük parmak egzersizi süresinin (15, 30 ve 45 dakika) akustik gitar öğrencilerinin bir dakikada yaptıkları temiz akor geçişi sayısı üzerindeki etkisini bir hafta sonunda ölçmektedir.',
+        soru: 'Günlük gitar egzersiz süresi, öğrencilerin bir dakikada yaptığı doğru akor geçişi sayısını etkiler mi?',
+        bagimsiz: 'Günlük parmak egzersizi süresi (15, 30, 45 dk)',
+        bagimli: 'Bir dakikada yapılan temiz akor geçişi sayısı',
+        kontrol: ['Sorulan akor dizisi (Am–G–C–F)', 'Öğrencilerin deneyim düzeyi'],
+        evren: 'Üniversite müzik kulübündeki 200 akustik gitar öğrencisi',
+        birim: 'öğrenci',
+        tabakalar: ['1. Yıl Öğrencileri', '2. Yıl Öğrencileri', '3. Yıl Öğrencileri'],
+        arac: '1 dakikalık standart akor geçiş testi ve ses temizliği rubriği',
+        nitel: 'Öğrenciler günlük gitar egzersizini ders yoğunluğu arasında sürdürürken motivasyonlarını nasıl koruyor?',
+        karma: 'Önce 120 öğrencinin egzersiz süresi ve akor geçiş hızları ölçülür, ardından en çok ilerleyen ve zorlanan 8 öğrenciyle görüşülür.',
+        etik: 'Performans kayıtları yalnızca araştırma ekibince dinlenir ve öğrencilerin onamı alınarak isimleri gizlenir.',
+        gecersiz: 'Akor geçiş hızını ölçmek için dakikadaki doğru akor sayısı yerine öğrencinin bildiği şarkı sözü sayısının sorulması',
+        guvenilmez: 'Test sırasında kronometre bazen 40 saniyede bazen 75 saniyede durdurulduğu için aynı öğrencinin puanının sürekli değişmesi',
+        veri: { etiket: ['15 dk egzersiz', '30 dk egzersiz', '45 dk egzersiz'], deger: [22, 31, 38], olcu: 'Dakikada ortalama temiz akor geçişi' },
+        bulgu: 'Günde 45 dakika egzersiz yapan grubun dakikadaki ortalama akor geçişi 38 iken, 30 dakika yapanların 31, 15 dakika yapanların 22’dir.',
+      },
+    },
+    o5: {
+      id: 'o5',
+      etiket: 'Öğrenci 5 — Kahve ve Çay (V60 · Demleme Süresi & Aroma)',
+      kisa: 'Kahve (Demleme Süresi)',
+      temaTip: 'kahve',
+      c: {
+        tema: 'V60 demleme süresi ve aromatik yoğunluk puanı',
+        gozlem: 'Bir gıda araştırmacısı, aynı kahve çekirdeği ve sabit 92°C su sıcaklığıyla V60 demlerken uygulanan üç farklı demleme süresinin (2 dk, 3 dk ve 4 dk) kahvenin aromatik yoğunluk puanı üzerindeki etkisini incelemektedir.',
+        soru: 'V60 filtre kahvede demleme süresi, kahvenin aromatik yoğunluk puanını etkiler mi?',
+        bagimsiz: 'V60 demleme süresi (2, 3 ve 4 dakika)',
+        bagimli: 'Aromatik yoğunluk puanı (100 üzerinden)',
+        kontrol: ['Su sıcaklığı (92°C)', 'Kahve/su oranı (15 g / 250 ml)'],
+        evren: 'Kahve tadım etkinliğine katılan 200 nitelikli kahve sever',
+        birim: 'katılımcı',
+        tabakalar: ['Sabah Tüketicileri', 'Öğleden Sonra Tüketicileri', 'Ev Baristaları'],
+        arac: 'Uluslararası SCA aromatik yoğunluk tadım ölçeği',
+        nitel: 'Tadım katılımcıları meyvemsi ve çikolatamsı kahve notalarını kendi geçmiş tat belleğiyle nasıl ilişkilendiriyor?',
+        karma: 'Önce 120 katılımcının üç demleme süresine verdiği aromatik yoğunluk puanları karşılaştırılır, ardından 8 katılımcıyla tat algıları üzerine görüşülür.',
+        etik: 'Kör tadımda katılımcılara kafein miktarı hakkında bilgi verilir, gönüllü onam alınır ve bireysel puanlar anonim tutulur.',
+        gecersiz: 'Kahvenin aromatik yoğunluğunu ölçmek için tat ve koku yerine yalnızca demleme sürahisinin ağırlığının ölçülmesi',
+        guvenilmez: 'Tadım yapılan bardakların bir kısmı soğuk bir kısmı sıcak sunulduğu için aynı kahveye iki turda bambaşka puanlar verilmesi',
+        veri: { etiket: ['2 dakika', '3 dakika', '4 dakika'], deger: [68, 85, 74], olcu: 'Ortalama aromatik yoğunluk puanı' },
+        bulgu: '3 dakika demlenen V60 kahvenin ortalama aromatik yoğunluk puanı 85 iken, 4 dakika demlenen kahvenin 74, 2 dakika demlenenin 68 puandır.',
+      },
+    },
+    o6: {
+      id: 'o6',
+      etiket: 'Öğrenci 6 — Resim ve Çizim (Dijital Karakter Eskiz Süresi)',
+      kisa: 'Sanat (Eskiz Süresi)',
+      temaTip: 'sanat',
+      c: {
+        tema: 'Çizim öncesi eskiz hazırlık süresi ve anatomik oran-orantı',
+        gozlem: 'Bir tasarım araştırmacısı, dijital karakter çizimine başlamadan önce yapılan üç farklı kaba eskiz hazırlık süresinin (5, 10 ve 15 dakika) nihai karakter çizimindeki oran-orantı doğruluk puanına etkisini incelemektedir.',
+        soru: 'Dijital karakter çizimi öncesi yapılan eskiz hazırlık süresi, oran-orantı doğruluk puanını etkiler mi?',
+        bagimsiz: 'Çizim öncesi eskiz hazırlık süresi (5, 10, 15 dk)',
+        bagimli: 'Karakter çizimi oran-orantı doğruluk puanı',
+        kontrol: ['Toplam boyama süresi', 'Çizilen karakter referansı ve tablet modeli'],
+        evren: 'Dijital sanat topluluğundaki 200 karakter tasarımcısı öğrenci',
+        birim: 'çizer',
+        tabakalar: ['1. Sınıf Tasarım', '2. Sınıf İllüstrasyon', '3. Sınıf Animasyon'],
+        arac: 'Karakter anatomisi ve perspektif doğruluk rubriği (100 puanlık)',
+        nitel: 'Öğrenciler hızlı eskiz aşamasından temiz çizgi (line-art) aşamasına geçerken çizgilerinin dinamizmini nasıl koruyor?',
+        karma: 'Önce 120 öğrencinin eskiz süresi ve rubrik puanları karşılaştırılır, ardından 8 öğrenciyle eskiz defteri alışkanlıkları üzerine görüşülür.',
+        etik: 'Öğrencilerin çizim dosyaları izinsiz sergi veya ticari amaçla kullanılmaz; puanlama kör hakemlik ile isimler gizlenerek yapılır.',
+        gecersiz: 'Karakterin anatomik oran-orantı doğruluğunu ölçmek için çizim oranları yerine yalnızca kullanılan renk sayısının sayılması',
+        guvenilmez: 'Değerlendirme rubriğinde açık kriter olmadığı için aynı çizime sabah 60, öğleden sonra 90 puan verilmesi',
+        veri: { etiket: ['5 dk eskiz', '10 dk eskiz', '15 dk eskiz'], deger: [71, 81, 89], olcu: 'Ortalama oran-orantı puanı' },
+        bulgu: '15 dakika eskiz hazırlığı yapan grubun ortalama oran-orantı puanı 89 iken, 10 dakika yapanların 81, 5 dakika yapanların 71 puandır.',
+      },
+    },
+  };
 
   function baglamdanSenaryo(b, modulId = 'm2') {
     if (modulId === 'm2' && b.alt && b.alt.id === 'spor.basketbol') return SENARYOLAR[1];
@@ -372,6 +572,20 @@ window.GorevPrototip = (() => {
       ipucuBagimli: 'Kontrol değişkenleri sabit tutulmazsa sonucun neyden kaynaklandığı bilinemez.',
       aciklamaDogru: `Doğru! Araştırmacı "${c.bagimsiz}" koşulunu değiştirdiği için bağımsız değişken, ölçtüğü "${c.bagimli}" bağımlı değişken, sabit tuttuğu unsur ise kontrol değişkenidir.`,
     };
+  }
+
+  function getDeneyGorev(modulId = 'm2', profilId = 'o1') {
+    const p = JURI_GOREV_BAGLAMLAR[profilId] || JURI_GOREV_BAGLAMLAR.o1;
+    const uret = baglamdanSenaryo({
+      ilgi: { id: p.temaTip, ad: p.kisa },
+      alt: { id: profilId, ad: p.etiket },
+      c: p.c,
+    }, modulId);
+    uret.id = `deney-gorev-${modulId}-${profilId}`;
+    uret.etiket = p.etiket;
+    uret.kisa = p.kisa;
+    uret.temaTip = p.temaTip;
+    return uret;
   }
 
   /* Etkileşimli Ana Mikro-Görev Oynatıcı:
@@ -973,5 +1187,5 @@ window.GorevPrototip = (() => {
     };
   }
 
-  return { SENARYOLAR, SABLONLAR, TABLO_KARS, baglamdanSenaryo, createTaskPlayer, createTemplateShowcase };
+  return { SENARYOLAR, SABLONLAR, TABLO_KARS, JURI_GOREV_BAGLAMLAR, getDeneyGorev, baglamdanSenaryo, createTaskPlayer, createTemplateShowcase };
 })();

@@ -267,6 +267,185 @@ window.SlaytSunum = (() => {
     },
   ];
 
+  /* 6 Simüle Edilmiş Öğrenci İlgi Profili (o1..o6) için Tüm Modüllerde (m1..m6) Kullanılan Hazır Deneysel Bağlamlar */
+  const JURI_DENEY_BAGLAMLAR = {
+    o1: {
+      id: 'o1',
+      etiket: 'Öğrenci 1 — Basketbol (İzleyici · EuroLeague)',
+      kisa: 'Basketbol (EuroLeague)',
+      temaTip: 'basketbol',
+      c: {
+        tema: "EuroLeague'de hücum stratejileri ve sayı üretimi",
+        gozlem: 'EuroLeague maçlarını izlerken hızlı hücum oynayan takımların set hücumuna göre daha yüksek sayı ürettiğini, ancak karma hücum kullanan takımların hücum verimliliğinin zirveye çıktığını gözlemliyorsun.',
+        gorus: 'Hızlı hücum oynayan takım her maçı kesin kazanır.',
+        zayif: 'Basketbolda hangi taktik daha iyidir?',
+        soru: 'EuroLeague deneme maçlarında uygulanan hücum stratejisi (hızlı, set, karma), takımın maç başına attığı toplam sayıyı etkiler mi?',
+        bagimsiz: 'Uygulanan hücum stratejisi',
+        bagimli: 'Maç başına atılan toplam sayı',
+        kontrol: ['Maç süresi (40 dk)', 'Oyuncu kadrosu', 'Rakip savunma sertliği'],
+        evren: 'EuroLeague sezonunda oynanan 300 karşılaşma',
+        birim: 'maç',
+        tabakalar: ['Normal Sezon', 'Play-Off Serisi', 'Final Four'],
+        arac: 'Resmî EuroLeague maç istatistik formu ve hücum dizilimi video kodlama çizelgesi',
+        nitel: 'Başantrenörler maçın kritik anlarında hücum stratejisini değiştirme kararını nasıl deneyimliyor?',
+        karma: 'Önce 300 maçın hücum stratejisi ve sayı verileri istatistiksel olarak karşılaştırılır, ardından 8 başantrenörle taktik kararları üzerine görüşülür.',
+        etik: 'Takımların kamuya açık olmayan antrenman içi taktik analiz kayıtları kulüp izni olmadan paylaşılmaz.',
+        gecersiz: 'Takımın hücum verimliliğini ölçmek için atılan sayı yerine yalnızca forma satış rakamlarına bakılması',
+        guvenilmez: 'İki farklı maç analistinin aynı maçı izlediğinde hızlı hücum sayılarını birbirinden tamamen farklı kaydetmesi',
+        veri: { etiket: ['Set hücumu', 'Hızlı hücum', 'Karma hücum'], deger: [64, 72, 80], olcu: 'Maç başına ortalama sayı' },
+        bulgu: 'Karma hücum stratejisi uygulanan maçlarda ortalama sayı üretimi 80 iken, hızlı hücumda 72, yalnızca set hücumunda 64 sayıdır.',
+      },
+    },
+    o2: {
+      id: 'o2',
+      etiket: 'Öğrenci 2 — Basketbol (Oyuncu · Şut Antrenmanı)',
+      kisa: 'Basketbol (Oyuncu)',
+      temaTip: 'basketbol_oyuncu',
+      c: {
+        tema: 'Üç sayılık şut antrenmanı süresi ve atış isabeti',
+        gozlem: 'Üniversite takımı antrenmanlarından sonra 45 dakika ekstra üç sayılık şut çalışan oyuncuların maçlarda 15 dakika çalışanlara göre çok daha yüksek isabet bulduğunu fark ediyorsun.',
+        gorus: 'Doğuştan şutör olmayan oyuncu ne kadar çalışsa da üçlük atamaz.',
+        zayif: 'Çok antrenman yapmak şutu geliştirir mi?',
+        soru: 'Üniversite basketbol oyuncularında günlük üç sayılık şut antrenmanı süresi (15, 30, 45 dk), 20 denemedeki başarılı atış sayısını etkiler mi?',
+        bagimsiz: 'Üç sayılık şut antrenmanı süresi',
+        bagimli: '20 denemedeki başarılı üç sayılık atış sayısı',
+        kontrol: ['Atış mesafesi (6,75 m)', 'Kullanılan top', 'Antrenman salonu'],
+        evren: 'Üniversite basketbol liginde mücadele eden 300 oyuncu',
+        birim: 'oyuncu',
+        tabakalar: ['Oyun Kurucu (Guard)', 'Kanat (Forvet)', 'Uzun (Pivot)'],
+        arac: 'Standart 20 atışlık üç sayı performans testi ve haftalık antrenman süre çizelgesi',
+        nitel: 'Oyuncular art arda kaçan şutlardan sonra atış özgüvenlerini ve odaklarını nasıl yeniden topluyor?',
+        karma: 'Önce 90 oyuncunun antrenman süresi ve 20 atışlık test sonuçları karşılaştırılır, ardından isabeti en çok artan ve değişmeyen 8 oyuncuyla görüşülür.',
+        etik: 'Oyuncuların şut testi ve yorgunluk verileri kadro seçimi için kullanılmaz; bilgilendirilmiş onam alınarak kodlarla raporlanır.',
+        gecersiz: 'Üç sayılık şut isabetini ölçmek için 6,75 m çizgisi yerine yalnızca pota altı turnike atışlarının sayılması',
+        guvenilmez: 'Aynı oyuncunun salon ışıkları ve pota yüksekliği standart olmadığı için sabah 16, akşam 5 isabet bulması',
+        veri: { etiket: ['15 dk şut', '30 dk şut', '45 dk şut'], deger: [9, 13, 16], olcu: '20 atışta ortalama isabet' },
+        bulgu: 'Günde 45 dakika üçlük çalışan grubun 20 atıştaki ortalama isabeti 16 iken, 30 dakika çalışanların 13, 15 dakika çalışanların 9’dur.',
+      },
+    },
+    o3: {
+      id: 'o3',
+      etiket: 'Öğrenci 3 — Strateji Oyunları (Age of Empires IV)',
+      kisa: 'Strateji (AoE IV)',
+      temaTip: 'oyun',
+      c: {
+        tema: 'Age of Empires IV kaynak toplama stratejisi ve ekonomi hızı',
+        gozlem: 'Age of Empires IV karşılaşmalarında işçileri başlangıçta dengeli dağıtan oyuncuların, yalnızca tek kaynağa yüklenen oyunculara göre 15. dakikada çok daha güçlü bir ekonomiye ulaştığını görüyorsun.',
+        gorus: 'Strateji oyunlarında sadece hızlı tıklayan oyuncu her zaman kazanır.',
+        zayif: 'Age of Empires IV’te en iyi taktik hangisidir?',
+        soru: 'Age of Empires IV oyununda uygulanan başlangıç kaynak stratejisi (odun odaklı, altın odaklı, dengeli dağılım), ilk 15 dakikada toplanan toplam kaynak miktarını etkiler mi?',
+        bagimsiz: 'Başlangıç kaynak toplama stratejisi',
+        bagimli: 'İlk 15 dakikada toplanan toplam kaynak miktarı',
+        kontrol: ['Oynanan harita (Dry Arabia)', 'Medeniyet seçimi', 'Oyuncu sıralama puanı (ELO)'],
+        evren: 'Üniversite strateji oyunları topluluğundaki 300 Age of Empires IV karşılaşması',
+        birim: 'karşılaşma',
+        tabakalar: ['Bronz-Gümüş Lig', 'Altın-Platin Lig', 'Elmas+ Lig'],
+        arac: 'Oyun sonu tekrar kaydı (replay) 15. dakika ekonomi sayacı ve kaynak dökümü tablosu',
+        nitel: 'Strateji oyuncuları rakibin erken baskısı altında kaynak dağılımı kararlarını nasıl değiştiriyor?',
+        karma: 'Önce 120 karşılaşmanın 15. dakika kaynak verileri analiz edilir, ardından farklı liglerden 9 oyuncuyla karar süreçleri üzerine görüşülür.',
+        etik: 'Oyuncuların hesap adları ve oyun içi sohbet kayıtları gizlenir; yalnızca izin verilen maç tekrarlarının anonim kaynak sayıları kullanılır.',
+        gecersiz: 'Oyuncunun ekonomik kaynak toplama başarısını ölçmek için toplanan kaynak yerine yalnızca harita yakınlaştırma sayısına bakılması',
+        guvenilmez: 'Oyun içi kronometre farklı hız ayarlarında (1x vs 1.5x) çalıştırıldığı için aynı stratejide tutarsız kaynak puanları kaydedilmesi',
+        veri: { etiket: ['Tek kaynak', 'Altın ağırlıklı', 'Dengeli dağılım'], deger: [8400, 10200, 12100], olcu: '15. dk ortalama toplam kaynak' },
+        bulgu: 'Dengeli kaynak dağılımı stratejisinde 15. dakika ortalama kaynak miktarı 12.100 iken, altın ağırlıklıda 10.200, tek kaynak odaklıda 8.400’dür.',
+      },
+    },
+    o4: {
+      id: 'o4',
+      etiket: 'Öğrenci 4 — Enstrüman Çalmak (Akustik Gitar)',
+      kisa: 'Müzik (Akustik Gitar)',
+      temaTip: 'muzik',
+      c: {
+        tema: 'Akustik gitarda çalışma yöntemi ve hatasız çalma başarısı',
+        gozlem: 'Akustik gitarda yeni bir parçayı baştan sona hızlıca çalmaya çalışanlara göre, zor ölçüleri bölümlere ayırıp metronomla yavaş çalışanların parçayı çok daha az hatayla çaldığını fark ediyorsun.',
+        gorus: 'Müzik kulağı olan kişi hiç pratik yapmadan da her parçayı hatasız çalar.',
+        zayif: 'Gitar çalmayı öğrenmek neden zordur?',
+        soru: 'Akustik gitar öğrencilerinde uygulanan pratik yöntemi (serbest tekrar, kayda eşlik, bölümlere ayırarak metronomla çalışma), yeni parçada doğru basılan nota sayısını etkiler mi?',
+        bagimsiz: 'Uygulanan gitar pratik yöntemi',
+        bagimli: 'Parçada doğru basılan nota sayısı (80 nota üzerinden)',
+        kontrol: ['Çalışılan parça (Aynı etüt)', 'Toplam çalışma süresi (30 dk)', 'Gitar tel yüksekliği'],
+        evren: 'Üniversite müzik kulübü ve konservatuvar hazırlık kursundaki 300 akustik gitar öğrencisi',
+        birim: 'öğrenci',
+        tabakalar: ['Başlangıç (0–6 ay)', 'Orta Düzey (6–18 ay)', 'İleri Düzey (18+ ay)'],
+        arac: '80 notalık standart gitar etüdü performans kontrol listesi ve metronom ses kaydı analizi',
+        nitel: 'Gitar öğrencileri zor bir bare akor geçişinde yaşadıkları fiziksel yorgunluk ve motivasyon kaybıyla nasıl başa çıkıyor?',
+        karma: 'Önce 90 öğrencinin üç pratik yöntemindeki doğru nota sayıları karşılaştırılır, ardından 8 öğrenciyle pratik deneyimleri üzerine görüşülür.',
+        etik: 'Öğrencilerin performans ses kayıtları izinleri olmadan paylaşılmaz ve değerlendirme sonuçları kulüp seçmelerini etkilemez.',
+        gecersiz: 'Öğrencinin parçayı doğru çalma becerisini ölçmek için bastığı notalar yerine yalnızca gitarının ahşap kalitesine puan verilmesi',
+        guvenilmez: 'İki farklı müzik eğitmeninin önceden belirlenmiş bir nota anahtarı olmadan aynı performansa 45 ve 76 gibi çelişkili puanlar vermesi',
+        veri: { etiket: ['Serbest tekrar', 'Kayda eşlik', 'Bölümlü+Metronom'], deger: [56, 65, 74], olcu: '80 notada ortalama doğru nota' },
+        bulgu: 'Parçayı bölümlere ayırarak metronomla çalışan grubun ortalaması 74 doğru nota iken, kayda eşlik edenlerin 65, serbest tekrar yapanların 56’dır.',
+      },
+    },
+    o5: {
+      id: 'o5',
+      etiket: 'Öğrenci 5 — Kahve ve Çay (V60 Filtre Kahve)',
+      kisa: 'Kahve (V60 Demleme)',
+      temaTip: 'kahve',
+      c: {
+        tema: 'V60 demlemede su sıcaklığı ve tadım beğeni puanı',
+        gozlem: 'Evde V60 ile filtre kahve demlerken kaynar suyu doğrudan döktüğünde kahvenin acılaştığını, 92°C civarında demlediğinde ise meyvemsi ve dengeli aromaların öne çıktığını gözlemliyorsun.',
+        gorus: 'Pahalı kahve çekirdeği hangi sıcaklıkla demlenirse demlensin mükemmel tat verir.',
+        zayif: 'En lezzetli kahve nasıl yapılır?',
+        soru: 'V60 filtre kahve demlemede kullanılan su sıcaklığı (88°C, 92°C ve 96°C), katılımcıların 100 üzerinden verdiği tadım beğeni puanını etkiler mi?',
+        bagimsiz: 'Demlemede kullanılan su sıcaklığı',
+        bagimli: 'Kahvenin tadım beğeni puanı (100 üzerinden)',
+        kontrol: ['Kahve çekirdeği (Aynı yöre)', 'Öğütme derecesi', 'Demleme süresi (3 dk)'],
+        evren: 'Şehirdeki 3. nesil kahve atölyelerine katılan 300 nitelikli kahve tüketicisi',
+        birim: 'katılımcı',
+        tabakalar: ['Sade Filtre İçenler', 'Espresso Bazlı İçenler', 'Soğuk Demleme Sevenler'],
+        arac: 'Kör tadım (blind cupping) duyusal değerlendirme formu ve dijital ısı ölçer kaydı',
+        nitel: 'Kahve severler sabah ilk fincan V60 kahveyi hazırlama ritüelini günlük odaklanmaları açısından nasıl anlamlandırıyor?',
+        karma: 'Önce 90 katılımcının üç farklı su sıcaklığındaki kör tadım puanları analiz edilir, ardından 9 katılımcıyla aroma algıları üzerine görüşülür.',
+        etik: 'Katılımcıların kafein hassasiyeti ve alerji durumları tadım öncesinde sorulur, bilgilendirilmiş onam alınır ve kör tadım kodları gizli tutulur.',
+        gecersiz: 'Kahvenin lezzet ve aroma kalitesini ölçmek için tadım puanı yerine yalnızca fincanın renginin sorulması',
+        guvenilmez: 'Demleme suyu sıcaklığı kalibre edilmemiş bozuk bir termometreyle ölçüldüğü için aynı tarifte her seferinde farklı tat çıkması',
+        veri: { etiket: ['88°C su', '92°C su', '96°C su'], deger: [74, 86, 79], olcu: 'Ortalama tadım beğeni puanı' },
+        bulgu: '92°C suyla demlenen V60 kahvenin ortalama tadım beğeni puanı 86 iken, 96°C demlemenin 79, 88°C demlemenin ise 74 puandır.',
+      },
+    },
+    o6: {
+      id: 'o6',
+      etiket: 'Öğrenci 6 — Resim ve Çizim (Dijital Portre)',
+      kisa: 'Sanat (Dijital Çizim)',
+      temaTip: 'sanat',
+      c: {
+        tema: 'Dijital portre çiziminde katman tekniği ve oran doğruluğu',
+        gozlem: 'Grafik tabletle portre çizerken eskiz, ışık ve rengi ayrı katmanlarda (layer) kuran çizerlerin, tek katmanda çalışanlara göre yüz oranlarını çok daha doğru ve hızlı tamamladığını görüyorsun.',
+        gorus: 'Dijital çizimde kullanılan tablet pahalıysa çizim kendiliğinden kusursuz olur.',
+        zayif: 'Dijital çizim geleneksel çizimden daha mı kolaydır?',
+        soru: 'Grafik tabletle dijital portre çizerken kullanılan katman tekniği (tek katman, üç aşamalı katman, referans ızgaralı katman), portre oran-orantı doğruluk puanını etkiler mi?',
+        bagimsiz: 'Kullanılan dijital çizim katman tekniği',
+        bagimli: 'Portre oran-orantı doğruluk puanı (100 üzerinden)',
+        kontrol: ['Çizilen referans portre', 'Çizim süresi (45 dk)', 'Kullanılan fırça seti'],
+        evren: 'Güzel sanatlar ve tasarım fakültelerinde grafik tablet kullanan 300 öğrenci',
+        birim: 'öğrenci',
+        tabakalar: ['İllüstrasyon', 'Görsel İletişim Tasarımı', 'Animasyon & Oyun Sanatı'],
+        arac: 'Standart anatomik oran-orantı değerlendirme rubriği ve çizim yazılımı katman geçmişi kaydı',
+        nitel: 'Dijital çizerler boş tuval karşısında ilk eskiz çizgilerini atarken yaşadıkları yaratıcı tıkanıklığı nasıl aşıyor?',
+        karma: 'Önce 90 öğrencinin üç katman tekniğindeki doğruluk puanları karşılaştırılır, ardından 9 öğrenciyle çizim süreçleri üzerine görüşülür.',
+        etik: 'Öğrencilerin ürettiği dijital portrelerin telif hakkı kendilerine aittir; yalnızca anonimleştirilmiş rubrik puanları araştırmada kullanılır.',
+        gecersiz: 'Portredeki anatomik oran-orantı doğruluğunu ölçmek için yüz oranları yerine yalnızca dosya boyutuna (MB) bakılması',
+        guvenilmez: 'Aynı dijital portreyi iki jüri üyesinin ortak bir rubrik kullanmadan tamamen kişisel zevklerine göre 50 ve 92 olarak puanlaması',
+        veri: { etiket: ['Tek katman', '3 aşamalı katman', 'Izgaralı katman'], deger: [68, 82, 87], olcu: 'Ortalama oran-orantı puanı' },
+        bulgu: 'Referans ızgaralı katman tekniğini kullanan grubun ortalama doğruluk puanı 87, üç aşamalı katman grubunun 82, tek katman grubunun 68’dir.',
+      },
+    },
+  };
+
+  function getDeneySlayt(modulId = 'm2', profilId = 'o1') {
+    const p = JURI_DENEY_BAGLAMLAR[profilId] || JURI_DENEY_BAGLAMLAR.o1;
+    const uret = baglamdanUret({
+      ilgi: { id: p.temaTip, ad: p.kisa },
+      alt: { id: profilId, ad: p.etiket },
+      c: p.c,
+    }, modulId);
+    uret.id = `deney-${modulId}-${profilId}`;
+    uret.etiket = p.etiket;
+    uret.kisa = p.kisa;
+    uret.temaTip = p.temaTip;
+    return uret;
+  }
   /* Öğrenci ders ekranında (#ders-mX-ornek) veya modül geçişlerinde
      modülün konusuna (m1..m6) ve öğrencinin ilgi bağlamına (b) özgü 5 slaytlık farklı şablonlar üretir. */
   function baglamdanUret(b, modulId = 'm2') {
@@ -738,6 +917,85 @@ window.SlaytSunum = (() => {
           <circle cx="22" cy="78" r="8" fill="#0E8C7F"/><text x="40" y="83" fill="#0A6A60" font-family="Figtree,sans-serif" font-size="14" font-weight="700">92°C · Dengeli</text>
           <rect y="112" width="144" height="44" rx="12" fill="#FFEDE2" stroke="#EE6C2B" stroke-width="2"/>
           <circle cx="22" cy="134" r="8" fill="#EE6C2B"/><text x="40" y="139" fill="#B84A12" font-family="Figtree,sans-serif" font-size="14" font-weight="700">96°C · Yoğun</text>
+        </g>
+      </svg>`;
+    }
+    if (tip === 'basketbol_oyuncu') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <rect width="640" height="310" fill="#142C28"/>
+        <path d="M90 270 A230 230 0 0 1 550 270" fill="none" stroke="#9FD8CC" stroke-width="3" stroke-dasharray="8 6" opacity=".45"/>
+        <rect x="275" y="42" width="90" height="58" rx="8" fill="#1F423C" stroke="#9FD8CC" stroke-width="2.5"/>
+        <circle cx="320" cy="88" r="14" fill="none" stroke="#EE6C2B" stroke-width="4"/>
+        <path d="M160 232 Q240 60 316 90" fill="none" stroke="#EE6C2B" stroke-width="3.5" stroke-dasharray="6 5"/>
+        <circle cx="160" cy="232" r="16" fill="#0E8C7F" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="252" cy="118" r="13" fill="#EE6C2B"/>
+        <g transform="translate(420 158)">
+          <rect width="176" height="94" rx="14" fill="#0D201D" stroke="#2D5E55"/>
+          <text x="16" y="28" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="12" font-weight="700">3 SAYILIK ŞUT TESTİ</text>
+          <text x="16" y="54" fill="#fff" font-family="Bricolage Grotesque,sans-serif" font-size="18" font-weight="700">15 · 30 · 45 dk</text>
+          <text x="16" y="76" fill="#F4A278" font-family="Figtree,sans-serif" font-size="13" font-weight="600">20 Denemede İsabet</text>
+        </g>
+      </svg>`;
+    }
+    if (tip === 'oyun') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <rect width="640" height="310" fill="#19213A"/>
+        <g opacity=".18" stroke="#8FA2E8" stroke-width="1.5" fill="none">
+          <path d="M60 155 L320 42 L580 155 L320 268 Z"/>
+          <path d="M190 98 L450 212 M450 98 L190 212"/>
+        </g>
+        <g transform="translate(82 72)">
+          <rect width="142" height="158" rx="16" fill="#232E52" stroke="#5B6BE8" stroke-width="2"/>
+          <text x="71" y="42" fill="#9FB0F5" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">ODUN ODAKLI</text>
+          <text x="71" y="88" fill="#fff" font-family="Bricolage Grotesque,sans-serif" font-size="24" font-weight="700" text-anchor="middle">8.400</text>
+          <text x="71" y="122" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="13" text-anchor="middle">15. dk Kaynak</text>
+        </g>
+        <g transform="translate(249 58)">
+          <rect width="142" height="182" rx="16" fill="#283862" stroke="#17A594" stroke-width="3"/>
+          <text x="71" y="44" fill="#9FD8CC" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">DENGELİ DAĞILIM</text>
+          <text x="71" y="96" fill="#F6C445" font-family="Bricolage Grotesque,sans-serif" font-size="26" font-weight="700" text-anchor="middle">12.100</text>
+          <text x="71" y="134" fill="#fff" font-family="Figtree,sans-serif" font-size="13" text-anchor="middle">En Yüksek Ekonomi</text>
+        </g>
+        <g transform="translate(416 72)">
+          <rect width="142" height="158" rx="16" fill="#232E52" stroke="#F6C445" stroke-width="2"/>
+          <text x="71" y="42" fill="#F6C445" font-family="Figtree,sans-serif" font-size="12" font-weight="700" text-anchor="middle">ALTIN ODAKLI</text>
+          <text x="71" y="88" fill="#fff" font-family="Bricolage Grotesque,sans-serif" font-size="24" font-weight="700" text-anchor="middle">10.200</text>
+          <text x="71" y="122" fill="#9FB0F5" font-family="Figtree,sans-serif" font-size="13" text-anchor="middle">15. dk Kaynak</text>
+        </g>
+      </svg>`;
+    }
+    if (tip === 'muzik') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <rect width="640" height="310" fill="#FBF5EA"/>
+        <rect x="64" y="94" width="320" height="122" rx="14" fill="#5A3821" stroke="#3B2313" stroke-width="3"/>
+        ${[0, 1, 2, 3, 4, 5].map(i => `<line x1="64" y1="${110 + i * 18}" x2="384" y2="${110 + i * 18}" stroke="#EAD7C3" stroke-width="${1.2 + i * 0.3}"/>`).join('')}
+        ${[120, 180, 240, 300, 355].map(x => `<line x1="${x}" y1="94" x2="${x}" y2="216" stroke="#C9B29B" stroke-width="2"/>`).join('')}
+        <circle cx="150" cy="128" r="9" fill="#0E8C7F"/><circle cx="210" cy="164" r="9" fill="#EE6C2B"/><circle cx="270" cy="146" r="9" fill="#0E8C7F"/>
+        <g transform="translate(422 66)">
+          <rect width="156" height="178" rx="18" fill="#FFFFFF" stroke="#E2D3BE" stroke-width="2"/>
+          <polygon points="78,28 46,128 110,128" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="2.5"/>
+          <line x1="78" y1="120" x2="102" y2="48" stroke="#EE6C2B" stroke-width="3.5" stroke-linecap="round"/>
+          <text x="78" y="156" fill="#11211E" font-family="Figtree,sans-serif" font-size="13.5" font-weight="700" text-anchor="middle">Bölümlü + Metronom</text>
+        </g>
+      </svg>`;
+    }
+    if (tip === 'sanat') {
+      return `<svg viewBox="0 0 640 310" aria-hidden="true">
+        <rect width="640" height="310" fill="#EEF4F3"/>
+        <rect x="74" y="46" width="286" height="218" rx="18" fill="#1B2A28" stroke="#0E8C7F" stroke-width="3"/>
+        <rect x="92" y="64" width="250" height="182" rx="10" fill="#FFFFFF"/>
+        <g stroke="#B8D8D2" stroke-width="1" stroke-dasharray="4 4">
+          <line x1="175" y1="64" x2="175" y2="246"/><line x1="258" y1="64" x2="258" y2="246"/>
+          <line x1="92" y1="124" x2="342" y2="124"/><line x1="92" y1="184" x2="342" y2="184"/>
+        </g>
+        <ellipse cx="217" cy="148" rx="44" ry="56" fill="#F7E4D4" stroke="#0E8C7F" stroke-width="2.5"/>
+        <g transform="translate(394 64)">
+          <rect width="172" height="50" rx="12" fill="#FFFFFF" stroke="#CBD8D4" stroke-width="2"/>
+          <text x="18" y="30" fill="#5C6C68" font-family="Figtree,sans-serif" font-size="13.5" font-weight="700">Katman 1 · Eskiz Izgarası</text>
+          <rect y="64" width="172" height="50" rx="12" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="2.5"/>
+          <text x="18" y="94" fill="#0A6A60" font-family="Figtree,sans-serif" font-size="13.5" font-weight="700">Katman 2 · Işık &amp; Gölge</text>
+          <rect y="128" width="172" height="50" rx="12" fill="#FFEDE2" stroke="#EE6C2B" stroke-width="2"/>
+          <text x="18" y="158" fill="#B84A12" font-family="Figtree,sans-serif" font-size="13.5" font-weight="700">Katman 3 · Renk &amp; Detay</text>
         </g>
       </svg>`;
     }
@@ -1299,5 +1557,5 @@ window.SlaytSunum = (() => {
     };
   }
 
-  return { PROFILLER, baglamdanUret, createPlayer };
+  return { PROFILLER, JURI_DENEY_BAGLAMLAR, getDeneySlayt, baglamdanUret, createPlayer };
 })();
