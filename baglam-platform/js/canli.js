@@ -5,70 +5,82 @@
 window.CanliDeney = (() => {
   'use strict';
 
-  /* ---------- 1. Tüm Modüller (m1..m6) için Standart Kontrol Grubu İçerikleri ---------- */
+  /* ---------- 1. Tüm Modüller (m1..m6) için Konuya Özgü Standart Kontrol Grubu İçerikleri ----------
+     ÖNEMLİ METODOLOJİK İLKE:
+     - Her modül (m1..m6), kendi konusunun pedagojik doğasına en uygun ÖZEL bir slayt ve mikro-görev şablonuna sahiptir.
+     - Ancak AYNI MODÜL İÇİNDE Kontrol Grubu ile Deney Grubu BİREBİR AYNI tasarım ve etkileşim şablonunu kullanır; gruplar arasındaki tek fark kişiselleştirilmiş bağlamdır. */
   const KONTROL_ICERIK = {
     m1: {
       modulId: 'm1',
       modulAd: 'Bilimsel araştırmanın temelleri',
-      kazanim: 'Bilimsel bilgiyi gündelik görüşten ayırır ve araştırmanın temel adımlarını sıralar.',
+      sablonAd: 'Gözlemden Bilimsel Döngüye & Etiğe (Sıralama + Etik)',
+      kazanim: 'Bilimsel bilgiyi gündelik görüşten ayırır, araştırmanın temel adımlarını sıralar ve etik ilkeleri uygular.',
       slayt: {
-        id: 'kontrol-m1', etiket: 'Kontrol grubu — Standart içerik', kisa: 'Standart (Kontrol)',
-        altBaslik: 'Not tutma yöntemleri ve bilimsel soru', sureToplam: '75 sn', temaTip: 'calisma',
+        id: 'kontrol-m1', etiket: 'Kontrol grubu — Standart içerik (M1)', kisa: 'Standart (Kontrol)',
+        altBaslik: 'Not tutma yöntemleri ve bilimsel döngü', sureToplam: '75 sn', temaTip: 'calisma',
         slaytlar: [
           {
-            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Gözlem', ikon: 'odul',
             ustBaslik: 'Gözlemden bilimsel soruya', altBaslik: 'Ders notu tutma alışkanlıkları',
-            soru: 'Derste özet çıkararak not tutmak mı, sadece altını çizmek mi hatırlamayı daha çok artırır?',
+            soru: 'Derste yalnızca metnin altını çizenlere göre kendi cümleleriyle özet çıkaran öğrenciler sınavda daha çok bilgi hatırlıyor.',
             image_path: 'images/m1-standart-s1.png', audio_path: 'audio/m1-standart-s1.mp3',
             narration: 'Bir öğrenci, derste yalnızca metnin altını çizen arkadaşlarına göre kendi cümleleriyle özet çıkaranların sınavda daha çok bilgi hatırladığını gözlemlemiştir.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Araştırma', ikon: 'izgara',
-            ustBaslik: 'Üç not tutma koşulu sınanıyor', altBaslik: 'Aynı ders metni, üç farklı grup',
-            kosullar: [
-              { ad: 'Altını çizme', deger: '61 puan', diyagram: 'saat1' },
-              { ad: 'Özet çıkarma', deger: '78 puan', diyagram: 'saat2' },
-              { ad: 'Kavram haritası', deger: '82 puan', diyagram: 'saat3' },
-            ],
-            dipnot: 'Örnek amaçlı kurgusal hatırlama testi puanları',
+            slide_id: 2, slide_type: 'claim_vs_testable', kisaAd: '2. Sınanabilirlik', ikon: 'izgara',
+            ustBaslik: 'Gündelik görüşten sınanabilir soruya', altBaslik: 'Bilimsel bilginin ayırt edici özelliği',
+            gorusBaslik: 'Gündelik Görüş (Sınanamaz)',
+            gorusMetin: 'Özet çıkararak çalışmak her zaman en iyi yöntemdir.',
+            gorusNeden: 'Mutlak ve belirsiz bir yargıdır; kimin, hangi yöntemle ve hangi ölçümle karşılaştırılacağı belli değildir.',
+            bilimselBaslik: 'Bilimsel Araştırma Sorusu (Sınanabilir)',
+            bilimselMetin: 'Üniversite öğrencilerinde kullanılan not tutma yöntemi (altını çizme, özet, kavram haritası), 1 hafta sonraki hatırlama testi puanını etkiler mi?',
+            kriterler: ['Karşılaştırılan: Not tutma yöntemi', 'Ölçülen: Hatırlama testi puanı', 'Grup: Üniversite öğrencileri'],
             audio_path: 'audio/m1-standart-s2.mp3',
-            narration: 'Kişisel bir görüş yerine sınanabilir bir araştırma yürütülerek üç grubun aynı hatırlama testinden aldığı ortalama puanlar karşılaştırılmıştır.',
+            narration: 'Kişisel bir görüş yerine, neyin karşılaştırıldığını ve hangi ölçümün yapılacağını açıkça belirten sınanabilir bir araştırma sorusu kurulur.',
             estimated_duration_seconds: 16,
           },
           {
-            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Sınanabilirlik', ikon: 'dal',
-            ustBaslik: 'Görüş değil, sınanabilir iddia', altBaslik: 'Bilimsel bilginin ayırt edici özelliği',
-            degisken: 'Ölçüme açık karşılaştırma',
-            seviyeler: ['Gözlem & Soru', 'Veri Toplama', 'Kanıta Dayalı Sonuç'],
-            digerRef: 'Gündelik görüş: "Özet çıkarmak her zaman daha iyidir" (Sınanmamış)',
+            slide_id: 3, slide_type: 'process_timeline', kisaAd: '3. Döngü', ikon: 'dal',
+            ustBaslik: 'Sistemli araştırma döngüsü', altBaslik: 'Gözlemden rapora uzanan 4 temel adım',
+            adimlar: [
+              { no: '01', baslik: 'Soru & Hipotez', aciklama: 'Not tutma yöntemi hatırlama puanını etkiler mi?' },
+              { no: '02', baslik: 'Örneklem & Veri Toplama', aciklama: '90 lisans öğrencisiyle 3 grupta aynı ders metni üzerinden uygulama.' },
+              { no: '03', baslik: 'Analiz & Bulgu', aciklama: 'Altını çizme (61), Özet (78) ve Kavram haritası (82) puanlarının karşılaştırılması.' },
+              { no: '04', baslik: 'Açık Raporlama', aciklama: 'Yöntemin ve örneklem sınırlılıklarının şeffafça paylaşılması.' },
+            ],
             audio_path: 'audio/m1-standart-s3.mp3',
-            narration: 'Bilimsel bilgi; gözleme, sistemli veri toplamaya ve kanıtlara dayanır. Bu sayede herkes tarafından yeniden sınanabilir.',
+            narration: 'Bilimsel araştırma; sınanabilir sorudan veri toplamaya, sayısal analizden şeffaf raporlamaya uzanan sistemli bir döngü izler.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Bulgular', ikon: 'grafik',
-            ustBaslik: 'Kanıtların karşılaştırılması', altBaslik: 'Hatırlama testi ortalamaları',
-            degisken: '1 hafta sonraki hatırlama puanı',
-            oncekiRef: 'Karşılaştırılan yöntemler: Altını çizme, Özet, Kavram haritası',
-            veri: [{ etiket: 'Altını çizme', deger: 61 }, { etiket: 'Özet', deger: 78 }, { etiket: 'Harita', deger: 82 }],
+            slide_id: 4, slide_type: 'ethics_pillars', kisaAd: '4. Bilimsel Etik', ikon: 'grafik',
+            ustBaslik: 'Bilimsel etik ve katılımcı hakları', altBaslik: 'Araştırmada uyulması zorunlu ilkeler',
+            etikSenaryo: 'Öğrencilerin sınav ve hatırlama testi puanları ders notunu etkilemez, isim yerine kod kullanılarak gizli tutulur.',
+            ilkeler: [
+              { baslik: 'Bilgilendirilmiş Onam', aciklama: 'Öğrencilere çalışmanın amacı açıklanır ve gönüllü katılımları alınır.' },
+              { baslik: 'Gizlilik & Anonimlik', aciklama: 'Test sonuçları öğrenci kimliğiyle eşleşmeyecek biçimde kodlanır.' },
+              { baslik: 'Dürüst Raporlama', aciklama: 'Veriler beklentiye uysun diye değiştirilmeden olduğu gibi raporlanır.' },
+            ],
             audio_path: 'audio/m1-standart-s4.mp3',
-            narration: 'Elde edilen puanlar kavram haritası ve özet çıkarma gruplarının altını çizme grubundan daha yüksek ortalama aldığını göstermektedir.',
+            narration: 'Veri toplamadan önce katılımcıların bilgilendirilmiş onamı alınır ve kişisel verileri anonimleştirilerek korunur.',
             estimated_duration_seconds: 15,
           },
           {
             slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
             ustBaslik: 'Bilimsel araştırma döngüsü', altBaslik: 'Çözümün özeti',
-            bagimsiz: 'Sınanabilir soru & yöntem', bagimli: 'Kanıta dayalı rapor',
-            ozetNot: 'Bilimsel araştırma bir gözlemi açık, ölçülebilir ve etik kurallara uygun biçimde sınar.',
+            solEtiket: 'Başlangıç', bagimsiz: 'Gözlem & Sınanabilir Soru',
+            sagEtiket: 'Bilimsel Sonuç', bagimli: 'Etik & Kanıta Dayalı Rapor',
+            ozetNot: 'Bilimsel araştırma bir gözlemi açık, ölçülebilir, sistemli ve etik kurallara uygun biçimde sınar.',
             audio_path: 'audio/m1-standart-s5.mp3',
-            narration: 'Özetle bilimsel araştırma; gözlemden sınanabilir soruya, sistemli veriden sınırlılıklarıyla raporlanan bulguya ilerler.',
+            narration: 'Özetle bilimsel araştırma; gözlemden sınanabilir soruya, sistemli ve etik veriden sınırlılıklarıyla raporlanan bulguya ilerler.',
             estimated_duration_seconds: 14,
           },
         ],
       },
       gorev: {
-        id: 'kontrol-m1', eyebrow: 'MODÜL 01 · MİKRO-GÖREV', altYazi: 'Araştırma senaryosunu incele ve bilimsel ilkeleri belirle.',
+        id: 'kontrol-m1', gorevTipi: 'm1_sirala_etik', eyebrow: 'MODÜL 01 · MİKRO-GÖREV',
+        altYazi: 'Araştırma döngüsü adımlarını doğru sıraya koy ve bilimsel etik ilkesini belirle.',
         baslik: 'Okuma ortamı dikkati etkiler mi?',
         metin: 'Bir eğitim araştırmacısı, öğrencilerin sessiz kütüphane ortamında ve kafeterya ortamında okudukları metinleri hatırlama düzeylerini karşılaştırmıştır. Katılımcıların izni alınarak uygulanan testte kütüphane grubu 81, kafeterya grubu 65 ortalama almıştır.',
         temaTip: 'standart',
@@ -77,86 +89,185 @@ window.CanliDeney = (() => {
           { ad: 'Kafeterya', deger: '65 puan', diyagram: 'saat1' },
           { ad: 'Karma grup', deger: '73 puan', diyagram: 'saat3' },
         ],
-        soruBaslik: 'Bilimsel soruyu ve yöntemi ayırt et', soruAlt: 'Bilimsel bilginin temelleri',
-        soru1: 'Bu çalışmada aşağıdakilerden hangisi bilimsel olarak sınanabilir bir araştırma sorusudur?',
+        soruBaslik: '1. Bölüm: Bilimsel araştırma adımlarını baştan sona sırala',
+        soruAlt: 'Ok düğmelerini kullanarak 4 adımı doğru mantıksal sıraya getir',
+        siralaAdimlar: [
+          'Gözlemden yola çıkarak çalışma ortamı ve hatırlama puanı sorusunu tanımlama',
+          'Katılımcılardan bilgilendirilmiş onam alıp okuma ve hatırlama testini uygulama',
+          'Kütüphane (81) ve kafeterya (65) gruplarının test puanlarını analiz etme',
+          'Bulguları örneklem sınırlılıklarıyla birlikte araştırma raporunda paylaşma',
+        ],
+        soru1: '2. Bölüm: Bu araştırmada veri toplama öncesi katılımcılardan gönüllü izin alınması hangi ilkenin gereğidir?',
         bagimsizSecenekler: [
-          'Çalışma ortamının gürültü düzeyi üniversite öğrencilerinin okuduğunu hatırlama puanını etkiler mi?',
-          'Kütüphaneler her zaman kafeteryalardan daha güzel yerlerdir.',
-          'Öğrenciler neden ders çalışmayı sevmez?',
-          'Sessizlik iyi midir?',
+          'Bilgilendirilmiş onam ve bilimsel etik ilkesi',
+          'Tabakalı örnekleme kuralı',
+          'Bağımsız değişken manipülasyonu',
+          'İçerik analizi kodlaması',
         ],
         bagimsizDogru: 0,
-        soru2: 'Bu araştırmada veri toplama öncesi katılımcılardan izin alınması hangi ilkenin gereğidir?',
-        bagimliSecenekler: ['Rastgele atama', 'Bilgilendirilmiş onam ve bilimsel etik', 'Tabakalı örnekleme', 'İçerik analizi'],
-        bagimliDogru: 1,
-        ipucuBagimsiz: 'Sınanabilir soru; neyin karşılaştırıldığını ve hangi ölçümün yapılacağını açıkça belirtmelidir.',
-        ipucuBagimli: 'Katılımcıların çalışmadan haberdar edilip gönüllü onay vermesi etik ilkeyle ilgilidir.',
-        feedback1Yanlis: 'İkinci seçimin doğru; ilk soruda ölçülebilir ve sınanabilir olan araştırma sorusunu seçmelisin.',
-        feedback2Yanlis: 'İlk seçimin doğru; ikinci soruda katılımcı izni ve haklarını koruyan etik ilkeyi belirlemelisin.',
-        aciklamaDogru: 'Doğru! İlk soru ölçülebilir değişkenleri tanımladığı için sınanabilirdir; katılımcı izni alınması ise bilimsel etik ve bilgilendirilmiş onam ilkesinin gereğidir.',
+        ipucuBagimsiz: 'Araştırma her zaman gözlem/soru ile başlar, veri toplama ve analizle devam eder, raporla biter.',
+        ipucuBagimli: 'Katılımcıların çalışmadan haberdar edilip gönüllü onay vermesi bilgilendirilmiş onam ilkesidir.',
+        aciklamaDogru: 'Doğru! Araştırma adımlarını Gözlem/Soru → Veri Toplama → Analiz → Raporlama sırasıyla dizdin ve bilgilendirilmiş onam etik ilkesini doğru belirledin.',
       },
     },
     m2: {
       modulId: 'm2',
       modulAd: 'Araştırma problemi ve sorusu',
-      kazanim: 'Verilen araştırma senaryosunda bağımsız ve bağımlı değişkenleri belirler.',
-      slayt: null, // SlaytSunum.PROFILLER[0] ile eşleştirilecek
-      gorev: null, // GorevPrototip.SENARYOLAR[0] ile eşleştirilecek
+      sablonAd: 'Soruyu Daraltma Hunisi & Değişkenler (Değişken Rolü Eşleştirme)',
+      kazanim: 'Geniş bir soruyu daraltır; araştırma senaryosunda bağımsız, bağımlı ve kontrol değişkenlerini belirler.',
+      slayt: {
+        id: 'kontrol-m2', etiket: 'Kontrol grubu — Standart içerik (M2)', kisa: 'Standart (Kontrol)',
+        altBaslik: 'Ders çalışma süresi ve sınav başarısı', sureToplam: '78 sn', temaTip: 'calisma',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
+            ustBaslik: 'Bir araştırma problemi ve senaryosu', altBaslik: 'Üniversitede ders çalışma süreleri',
+            soru: 'Çalışma süresi öğrencilerin test başarısını etkiler mi?',
+            image_path: 'images/m2-standart-s1.png', audio_path: 'audio/m2-standart-s1.mp3',
+            narration: 'Bir araştırmacı, farklı çalışma sürelerinin üniversite öğrencilerinin test başarıları üzerindeki etkisini incelemek istemektedir. Öğrenciler rastgele üç gruba ayrılmıştır.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 2, slide_type: 'question_funnel', kisaAd: '2. Soruyu Daralt', ikon: 'izgara',
+            ustBaslik: 'Geniş meraktan odaklanmış araştırma sorusuna', altBaslik: 'Üç farklı çalışma süresi koşulu',
+            zayifSoru: 'Ders çalışmak öğrencilere faydalı mıdır?',
+            gucluSoru: 'Üniversite öğrencilerinde çalışma süresi (15, 30 ve 45 dk), başarı testi puanını etkiler mi?',
+            kosullar: [
+              { ad: '15 dakika', deger: '68 puan', diyagram: 'saat1' },
+              { ad: '30 dakika', deger: '76 puan', diyagram: 'saat2' },
+              { ad: '45 dakika', deger: '84 puan', diyagram: 'saat3' },
+            ],
+            dipnot: 'Örnek amaçlı kurgusal test sonuçları',
+            audio_path: 'audio/m2-standart-s2.mp3',
+            narration: 'Geniş ve belirsiz bir soru yerine, on beş, otuz ve kırk beş dakikalık çalışma sürelerinin başarı testi puanına etkisini soran odaklanmış bir soru kurulur.',
+            estimated_duration_seconds: 17,
+          },
+          {
+            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Bağımsız Değişken', ikon: 'dal',
+            ustBaslik: 'Bağımsız değişkeni belirleyelim', altBaslik: 'Araştırmacının değiştirdiği unsur',
+            degisken: 'Çalışma süresi',
+            seviyeler: ['15 dakika', '30 dakika', '45 dakika'],
+            digerRef: 'Ölçülen sonuç: Başarı testinden alınan puan',
+            audio_path: 'audio/m2-standart-s3.mp3',
+            narration: 'Araştırmacının gruplar arasında bilerek değiştirdiği unsur çalışma süresidir. Bu nedenle çalışma süresi bağımsız değişkendir.',
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Bağımlı & Kontrol', ikon: 'grafik',
+            ustBaslik: 'Bağımlı ve kontrol değişkenleri', altBaslik: 'Araştırmacının ölçtüğü sonuç ve sabit tutulanlar',
+            degisken: 'Başarı testinden alınan puan',
+            oncekiRef: 'Değiştirilen unsur: Çalışma süresi',
+            kontrolDegiskenleri: ['Konu zorluğu', 'Test soru sayısı', 'Sınıf ortamı'],
+            veri: [
+              { etiket: '15 dk', deger: 68 },
+              { etiket: '30 dk', deger: 76 },
+              { etiket: '45 dk', deger: 84 },
+            ],
+            audio_path: 'audio/m2-standart-s4.mp3',
+            narration: 'Çalışma süresine bağlı olarak ölçülen sonuç test puanıdır; konu zorluğu ve soru sayısı ise kontrol değişkeni olarak sabit tutulur.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
+            ustBaslik: 'Araştırmanın değişken mimarisi', altBaslik: 'Çözümün özeti',
+            bagimsiz: 'Çalışma süresi', bagimli: 'Test puanı',
+            kontrolList: ['Konu zorluğu', 'Test soru sayısı'],
+            ozetNot: 'Bağımsız değişkeni değiştiriyor, kontrol değişkenlerini sabit tutuyor ve bağımlı değişkendeki sonucu ölçüyoruz.',
+            audio_path: 'audio/m2-standart-s5.mp3',
+            narration: 'Özetle araştırmacı bağımsız değişken olan çalışma süresini değiştirir, diğer koşulları sabit tutar ve bağımlı değişken olan test puanını ölçer.',
+            estimated_duration_seconds: 14,
+          },
+        ],
+      },
+      gorev: {
+        id: 'kontrol-m2', gorevTipi: 'm2_degisken_eslestir', eyebrow: 'MODÜL 02 · MİKRO-GÖREV',
+        altYazi: 'Senaryodaki değişkenleri araştırmadaki rolleriyle eşleştir ve kontrol mantığını doğrula.',
+        baslik: 'Problem çözme yöntemi başarıyı etkiler mi?',
+        metin: 'Bir araştırmacı, farklı problem çözme yöntemlerinin öğrencilerin doğru çözdükleri problem sayısına etkisini incelemektedir. Öğrenciler aynı sınıf düzeyinden seçilerek rastgele üç gruba ayrılmış, her grupta farklı bir problem çözme yöntemi uygulanmış ve sonunda doğru çözülen problem sayıları kaydedilmiştir.',
+        temaTip: 'standart',
+        kosullar: [
+          { ad: 'Örnekli çözüm', deger: '12 problem', diyagram: 'saat1' },
+          { ad: 'Grup tartışması', deger: '17 problem', diyagram: 'saat2' },
+          { ad: 'Bireysel çalışma', deger: '14 problem', diyagram: 'saat3' },
+        ],
+        soruBaslik: '1. Bölüm: Değişkenleri Rolleriyle Eşleştir',
+        soruAlt: 'Yukarıdaki kavramlardan birine dokun, ardından aşağıdaki uygun değişken rolü yuvasına yerleştir',
+        eslestirOgeler: ['Problem çözme yöntemi', 'Doğru çözülen problem sayısı', 'Öğrencilerin sınıf düzeyi ve soru sayısı'],
+        eslestirRoller: [
+          'Bağımsız Değişken (Araştırmacının değiştirdiği)',
+          'Bağımlı Değişken (Sonuç olarak ölçülen)',
+          'Kontrol Değişkeni (Sabit tutulan)',
+        ],
+        soru1: '2. Bölüm: Bu araştırmada tüm gruplarda aynı sınıf düzeyinin ve eşit soru sayısının kullanılmasının nedeni nedir?',
+        bagimsizSecenekler: [
+          'Doğru problem sayısındaki farkın başka etkenlerden değil, yalnızca problem çözme yönteminden kaynaklandığını güvenceye almak',
+          'Bağımsız değişkenin etkisini tamamen ortadan kaldırmak',
+          'Örneklem büyüklüğünü küçültmek',
+          'Araştırmayı nitel desene dönüştürmek',
+        ],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: 'Araştırmacının üç grupta değiştirdiği yöntem bağımsız, sonunda saydığı doğru problem sayısı bağımlı, eşit tuttuğu sınıf düzeyi ise kontrol değişkenidir.',
+        ipucuBagimli: 'Kontrol değişkenlerini sabit tutmak karıştırıcı etkileri önler.',
+        aciklamaDogru: 'Harika! Bağımsız (Problem çözme yöntemi), bağımlı (Doğru çözülen problem sayısı) ve kontrol değişkenlerini doğru eşleştirdin.',
+      },
     },
     m3: {
       modulId: 'm3',
       modulAd: 'Araştırma desenleri',
+      sablonAd: 'Desen Karşılaştırma Matrisi & Müdahale Karar Ağacı (Desen Sınıflandırma)',
       kazanim: 'Araştırma sorusuna göre nicel (deneysel/ilişkisel), nitel ve karma desenleri ayırt eder.',
       slayt: {
-        id: 'kontrol-m3', etiket: 'Kontrol grubu — Standart içerik', kisa: 'Standart (Kontrol)',
+        id: 'kontrol-m3', etiket: 'Kontrol grubu — Standart içerik (M3)', kisa: 'Standart (Kontrol)',
         altBaslik: 'Aynı konuya üç farklı araştırma deseni', sureToplam: '76 sn', temaTip: 'calisma',
         slaytlar: [
           {
             slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
-            ustBaslik: 'Sorunun türü deseni belirler', altBaslik: 'Uzaktan eğitimde ders katılımı',
+            ustBaslik: 'Sorunun türü araştırma desenini belirler', altBaslik: 'Uzaktan eğitimde ders katılımı',
             soru: 'Aynı konu nicel, nitel ve karma desenlerle nasıl araştırılır?',
             image_path: 'images/m3-standart-s1.png', audio_path: 'audio/m3-standart-s1.mp3',
-            narration: 'Bir araştırmacı üniversite öğrencilerinin çevrim içi derslere katılımını incelemek istemektedir. Sorduğu sorunun türü, kullanacağı araştırma desenini belirler.',
+            narration: 'Bir araştırmacı üniversite öğrencilerinin çevrim içi derslere katılımını incelemek istemektedir. Sorduğu sorunun amacı, kullanacağı araştırma desenini belirler.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Desenler', ikon: 'izgara',
-            ustBaslik: 'Üç temel desen yaklaşımı', altBaslik: 'Sayılar, deneyimler ve bütünleştirme',
-            kosullar: [
-              { ad: 'İlişkisel (Nicel)', deger: 'r = 0,62', diyagram: 'saat1' },
-              { ad: 'Olgubilim (Nitel)', deger: '10 görüşme', diyagram: 'saat2' },
-              { ad: 'Açıklayıcı Karma', deger: 'Nicel + Nitel', diyagram: 'saat3' },
+            slide_id: 2, slide_type: 'design_matrix', kisaAd: '2. Üç Yaklaşım', ikon: 'izgara',
+            ustBaslik: 'Üç Temel Araştırma Deseni Yaklaşımı', altBaslik: 'Sayılar, deneyimler ve bütünleştirme',
+            desenler: [
+              { tur: 'Nicel (İlişkisel)', rozet: 'r = 0,62 · Sayısal', soru: 'Derse katılım süresi ile dönem sonu notu arasında ilişki var mıdır?', yontem: '240 öğrencinin sistem kayıtları ve sınav notları sayısal olarak karşılaştırılır.' },
+              { tur: 'Nitel (Olgubilim)', rozet: '10 Görüşme · Anlam', soru: 'Öğrenciler çevrim içi derste kamera açmama deneyimlerini nasıl anlamlandırıyor?', yontem: '10 öğrenciyle derinlemesine yarı yapılandırılmış görüşme yapılır.' },
+              { tur: 'Açıklayıcı Karma', rozet: 'Nicel → Nitel', soru: 'Katılım puanı düşen öğrenciler neden dersten kopmaktadır?', yontem: 'Önce 240 öğrenciden katılım verisi toplanır, ardından katılımı en düşük ve en yüksek 10 öğrenciyle görüşülür.' },
             ],
-            dipnot: 'Örnek amaçlı araştırma tasarımı karşılaştırması',
             audio_path: 'audio/m3-standart-s2.mp3',
             narration: 'İlişki ölçülüyorsa nicel ilişkisel desen, yaşanmış deneyimler derinlemesine anlaşılacaksa nitel olgubilim, ikisi birleştirilecekse karma desen seçilir.',
             estimated_duration_seconds: 17,
           },
           {
-            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Müdahale', ikon: 'dal',
-            ustBaslik: 'Deneysel ve ilişkisel ayrımı', altBaslik: 'Değişkene müdahale var mı?',
-            degisken: 'Araştırmacının rolü',
-            seviyeler: ['Müdahale var → Deneysel', 'Müdahale yok → İlişkisel', 'Anlam arayışı → Nitel'],
-            digerRef: 'Sadece mevcut durumu ölçmek ilişkisel; grup atayıp yöntem uygulamak deneyseldir.',
+            slide_id: 3, slide_type: 'decision_tree', kisaAd: '3. Karar Ağacı', ikon: 'dal',
+            ustBaslik: 'Deneysel mi, İlişkisel mi?', altBaslik: 'Araştırmacının değişkene müdahalesi var mı?',
+            kokSoru: 'Araştırmacı öğrencilerin çalışma/katılım koşuluna kendisi müdahale edip gruplara atama yapıyor mu?',
+            dallar: [
+              { kosul: 'EVET — Müdahale & Grup Ataması Var', desen: 'Deneysel Desen', ornek: 'Öğrencileri rastgele दो gruba ayırıp bir gruba etkileşimli kısa sınav uygulamak, diğerine uygulamamak.' },
+              { kosul: 'HAYIR — Müdahale Yok, Mevcut Durum Ölçülüyor', desen: 'İlişkisel Tarama Deseni', ornek: 'Öğrencilerin mevcut kütüphane/sistem kullanım süreleri ile not ortalamaları arasındaki ilişkiyi hesaplamak.' },
+            ],
             audio_path: 'audio/m3-standart-s3.mp3',
             narration: 'Araştırmacı değişkenlere müdahale etmeden mevcut ilişkiye bakıyorsa ilişkisel, gruplara farklı koşul uyguluyorsa deneysel desen kullanmış olur.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Veri türü', ikon: 'grafik',
-            ustBaslik: 'Desene göre toplanan veri', altBaslik: 'Nicel ölçümler ve nitel anlatımlar',
-            degisken: 'Örneklem genişliği (katılımcı)',
-            oncekiRef: 'Nicel taramada geniş örneklem, nitelde derinlemesine az katılımcı',
-            veri: [{ etiket: 'Nitel', deger: 10 }, { etiket: 'Deneysel', deger: 60 }, { etiket: 'Tarama', deger: 240 }],
+            slide_id: 4, slide_type: 'mixed_sequence', kisaAd: '4. Karma Akış', ikon: 'grafik',
+            ustBaslik: 'Açıklayıcı Sıralı Karma Desen', altBaslik: 'Nicel genel eğilimden nitel derinliğe geçiş',
+            asama1: { baslik: '1. Aşama: Nicel Tarama (n = 240)', detay: 'Katılım süresi ile başarı arasındaki sayısal örüntü (r = 0,62) belirlenir.' },
+            asama2: { baslik: '2. Aşama: Nitel Görüşme (n = 10)', detay: 'Sayısal farkın nedenlerini açıklamak için seçilen öğrencilerle derinlemesine görüşülür.' },
+            sentez: 'Sayılar "ne kadar" sorusunu, görüşmeler ise "neden ve nasıl" sorusunu yanıtlayarak bütüncül bulgu sağlar.',
             audio_path: 'audio/m3-standart-s4.mp3',
-            narration: 'Nitel çalışmalarda az sayıda katılımcıyla derinlemesine görüşme yapılırken, nicel tarama çalışmalarında daha geniş örneklemden sayısal veri toplanır.',
+            narration: 'Açıklayıcı sıralı karma desende önce geniş örneklemden sayısal veri toplanır, ardından bu sonuçları açıklamak için nitel görüşmeler yapılır.',
             estimated_duration_seconds: 15,
           },
           {
             slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
             ustBaslik: 'Sorudan uygun desene', altBaslik: 'Çözümün özeti',
-            bagimsiz: 'Araştırma sorusunun amacı', bagimli: 'Nicel / Nitel / Karma desen',
-            ozetNot: 'Ne öğrenmek istediğimiz, veriyi nasıl toplayacağımızı belirler.',
+            solEtiket: 'Araştırma Sorusunun Amacı', bagimsiz: 'Etki / İlişki / Deneyim',
+            sagEtiket: 'Seçilen Araştırma Deseni', bagimli: 'Nicel / Nitel / Karma Desen',
+            ozetNot: 'Ne öğrenmek istediğimiz, araştırma desenimizi ve veriyi nasıl toplayacağımızı belirler.',
             audio_path: 'audio/m3-standart-s5.mp3',
             narration: 'Özetle desen seçimi araştırma sorusunun doğasına göre yapılır: ilişki veya etki için nicel, deneyim için nitel, her ikisi için karma yöntem seçilir.',
             estimated_duration_seconds: 14,
@@ -164,41 +275,40 @@ window.CanliDeney = (() => {
         ],
       },
       gorev: {
-        id: 'kontrol-m3', eyebrow: 'MODÜL 03 · MİKRO-GÖREV', altYazi: 'Araştırma senaryosunu incele ve uygun deseni belirle.',
-        baslik: 'Hangi araştırma deseni kullanılmıştır?',
-        metin: 'Bir araştırmacı, üniversite öğrencilerinin haftalık kütüphane kullanım süreleri ile dönem sonu not ortalamaları arasındaki ilişkiyi incelemiştir. Mevcut kullanım ve not verilerini toplamış, öğrencilerin çalışma düzenine herhangi bir müdahalede bulunmamıştır.',
+        id: 'kontrol-m3', gorevTipi: 'm3_desen_siniflandir', eyebrow: 'MODÜL 03 · MİKRO-GÖREV',
+        altYazi: 'Üç farklı araştırma kurgusunu uygun araştırma desenine sınıflandır ve müdahale ölçütünü doğrula.',
+        baslik: 'Kütüphane kullanımı ve akademik başarı nasıl araştırılır?',
+        metin: 'Üç farklı araştırmacı, üniversite öğrencilerinin kütüphane kullanım alışkanlıklarını farklı araştırma sorularıyla incelemiştir. Her bir çalışmanın kurgusunu inceleyerek uygun araştırma desenine yerleştir.',
         temaTip: 'standart',
         kosullar: [
           { ad: '0–2 saat', deger: '2,45 GNO', diyagram: 'saat1' },
           { ad: '3–6 saat', deger: '2,95 GNO', diyagram: 'saat2' },
           { ad: '7+ saat', deger: '3,35 GNO', diyagram: 'saat3' },
         ],
-        soruBaslik: 'Araştırmanın desenini ve gerekçesini belirle', soruAlt: 'Deneysel ve ilişkisel desen ayrımı',
-        soru1: 'Bu araştırmanın deseni aşağıdakilerden hangisidir?',
-        bagimsizSecenekler: ['İlişkisel araştırma deseni', 'Deneysel araştırma deseni', 'Olgubilim (Nitel) deseni', 'Durum çalışması'],
-        bagimsizDogru: 0,
-        soru2: 'Bu seçimin temel gerekçesi nedir?',
-        bagimliSecenekler: [
-          'Katılımcılar rastgele gruplara atanıp müdahale edildiği için',
-          'Değişkenlere müdahale edilmeden mevcut durumlar arasındaki ilişki incelendiği için',
-          'Yalnızca 3 öğrenciyle görüşme yapıldığı için',
-          'Açık uçlu günlükler toplandığı için',
+        soruBaslik: '1. Bölüm: Üç araştırma kurgusunu uygun desene sınıflandır',
+        soruAlt: 'Bir araştırma kurgusuna dokun, ardından ait olduğu desen kutusunu seç',
+        sinifKategoriler: ['Nicel (İlişkisel / Deneysel)', 'Nitel (Olgubilim / Görüşme)', 'Karma Yöntem (Sıralı)'],
+        sinifOgeler: [
+          { metin: '200 öğrencinin haftalık kütüphane kullanım saati ile dönem sonu not ortalaması arasındaki istatistiksel ilişkiyi hesaplamak', kategori: 0 },
+          { metin: '8 öğrenciyle kütüphanede ders çalışırken yaşadıkları odaklanma ve kaygı deneyimleri üzerine derinlemesine görüşme yapmak', kategori: 1 },
+          { metin: 'Önce 200 öğrencinin kütüphane süresi ve notlarını karşılaştırmak, ardından en çok ve en az kullanan 8 öğrenciyle nedenleri üzerine görüşmek', kategori: 2 },
         ],
-        bagimliDogru: 1,
-        ipucuBagimsiz: 'Araştırmacının öğrencilerin çalışma süresini değiştirip değiştirmediğine dikkat et.',
-        ipucuBagimli: 'Müdahale (manipülasyon) olmaması ile değişkenler arası ilişkiye bakılması arasındaki bağlantıyı düşün.',
-        feedback1Yanlis: 'Gerekçen doğru; ilk soruda müdahale olmadan sayısal ilişkiyi inceleyen deseni seç.',
-        feedback2Yanlis: 'Desen seçimin doğru; ikinci soruda bunun neden ilişkisel desen olduğunu açıklayan ifadeyi seç.',
-        aciklamaDogru: 'Doğru! Araştırmacı değişkenlere müdahale etmeden mevcut kütüphane süresi ile not ortalaması arasındaki ilişkiyi incelediği için desen ilişkiseldir.',
+        soru1: '2. Bölüm: İlk çalışmada araştırmacı öğrencilerin çalışma düzenine müdahale etmeden mevcut durumu ölçtüğü için hangi nicel alt deseni kullanmıştır?',
+        bagimsizSecenekler: ['İlişkisel araştırma deseni', 'Gerçek deneysel desen', 'Olgubilim deseni', 'Eylem araştırması'],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: 'Sayısal ilişkiyi Nicel, derinlemesine görüşmeyi Nitel, önce sayısal sonra görüşme yapanı Karma kutusuna yerleştir.',
+        ipucuBagimli: 'Araştırmacının öğrencilerin çalışma süresini değiştirip değiştirmediğine (müdahale olup olmadığına) dikkat et.',
+        aciklamaDogru: 'Doğru! Üç çalışmayı da desenlerine doğru sınıflandırdın ve müdahalesiz nicel incelemenin ilişkisel desen olduğunu belirledin.',
       },
     },
     m4: {
       modulId: 'm4',
       modulAd: 'Evren ve örneklem',
-      kazanim: 'Araştırmada evren, örneklem ve tabakalı örnekleme mantığını ayırt eder.',
+      sablonAd: 'Evren-Örneklem Kapsülü & Tabakalı Nokta Izgarası (Etkileşimli Tabakalı Seçim)',
+      kazanim: 'Araştırmada evren, örneklem ve tabakalı örnekleme mantığını ayırt eder ve uygular.',
       slayt: {
-        id: 'kontrol-m4', etiket: 'Kontrol grubu — Standart içerik', kisa: 'Standart (Kontrol)',
-        altBaslik: 'Fakülte öğrencilerinden örneklem seçimi', sureToplam: '75 sn', temaTip: 'calisma',
+        id: 'kontrol-m4', etiket: 'Kontrol grubu — Standart içerik (M4)', kisa: 'Standart (Kontrol)',
+        altBaslik: 'Fakülte öğrencilerinden tabakalı örneklem seçimi', sureToplam: '75 sn', temaTip: 'calisma',
         slaytlar: [
           {
             slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
@@ -209,42 +319,46 @@ window.CanliDeney = (() => {
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Tabakalar', ikon: 'izgara',
-            ustBaslik: 'Evrendeki alt gruplar', altBaslik: 'Üç bölümden eşit temsil',
-            kosullar: [
-              { ad: 'Mühendislik', deger: '400 öğrenci', diyagram: 'saat1' },
-              { ad: 'Eğitim', deger: '400 öğrenci', diyagram: 'saat2' },
-              { ad: 'Fen-Edebiyat', deger: '400 öğrenci', diyagram: 'saat3' },
-            ],
-            dipnot: 'Toplam evren: 1.200 lisans öğrencisi',
+            slide_id: 2, slide_type: 'population_vs_sample', kisaAd: '2. Evren & Örneklem', ikon: 'izgara',
+            ustBaslik: 'Evren, Örneklem ve Analiz Birimi', altBaslik: 'Genellenmek istenen bütün grup ve seçilen alt küme',
+            evrenTanim: 'Fakültedeki 3 bölümde öğrenim gören toplam 1.200 lisans öğrencisi (N = 1.200)',
+            orneklemTanim: 'Her bölümden rastgele seçilerek veri toplanan 120 öğrenci (n = 120)',
+            birimTanim: 'Tek bir lisans öğrencisi',
+            nedenOrneklem: 'Tüm evrene ulaşmak yerine evrendeki bölümleri dengeli temsil eden 120 öğrenciyle çalışmak zaman ve maliyet tasarrufu sağlar.',
             audio_path: 'audio/m4-standart-s2.mp3',
-            narration: 'Evrende üç farklı bölüm bulunmaktadır. Sadece tek bir bölümden veya gönüllülerden seçim yapılırsa örneklem evreni temsil etmez.',
+            narration: 'Sonuçların genellenmek istendiği bin iki yüz kişilik bütün grup evreni, arasından seçilip veri toplanan yüz yirmi öğrenci ise örneklemi oluşturur.',
             estimated_duration_seconds: 16,
           },
           {
-            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Evren', ikon: 'dal',
-            ustBaslik: 'Evren ve örneklem ayrımı', altBaslik: 'Genellenmek istenen bütün grup',
-            degisken: 'Evren: Fakültedeki 1.200 öğrenci',
-            seviyeler: ['Evren = Bütün grup (1.200)', 'Örneklem = Seçilen alt grup (120)', 'Birim = Öğrenci'],
-            digerRef: 'Örneklem büyüklüğü bu örnekte n = 120 öğrencidir.',
+            slide_id: 3, slide_type: 'sampling_bias_comparison', kisaAd: '3. Yanlılık Riski', ikon: 'dal',
+            ustBaslik: 'Yanlı Seçim vs Tabakalı Seçkisiz Seçim', altBaslik: 'Temsil gücü neden bozulur?',
+            yanliBaslik: '✕ Yanlı / Uygun Örnekleme Hatası',
+            yanliAciklama: 'Sadece Mühendislik kantininde oturan 120 gönüllü öğrenciye anket uygulamak, Eğitim ve Fen-Edebiyat öğrencilerini dışarıda bırakır.',
+            dogruBaslik: '✓ Tabakalı Seçkisiz Örnekleme',
+            dogruAciklama: 'Bölümler tabaka olarak belirlenir ve her bölümden rastgele 40’ar öğrenci seçilerek tüm fakültenin temsil edilmesi sağlanır.',
             audio_path: 'audio/m4-standart-s3.mp3',
-            narration: 'Sonuçların genellenmek istendiği bin iki yüz kişilik bütün grup evreni, arasından seçilip veri toplanan yüz yirmi öğrenci ise örneklemi oluşturur.',
+            narration: 'Sadece tek bir bölümden veya gönüllülerden seçim yapılırsa örneklem yanlı olur; tabakalı seçim ise tüm bölümleri temsil eder.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Tabakalı seçim', ikon: 'grafik',
-            ustBaslik: 'Tabakalı örnekleme dağılımı', altBaslik: 'Her bölümden 40 öğrenci',
-            degisken: 'Örnekleme alınan öğrenci sayısı',
-            oncekiRef: 'Bölümler tabaka olarak belirlenip her birinden rastgele 40 öğrenci seçildi',
-            veri: [{ etiket: 'Mühendislik', deger: 40 }, { etiket: 'Eğitim', deger: 40 }, { etiket: 'Fen-Edb.', deger: 40 }],
+            slide_id: 4, slide_type: 'stratified_grid', kisaAd: '4. Tabakalı Seçim', ikon: 'grafik',
+            ustBaslik: 'Tabakalı Örnekleme Dağılımı', altBaslik: 'Her bölümden 40 öğrenci (%10 temsil)',
+            birim: 'öğrenci',
+            tabakalar: [
+              { ad: 'Mühendislik', evrenSayi: '400', orneklemSayi: '40', oran: '%10 rastgele' },
+              { ad: 'Eğitim', evrenSayi: '400', orneklemSayi: '40', oran: '%10 rastgele' },
+              { ad: 'Fen-Edebiyat', evrenSayi: '400', orneklemSayi: '40', oran: '%10 rastgele' },
+            ],
+            toplamNot: 'Toplam Evren: N = 1.200 öğrenci → Toplam Tabakalı Örneklem: n = 120 öğrenci',
             audio_path: 'audio/m4-standart-s4.mp3',
-            narration: 'Tabakalı örnekleme sayesinde her bölümden kırk öğrenci seçilerek toplam yüz yirmi kişilik dengeli bir örneklem elde edilir.',
+            narration: 'Tabakalı örnekleme sayesinde her bölümden kırk öğrenci rastgele seçilerek toplam yüz yirmi kişilik dengeli bir örneklem elde edilir.',
             estimated_duration_seconds: 15,
           },
           {
             slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
             ustBaslik: 'Temsil gücü yüksek örneklem', altBaslik: 'Çözümün özeti',
-            bagimsiz: 'Evren (1.200 öğrenci)', bagimli: 'Tabakalı örneklem (120 öğrenci)',
+            solEtiket: 'Hedef Evren (Bütün)', bagimsiz: '1.200 Fakülte Öğrencisi',
+            sagEtiket: 'Tabakalı Örneklem', bagimli: '120 Öğrenci (3×40)',
             ozetNot: 'Doğru örnekleme yöntemi, az kişiyle evreni güvenilir biçimde temsil etmeyi sağlar.',
             audio_path: 'audio/m4-standart-s5.mp3',
             narration: 'Özetle evren bütün hedef grubu ifade eder; tabakalı örnekleme ise tüm alt grupların örneklemde adil biçimde temsil edilmesini güvence altına alır.',
@@ -253,35 +367,41 @@ window.CanliDeney = (() => {
         ],
       },
       gorev: {
-        id: 'kontrol-m4', eyebrow: 'MODÜL 04 · MİKRO-GÖREV', altYazi: 'Araştırma senaryosunu incele ve evren ile örneklemi belirle.',
-        baslik: 'Evren ve örneklem hangileridir?',
-        metin: 'Bir araştırmacı, bir üniversitedeki 300 hazırlık sınıfı öğrencisinin haftalık kütüphane kullanım alışkanlıklarını incelemek istemektedir. Bu öğrenciler arasından rastgele seçtiği 60 öğrenciye anket uygulamıştır.',
+        id: 'kontrol-m4', gorevTipi: 'm4_tabakali_orneklem', eyebrow: 'MODÜL 04 · MİKRO-GÖREV',
+        altYazi: 'Evrendeki 3 alt tabakadan eşit temsil sağlayacak şekilde tabakalı örneklem seç ve evren/örneklemi belirle.',
+        baslik: '300 hazırlık öğrencisinden dengeli örneklem seçimi',
+        metin: 'Bir araştırmacı, bir üniversitedeki 3 farklı kurda (Başlangıç, Orta, İleri) eğitim gören toplam 300 hazırlık sınıfı öğrencisinin kütüphane kullanım alışkanlıklarını incelemektedir. Her kurda 100 öğrenci vardır ve araştırmacı toplam 60 öğrenci seçecektir.',
         temaTip: 'standart',
         kosullar: [
-          { ad: 'Toplam evren', deger: '300 öğrenci', diyagram: 'saat1' },
-          { ad: 'Seçilen örneklem', deger: '60 öğrenci', diyagram: 'saat2' },
-          { ad: 'Örneklem oranı', deger: '%20 temsil', diyagram: 'saat3' },
+          { ad: 'Toplam evren (N)', deger: '300 öğrenci', diyagram: 'saat1' },
+          { ad: 'Tabakalı örneklem (n)', deger: '60 öğrenci', diyagram: 'saat2' },
+          { ad: 'Her tabakadan', deger: '20 öğrenci', diyagram: 'saat3' },
         ],
-        soruBaslik: 'Evren ve örneklem kavramlarını belirle', soruAlt: 'Evren, örneklem ve örneklem büyüklüğü',
-        soru1: 'Bu araştırmanın evreni aşağıdakilerden hangisidir?',
-        bagimsizSecenekler: ['Üniversitedeki 300 hazırlık öğrencisi', 'Anket uygulanan 60 öğrenci', 'Türkiye’deki tüm üniversiteliler', 'Kütüphane görevlileri'],
+        soruBaslik: '1. Bölüm: Tabakalı Örnekleme Simülasyonu (Her kurdan 2 temsilci birim seç)',
+        soruAlt: 'Aşağıdaki üç kur tabakasının her birinden tam 2 öğrenci noktasına dokunarak dengeli örneklemi oluştur',
+        birim: 'öğrenci',
+        hedefAdet: 2,
+        tabakalar: ['Başlangıç Kuru', 'Orta Kur', 'İleri Kur'],
+        soru1: '2. Bölüm: Bu araştırmanın evreni ve örneklemi aşağıdakilerden hangisinde doğru verilmiştir?',
+        bagimsizSecenekler: [
+          'Evren: Üniversitedeki 300 hazırlık öğrencisi · Örneklem: Seçilen 60 öğrenci (her kurdan 20’şer öğrenci)',
+          'Evren: Anket uygulanan 60 öğrenci · Örneklem: 300 hazırlık öğrencisi',
+          'Evren: Türkiye’deki tüm üniversiteliler · Örneklem: 300 öğrenci',
+          'Evren: Sadece İleri Kur öğrencileri · Örneklem: 20 öğrenci',
+        ],
         bagimsizDogru: 0,
-        soru2: 'Bu araştırmanın örneklemi ve örneklem büyüklüğü nedir?',
-        bagimliSecenekler: ['300 öğrenci', 'Rastgele seçilen 60 öğrenci (n = 60)', '240 öğrenci', 'Tek bir sınıf'],
-        bagimliDogru: 1,
-        ipucuBagimsiz: 'Evren, araştırmacının sonuçlarını genellemek istediği 300 kişilik grubun tamamıdır.',
-        ipucuBagimli: 'Örneklem, evrenden seçilip doğrudan anket uygulanan alt gruptur.',
-        feedback1Yanlis: 'Örneklem seçimin doğru; evren sorusunda bu çalışmadaki hedef grubun tamamına odaklan.',
-        feedback2Yanlis: 'Evren seçimin doğru; örneklem sorusunda veri toplanan alt gruba odaklan.',
-        aciklamaDogru: 'Doğru! Araştırmanın evreni üniversitedeki 300 hazırlık öğrencisi, örneklemi ise rastgele seçilip anket uygulanan 60 öğrencidir.',
+        ipucuBagimsiz: 'Üç kur tabakasının her birinden tam 2 daire seçtiğinden emin ol.',
+        ipucuBagimli: 'Evren sonuçların genelleneceği 300 kişilik bütünü, örneklem ise veri toplanan 60 kişilik alt grubu ifade eder.',
+        aciklamaDogru: 'Doğru! Her kur tabakasından eşit sayıda birim seçerek tabakalı örneklemi oluşturdun; araştırmanın evreninin 300, örnekleminin 60 öğrenci olduğunu doğru belirledin.',
       },
     },
     m5: {
       modulId: 'm5',
       modulAd: 'Veri toplama',
-      kazanim: 'Ölçme aracında geçerlik ve güvenirlik kavramlarını ayırt eder.',
+      sablonAd: 'Ölçme Aracı Planı & 3’lü Hedef Tahtası (Geçerlik/Güvenirlik Hata Teşhisi)',
+      kazanim: 'Ölçme aracında geçerlik ve güvenirlik kavramlarını ayırt eder ve ölçüm hatalarını teşhis eder.',
       slayt: {
-        id: 'kontrol-m5', etiket: 'Kontrol grubu — Standart içerik', kisa: 'Standart (Kontrol)',
+        id: 'kontrol-m5', etiket: 'Kontrol grubu — Standart içerik (M5)', kisa: 'Standart (Kontrol)',
         altBaslik: 'Ölçme aracının geçerliği ve güvenirliği', sureToplam: '75 sn', temaTip: 'calisma',
         slaytlar: [
           {
@@ -293,43 +413,45 @@ window.CanliDeney = (() => {
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Ölçüm', ikon: 'izgara',
-            ustBaslik: 'İki temel ölçüm ölçütü', altBaslik: 'Tutarlılık ve amaca uygunluk',
-            kosullar: [
-              { ad: 'Güvenirlik', deger: 'Tutarlılık', diyagram: 'saat1' },
-              { ad: 'Geçerlik', deger: 'Doğru hedef', diyagram: 'saat2' },
-              { ad: 'Etik onam', deger: 'Gizlilik', diyagram: 'saat3' },
-            ],
-            dipnot: 'Nitelikli veri toplama sürecinin üç ayağı',
+            slide_id: 2, slide_type: 'instrument_blueprint', kisaAd: '2. Ölçme Aracı', ikon: 'izgara',
+            ustBaslik: 'Hedef Yapı ve Veri Toplama Aracı Uyumu', altBaslik: 'Ne ölçülüyor ve hangi araçla ölçülüyor?',
+            olculenYapi: 'Metindeki ana fikri ve çıkarımları anlama becerisi',
+            secilenArac: '20 soruluk çoktan seçmeli ve kısa yanıtlı Okuduğunu Anlama Testi',
+            aracGerekce: 'Okuma hızını veya genel ezberi değil, doğrudan metinden anlam çıkarma becerisini ölçmek üzere uzman görüşüyle yapılandırılmıştır.',
+            kontrolListesi: ['Açık puanlama anahtarı', 'Uzman kapsam onayı', 'Standart 40 dk süre'],
             audio_path: 'audio/m5-standart-s2.mp3',
-            narration: 'Güvenirlik aynı koşulda tekrarlanan ölçümlerin tutarlılığını, geçerlik ise aracın gerçekten ölçmek istenen özelliği ölçmesini ifade eder.',
+            narration: 'Seçilen ölçme aracı, ölçmek istediğimiz okuduğunu anlama becerisine doğrudan karşılık gelmeli ve standart koşullarda uygulanmalıdır.',
             estimated_duration_seconds: 16,
           },
           {
-            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Güvenirlik', ikon: 'dal',
-            ustBaslik: 'Güvenirlik nedir?', altBaslik: 'Ölçümlerde kararlılık ve tutarlılık',
-            degisken: 'Tekrarlı ölçümlerde benzer sonuç',
-            seviyeler: ['Test–tekrar test tutarlılığı', 'Puanlayıcılar arası uyum', 'Düşük rastgele hata'],
-            digerRef: 'Güvenilir ama geçersiz bir test tutarlı biçimde yanlış şeyi ölçebilir.',
+            slide_id: 3, slide_type: 'bullseye_targets', kisaAd: '3. Hedef Tahtası', ikon: 'dal',
+            ustBaslik: 'Geçerlik ve Güvenirlik: Hedef Tahtası Analojisi', altBaslik: 'Ölçümlerde kararlılık ve hedef isabeti',
+            hedefler: [
+              { tip: 'daginik', baslik: 'Güvenilir Değil & Geçersiz', aciklama: 'Sorular belirsiz; aynı öğrenci her uygulamada bambaşka puan alıyor.' },
+              { tip: 'kaymis', baslik: 'Güvenilir Ama Geçersiz', aciklama: 'Her ölçümde aynı puanı veriyor (ör. 2 kg fazla tartan terazi gibi) ama anlama yerine hızlı yazmayı ölçüyor.' },
+              { tip: 'merkez', baslik: 'Hem Güvenilir Hem Geçerli', aciklama: 'Doğrudan okuduğunu anlamayı her tekrarda tutarlı ve hatasız biçimde ölçüyor.' },
+            ],
             audio_path: 'audio/m5-standart-s3.mp3',
             narration: 'Bir terazi her ölçümde 2 kilogram fazla gösteriyorsa tutarlı olduğu için güvenilirdir; ancak doğru ağırlığı vermediği için geçerli değildir.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Geçerlik', ikon: 'grafik',
-            ustBaslik: 'Geçerlik neden önce gelir?', altBaslik: 'Ölçülmek istenen yapıyı yakalama',
-            degisken: 'Hedef kavramı ölçme isabeti (%)',
-            oncekiRef: 'Okuduğunu anlama testinde yalnızca hızlı yazmayı ölçmek geçerliği düşürür',
-            veri: [{ etiket: 'Hatalı araç', deger: 35 }, { etiket: 'Sadece tutarlı', deger: 60 }, { etiket: 'Geçerli+Güvenilir', deger: 95 }],
+            slide_id: 4, slide_type: 'threat_diagnosis', kisaAd: '4. Hata Teşhisi', ikon: 'grafik',
+            ustBaslik: 'Geçerlik ve Güvenirlik Tehditlerini Ayırt Etme', altBaslik: 'Ölçmeye karışan hata kaynakları ve önlemler',
+            gecerlikTehdidi: 'Okuduğunu anlama testinde metinle ilgisiz genel kültür veya hızlı klavye yazma hızının puanı belirlemesi.',
+            gecerlikOnlem: 'Soruların yalnızca verilen metni anlamaya dayalı olmasını sağlamak (Kapsam ve yapı geçerliği).',
+            guvenirlikTehdidi: 'Açık uçlu yanıtları iki farklı öğretmenin tamamen farklı kriterlerle puanlaması veya sabah/akşam ölçümlerinin çelişmesi.',
+            guvenirlikOnlem: 'Ayrıntılı puanlama rubriği kullanmak ve puanlayıcılar arası uyumu kontrol etmek.',
             audio_path: 'audio/m5-standart-s4.mp3',
-            narration: 'Okuduğunu anlama yerine sadece yazma hızını ölçen bir testin geçerliği düşüktür. Geçerli bir araç doğrudan hedeflenen beceriyi ölçer.',
+            narration: 'Okuduğunu anlama yerine sadece yazma hızını ölçen bir testin geçerliği düşüktür; puanlayıcıdan puanlayıcıya değişen bir testin ise güvenirliği düşüktür.',
             estimated_duration_seconds: 15,
           },
           {
             slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
             ustBaslik: 'Geçerlik ve güvenirlik dengesi', altBaslik: 'Çözümün özeti',
-            bagimsiz: 'Güvenirlik (Tutarlılık)', bagimli: 'Geçerlik (Doğru şeyi ölçme)',
-            ozetNot: 'Bilimsel bir ölçme aracı hem tutarlı sonuç vermeli hem de doğru kavramı ölçmelidir.',
+            solEtiket: 'Güvenirlik (Tutarlılık)', bagimsiz: 'Tekrarlı Ölçümde Kararlılık',
+            sagEtiket: 'Geçerlik (Amaca Uygunluk)', bagimli: 'Doğru Özelliği Ölçme',
+            ozetNot: 'Bilimsel bir ölçme aracı hem tutarlı sonuç vermeli hem de gerçekten hedeflediği kavramı ölçmelidir.',
             audio_path: 'audio/m5-standart-s5.mp3',
             narration: 'Özetle güvenirlik tutarlılığı, geçerlik ise doğru hedefi ölçmeyi sağlar; nitelikli veri için ikisi birlikte gereklidir.',
             estimated_duration_seconds: 14,
@@ -337,83 +459,101 @@ window.CanliDeney = (() => {
         ],
       },
       gorev: {
-        id: 'kontrol-m5', eyebrow: 'MODÜL 05 · MİKRO-GÖREV', altYazi: 'Ölçme senaryosunu incele ve geçerlik ile güvenirlik sorunlarını belirle.',
-        baslik: 'Geçerlik mi, güvenirlik mi?',
-        metin: 'Bir araştırmacı, öğrencilerin stres düzeyini ölçmek için bir anket uygulamaktadır. Anketin 1. bölümünde öğrencilerin yalnızca uyku süresini soran sorular vardır; ayrıca aynı öğrencilere iki gün arayla uygulandığında çok farklı puanlar çıkmaktadır.',
+        id: 'kontrol-m5', gorevTipi: 'm5_gecerlik_guvenirlik', eyebrow: 'MODÜL 05 · MİKRO-GÖREV',
+        altYazi: 'Ölçme senaryosundaki 4 durumu Geçerlik Sorunu veya Güvenirlik Sorunu olarak sınıflandır.',
+        baslik: 'Stres ölçeğinde geçerlik mi, güvenirlik mi zedelendi?',
+        metin: 'Bir araştırmacı, üniversite öğrencilerinin sınav stresi düzeyini ölçmek için yeni bir ölçek uygulamaktadır. Uygulama sırasında aşağıdaki dört sorun tespit edilmiştir.',
         temaTip: 'standart',
         kosullar: [
           { ad: '1. Ölçüm (Pzt)', deger: '78 puan', diyagram: 'saat1' },
           { ad: '2. Ölçüm (Çar)', deger: '42 puan', diyagram: 'saat2' },
-          { ad: 'Kapsam', deger: 'Sadece uyku', diyagram: 'saat3' },
+          { ad: 'Madde kapsamı', deger: 'Sadece uyku saati', diyagram: 'saat3' },
         ],
-        soruBaslik: 'Ölçüm sorunlarını sınıflandır', soruAlt: 'Geçerlik ve güvenirlik ayrımı',
-        soru1: 'Stres düzeyi yerine yalnızca uyku süresinin sorulması hangi özelliği zedeler?',
-        bagimsizSecenekler: ['Geçerlik (ölçülmek istenen özelliği ölçmeme)', 'Güvenirlik', 'Örneklem büyüklüğü', 'Gizlilik ilkesi'],
+        soruBaslik: '1. Bölüm: Dört ölçüm sorununu zedelediği özelliğe göre sınıflandır',
+        soruAlt: 'Bir ifadeye dokun, ardından Geçerlik Sorunu veya Güvenirlik Sorunu kutusuna yerleştir',
+        sinifKategoriler: ['Geçerlik Sorunu (Hedef Sapması)', 'Güvenirlik Sorunu (Tutarsızlık)'],
+        sinifOgeler: [
+          { metin: 'Sınav stresi ölçeğinde stres belirtileri yerine yalnızca öğrencinin kaç saat uyuduğunun sorulması', kategori: 0 },
+          { metin: 'Ölçeğin aynı öğrencilere koşullar değişmeden iki gün arayla uygulandığında çok farklı puanlar vermesi', kategori: 1 },
+          { metin: 'Maddelerin öğrenciyi "Stres hiç yaşamam" cevabını seçmeye zorlayacak şekilde yönlendirici yazılması', kategori: 0 },
+          { metin: 'İki farklı uzmanın aynı görüşme formunu puanlarken birbirinden tamamen farklı toplam puanlar çıkarması', kategori: 1 },
+        ],
+        soru1: '2. Bölüm: Bir ölçme aracı her ölçümde birebir aynı sonucu veriyor ancak hedeflenen özellik yerine başka bir özelliği ölçüyorsa nasıl tanımlanır?',
+        bagimsizSecenekler: [
+          'Güvenilirdir ancak geçerli değildir',
+          'Geçerlidir ancak güvenilir değildir',
+          'Hem geçerli hem güvenilirdir',
+          'Ne geçerli ne de tutarlıdır',
+        ],
         bagimsizDogru: 0,
-        soru2: 'Aynı gruba iki gün arayla uygulandığında çok farklı puanlar çıkması hangi sorunu gösterir?',
-        bagimliSecenekler: ['Tabakalı örnekleme', 'Güvenirlik sorunu (tutarlılık eksikliği)', 'İçerik geçerliği', 'Rastgele atama'],
-        bagimliDogru: 1,
-        ipucuBagimsiz: 'Ölçmek istediğin kavram yerine başka bir şeyi ölçmek hangi kavramın ihlalidir?',
-        ipucuBagimli: 'Tekrarlanan ölçümler arasında tutarsızlık bulunması hangi kavramla ilgilidir?',
-        feedback1Yanlis: 'İkinci seçimin doğru; ilk soruda hedef kavramı ölçememe sorununa odaklan.',
-        feedback2Yanlis: 'İlk seçimin doğru; ikinci soruda tekrarlı ölçümlerde tutarsızlık sorununa odaklan.',
-        aciklamaDogru: 'Doğru! Stres yerine yalnızca uyku süresini ölçmek geçerliği, iki gün arayla tutarsız puanlar almak ise güvenirliği zedeler.',
+        ipucuBagimsiz: 'Ölçülmek istenen kavramın dışına çıkmak Geçerlik; tekrarlanan ölçümler veya puanlayıcılar arasındaki tutarsızlık ise Güvenirlik sorunudur.',
+        ipucuBagimli: 'Hep aynı yanlış noktayı vuran oklar tutarlıdır (güvenilir) ama hedefi vuramamıştır (geçersiz).',
+        aciklamaDogru: 'Doğru! Stres yerine uyku süresini ölçmenin geçerliği, iki gün arayla tutarsız puanlar almanın ise güvenirliği zedelediğini eksiksiz sınıflandırdın.',
       },
     },
     m6: {
       modulId: 'm6',
       modulAd: 'Analiz ve raporlama',
-      kazanim: 'Tablo/grafik verilerini doğru yorumlar ve ilişki ile nedenselliği ayırır.',
+      sablonAd: 'Betimsel Veri Tablosu, İlişki vs Nedensellik & Sınırlılık Raporu',
+      kazanim: 'Tablo/grafik verilerini doğru yorumlar, ilişki ile nedenselliği ayırır ve araştırmanın sınırlılıklarını raporlar.',
       slayt: {
-        id: 'kontrol-m6', etiket: 'Kontrol grubu — Standart içerik', kisa: 'Standart (Kontrol)',
+        id: 'kontrol-m6', etiket: 'Kontrol grubu — Standart içerik (M6)', kisa: 'Standart (Kontrol)',
         altBaslik: 'Veriden bulguya ve sınırlılık raporuna', sureToplam: '76 sn', temaTip: 'calisma',
         slaytlar: [
           {
             slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
-            ustBaslik: 'Ham veriden bulguya', altBaslik: 'Haftalık tekrar ve dönem sonu notu',
+            ustBaslik: 'Ham veriden bilimsel bulguya', altBaslik: 'Haftalık tekrar ve dönem sonu notu',
             soru: 'Grafikte gördüğümüz farktan hangi bilimsel ifadeler çıkarılabilir?',
             image_path: 'images/m6-standart-s1.png', audio_path: 'audio/m6-standart-s1.mp3',
             narration: 'Bir araştırmacı 180 lisans öğrencisinin haftalık ders tekrar sıklığı ile dönem sonu sınav ortalamalarını incelemiş ve grupların ortalamalarını hesaplamıştır.',
             estimated_duration_seconds: 15,
           },
           {
-            slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Veri tablosu', ikon: 'izgara',
-            ustBaslik: 'Gruplara göre sınav ortalamaları', altBaslik: 'Ham verilerin özetlenmesi',
-            kosullar: [
-              { ad: 'Tekrar yok', deger: '58 puan', diyagram: 'saat1' },
-              { ad: 'Haftada 1 kez', deger: '71 puan', diyagram: 'saat2' },
-              { ad: 'Haftada 3+ kez', deger: '83 puan', diyagram: 'saat3' },
+            slide_id: 2, slide_type: 'data_cleaning_table', kisaAd: '2. Veri Tablosu', ikon: 'izgara',
+            ustBaslik: 'Gruplara Göre Betimsel İstatistik Tablosu', altBaslik: 'Ham verilerin temizlenmesi ve özetlenmesi (n = 180)',
+            olcuBirimi: 'Dönem Sonu Sınav Ortalaması',
+            satirlar: [
+              { grup: 'Haftalık tekrar yok', n: '60', ortalama: '58 puan', not: 'En düşük ortalama' },
+              { grup: 'Haftada 1 kez tekrar', n: '60', ortalama: '71 puan', not: 'Orta düzey ortalama' },
+              { grup: 'Haftada 3+ kez tekrar', n: '60', ortalama: '83 puan', not: 'En yüksek ortalama' },
             ],
-            dipnot: 'Örnek amaçlı dönem sonu ortalamaları (n = 180)',
+            temizlikNotu: 'Veri analizi öncesinde eksik formlar ve hatalı veri girişleri kontrol edilerek grup ortalamaları hesaplanmıştır.',
             audio_path: 'audio/m6-standart-s2.mp3',
             narration: 'Veriler temizlenip gruplandırıldığında haftada üç ve üzeri tekrar yapan öğrencilerin ortalamasının seksen üç puan olduğu görülmektedir.',
             estimated_duration_seconds: 16,
           },
           {
-            slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Bulgu yazımı', ikon: 'dal',
-            ustBaslik: 'Nesnel bulgu cümlesi', altBaslik: 'Abartısız ve veriye sadık raporlama',
-            degisken: 'Veriyi olduğu gibi aktarmak',
-            seviyeler: ['Sayıları doğru ver', 'Örneklemi belirt', 'Kesin nedensellikten kaçın'],
-            digerRef: 'Rastgele atama yoksa "kesin olarak neden olur" demek yerine ilişki bildirilir.',
+            slide_id: 3, slide_type: 'dependent_var', kisaAd: '3. Grafik Okuma', ikon: 'grafik',
+            ustBaslik: 'Gruplar arası dağılım grafiği', altBaslik: 'Dönem sonu sınav ortalamalarının görselleştirilmesi',
+            degisken: 'Dönem sonu sınav puanı (Ortalama)',
+            oncekiRef: 'Tekrar yok: 58 · Haftada 1: 71 · Haftada 3+: 83',
+            veri: [{ etiket: 'Tekrar yok', deger: 58 }, { etiket: 'Haftada 1', deger: 71 }, { etiket: 'Haftada 3+', deger: 83 }],
             audio_path: 'audio/m6-standart-s3.mp3',
+            narration: 'Çubuk grafik, haftalık tekrar sıklığı arttıkça dönem sonu sınav ortalamasının da yükseldiğini açıkça göstermektedir.',
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 4, slide_type: 'correlation_vs_causation', kisaAd: '4. Bulgu Yazımı', ikon: 'dal',
+            ustBaslik: 'İlişki vs Nedensellik: Nesnel Bulgu Cümlesi', altBaslik: 'Abartısız ve veriye sadık raporlama',
+            yanlisBaslik: '✕ Hatalı / Aşırı Genellenmiş Yorum',
+            yanlisMetin: '“Haftalık tekrar yapmak bütün dünyadaki öğrencilerde sınav başarısını kesin olarak garantileyen tek nedendir.”',
+            yanlisNeden: 'Gruplar rastgele atanmadığı halde kesin nedensellik iddia ediyor ve örneklem dışına aşırı genelleme yapıyor.',
+            dogruBaslik: '✓ Veriye Sadık Nesnel Bulgu Cümlesi',
+            dogruMetin: '“İncelenen 180 lisans öğrencisinde haftada 3 ve üzeri tekrar yapan grubun sınav ortalaması (83), tekrar yapmayan gruptan (58) daha yüksektir.”',
+            dogruNeden: 'Sayıları ve örneklemi olduğu gibi aktarır; ilişkisel veriden kanıtsız nedensellik çıkarmaz.',
+            audio_path: 'audio/m6-standart-s4.mp3',
             narration: 'Araştırmada gruplar rastgele atanmadığı için tek başına nedensellik kurulamaz; bulgu cümlesi yalnızca gözlenen farkı nesnel biçimde aktarır.',
             estimated_duration_seconds: 16,
           },
           {
-            slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Grafik okuma', ikon: 'grafik',
-            ustBaslik: 'Gruplar arası dağılım', altBaslik: 'Dönem sonu sınav ortalamaları',
-            degisken: 'Dönem sonu sınav puanı',
-            oncekiRef: 'Grup 1: 58 · Grup 2: 71 · Grup 3: 83',
-            veri: [{ etiket: 'Tekrar yok', deger: 58 }, { etiket: 'Haftada 1', deger: 71 }, { etiket: 'Haftada 3+', deger: 83 }],
-            audio_path: 'audio/m6-standart-s4.mp3',
-            narration: 'Çubuk grafik haftalık tekrar sıklığı arttıkça sınav ortalamasının da yükseldiğini açıkça göstermektedir.',
-            estimated_duration_seconds: 15,
-          },
-          {
-            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
-            ustBaslik: 'Şeffaf raporlama ve sınırlılıklar', altBaslik: 'Çözümün özeti',
-            bagimsiz: 'Nesnel bulgu cümlesi', bagimli: 'Sınırlılıklarla birlikte paylaşım',
-            ozetNot: 'İyi bir rapor hem verideki örüntüyü gösterir hem de çalışmanın sınırlarını açıkça yazar.',
+            slide_id: 5, slide_type: 'limitations_report', kisaAd: '5. Sınırlılıklar', ikon: 'tik',
+            ustBaslik: 'Şeffaf raporlama ve araştırmanın sınırlılıkları', altBaslik: 'Çözümün özeti',
+            bulguOzeti: 'Haftalık tekrar sıklığı ile dönem sonu sınav ortalaması arasında pozitif yönlü bir fark/ilişki gözlenmiştir (83 vs 58 puan).',
+            sinirliliklar: [
+              'Yöntemsel Sınır: Gruplar rastgele atanmadığı (ilişkisel tarama olduğu) için doğrudan neden-sonuç ilişkisi kurulamaz.',
+              'Örneklem Sınırı: Bulgular çalışmanın yürütüldüğü fakültedeki 180 lisans öğrencisiyle sınırlıdır.',
+              'Ölçüm Sınırı: Tekrar sıklığı öğrencilerin öz bildirimine dayanmaktadır.',
+            ],
             audio_path: 'audio/m6-standart-s5.mp3',
             narration: 'Özetle veriyi grafiğe dökmek örüntüyü görünür kılar; raporda ise yalnızca verinin desteklediği bulgular ve sınırlılıklar paylaşılır.',
             estimated_duration_seconds: 14,
@@ -421,17 +561,19 @@ window.CanliDeney = (() => {
         ],
       },
       gorev: {
-        id: 'kontrol-m6', eyebrow: 'MODÜL 06 · MİKRO-GÖREV', altYazi: 'Verileri incele, doğru bulgu cümlesini ve sınırlılığı belirle.',
-        baslik: 'Grafikten hangi sonuca ulaşılabilir?',
-        metin: 'Bir fakültede 150 öğrencinin ders çalışma süresi ile proje puanı arasındaki ilişki incelenmiştir. Günde 3 saat ve üzeri çalışanların ortalaması 86, 1 saatten az çalışanların ortalaması ise 64 olarak bulunmuştur. Gruplar rastgele atanmamıştır.',
+        id: 'kontrol-m6', gorevTipi: 'm6_analiz_rapor', eyebrow: 'MODÜL 06 · MİKRO-GÖREV',
+        altYazi: 'Grafik verilerini incele, doğru bulgu cümlesini ve araştırmanın sınırlılığını belirle.',
+        baslik: 'Grafikten hangi bilimsel sonuca ulaşılabilir?',
+        metin: 'Bir fakültede 150 öğrencinin günlük çalışma süresi ile proje puanı arasındaki ilişki incelenmiştir. Günde 3 saat ve üzeri çalışanların ortalaması 86, 1–3 saat çalışanların 76, 1 saatten az çalışanların ortalaması ise 64 olarak bulunmuştur. Gruplar rastgele atanmamıştır.',
         temaTip: 'standart',
+        veriBirimi: 'Ortalama Proje Puanı (n = 150)',
         kosullar: [
           { ad: '1 saatten az', deger: '64 puan', diyagram: 'saat1' },
           { ad: '1–3 saat', deger: '76 puan', diyagram: 'saat2' },
           { ad: '3+ saat', deger: '86 puan', diyagram: 'saat3' },
         ],
-        soruBaslik: 'Bulguyu ve sınırlılığı yorumla', soruAlt: 'Analiz ve raporlama',
-        soru1: 'Bu verilere dayanarak aşağıdaki ifadelerden hangisi doğrudan söylenebilir?',
+        soruBaslik: 'Bulguyu ve yöntemsel sınırlılığı yorumla', soruAlt: 'Analiz ve şeffaf raporlama',
+        soru1: '1. Bu verilere dayanarak aşağıdaki bulgu ifadelerinden hangisi doğrudan söylenebilir?',
         bagimsizSecenekler: [
           'Bu örneklemde günde 3+ saat çalışanların ortalama proje puanı 86, 1 saatten az çalışanların 64’tür.',
           'Ders çalışma süresi bütün insanlarda başarıyı kesin olarak belirleyen tek nedendir.',
@@ -439,12 +581,12 @@ window.CanliDeney = (() => {
           '1 saatten az çalışanların hepsi dersten kalmıştır.',
         ],
         bagimsizDogru: 0,
-        soru2: 'Bu çalışmanın raporunun “Sınırlılıklar” bölümünde aşağıdakilerden hangisi belirtilmelidir?',
+        soru2: '2. Bu çalışmanın raporunun “Sınırlılıklar” bölümünde aşağıdakilerden hangisi belirtilmelidir?',
         bagimliSecenekler: [
           'Grafik çubuklarının rengi turuncudur.',
-          'Gruplar rastgele atanmadığı için neden–sonuç ilişkisi kurulamaz ve bulgu yalnızca bu fakülteyle sınırlıdır.',
-          'Tüm fakülte öğrencileri aynı yaşta değildir.',
-          'Rapor 5 sayfadan kısadır.',
+          'Gruplar rastgele atanmadığı için kesin neden–sonuç ilişkisi kurulamaz ve bulgu yalnızca bu fakülte örneklemiyle sınırlıdır.',
+          'Veriler ortalama alınarak özetlenmiştir.',
+          'Araştırmada 3 grup karşılaştırılmıştır.',
         ],
         bagimliDogru: 1,
         ipucuBagimsiz: 'Veriye sadık kalan, aşırı genelleme veya kesin nedensellik iddiası içermeyen seçeneği bul.',
@@ -457,15 +599,6 @@ window.CanliDeney = (() => {
   };
 
   function getKontrol(modulId) {
-    if (modulId === 'm2') {
-      return {
-        modulId: 'm2',
-        modulAd: 'Araştırma problemi ve sorusu',
-        kazanim: 'Verilen araştırma senaryosunda bağımsız ve bağımlı değişkenleri belirler.',
-        slayt: window.SlaytSunum ? window.SlaytSunum.PROFILLER[0] : null,
-        gorev: window.GorevPrototip ? window.GorevPrototip.SENARYOLAR[0] : null,
-      };
-    }
     return KONTROL_ICERIK[modulId] || KONTROL_ICERIK.m2;
   }
 
@@ -1086,108 +1219,56 @@ AŞAĞIDAKİ JSON ŞEMASINI EKSİKSİZ DOLDUR:
       ? [...mevcutSonuc.turlar]
       : [];
 
-    /* ADIM 1: Senaryo ve yapılandırılmış slayt + mikro-görev üretimi */
-    onAdim && onAdim({ adim: 1, durum: 'calisiyor', mesaj: `${uretim.senaryoModel} ile senaryo üretiliyor...` });
+    /* ADIM 1: Senaryo ve yapılandırılmış slayt + mikro-görev üretimi (Modülün kendi şablonuyla BİREBİR EŞDEĞER) */
+    onAdim && onAdim({ adim: 1, durum: 'calisiyor', mesaj: `${uretim.senaryoModel} ile ${modul.id.toUpperCase()} şablonunda senaryo üretiliyor...` });
     const sys1 = `Sen eğitim teknolojileri ve araştırma yöntemleri alanında uzman bir öğretim tasarımcısısın.
-Görevin: Kontrol grubunun standart içeriğiyle PEDAGOJİK VE BİLİŞSEL OLARAK BİREBİR EŞDEĞER, ancak öğrencinin ilgi profiline göre bağlamsallaştırılmış 5 slaytlık çözümlü örnek + 1 transfer mikro-görev üretmek.
-Kurallar:
-- Yalnızca geçerli JSON döndür, başka açıklama yazma.
-- Öğrenme kazanımı, bilişsel talep, soru sayısı ve adım yapısı kontrol grubuyla aynı kalmalı; yalnızca senaryo bağlamı kişiselleştirilmeli.
-- Çözümlü örnek ile mikro-görev AYNI ilgi alanı içinde ama FARKLI bir araştırma senaryosu (transfer) olmalı (ör. basketbolda çözümlü örnek hücum stratejisi ise mikro-görev paslaşma düzeni).
+Görevin: Seçilen modülün (${modul.id.toUpperCase()} — ${modul.ad}) Kontrol Grubu standart içeriğiyle TASARIM ŞABLONU, SLAYT TİPLERİ (slide_type), ETKİLEŞİM ŞABLONU (gorevTipi), BİLİŞSEL TALEP VE ÖĞRENME KAZANIMI AÇISINDAN BİREBİR EŞDEĞER; yalnızca senaryo bağlamı öğrencinin ilgi profiline göre kişiselleştirilmiş 5 slaytlık çözümlü örnek + 1 transfer mikro-görev üretmek.
+Kritik Metodolojik Kurallar:
+- Yalnızca geçerli RFC 8259 JSON döndür, başka açıklama yazma.
+- Kontrol grubunda hangi "slide_type" dizilimi ve hangi "gorevTipi" kullanılmışsa Deney grubunda da BİREBİR AYNI şablon ve alanlar kullanılmalıdır. Tasarım şablonu farkı yaratma; fark yalnızca kişiselleştirilmiş bağlamdan kaynaklanmalıdır.
+- Çözümlü örnek ile mikro-görev AYNI ilgi alanı içinde ama FARKLI bir araştırma senaryosu (transfer) olmalı.
 - Senaryo öğrencinin ilgili alandaki teknik uzmanlığını değil, araştırma yöntemleri kazanımını ölçmelidir (ön bilgi bağımsızlığı).
 - Tüm metinler doğal, akıcı Türkçe olmalı; sayılar kurgusal ve gerçekçi olmalı.`;
 
-    const temelUsr1 = `MODÜL: ${modul.id.toUpperCase()} — ${modul.ad}
-KAZANIM: ${kontrol.kazanim}
+    const kontrolSablonJSON = JSON.stringify({
+      altBaslik: kontrol.slayt.altBaslik,
+      slaytlar: kontrol.slayt.slaytlar.map(s => {
+        const kopya = { ...s };
+        delete kopya.image_path;
+        delete kopya.audio_path;
+        delete kopya.image_data_url;
+        delete kopya.audio_data_url;
+        return kopya;
+      }),
+      gorev: (() => {
+        const gKopya = { ...kontrol.gorev };
+        delete gKopya.id;
+        delete gKopya.eyebrow;
+        delete gKopya.temaTip;
+        delete gKopya.image_path;
+        delete gKopya.audio_path;
+        delete gKopya.image_data_url;
+        delete gKopya.audio_data_url;
+        return gKopya;
+      })(),
+    }, null, 2);
 
-ÖĞRENCİ İLGİ PROFİLİ:
+    const temelUsr1 = `MODÜL: ${modul.id.toUpperCase()} — ${modul.ad}
+MODÜL ÖZEL ŞABLONU: ${kontrol.sablonAd || modul.ad}
+HEDEF ÖĞRENME KAZANIMI: ${kontrol.kazanim}
+
+ÖĞRENCİ İLGİ PROFİLİ (Yalnızca bağlamı bu profile göre uyarla):
 - Kategori / Alt alan: ${profil.kategori || ''} / ${profil.altKategori || ''}
 - Etkileşim biçimleri: ${(profil.etkilesimler || []).join(', ')}
-- Özgül ilgi: ${profil.ozgulKisa || ''} — ${profil.aciklama || ''}
+- Özgül ilgi açıklaması: ${profil.ozgulKisa || ''} — ${profil.aciklama || ''}
 
-KONTROL GRUBU REFERANS ŞABLONU (Eşdeğerlik için bunu örnek al):
-Çözümlü örnek başlığı: ${kontrol.slayt.altBaslik}
-Slayt 1 soru: ${kontrol.slayt.slaytlar[0].soru}
-Slayt 2 koşullar (3 adet): ${JSON.stringify(kontrol.slayt.slaytlar[1].kosullar)}
-Slayt 3 odak: ${kontrol.slayt.slaytlar[2].ustBaslik}
-Slayt 4 odak: ${kontrol.slayt.slaytlar[3].ustBaslik}
-Mikro-görev soru 1: ${kontrol.gorev.soru1 || 'Bağımsız değişken hangisidir?'}
-Mikro-görev soru 2: ${kontrol.gorev.soru2 || 'Bağımlı değişken hangisidir?'}
+KONTROL GRUBU REFERANS JSON ŞABLONU (Deney grubu için BİREBİR AYNI JSON anahtarlarını, slide_type ve gorevTipi değerlerini koruyarak yalnızca metin/veri bağlamını öğrencinin ilgi profiline uyarla):
+${kontrolSablonJSON}
 
-AŞAĞIDAKİ TAM JSON ŞEMASINI ÜRET:
-{
-  "altBaslik": "Çözümlü örnek kısa başlığı (3-6 kelime)",
-  "slaytlar": [
-    {
-      "ustBaslik": "Bir araştırma senaryosu",
-      "altBaslik": "Kısa bağlam alt başlığı",
-      "soru": "Net, sınanabilir araştırma sorusu?",
-      "narration": "Slayt 1 için 15-20 sn konuşma metni (2 cümle)",
-      "estimated_duration_seconds": 16
-    },
-    {
-      "ustBaslik": "Araştırma nasıl yürütülüyor?",
-      "altBaslik": "3 koşulun kısa başlığı",
-      "kosullar": [
-        { "ad": "Koşul 1", "deger": "72 birim" },
-        { "ad": "Koşul 2", "deger": "64 birim" },
-        { "ad": "Koşul 3", "deger": "80 birim" }
-      ],
-      "dipnot": "Örnek amaçlı kurgusal araştırma verileri",
-      "narration": "Slayt 2 için 15-20 sn konuşma metni",
-      "estimated_duration_seconds": 17
-    },
-    {
-      "ustBaslik": "${kontrol.slayt.slaytlar[2].ustBaslik}",
-      "altBaslik": "${kontrol.slayt.slaytlar[2].altBaslik}",
-      "degisken": "Vurgulanan ana kavram / değişken",
-      "seviyeler": ["Seviye/İlke 1", "Seviye/İlke 2", "Seviye/İlke 3"],
-      "digerRef": "Referans notu (tek satır)",
-      "narration": "Slayt 3 için 15 sn konuşma metni",
-      "estimated_duration_seconds": 15
-    },
-    {
-      "ustBaslik": "${kontrol.slayt.slaytlar[3].ustBaslik}",
-      "altBaslik": "${kontrol.slayt.slaytlar[3].altBaslik}",
-      "degisken": "Ölçülen sonuç / kavram",
-      "oncekiRef": "Önceki adıma referans (tek satır)",
-      "veri": [
-        { "etiket": "Kısa 1", "deger": 72 },
-        { "etiket": "Kısa 2", "deger": 64 },
-        { "etiket": "Kısa 3", "deger": 80 }
-      ],
-      "narration": "Slayt 4 için 15 sn konuşma metni",
-      "estimated_duration_seconds": 16
-    },
-    {
-      "ustBaslik": "${kontrol.slayt.slaytlar[4].ustBaslik}",
-      "altBaslik": "Çözümün özeti",
-      "bagimsiz": "Sol özet kavram",
-      "bagimli": "Sağ özet kavram",
-      "ozetNot": "Tek cümlelik özet",
-      "narration": "Slayt 5 için 14 sn özet konuşma metni",
-      "estimated_duration_seconds": 14
-    }
-  ],
-  "gorev": {
-    "baslik": "Transfer mikro-görev sorusu (örn. Paslaşma düzeni asisti etkiler mi?)",
-    "metin": "Transfer senaryosunun 2-3 cümlelik açıklaması",
-    "kosullar": [
-      { "ad": "Koşul A", "deger": "14" },
-      { "ad": "Koşul B", "deger": "21" },
-      { "ad": "Koşul C", "deger": "18" }
-    ],
-    "soru1": ${JSON.stringify(kontrol.gorev.soru1 || 'Bağımsız değişken hangisidir?')},
-    "bagimsizSecenekler": ["Doğru cevap", "Çeldirici 1", "Çeldirici 2", "Çeldirici 3"],
-    "bagimsizDogru": 0,
-    "soru2": ${JSON.stringify(kontrol.gorev.soru2 || 'Bağımlı değişken hangisidir?')},
-    "bagimliSecenekler": ["Çeldirici 1", "Doğru cevap", "Çeldirici 2", "Çeldirici 3"],
-    "bagimliDogru": 1,
-    "ipucuBagimsiz": "1. soru için açıklayıcı ipucu",
-    "ipucuBagimli": "2. soru için açıklayıcı ipucu",
-    "aciklamaDogru": "Her iki cevap doğru olduğunda gösterilecek açıklayıcı geri bildirim"
-  }
-}`;
+ÖNEMLİ KURALLAR:
+1. "slaytlar" dizisindeki 5 slaytın her birinin "slide_type", "kisaAd", "ikon" ve şablona özgü alt alanlarını (ör. M1 için claim_vs_testable/process_timeline/ethics_pillars; M2 için question_funnel/independent_var/dependent_var; M3 için design_matrix/decision_tree/mixed_sequence; M4 için population_vs_sample/sampling_bias_comparison/stratified_grid; M5 için instrument_blueprint/bullseye_targets/threat_diagnosis; M6 için data_cleaning_table/correlation_vs_causation/limitations_report) BİREBİR KORU ve öğrencinin ilgi profiline göre doldur.
+2. "gorev" nesnesindeki "gorevTipi" ("${kontrol.gorev.gorevTipi || 'ikili_secim'}") ve etkileşim alanlarını (ör. M1'de "siralaAdimlar" [4 adım doğru sırada]; M2'de "eslestirOgeler" [Bağımsız, Bağımlı, Kontrol sırasıyla 3 öğe] ve "eslestirRoller"; M3 ve M5'te "sinifKategoriler" ve "sinifOgeler"; M4'te "tabakalar" [3 tabaka], "birim", "hedefAdet": 2; M6'da "kosullar", "soru1", "soru2") BİREBİR KORU.
+3. Çoktan seçmeli sorularda doğru cevabın indeksini kontrol grubuyla aynı tut ("bagimsizDogru": ${kontrol.gorev.bagimsizDogru ?? 0}${kontrol.gorev.bagimliDogru !== undefined ? `, "bagimliDogru": ${kontrol.gorev.bagimliDogru}` : ''}).`;
 
     const usr1 = akademisyenNotu && mevcutSonuc && mevcutSonuc.hamUretilen
       ? `${temelUsr1}\n\nAKADEMİSYEN REVİZYON TALEBİ (ÖNCEKİ TASLAĞI BU DÖNÜTE GÖRE DÜZELT):\nAkademisyen Notu: "${akademisyenNotu}"\nÖnceki Taslak JSON:\n${JSON.stringify(mevcutSonuc.hamUretilen, null, 2)}`
@@ -1478,27 +1559,37 @@ GÖREV: Yukarıdaki pedagojik ve deneysel eşdeğerlik eleştirilerinin tamamın
     const g = uretilen.gorev;
     const gorevObj = {
       ...kontrol.gorev,
+      ...g,
       id: `deney-${modul.id}-${pSlug}`,
+      gorevTipi: kontrol.gorev.gorevTipi || g.gorevTipi,
       eyebrow: `${modul.id.replace('m', 'MODÜL 0')} · MİKRO-GÖREV (CANLI API)`,
-      altYazi: kontrol.gorev.altYazi,
-      baslik: g.baslik,
-      metin: g.metin,
+      altYazi: g.altYazi || kontrol.gorev.altYazi,
+      baslik: g.baslik || kontrol.gorev.baslik,
+      metin: g.metin || kontrol.gorev.metin,
       temaTip: temaTip === 'calisma' ? 'standart' : temaTip,
       image_path: `images/${modul.id}-${pSlug}-gorev.png`,
       image_data_url: gorevImg || undefined,
       audio_path: `audio/${modul.id}-${pSlug}-gorev.${sesExt(gorevAudioUrl)}`,
       audio_data_url: gorevAudioUrl || undefined,
-      kosullar: (g.kosullar || []).map((k, idx) => ({
+      kosullar: (g.kosullar || kontrol.gorev.kosullar || []).map((k, idx) => ({
         ad: k.ad,
         deger: k.deger,
         diyagram: temaTip === 'basketbol' ? `saha${idx + 1}` : temaTip === 'kahve' ? `kahve${idx + 1}` : `saat${idx + 1}`,
       })),
+      siralaAdimlar: Array.isArray(g.siralaAdimlar) && g.siralaAdimlar.length >= 4 ? g.siralaAdimlar : kontrol.gorev.siralaAdimlar,
+      eslestirOgeler: Array.isArray(g.eslestirOgeler) && g.eslestirOgeler.length >= 3 ? g.eslestirOgeler : kontrol.gorev.eslestirOgeler,
+      eslestirRoller: kontrol.gorev.eslestirRoller,
+      sinifKategoriler: kontrol.gorev.sinifKategoriler,
+      sinifOgeler: Array.isArray(g.sinifOgeler) && g.sinifOgeler.length ? g.sinifOgeler : kontrol.gorev.sinifOgeler,
+      tabakalar: Array.isArray(g.tabakalar) && g.tabakalar.length >= 3 ? g.tabakalar : kontrol.gorev.tabakalar,
+      birim: g.birim || kontrol.gorev.birim,
+      hedefAdet: kontrol.gorev.hedefAdet || 2,
       soru1: g.soru1 || kontrol.gorev.soru1,
       bagimsizSecenekler: g.bagimsizSecenekler || kontrol.gorev.bagimsizSecenekler,
-      bagimsizDogru: Number.isInteger(g.bagimsizDogru) ? g.bagimsizDogru : 0,
+      bagimsizDogru: Number.isInteger(g.bagimsizDogru) ? g.bagimsizDogru : (kontrol.gorev.bagimsizDogru ?? 0),
       soru2: g.soru2 || kontrol.gorev.soru2,
       bagimliSecenekler: g.bagimliSecenekler || kontrol.gorev.bagimliSecenekler,
-      bagimliDogru: Number.isInteger(g.bagimliDogru) ? g.bagimliDogru : 1,
+      bagimliDogru: Number.isInteger(g.bagimliDogru) ? g.bagimliDogru : (kontrol.gorev.bagimliDogru ?? 1),
       ipucuBagimsiz: g.ipucuBagimsiz || kontrol.gorev.ipucuBagimsiz,
       ipucuBagimli: g.ipucuBagimli || kontrol.gorev.ipucuBagimli,
       aciklamaDogru: g.aciklamaDogru || kontrol.gorev.aciklamaDogru,

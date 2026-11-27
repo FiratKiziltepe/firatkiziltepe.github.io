@@ -26,6 +26,8 @@
 .mg-bolum-bas small { font-size: 13px; color: var(--soluk); }
 
 .mg-sorular { display: grid; gap: 16px; }
+.mg-etkilesim-blok { display: flex; flex-direction: column; gap: 12px; margin-bottom: 6px; }
+.mg-sr-liste li { grid-template-columns: 32px minmax(0, 1fr) auto; cursor: default; }
 .mg-soru-kart { background: var(--bg); border: 1.5px solid var(--cizgi); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
 .mg-soru-bas { display: flex; align-items: center; gap: 12px; }
 .mg-soru-no { width: 28px; height: 28px; border-radius: 50%; background: var(--murekkep); color: #fff; font: 700 13.5px/1 var(--baslik); display: grid; place-items: center; flex: none; }

@@ -2434,7 +2434,7 @@
     if (r.ad === 'ders' && r.k === 'ornek' && window.SlaytSunum && $('#dersSlaytHost')) {
       const b = baglamAl(r.m);
       const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === r.m.id && ogrenciGorebilirMi(UI.canliSonuc);
-      const slaytVeri = canliAktif ? UI.canliSonuc.slayt : window.SlaytSunum.baglamdanUret(b);
+      const slaytVeri = canliAktif ? UI.canliSonuc.slayt : window.SlaytSunum.baglamdanUret(b, r.m.id);
       UI.slaytPlayer = window.SlaytSunum.createPlayer($('#dersSlaytHost'), slaytVeri, {
         moduleId: r.m.id,
         onCompleteHash: `ders-${r.m.id}-gorev`,
@@ -2445,7 +2445,7 @@
     if (r.ad === 'ders' && r.k === 'gorev' && window.GorevPrototip && $('#dersGorevHost')) {
       const b = baglamAl(r.m), s = sonrakiAdim(r.m, 'gorev');
       const canliAktif = UI.canliSonuc && UI.canliSonuc.modulId === r.m.id && ogrenciGorebilirMi(UI.canliSonuc);
-      const gorevVeri = canliAktif ? UI.canliSonuc.gorev : window.GorevPrototip.baglamdanSenaryo(b);
+      const gorevVeri = canliAktif ? UI.canliSonuc.gorev : window.GorevPrototip.baglamdanSenaryo(b, r.m.id);
       UI.gorevPlayer = window.GorevPrototip.createTaskPlayer($('#dersGorevHost'), gorevVeri, {
         moduleId: r.m.id,
         onCompleteHash: `ders-${r.m.id}-${s}`,

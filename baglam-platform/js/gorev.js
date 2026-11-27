@@ -188,31 +188,214 @@ window.GorevPrototip = (() => {
     </svg>`;
   }
 
-  function baglamdanSenaryo(b) {
-    if (b.alt && b.alt.id === 'spor.basketbol') return SENARYOLAR[1];
-    if (b.alt && b.alt.id === 'yemek.kahve') return SENARYOLAR[2];
+  function baglamdanSenaryo(b, modulId = 'm2') {
+    if (modulId === 'm2' && b.alt && b.alt.id === 'spor.basketbol') return SENARYOLAR[1];
+    if (modulId === 'm2' && b.alt && b.alt.id === 'yemek.kahve') return SENARYOLAR[2];
     const c = b.c, et = c.veri.etiket, dg = c.veri.deger;
-    return {
-      id: b.alt ? b.alt.id : 'genel',
+    const temaTip = b.ilgi && b.ilgi.id === 'spor' ? 'basketbol' : b.ilgi && b.ilgi.id === 'yemek' ? 'kahve' : 'standart';
+    const baz = {
+      id: `${modulId}-${b.alt ? b.alt.id : 'genel'}`,
+      modulId,
       etiket: b.alt ? b.alt.ad : 'Seçili bağlam',
+      eyebrow: `${modulId.replace('m', 'MODÜL 0')} · MİKRO-GÖREV`,
       baslik: c.soru,
       metin: c.gozlem,
-      temaTip: b.ilgi && b.ilgi.id === 'spor' ? 'basketbol' : b.ilgi && b.ilgi.id === 'yemek' ? 'kahve' : 'standart',
+      temaTip,
       kosullar: et.map((ad, i) => ({ ad, deger: String(dg[i]), diyagram: `genel${i + 1}` })),
-      bagimsizSecenekler: [c.bagimsiz, c.bagimli, c.kontrol[0] || 'Katılımcı sayısı', c.kontrol[1] || 'Uygulama süresi'],
+    };
+
+    if (modulId === 'm1') {
+      return {
+        ...baz,
+        gorevTipi: 'm1_sirala_etik',
+        altYazi: 'Araştırma döngüsü adımlarını doğru sıraya koy ve bilimsel etik ilkesini belirle.',
+        soruBaslik: '1. Bölüm: Bilimsel araştırma adımlarını baştan sona sırala',
+        soruAlt: 'Ok düğmelerini kullanarak 4 adımı doğru mantıksal sıraya getir',
+        siralaAdimlar: [
+          `Gözlem ve sınanabilir araştırma sorusunu tanımlama (${c.soru})`,
+          `Hedef gruptan (${c.evren}) etik onam alarak ${c.arac} ile veri toplama`,
+          `${et.join(', ')} gruplarının ölçümlerini (${c.veri.olcu}) karşılaştırıp analiz etme`,
+          `Ulaşılan bulguyu (${c.bulgu}) sınırlılıklarıyla birlikte açıkça raporlama`,
+        ],
+        soru1: '2. Bölüm: Bu çalışmada veri toplamadan önce uygulanması gereken temel bilimsel etik kuralı hangisidir?',
+        bagimsizSecenekler: [
+          c.etik,
+          'Katılımcılara haber vermeden gizlice kayıt almak',
+          'Yalnızca beklentiyi doğrulayan yüksek puanlı katılımcıları rapora yazmak',
+          'Sonuçları kesin kanıt gibi göstermek için katılımcı isimlerini açıkça yayınlamak',
+        ],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: 'Araştırma her zaman gözlem/soru ile başlar, veri toplama ve analizle devam eder, raporlama ile biter.',
+        ipucuBagimli: 'Katılımcıların gönüllü onamı, kişisel verilerinin gizliliği ve şeffaflık bilimsel etiğin temelidir.',
+        aciklamaDogru: `Doğru! Bilimsel araştırma döngüsü soru → veri toplama → analiz → raporlama sırasıyla ilerler ve süreç boyunca "${c.etik}" ilkesine uyulur.`,
+      };
+    }
+
+    if (modulId === 'm3') {
+      return {
+        ...baz,
+        gorevTipi: 'm3_desen_siniflandir',
+        altYazi: 'Aynı konu üzerindeki 3 farklı araştırma kurgusunu uygun araştırma desenine yerleştir.',
+        soruBaslik: '1. Bölüm: Üç araştırma kurgusunu uygun desene sınıflandır',
+        soruAlt: 'Bir araştırma kurgusuna dokun, ardından ait olduğu desen kutusunu seç',
+        sinifKategoriler: ['Nicel (İlişkisel / Deneysel)', 'Nitel (Olgubilim / Görüşme)', 'Karma Yöntem (Sıralı)'],
+        sinifOgeler: [
+          { metin: `${c.soru} (${c.arac} ile sayısal karşılaştırma)`, kategori: 0 },
+          { metin: `${c.nitel} (Derinlemesine yarı yapılandırılmış görüşme)`, kategori: 1 },
+          { metin: c.karma, kategori: 2 },
+        ],
+        soru1: '2. Bölüm: Nicel bir çalışmada araştırmacı katılımcılara müdahale etmeden sadece mevcut durumu ölçüyorsa hangi desen kullanılmıştır?',
+        bagimsizSecenekler: [
+          'İlişkisel (Korelasyonel) tarama deseni',
+          'Gerçek deneysel desen',
+          'Nitel olgubilim deseni',
+          'Eylem araştırması',
+        ],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: 'Sayısal ölçüm yapan kurguyu Nicel, deneyimi soranı Nitel, ikisini sıralı birleştireni Karma kutusuna yerleştir.',
+        ipucuBagimli: 'Değişkene müdahale (manipülasyon) yoksa deneysel değil ilişkisel tarama deseni söz konusudur.',
+        aciklamaDogru: 'Tebrikler! Üç araştırma kurgusunu da amacına göre doğru desene yerleştirdin ve müdahalesiz nicel incelemenin ilişkisel desen olduğunu doğru belirledin.',
+      };
+    }
+
+    if (modulId === 'm4') {
+      const tablar = (c.tabakalar || et).slice(0, 3);
+      return {
+        ...baz,
+        gorevTipi: 'm4_tabakali_orneklem',
+        altYazi: 'Evrendeki 3 alt tabakadan eşit temsil sağlayacak şekilde tabakalı örneklem seç.',
+        soruBaslik: `1. Bölüm: Tabakalı Örnekleme Simülasyonu (${c.evren})`,
+        soruAlt: `Her tabakadan tam 2 ${c.birim} seçerek toplam 6 ${c.birim}lik dengeli bir alt örneklem oluştur`,
+        birim: c.birim,
+        hedefAdet: 2,
+        tabakalar: tablar,
+        soru1: '2. Bölüm: Bu araştırmada tabakalı örnekleme kullanmanın temel bilimsel amacı nedir?',
+        bagimsizSecenekler: [
+          `Evrendeki tüm alt grupların (${tablar.join(', ')}) örneklemde dengeli ve yansız biçimde temsil edilmesini sağlamak`,
+          'Sadece en kolay ulaşılan tek bir gruptan hızlıca veri toplamak',
+          'Örneklem büyüklüğünü evrenin tamamına eşitlemek',
+          'İstatistiksel analiz yapma ihtiyacını ortadan kaldırmak',
+        ],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: `Üç tabakanın her birinden 2'şer nokta seçtiğinden emin ol.`,
+        ipucuBagimli: 'Tabakalı örnekleme, alt grupların şans eseri dışarıda kalmasını önleyerek temsil gücünü artırır.',
+        aciklamaDogru: `Doğru! Her tabakadan eşit sayıda ${c.birim} seçerek tüm alt grupların örneklemde adil biçimde temsil edilmesini sağladın.`,
+      };
+    }
+
+    if (modulId === 'm5') {
+      return {
+        ...baz,
+        gorevTipi: 'm5_gecerlik_guvenirlik',
+        altYazi: 'Veri toplama sürecinde karşılaşılan 4 ölçüm sorununu Geçerlik veya Güvenirlik sorunu olarak teşhis et.',
+        soruBaslik: `1. Bölüm: Ölçüm Sorunlarını Sınıflandır (${c.arac})`,
+        soruAlt: 'Her bir ölçüm hatasına dokun ve zedelediği özelliğin kutusuna yerleştir',
+        sinifKategoriler: ['Geçerlik Sorunu (Hedef Sapması)', 'Güvenirlik Sorunu (Tutarsızlık)'],
+        sinifOgeler: [
+          { metin: c.gecersiz || `Aracın "${c.bagimli}" yerine katılımcının başka bir özelliğini ölçmesi`, kategori: 0 },
+          { metin: c.guvenilmez || 'Aynı katılımcıya kısa arayla uygulandığında birbiriyle çelişen çok farklı puanlar vermesi', kategori: 1 },
+          { metin: 'Soruların katılımcıyı belirli bir cevaba yönlendirecek biçimde yanlı yazılması', kategori: 0 },
+          { metin: 'İki farklı puanlayıcının aynı performansa birbirinden tamamen kopuk puanlar vermesi', kategori: 1 },
+        ],
+        soru1: '2. Bölüm: Bir ölçme aracı her seferinde tutarlı sonuç veriyor ancak yanlış özelliği ölçüyorsa bu aracın durumu nedir?',
+        bagimsizSecenekler: [
+          'Güvenilirdir ancak geçerli değildir',
+          'Geçerlidir ancak güvenilir değildir',
+          'Hem geçerli hem güvenilirdir',
+          'Rastgele hatası çok yüksektir',
+        ],
+        bagimsizDogru: 0,
+        ipucuBagimsiz: 'Yanlış şeyi ölçmek veya yönlendirici soru sormak Geçerlik; tekrarlı ölçümde veya puanlayıcılar arasında tutarsızlık olması Güvenirlik sorunudur.',
+        ipucuBagimli: 'Hedef tahtasında aynı köşeye toplanan atışlar tutarlıdır (güvenilir) ama merkezi vurmamıştır (geçersiz).',
+        aciklamaDogru: 'Harika! Geçerlik ve güvenirlik tehditlerini doğru teşhis ettin; tutarlı ama hedeften sapmış ölçümün "güvenilir ama geçersiz" olduğunu doğru belirledin.',
+      };
+    }
+
+    if (modulId === 'm6') {
+      return {
+        ...baz,
+        gorevTipi: 'm6_analiz_rapor',
+        altYazi: 'Grafik verilerini incele, veriye sadık bulgu cümlesini ve araştırmanın yöntemsel sınırlılığını belirle.',
+        soruBaslik: `Veri Yorumlama ve Şeffaf Raporlama (${c.veri.olcu})`,
+        soruAlt: 'Tablo/grafik bulgusunu aşırı genellemeden yorumla',
+        veriBirimi: c.veri.olcu,
+        soru1: '1. Grafiğe ve araştırma verilerine dayanarak aşağıdaki bulgu cümlelerinden hangisi doğrudan ve nesnel olarak yazılabilir?',
+        bagimsizSecenekler: [
+          c.bulgu,
+          `${c.bagimsiz}, bütün insanlarda ${c.bagimli.toLocaleLowerCase('tr')} sonucunu belirleyen tek kesin nedendir.`,
+          'En düşük puan alan gruptaki katılımcıların tamamı başarısız olmuştur.',
+          'Bu bulgu hiçbir sınırlılık olmaksızın tüm yaş ve kültür gruplarına genellenebilir.',
+        ],
+        bagimsizDogru: 0,
+        soru2: '2. Bu araştırmanın raporunun “Sınırlılıklar” bölümünde aşağıdakilerden hangisinin belirtilmesi gerekir?',
+        bagimliSecenekler: [
+          'Grafikte üç farklı sütun kullanılmış olması',
+          `Bulguların "${c.evren}" kapsamıyla sınırlı olması ve kontrol edilmeyen bireysel etkenlerin bulunabilmesi`,
+          'Verilerin tablo halinde özetlenmiş olması',
+          'Araştırma sorusunun sınanabilir olması',
+        ],
+        bagimliDogru: 1,
+        ipucuBagimsiz: 'Yalnızca ölçülen grupların ortalamalarını abartısız aktaran seçeneği bul.',
+        ipucuBagimli: 'Örneklem kapsamı ve kontrol edilemeyen değişkenler her araştırmanın doğal sınırlılığıdır.',
+        aciklamaDogru: `Doğru! Veriye sadık bulgu cümlesini ("${c.bulgu}") ve örneklem kapsamına dayalı yöntemsel sınırlılığı eksiksiz belirledin.`,
+      };
+    }
+
+    // Varsayılan Modül 2 (m2): Değişken Rollerini Eşleştirme (Bağımsız / Bağımlı / Kontrol) + Araştırma Sorusu
+    return {
+      ...baz,
+      gorevTipi: 'm2_degisken_eslestir',
+      altYazi: 'Senaryodaki değişkenleri araştırmadaki rolleriyle eşleştir ve kontrol mantığını doğrula.',
+      soruBaslik: '1. Bölüm: Değişkenleri Rolleriyle Eşleştir',
+      soruAlt: 'Yukarıdaki kavramlardan birine dokun, ardından aşağıdaki uygun değişken rolü yuvasına yerleştir',
+      eslestirOgeler: [
+        c.bagimsiz,
+        c.bagimli,
+        (c.kontrol && c.kontrol[0]) || 'Katılımcıların ön deneyim düzeyi',
+      ],
+      eslestirRoller: [
+        'Bağımsız Değişken (Araştırmacının değiştirdiği)',
+        'Bağımlı Değişken (Sonuç olarak ölçülen)',
+        'Kontrol Değişkeni (Sabit tutulan)',
+      ],
+      soru1: '2. Bölüm: Bu araştırmada kontrol değişkenlerini sabit tutmanın temel amacı nedir?',
+      bagimsizSecenekler: [
+        `“${c.bagimli}” üzerindeki değişimin başka etkenlerden değil, gerçekten “${c.bagimsiz}” değişkeninden kaynaklandığını görebilmek`,
+        'Araştırmayı daha karmaşık ve uzun hale getirmek',
+        'Bağımsız değişkenin etkisini tamamen ortadan kaldırmak',
+        'Örneklemdeki katılımcı sayısını azaltmak',
+      ],
       bagimsizDogru: 0,
       bagimliSecenekler: [c.kontrol[1] || 'Uygulama süresi', c.bagimli, c.kontrol[0] || 'Katılımcı sayısı', c.bagimsiz],
       bagimliDogru: 1,
-      ipucuBagimsiz: 'Bağımsız değişken için araştırmacının gruplar arasında değiştirdiği koşula odaklan.',
-      ipucuBagimli: 'Bağımlı değişken için çalışma sonunda ölçülen sonuca odaklan.',
-      aciklamaDogru: `Doğru! Araştırmacı "${c.bagimsiz}" koşulunu değiştirdiği için bağımsız değişken budur; sonunda ölçtüğü "${c.bagimli}" ise bağımlı değişkendir.`,
+      ipucuBagimsiz: `Değiştirilen koşul (${c.bagimsiz}) bağımsız, ölçülen sonuç (${c.bagimli}) bağımlı, sabit tutulan unsur ise kontrol değişkenidir.`,
+      ipucuBagimli: 'Kontrol değişkenleri sabit tutulmazsa sonucun neyden kaynaklandığı bilinemez.',
+      aciklamaDogru: `Doğru! Araştırmacı "${c.bagimsiz}" koşulunu değiştirdiği için bağımsız değişken, ölçtüğü "${c.bagimli}" bağımlı değişken, sabit tuttuğu unsur ise kontrol değişkenidir.`,
     };
   }
 
-  /* Etkileşimli Ana Mikro-Görev Oynatıcı */
+  /* Etkileşimli Ana Mikro-Görev Oynatıcı:
+     Modülün konusuna (gorevTipi) göre Sıralama, Eşleştirme, Sınıflandırma, Tabakalı Örneklem Seçimi veya Grafik Analizi şablonunu çalıştırır.
+     Aynı modül içinde Kontrol ve Deney grubu BİREBİR AYNI etkileşim şablonunu paylaşır. */
   function createTaskPlayer(host, senaryo, opts = {}) {
     if (!host) return { destroy() {} };
+    const gorevTipi = senaryo.gorevTipi || 'ikili_secim';
     let sec1 = null, sec2 = null, kontrol = false, ipucu = false, metin = false, caliyor = false, audioEl = null, destroyed = false;
+
+    // Modül-spesifik etkileşim durumları:
+    // M1 sıralama: başlangıçta karışık sıra [2, 0, 3, 1]
+    let siraList = Array.isArray(senaryo.siralaAdimlar) ? [2, 0, 3, 1].filter(i => i < senaryo.siralaAdimlar.length) : [];
+    if (Array.isArray(senaryo.siralaAdimlar) && siraList.length !== senaryo.siralaAdimlar.length) {
+      siraList = senaryo.siralaAdimlar.map((_, i) => i).reverse();
+    }
+    // M2 eşleştirme:
+    let esSec = null;
+    let esYer = {};
+    // M3 & M5 sınıflandırma:
+    let sinifSec = null;
+    let sinifYer = {};
+    // M4 tabakalı örneklem seçimi:
+    let tabakaSec = [[], [], []];
 
     const durdurSes = () => {
       caliyor = false;
@@ -228,20 +411,163 @@ window.GorevPrototip = (() => {
       }
     };
 
+    function hesaplaDurum() {
+      const dSoru1 = sec1 === (senaryo.bagimsizDogru ?? 0);
+      if (gorevTipi === 'm1_sirala_etik') {
+        const siraTam = siraList.every((oi, pos) => oi === pos);
+        return { hazir: sec1 != null, d1: siraTam, d2: dSoru1, tam: kontrol && siraTam && dSoru1 };
+      }
+      if (gorevTipi === 'm2_degisken_eslestir') {
+        const top = (senaryo.eslestirRoller || []).length || 3;
+        const dolu = Object.keys(esYer).length === top;
+        const esTam = dolu && Object.keys(esYer).every(ri => +esYer[ri] === +ri);
+        return { hazir: dolu && sec1 != null, d1: esTam, d2: dSoru1, tam: kontrol && esTam && dSoru1 };
+      }
+      if (gorevTipi === 'm3_desen_siniflandir' || gorevTipi === 'm5_gecerlik_guvenirlik') {
+        const ogeler = senaryo.sinifOgeler || [];
+        const dolu = Object.keys(sinifYer).length === ogeler.length;
+        const sinifTam = dolu && ogeler.every((o, idx) => sinifYer[idx] === o.kategori);
+        return { hazir: dolu && sec1 != null, d1: sinifTam, d2: dSoru1, tam: kontrol && sinifTam && dSoru1 };
+      }
+      if (gorevTipi === 'm4_tabakali_orneklem') {
+        const hedef = senaryo.hedefAdet || 2;
+        const tabTam = tabakaSec.every(l => l.length === hedef);
+        return { hazir: tabakaSec.some(l => l.length > 0) && sec1 != null, d1: tabTam, d2: dSoru1, tam: kontrol && tabTam && dSoru1 };
+      }
+      // m6_analiz_rapor veya klasik ikili_secim
+      const dSoru2 = sec2 === (senaryo.bagimliDogru ?? 1);
+      return { hazir: sec1 != null && sec2 != null, d1: dSoru1, d2: dSoru2, tam: kontrol && dSoru1 && dSoru2 };
+    }
+
+    function renderEtkilesimAlan() {
+      if (gorevTipi === 'm1_sirala_etik') {
+        const adimlar = senaryo.siralaAdimlar || [];
+        return `<div class="mg-etkilesim-blok">
+          <ol class="sr mg-sr-liste">
+            ${siraList.map((oi, pos) => `<li class="${kontrol ? (oi === pos ? 'd' : 'y') : ''}">
+              <span class="no">${pos + 1}</span>
+              <span class="sr-t"><b>${esc(adimlar[oi])}</b></span>
+              <span class="sr-ok">
+                <button type="button" data-mg-sira="${pos}" data-yon="-1" aria-label="Yukarı taşı"${pos === 0 ? ' disabled' : ''}>${ic('yukari')}</button>
+                <button type="button" data-mg-sira="${pos}" data-yon="1" aria-label="Aşağı taşı"${pos === siraList.length - 1 ? ' disabled' : ''}>${ic('asagi')}</button>
+              </span>
+            </li>`).join('')}
+          </ol>
+        </div>`;
+      }
+
+      if (gorevTipi === 'm2_degisken_eslestir') {
+        const ogeler = senaryo.eslestirOgeler || [];
+        const roller = senaryo.eslestirRoller || ['Bağımsız Değişken', 'Bağımlı Değişken', 'Kontrol Değişkeni'];
+        return `<div class="mg-etkilesim-blok">
+          <div class="havuz" data-mg-eshavuz="1">
+            ${ogeler.map((ad, i) => Object.values(esYer).includes(i) ? '' : `<button type="button" class="cip${esSec === i ? ' sec' : ''}" data-mg-escip="${i}">${esc(ad)}</button>`).join('')}
+          </div>
+          <div class="es-izgara">
+            ${roller.map((r, ri) => {
+              const oi = esYer[ri];
+              const cls = oi != null ? (kontrol ? (oi === ri ? ' dogru' : ' yanlis') : ' dolu') : '';
+              return `<button type="button" class="es-slot${cls}" data-mg-esslot="${ri}">
+                <small>${esc(r)}</small>
+                ${oi != null ? `<b>${esc(ogeler[oi])}</b>` : '<span>Yukarıdan bir kavram seçip buraya dokun</span>'}
+              </button>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }
+
+      if (gorevTipi === 'm3_desen_siniflandir' || gorevTipi === 'm5_gecerlik_guvenirlik') {
+        const kategoriler = senaryo.sinifKategoriler || ['Kategori 1', 'Kategori 2'];
+        const ogeler = senaryo.sinifOgeler || [];
+        return `<div class="mg-etkilesim-blok">
+          <div class="havuz" data-mg-snhavuz="1">
+            ${ogeler.map((o, i) => sinifYer[i] == null ? `<button type="button" class="cip${sinifSec === i ? ' sec' : ''}" data-mg-sncip="${i}">${esc(o.metin)}</button>` : '').join('')}
+          </div>
+          <div class="kutular">
+            ${kategoriler.map((kt, ki) => `<div class="kutu" role="button" tabindex="0" data-mg-snkutu="${ki}">
+              <h4>${esc(kt)}</h4>
+              ${ogeler.map((o, i) => sinifYer[i] === ki ? `<button type="button" class="cip${kontrol ? (o.kategori === ki ? ' d' : ' y') : ''}" data-mg-sncip="${i}">${esc(o.metin)}</button>` : '').join('')}
+            </div>`).join('')}
+          </div>
+        </div>`;
+      }
+
+      if (gorevTipi === 'm4_tabakali_orneklem') {
+        const tabakalar = (senaryo.tabakalar || ['1. Tabaka', '2. Tabaka', '3. Tabaka']).slice(0, 3);
+        const hedef = senaryo.hedefAdet || 2;
+        const birim = senaryo.birim || 'katılımcı';
+        const renkler = ['#17A594', '#5B6BE8', '#EE6C2B'];
+        return `<div class="mg-etkilesim-blok">
+          <div class="tabakalar">
+            ${tabakalar.map((t, ti) => {
+              const secilenler = tabakaSec[ti] || [];
+              const n = secilenler.length;
+              return `<div class="tb" style="--tc:${renkler[ti % 3]}">
+                <div class="tb-bas">
+                  <b>${esc(t)}</b>
+                  <span class="${n === hedef ? 'tam' : n > hedef ? 'fazla' : ''}">${n}/${hedef} ${esc(birim)}</span>
+                </div>
+                <div class="tb-n">
+                  ${Array.from({ length: 8 }, (_, ni) => {
+                    const aktif = secilenler.includes(ni);
+                    return `<button type="button" class="${aktif ? 's' : ''}" data-mg-tb="${ti}" data-n="${ni}" aria-pressed="${aktif}" aria-label="${esc(t)} ${ni + 1}. ${esc(birim)}"></button>`;
+                  }).join('')}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }
+
+      return '';
+    }
+
+    function renderVeriBolumu() {
+      const kosullar = Array.isArray(senaryo.kosullar) ? senaryo.kosullar : [];
+      if (!kosullar.length) return '';
+      if (gorevTipi === 'm6_analiz_rapor') {
+        const sayilar = kosullar.map(k => parseFloat(String(k.deger).replace(',', '.').replace(/[^0-9.]/g, '')) || 10);
+        const max = Math.max(...sayilar, 1);
+        return `<div class="mg-veri-bolum">
+          <div class="mg-bolum-bas">
+            <b>Araştırma Veri Tablosu ve Karşılaştırma Grafiği</b>
+            <small>${esc(senaryo.veriBirimi || 'Gruplara göre ölçülen ortalama değerler')}</small>
+          </div>
+          <div class="slayt-vurgu-kutu turuncu">
+            <div class="slayt-barlar">
+              ${kosullar.map((k, i) => `<div class="slayt-bar-satir">
+                <span>${esc(k.ad)}</span>
+                <div class="slayt-bar-yol"><i style="width:${Math.max(18, (sayilar[i] / max) * 92).toFixed(1)}%"></i></div>
+                <b>${esc(k.deger)}</b>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      }
+      return `<div class="mg-veri-bolum">
+        <div class="mg-bolum-bas">
+          <b>Senaryo Özeti &amp; Koşullar</b>
+          <small>Temsili şemalar ve araştırma verileri</small>
+        </div>
+        <div class="slayt-kosul-izgara">
+          ${kosullar.map((k, idx) => `<div class="slayt-kosul">${kosulSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}
+        </div>
+      </div>`;
+    }
+
     function draw() {
-      const d1 = sec1 === senaryo.bagimsizDogru, d2 = sec2 === senaryo.bagimliDogru;
-      const tam = kontrol && d1 && d2;
-      const secili = sec1 != null && sec2 != null;
+      const { hazir, d1, d2, tam } = hesaplaDurum();
+      const ikiliSoruMu = gorevTipi === 'ikili_secim' || gorevTipi === 'm6_analiz_rapor' || (!senaryo.gorevTipi && Array.isArray(senaryo.bagimliSecenekler));
       let geriBildirim = '';
       if (kontrol) {
         if (tam) {
-          geriBildirim = `<div class="gb d">${ic('bilgi')}<div><b>Tebrikler, her iki soruyu da doğru yanıtladın!</b><br>${esc(senaryo.aciklamaDogru)}</div></div>`;
+          geriBildirim = `<div class="gb d">${ic('bilgi')}<div><b>Tebrikler, görevin tüm adımlarını doğru tamamladın!</b><br>${esc(senaryo.aciklamaDogru)}</div></div>`;
         } else if (d1 && !d2) {
-          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>${esc(senaryo.feedback2Yanlis || 'İlk seçimin doğru; ikinci soruda ise araştırma sonunda ölçülen sonuca veya çıktısına odaklan.')}</div></div>`;
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>İlk bölüm doğru, ikinci adıma tekrar bakalım.</b><br>${esc(senaryo.feedback2Yanlis || senaryo.ipucuBagimli || 'İkinci sorudaki seçeneğini gözden geçir.')}</div></div>`;
         } else if (!d1 && d2) {
-          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Kısmen doğru, bir kez daha düşün.</b><br>${esc(senaryo.feedback1Yanlis || ('İkinci seçimin doğru; ilk soru için ' + senaryo.ipucuBagimsiz))}</div></div>`;
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Soru seçimin doğru, ancak 1. bölümdeki etkileşimi düzeltmelisin.</b><br>${esc(senaryo.feedback1Yanlis || senaryo.ipucuBagimsiz || 'Yukarıdaki etkileşimli eşleştirme/sıralama adımlarını kontrol et.')}</div></div>`;
         } else {
-          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Tekrar deneyelim.</b><br>${esc(senaryo.ipucuBagimsiz)} ${esc(senaryo.ipucuBagimli)}</div></div>`;
+          geriBildirim = `<div class="gb y">${ic('bilgi')}<div><b>Tekrar deneyelim.</b><br>${esc(senaryo.ipucuBagimsiz || '')} ${esc(senaryo.ipucuBagimli || '')}</div></div>`;
         }
       }
 
@@ -249,12 +575,14 @@ window.GorevPrototip = (() => {
         ? `<a class="btn lg" href="#${esc(opts.onCompleteHash)}" data-act="${esc(opts.onCompleteAct || '')}" data-m="${esc(opts.moduleId || '')}">${esc(opts.completeLabel || 'Mikro-görevi tamamla')} ${ic('sag')}</a>`
         : '';
 
+      const etkilesimHTML = renderEtkilesimAlan();
+
       host.innerHTML = `<div class="mg-kart">
         <div class="mg-ust">
           <div>
             <span class="mg-eyebrow">${esc(senaryo.eyebrow || 'MODÜL 02 · MİKRO-GÖREV')}</span>
             <h2>Şimdi sıra sende!</h2>
-            <p>${esc(senaryo.altYazi || 'Araştırma senaryosunu incele ve değişkenleri belirle.')}</p>
+            <p>${esc(senaryo.altYazi || 'Araştırma senaryosunu incele ve görevi tamamla.')}</p>
           </div>
           <span class="mg-sure">Yaklaşık 2 dk.</span>
         </div>
@@ -262,7 +590,7 @@ window.GorevPrototip = (() => {
         <div class="mg-senaryo-kutu">
           <div class="mg-gorsel">${senaryo.image_data_url ? `<img class="mg-uretilen-img" src="${senaryo.image_data_url}" alt="${esc(senaryo.baslik)}">` : senaryoSVG(senaryo.temaTip)}</div>
           <div class="mg-senaryo-metin">
-            <span class="mg-senaryo-etiket">Araştırma senaryosu</span>
+            <span class="mg-senaryo-etiket">Transfer araştırma senaryosu</span>
             <h3>${esc(senaryo.baslik)}</h3>
             <p>${esc(senaryo.metin)}</p>
             <div class="mg-ses-satir">
@@ -273,52 +601,47 @@ window.GorevPrototip = (() => {
           </div>
         </div>
 
-        <div class="mg-veri-bolum">
-          <div class="mg-bolum-bas">
-            <b>Araştırma sonuçları</b>
-            <small>Temsili şemalar ve kurgusal araştırma verileri</small>
-          </div>
-          <div class="slayt-kosul-izgara">
-            ${senaryo.kosullar.map((k, idx) => `<div class="slayt-kosul">${kosulSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}
-          </div>
-        </div>
+        ${renderVeriBolumu()}
 
         <div class="mg-veri-bolum">
           <div class="mg-bolum-bas">
             <b>${esc(senaryo.soruBaslik || 'Araştırmanın değişkenlerini belirle')}</b>
             <small>${esc(senaryo.soruAlt || 'Bağımlı ve bağımsız değişkenler')}</small>
           </div>
+
+          ${etkilesimHTML}
+
           <div class="mg-sorular">
             <div class="mg-soru-kart">
-              <div class="mg-soru-bas"><span class="mg-soru-no">1</span><b>${esc(senaryo.soru1 || 'Bağımsız değişken hangisidir?')}</b></div>
-              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru1 || 'Bağımsız değişken hangisidir?')}">
-                ${senaryo.bagimsizSecenekler.map((s, i) => {
+              <div class="mg-soru-bas"><span class="mg-soru-no">${etkilesimHTML ? '2' : '1'}</span><b>${esc(senaryo.soru1 || 'Bağımsız değişken hangisidir?')}</b></div>
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru1 || '1. Soru')}">
+                ${(senaryo.bagimsizSecenekler || []).map((s, i) => {
                   const on = sec1 === i;
-                  const cls = on ? (kontrol ? (i === senaryo.bagimsizDogru ? ' dogru' : ' yanlis') : ' sec') : '';
+                  const cls = on ? (kontrol ? (i === (senaryo.bagimsizDogru ?? 0) ? ' dogru' : ' yanlis') : ' sec') : '';
                   return `<button type="button" class="mg-sec-btn${cls}" data-mg-sec="1" data-i="${i}" aria-pressed="${on}">${esc(s)}</button>`;
                 }).join('')}
               </div>
             </div>
-            <div class="mg-soru-kart">
+            ${ikiliSoruMu ? `<div class="mg-soru-kart">
               <div class="mg-soru-bas"><span class="mg-soru-no">2</span><b>${esc(senaryo.soru2 || 'Bağımlı değişken hangisidir?')}</b></div>
-              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru2 || 'Bağımlı değişken hangisidir?')}">
-                ${senaryo.bagimliSecenekler.map((s, i) => {
+              <div class="mg-secenek-grid" role="radiogroup" aria-label="${esc(senaryo.soru2 || '2. Soru')}">
+                ${(senaryo.bagimliSecenekler || []).map((s, i) => {
                   const on = sec2 === i;
-                  const cls = on ? (kontrol ? (i === senaryo.bagimliDogru ? ' dogru' : ' yanlis') : ' sec') : '';
+                  const cls = on ? (kontrol ? (i === (senaryo.bagimliDogru ?? 1) ? ' dogru' : ' yanlis') : ' sec') : '';
                   return `<button type="button" class="mg-sec-btn${cls}" data-mg-sec="2" data-i="${i}" aria-pressed="${on}">${esc(s)}</button>`;
                 }).join('')}
               </div>
-            </div>
+            </div>` : ''}
           </div>
         </div>
 
-        ${ipucu ? `<div class="mg-ipucu-kutu">${ic('ampul')}<div><b>İpucu:</b> ${esc(senaryo.ipucuBagimsiz)} ${esc(senaryo.ipucuBagimli)}</div></div>` : ''}
+        ${ipucu ? `<div class="mg-ipucu-kutu">${ic('ampul')}<div><b>İpucu:</b> ${esc(senaryo.ipucuBagimsiz || '')} ${esc(senaryo.ipucuBagimli || '')}</div></div>` : ''}
         ${geriBildirim}
 
         <div class="mg-aksiyon">
           <div class="mg-aksiyon-sol">
             <button type="button" class="btn ghost" data-mg="ipucu">${ic('ampul')} ${ipucu ? 'İpucunu gizle' : 'İpucuna ihtiyacım var'}</button>
-            <button type="button" class="btn" data-mg="kontrol"${secili ? '' : ' disabled'}>${kontrol && !tam ? 'Cevaplarımı tekrar kontrol et' : 'Cevapları kontrol et'}</button>
+            <button type="button" class="btn" data-mg="kontrol"${hazir ? '' : ' disabled'}>${kontrol && !tam ? 'Cevaplarımı tekrar kontrol et' : 'Cevapları kontrol et'}</button>
             ${tam ? tamamBtn : ''}
           </div>
           <span class="mg-durum">${tam ? 'Mikro-görev tamamlandı' : 'Mikro-görev devam ediyor'}</span>
@@ -327,6 +650,82 @@ window.GorevPrototip = (() => {
     }
 
     const onClick = ev => {
+      // M1 Sıralama okları
+      const siraBtn = ev.target.closest('[data-mg-sira]');
+      if (siraBtn && !siraBtn.disabled) {
+        const pos = +siraBtn.dataset.mgSira;
+        const yon = +siraBtn.dataset.yon;
+        const yeni = pos + yon;
+        if (yeni >= 0 && yeni < siraList.length) {
+          [siraList[pos], siraList[yeni]] = [siraList[yeni], siraList[pos]];
+          kontrol = false;
+          draw();
+        }
+        return;
+      }
+      // M2 Eşleştirme çipleri ve yuvaları
+      const esCip = ev.target.closest('[data-mg-escip]');
+      if (esCip) {
+        const i = +esCip.dataset.mgEscip;
+        esSec = esSec === i ? null : i;
+        draw();
+        return;
+      }
+      const esSlot = ev.target.closest('[data-mg-esslot]');
+      if (esSlot) {
+        const ri = +esSlot.dataset.mgEsslot;
+        if (esSec == null) {
+          delete esYer[ri];
+        } else {
+          Object.keys(esYer).forEach(k => { if (esYer[k] === esSec) delete esYer[k]; });
+          esYer[ri] = esSec;
+          esSec = null;
+        }
+        kontrol = false;
+        draw();
+        return;
+      }
+      // M3 & M5 Sınıflandırma çipleri ve kutuları
+      const snCip = ev.target.closest('[data-mg-sncip]');
+      if (snCip) {
+        const i = +snCip.dataset.mgSncip;
+        sinifSec = sinifSec === i ? null : i;
+        draw();
+        return;
+      }
+      const snKutu = ev.target.closest('[data-mg-snkutu]');
+      if (snKutu && !ev.target.closest('[data-mg-sncip]')) {
+        if (sinifSec != null) {
+          sinifYer[sinifSec] = +snKutu.dataset.mgSnkutu;
+          sinifSec = null;
+          kontrol = false;
+          draw();
+        }
+        return;
+      }
+      const snHavuz = ev.target.closest('[data-mg-snhavuz]');
+      if (snHavuz && !ev.target.closest('[data-mg-sncip]')) {
+        if (sinifSec != null) {
+          delete sinifYer[sinifSec];
+          sinifSec = null;
+          kontrol = false;
+          draw();
+        }
+        return;
+      }
+      // M4 Tabakalı örneklem noktaları
+      const tbBtn = ev.target.closest('[data-mg-tb]');
+      if (tbBtn) {
+        const ti = +tbBtn.dataset.mgTb;
+        const ni = +tbBtn.dataset.n;
+        const l = tabakaSec[ti] = tabakaSec[ti] || [];
+        const idx = l.indexOf(ni);
+        if (idx < 0) l.push(ni); else l.splice(idx, 1);
+        kontrol = false;
+        draw();
+        return;
+      }
+      // Çoktan seçmeli soru şıkları
       const sec = ev.target.closest('[data-mg-sec]');
       if (sec) {
         if (sec.dataset.mgSec === '1') sec1 = +sec.dataset.i;

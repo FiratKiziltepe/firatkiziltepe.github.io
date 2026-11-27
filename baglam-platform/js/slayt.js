@@ -267,60 +267,388 @@ window.SlaytSunum = (() => {
     },
   ];
 
-  /* Öğrenci ders ekranında (#ders-m2-ornek) başka bir ilgi alanı seçilmişse
-     o bağlamın senaryo nesnesinden (c) dinamik 5 slaytlık yapı üretir. */
-  function baglamdanUret(b) {
-    if (b.alt && b.alt.id === 'spor.basketbol') return PROFILLER[1];
-    if (b.alt && b.alt.id === 'yemek.kahve') return PROFILLER[2];
+  /* Öğrenci ders ekranında (#ders-mX-ornek) veya modül geçişlerinde
+     modülün konusuna (m1..m6) ve öğrencinin ilgi bağlamına (b) özgü 5 slaytlık farklı şablonlar üretir. */
+  function baglamdanUret(b, modulId = 'm2') {
+    if (modulId === 'm2' && b.alt && b.alt.id === 'spor.basketbol') return PROFILLER[1];
+    if (modulId === 'm2' && b.alt && b.alt.id === 'yemek.kahve') return PROFILLER[2];
     const c = b.c, et = c.veri.etiket, dg = c.veri.deger;
-    return {
-      id: b.alt ? b.alt.id : 'genel',
-      etiket: b.alt ? b.alt.ad : 'Kişiselleştirilmiş bağlam',
+    const slugId = b.alt ? b.alt.id.replace(/\./g, '-') : 'genel';
+    const temaTip = b.ilgi ? b.ilgi.id : 'genel';
+    const baz = {
+      id: `${modulId}-${slugId}`,
+      modulId,
+      etiket: b.alt ? `${b.alt.ad} (${modulId.toUpperCase()})` : 'Kişiselleştirilmiş bağlam',
       kisa: b.alt ? b.alt.ad : 'Seçili bağlam',
       altBaslik: c.tema,
       sureToplam: '78 sn',
-      temaTip: b.ilgi ? b.ilgi.id : 'genel',
+      temaTip,
+    };
+
+    if (modulId === 'm1') {
+      return {
+        ...baz,
+        sablonAd: 'Gözlemden Bilimsel Döngüye & Etiğe',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Gözlem', ikon: 'odul',
+            ustBaslik: 'Günlük bir gözlemle başla', altBaslik: c.tema, soru: c.gozlem,
+            image_path: `images/m1-${slugId}-s1.png`, audio_path: `audio/m1-${slugId}-s1.mp3`,
+            narration: `Her bilimsel araştırma merak uyandıran bir gözlemle başlar: ${c.gozlem}`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 2, slide_type: 'claim_vs_testable', kisaAd: '2. Sınanabilirlik', ikon: 'izgara',
+            ustBaslik: 'Gündelik görüşten sınanabilir soruya', altBaslik: 'Bilimsel iddianın ölçütleri',
+            gorusBaslik: 'Gündelik Görüş (Sınanamaz)',
+            gorusMetin: c.gorus,
+            gorusNeden: 'Öznel yargı içerir; kimin, hangi koşulda ve hangi ölçümle karşılaştırılacağı belirsizdir.',
+            bilimselBaslik: 'Bilimsel Araştırma Sorusu (Sınanabilir)',
+            bilimselMetin: c.soru,
+            kriterler: [`Karşılaştırılan: ${c.bagimsiz}`, `Ölçülen çıktı: ${c.bagimli}`, `Hedef grup: ${c.evren}`],
+            audio_path: `audio/m1-${slugId}-s2.mp3`,
+            narration: `"${c.gorus}" ifadesi kişisel bir kanaattir. Oysa "${c.soru}" sorusu ölçülebilir değişkenler tanımladığı için bilimsel olarak sınanabilir.`,
+            estimated_duration_seconds: 17,
+          },
+          {
+            slide_id: 3, slide_type: 'process_timeline', kisaAd: '3. Araştırma Döngüsü', ikon: 'dal',
+            ustBaslik: 'Sistemli araştırma adımları', altBaslik: 'Gözlemden kanıta uzanan 4 aşama',
+            adimlar: [
+              { no: '01', baslik: 'Soru & Hipotez', aciklama: c.soru },
+              { no: '02', baslik: 'Örneklem & Veri', aciklama: `${c.evren} içinden ${c.arac} ile veri toplanması` },
+              { no: '03', baslik: 'Analiz & Bulgu', aciklama: `${et.join(', ')} gruplarının (${c.veri.olcu}) karşılaştırılması` },
+              { no: '04', baslik: 'Açık Raporlama', aciklama: c.bulgu },
+            ],
+            audio_path: `audio/m1-${slugId}-s3.mp3`,
+            narration: 'Soru netleştikten sonra araştırmacı sistemli biçimde veri toplar, grupları analiz eder ve bulguları şeffafça raporlar.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 4, slide_type: 'ethics_pillars', kisaAd: '4. Bilimsel Etik', ikon: 'grafik',
+            ustBaslik: 'Bilimsel etik ve katılımcı hakları', altBaslik: 'Veri toplarken uyulması gereken ilkeler',
+            etikSenaryo: c.etik,
+            ilkeler: [
+              { baslik: 'Bilgilendirilmiş Onam', aciklama: `Katılımcılara çalışmanın amacı (${c.tema}) açıklanır ve gönüllü onayları alınır.` },
+              { baslik: 'Gizlilik & Anonimlik', aciklama: c.etik },
+              { baslik: 'Dürüst & Açık Bilim', aciklama: 'Beklentiyi desteklemese bile tüm ölçümler çarpıtılmadan raporlanır.' },
+            ],
+            audio_path: `audio/m1-${slugId}-s4.mp3`,
+            narration: `Bilimsel araştırmada doğruluk kadar etik sorumluluk da esastır. ${c.etik}`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Sentez', ikon: 'tik',
+            ustBaslik: 'Bilimsel araştırmanın temeli', altBaslik: 'Çözümün özeti',
+            solEtiket: 'Başlangıç Noktası', bagimsiz: 'Gözlem & Sınanabilir Soru',
+            sagEtiket: 'Bilimsel Çıktı', bagimli: 'Etik & Kanıta Dayalı Bulgu',
+            ozetNot: `Bilimsel bilgi; kişisel görüşleri sistemli veri (${c.arac}) ve etik kurallarla sınayarak güvenilir yanıtlara ulaşır.`,
+            audio_path: `audio/m1-${slugId}-s5.mp3`,
+            narration: 'Özetle bilimsel araştırma; merak edilen bir gözlemi sınanabilir soruya dönüştürür, etik kurallarla veri toplar ve kanıta dayalı sonuca ulaşır.',
+            estimated_duration_seconds: 14,
+          },
+        ],
+      };
+    }
+
+    if (modulId === 'm3') {
+      return {
+        ...baz,
+        sablonAd: 'Aynı Konuya Üç Farklı Araştırma Deseni',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Konu & Amaç', ikon: 'odul',
+            ustBaslik: 'Sorunun amacı araştırma desenini belirler', altBaslik: c.tema, soru: `“${c.tema}” konusunu farklı sorularla nasıl araştırabiliriz?`,
+            image_path: `images/m3-${slugId}-s1.png`, audio_path: `audio/m3-${slugId}-s1.mp3`,
+            narration: `Aynı ilgi alanı üzerinde sorduğumuz sorunun amacı değiştiğinde, kullanacağımız araştırma deseni de değişir.`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 2, slide_type: 'design_matrix', kisaAd: '2. Üç Yaklaşım', ikon: 'izgara',
+            ustBaslik: 'Nicel, Nitel ve Karma Desen Karşılaştırması', altBaslik: 'Aynı bağlamda üç farklı araştırma kurgusu',
+            desenler: [
+              { tur: 'Nicel Desen', rozet: 'Sayısal Ölçüm', soru: c.soru, yontem: `${c.arac} ile ${et.join(' / ')} gruplarından sayısal veri toplanır.` },
+              { tur: 'Nitel Desen', rozet: 'Derinlemesine Anlam', soru: c.nitel, yontem: 'Az sayıda katılımcıyla yarı yapılandırılmış derinlemesine görüşmeler yapılır.' },
+              { tur: 'Karma Desen', rozet: 'Sayı + Deneyim', soru: 'Sayısal farkın ardındaki kişisel deneyimler nelerdir?', yontem: c.karma },
+            ],
+            audio_path: `audio/m3-${slugId}-s2.mp3`,
+            narration: 'Sayısal etki ve ilişki için nicel, yaşanmış deneyimi anlamak için nitel, her ikisini bütünleştirmek için karma desen kullanılır.',
+            estimated_duration_seconds: 17,
+          },
+          {
+            slide_id: 3, slide_type: 'decision_tree', kisaAd: '3. Karar Ağacı', ikon: 'dal',
+            ustBaslik: 'Deneysel mi, İlişkisel mi?', altBaslik: 'Araştırmacının değişkene müdahalesi var mı?',
+            kokSoru: `Araştırmacı “${c.bagimsiz}” değişkenine kendisi müdahale edip gruplara rastgele atama yapıyor mu?`,
+            dallar: [
+              { kosul: 'EVET — Müdahale & Rastgele Atama Var', desen: 'Deneysel Desen', ornek: `Katılımcıları rastgele ${et.join(', ')} koşullarına atayıp "${c.bagimli}" sonucunu ölçmek.` },
+              { kosul: 'HAYIR — Müdahale Yok, Mevcut Durum Ölçülüyor', desen: 'İlişkisel (Korelasyonel) Desen', ornek: `Katılımcıların hâlihazırdaki "${c.bagimsiz}" alışkanlıkları ile "${c.bagimli}" puanları arasındaki ilişkiyi incelemek.` },
+            ],
+            audio_path: `audio/m3-${slugId}-s3.mp3`,
+            narration: 'Nicel araştırmalarda araştırmacı koşulları kendisi değiştirip gruplara müdahale ediyorsa deneysel, mevcut durumu müdahalesiz ölçüyorsa ilişkisel desen söz konusudur.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 4, slide_type: 'mixed_sequence', kisaAd: '4. Karma Akış', ikon: 'grafik',
+            ustBaslik: 'Açıklayıcı Sıralı Karma Desen Nasıl İşler?', altBaslik: 'Önce nicel eğilim, sonra nitel derinlik',
+            asama1: { baslik: '1. Aşama: Nicel Veri Toplama & Analiz', detay: `${c.arac} ile gruplar karşılaştırılır (${c.bulgu})` },
+            asama2: { baslik: '2. Aşama: Nitel Görüşmelerle Açıklama', detay: `Neden bu farkın oluştuğunu anlamak için "${c.nitel}" sorusuyla uç gruplarla görüşülür.` },
+            sentez: c.karma,
+            audio_path: `audio/m3-${slugId}-s4.mp3`,
+            narration: `Açıklayıcı sıralı karma desende önce nicel verilerle genel tablo ortaya konur, ardından yapılan görüşmelerle bu sayıların arkasındaki nedenler açıklanır.`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Desen Özeti', ikon: 'tik',
+            ustBaslik: 'Sorudan uygun araştırma desenine', altBaslik: 'Çözümün özeti',
+            solEtiket: 'Araştırma Sorusunun Doğası', bagimsiz: 'Etki / İlişki / Deneyim',
+            sagEtiket: 'Seçilen Araştırma Deseni', bagimli: 'Deneysel · İlişkisel · Nitel · Karma',
+            ozetNot: 'Yöntem seçiminde altın kural: Araştırma desenini araştırmacının alışkanlığı değil, araştırma sorusunun amacı belirler.',
+            audio_path: `audio/m3-${slugId}-s5.mp3`,
+            narration: 'Özetle araştırma sorusu müdahaleli etkiyi soruyorsa deneysel, doğal ilişkiyi soruyorsa ilişkisel, deneyimi soruyorsa nitel desen seçilir.',
+            estimated_duration_seconds: 14,
+          },
+        ],
+      };
+    }
+
+    if (modulId === 'm4') {
+      return {
+        ...baz,
+        sablonAd: 'Evrenden Temsili ve Tabakalı Örnekleme',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Hedef Grup', ikon: 'odul',
+            ustBaslik: 'Araştırmada kimlerden veri toplanacak?', altBaslik: c.tema, soru: `${c.evren} grubunun tamamına ulaşmadan güvenilir sonuç elde edebilir miyiz?`,
+            image_path: `images/m4-${slugId}-s1.png`, audio_path: `audio/m4-${slugId}-s1.mp3`,
+            narration: `Araştırmamızda hedef grubumuz: ${c.evren}. Zaman ve maliyet nedeniyle herkese ulaşmak yerine evreni temsil eden bir örneklem seçmeliyiz.`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 2, slide_type: 'population_vs_sample', kisaAd: '2. Evren & Örneklem', ikon: 'izgara',
+            ustBaslik: 'Evren, Örneklem ve Analiz Birimi', altBaslik: 'Bütünden temsil gücü yüksek alt kümeye geçiş',
+            evrenTanim: c.evren,
+            orneklemTanim: `Evrenden bilimsel yöntemle seçilen 120 ${c.birim} (n = 120)`,
+            birimTanim: `Her bir ${c.birim}`,
+            nedenOrneklem: 'Evrendeki tüm birimlere ulaşmak yerine, evrenin yapısını bozmayan küçük bir kesitle çalışıp sonuçları evrene genelleriz.',
+            audio_path: `audio/m4-${slugId}-s2.mp3`,
+            narration: `Sonuçları genellemek istediğimiz bütün gruba evren, veri topladığımız alt gruba örneklem, her bir katılımcıya ise analiz birimi denir.`,
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 3, slide_type: 'sampling_bias_comparison', kisaAd: '3. Temsil Yanlılığı', ikon: 'dal',
+            ustBaslik: 'Yanlı Seçim vs Seçkisiz (Rastgele) Seçim', altBaslik: 'Örneklem ne zaman evreni temsil etmez?',
+            yanliBaslik: 'Olasılıksız / Yanlı Seçim Riski (✕)',
+            yanliAciklama: `Yalnızca en kolay ulaşılan veya sadece "${(c.tabakalar && c.tabakalar[0]) || et[0]}" grubundaki ${c.birim}lerle çalışmak diğer alt grupları dışarıda bırakır.`,
+            dogruBaslik: 'Olasılıklı & Tabakalı Seçim (✓)',
+            dogruAciklama: `Evrendeki tüm alt grupların (${(c.tabakalar || et).join(', ')}) örneklemde kendi ağırlıklarıyla ve seçkisiz biçimde yer almasını sağlar.`,
+            audio_path: `audio/m4-${slugId}-s3.mp3`,
+            narration: 'Yalnızca elimizin altındaki tek bir alt gruptan veri toplarsak örneklem yanlı olur ve sonuçlar bütün evrene genellenemez.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 4, slide_type: 'stratified_grid', kisaAd: '4. Tabakalı Seçim', ikon: 'grafik',
+            ustBaslik: 'Tabakalı Örnekleme Dağılımı', altBaslik: 'Alt grupların örneklemde dengeli temsili',
+            birim: c.birim,
+            tabakalar: (c.tabakalar || et).slice(0, 3).map((ad, i) => ({
+              ad,
+              evrenSayi: [400, 400, 400][i] || 300,
+              orneklemSayi: [40, 40, 40][i] || 30,
+              oran: '%10 seçkisiz seçim',
+            })),
+            toplamNot: `Toplam örneklem büyüklüğü: n = 120 ${c.birim} (3 tabakadan eşit ve rastgele seçildi)`,
+            audio_path: `audio/m4-${slugId}-s4.mp3`,
+            narration: `Tabakalı örneklemede evren önce ${(c.tabakalar || et).slice(0, 3).join(', ')} tabakalarına ayrılır ve her tabakadan rastgele seçim yapılır.`,
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Örnekleme Özeti', ikon: 'tik',
+            ustBaslik: 'Evrenden temsili örnekleme', altBaslik: 'Çözümün özeti',
+            solEtiket: 'Hedef Evren (Bütün)', bagimsiz: c.evren,
+            sagEtiket: 'Temsili Örneklem (Alt Küme)', bagimli: `Tabakalı seçilen ${c.birim} grubu`,
+            ozetNot: 'İyi bir örneklem sadece kalabalık olan değil, evrendeki alt grupları yansız biçimde temsil edendir.',
+            audio_path: `audio/m4-${slugId}-s5.mp3`,
+            narration: 'Özetle tabakalı ve seçkisiz örnekleme, tüm alt grupların araştırmada adil biçimde temsil edilmesini güvence altına alır.',
+            estimated_duration_seconds: 14,
+          },
+        ],
+      };
+    }
+
+    if (modulId === 'm5') {
+      return {
+        ...baz,
+        sablonAd: 'Ölçme Aracı, Geçerlik & Güvenirlik Hedef Analizi',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Ölçme İhtiyacı', ikon: 'odul',
+            ustBaslik: 'Değişkeni nasıl doğru ve tutarlı ölçeriz?', altBaslik: c.tema, soru: `“${c.bagimli}” özelliğini bilimsel olarak hangi araçla ve nasıl ölçmeliyiz?`,
+            image_path: `images/m5-${slugId}-s1.png`, audio_path: `audio/m5-${slugId}-s1.mp3`,
+            narration: `Araştırmamızda "${c.bagimli}" değişkenini ölçmek için "${c.arac}" kullanıyoruz. Ancak bu aracın hem geçerli hem de güvenilir olması gerekir.`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 2, slide_type: 'instrument_blueprint', kisaAd: '2. Ölçme Aracı', ikon: 'izgara',
+            ustBaslik: 'Ölçülecek Yapı ve Veri Toplama Aracı Uyumu', altBaslik: 'Hedef değişkene uygun ölçme aracının seçimi',
+            olculenYapi: c.bagimli,
+            secilenArac: c.arac,
+            aracGerekce: `Bu araç, "${c.bagimli}" değişkenini dolaylı tahminler yerine doğrudan ve standartlaştırılmış biçimde kayıt altına alır.`,
+            kontrolListesi: ['Standart uygulama yönergesi', 'Kapsam temsili', 'Nesnel puanlama anahtarı'],
+            audio_path: `audio/m5-${slugId}-s2.mp3`,
+            narration: `Veri toplama aracı, ölçmek istediğimiz "${c.bagimli}" yapısına doğrudan karşılık gelmeli ve standart bir yönergeyle uygulanmalıdır.`,
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 3, slide_type: 'bullseye_targets', kisaAd: '3. Hedef Tahtası', ikon: 'dal',
+            ustBaslik: 'Geçerlik ve Güvenirlik: Hedef Tahtası Analojisi', altBaslik: 'Tutarlılık (Güvenirlik) ve Doğru Hedef (Geçerlik)',
+            hedefler: [
+              { tip: 'daginik', baslik: 'Güvenilir Değil & Geçersiz', aciklama: 'Ölçümler her seferinde farklı ve hedeften uzak (Rastgele hata yüksek).' },
+              { tip: 'kaymis', baslik: 'Güvenilir Ama Geçersiz', aciklama: `Her ölçümde aynı sonucu veriyor ama "${c.bagimli}" yerine başka bir özelliği ölçüyor.` },
+              { tip: 'merkez', baslik: 'Hem Güvenilir Hem Geçerli', aciklama: `Doğrudan "${c.bagimli}" özelliğini her tekrarda tutarlı ve isabetli biçimde ölçüyor.` },
+            ],
+            audio_path: `audio/m5-${slugId}-s3.mp3`,
+            narration: 'Bir ölçme aracı her seferinde aynı hatalı noktayı vuruyorsa güvenilirdir ama geçerli değildir. Bilimsel ölçüm tam merkezi tutarlı biçimde vurmalıdır.',
+            estimated_duration_seconds: 17,
+          },
+          {
+            slide_id: 4, slide_type: 'threat_diagnosis', kisaAd: '4. Hata Teşhisi', ikon: 'grafik',
+            ustBaslik: 'Bu Senaryoda Geçerlik ve Güvenirlik Tehditleri', altBaslik: 'Ölçmeye karışabilecek hata kaynakları',
+            gecerlikTehdidi: c.gecersiz || `Ölçme aracının "${c.bagimli}" yerine katılımcının genel hızını veya ilgisiz bir becerisini ölçmesi.`,
+            gecerlikOnlem: 'Maddelerin ve ölçüm kriterlerinin yalnızca hedef kazanımı/özelliği ölçtüğünden uzman görüşüyle emin olmak.',
+            guvenirlikTehdidi: c.guvenilmez || 'Aynı koşulda kısa aralıkla tekrarlanan ölçümlerde veya farklı puanlayıcılar arasında çok farklı sonuçlar çıkması.',
+            guvenirlikOnlem: 'Ortam koşullarını standartlaştırmak ve açık bir puanlama rubriği kullanmak.',
+            audio_path: `audio/m5-${slugId}-s4.mp3`,
+            narration: 'Başka bir özelliği ölçmek geçerliği zedelerken, aynı koşulda tutarsız puanlar elde etmek güvenirlik sorununa işaret eder.',
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Ölçme Özeti', ikon: 'tik',
+            ustBaslik: 'Nitelikli veri toplamanın iki direği', altBaslik: 'Çözümün özeti',
+            solEtiket: 'Güvenirlik (Tutarlılık)', bagimsiz: 'Kararlı & Hatasız Ölçüm',
+            sagEtiket: 'Geçerlik (Amaca Uygunluk)', bagimli: `Doğrudan “${c.bagimli}” Ölçümü`,
+            ozetNot: `Etik kural: ${c.etik}`,
+            audio_path: `audio/m5-${slugId}-s5.mp3`,
+            narration: 'Özetle güvenirlik ölçümlerin tutarlılığını, geçerlik ise gerçekten hedeflediğimiz özelliği ölçmeyi güvence altına alır.',
+            estimated_duration_seconds: 14,
+          },
+        ],
+      };
+    }
+
+    if (modulId === 'm6') {
+      return {
+        ...baz,
+        sablonAd: 'Ham Veriden Grafiğe, Nesnel Bulguya ve Sınırlılıklara',
+        slaytlar: [
+          {
+            slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Veri Seti', ikon: 'odul',
+            ustBaslik: 'Toplanan verilerden bilimsel bulguya', altBaslik: c.tema, soru: `Toplanan “${c.veri.olcu}” verilerini nasıl analiz edip abartısız raporlamalıyız?`,
+            image_path: `images/m6-${slugId}-s1.png`, audio_path: `audio/m6-${slugId}-s1.mp3`,
+            narration: `Araştırmanın son aşamasında "${c.arac}" ile toplanan ham veriler temizlenir, grupların ortalamaları hesaplanır ve yorumlanır.`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 2, slide_type: 'data_cleaning_table', kisaAd: '2. Veri Tablosu', ikon: 'izgara',
+            ustBaslik: 'Verilerin Hazırlanması ve Betimsel Tablo', altBaslik: `Ölçülen gösterge: ${c.veri.olcu}`,
+            olcuBirimi: c.veri.olcu,
+            satirlar: et.map((grup, i) => ({
+              grup,
+              n: '60',
+              ortalama: String(dg[i]),
+              not: i === 0 ? 'Alt grup' : i === et.length - 1 ? 'Üst grup' : 'Orta grup',
+            })),
+            temizlikNotu: 'Analiz öncesi eksik girişler ve hatalı uç değerler kontrol edilerek grup ortalamaları hesaplanmıştır.',
+            audio_path: `audio/m6-${slugId}-s2.mp3`,
+            narration: `Ham veriler kodlanıp temizlendikten sonra ${et.join(', ')} gruplarının ortalama değerleri tablo halinde özetlenir.`,
+            estimated_duration_seconds: 16,
+          },
+          {
+            slide_id: 3, slide_type: 'dependent_var', kisaAd: '3. Grafik Okuma', ikon: 'grafik',
+            ustBaslik: 'Görselleştirme ve Örüntü Okuma', altBaslik: 'Gruplar arasındaki farkın grafikle gösterimi',
+            degisken: c.veri.olcu,
+            oncekiRef: `Karşılaştırılan gruplar (${c.bagimsiz}): ${et.join(' · ')}`,
+            veri: et.map((etiket, idx) => ({ etiket, deger: dg[idx] })),
+            audio_path: `audio/m6-${slugId}-s3.mp3`,
+            narration: `Grafik incelendiğinde gruplar arasındaki dağılım açıkça görülür: ${c.bulgu}`,
+            estimated_duration_seconds: 15,
+          },
+          {
+            slide_id: 4, slide_type: 'correlation_vs_causation', kisaAd: '4. Bulgu Yazımı', ikon: 'dal',
+            ustBaslik: 'İlişki vs Nedensellik: Doğru Bulgu Cümlesi', altBaslik: 'Verinin söylediğinden fazlasını iddia etmemek',
+            yanlisBaslik: 'Hatalı / Aşırı Genellenmiş Yorum (✕)',
+            yanlisMetin: `“${c.bagimsiz}, bütün insanlarda ${c.bagimli.toLocaleLowerCase('tr')} sonucunu kesin olarak belirleyen tek nedendir.”`,
+            yanlisNeden: 'Kontrolsüz değişkenleri yok sayar, ilişkisel veriden kesin nedensellik çıkarır ve örneklem dışına aşırı genelleme yapar.',
+            dogruBaslik: 'Nesnel ve Veriye Sadık Bulgu Cümlesi (✓)',
+            dogruMetin: c.bulgu,
+            dogruNeden: 'Yalnızca bu örneklemde ölçülen sayısal değerleri ve gözlenen farkı/ilişkiyi nesnel biçimde aktarır.',
+            audio_path: `audio/m6-${slugId}-s4.mp3`,
+            narration: 'Bilimsel raporda sayılar abartılmaz ve rastgele atama yoksa kesin neden-sonuç iddiasında bulunulmaz; yalnızca verinin desteklediği bulgu yazılır.',
+            estimated_duration_seconds: 17,
+          },
+          {
+            slide_id: 5, slide_type: 'limitations_report', kisaAd: '5. Sınırlılıklar', ikon: 'tik',
+            ustBaslik: 'Şeffaf Raporlama ve Araştırmanın Sınırlılıkları', altBaslik: 'Çözümün özeti',
+            bulguOzeti: c.bulgu,
+            sinirliliklar: [
+              `Örneklem Sınırı: Bulgular yalnızca "${c.evren}" kapsamındaki katılımcılarla sınırlıdır.`,
+              `Kontrol Edilmeyen Etkenler: ${(c.kontrol || ['Ön deneyim', 'Ortam']).join(' ve ')} dışındaki bireysel farklılıklar sonucu etkilemiş olabilir.`,
+              'Gelecek Önerisi: Farklı yaş ve deneyim gruplarında uzun süreli (boylamsal) ölçümler tekrarlanmalıdır.',
+            ],
+            audio_path: `audio/m6-${slugId}-s5.mp3`,
+            narration: 'İyi bir araştırma raporu, ulaştığı bulguyu çalışmanın yöntemsel sınırlılıkları ve gelecek araştırmalar için önerilerle birlikte şeffafça paylaşır.',
+            estimated_duration_seconds: 15,
+          },
+        ],
+      };
+    }
+
+    // Varsayılan Modül 2 (m2): Araştırma Problemi, Sorusu ve Değişkenler (Soruyu Daraltma Hunisi + Bağımsız/Bağımlı/Kontrol)
+    return {
+      ...baz,
+      sablonAd: 'Geniş Sorudan Değişkenlere ve Deneysel Kurgulaya',
       slaytlar: [
         {
           slide_id: 1, slide_type: 'scenario_scene', kisaAd: '1. Senaryo', ikon: 'odul',
-          ustBaslik: 'Bir araştırma senaryosu', altBaslik: c.tema, soru: c.soru,
-          image_path: `images/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s1.png`,
-          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s1.mp3`,
+          ustBaslik: 'Bir araştırma problemi ve senaryosu', altBaslik: c.tema, soru: c.soru,
+          image_path: `images/m2-${slugId}-s1.png`,
+          audio_path: `audio/m2-${slugId}-s1.mp3`,
           narration: `${c.gozlem} Bu gözlemden yola çıkarak araştırma sorumuz: ${c.soru}`,
           estimated_duration_seconds: 16,
         },
         {
-          slide_id: 2, slide_type: 'condition_cards', kisaAd: '2. Araştırma', ikon: 'izgara',
-          ustBaslik: 'Araştırma nasıl yürütülüyor?', altBaslik: c.veri.olcu,
+          slide_id: 2, slide_type: 'question_funnel', kisaAd: '2. Soruyu Daralt', ikon: 'izgara',
+          ustBaslik: 'Geniş meraktan odaklanmış araştırma sorusuna', altBaslik: c.veri.olcu,
+          zayifSoru: c.zayif || `${c.tema} iyi midir?`,
+          gucluSoru: c.soru,
           kosullar: et.map((ad, idx) => ({ ad, deger: String(dg[idx]), diyagram: `genel${idx + 1}` })),
-          dipnot: 'Örnek amaçlı kurgusal araştırma verileri',
-          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s2.mp3`,
-          narration: `Araştırmacı ${et.join(', ')} koşullarını karşılaştırarak "${c.veri.olcu}" ölçümünü kaydetmiştir.`,
+          dipnot: 'Örnek amaçlı kurgusal araştırma koşulları',
+          audio_path: `audio/m2-${slugId}-s2.mp3`,
+          narration: `Çok geniş bir soru yerine, ${et.join(', ')} koşullarını karşılaştırarak "${c.veri.olcu}" ölçümünü hedefleyen odaklanmış bir soru kuruyoruz.`,
           estimated_duration_seconds: 17,
         },
         {
-          slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Bağımsız değişken', ikon: 'dal',
-          ustBaslik: 'Bağımsız değişkeni belirleyelim', altBaslik: 'Araştırmacının değiştirdiği unsur',
+          slide_id: 3, slide_type: 'independent_var', kisaAd: '3. Bağımsız Değişken', ikon: 'dal',
+          ustBaslik: 'Bağımsız değişkeni belirleyelim', altBaslik: 'Araştırmacının değiştirdiği / karşılaştırdığı unsur',
           degisken: c.bagimsiz, seviyeler: et, digerRef: `Ölçülen sonuç: ${c.bagimli}`,
-          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s3.mp3`,
+          audio_path: `audio/m2-${slugId}-s3.mp3`,
           narration: `Araştırmacının karşılaştırdığı ve değiştirdiği unsur "${c.bagimsiz}" olduğu için bağımsız değişken budur.`,
           estimated_duration_seconds: 15,
         },
         {
-          slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Bağımlı değişken', ikon: 'grafik',
-          ustBaslik: 'Bağımlı değişkeni belirleyelim', altBaslik: 'Araştırmacının ölçtüğü sonuç',
+          slide_id: 4, slide_type: 'dependent_var', kisaAd: '4. Bağımlı & Kontrol', ikon: 'grafik',
+          ustBaslik: 'Bağımlı ve kontrol değişkenleri', altBaslik: 'Araştırmacının ölçtüğü sonuç ve sabit tutulanlar',
           degisken: c.bagimli, oncekiRef: `Değiştirilen unsur: ${c.bagimsiz}`,
+          kontrolDegiskenleri: c.kontrol || ['Katılımcı düzeyi', 'Uygulama ortamı'],
           veri: et.map((etiket, idx) => ({ etiket, deger: dg[idx] })),
-          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s4.mp3`,
-          narration: `Değişime bağlı olarak ölçülen sonuç "${c.bagimli}" olduğundan bağımlı değişken budur.`,
+          audio_path: `audio/m2-${slugId}-s4.mp3`,
+          narration: `Değişime bağlı olarak ölçülen sonuç "${c.bagimli}" bağımlı değişkendir; ${(c.kontrol || []).join(' ve ')} ise sonucu karıştırmaması için sabit tutulur.`,
           estimated_duration_seconds: 16,
         },
         {
-          slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Özet', ikon: 'tik',
-          ustBaslik: 'Araştırmanın değişkenleri', altBaslik: 'Çözümün özeti',
+          slide_id: 5, slide_type: 'summary_relation', kisaAd: '5. Değişken Özeti', ikon: 'tik',
+          ustBaslik: 'Araştırmanın değişken mimarisi', altBaslik: 'Çözümün özeti',
           bagimsiz: c.bagimsiz, bagimli: c.bagimli,
-          ozetNot: 'Bir değişkeni değiştiriyor, diğerindeki sonucu ölçüyoruz.',
-          audio_path: `audio/m2-${b.alt ? b.alt.id.replace(/\./g, '-') : 'genel'}-s5.mp3`,
+          kontrolList: c.kontrol,
+          ozetNot: 'Bağımsız değişkeni değiştiriyor, kontrol değişkenlerini sabit tutuyor ve bağımlı değişkendeki sonucu ölçüyoruz.',
+          audio_path: `audio/m2-${slugId}-s5.mp3`,
           narration: `Özetle bağımsız değişken "${c.bagimsiz}", bağımlı değişken ise "${c.bagimli}" olarak belirlenir.`,
           estimated_duration_seconds: 14,
         },
@@ -478,42 +806,287 @@ window.SlaytSunum = (() => {
     </svg>`;
   }
 
+  function hedefSVG(tip) {
+    const pts = tip === 'daginik'
+      ? [[24, 26], [76, 22], [28, 74], [78, 68], [52, 18]]
+      : tip === 'kaymis'
+        ? [[70, 25], [75, 29], [67, 30], [73, 22], [77, 26]]
+        : [[49, 49], [52, 51], [48, 52], [51, 47], [50, 50]];
+    const renk = tip === 'merkez' ? '#1F9D61' : tip === 'kaymis' ? '#EE6C2B' : '#C7472B';
+    return `<svg viewBox="0 0 100 100" class="slayt-hedef-svg" aria-hidden="true">
+      <circle cx="50" cy="50" r="44" fill="#fff" stroke="#CBD8D4" stroke-width="2"/>
+      <circle cx="50" cy="50" r="29" fill="none" stroke="#CBD8D4" stroke-width="1.8"/>
+      <circle cx="50" cy="50" r="15" fill="#E1F3F0" stroke="#0E8C7F" stroke-width="1.8"/>
+      <circle cx="50" cy="50" r="3.5" fill="#0E8C7F"/>
+      ${pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${renk}" stroke="#fff" stroke-width="1.2"/>`).join('')}
+    </svg>`;
+  }
+
   function slaytGovde(profil, s) {
     if (s.slide_type === 'scenario_scene') {
       const gorsel = s.image_data_url
         ? `<img class="slayt-uretilen-img" src="${s.image_data_url}" alt="${esc(s.altBaslik || s.ustBaslik)}">`
-        : sahneSVG(profil.temaTip);
-      return `<div class="slayt-gorsel-kutu">${gorsel}<span class="slayt-dosya-etiket">${esc(s.image_path)}</span></div>
+        : sahneSVG(profil.temaTip, s.ustBaslik, s.altBaslik);
+      return `<div class="slayt-gorsel-kutu">${gorsel}<span class="slayt-dosya-etiket">${esc(s.image_path || 'Sahne')}</span></div>
         <div class="slayt-soru-serit">${esc(s.soru)}</div>`;
     }
+
+    /* MODÜL 1 ŞABLONLARI: claim_vs_testable, process_timeline, ethics_pillars */
+    if (s.slide_type === 'claim_vs_testable') {
+      return `<div class="slayt-ikili-kars">
+          <div class="slayt-kars-kart yanlis">
+            <span class="slayt-kars-etiket">✕ ${esc(s.gorusBaslik || 'Gündelik Görüş / Sınanamaz İddia')}</span>
+            <b>“${esc(s.gorusMetin)}”</b>
+            <p>${esc(s.gorusNeden || 'Ölçüt ve karşılaştırma grubu belirsiz olduğu için doğrudan veriyle yanlışlanamaz veya doğrulanamaz.')}</p>
+          </div>
+          <div class="slayt-kars-kart dogru">
+            <span class="slayt-kars-etiket">✓ ${esc(s.bilimselBaslik || 'Bilimsel & Sınanabilir Araştırma Sorusu')}</span>
+            <b>“${esc(s.bilimselMetin)}”</b>
+            ${Array.isArray(s.kriterler) && s.kriterler.length ? `<div class="slayt-kriter-etiketler">${s.kriterler.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}
+          </div>
+        </div>`;
+    }
+    if (s.slide_type === 'process_timeline') {
+      const adimlar = Array.isArray(s.adimlar) ? s.adimlar : [];
+      return `<div class="slayt-dongu-izgara">
+        ${adimlar.map((a, i) => `<div class="slayt-dongu-adim">
+          <div class="slayt-dongu-ust"><span class="slayt-dongu-no">${esc(a.no || ('0' + (i + 1)))}</span><b>${esc(a.baslik)}</b></div>
+          <p>${esc(a.aciklama)}</p>
+        </div>`).join('')}
+      </div>`;
+    }
+    if (s.slide_type === 'ethics_pillars') {
+      const ilkeler = Array.isArray(s.ilkeler) ? s.ilkeler : [];
+      return `<div class="slayt-etik-izgara">
+        ${ilkeler.map((il, i) => `<div class="slayt-etik-kart">
+          <span class="slayt-etik-ikon">${['🛡️', '🔒', '📊'][i % 3]}</span>
+          <b>${esc(il.baslik)}</b>
+          <p>${esc(il.aciklama)}</p>
+        </div>`).join('')}
+      </div>
+      ${s.etikSenaryo ? `<div class="slayt-ref-serit"><b>Senaryo Etik Kuralı:</b> ${esc(s.etikSenaryo)}</div>` : ''}`;
+    }
+
+    /* MODÜL 2 ŞABLONLARI: question_funnel, condition_cards, independent_var, dependent_var */
+    if (s.slide_type === 'question_funnel') {
+      return `<div class="slayt-huni-kutu">
+          <div class="slayt-huni-satir zayif">
+            <small>1. Geniş / Belirsiz Merak</small>
+            <span>“${esc(s.zayifSoru || 'Bu konu performansı etkiler mi?')}”</span>
+          </div>
+          <div class="slayt-huni-ok">↓ Odaklama: Bağlam + Değişken + Ölçülebilir Çıktı ↓</div>
+          <div class="slayt-huni-satir guclu">
+            <small>2. Odaklanmış &amp; Ölçülebilir Araştırma Sorusu</small>
+            <b>“${esc(s.gucluSoru)}”</b>
+          </div>
+        </div>
+        ${Array.isArray(s.kosullar) && s.kosullar.length ? `<div class="slayt-kosul-izgara">${s.kosullar.map((k, idx) => `<div class="slayt-kosul"><small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}</div>` : ''}`;
+    }
     if (s.slide_type === 'condition_cards') {
-      return `<div class="slayt-kosul-izgara">${s.kosullar.map((k, idx) => `<div class="slayt-kosul">${diyagramSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}</div>
-        <p class="slayt-dipnot">${esc(s.dipnot)}</p>`;
+      return `<div class="slayt-kosul-izgara">${(s.kosullar || []).map((k, idx) => `<div class="slayt-kosul">${diyagramSVG(k.diyagram || 'genel', idx)}<small>${esc(k.ad)}</small><b>${esc(k.deger)}</b></div>`).join('')}</div>
+        <p class="slayt-dipnot">${esc(s.dipnot || '')}</p>`;
     }
     if (s.slide_type === 'independent_var') {
       return `<div class="slayt-vurgu-kutu">
-          <span class="slayt-vurgu-ust">Araştırmacının değiştirdiği</span>
+          <span class="slayt-vurgu-ust">${esc(s.vurguUst || 'Araştırmacının değiştirdiği / karşılaştırdığı')}</span>
           <b class="slayt-vurgu-ad">${esc(s.degisken)}</b>
-          <div class="slayt-seviyeler">${s.seviyeler.map(sv => `<div class="slayt-seviye">${esc(sv)}</div>`).join('')}</div>
-          <span class="slayt-vurgu-alt">Bağımsız değişken</span>
+          <div class="slayt-seviyeler">${(s.seviyeler || []).map(sv => `<div class="slayt-seviye">${esc(sv)}</div>`).join('')}</div>
+          <span class="slayt-vurgu-alt">${esc(s.vurguAlt || 'Bağımsız değişken')}</span>
         </div>
-        <div class="slayt-ref-serit">${esc(s.digerRef)}</div>`;
+        <div class="slayt-ref-serit">${esc(s.digerRef || '')}</div>`;
     }
     if (s.slide_type === 'dependent_var') {
-      const max = Math.max(...s.veri.map(v => Number(v.deger) || 0), 1);
-      return `<div class="slayt-ref-serit">${esc(s.oncekiRef)}</div>
+      const veri = Array.isArray(s.veri) ? s.veri : [];
+      const max = Math.max(...veri.map(v => Number(v.deger) || 0), 1);
+      return `<div class="slayt-ref-serit">${esc(s.oncekiRef || '')}</div>
         <div class="slayt-vurgu-kutu turuncu">
-          <span class="slayt-vurgu-ust">Araştırmacının ölçtüğü</span>
+          <span class="slayt-vurgu-ust">${esc(s.vurguUst || 'Araştırmacının ölçtüğü sonuç')}</span>
           <b class="slayt-vurgu-ad">${esc(s.degisken)}</b>
-          <div class="slayt-barlar">${s.veri.map(v => `<div class="slayt-bar-satir"><span>${esc(v.etiket)}</span><div class="slayt-bar-yol"><i style="width:${Math.max(18, (v.deger / max) * 92).toFixed(1)}%"></i></div><b>${esc(v.deger)}</b></div>`).join('')}</div>
-          <span class="slayt-vurgu-alt">Bağımlı değişken</span>
-        </div>`;
+          <div class="slayt-barlar">${veri.map(v => `<div class="slayt-bar-satir"><span>${esc(v.etiket)}</span><div class="slayt-bar-yol"><i style="width:${Math.max(18, ((Number(v.deger) || 0) / max) * 92).toFixed(1)}%"></i></div><b>${esc(v.deger)}</b></div>`).join('')}</div>
+          <span class="slayt-vurgu-alt">${esc(s.vurguAlt || 'Ölçülen gösterge / Bağımlı değişken')}</span>
+        </div>
+        ${Array.isArray(s.kontrolDegiskenleri) && s.kontrolDegiskenleri.length ? `<div class="slayt-kontrol-serit"><b>Sabit tutulan kontrol değişkenleri:</b> ${s.kontrolDegiskenleri.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}`;
     }
-    return `<div class="slayt-ozet-izgara">
-        <div class="slayt-ozet-kutu"><small>Bağımsız değişken</small><b>${esc(s.bagimsiz)}</b><span>Değiştirilen</span></div>
-        <div class="slayt-ozet-ok">${svgIc('sag')}</div>
-        <div class="slayt-ozet-kutu turuncu"><small>Bağımlı değişken</small><b>${esc(s.bagimli)}</b><span>Ölçülen</span></div>
+
+    /* MODÜL 3 ŞABLONLARI: design_matrix, decision_tree, mixed_sequence */
+    if (s.slide_type === 'design_matrix') {
+      const desenler = Array.isArray(s.desenler) ? s.desenler : [];
+      return `<div class="slayt-desen-matris">
+        ${desenler.map((d, i) => `<div class="slayt-desen-kart tip-${i}">
+          <div class="slayt-desen-ust"><b>${esc(d.tur)}</b><span>${esc(d.rozet || '')}</span></div>
+          <p class="slayt-desen-soru">“${esc(d.soru)}”</p>
+          <small>${esc(d.yontem)}</small>
+        </div>`).join('')}
+      </div>`;
+    }
+    if (s.slide_type === 'decision_tree') {
+      const dallar = Array.isArray(s.dallar) ? s.dallar : [];
+      return `<div class="slayt-karar-agaci">
+        <div class="slayt-karar-kok"><small>Karar Ölçütü</small><b>${esc(s.kokSoru)}</b></div>
+        <div class="slayt-karar-dallar">
+          ${dallar.map((d, i) => `<div class="slayt-karar-dal ${i === 0 ? 'evet' : 'hayir'}">
+            <span class="dal-kosul">${esc(d.kosul)}</span>
+            <b>→ ${esc(d.desen)}</b>
+            <p>${esc(d.ornek)}</p>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (s.slide_type === 'mixed_sequence') {
+      const a1 = s.asama1 || {}, a2 = s.asama2 || {};
+      return `<div class="slayt-karma-akis">
+        <div class="slayt-karma-kutu nicel">
+          <span class="karma-etiket">AŞAMA 1 · NİCEL</span>
+          <b>${esc(a1.baslik || 'Nicel Ölçüm')}</b>
+          <p>${esc(a1.detay || '')}</p>
+        </div>
+        <div class="slayt-karma-ok">→<span>Neden?</span></div>
+        <div class="slayt-karma-kutu nitel">
+          <span class="karma-etiket">AŞAMA 2 · NİTEL</span>
+          <b>${esc(a2.baslik || 'Nitel Görüşme')}</b>
+          <p>${esc(a2.detay || '')}</p>
+        </div>
       </div>
+      ${s.sentez ? `<div class="slayt-ref-serit"><b>Karma Bütünleştirme:</b> ${esc(s.sentez)}</div>` : ''}`;
+    }
+
+    /* MODÜL 4 ŞABLONLARI: population_vs_sample, sampling_bias_comparison, stratified_grid */
+    if (s.slide_type === 'population_vs_sample') {
+      return `<div class="slayt-evren-kapsul">
+        <div class="evren-halka dis">
+          <span class="halka-etiket">HEDEF EVREN (N) — Genellenmek İstenen Bütün</span>
+          <b>${esc(s.evrenTanim)}</b>
+          <div class="evren-halka orta">
+            <span class="halka-etiket">ÖRNEKLEM (n) — Veri Toplanan Alt Küme</span>
+            <b>${esc(s.orneklemTanim)}</b>
+            <div class="evren-birim-rozet">Analiz Birimi: <b>${esc(s.birimTanim || 'Katılımcı')}</b></div>
+          </div>
+        </div>
+        ${s.nedenOrneklem ? `<p class="slayt-dipnot">${esc(s.nedenOrneklem)}</p>` : ''}
+      </div>`;
+    }
+    if (s.slide_type === 'sampling_bias_comparison') {
+      return `<div class="slayt-ikili-kars">
+        <div class="slayt-kars-kart yanlis">
+          <span class="slayt-kars-etiket">${esc(s.yanliBaslik || '✕ Yanlı / Uygun Örnekleme Riski')}</span>
+          <p>${esc(s.yanliAciklama)}</p>
+        </div>
+        <div class="slayt-kars-kart dogru">
+          <span class="slayt-kars-etiket">${esc(s.dogruBaslik || '✓ Seçkisiz & Temsili Örnekleme')}</span>
+          <p>${esc(s.dogruAciklama)}</p>
+        </div>
+      </div>`;
+    }
+    if (s.slide_type === 'stratified_grid') {
+      const tabakalar = Array.isArray(s.tabakalar) ? s.tabakalar : [];
+      return `<div class="slayt-tabaka-izgara">
+        ${tabakalar.map((t, ti) => `<div class="slayt-tabaka-kart t-${ti}">
+          <div class="tabaka-ust"><b>${esc(t.ad)}</b><span>${esc(t.oran || 'Eşit temsil')}</span></div>
+          <div class="tabaka-noktalar" aria-hidden="true">
+            ${Array.from({ length: 15 }, (_, ni) => `<i class="${ni < 5 ? 'secili' : ''}"></i>`).join('')}
+          </div>
+          <div class="tabaka-sayilar">
+            <span>Evren: <b>${esc(t.evrenSayi)}</b></span>
+            <span>Örneklem: <b>${esc(t.orneklemSayi)}</b></span>
+          </div>
+        </div>`).join('')}
+      </div>
+      ${s.toplamNot ? `<div class="slayt-ref-serit">${esc(s.toplamNot)}</div>` : ''}`;
+    }
+
+    /* MODÜL 5 ŞABLONLARI: instrument_blueprint, bullseye_targets, threat_diagnosis */
+    if (s.slide_type === 'instrument_blueprint') {
+      return `<div class="slayt-arac-sema">
+        <div class="arac-sol">
+          <small>Ölçülmek İstenen Hedef Yapı</small>
+          <b>${esc(s.olculenYapi)}</b>
+        </div>
+        <div class="arac-ok">→</div>
+        <div class="arac-sag">
+          <small>Seçilen Veri Toplama Aracı</small>
+          <b>${esc(s.secilenArac)}</b>
+          <p>${esc(s.aracGerekce || '')}</p>
+        </div>
+      </div>
+      ${Array.isArray(s.kontrolListesi) ? `<div class="slayt-kontrol-serit"><b>Standardizasyon Kriterleri:</b> ${s.kontrolListesi.map(k => `<span>✓ ${esc(k)}</span>`).join('')}</div>` : ''}`;
+    }
+    if (s.slide_type === 'bullseye_targets') {
+      const hedefler = Array.isArray(s.hedefler) ? s.hedefler : [];
+      return `<div class="slayt-hedef-izgara">
+        ${hedefler.map(h => `<div class="slayt-hedef-kart ${esc(h.tip || '')}">
+          ${hedefSVG(h.tip || 'merkez')}
+          <b>${esc(h.baslik)}</b>
+          <p>${esc(h.aciklama)}</p>
+        </div>`).join('')}
+      </div>`;
+    }
+    if (s.slide_type === 'threat_diagnosis') {
+      return `<div class="slayt-ikili-kars">
+        <div class="slayt-kars-kart yanlis">
+          <span class="slayt-kars-etiket">🎯 Geçerlik Tehdidi (Yanlış Özelliği Ölçme)</span>
+          <p><b>Sorun:</b> ${esc(s.gecerlikTehdidi)}</p>
+          <p class="onlem-satir"><b>Önlem:</b> ${esc(s.gecerlikOnlem)}</p>
+        </div>
+        <div class="slayt-kars-kart kismi">
+          <span class="slayt-kars-etiket">⚖️ Güvenirlik Tehdidi (Tutarsız Ölçüm)</span>
+          <p><b>Sorun:</b> ${esc(s.guvenirlikTehdidi)}</p>
+          <p class="onlem-satir"><b>Önlem:</b> ${esc(s.guvenirlikOnlem)}</p>
+        </div>
+      </div>`;
+    }
+
+    /* MODÜL 6 ŞABLONLARI: data_cleaning_table, correlation_vs_causation, limitations_report */
+    if (s.slide_type === 'data_cleaning_table') {
+      const satirlar = Array.isArray(s.satirlar) ? s.satirlar : [];
+      return `<div class="slayt-veri-tablo-sarici">
+        <table class="slayt-veri-tablo">
+          <thead>
+            <tr><th>Karşılaştırma Grubu</th><th>Katılımcı (n)</th><th>${esc(s.olcuBirimi || 'Ortalama')}</th><th>Gözlenen Düzey</th></tr>
+          </thead>
+          <tbody>
+            ${satirlar.map(st => `<tr>
+              <td><b>${esc(st.grup)}</b></td>
+              <td>${esc(st.n || '60')}</td>
+              <td class="deger-hucre"><b>${esc(st.ortalama)}</b></td>
+              <td><span>${esc(st.not || '')}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${s.temizlikNotu ? `<div class="slayt-ref-serit">${esc(s.temizlikNotu)}</div>` : ''}`;
+    }
+    if (s.slide_type === 'correlation_vs_causation') {
+      return `<div class="slayt-ikili-kars">
+        <div class="slayt-kars-kart yanlis">
+          <span class="slayt-kars-etiket">${esc(s.yanlisBaslik || '✕ Aşırı Genelleme / Kanıtsız Nedensellik')}</span>
+          <b>${esc(s.yanlisMetin)}</b>
+          <p>${esc(s.yanlisNeden)}</p>
+        </div>
+        <div class="slayt-kars-kart dogru">
+          <span class="slayt-kars-etiket">${esc(s.dogruBaslik || '✓ Nesnel & Veriye Sadık Bulgu Cümlesi')}</span>
+          <b>“${esc(s.dogruMetin)}”</b>
+          <p>${esc(s.dogruNeden)}</p>
+        </div>
+      </div>`;
+    }
+    if (s.slide_type === 'limitations_report') {
+      const sinirliliklar = Array.isArray(s.sinirliliklar) ? s.sinirliliklar : [];
+      return `<div class="slayt-rapor-kutu">
+        <div class="rapor-bulgu-serit"><small>Raporlanan Temel Bulgu</small><b>${esc(s.bulguOzeti)}</b></div>
+        <div class="rapor-sinirlilik-liste">
+          <small>Araştırmanın Sınırlılıkları &amp; Şeffaflık Notları</small>
+          <ul>${sinirliliklar.map(sn => `<li>${esc(sn)}</li>`).join('')}</ul>
+        </div>
+      </div>`;
+    }
+
+    /* Genel / Özet İlişki Şeması (summary_relation) */
+    return `<div class="slayt-ozet-izgara">
+        <div class="slayt-ozet-kutu"><small>${esc(s.solEtiket || 'Bağımsız değişken')}</small><b>${esc(s.bagimsiz)}</b><span>${esc(s.solAlt || 'Temel girdi / Değiştirilen')}</span></div>
+        <div class="slayt-ozet-ok">${svgIc('sag')}</div>
+        <div class="slayt-ozet-kutu turuncu"><small>${esc(s.sagEtiket || 'Bağımlı değişken')}</small><b>${esc(s.bagimli)}</b><span>${esc(s.sagAlt || 'Ölçülen çıktı / Sonuç')}</span></div>
+      </div>
+      ${Array.isArray(s.kontrolList) && s.kontrolList.length ? `<div class="slayt-kontrol-serit" style="justify-content:center"><b>Sabit tutulanlar:</b> ${s.kontrolList.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}
       <p class="slayt-ozet-not">${esc(s.ozetNot)}</p>`;
   }
 
